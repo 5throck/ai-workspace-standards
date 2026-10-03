@@ -8,8 +8,8 @@
  * Provider disclosure: Anthropic. Credentials: operator's `claude login` — never copied.
  */
 
-import type { HermesEvent, HermesTurnResult } from "./hermes";
-import { allowlistedEnv } from "./hermes";
+import type { HermesEvent, HermesTurnResult, HermesSpawnOptions } from "./hermes";
+import { allowlistedEnv, turnSpawnArgv, dockerCliEnv, containerKillHandle } from "./hermes";
 
 export interface ClaudeSpawnOptions {
   claudeBin: string;
@@ -28,6 +28,13 @@ export interface ClaudeSpawnOptions {
   /** QA-07 parity (2026-10-03 review H1): register the live process so cancel/delete work
    * for claude turns exactly as they do for hermes turns. */
   onSpawn?: (proc: { kill: (code?: number) => void }) => void;
+  /** 2026-10-03 sibling-turns design (D5): docker-isolated turn — wraps the CLI in an
+   * ephemeral sibling container via the shared turnSpawnArgv builder. */
+  container?: HermesSpawnOptions["container"];
+  /** Secret provider key (bare `-e NAME`; the value rides the docker CLI env). */
+  providerKeyEnv?: { name: string; value: string };
+  /** Literal NAME=value pairs (non-secret, e.g. ANTHROPIC_BASE_URL). */
+  extraEnvPairs?: string[];
 }
 
 export function claudeArgs(o: ClaudeSpawnOptions): string[] {
@@ -92,14 +99,31 @@ export async function runClaudeTurn(
   o: ClaudeSpawnOptions,
   onEvent?: (evt: HermesEvent) => void,
 ): Promise<HermesTurnResult> {
-  const proc = Bun.spawn(claudeArgs(o), {
-    cwd: o.projectDir,
+  // 2026-10-03 sibling-turns design (D5): container mode wraps the same inner argv in the
+  // shared docker-run builder (project + claude-home mounts, CLAUDE_CONFIG_DIR, provider
+  // key via bare -e). HOME inside the container is unset — CLAUDE_CONFIG_DIR is the state dir.
+  const argv = o.container
+    ? turnSpawnArgv({
+        entrypointBin: "claude",
+        innerArgs: claudeArgs(o),
+        container: o.container,
+        projectSource: o.container.hostProjectDir ?? o.projectDir,
+        homeLeaf: "claude-home",
+        homeSource: o.container.hostRuntimeHome ?? "",
+        envPairs: ["CLAUDE_CONFIG_DIR=/work/claude-home", ...(o.extraEnvPairs ?? [])],
+        providerKeyEnv: o.providerKeyEnv,
+      })
+    : claudeArgs(o);
+  const proc = Bun.spawn(argv, {
+    cwd: o.container ? undefined : o.projectDir,
     stdin: "ignore",
     stdout: "pipe",
     stderr: "pipe",
-    env: allowlistedEnv(o.env ?? process.env),
+    env: o.container
+      ? dockerCliEnv(o.providerKeyEnv, o.env ?? process.env)
+      : allowlistedEnv(o.env ?? process.env),
   });
-  o.onSpawn?.(proc);
+  o.onSpawn?.(o.container ? containerKillHandle(proc, o.container) : proc);
 
   // External watchdog (2026-10-03 review H1): the CLI has no budget flag.
   let timedOut = false;

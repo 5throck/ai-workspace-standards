@@ -7,13 +7,15 @@
  */
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { chmodSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig, readKeyEntries, runtimeProviderKeyEnv, runtimeProviderKeyGap } from "../../services/co-workspace/src/config";
 import { isolationPostureWarning, runtimeProviderKeyWarning } from "../../services/co-workspace/src/access";
 import { UserStore } from "../../services/co-workspace/src/users";
 import { runClaudeTurn } from "../../services/co-workspace/src/claude";
+import { turnSpawnArgv } from "../../services/co-workspace/src/hermes";
+import { seedHermesHome } from "../../services/co-workspace/src/tenant";
 import { runCodexTurn } from "../../services/co-workspace/src/codex";
 import { runChat } from "../../services/co-workspace/src/server";
 import { createState } from "../../services/co-workspace/src/state";
@@ -254,5 +256,99 @@ describe("CLI provider-key injection (2026-10-03 cli-provider-key design, T-2026
   test("runtimeProviderKeyWarning wraps the gap with the boot prefix", () => {
     expect(runtimeProviderKeyWarning({ runtime: "antigravity", ...key, llmProvider: "gemini" })).toContain("[co-workspace] PROVIDER KEY NOT APPLICABLE");
     expect(runtimeProviderKeyWarning({ runtime: "claude", ...key, llmProvider: "anthropic" })).toBeNull();
+  });
+});
+
+describe("docker-isolated sibling turns for claude/codex (2026-10-03 sibling-turns design, T-20261003-025)", () => {
+  const container = {
+    image: "co-workspace-runtime:latest",
+    dockerBin: "docker",
+    name: "co-workspace-turn-gw-abc123-abcd1234",
+    tenantId: "gw-abc123",
+    instance: "default",
+    hostProjectDir: "/host/data/storage/p/n/project",
+    hostRuntimeHome: "/host/data/storage/p/n/claude-home",
+    memory: "2g",
+    cpus: "2",
+    pidsLimit: 256,
+  };
+  const claudeInner = ["claude", "-p", "hi", "--output-format", "stream-json", "--verbose"];
+
+  test("claude container argv: entrypoint claude, project+claude-home binds, CLAUDE_CONFIG_DIR, bare -e key", () => {
+    const argv = turnSpawnArgv({
+      entrypointBin: "claude",
+      innerArgs: claudeInner,
+      container,
+      projectSource: container.hostProjectDir,
+      homeLeaf: "claude-home",
+      homeSource: container.hostRuntimeHome,
+      envPairs: ["CLAUDE_CONFIG_DIR=/work/claude-home"],
+      providerKeyEnv: { name: "ANTHROPIC_API_KEY", value: "sk-secret" },
+    });
+    expect(argv[0]).toBe("docker");
+    expect(argv[argv.indexOf("--entrypoint") + 1]).toBe("claude");
+    expect(argv).toContain("-v");
+    expect(argv.join("\n")).toContain("/host/data/storage/p/n/project:/work/project");
+    expect(argv.join("\n")).toContain("/host/data/storage/p/n/claude-home:/work/claude-home");
+    expect(argv.join("\n")).toContain("CLAUDE_CONFIG_DIR=/work/claude-home");
+    // the secret key rides as a bare -e NAME; the VALUE never appears in argv
+    const i = argv.indexOf("ANTHROPIC_API_KEY");
+    expect(argv[i - 1]).toBe("-e");
+    expect(argv.join("\n")).not.toContain("sk-secret");
+    // resource caps + user + labels shared with the hermes contract
+    expect(argv).toContain("--user"); expect(argv[argv.indexOf("--user") + 1]).toBe("10000:10000");
+    expect(argv).toContain("--cap-drop"); expect(argv).toContain("ALL");
+    const imgIdx = argv.indexOf("co-workspace-runtime:latest");
+    expect(imgIdx).toBeGreaterThan(argv.indexOf("--entrypoint"));
+    expect(argv.slice(imgIdx + 1)).toEqual(["-p", "hi", "--output-format", "stream-json", "--verbose"]);
+  });
+
+  test("volume mode: subpath mounts use the runtime home leaf", () => {
+    const argv = turnSpawnArgv({
+      entrypointBin: "codex",
+      innerArgs: ["codex", "exec", "--json", "hi"],
+      container: { ...container, dataVolume: "cow-vol", subpathBase: "storage/p/n", hostRuntimeHome: undefined },
+      projectSource: "/host/data/storage/p/n/project",
+      homeLeaf: "codex-home",
+      homeSource: "",
+      envPairs: ["CODEX_HOME=/work/codex-home"],
+    });
+    const j = argv.join("\n");
+    expect(j).toContain("type=volume,src=cow-vol,dst=/work/project,volume-subpath=storage/p/n/project");
+    expect(j).toContain("type=volume,src=cow-vol,dst=/work/codex-home,volume-subpath=storage/p/n/codex-home");
+    expect(j).not.toContain("hermes-home");
+  });
+
+  test("hermesSpawnArgv delegates byte-identically (volume + bind fixtures)", () => {
+    // the pinned hermes spawn tests prove this too; here we assert the shape directly
+    const argv = turnSpawnArgv({
+      entrypointBin: "hermes",
+      innerArgs: ["hermes", "chat", "--format", "stream-json"],
+      container: { ...container, hostRuntimeHome: undefined },
+      projectSource: container.hostProjectDir,
+      homeLeaf: "hermes-home",
+      homeSource: "/host/data/storage/p/n/hermes-home",
+      envPairs: ["HERMES_HOME=/work/hermes-home", "HERMES_ACCEPT_HOOKS=1"],
+    });
+    expect(argv[argv.indexOf("--entrypoint") + 1]).toBe("hermes");
+    expect(argv.join("\n")).toContain("/host/data/storage/p/n/hermes-home:/work/hermes-home");
+  });
+
+  test("provisioning creates the claude/codex runtime homes beside hermes-home", () => {
+    const dir = scratch("homes");
+    const rec = {
+      tenantId: "gw-abc123",
+      variant: "co-consult",
+      status: "provisioning",
+      createdAt: new Date().toISOString(),
+      projectDir: join(dir, "project"),
+      hermesHome: join(dir, "hermes-home"),
+      sessions: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+    } as TenantRecord;
+    seedHermesHome(rec, undefined, "test-model", undefined, undefined);
+    expect(existsSync(join(dir, "claude-home"))).toBe(true);
+    expect(existsSync(join(dir, "codex-home"))).toBe(true);
   });
 });

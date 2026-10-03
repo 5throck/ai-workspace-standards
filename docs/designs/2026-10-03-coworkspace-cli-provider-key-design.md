@@ -76,3 +76,18 @@ deployment parity (T-20261003-023 scope a; process-isolation layer):
   needs runtime-image CLI builds, adapter container wrappers, and a broker bind-policy
   expansion for per-CLI credential homes (security-sensitive, its own design gate).
 - B5 — README gains the runtime matrix (protocol / continuity / credentials / isolation).
+
+## Part C — antigravity binary baked (amends B2; user-provided installer, 2026-10-03)
+
+The user pointed at Google's official installer (`curl -fsSL https://antigravity.google/cli/install.sh | bash`),
+which the script's own header confirms supports linux amd64/arm64 with staged-download
+verification — B2's "no verifiable Linux artifact" premise is corrected. The gateway image
+now BAKES agy (installer runs at build time, `agy --help` asserted), so the creds overlay's
+binary-mount row (`CO_WORKSPACE_AGY_BIN_HOST`) is removed; process-isolation antigravity
+turns work in compose deployments with only the login-home mount.
+
+What does NOT change: docker-ISOLATED antigravity turns stay blocked. The CLI remains
+login-only (no API-key surface), and the only credential path into a sibling container is
+mounting operator login state — a SEC-07-class exposure this wave will not ship. If Google
+ships an API-key/env credential mode for agy, the runtime profile table is the single
+place to enable it.

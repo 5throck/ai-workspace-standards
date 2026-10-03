@@ -85,7 +85,7 @@ describe("hermes spawn adapter — toolsets and container isolation", () => {
     // docker -e flags must precede the image
     expect(eIdx).toBeLessThan(dockerArgv.indexOf("co-workspace-runtime:latest"));
     expect(hermesSpawnArgv(base)).not.toContain("OPENAI_API_KEY");
-    const cliEnv = dockerCliEnv({ ...base, providerKeyEnv: { name: "ZAI_API_KEY", value: "sk-z" } }, { PATH: "/bin", CO_WORKSPACE_API_KEYS: "secret", DOCKER_HOST: "unix:///tmp/d.sock" });
+    const cliEnv = dockerCliEnv({ name: "ZAI_API_KEY", value: "sk-z" }, { PATH: "/bin", CO_WORKSPACE_API_KEYS: "secret", DOCKER_HOST: "unix:///tmp/d.sock" });
     expect(cliEnv.ZAI_API_KEY).toBe("sk-z");
     expect(cliEnv.DOCKER_HOST).toBe("unix:///tmp/d.sock");
     expect(cliEnv.CO_WORKSPACE_API_KEYS).toBeUndefined();

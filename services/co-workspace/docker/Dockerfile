@@ -35,14 +35,22 @@ COPY --from=docker:cli /usr/local/bin/docker /usr/local/bin/docker
 # Non-hermes runtimes in container deployments (2026-10-03 T-20261003-023a): the claude and
 # codex CLIs are baked so CO_WORKSPACE_RUNTIME=claude|codex works with process isolation.
 # Credentials come from the provider-key env injection (see the cli-provider-key design) or
-# from the login-home mounts in docker-compose.creds.yml. agy is NOT baked — no verifiable
-# Linux artifact source (login-only runtime); mount the binary per the creds overlay.
+# from the login-home mounts in docker-compose.creds.yml.
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
 # -f: the hermes base image already carries an npm at /usr/local/bin/npm
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && npm install -g --omit=dev @anthropic-ai/claude-code@2.1.288 @openai/codex@0.160.0 \
  && claude --version >/dev/null && codex --version >/dev/null
+
+# Antigravity CLI (agy) — baked via Google's official installer (user-provided URL,
+# 2026-10-03; supports linux amd64/arm64 and self-verifies the staged download). The
+# binary serves PROCESS-isolation antigravity turns; DOCKER-isolated antigravity turns
+# remain blocked (the CLI is login-only — no API-key surface — and mounting operator
+# login state into a tenant container is a SEC-07-class exposure; see the
+# sibling-turns design Part C).
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /usr/local/bin \
+ && agy --help >/dev/null
 
 WORKDIR /app/services/co-workspace
 COPY services/co-workspace/package.json ./

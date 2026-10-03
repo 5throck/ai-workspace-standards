@@ -1,12 +1,13 @@
-# Optional overlay: login-mode credential surfaces for the non-hermes runtimes
+# Optional overlay: login-mode credential homes for the non-hermes runtimes
 # (2026-10-03 CLI provider-key design + T-20261003-023a).
 # Layer: COMPOSE_FILE=docker-compose.yml:docker-compose.creds.yml
 #
 # provider-key mode (CO_WORKSPACE_LLM_PROVIDER/_LLM_API_KEY) needs NOTHING from this
 # file for claude/codex — the deployment key is injected as the CLI's native env var
-# per turn (ANTHROPIC_API_KEY / OPENAI_API_KEY). Layer this overlay ONLY when a runtime
-# must use the operator's INTERACTIVE login instead (claude login / codex login /
-# agy's Google sign-in), or when running the antigravity runtime at all.
+# per turn (ANTHROPIC_API_KEY / OPENAI_API_KEY). The agy binary itself is baked into
+# the gateway image (Google's official installer, 2026-10-03) — no binary mount needed.
+# Layer this overlay ONLY when a runtime must use the operator's INTERACTIVE login
+# (claude login / codex login / agy's Google sign-in).
 #
 # All mounts are READ-ONLY: the CLIs only ever read their credential homes (writes to
 # login state happen on the HOST, by the operator, with the operator's own consent —
@@ -15,15 +16,10 @@
 # Required env when layered (see docker/.env.sample):
 #   CO_WORKSPACE_CLAUDE_HOME_HOST   host path of the operator's ~/.claude (login mode)
 #   CO_WORKSPACE_CODEX_HOME_HOST    host path of the operator's ~/.codex (login mode)
-#   CO_WORKSPACE_AGY_BIN_HOST       host path of the agy binary (antigravity runtime —
-#                                   no verifiable Linux artifact is baked; mount yours)
 #   CO_WORKSPACE_GEMINI_HOME_HOST   host path of the operator's ~/.gemini (agy login)
 services:
   co-workspace:
-    environment:
-      CO_WORKSPACE_ANTIGRAVITY_BIN: /usr/local/bin/agy
     volumes:
       - ${CO_WORKSPACE_CLAUDE_HOME_HOST:?set to the operator's ~/.claude (or drop this file when using provider-key mode)}:/home/gw/.claude:ro
       - ${CO_WORKSPACE_CODEX_HOME_HOST:?set to the operator's ~/.codex (or drop this file when using provider-key mode)}:/home/gw/.codex:ro
-      - ${CO_WORKSPACE_AGY_BIN_HOST:?set to the host path of the agy binary (antigravity runtime)}:/usr/local/bin/agy:ro
-      - ${CO_WORKSPACE_GEMINI_HOME_HOST:?set to the operator's ~/.gemini (antigravity login)}:/home/gw/.gemini:ro
+      - ${CO_WORKSPACE_GEMINI_HOME_HOST:?set to the operator's ~/.gemini (agy login)}:/home/gw/.gemini:ro

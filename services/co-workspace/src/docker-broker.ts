@@ -642,7 +642,9 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
   async function runVolumeHelper(op: "init" | "rm", subpath: string): Promise<void> {
     const name = `co-workspace-vol-control-${Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, "0")}`;
     const leaf = op === "init"
-      ? "mkdir -p /v/" + subpath + "/project /v/" + subpath + "/hermes-home && chown -R 10000:10000 /v/" + subpath + " && chmod 700 /v/" + subpath
+      // 2026-10-03 sibling-turns design (D4): the non-hermes runtime homes join init so
+      // their volume subpaths exist before any isolated claude/codex turn mounts them.
+      ? "mkdir -p /v/" + subpath + "/project /v/" + subpath + "/hermes-home /v/" + subpath + "/claude-home /v/" + subpath + "/codex-home && chown -R 10000:10000 /v/" + subpath + " && chmod 700 /v/" + subpath
       : "rm -rf /v/" + subpath;
     const body = JSON.stringify({
       Image: cfg.volumeInitImage,

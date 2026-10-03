@@ -1,7 +1,7 @@
 import { chownSync, copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName, runtimeProviderKeyEnv } from "./config";
-import { recordTurnUsage, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
+import { recordTurnUsage, runtimeHomeDir, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn, turnContainerName } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
 import { runClaudeTurn } from "./claude";
@@ -102,7 +102,36 @@ export async function runChat(
       // [+ ANTHROPIC_BASE_URL]; codex: OPENAI_API_KEY) — precedence over interactive
       // logins; nothing is injected when keyless, mismatched, or antigravity.
       const cliKeyEnv = runtimeProviderKeyEnv(state.cfg.runtime, state.cfg);
+      const cliSecret = Object.entries(cliKeyEnv ?? {}).find(([k]) => k.endsWith("_API_KEY"));
+      const cliLiterals = Object.entries(cliKeyEnv ?? {})
+        .filter(([k]) => !k.endsWith("_API_KEY"))
+        .map(([k, v]) => `${k}=${v}`);
       const cliEnv = cliKeyEnv ? { ...process.env, ...cliKeyEnv } : undefined;
+      // 2026-10-03 sibling-turns design (D6): docker-isolated sibling turns for claude/codex
+      // — same container contract as hermes turns (name/labels/caps); antigravity stays
+      // blocked (fail-fast at boot). Bind mode needs dataDirHost for host-visible sources.
+      const cliContainer =
+        state.cfg.isolation === "docker" && (state.cfg.runtime === "claude" || state.cfg.runtime === "codex")
+          ? {
+              image: state.cfg.runtimeImage,
+              dockerBin: state.cfg.dockerBin,
+              name: turnContainerName(rec.tenantId),
+              tenantId: rec.tenantId,
+              instance: state.cfg.instanceId,
+              ...(state.cfg.dataVolume
+                ? { dataVolume: state.cfg.dataVolume, subpathBase: tenantSubpathBase(state.cfg, rec) }
+                : {}),
+              hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+              // Bind mode: the home source must resolve on the HOST when the gateway is
+              // itself containerized; the local path is the bare-metal fallback.
+              hostRuntimeHome:
+                hostSidePath(state.cfg, runtimeHomeDir(rec, state.cfg.runtime)) ??
+                runtimeHomeDir(rec, state.cfg.runtime),
+              memory: state.cfg.containerMemory,
+              cpus: state.cfg.containerCpus,
+              pidsLimit: state.cfg.containerPidsLimit,
+            }
+          : undefined;
       if (state.cfg.runtime === "claude") {
         return runClaudeTurn(
           {
@@ -113,7 +142,14 @@ export async function runChat(
             extraArgs: state.cfg.hermesExtraArgs,
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
-            env: cliEnv,
+            env: cliContainer ? undefined : cliEnv,
+            ...(cliContainer
+              ? {
+                  container: cliContainer,
+                  providerKeyEnv: cliSecret ? { name: cliSecret[0], value: cliSecret[1] } : undefined,
+                  extraEnvPairs: cliLiterals,
+                }
+              : {}),
           },
           onEvent,
         );
@@ -128,7 +164,13 @@ export async function runChat(
             extraArgs: state.cfg.hermesExtraArgs,
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
-            env: cliEnv,
+            env: cliContainer ? undefined : cliEnv,
+            ...(cliContainer
+              ? {
+                  container: cliContainer,
+                  providerKeyEnv: cliSecret ? { name: cliSecret[0], value: cliSecret[1] } : undefined,
+                }
+              : {}),
           },
           onEvent,
         );

@@ -8,12 +8,18 @@ title: >-
   design-gated, follow-up to T-20261003-023a which delivered process-isolation
   parity)
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-03T10:16:43.772Z'
 history:
   - at: '2026-10-03T10:16:43.772Z'
     from: null
     to: backlog
+  - at: '2026-10-03T10:37:50.893Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T11:02:44.009Z'
+    from: waiting
+    to: review
 result: null
 error: null

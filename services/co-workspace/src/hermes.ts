@@ -70,6 +70,9 @@ export interface HermesSpawnOptions {
     hostProjectDir?: string;
     hostHermesHome?: string;
     hostAuthDir?: string;
+    /** 2026-10-03 sibling-turns design (D5): host path of the NON-hermes runtime home
+     * (claude-home/codex-home) for claude/codex container turns. Bind mode only. */
+    hostRuntimeHome?: string;
     /** T-20260930-038 volume mode: named data volume + storage/<P>/<N> base inside it. When
      * set, the two tenant -v binds are replaced by --mount type=volume,...,volume-subpath=...
      * flags (no host path is named, closing the F3 bind-source TOCTOU). */
@@ -148,25 +151,66 @@ function stopContainer(bin: string, name: string): void {
 export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
   const inner = hermesArgs(o, o.container ? { projectDir: MOUNT_PROJECT } : {});
   if (!o.container) return inner;
+  return turnSpawnArgv({
+    entrypointBin: o.hermesBin,
+    innerArgs: inner,
+    container: o.container,
+    projectSource: o.container.hostProjectDir ?? o.projectDir,
+    homeLeaf: "hermes-home",
+    homeSource: o.container.hostHermesHome ?? o.hermesHome,
+    envPairs: [`HERMES_HOME=${MOUNT_HERMES_HOME}`, "HERMES_ACCEPT_HOOKS=1"],
+    providerKeyEnv: o.providerKeyEnv,
+    sharedAuthDir: o.sharedAuthDir,
+    hostAuthDir: o.container.hostAuthDir,
+  });
+}
+
+/** 2026-10-03 sibling-turns design (D5): the docker-run argv builder shared by ALL runtimes —
+ * one flag contract (labels, caps, user, resource caps), per-runtime home leaf/mount/env.
+ * `hermesSpawnArgv` delegates with the hermes profile; the claude/codex adapters call this
+ * directly. The broker policy (RUNTIME_TURN_PROFILES) validates exactly what this builds. */
+export function turnSpawnArgv(o: {
+  entrypointBin: string;
+  /** Full inner argv INCLUDING the binary at [0] (it moves to --entrypoint). */
+  innerArgs: string[];
+  container: NonNullable<HermesSpawnOptions["container"]>;
+  /** Host path of the tenant project dir (container mode already resolved the host form). */
+  projectSource: string;
+  homeLeaf: "hermes-home" | "claude-home" | "codex-home";
+  /** Host path of the per-tenant runtime home. */
+  homeSource: string;
+  /** Fixed NAME=value pairs (non-secret; the broker validates the exact values). */
+  envPairs: string[];
+  /** Secret provider key: bare `-e NAME` — docker copies the value from the CLI env. */
+  providerKeyEnv?: { name: string; value: string };
+  /** Hermes-only shared credential store (never set for claude/codex). */
+  sharedAuthDir?: string;
+  hostAuthDir?: string;
+}): string[] {
+  const c = o.container;
+  const homeMount = `/work/${o.homeLeaf}`;
+  if (c.dataVolume && o.sharedAuthDir) throw new Error("sharedAuthDir is not supported in volume mode (use provider-key credential mode)");
+  if (c.dataVolume && !c.subpathBase) throw new Error("volume mode requires container.subpathBase");
+  const base = (c.subpathBase ?? "").replace(/\/+$/, "");
   return [
-    o.container.dockerBin ?? "docker",
+    c.dockerBin ?? "docker",
     "run",
     "--rm",
     "--interactive",
     // --init: without a PID-1 reaper the container ignores SIGTERM from the docker CLI.
     "--init",
-    ...(o.container.name ? ["--name", o.container.name] : []),
+    ...(c.name ? ["--name", c.name] : []),
     "--label",
     "co-workspace.turn=1",
-    ...(o.container.tenantId
-      ? ["--label", `co-workspace.tenant=${o.container.tenantId.replace(/[^a-zA-Z0-9_.-]/g, "-")}`]
+    ...(c.tenantId
+      ? ["--label", `co-workspace.tenant=${c.tenantId.replace(/[^a-zA-Z0-9_.-]/g, "-")}`]
       : []),
-    ...(o.container.instance ? ["--label", `co-workspace.instance=${o.container.instance}`] : []),
+    ...(c.instance ? ["--label", `co-workspace.instance=${c.instance}`] : []),
     // SEC-10: resource caps + privilege hardening (network stays open — the runtime needs
     // provider egress; egress policy is the iron-proxy path).
-    ...(o.container.memory ? ["--memory", o.container.memory] : []),
-    ...(o.container.cpus ? ["--cpus", o.container.cpus] : []),
-    ...(o.container.pidsLimit ? ["--pids-limit", String(o.container.pidsLimit)] : []),
+    ...(c.memory ? ["--memory", c.memory] : []),
+    ...(c.cpus ? ["--cpus", c.cpus] : []),
+    ...(c.pidsLimit ? ["--pids-limit", String(c.pidsLimit)] : []),
     "--security-opt",
     "no-new-privileges",
     "--cap-drop",
@@ -176,41 +220,47 @@ export function hermesSpawnArgv(o: HermesSpawnOptions): string[] {
     "--user",
     "10000:10000",
     "--entrypoint",
-    o.hermesBin,
+    o.entrypointBin,
     "--workdir",
     MOUNT_PROJECT,
-    ...(o.container.dataVolume
-      ? (() => {
-          if (!o.container!.subpathBase) throw new Error("volume mode requires container.subpathBase");
-          if (o.sharedAuthDir) throw new Error("sharedAuthDir is not supported in volume mode (use provider-key credential mode)");
-          const base = o.container.subpathBase.replace(/\/+$/, "");
-          return [
-            "--mount", `type=volume,src=${o.container.dataVolume},dst=${MOUNT_PROJECT},volume-subpath=${base}/project`,
-            "--mount", `type=volume,src=${o.container.dataVolume},dst=${MOUNT_HERMES_HOME},volume-subpath=${base}/hermes-home`,
-          ];
-        })()
+    ...(c.dataVolume
+      ? [
+          "--mount", `type=volume,src=${c.dataVolume},dst=${MOUNT_PROJECT},volume-subpath=${base}/project`,
+          "--mount", `type=volume,src=${c.dataVolume},dst=${homeMount},volume-subpath=${base}/${o.homeLeaf}`,
+        ]
       : [
           "-v",
-          `${o.container.hostProjectDir ?? o.projectDir}:${MOUNT_PROJECT}`,
+          `${c.hostProjectDir ?? o.projectSource}:${MOUNT_PROJECT}`,
           "-v",
-          `${o.container.hostHermesHome ?? o.hermesHome}:${MOUNT_HERMES_HOME}`,
+          `${o.homeSource}:${homeMount}`,
         ]),
-    "-e",
-    `HERMES_HOME=${MOUNT_HERMES_HOME}`,
-    "-e",
-    "HERMES_ACCEPT_HOOKS=1",
+    ...o.envPairs.flatMap((e) => ["-e", e]),
     ...(o.providerKeyEnv ? ["-e", o.providerKeyEnv.name] : []),
     ...(o.sharedAuthDir
       ? [
           "-v",
-          `${o.container.hostAuthDir ?? o.sharedAuthDir}:${MOUNT_SHARED_AUTH}`,
+          `${o.hostAuthDir ?? o.sharedAuthDir}:${MOUNT_SHARED_AUTH}`,
           "-e",
           `HERMES_SHARED_AUTH_DIR=${MOUNT_SHARED_AUTH}`,
         ]
       : []),
-    o.container.image,
-    ...inner.slice(1), // drop the bin — it moved to --entrypoint
+    c.image,
+    ...o.innerArgs.slice(1), // drop the bin — it moved to --entrypoint
   ];
+}
+
+/** Kill handle for a containerized turn: killing the `docker run` CLI does not stop the
+ * container; kill it by name too. Shared by every runtime's onSpawn wiring. */
+export function containerKillHandle(
+  proc: { kill: (code?: number) => void },
+  c: { dockerBin?: string; name?: string },
+): { kill: (code?: number) => void } {
+  return {
+    kill: (code?: number) => {
+      proc.kill(code);
+      if (c.name) stopContainer(c.dockerBin ?? "docker", c.name);
+    },
+  };
 }
 
 /** P2-4 (QA fair): spawned runtimes get an ALLOWLIST env — never the full gateway env, which
@@ -250,16 +300,20 @@ export function hermesEnv(o: HermesSpawnOptions, base: Record<string, string | u
   return env;
 }
 
-/** Env of the `docker run` CLI process. The provider key is passed as a bare `-e NAME` in the
- * argv (never `NAME=value`, which leaks via ps / docker inspect of the CLI) and docker copies
- * it from THIS env — so it is injected explicitly, independent of the prefix allowlist. */
-export function dockerCliEnv(o: HermesSpawnOptions, base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
+/** Env of the `docker run` CLI process (any runtime). The provider key is passed as a bare
+ * `-e NAME` in the argv (never `NAME=value`, which leaks via ps / docker inspect of the CLI)
+ * and docker copies it from THIS env — so it is injected explicitly, independent of the
+ * prefix allowlist. */
+export function dockerCliEnv(
+  providerKeyEnv: { name: string; value: string } | undefined,
+  base: Record<string, string | undefined> = process.env,
+): Record<string, string | undefined> {
   const env = allowlistedEnv(base);
   // The docker CLI locates its daemon/config through DOCKER_* (HOST, CONTEXT, CONFIG, ...).
   for (const [k, v] of Object.entries(base)) {
     if (v !== undefined && /^DOCKER_/.test(k)) env[k] = v;
   }
-  if (o.providerKeyEnv) env[o.providerKeyEnv.name] = o.providerKeyEnv.value;
+  if (providerKeyEnv) env[providerKeyEnv.name] = providerKeyEnv.value;
   return env;
 }
 
@@ -290,22 +344,13 @@ export async function runHermesTurn(
     stdout: "pipe",
     stderr: "pipe",
     env: o.container
-      ? dockerCliEnv(o, o.env ?? process.env)
+      ? dockerCliEnv(o.providerKeyEnv, o.env ?? process.env)
       : hermesEnv(o, o.env ?? process.env),
   });
   timing.mark("t_spawn", { ms_since_t0: Date.now() - tSpawn0 });
   const c = o.container;
   // Killing the `docker run` CLI does not stop the container; kill it by name too.
-  o.onSpawn?.(
-    c?.name
-      ? {
-          kill: (code?: number) => {
-            proc.kill(code);
-            stopContainer(c.dockerBin ?? "docker", c.name!);
-          },
-        }
-      : proc,
-  ); // QA-07: cancel support — the server can kill a running turn
+  o.onSpawn?.(c ? containerKillHandle(proc, c) : proc); // QA-07: cancel support — the server can kill a running turn
   proc.stdin.write(o.message);
   proc.stdin.end();
 
