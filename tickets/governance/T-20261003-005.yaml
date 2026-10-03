@@ -5,12 +5,28 @@ title: >-
   Fix pre-existing root test failures: .agents-only shortcut back-sync + hermes
   security-gate parity (bun test 1937 pass / 2 fail on main)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T02:39:09.134Z'
 history:
   - at: '2026-10-03T02:39:09.134Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-03T02:48:14.778Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T03:01:05.919Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T03:01:35.472Z'
+    from: review
+    to: done
+result: >-
+  Verified fixed on main 2026-10-03: both target tests pass (suite 1938 pass / 1
+  unrelated fail). The two named failures (.agents-only shortcut back-sync,
+  hermes security-gate parity) were fixed upstream by concurrent governance
+  merges on 2026-10-03 (PRs #1343..#1348; the tickets commit rode PR #1349) — no
+  code change needed. Remaining suite failure (Appendix E client_roots E13b-ii
+  Q9) belongs to the active upstream-MCP workstream tracked by
+  T-20261003-003/004.
 error: null
