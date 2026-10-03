@@ -1,0 +1,48 @@
+# Weekly drift check: the co-workspace baked-CLI npm pins vs registry latest
+# (design docs/designs/2026-10-03-coworkspace-cli-refresh-design.md, P2).
+# Deliberate-bump policy (ADR-0094 amendment precedent): pins move only through a
+# reviewed PR — this workflow SIGNALS drift by opening an issue; it never bumps.
+name: CLI version drift
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Mondays 03:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare Dockerfile pins against npm latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          dockerfile=services/co-workspace/docker/Dockerfile
+          pinned_claude=$(grep -oE '@anthropic-ai/claude-code@[0-9]+\.[0-9]+\.[0-9]+' "$dockerfile" | head -1 | cut -d@ -f3)
+          pinned_codex=$(grep -oE '@openai/codex@[0-9]+\.[0-9]+\.[0-9]+' "$dockerfile" | head -1 | cut -d@ -f3)
+          latest_claude=$(npm view @anthropic-ai/claude-code version)
+          latest_codex=$(npm view @openai/codex version)
+          echo "claude: pinned=${pinned_claude} latest=${latest_claude}"
+          echo "codex:  pinned=${pinned_codex} latest=${latest_codex}"
+          drift=0
+          summary="$GITHUB_STEP_SUMMARY"
+          [ "$pinned_claude" = "$latest_claude" ] || { echo "claude drift: $pinned_claude -> $latest_claude" >> "$summary"; drift=1; }
+          [ "$pinned_codex" = "$latest_codex" ] || { echo "codex drift: $pinned_codex -> $latest_codex" >> "$summary"; drift=1; }
+          if [ "$drift" -eq 1 ]; then
+            title="[co-workspace] baked-CLI npm pins drifted from latest"
+            existing=$(gh issue list --search "$title in:title" --state open --json number -q 'length' || echo 0)
+            if [ "$existing" -eq 0 ]; then
+              gh issue create --title "$title" --body "$(printf '%s\n\nBump the pins in `services/co-workspace/docker/Dockerfile` through a reviewed PR (deliberate-bump policy — never silent latest), probe `claude --version` / `codex --version` in the build, then refresh the stack with `services/co-workspace/docker/rebuild.sh --runtime`. Design: docs/designs/2026-10-03-coworkspace-cli-refresh-design.md')" || echo "issue creation failed — drift is still recorded in the run summary"
+            else
+              echo "drift issue already open — not duplicating"
+            fi
+            exit 1 # loud: the scheduled run itself shows red until the bump lands
+          fi
+          echo "No drift — pins are current."

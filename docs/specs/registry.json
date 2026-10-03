@@ -1990,6 +1990,15 @@
       "source": "manual",
       "created": "2026-10-03",
       "last_updated": "2026-10-03"
+    },
+    {
+      "id": "2026-10-03-coworkspace-cli-refresh-design",
+      "title": "coworkspace cli refresh design",
+      "file": "docs/designs/2026-10-03-coworkspace-cli-refresh-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-10-03",
+      "last_updated": "2026-10-03"
     }
   ]
 }
