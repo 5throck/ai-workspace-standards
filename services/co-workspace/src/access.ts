@@ -170,6 +170,25 @@ export function runtimeProviderKeyWarning(cfg: {
   return `[co-workspace] PROVIDER KEY NOT APPLICABLE: ${gap}`;
 }
 
+/** 2026-10-03 session-hardening design (D4): destructive admin operations require the
+ * caller to RE-PRESENT their password (`x-admin-password` header) — a stolen session must
+ * not be able to delete users or mint temp credentials even inside its (now short) window.
+ * The proof is the password itself, verified against the SESSION caller's argon2 hash.
+ * Passwordless (SSO/bootstrap) admins have no proof to give: they must set a password
+ * first (first-time set needs no current password — see PATCH /auth/me). */
+export async function requireAdminReauth(state: GatewayState, req: Request): Promise<void> {
+  const user = state.users.resolveSession(sessionTokenFromCookie(req));
+  if (!user || user.role !== "admin") throw new HttpError(403, "admin only");
+  const presented = req.headers.get("x-admin-password") ?? "";
+  if (!user.passwordHash) {
+    throw new HttpError(403, "password re-confirmation required — set a password first (Account > set password)");
+  }
+  if (!(await Bun.password.verify(presented, user.passwordHash))) {
+    state.audit.record(user.principal, "admin.reauth.failed", "admin-op");
+    throw new HttpError(403, "password re-confirmation required (wrong password or missing x-admin-password header)");
+  }
+}
+
 /** M2: constant-time comparison of the OAuth `state` param against the cookie value. */
 export function oauthStateMatches(returned: string | null | undefined, expected: string | null | undefined): boolean {
   if (!returned || !expected) return false;

@@ -139,7 +139,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     const token = state.users.createSession(user.id);
     return new Response(JSON.stringify({ user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) } }), {
       status: 200,
-      headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, cookieSecureFor(state.cfg, req)) },
+      headers: { "content-type": "application/json", "set-cookie": sessionCookieHeader(token, cookieSecureFor(state.cfg, req), state.cfg.sessionTtlMs / 1000) },
     });
   }
 
@@ -180,15 +180,49 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
       state.audit.record(updated.principal, "user.password.rotation");
       return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
     }
-    // R3: a normal password change must present the current credential.
+    // R3: a normal password change must present the current credential. EXCEPTION
+    // (session-hardening D5): a passwordless account (SSO/bootstrap) is SETTING a password
+    // for the first time — there is no current credential to verify, and admins need one
+    // to pass requireAdminReauth on destructive ops.
     const currentPassword = typeof body.currentPassword === "string" ? body.currentPassword : "";
-    if (!currentPassword || !(await Bun.password.verify(currentPassword, user.passwordHash ?? ""))) {
+    if (user.passwordHash && (!currentPassword || !(await Bun.password.verify(currentPassword, user.passwordHash)))) {
       throw new HttpError(403, "current password is incorrect");
     }
     const updated = state.users.changePassword(user.id, password, sessionTokenFromCookie(req));
     if (!updated) throw new HttpError(404, "user not found");
     state.audit.record(updated.principal, "user.password.change");
     return jsonResponse({ user: { loginId: updated.principal, name: updated.name, role: updated.role } });
+  }
+
+  // ── 2026-10-03 session-hardening design (D6): the user's own session management ──
+  if (req.method === "GET" && path === "/auth/sessions") {
+    const user = state.users.resolveSession(sessionTokenFromCookie(req));
+    if (!user) throw new HttpError(401, "not signed in");
+    const token = sessionTokenFromCookie(req);
+    return jsonResponse({ sessions: state.users.listSessions(token) });
+  }
+
+  if (req.method === "POST" && path === "/auth/sessions/revoke-others") {
+    if (!state.sessionLimiter.allow(ctx.clientIp)) throw new HttpError(429, "too many attempts — try later");
+    const token = sessionTokenFromCookie(req);
+    const user = state.users.resolveSession(token);
+    if (!user) throw new HttpError(401, "not signed in");
+    const revoked = state.users.revokeOtherSessions(token);
+    state.audit.record(user.principal, "session.revoke-others", undefined, String(revoked));
+    return jsonResponse({ ok: true, revoked, message: `${revoked} other session(s) signed out — this session is kept` });
+  }
+
+  if (req.method === "POST" && path === "/auth/sessions/revoke-all") {
+    if (!state.sessionLimiter.allow(ctx.clientIp)) throw new HttpError(429, "too many attempts — try later");
+    const token = sessionTokenFromCookie(req);
+    const user = state.users.resolveSession(token);
+    if (!user) throw new HttpError(401, "not signed in");
+    const revoked = state.users.revokeAllSessions(token);
+    state.audit.record(user.principal, "session.revoke-all", undefined, String(revoked));
+    return new Response(JSON.stringify({ ok: true, revoked, message: `signed out everywhere (${revoked} session(s) revoked)` }), {
+      status: 200,
+      headers: { "content-type": "application/json", "set-cookie": clearCookieHeader() },
+    });
   }
 
   // ── Wave B2: Google SSO ──
@@ -245,7 +279,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     const token = state.users.createSession(user.id);
     const secureFlag = cookieSecureFor(state.cfg, req) ? "; Secure" : "";
     const headers = new Headers({ location: "/" });
-    headers.append("set-cookie", sessionCookieHeader(token, cookieSecureFor(state.cfg, req)));
+    headers.append("set-cookie", sessionCookieHeader(token, cookieSecureFor(state.cfg, req), state.cfg.sessionTtlMs / 1000));
     headers.append("set-cookie", `gw_oauth_state=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
     headers.append("set-cookie", `gw_oauth_verifier=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secureFlag}`);
     return new Response(null, { status: 302, headers });

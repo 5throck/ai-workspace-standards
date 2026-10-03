@@ -84,7 +84,7 @@ describe("admin user delete with tenants=delete", () => {
     bad.hermesHome = join(outside, "hermes-home");
     state.registry.upsert(bad);
 
-    const res = await fetch(`${base}/admin/users/${victim!.id}?tenants=delete`, { method: "DELETE", headers: { cookie } });
+    const res = await fetch(`${base}/admin/users/${victim!.id}?tenants=delete`, { method: "DELETE", headers: { cookie, "x-admin-password": "adminpass123" } });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.tenantsHandled).toBe(1);

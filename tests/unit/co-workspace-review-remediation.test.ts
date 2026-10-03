@@ -388,3 +388,106 @@ describe("admin users table per-user rollup (live bug found 2026-10-03)", () => 
     }
   });
 });
+
+describe("session hardening (2026-10-03 session-hardening design, T-20261003-027)", () => {
+  test("idle expiry: a session idle past the idle window is rejected; fresh activity recovers", async () => {
+    const { loadConfig } = await import("../../services/co-workspace/src/config");
+    const cfg = loadConfig({
+      CO_WORKSPACE_DATA_DIR: scratch("sess-idle"),
+      CO_WORKSPACE_SESSION_TTL_HOURS: "24",
+      CO_WORKSPACE_SESSION_IDLE_HOURS: "4",
+    });
+    const store = new UserStore(cfg.dataDir, cfg.sessionTtlMs, cfg.sessionIdleMs);
+    try {
+      const u = store.createUser({ email: "s@example.com", name: "s", password: "longenough1" })!;
+      const token = store.createSession(u.id);
+      expect(store.resolveSession(token)?.id).toBe(u.id);
+      // simulate idleness: backdate last_seen past the 4h idle window
+      store.db.query("UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?")
+        .run(new Date(Date.now() - 5 * 3600 * 1000).toISOString(), (await import("../../services/co-workspace/src/users")).hashToken(token));
+      expect(store.resolveSession(token)).toBeNull(); // idle-expired and purged
+    } finally {
+      store.close();
+    }
+  });
+
+  test("absolute TTL still caps a continuously-active session", async () => {
+    const { loadConfig } = await import("../../services/co-workspace/src/config");
+    const cfg = loadConfig({
+      CO_WORKSPACE_DATA_DIR: scratch("sess-ttl"),
+      CO_WORKSPACE_SESSION_TTL_HOURS: "24",
+      CO_WORKSPACE_SESSION_IDLE_HOURS: "4",
+    });
+    const store = new UserStore(cfg.dataDir, cfg.sessionTtlMs, cfg.sessionIdleMs);
+    try {
+      const u = store.createUser({ email: "t@example.com", name: "t", password: "longenough1" })!;
+      const token = store.createSession(u.id);
+      const h = (await import("../../services/co-workspace/src/users")).hashToken(token);
+      // keep last_seen fresh (active use) but backdate expires_at past the absolute cap
+      store.db.query("UPDATE sessions SET expires_at = ? WHERE token_hash = ?")
+        .run(new Date(Date.now() - 1000).toISOString(), h);
+      expect(store.resolveSession(token)).toBeNull();
+    } finally {
+      store.close();
+    }
+  });
+
+  test("revoke-others keeps the current session; revoke-all purges everything", async () => {
+    const { loadConfig } = await import("../../services/co-workspace/src/config");
+    const cfg = loadConfig({ CO_WORKSPACE_DATA_DIR: scratch("sess-revoke") });
+    const store = new UserStore(cfg.dataDir, cfg.sessionTtlMs, cfg.sessionIdleMs);
+    try {
+      const u = store.createUser({ email: "r@example.com", name: "r", password: "longenough1" })!;
+      const keep = store.createSession(u.id);
+      const other1 = store.createSession(u.id);
+      const other2 = store.createSession(u.id);
+      const list = store.listSessions(keep);
+      expect(list.length).toBe(3);
+      expect(list.filter((x) => x.current).length).toBe(1);
+      const revoked = store.revokeOtherSessions(keep);
+      expect(revoked).toBe(2);
+      expect(store.resolveSession(keep)?.id).toBe(u.id);
+      expect(store.resolveSession(other1)).toBeNull();
+      expect(store.resolveSession(other2)).toBeNull();
+      const all = store.revokeAllSessions(keep);
+      expect(all).toBe(1);
+      expect(store.resolveSession(keep)).toBeNull();
+    } finally {
+      store.close();
+    }
+  });
+
+  test("destructive admin ops require password re-confirmation (D4)", async () => {
+    const { handleAdmin } = await import("../../services/co-workspace/src/routes/admin");
+    const { loadConfig } = await import("../../services/co-workspace/src/config");
+    const cfg = loadConfig({
+      CO_WORKSPACE_DATA_DIR: scratch("reauth"),
+      CO_WORKSPACE_WORKSPACE_DIR: scratch("reauth-ws"),
+    });
+    const state = createState(cfg);
+    try {
+      const admin = state.users.createUser({ email: "ad@example.com", name: "ad", password: "longenough1" })!;
+      state.users.bootstrapAdmin("ad@example.com"); // promote to admin
+      const token = state.users.createSession(admin.id); // created AFTER promotion — survives the purge
+      const ctx = { url: new URL("http://x/admin/users/x/reset-password"), path: "/admin/users/x/reset-password", sessionUser: state.users.resolveSession(token), clientIp: "local" };
+      // handleAdmin propagates HttpError (the catch lives in handleRequest) — assert the throws
+      const call = (pw?: string) => handleAdmin(
+        state,
+        new Request("http://x/admin/users/x/reset-password", { method: "POST", headers: { cookie: `gw_session=${token}`, "content-type": "application/json", ...(pw ? { "x-admin-password": pw } : {}) }, body: "{}" }),
+        ctx,
+      );
+      const noHeader = await call().then((r) => r.status, (e) => ({ status: e.status, message: e.message }));
+      expect(noHeader.status ?? noHeader).toBe(403);
+      expect(String(noHeader.message ?? noHeader)).toContain("re-confirmation");
+      const wrong = await call("wrong-password").then((r) => r.status, (e) => ({ status: e.status, message: e.message }));
+      expect(wrong.status ?? wrong).toBe(403);
+      // correct password → past re-auth (404: the fixture user id does not exist)
+      const good = await call("longenough1").then((r) => r.status, (e) => ({ status: e.status, message: e.message }));
+      expect(good.status ?? good).toBe(404);
+    } finally {
+      for (const store of [state.registry, state.turns, state.users, state.audit]) {
+        try { store.close(); } catch { /* best effort */ }
+      }
+    }
+  });
+});

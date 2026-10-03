@@ -99,6 +99,10 @@ export interface GatewayConfig {
   allowAnonProvisioning: boolean;
   /** SEC-05 (remnant): per-principal lifetime token budget ACROSS all their tenants. 0 = off. */
   principalMaxTokens: number;
+  /** 2026-10-03 session-hardening design (D1): absolute session TTL and idle timeout.
+   * Activity slides the idle window but never past the absolute cap. */
+  sessionTtlMs: number;
+  sessionIdleMs: number;
   /** SEC-10: docker isolation resource caps. */
   containerMemory: string;
   containerCpus: string;
@@ -281,7 +285,10 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     trustProxy: env.CO_WORKSPACE_TRUST_PROXY === "true" || env.CO_WORKSPACE_TRUST_PROXY === "1",
     tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
     allowAnonProvisioning: env.CO_WORKSPACE_ALLOW_ANON_PROVISIONING === "true",
-    principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),    containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
+    principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),
+    sessionTtlMs: num(env.CO_WORKSPACE_SESSION_TTL_HOURS, 24) * 3600 * 1000,
+    sessionIdleMs: num(env.CO_WORKSPACE_SESSION_IDLE_HOURS, 4) * 3600 * 1000,
+    containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
     containerCpus: env.CO_WORKSPACE_CONTAINER_CPUS ?? "2",
     containerPidsLimit: numOr0(env.CO_WORKSPACE_CONTAINER_PIDS_LIMIT) || 256,
     runtime: (["antigravity", "claude", "codex"] as const).includes(

@@ -31,6 +31,6 @@ We appreciate responsible disclosure and will credit reporters (unless anonymity
 
 ## Template Enforcement Strategy
 
-We have shifted to a 644/755 model, meaning templates are fully writable on the filesystem. The Single Source of Truth (SSOT) architecture is now enforced primarily via Git `pre-commit` hooks that block direct changes to `templates/` instead of filesystem-level read-only locks. The only authorized mechanism to modify these files is through the `bun scripts/publish-to-template.ts` lifecycle script. 
+We have shifted to a 644/755 model, meaning templates are fully writable on the filesystem. The Single Source of Truth (SSOT) architecture is now enforced primarily via Git `pre-commit` hooks that block direct changes to `templates/` instead of filesystem-level read-only locks. The only authorized mechanism to modify these files is through the `bun scripts/propagate-to-templates.ts` lifecycle script (`publish-to-template.ts` was deprecated in v1.8.0 and has been removed). 
 
 Note that for scripts, Windows executable bits are maintained entirely via the Git Index (`+x`) rather than through Windows attributes.

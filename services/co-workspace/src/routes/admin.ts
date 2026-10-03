@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { sessionTokenFromCookie } from "../users";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
-import { callerPrincipal, requireTenantAccess } from "../access";
+import { callerPrincipal, requireAdminReauth, requireTenantAccess } from "../access";
 import { deleteTenantData, cachedDirSize } from "../lifecycle";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
@@ -62,6 +62,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   if (req.method === "POST" && resetRoute) {
     const caller = state.users.resolveSession(sessionTokenFromCookie(req));
     if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    await requireAdminReauth(state, req); // session-hardening D4: re-present the password
     const target = state.users.findById(decodeURIComponent(resetRoute[1]));
     if (!target) throw new HttpError(404, "user not found");
     const tempPassword = state.users.createTempPassword(target.id);
@@ -87,6 +88,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   if (req.method === "DELETE" && deleteRoute) {
     const caller = state.users.resolveSession(sessionTokenFromCookie(req));
     if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    await requireAdminReauth(state, req); // session-hardening D4
     const targetId = decodeURIComponent(deleteRoute[1]);
     const target = state.users.findById(targetId);
     if (!target) throw new HttpError(404, "user not found");

@@ -27,7 +27,7 @@ export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
   return {
     cfg,
     turns: new TurnStore(cfg.dataDir),
-    users: new UserStore(cfg.dataDir),
+    users: new UserStore(cfg.dataDir, cfg.sessionTtlMs, cfg.sessionIdleMs),
     audit: new AuditLog(cfg.dataDir),
     loginLimiter: new RateLimiter(10, 15 * 60 * 1000),
     signupLimiter: new RateLimiter(5, 3600 * 1000),

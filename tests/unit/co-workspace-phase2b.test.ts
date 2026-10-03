@@ -143,7 +143,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     writeFileSync(keysFile, "sk-old\nsk-new\n");
     const reload = await fetch(`${base}/admin/reload`, {
       method: "POST",
-      headers: { cookie: adminCookie },
+      headers: { cookie: adminCookie, "x-admin-password": "adminpass123" },
     });
     expect(((await reload.json()) as any).keyCount).toBe(2);
     expect((await models("sk-new")).status).toBe(200);
@@ -151,7 +151,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     writeFileSync(keysFile, "sk-new\n");
     const reload2 = await fetch(`${base}/admin/reload`, {
       method: "POST",
-      headers: { cookie: adminCookie },
+      headers: { cookie: adminCookie, "x-admin-password": "adminpass123" },
     });
     expect(((await reload2.json()) as any).keyCount).toBe(1);
     expect((await models("sk-old")).status).toBe(401);
@@ -164,7 +164,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
 
     const reset = await fetch(`${base}/admin/users/${target!.id}/reset-password`, {
       method: "POST",
-      headers: { cookie: adminCookie },
+      headers: { cookie: adminCookie, "x-admin-password": "adminpass123" },
     });
     expect(reset.status).toBe(200);
     const { tempPassword, resetToken } = await reset.json();
@@ -220,7 +220,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     const gated = state.users.createUser({ email: "gated@test.local", name: "gated", password: "oldpass123", role: "user" });
     const reset = await fetch(`${base}/admin/users/${gated!.id}/reset-password`, {
       method: "POST",
-      headers: { cookie: adminCookie },
+      headers: { cookie: adminCookie, "x-admin-password": "adminpass123" },
     });
     const { tempPassword } = await reset.json();
     const login = await fetch(`${base}/auth/login`, {
@@ -362,12 +362,12 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
   test("reload with an emptied key file is rejected and leaves keys unchanged (T-20260928-009)", async () => {
     const before = state.cfg.apiKeys.slice();
     writeFileSync(keysFile, "# emptied\n");
-    const res = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie } });
+    const res = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie, "x-admin-password": "adminpass123" } });
     expect(res.status).toBe(400);
     expect(state.cfg.apiKeys).toEqual(before);
     // restore for the suites that follow
     writeFileSync(keysFile, "sk-new\n");
-    const ok = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie } });
+    const ok = await fetch(`${base}/admin/reload`, { method: "POST", headers: { cookie: adminCookie, "x-admin-password": "adminpass123" } });
     expect(ok.status).toBe(200);
   });
 
@@ -399,7 +399,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
     expect((await r1.json()).ok).toBe(true);
     // admin delete no longer returns the raw email
     const victim = state.users.createUser({ email: "victim@test.local", name: "victim", password: "victimpw123", role: "user" });
-    const del = await fetch(`${base}/admin/users/${victim!.id}?tenants=delete`, { method: "DELETE", headers: { cookie: adminCookie } });
+    const del = await fetch(`${base}/admin/users/${victim!.id}?tenants=delete`, { method: "DELETE", headers: { cookie: adminCookie, "x-admin-password": "adminpass123" } });
     expect(del.status).toBe(200);
     const body = await del.json();
     expect(body.deletedUser).toBe(victim!.principal);

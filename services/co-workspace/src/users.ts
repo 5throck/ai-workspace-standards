@@ -31,7 +31,11 @@ export interface SessionInfo {
   expiresAt: string;
 }
 
-const SESSION_TTL_MS = 7 * 24 * 3600 * 1000;
+/** Session lifetime defaults (2026-10-03 session-hardening design D1): 24h absolute cap,
+ * 4h idle expiry — activity slides the idle window, never the absolute cap. The store takes
+ * the operator-configurable values from the gateway config. */
+const DEFAULT_SESSION_TTL_MS = 24 * 3600 * 1000;
+const DEFAULT_SESSION_IDLE_MS = 4 * 3600 * 1000;
 
 export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -43,8 +47,12 @@ export function principalFromEmail(email: string): string {
 
 export class UserStore {
   private readonly db: Database;
+  private readonly sessionTtlMs: number;
+  private readonly sessionIdleMs: number;
 
-  constructor(dataDir: string) {
+  constructor(dataDir: string, sessionTtlMs = DEFAULT_SESSION_TTL_MS, sessionIdleMs = DEFAULT_SESSION_IDLE_MS) {
+    this.sessionTtlMs = sessionTtlMs;
+    this.sessionIdleMs = sessionIdleMs;
     const dir = join(dataDir, "tenants");
     mkdirSync(dir, { recursive: true });
     this.db = new Database(join(dir, "users.db"));
@@ -110,6 +118,8 @@ export class UserStore {
       "ALTER TABLE users ADD COLUMN verified_at TEXT",
       "ALTER TABLE users ADD COLUMN must_change_password INTEGER",
       "ALTER TABLE users ADD COLUMN temp_password_expires TEXT",
+      "ALTER TABLE sessions ADD COLUMN last_seen_at TEXT",
+      "ALTER TABLE sessions ADD COLUMN created_at TEXT",
       "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login_id) WHERE login_id IS NOT NULL",
       "CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash)",
       "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_hash_unique ON users(email_hash) WHERE email_hash IS NOT NULL",
@@ -383,12 +393,15 @@ export class UserStore {
     return { ok: true, principal: user.principal };
   }
 
-  /** Create a login session; returns the raw token (cookie value). Stored hashed. */
+  /** Create a login session; returns the raw token (cookie value). Stored hashed.
+   * Absolute expiry = now + TTL (session-hardening design D2); the idle window is tracked
+   * by last_seen_at and slides with activity up to the absolute cap. */
   createSession(userId: string): string {
     const token = randomBytes(32).toString("hex");
+    const now = new Date();
     this.db
-      .query("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)")
-      .run(hashToken(token), userId, new Date(Date.now() + SESSION_TTL_MS).toISOString());
+      .query("INSERT INTO sessions (token_hash, user_id, expires_at, last_seen_at, created_at) VALUES (?, ?, ?, ?, ?)")
+      .run(hashToken(token), userId, new Date(now.getTime() + this.sessionTtlMs).toISOString(), now.toISOString(), now.toISOString());
     return token;
   }
 
@@ -398,11 +411,53 @@ export class UserStore {
       .query("SELECT * FROM sessions WHERE token_hash = ?")
       .get(hashToken(token)) as Record<string, unknown> | null;
     if (!row) return null;
-    if (new Date(row.expires_at as string).getTime() < Date.now()) {
+    const now = Date.now();
+    const expired =
+      new Date(row.expires_at as string).getTime() < now ||
+      new Date((row.last_seen_at as string | null) ?? (row.expires_at as string)).getTime() + this.sessionIdleMs < now;
+    if (expired) {
       this.db.query("DELETE FROM sessions WHERE token_hash = ?").run(hashToken(token));
       return null;
     }
+    // Slide the idle window with activity — throttled to one write per idleWindow/12 so the
+    // per-request resolve path does not hit the DB every time.
+    const lastSeen = new Date((row.last_seen_at as string | null) ?? 0).getTime();
+    if (now - lastSeen > this.sessionIdleMs / 12) {
+      this.db.query("UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?").run(new Date(now).toISOString(), hashToken(token));
+    }
     return this.findById(row.user_id as string);
+  }
+
+  /** 2026-10-03 session-hardening design (D6): the caller's own sessions, newest
+   * activity first; `current` flags the presented token. */
+  listSessions(token: string | undefined): Array<{ current: boolean; createdAt: string; lastActive: string; expiresAt: string }> {
+    if (!token) return [];
+    const currentHash = hashToken(token);
+    const rows = this.db
+      .query("SELECT * FROM sessions WHERE user_id = (SELECT user_id FROM sessions WHERE token_hash = ?) ORDER BY COALESCE(last_seen_at, expires_at) DESC")
+      .all(currentHash) as Record<string, unknown>[];
+    return rows.map((r) => ({
+      current: r.token_hash === currentHash,
+      createdAt: r.created_at as string,
+      lastActive: (r.last_seen_at as string | null) ?? (r.expires_at as string),
+      expiresAt: r.expires_at as string,
+    }));
+  }
+
+  /** Revoke every session of the presented token's user EXCEPT the presented one. */
+  revokeOtherSessions(token: string | undefined): number {
+    if (!token) return 0;
+    const row = this.db.query("SELECT user_id FROM sessions WHERE token_hash = ?").get(hashToken(token)) as { user_id: string } | null;
+    if (!row) return 0;
+    return Number(this.db.query("DELETE FROM sessions WHERE user_id = ? AND token_hash != ?").run(row.user_id, hashToken(token)).changes);
+  }
+
+  /** Revoke ALL sessions of the presented token's user — including the current one. */
+  revokeAllSessions(token: string | undefined): number {
+    if (!token) return 0;
+    const row = this.db.query("SELECT user_id FROM sessions WHERE token_hash = ?").get(hashToken(token)) as { user_id: string } | null;
+    if (!row) return 0;
+    return Number(this.db.query("DELETE FROM sessions WHERE user_id = ?").run(row.user_id).changes);
   }
 
   destroySession(token: string | undefined): void {
@@ -485,8 +540,10 @@ export function sessionTokenFromCookie(req: Request): string | undefined {
   return match?.[1];
 }
 
-export function sessionCookieHeader(token: string, secure = false): string {
-  const flags = `HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 3600}${secure ? "; Secure" : ""}`;
+/** Session cookie: Max-Age mirrors the ABSOLUTE TTL (session-hardening design D3) — an
+ * idle-expired session leaves a dead browser cookie that the server simply rejects. */
+export function sessionCookieHeader(token: string, secure = false, ttlSeconds = 24 * 3600): string {
+  const flags = `HttpOnly; Path=/; SameSite=Lax; Max-Age=${Math.round(ttlSeconds)}${secure ? "; Secure" : ""}`;
   return `gw_session=${token}; ${flags}`;
 }
 
