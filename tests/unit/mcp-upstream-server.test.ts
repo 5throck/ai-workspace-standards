@@ -1,4 +1,4 @@
-// @version 2.1.0
+// @version 2.2.0
 /**
  * Tests for scripts/mcp-upstream-server.ts against design §13
  * (docs/designs/2026-10-01-upstream-request-mcp-design.md).
@@ -15,8 +15,9 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, isAbsolute } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { load, JSON_SCHEMA } from 'js-yaml';
-import { validateTicket } from '../../scripts/helpers/ticket-schema.ts';
+import { validateTicket, upstreamIdentitySource } from '../../scripts/helpers/ticket-schema.ts';
 import { listTickets, nextServiceTicket } from '../../scripts/helpers/ticket-store.ts';
 
 const REPO_ROOT = resolve(import.meta.dir, '..', '..');
@@ -93,6 +94,11 @@ class Session {
   stderr = '';
   waiting = new Map<number | string, (r: Rpc) => void>();
   nextId = 100;
+  /** Fake MCP client behavior for server-originated roots/list requests (Appendix E tests). */
+  rootsMode: 'reply' | 'silent' | 'error' | 'malformed' = 'reply';
+  rootsUris: string[] = [];
+  rootsRequests = 0;
+  serverRequestIds: Array<string | number | null> = [];
   constructor(ws: Workspace, cwd: string, env: Record<string, string> = {}) {
     this.child = spawn('bun', [serverPath], {
       cwd, stdio: ['pipe', 'pipe', 'pipe'],
@@ -105,12 +111,28 @@ class Session {
         const line = this.buf.slice(0, i).trim();
         this.buf = this.buf.slice(i + 1);
         if (!line) continue;
-        const msg = JSON.parse(line) as Rpc;
+        const msg = JSON.parse(line) as Rpc & { method?: string };
+        if (msg.method === 'roots/list') { this.answerRoots(msg.id); continue; }
         const w = msg.id === null ? undefined : this.waiting.get(msg.id);
         if (w) { this.waiting.delete(msg.id as number); w(msg); }
       }
     });
     this.child.stderr!.on('data', (c: Buffer) => { this.stderr += c.toString('utf-8'); });
+  }
+  private answerRoots(id: string | number | null): void {
+    this.rootsRequests++;
+    this.serverRequestIds.push(id);
+    if (this.rootsMode === 'silent') return;
+    const body = this.rootsMode === 'error' ? { error: { code: -32603, message: 'no roots' } }
+      : this.rootsMode === 'malformed' ? { result: { roots: 'nope' } }
+        : { result: { roots: this.rootsUris.map((uri) => ({ uri })) } };
+    this.child.stdin!.write(JSON.stringify({ jsonrpc: '2.0', id, ...body }) + '\n');
+  }
+  /** initialize (advertising roots by default) then notifications/initialized. */
+  async handshake(caps: Record<string, unknown> = { roots: { listChanged: true } }, clientName = 'fake-client'): Promise<Rpc> {
+    const r = await this.send('initialize', { protocolVersion: '2024-11-05', capabilities: caps, clientInfo: { name: clientName, version: '1' } });
+    this.raw(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }));
+    return r;
   }
   send(method: string, params?: unknown): Promise<Rpc> {
     const id = this.nextId++;
@@ -1265,6 +1287,275 @@ describe('review fixes 3-6', () => {
 // =====================================================================
 // test seam
 // =====================================================================
+// =====================================================================
+// Appendix E tests 13b-13l - client-attested identity via roots/list
+// (named E13b..E13l: the plain 13b/13c labels already belong to the installer tests)
+// =====================================================================
+describe('Appendix E: client_roots identity', () => {
+  const NEUTRAL = tmpdir(); // a cwd that is not under Projects/ (stands in for cwd=/)
+  const uri = (p: string): string => pathToFileURL(p).href;
+  async function rootsSession(uris: string[], env: Record<string, string> = {}, mode: Session['rootsMode'] = 'reply'): Promise<Session> {
+    const s = open(NEUTRAL, env);
+    s.rootsUris = uris;
+    s.rootsMode = mode;
+    await s.handshake();
+    return s;
+  }
+  async function waitFor<T>(fn: () => T | undefined | false, ms = 5000): Promise<T> {
+    const end = Date.now() + ms;
+    for (;;) {
+      const v = fn();
+      if (v) return v;
+      if (Date.now() > end) throw new Error('waitFor timed out');
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  }
+
+  test('E13b. roots handshake success: one root in co-test -> client_roots, not flagged, inbox with identity:client_roots_untrusted', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = await rootsSession([uri(proj)]);
+    const r = await s.create(good());
+    expect(r.rpc.error).toBeUndefined();
+    expect(r.body.flagged).toBe(false);
+    expect(r.body.triage).toBe('inbox');
+    const t = readTicketYaml(r.body.id);
+    expect(t.upstream.identity_source).toBe('client_roots');
+    expect(t.upstream.flagged).toBe(false);
+    expect(t.upstream.triage_reasons).toContain('identity:client_roots_untrusted');
+    expect(t.upstream.triage_reasons).not.toContain('identity:self_declared');
+    expect(() => validateTicket(t)).not.toThrow();
+    expect(s.rootsRequests).toBe(1);
+    expect(s.serverRequestIds[0]).toMatch(/^srv-/);
+  });
+
+  test('E13b-ii. Q9: after one PM-resolved client_roots ticket the next client_roots request is auto-ready; a self_declared-only history does not unlock it', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = await rootsSession([uri(proj)]);
+    const first = await s.create(good());
+    expect(first.body.triage).toBe('inbox');
+    const { setUpstreamResolution } = await import('../../scripts/helpers/ticket-store.ts');
+    setUpstreamResolution(ws.ticketsDir, first.body.id, { outcome: 'fixed', summary: 'fixed in 0.9.0' }, 'fixed in 0.9.0');
+    const second = await s.create(good());
+    expect(second.body.triage).toBe('ready');
+    expect(second.body.reasons).toEqual([]);
+
+    // a different project whose only resolved ticket was self_declared stays untrusted
+    const other = ws.project('co-other');
+    seedKnown(ws, 'co-test', 'co-other');
+    const decl = await open(NEUTRAL).create(good({ project_root: other }));
+    expect(readTicketYaml(decl.body.id).upstream.identity_source).toBe('self_declared');
+    setUpstreamResolution(ws.ticketsDir, decl.body.id, { outcome: 'fixed', summary: 'fixed in 0.9.0' }, 'fixed in 0.9.0');
+    const viaRoots = await (await rootsSession([uri(other)])).create(good());
+    expect(viaRoots.body.triage).toBe('inbox');
+    expect(readTicketYaml(viaRoots.body.id).upstream.triage_reasons).toContain('identity:client_roots_untrusted');
+  });
+
+  test('E13c. roots absent: no roots/list is sent; cwd and project_root behavior are unchanged', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(NEUTRAL);
+    await s.handshake({});
+    const rejected = await s.create(good());
+    expect(rejected.rpc.error?.code).toBe(-32602);
+    const declared = await s.create(good({ project_root: proj }));
+    expect(readTicketYaml(declared.body.id).upstream.identity_source).toBe('self_declared');
+    expect(declared.body.flagged).toBe(true);
+    const viaCwd = await open(proj).create(good());
+    expect(readTicketYaml(viaCwd.body.id).upstream.identity_source).toBe('cwd');
+    await s.send('ping');
+    expect(s.rootsRequests).toBe(0);
+  });
+
+  test('E13d. timeout: silent client -> fallback within 1 s, ping still answered while waiting, one retry per session', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = await rootsSession([uri(proj)], { UPSTREAM_ROOTS_TIMEOUT_MS: '200' }, 'silent');
+    const t0 = Date.now();
+    const pending = s.create(good({ project_root: proj }));
+    const ping = await s.send('ping');
+    expect(ping.result).toEqual({});
+    expect(Date.now() - t0).toBeLessThan(180); // answered while roots/list is still outstanding
+    const declared = await pending;
+    expect(Date.now() - t0).toBeLessThan(1000);
+    expect(declared.body.flagged).toBe(true);
+    expect(readTicketYaml(declared.body.id).upstream.identity_source).toBe('self_declared');
+    expect(s.rootsRequests).toBe(1);
+
+    const rej = await s.create(good()); // failed state retried once on this call
+    expect(rej.rpc.error?.code).toBe(-32602);
+    expect(s.rootsRequests).toBe(2);
+    await s.create(good());              // retry budget spent: no third request
+    expect(s.rootsRequests).toBe(2);
+  });
+
+  test('E13d-ii. roots error / malformed result / too many roots fail closed to the existing path', async () => {
+    const proj = ws.project('co-test');
+    for (const mode of ['error', 'malformed'] as const) {
+      const s = await rootsSession([uri(proj)], {}, mode);
+      const rej = await s.create(good());
+      expect(rej.rpc.error?.code).toBe(-32602);
+    }
+    const many = await rootsSession(Array.from({ length: 33 }, () => uri(proj)));
+    expect((await many.create(good())).rpc.error?.code).toBe(-32602);
+  });
+
+  test('E13e. multiple candidates fall back to project_root (Q10: project_root does not narrow)', async () => {
+    const a = ws.project('co-test');
+    const b = ws.project('co-test2');
+    seedKnown(ws, 'co-test', 'co-test2');
+    const s = await rootsSession([uri(a), uri(b)]);
+    expect((await s.create(good())).rpc.error?.code).toBe(-32602);
+    const declared = await s.create(good({ project_root: a }));
+    expect(readTicketYaml(declared.body.id).upstream.identity_source).toBe('self_declared');
+    expect(declared.body.flagged).toBe(true);
+    // two roots in the SAME project dedupe to one candidate
+    mkdirSync(join(a, 'sub'), { recursive: true });
+    const same = await rootsSession([uri(a), uri(join(a, 'sub'))]);
+    const ok = await same.create(good());
+    expect(readTicketYaml(ok.body.id).upstream.identity_source).toBe('client_roots');
+  });
+
+  test('E13f. zero candidates (outside Projects, non-file URI, gw-* project) fall back to project_root / the registration error', async () => {
+    const proj = ws.project('co-test');
+    const gw = ws.project('gw-test');
+    seedKnown(ws, 'co-test');
+    const s = await rootsSession([uri(NEUTRAL), 'https://example.com/Projects/co-test', uri(gw), 'file://remote-host/share/x']);
+    const rej = await s.create(good());
+    expect(rej.rpc.error?.code).toBe(-32602);
+    expect(rej.rpc.error!.message).toContain('project_root');
+    const declared = await s.create(good({ project_root: proj }));
+    expect(readTicketYaml(declared.body.id).upstream.identity_source).toBe('self_declared');
+  });
+
+  test('E13g. conflicting project_root is rejected with -32602 and audit-logged; same-project and unresolvable project_root are ignored', async () => {
+    const a = ws.project('co-test');
+    const b = ws.project('co-test2');
+    seedKnown(ws, 'co-test', 'co-test2');
+    const s = await rootsSession([uri(a)]);
+    const before = ticketFiles().length;
+    const conflict = await s.create(good({ project_root: b }));
+    expect(conflict.rpc.error?.code).toBe(-32602);
+    expect(conflict.rpc.error!.message).toBe('identity conflict: project_root does not match the client-attested workspace root');
+    expect(ticketFiles().length).toBe(before);
+    const logged = auditLines().find((l) => l.outcome === 'reject_identity_conflict');
+    expect(logged).toMatchObject({ project: 'co-test', declared_project: 'co-test2', identity_source: 'client_roots' });
+    expect(logged.root_hashes[0]).toMatch(/^[0-9a-f]{16}$/);
+    expect(JSON.stringify(auditLines())).not.toContain(a);
+
+    const same = await s.create(good({ project_root: a }));
+    expect(readTicketYaml(same.body.id).upstream.identity_source).toBe('client_roots');
+    const bogus = await s.create(good({ project_root: join(NEUTRAL, 'does-not-exist') }));
+    expect(readTicketYaml(bogus.body.id).upstream.identity_source).toBe('client_roots');
+    expect(auditLines().filter((l) => l.outcome === 'accepted').some((l) => l.project_root_ignored === true)).toBe(true);
+  });
+
+  test('E13h. symlinks: a link from outside INTO a project resolves to the real project; a link under Projects/ pointing OUT is rejected', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const outsideRepo = realpathSync(mkdtempSync(join(tmpdir(), 'upstream-out-')));
+    const linkDir = realpathSync(mkdtempSync(join(tmpdir(), 'upstream-lnk-')));
+    try {
+      symlinkSync(proj, join(linkDir, 'alias'));
+      const viaAlias = await (await rootsSession([uri(join(linkDir, 'alias'))])).create(good());
+      expect(viaAlias.rpc.error).toBeUndefined();
+      expect(readTicketYaml(viaAlias.body.id).upstream.project).toBe('co-test');
+      expect(readTicketYaml(viaAlias.body.id).upstream.identity_source).toBe('client_roots');
+
+      execFileSync('git', ['init', '-q', outsideRepo]);
+      writeFileSync(join(outsideRepo, 'template-version.txt'), 'variant=co-spoof\n');
+      symlinkSync(outsideRepo, join(ws.projects, 'co-spoof'));
+      const escaped = await (await rootsSession([uri(join(ws.projects, 'co-spoof'))])).create(good());
+      expect(escaped.rpc.error?.code).toBe(-32602);
+    } finally {
+      await closeAll();
+      rmSync(outsideRepo, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      rmSync(linkDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    }
+  });
+
+  test('E13i. roots/list_changed: the next call re-requests roots and uses the new single candidate; ignored without the capability', async () => {
+    const a = ws.project('co-test');
+    const b = ws.project('co-test2');
+    seedKnown(ws, 'co-test', 'co-test2');
+    const s = await rootsSession([uri(a)]);
+    const first = await s.create(good());
+    expect(readTicketYaml(first.body.id).upstream.project).toBe('co-test');
+    s.rootsUris = [uri(b)];
+    s.raw(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/roots/list_changed' }));
+    await s.send('ping');
+    const second = await s.create(good());
+    expect(readTicketYaml(second.body.id).upstream.project).toBe('co-test2');
+    expect(s.rootsRequests).toBe(2);
+
+    const noCap = open(NEUTRAL);
+    await noCap.handshake({});
+    noCap.raw(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/roots/list_changed' }));
+    await noCap.send('ping');
+    expect(noCap.rootsRequests).toBe(0);
+  });
+
+  test('E13j. identity_source is recorded on the ticket and the audit line for every tier; legacy tickets still validate', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const viaCwd = await open(proj).create(good());
+    const viaRoots = await (await rootsSession([uri(proj)])).create(good());
+    const viaDecl = await open(NEUTRAL).create(good({ project_root: proj }));
+    expect(readTicketYaml(viaCwd.body.id).upstream.identity_source).toBe('cwd');
+    expect(readTicketYaml(viaRoots.body.id).upstream.identity_source).toBe('client_roots');
+    expect(readTicketYaml(viaDecl.body.id).upstream.identity_source).toBe('self_declared');
+    const accepted = auditLines().filter((l) => l.outcome === 'accepted');
+    expect(accepted.map((l) => l.identity_source)).toEqual(['cwd', 'client_roots', 'self_declared']);
+    expect(accepted.map((l) => l.identity)).toEqual(['cwd', 'cwd', 'declared']); // legacy key kept
+    for (const id of [viaCwd.body.id, viaRoots.body.id, viaDecl.body.id]) expect(() => validateTicket(readTicketYaml(id))).not.toThrow();
+
+    const legacy = readTicketYaml(viaCwd.body.id);
+    delete legacy.upstream.identity_source;
+    expect(() => validateTicket(legacy)).not.toThrow();
+    expect(upstreamIdentitySource(legacy.upstream)).toBe('cwd');
+    const legacyDecl = readTicketYaml(viaDecl.body.id);
+    delete legacyDecl.upstream.identity_source;
+    expect(upstreamIdentitySource(legacyDecl.upstream)).toBe('self_declared');
+    const bad = readTicketYaml(viaCwd.body.id);
+    bad.upstream.identity_source = 'bogus';
+    expect(() => validateTicket(bad)).toThrow(/identity_source/);
+  });
+
+  test('E13k. Phase A (UPSTREAM_CLIENT_ROOTS=0): client_init and roots_probe are logged, identity outcomes are unchanged, instruction text is the old wording', async () => {
+    const proj = ws.project('co-test');
+    const s = open(NEUTRAL, { UPSTREAM_CLIENT_ROOTS: '0' });
+    s.rootsUris = [uri(proj)];
+    const init = await s.handshake({ roots: { listChanged: true } }, 'Fake Client\u200b');
+    expect(init.result.instructions).not.toContain('workspace roots');
+    const probe = await waitFor(() => auditLines().find((l) => l.outcome === 'roots_probe'));
+    expect(probe).toMatchObject({ root_count: 1, candidate_count: 1, would_resolve: true, state: 'ok' });
+    expect(typeof probe.latency_ms).toBe('number');
+    const ci = auditLines().find((l) => l.outcome === 'client_init');
+    expect(ci).toMatchObject({ client_name: 'Fake Client', roots_supported: true, roots_list_changed: true });
+    expect((await s.create(good())).rpc.error?.code).toBe(-32602); // tier disabled: pre-change behavior
+    expect(readFileSync(join(ws.logsDir, readdirSync(ws.logsDir).find((f) => f.endsWith('.jsonl'))!), 'utf-8')).not.toContain(proj);
+
+    const on = open(NEUTRAL);
+    const onInit = await on.handshake({});
+    expect(onInit.result.instructions).toContain('workspace roots');
+  });
+
+  test('E13l. status: client_roots identity gets unredacted resolutions, self_declared stays redacted', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const filed = await open(proj).create(good());
+    const { setUpstreamResolution } = await import('../../scripts/helpers/ticket-store.ts');
+    setUpstreamResolution(ws.ticketsDir, filed.body.id, { outcome: 'fixed', summary: 'SECRET-RESOLUTION-SUMMARY', pr_url: 'https://github.com/x/pull/1' }, 'SECRET-RESOLUTION-SUMMARY');
+    const viaRoots = await (await rootsSession([uri(proj)])).status({ id: filed.body.id });
+    expect(viaRoots.rpc.error).toBeUndefined();
+    expect(viaRoots.body.requests[0].resolution.summary).toContain('SECRET-RESOLUTION-SUMMARY');
+    const declared = await open(NEUTRAL).status({ id: filed.body.id, project_root: proj });
+    expect(declared.body.requests[0].resolution).toBeUndefined();
+    expect(auditLines().filter((l) => l.outcome === 'status').map((l) => l.identity_source)).toEqual(['client_roots', 'self_declared']);
+  });
+});
+
 describe('UPSTREAM_WORKSPACE_ROOT seam', () => {
   test('relative override is ignored with a warning (initialize only; no create, so the real workspace is never written)', async () => {
     const proj = ws.project('co-test');
