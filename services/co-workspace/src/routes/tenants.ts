@@ -4,7 +4,7 @@ import { modelsPayload } from "../openai";
 import { genId } from "../util";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { variantStatus } from "../pages";
-import { callerPrincipal, isAdminCaller, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
+import { callerPrincipal, isPasswordSetAdmin, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
 import { sanitizeProjectName, tenantKeyFor, startProvisioning, deleteTenantData } from "../lifecycle";
 import { nativeChatResponse } from "../responses";
 import type { GatewayState } from "../state";
@@ -67,7 +67,9 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     // `?mine=1` remains accepted for backwards compat (same as the default for
     // non-admin callers).
     let list = state.registry.list();
-    if (!isAdminCaller(state, req)) {
+    // T-20261003-027 (sub-feature 4): the admin-wide listing needs the one-time password set
+    // complete — a passwordless admin sees their own tenants like any user until then.
+    if (!isPasswordSetAdmin(state, req)) {
       const principal = callerPrincipal(state, req) ?? "anonymous";
       list = list.filter((r) => (r.ownerPrincipal ?? "anonymous") === principal);
     }

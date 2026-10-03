@@ -156,7 +156,17 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     if (!user) throw new HttpError(401, "not signed in");
     const usage = principalTokenUsage(state, user.principal);
     return jsonResponse({
-      user: { loginId: user.principal, name: user.name, role: user.role, mustChangePassword: Boolean(user.mustChangePassword) },
+      user: {
+        loginId: user.principal,
+        name: user.name,
+        role: user.role,
+        mustChangePassword: Boolean(user.mustChangePassword),
+        // T-20261003-027 (sub-feature 4): the client needs the password state to branch its
+        // set-password flow (a passwordless account sets WITHOUT a current password) and to
+        // force the one-time dialog for admins before they attempt gated admin actions.
+        hasPassword: Boolean(user.passwordHash),
+        passwordSetRequired: user.role === "admin" && !user.passwordHash,
+      },
       usage: { inputTokens: usage.input, outputTokens: usage.output, totalTokens: usage.input + usage.output },
       budget: state.cfg.principalMaxTokens > 0 ? { maxTokens: state.cfg.principalMaxTokens } : null,
     });
