@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261003-009
+kind: manual
+title: >-
+  Seed >=3 genuine decision records with evidence_refs in co-safety's
+  schema-typed evidence plane (F3; M2 passes at 94.2d — closest to PROMOTABLE
+  per 2026-10-03 evidence-backport-scan). Records must come from real engagement
+  decisions, never fabricated for the metric; capture them during co-safety's
+  next engagement cycle, then re-run bun scripts/evidence-backport-scan.ts to
+  confirm M1 passes.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-03T03:36:09.341Z'
+history:
+  - at: '2026-10-03T03:36:09.341Z'
+    from: null
+    to: backlog
+result: null
+error: null

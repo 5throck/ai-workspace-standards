@@ -7,7 +7,7 @@ title: >-
   decision records in co-safety (F3, M2 94d pass), co-newbiz (F2), co-security
   (F1) to reach PROMOTABLE maturity
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-03T02:39:17.537Z'
 history:
@@ -17,5 +17,17 @@ history:
   - at: '2026-10-03T02:48:15.174Z'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-03T03:36:33.907Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T03:36:33.995Z'
+    from: review
+    to: done
+result: >-
+  Triage decision 2026-10-03: seed in co-safety first (F3 schema-typed, only
+  project passing M2 at 94.2d — nearest to PROMOTABLE); defer co-newbiz (F2, M2
+  31.6d) and co-security (F1, M2 0d) until their planes mature. Execution is
+  deliberately NOT done now: fabricating decision records to satisfy M1 would be
+  evidence-gaming; genuine records must come from real engagement decisions.
+  Follow-up execution ticket: T-20261003-009.
 error: null
