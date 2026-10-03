@@ -6,12 +6,15 @@ title: >-
   generation in .claude/helpers/graft-*.cjs to match fleet; land via co-deck's
   own next resync per ADR-0031 report-only echo rule)
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-03T02:39:17.432Z'
 history:
   - at: '2026-10-03T02:39:17.432Z'
     from: null
     to: backlog
+  - at: '2026-10-03T02:48:15.038Z'
+    from: backlog
+    to: waiting
 result: null
 error: null

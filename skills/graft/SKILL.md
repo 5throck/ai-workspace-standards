@@ -9,7 +9,7 @@ version: 1.0.0
 last_reviewed: 2026-10-01
 status: active
 scope: common
-l2_propagate: true
+l2_propagate: false
 owner: pm
 prerequisites: graft CLI
 metadata:
@@ -172,8 +172,8 @@ When the graft MCP server is connected, these are exposed as tools too:
 available; the guidance is identical.
 
 ## Maintenance (workspace)
-This skill lives in the `skills/` SSOT and is mirrored to every platform skill
-directory by `scripts/sync-skills.ts` (ADR-0076 amendment; it was previously
-Claude-only and hand-maintained). `graft init` rewrites only the `.claude/` copy,
-so after upgrading graft: copy the new body above into this file (keep the
-frontmatter above), then run `bun scripts/sync-skills.ts` to re-mirror.
+This skill lives in the `skills/` SSOT. Its platform mirrors and helper files are
+SELF-MANAGED by the graft CLI (docs/self-managed-surfaces.json, design
+2026-10-02-self-managed-tool-surfaces): sync-skills does not mirror them, and git
+ignores them. After upgrading graft, run `graft init` in the repo to refresh those
+surfaces; keep this SSOT copy frontmatter valid (lifecycle gates read it).

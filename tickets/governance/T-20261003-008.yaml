@@ -7,12 +7,15 @@ title: >-
   decision records in co-safety (F3, M2 94d pass), co-newbiz (F2), co-security
   (F1) to reach PROMOTABLE maturity
 priority: low
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-03T02:39:17.537Z'
 history:
   - at: '2026-10-03T02:39:17.537Z'
     from: null
     to: backlog
+  - at: '2026-10-03T02:48:15.174Z'
+    from: backlog
+    to: waiting
 result: null
 error: null
