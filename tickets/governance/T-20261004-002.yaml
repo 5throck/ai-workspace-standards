@@ -6,12 +6,21 @@ title: >-
   #1362 run 37116607423) — quarantine/retry policy or windows timeout bump for
   the co-workspace login gate
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-03T16:42:34.535Z'
 history:
   - at: '2026-10-03T16:42:34.535Z'
     from: null
     to: backlog
+  - at: '2026-10-03T18:11:24.825Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T18:11:24.840Z'
+    from: waiting
+    to: running
+  - at: '2026-10-03T18:11:24.854Z'
+    from: running
+    to: review
 result: null
 error: null
