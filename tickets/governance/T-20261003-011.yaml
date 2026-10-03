@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261003-011
+kind: manual
+title: >-
+  Dependency Audit gate has no waiver channel for no-fix advisories: co-price
+  fails on braces@3.0.3 (GHSA-vfj7-8cjw-p6xm, high, dev-only chain
+  eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch >
+  braces) with no patched braces release (3.0.3 is latest) and no eslint-config-next
+  bump that drops the chain (16.3.8 retested — same finding). Main already
+  carries the same lock entry, so every future co-price CI run fails; upgrade
+  PR co-price#138 is blocked through no fault of its content. Decide the fleet
+  disposition: a reviewed advisory-waiver file for the gate (gitleaks-allowlist
+  precedent), an upstream request for the gate, or a co-price lint-chain
+  trade-off decision.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-03T17:40:00.000Z'
+history:
+  - at: '2026-10-03T17:40:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
