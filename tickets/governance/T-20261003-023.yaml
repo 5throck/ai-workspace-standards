@@ -1,0 +1,45 @@
+schemaVersion: 1
+id: T-20261003-023
+kind: manual
+title: >-
+  co-workspace container-parity for the claude/codex/antigravity runtimes: the
+  three CLIs are first-class in bare-metal process mode (Waves C1/C2 + ADR-0092
+  A3, hardened 2026-10-03) but absent from the runtime image and carry no
+  credential seeding, so the compose deployment cannot run them — decide the
+  scope (add binaries + per-CLI credential mounts vs document process-mode-only
+  as the supported posture)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T10:06:27.159Z'
+history:
+  - at: '2026-10-03T10:06:27.159Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T10:25:41.717Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T10:25:41.735Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T10:25:41.762Z'
+    from: review
+    to: done
+result: >-
+  Resolved 2026-10-03 (user chose BOTH scope a and b). Scope (a) delivered at
+  the process-isolation layer: the gateway image bakes claude 2.1.288 + codex
+  0.160.0 (node:22 stage, install-time --version assertions; ln -sf for the base
+  image's pre-existing npm; verified by local docker build + in-image
+  claude/codex --version at uid 10000); antigravity is NOT baked (local probe:
+  186MB platform-native Mach-O, no verifiable Linux artifact source) and mounts
+  read-only via the new docker-compose.creds.yml overlay
+  (CO_WORKSPACE_AGY_BIN_HOST + _GEMINI_HOME_HOST; also RO login-home mounts
+  CO_WORKSPACE_CLAUDE_HOME_HOST/_CODEX_HOME_HOST for login-mode deployments —
+  provider-key needs no mounts). Scope (b) delivered: runtime matrix in the
+  README (protocol/continuity/credentials/isolation per runtime), the
+  docker-isolation fail-fast now states what IS supported (process isolation for
+  all runtimes; hermes-only sibling turns) and names the follow-up, and the boot
+  log names the effective credential mode per non-hermes runtime.
+  Docker-isolated sibling turns remain the design-gated follow-up
+  (T-20261003-025).
+error: null

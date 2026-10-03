@@ -61,7 +61,11 @@ so both paths are stamped explicitly — still per-tenant, never blanket (ADR-00
 
 - Per-tenant provider/model selection (one deployment-wide provider).
 - Migrating the antigravity/claude/codex runtimes (they carry their own binaries
-  and credential surfaces).
+  and credential surfaces). *Amended 2026-10-03:* the credential half of this non-goal is
+  superseded by `docs/designs/2026-10-03-coworkspace-cli-provider-key-design.md` — claude
+  (`ANTHROPIC_API_KEY`+`ANTHROPIC_BASE_URL`) and codex (`OPENAI_API_KEY`) now receive the
+  deployment key as their native env vars; antigravity remains excluded (the agy CLI
+  exposes no API-key surface). The binary/image half moved to T-20261003-023.
 - Removing the shared-store process-mode path (it remains the no-key fallback).
 
 ## R5 — Acceptance criteria

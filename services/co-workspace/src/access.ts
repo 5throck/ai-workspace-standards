@@ -2,7 +2,7 @@
 
 import { timingSafeEqual } from "node:crypto";
 import type { GatewayState } from "./state";
-import { GatewayConfig } from "./config";
+import { GatewayConfig, runtimeProviderKeyGap } from "./config";
 import { credentialValid, presentedCredential, principalFor } from "./auth";
 import { sessionTokenFromCookie } from "./users";
 import type { TenantRecord } from "./tenant";
@@ -154,6 +154,20 @@ export function isolationPostureWarning(cfg: {
     "[co-workspace]   every tenant's data under the shared data dir. Use CO_WORKSPACE_ISOLATION=docker for",
     "[co-workspace]   real per-tenant separation (single trusted operator is the documented use for process mode).",
   ].join("\n");
+}
+
+/** 2026-10-03 CLI provider-key design (D3): warn when a configured provider key cannot
+ * serve the active runtime (antigravity is login-only; named-provider protocol mismatch) —
+ * otherwise the operator discovers it from failed turns. Silent when matched or keyless. */
+export function runtimeProviderKeyWarning(cfg: {
+  runtime: string;
+  llmApiKey?: string;
+  llmBaseUrl?: string;
+  llmProvider?: string;
+}): string | null {
+  const gap = runtimeProviderKeyGap(cfg.runtime, cfg);
+  if (!gap) return null;
+  return `[co-workspace] PROVIDER KEY NOT APPLICABLE: ${gap}`;
 }
 
 /** M2: constant-time comparison of the OAuth `state` param against the cookie value. */

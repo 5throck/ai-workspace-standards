@@ -1,6 +1,6 @@
 import { chownSync, copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
+import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName, runtimeProviderKeyEnv } from "./config";
 import { recordTurnUsage, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn, turnContainerName } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
@@ -97,6 +97,12 @@ export async function runChat(
           onEvent,
         );
       }
+      // 2026-10-03 CLI provider-key design (D2): non-hermes turns receive the configured
+      // deployment key under the CLI's native env name (claude: ANTHROPIC_API_KEY
+      // [+ ANTHROPIC_BASE_URL]; codex: OPENAI_API_KEY) — precedence over interactive
+      // logins; nothing is injected when keyless, mismatched, or antigravity.
+      const cliKeyEnv = runtimeProviderKeyEnv(state.cfg.runtime, state.cfg);
+      const cliEnv = cliKeyEnv ? { ...process.env, ...cliKeyEnv } : undefined;
       if (state.cfg.runtime === "claude") {
         return runClaudeTurn(
           {
@@ -107,6 +113,7 @@ export async function runChat(
             extraArgs: state.cfg.hermesExtraArgs,
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
+            env: cliEnv,
           },
           onEvent,
         );
@@ -121,6 +128,7 @@ export async function runChat(
             extraArgs: state.cfg.hermesExtraArgs,
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
+            env: cliEnv,
           },
           onEvent,
         );

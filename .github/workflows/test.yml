@@ -130,6 +130,10 @@ jobs:
           export CO_WORKSPACE_BROKER_TOKEN=ci-stub
           export CO_WORKSPACE_DATA_VOLUME=ci-stub-volume
           export CO_WORKSPACE_HERMES_SEED_HOME=/tmp/hermes-seed
+          export CO_WORKSPACE_CLAUDE_HOME_HOST=/tmp/claude-home
+          export CO_WORKSPACE_CODEX_HOME_HOST=/tmp/codex-home
+          export CO_WORKSPACE_AGY_BIN_HOST=/tmp/agy
+          export CO_WORKSPACE_GEMINI_HOME_HOST=/tmp/gemini-home
           export CO_WORKSPACE_TENANT_MAX_TURNS=10
           export CO_WORKSPACE_TENANT_MAX_TOKENS=1000
           export CO_WORKSPACE_PRINCIPAL_MAX_TOKENS=1000
@@ -138,6 +142,7 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.isolation.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.isolation.yml -f docker-compose.volume.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.seed.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.creds.yml config -q
 
       - name: Run integration tests
         # Full-suite gate lives here since T-20260910-025 scoped the local
