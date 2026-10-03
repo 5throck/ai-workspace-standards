@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-04](2026-10-04.md) | chore: update |
 | [2026-10-03](2026-10-03.md) | fix(installer): detect Hermes home on Windows |
 | [2026-10-03](2026-10-03.md) | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | [2026-10-02](2026-10-02.md) | feat(governance): process backlog T-20261001-015..021 — soak exit, triage commands, intake hardening, surface validator |
@@ -14,7 +15,7 @@
 | [2026-09-29](2026-09-29.md) | docs(review): daily fleet review 2026-09-29 |
 | [2026-09-28](2026-09-28.md) | chore: update |
 | [2026-09-27](2026-09-27.md) | docs(review): daily fleet review 2026-09-27 |
-| [2026-09-26](2026-09-26.md) | docs(analysis): AGENTS.md duplication audit + §6 gap remediation |
+| 2026-09-26 | docs(analysis): AGENTS.md duplication audit + §6 gap remediation |
 | 2026-09-25 | fix(platform): fix six P1 platform-parity bugs (codex omission/overwrite class) |
 | 2026-09-24 | feat(audit): add template artifact hygiene check (spec 2026-09-24-template-hygiene-audit-design) |
 | 2026-09-23 | fix(templates): port Language Policy section into CODEX.md platform twin (ADR-0077) |
