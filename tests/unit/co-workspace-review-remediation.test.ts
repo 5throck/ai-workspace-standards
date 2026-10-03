@@ -71,39 +71,47 @@ describe("isolation posture warning (2026-10-03 review H1)", () => {
 describe("bootstrapAdmin promotion (2026-10-03 review M5)", () => {
   test("promoting an existing user invalidates their live sessions and reports promoted", async () => {
     const store = new UserStore(scratch("admin"));
-    const created = store.createUser({ email: "op@example.com", name: "op", password: "longenough1" });
-    expect(created).toBeTruthy();
-    const token = store.createSession(created!.id);
-    expect(store.resolveSession(token)?.id).toBe(created!.id);
+    try {
+      const created = store.createUser({ email: "op@example.com", name: "op", password: "longenough1" });
+      expect(created).toBeTruthy();
+      const token = store.createSession(created!.id);
+      expect(store.resolveSession(token)?.id).toBe(created!.id);
 
-    const { user, promoted } = store.bootstrapAdmin("op@example.com");
-    expect(promoted).toBe(true);
-    expect(user?.role).toBe("admin");
-    // the in-flight session was purged — the grant lands on a fresh sign-in
-    expect(store.resolveSession(token)).toBeNull();
+      const { user, promoted } = store.bootstrapAdmin("op@example.com");
+      expect(promoted).toBe(true);
+      expect(user?.role).toBe("admin");
+      // the in-flight session was purged — the grant lands on a fresh sign-in
+      expect(store.resolveSession(token)).toBeNull();
 
-    const second = store.bootstrapAdmin("op@example.com");
-    expect(second.promoted).toBe(false); // idempotent
+      const second = store.bootstrapAdmin("op@example.com");
+      expect(second.promoted).toBe(false); // idempotent
+    } finally {
+      store.close(); // Windows cannot delete an open SQLite file
+    }
   });
 });
 
 describe("email-change verification binding (2026-10-03 review M4)", () => {
   test("a pending change for user A cannot be consumed under user B's session", async () => {
     const store = new UserStore(scratch("email"));
-    const a = store.createUser({ email: "a@example.com", name: "a", password: "longenough1" })!;
-    store.createUser({ email: "b@example.com", name: "b", password: "longenough1" });
-    const staged = store.createEmailChange(a.id, "new-a@example.com");
-    expect(staged.ok).toBe(true);
-    if (!staged.ok) return;
-    // bound to the WRONG user → invalid (the token is consumed, nothing applied)
-    const wrong = store.verifyEmailChange(staged.token, "u-not-the-owner");
-    expect(wrong.ok).toBe(false);
-    // still bound to the right user → applies
-    const restaged = store.createEmailChange(a.id, "new-a@example.com");
-    expect(restaged.ok).toBe(true);
-    if (!restaged.ok) return;
-    const right = store.verifyEmailChange(restaged.token, a.id);
-    expect(right.ok).toBe(true);
+    try {
+      const a = store.createUser({ email: "a@example.com", name: "a", password: "longenough1" })!;
+      store.createUser({ email: "b@example.com", name: "b", password: "longenough1" });
+      const staged = store.createEmailChange(a.id, "new-a@example.com");
+      expect(staged.ok).toBe(true);
+      if (!staged.ok) return;
+      // bound to the WRONG user → invalid (the token is consumed, nothing applied)
+      const wrong = store.verifyEmailChange(staged.token, "u-not-the-owner");
+      expect(wrong.ok).toBe(false);
+      // still bound to the right user → applies
+      const restaged = store.createEmailChange(a.id, "new-a@example.com");
+      expect(restaged.ok).toBe(true);
+      if (!restaged.ok) return;
+      const right = store.verifyEmailChange(restaged.token, a.id);
+      expect(right.ok).toBe(true);
+    } finally {
+      store.close(); // Windows cannot delete an open SQLite file
+    }
   });
 });
 
@@ -178,21 +186,32 @@ describe("delete-vs-queued-turn abort (2026-10-03 review M10)", () => {
       CO_WORKSPACE_WORKSPACE_DIR: scratch("race-ws"),
     });
     const state = createState(cfg);
-    const rec = {
-      tenantId: "gw-deadbeef1234",
-      variant: "co-consult",
-      status: "ready",
-      createdAt: new Date().toISOString(),
-      projectDir: join(cfg.dataDir, "storage", "p", "n", "project"),
-      hermesHome: join(cfg.dataDir, "storage", "p", "n", "hermes-home"),
-      sessions: 0,
-      inputTokens: 0,
-      outputTokens: 0,
-    } as TenantRecord;
-    // No registry row on purpose: the queued task must abort against the deleted tenant.
-    const result = await runChat(state, rec, "hello");
-    expect(result.exitCode).toBeNull();
-    expect(result.stderrTail).toContain("tenant deleted");
-    expect(state.turns.list(rec.tenantId)).toEqual([]);
+    try {
+      const rec = {
+        tenantId: "gw-deadbeef1234",
+        variant: "co-consult",
+        status: "ready",
+        createdAt: new Date().toISOString(),
+        projectDir: join(cfg.dataDir, "storage", "p", "n", "project"),
+        hermesHome: join(cfg.dataDir, "storage", "p", "n", "hermes-home"),
+        sessions: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+      } as TenantRecord;
+      // No registry row on purpose: the queued task must abort against the deleted tenant.
+      const result = await runChat(state, rec, "hello");
+      expect(result.exitCode).toBeNull();
+      expect(result.stderrTail).toContain("tenant deleted");
+      expect(state.turns.list(rec.tenantId)).toEqual([]);
+    } finally {
+      // Windows cannot delete an open SQLite file — release the handles before cleanup.
+      for (const store of [state.registry, state.turns, state.users, state.audit]) {
+        try {
+          store.close();
+        } catch {
+          /* best effort */
+        }
+      }
+    }
   });
 });
