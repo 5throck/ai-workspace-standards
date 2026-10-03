@@ -329,6 +329,10 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
       CO_WORKSPACE_WORKSPACE_DIR: ws,
       // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
       CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+      // 2026-10-03 review M6: anon provisioning with unset quotas fails boot.
+      CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+      CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+      CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
       HERMES_BIN: hermesBin,
       HERMES_BIN_PREFIX: "bun",
     });
@@ -423,6 +427,10 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
       CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
       // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
       CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+      // 2026-10-03 review M6: anon provisioning with unset quotas fails boot.
+      CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+      CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+      CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
       HERMES_BIN: hermesBin,
       HERMES_BIN_PREFIX: "bun",
       CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "4",

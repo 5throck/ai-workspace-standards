@@ -23,11 +23,27 @@ export async function runChat(
   // chat.ts / hermes.ts / responses.ts lines join on one key (research §4).
   const timing = new TurnTiming(turnLogKey(rec.tenantId));
   timing.mark("t0", { tenant: rec.tenantId, runtime: state.cfg.runtime, isolation: state.cfg.isolation });
+  // 2026-10-03 review H1: one registration for every runtime — cancel (POST /tenants/:id/cancel)
+  // and delete can kill a running turn whether it runs hermes, agy, claude, or codex.
+  const registerProc = (proc: { kill: (code?: number) => void }) => {
+    state.activeProcs.set(rec.tenantId, proc);
+    onProc?.(proc);
+  };
   const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
   const task = prev
     .catch(() => undefined)
     .then(() => {
       timing.mark("t_lock");
+      // 2026-10-03 review M10: a turn queued behind a long chain can start AFTER its tenant
+      // was deleted (deleteTenantData's bounded wait gives up after 30s and removes files).
+      // Abort without touching the filesystem or re-inserting turn rows for a dead tenant.
+      if (!state.registry.get(rec.tenantId)) {
+        return {
+          exitCode: null,
+          finalText: "",
+          stderrTail: "tenant deleted while this turn was queued",
+        } as HermesTurnResult;
+      }
       // Keep the tenant home's credentials current: the containerized hermes (older release
       // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
       // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
@@ -74,6 +90,9 @@ export async function runChat(
             conversationId: rec.conversationId,
             printTimeoutSeconds: state.cfg.runBudgetSeconds,
             extraArgs: state.cfg.hermesExtraArgs,
+            // 2026-10-03 review H1: uniform cancel/kill + watchdog contract for every runtime.
+            timeoutMs: state.cfg.runBudgetSeconds * 1000,
+            onSpawn: registerProc,
           },
           onEvent,
         );
@@ -86,6 +105,8 @@ export async function runChat(
             message,
             sessionId: rec.conversationId,
             extraArgs: state.cfg.hermesExtraArgs,
+            timeoutMs: state.cfg.runBudgetSeconds * 1000,
+            onSpawn: registerProc,
           },
           onEvent,
         );
@@ -98,6 +119,8 @@ export async function runChat(
             message,
             threadId: rec.conversationId,
             extraArgs: state.cfg.hermesExtraArgs,
+            timeoutMs: state.cfg.runBudgetSeconds * 1000,
+            onSpawn: registerProc,
           },
           onEvent,
         );

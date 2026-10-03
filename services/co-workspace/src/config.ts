@@ -5,7 +5,7 @@
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
 
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 export interface GatewayConfig {
@@ -136,9 +136,34 @@ export function parseKeyList(text: string, separator: "," | "lines" = ","): stri
 
 const warnedMissingKeyFiles = new Set<string>();
 
-/** Parse key entries from a file with optional labels (key:label format). Returns key and label pairs. */
+/** Per-request hot-path cache (2026-10-03 review, T-20261003-022): keyPrincipals() ran a
+ * synchronous readFileSync on EVERY key-authenticated request. Cached by (mtimeMs, size) —
+ * a rotated file gets a new mtime, so `POST /admin/reload` and natural rotation re-read
+ * without an explicit invalidation hook. */
+let keyEntriesCache: { path: string; mtimeMs: number; size: number; entries: Array<{ key: string; label: string }> } | null = null;
+
+/** Parse key entries from a file with optional labels (key:label format). Returns key and label pairs.
+ * A missing OR non-regular file (the compose single-file bind turns a missing host file into a
+ * directory — 2026-10-03 review M9's EISDIR boot crash) is the warn-once empty case. */
 export function readKeyEntries(path: string | undefined): Array<{ key: string; label: string }> {
   if (!path) return [];
+  let st: { isFile: boolean; mtimeMs: number; size: number };
+  try {
+    const s = statSync(path);
+    st = { isFile: s.isFile(), mtimeMs: s.mtimeMs, size: s.size };
+  } catch {
+    st = { isFile: false, mtimeMs: 0, size: 0 };
+  }
+  if (!st.isFile) {
+    if (!warnedMissingKeyFiles.has(path)) {
+      warnedMissingKeyFiles.add(path);
+      console.warn(`[co-workspace] API key file not found (or not a regular file): ${path}`);
+    }
+    return [];
+  }
+  if (keyEntriesCache && keyEntriesCache.path === path && keyEntriesCache.mtimeMs === st.mtimeMs && keyEntriesCache.size === st.size) {
+    return keyEntriesCache.entries;
+  }
   try {
     const text = readFileSync(path, "utf8");
     const entries: Array<{ key: string; label: string }> = [];
@@ -158,17 +183,10 @@ export function readKeyEntries(path: string | undefined): Array<{ key: string; l
         });
       }
     }
+    keyEntriesCache = { path, mtimeMs: st.mtimeMs, size: st.size, entries };
     return entries;
   } catch (err) {
     const error = err as NodeJS.ErrnoException;
-    if (error.code === "ENOENT") {
-      // keyPrincipals() runs per authenticated request — warn once per path, not per request.
-      if (!warnedMissingKeyFiles.has(path)) {
-        warnedMissingKeyFiles.add(path);
-        console.warn(`[co-workspace] API key file not found: ${path}`);
-      }
-      return [];
-    }
     throw new Error(`[co-workspace] cannot read API key file ${path}: ${error.message}`);
   }
 }
@@ -217,7 +235,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   const apiKeysFile = env.CO_WORKSPACE_API_KEYS_FILE || undefined;
   const apiKeysEnv = [...apiKeys];
   apiKeys = [...new Set([...apiKeys, ...readKeysFile(apiKeysFile)])];
-  return {
+  const cfg: GatewayConfig = {
     host: env.CO_WORKSPACE_HOST ?? "127.0.0.1",
     port: num(env.CO_WORKSPACE_PORT, 9030),
     dataDir: resolve(env.CO_WORKSPACE_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
@@ -263,8 +281,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     trustProxy: env.CO_WORKSPACE_TRUST_PROXY === "true" || env.CO_WORKSPACE_TRUST_PROXY === "1",
     tenantMaxPerPrincipal: numOr0(env.CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL),
     allowAnonProvisioning: env.CO_WORKSPACE_ALLOW_ANON_PROVISIONING === "true",
-    principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),
-    containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
+    principalMaxTokens: numOr0(env.CO_WORKSPACE_PRINCIPAL_MAX_TOKENS),    containerMemory: env.CO_WORKSPACE_CONTAINER_MEMORY ?? "2g",
     containerCpus: env.CO_WORKSPACE_CONTAINER_CPUS ?? "2",
     containerPidsLimit: numOr0(env.CO_WORKSPACE_CONTAINER_PIDS_LIMIT) || 256,
     runtime: (["antigravity", "claude", "codex"] as const).includes(
@@ -279,6 +296,16 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
     codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
   };
+  // 2026-10-03 review M6: anonymous provisioning with all quotas off means unmetered
+  // provider spend for unauthenticated callers. Fail boot with remediation — consistent
+  // with the fail-closed style of the D5 checks above.
+  if (cfg.allowAnonProvisioning && (cfg.tenantMaxTurns === 0 || cfg.tenantMaxTokens === 0 || cfg.principalMaxTokens === 0)) {
+    throw new Error(
+      "CO_WORKSPACE_ALLOW_ANON_PROVISIONING=true requires explicit quotas — set CO_WORKSPACE_TENANT_MAX_TURNS, " +
+        "CO_WORKSPACE_TENANT_MAX_TOKENS and CO_WORKSPACE_PRINCIPAL_MAX_TOKENS so anonymous tenants are metered",
+    );
+  }
+  return cfg;
 }
 
 /** Volume-subpath mode name validation (design 2026-09-30, section 2): Docker's own

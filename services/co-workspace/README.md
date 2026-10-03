@@ -77,6 +77,10 @@ CO_WORKSPACE_HERMES_MODEL=<model id> bun run dev
 # [co-workspace] listening on http://127.0.0.1:9030
 ```
 
+Creating a team needs a credential: sign up/sign in via the web UI (`/login`) or present an
+API key. Anonymous team creation answers `401` unless `CO_WORKSPACE_ALLOW_ANON_PROVISIONING=true`
+(and that switch requires explicit quotas at boot — see the configuration table).
+
 `CO_WORKSPACE_HERMES_MODEL` is stamped as `model.default` into each team's generated
 `config.yaml` (trust keys there scope project skills to the team directory). Without an
 explicit model, Hermes auto-resolves one, which may be a paid model. See the
@@ -157,7 +161,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `CO_WORKSPACE_HOST` / `_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback unless fronted by auth) |
+| `CO_WORKSPACE_HOST` / `CO_WORKSPACE_PORT` | `127.0.0.1` / `9030` | Bind address (keep loopback unless fronted by auth) |
 | `CO_WORKSPACE_DATA_DIR` | `services/co-workspace/data` | Accounts, registry, history, audit and team storage (`storage/<principal>/<project>/`) |
 | `CO_WORKSPACE_DATA_DIR_HOST` | — | Host path of the data dir (bind + docker-isolation sibling mounts) |
 | `CO_WORKSPACE_WORKSPACE_DIR` | repo root | Workspace clone used for scaffolding |
@@ -165,32 +169,37 @@ continuity handle → credential model → isolation matrix → provider disclos
 | `CO_WORKSPACE_VARIANTS_INCLUDE_BETA` | `false` (compose: `true`) | Adds beta variants to the catalog (tagged `meta.status: "beta"`); also selectable per-creation in the New-team modal |
 | `CO_WORKSPACE_TEMPLATE_VERSION` | HEAD (`templates/VERSION`) | Pin to a `template-vX.Y.Z` tag |
 | `CO_WORKSPACE_HERMES_SEED_HOME` | — | Legacy/alternative (no provider key): Hermes home whose `auth.json`/`.env` seed team homes |
-| `CO_WORKSPACE_HERMES_AUTH_DIR` (+`_HOST`) | `<seed>/shared` | Shared credential store — one token store across operator and teams |
+| `CO_WORKSPACE_HERMES_AUTH_DIR` / `CO_WORKSPACE_HERMES_AUTH_DIR_HOST` | `<seed>/shared` | Shared credential store — one token store across operator and teams |
 | `CO_WORKSPACE_HERMES_MODEL` | Hermes auto | Model id stamped into team `config.yaml` (`model.default`), e.g. `upstage/solar-pro4:free` |
 | `CO_WORKSPACE_LLM_PROVIDER` + `CO_WORKSPACE_LLM_BASE_URL` + `CO_WORKSPACE_LLM_API_KEY` | — (off) | **Provider key+base-url mode** (recommended; co-newbiz scheme): `PROVIDER` selects `openai \| anthropic \| gemini \| zai \| custom` (default `custom`; `none` = off). Teams authenticate with a static provider key — stamped into team `config.yaml` (`model.api_key`; hermes agent turns resolve keys through their secret scope and do not borrow ambient env) plus injected as the provider's env name (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY` / `ZAI_API_KEY`) — and `model.provider`/`model.base_url` are stamped into team `config.yaml`; the OAuth auth.json re-seed is skipped. `zai` pairs with `https://api.z.ai/api/anthropic` (the coding-plan endpoint; hermes's `zai` provider preserves dotted model ids like `GLM-5.3-Flash`). `BASE_URL` is required for `custom`, optional override for named providers. Unset key = legacy shared-store/auth.json path. The stamped key is plaintext on the tenant's disk — use a dedicated low-limit key (ADR-0092 Addendum 9) |
 | `CO_WORKSPACE_HERMES_REASONING_EFFORT` | `low` (key mode) | Default effort stamped into team `config.yaml` (`agent.reasoning_effort`) — thinking-mandatory models (glm-5.3-flash) reject effort-less requests, so key-mode turns run with zero operator flags. `low \| high \| max`; an explicitly empty value omits the stamp (compose uses `${VAR-low}`, so empty is kept, not defaulted) |
-| `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
+| `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `CO_WORKSPACE_MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
-| `CO_WORKSPACE_API_KEYS` / `_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |
+| `CO_WORKSPACE_API_KEYS` / `CO_WORKSPACE_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |
 | `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless, sessionless visitors are redirected. A valid Bearer key satisfies the demand without a session, so keys and the login gate compose (ADR-0092 Addendum 15) |
 | `CO_WORKSPACE_PUBLISH` | `127.0.0.1` | Host IP of the compose publish binding; `0.0.0.0` exposes the gateway on all interfaces — keep auth on before widening (see Security model) |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
 | `CO_WORKSPACE_TRUST_PROXY` | `false` | Key auth rate limits on the right-most `X-Forwarded-For` hop (set only behind a reverse proxy); otherwise the socket peer IP |
 | `CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL` | `0` (=unlimited; compose: `10`) | Teams per principal — set a positive value for multi-user deployments |
-| `CO_WORKSPACE_TENANT_MAX_TURNS` / `_MAX_TOKENS` | `0` | Per-team turn/token caps (`429`, enforced before a turn starts) |
+| `CO_WORKSPACE_TENANT_MAX_TURNS` / `CO_WORKSPACE_TENANT_MAX_TOKENS` | `0` | Per-team turn/token caps (`429`, enforced before a turn starts) |
 | `CO_WORKSPACE_ISOLATION` | `process` | `docker` = per-turn ephemeral sibling container (tenant files only) |
 | `CO_WORKSPACE_RUNTIME_IMAGE` | `co-workspace-runtime:latest` | Runtime image for docker isolation (the gateway image also qualifies — it carries hermes) |
 | `CO_WORKSPACE_DOCKER_BIN` | `docker` | Docker CLI used for isolation spawns |
 | `CO_WORKSPACE_INSTANCE_ID` | `default` | Label value on turn containers; at boot the gateway removes leftover turn containers carrying its own id (set distinct ids when several gateways share one Docker daemon) |
 | `CO_WORKSPACE_COOKIE_SECURE` | `auto` | `true`/`false` force the session-cookie `Secure` flag; `auto` sets it on HTTPS requests, or on `X-Forwarded-Proto: https` only when `CO_WORKSPACE_TRUST_PROXY=true` |
+| `CO_WORKSPACE_ALLOW_ANON_PROVISIONING` | `false` | `false` = creating a team requires a credential (sign-in or API key); unauthenticated creation answers `401` and is audited (`tenant.provision.denied`). `true` restores zero-friction anonymous first-use for throwaway deploys — and REQUIRES explicit quotas (`CO_WORKSPACE_TENANT_MAX_TURNS`, `_TENANT_MAX_TOKENS`, `_PRINCIPAL_MAX_TOKENS`): boot fails when any of them is `0`, because anonymous tenants would otherwise spend unmetered provider tokens (2026-10-03 review M6) |
+| `CO_WORKSPACE_DATA_VOLUME` | — (bind mode) | Volume-subpath mode (T-20260930-038): a named Docker volume holding `storage/<P>/<N>/…`; turn containers mount it via `volume-subpath` and no host path is ever named to the daemon. Requires `docker-compose.volume.yml` in `COMPOSE_FILE` and `docker volume create` first (boot probe fails fast) |
+| `CO_WORKSPACE_BROKER_TOKEN` | — (base mode) / **required** (volume mode) | Shared secret between the gateway and the docker broker's volume-control route (sent as `x-co-workspace-token`). Volume mode refuses to start without it — the route runs an `rm -rf` helper inside the data volume (2026-10-03 review M13) |
 | `CO_WORKSPACE_PRINCIPAL_MAX_TOKENS` | `0` (=unlimited) | Token cap across all of a principal's teams |
 | `CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS` | `600000` | Time limit for scaffolding a team (ms) |
-| `CO_WORKSPACE_CLAUDE_BIN` / `_CODEX_BIN` / `_ANTIGRAVITY_BIN` (+`_ANTIGRAVITY_BIN_PREFIX`) / `HERMES_BIN_PREFIX` | — | Bare-metal binary/wrapper overrides (not wired into compose; those CLIs are not in the gateway image) |
+| `CO_WORKSPACE_CLAUDE_BIN` / `CO_WORKSPACE_CODEX_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN` / `CO_WORKSPACE_ANTIGRAVITY_BIN_PREFIX` / `HERMES_BIN_PREFIX` | — | Bare-metal binary/wrapper overrides (not wired into compose; those CLIs are not in the gateway image) |
 | `CO_WORKSPACE_CONTAINER_MEMORY` / `CO_WORKSPACE_CONTAINER_CPUS` / `CO_WORKSPACE_CONTAINER_PIDS_LIMIT` | `2g` / `2` / `256` | Resource caps for isolated turns |
 | `CO_WORKSPACE_RUNTIME` | `hermes` | `hermes` / `antigravity` (agy) / `claude` / `codex` |
 | `CO_WORKSPACE_ADMIN_EMAIL` | — | Bootstrap admin account (created at startup) |
-| `GOOGLE_CLIENT_ID` / `_SECRET` / `_REDIRECT_URI` | — | Google SSO |
+| `CO_WORKSPACE_TURN_TIMING` | compose: `1` | Per-stage turn timing logs (`t0/t_lock/t_spawn/…` JSON lines; set `0` to silence; T-20260930-011) |
+| `CO_WORKSPACE_VOLUME_INIT_IMAGE` | `alpine:3.20` | Helper image for the broker-internal volume init/rm containers (volume mode only; pin by digest for supply-chain hygiene) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | — | Google SSO |
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
 
@@ -289,6 +298,13 @@ source only, not `node_modules`.
   caps, `no-new-privileges`, `cap-drop ALL`, non-root runtime user) mounting only that
   team's project dir and Hermes home. Process mode (default in bare-metal quickstarts)
   shares the gateway container's filesystem — fine for a trusted single operator only.
+  **The real process-mode boundary (2026-10-03 review H1):** the env allowlist filters what
+  the gateway CONSTRUCTS for the child; it is not a sandbox. A same-uid agent can read
+  `/proc/1/environ` (the gateway's own env — `CO_WORKSPACE_LLM_API_KEY`,
+  `GOOGLE_CLIENT_SECRET`, `CO_WORKSPACE_API_KEYS`) and the entire shared data dir (every
+  principal's `storage/`, `users.db`, `turns.db`, the live mail outbox). The gateway prints
+  this warning at boot when credentials are on; use `CO_WORKSPACE_ISOLATION=docker` for
+  genuine per-tenant separation.
 - **Rate limiting** — login/signup limits key on the socket peer IP (never a client-supplied
   `X-Forwarded-For`), and logins are additionally limited per login ID. Behind Docker's
   bridge NAT all direct clients share one socket IP, so the per-IP limit is effectively
@@ -347,6 +363,16 @@ source only, not `node_modules`.
   `/seed-home`); provider key mode needs no seed home. The `.env.keys` and shared-store host
   paths default under the seed home when set, otherwise under `<data dir>/seed`.
 - **Known tradeoffs** (documented, by design):
+  - *SEC-07 composed residual (the umbrella entry — 2026-10-03 review H4/T-20261003-018)*:
+    three accepted tradeoffs COMPOSE into one risk: a plaintext provider key (or the OAuth
+    `auth.json` re-seeded every turn in legacy mode) sits on a read-write-mounted Hermes
+    home, the turn container's network egress is open, and the agent is prompt-injectable —
+    so a single injected turn can exfiltrate the credential. Individually each acceptance
+    lives in its own doc; THIS entry is the tracked composition. Exit criteria (either one
+    closes it): the iron-proxy egress policy deployment, or credential-injected-at-runtime
+    (token broker / RO mount + refresh channel — upstream Hermes capability) instead of
+    stamping credentials to disk. Provider-key mode with a dedicated low-limit key remains
+    the recommended mitigation until then.
   - *Provider key mode (recommended)*: no OAuth token is copied, so the refresh-token-reuse
     revocation class is gone. The key is stored in plaintext in each team's `config.yaml`
     (`model.api_key`; hermes turns do not read it from env) and is readable by the team's own
@@ -357,7 +383,12 @@ source only, not `node_modules`.
     the turn, and multiple homes refreshing the same single-use token can get the session
     revoked (the reason provider key mode exists). Process mode additionally binds the shared
     token store; team-scoped token separation is future work.
-  - *Restart and orphan turns*: `chatLocks`/`activeProcs` are memory-only. Docker mode is covered by the boot reaper (removes leftover labeled turn containers); process mode children die with the gateway container (bare-host `bun`: stop the process group or accept up to `runBudgetSeconds` of orphan runtime).
+  - *Restart and orphan turns*: `chatLocks`/`activeProcs` are memory-only, but every runtime
+    now carries a uniform kill+watchdog contract (2026-10-03 review H1): turns register their
+    live process, enforce `runBudgetSeconds` externally (exit 124), SIGTERM/SIGINT drain
+    children and checkpoint the stores, docker mode reaps orphaned turn containers hourly.
+    A bare-host orphan between watchdog ticks is still possible; stop the process group to
+    be certain.
   - The dev mailer writes verification mails to a local outbox instead of SMTP. Rate limiters
     are in-memory; session-authenticated mutations rely on SameSite=Lax (the CSRF header
     guards keyless requests).

@@ -67,6 +67,11 @@ export class AuditLog {
       .query("SELECT at, actor, action, target, detail FROM audit ORDER BY id DESC LIMIT ?")
       .all(limit) as Array<{ at: string; actor: string; action: string; target: string | null; detail: string | null }>;
   }
+
+  /** Graceful shutdown (2026-10-03 review H3): checkpoint WAL before process exit. */
+  close(): void {
+    this.db.close();
+  }
 }
 
 /** SEC-09: CSRF guard — mutating routes must carry a custom header a cross-site form cannot

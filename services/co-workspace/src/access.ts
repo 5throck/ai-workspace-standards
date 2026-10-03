@@ -8,12 +8,21 @@ import { sessionTokenFromCookie } from "./users";
 import type { TenantRecord } from "./tenant";
 import { HttpError } from "./http";
 
-/** Wave B3/SEC-13: bootstrap the admin account at startup (idempotent). */
+/** Wave B3/SEC-13: bootstrap the admin account at startup (idempotent). A promotion of an
+ * EXISTING user is loud (2026-10-03 review M5): logged AND audited — the sessions of the
+ * promoted user were already invalidated by the store, so the grant lands on a fresh
+ * sign-in instead of silently upgrading an in-flight session. */
 export function bootstrapAdminFromEnv(state: GatewayState): void {
   const email = process.env.CO_WORKSPACE_ADMIN_EMAIL;
   if (!email) return;
-  const admin = state.users.bootstrapAdmin(email);
-  if (admin) console.log(`[co-workspace] admin bootstrapped: ${admin.principal} (${email})`);
+  const { user: admin, promoted } = state.users.bootstrapAdmin(email);
+  if (!admin) return;
+  if (promoted) {
+    console.warn(`[co-workspace] ADMIN PROMOTION: existing user ${admin.principal} (${email}) was promoted to admin; their existing sessions were invalidated`);
+    state.audit.record("system", "user.admin.promoted", admin.principal, email);
+  } else {
+    console.log(`[co-workspace] admin bootstrapped: ${admin.principal} (${email})`);
+  }
 }
 
 /** SEC-01: resolve the caller's trusted principal — session first, then key label. */
@@ -38,7 +47,10 @@ export function requireTenantAccess(state: GatewayState, req: Request, rec: Tena
   if (openMode && (rec.ownerPrincipal ?? "anonymous") === "anonymous") return;
   const caller = callerPrincipal(state, req);
   if (caller && rec.ownerPrincipal && rec.ownerPrincipal === caller) return;
-  throw new HttpError(403, `tenant ${rec.tenantId} is owned by ${rec.ownerPrincipal ?? "anonymous"}`);
+  // 2026-10-03 review M1: the client message used to name the owner principal — a probing
+  // caller learned who owns a tenant id. Keep the detail in the audit trail only.
+  state.audit.record(caller ?? "anonymous", "tenant.access.denied", rec.tenantId, `owner=${rec.ownerPrincipal ?? "anonymous"}`);
+  throw new HttpError(403, "forbidden: you do not have access to this tenant");
 }
 
 /** 2026-10-02 gate-anonymous-tenant-provisioning design (D1/D2/D6): provisioning is a
@@ -119,6 +131,29 @@ export function assertQuota(
   if (cfg.tenantMaxTokens > 0 && usage.tokens >= cfg.tenantMaxTokens) {
     throw new HttpError(429, `tenant token quota exhausted (${usage.tokens}/${cfg.tenantMaxTokens} tokens, window: ${cfg.quotaWindow})`);
   }
+}
+
+/** 2026-10-03 review H1 (T-20261003-017): process isolation runs every tenant's agent as a
+ * same-uid sibling INSIDE the gateway container — such a child can read `/proc/1/environ`
+ * (the gateway's own env: `CO_WORKSPACE_LLM_API_KEY`, `GOOGLE_CLIENT_SECRET`,
+ * `CO_WORKSPACE_API_KEYS`) and the whole shared data dir (every tenant's storage, users.db,
+ * turns.db, the live mail outbox). The env allowlist filters what WE construct for the
+ * child; it is not a boundary against /proc. Credential-protected deployments get this
+ * warning at boot so the operator sees the real boundary. (Changing the default isolation
+ * is a breaking deploy decision — consciously deferred, see the ticket.) */
+export function isolationPostureWarning(cfg: {
+  isolation: string;
+  loginRequired: boolean;
+  apiKeys: string[];
+}): string | null {
+  if (cfg.isolation !== "process") return null;
+  if (!cfg.loginRequired && cfg.apiKeys.length === 0) return null; // open mode already warns
+  return [
+    "[co-workspace] PROCESS ISOLATION: tenant agents run as same-uid siblings inside the gateway container —",
+    "[co-workspace]   a compromised or prompt-injected agent can read /proc/1/environ (gateway secrets) and",
+    "[co-workspace]   every tenant's data under the shared data dir. Use CO_WORKSPACE_ISOLATION=docker for",
+    "[co-workspace]   real per-tenant separation (single trusted operator is the documented use for process mode).",
+  ].join("\n");
 }
 
 /** M2: constant-time comparison of the OAuth `state` param against the cookie value. */

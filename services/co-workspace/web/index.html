@@ -214,7 +214,7 @@
   // /app-helpers.js so they can be unit-tested without a browser.
   import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
-  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
         form = $("composer"), input = $("message"), send = $("send"),
         pnameLabel = $("pnameLabel");
@@ -1053,7 +1053,7 @@
       .map((sl, i) => `<div class="legRow"><span class="dot" style="background:${colors[i % colors.length]}"></span>${esc(sl.label)} — <b>${sl.value}${unit}</b> · ${(sl.value / (total || 1) * 100).toFixed(0)}%</div>`)
       .join("");
     return `<div class="donutBox"><h4>${esc(title)}</h4><div class="donut">` +
-      `<svg viewBox="0 0 42 42" role="img" aria-label="${esc(title)}: ${top.map((sl) => `${sl.label} ${sl.value}${unit}`).join(", ")}">${segs.join("")}<text x="21" y="24" text-anchor="middle" class="donutTotal">${total}</text></svg>` +
+      `<svg viewBox="0 0 42 42" role="img" aria-label="${esc(`${title}: ${top.map((sl) => `${sl.label} ${sl.value}${unit}`).join(", ")}`)}">${segs.join("")}<text x="21" y="24" text-anchor="middle" class="donutTotal">${total}</text></svg>` +
       `<div class="legend">${legend || '<div class="legRow">no data</div>'}</div></div></div>`;
   }
 

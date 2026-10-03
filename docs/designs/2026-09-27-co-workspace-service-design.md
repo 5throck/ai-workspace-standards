@@ -1,8 +1,16 @@
 # Team Gateway Service Design — Serving Variant Agent Teams over OpenAI-, Anthropic-, and Gemini-Compatible Web APIs
 
-- **Spec id**: `2026-09-27-co-workspace-service`
+> **SUPERSEDED IN PART — pre-rebrand record (2026-10-03 review H6).** This is the founding
+> design, written before the service was renamed. Current names: `services/co-workspace/`
+> with the `CO_WORKSPACE_*` env prefix (nothing reads `TEAM_GATEWAY_*`); the `auth.json`
+> seeding mechanism described here was replaced by the shared-store/provider-key models
+> (ADR-0092 Addenda 2/4/8-10); Phase 0's no-auth posture was superseded by the Phase 2
+> hardening design. The supersession ledger lives in ADR-0092 — read this document as
+> the historical proposal, not the operating spec.
+
+- **Spec id**: `2026-09-27-co-workspace-service-design`
 - **Date**: 2026-09-27
-- **Status**: Approved (Row 0 design; implementation lands with this PR)
+- **Status**: Implemented (superseded in part — see the banner above and ADR-0092)
 - **Related**: ADR-0092 (this design's decision record), ADR-0074 (Universal Design Gate), ADR-0088 (Hermes Agent platform support), ADR-0089 (template auto-release cadence), ADR-0078 (LLM work routing — see §2 N7), T-20260927-019 (upstream scaffold-pinning defect)
 - **Scope**: Design + Phase 0 implementation of `services/team-gateway/` — a bun HTTP server with a scaffold bridge, a Hermes session bridge, OpenAI-, Anthropic-, and Gemini-compatible APIs, Docker packaging, and a single-file demo page, with unit tests. Phase 1 (multi-variant catalog at scale, per-conversation mapping) and Phase 2 (multi-tenant hardening) are roadmap-only (§10).
 

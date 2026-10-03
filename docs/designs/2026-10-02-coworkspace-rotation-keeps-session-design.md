@@ -1,9 +1,16 @@
 # Design: co-workspace forced-rotation keeps the rotating session
 
-- **Spec ID**: `2026-10-02-coworkspace-rotation-keeps-session`
+- **Spec ID**: `2026-10-02-coworkspace-rotation-keeps-session-design`
 - **Date**: 2026-10-02
 - **Status**: implemented
 - **Scope**: `services/co-workspace/src/users.ts` (one method), `src/routes/auth.ts` (one branch), `web/index.html` (one dialog), `tests/unit/co-workspace-phase2b.test.ts`. No other surface.
+
+## Accessibility (ADR-0065/0070)
+
+The wave touches one user-facing surface: the forced-password-change dialog's save
+button keeps the user signed in. No modal closes or focus moves — the existing dialog
+structure, labels, and focus handling are unchanged, and screen-reader state now matches
+reality (the session survives). No new a11y obligations.
 
 ## 1. Problem
 

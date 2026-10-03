@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261003-018
+kind: manual
+title: >-
+  co-workspace SEC-07 residual: consolidate the plaintext-key-in-tenant-home +
+  RW mount + open-egress composed risk into one tracked item with exit criteria
+  (token broker or provider-key-only mode) — currently split across three docs
+  with no owner
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:32.505Z'
+history:
+  - at: '2026-10-03T08:53:32.505Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.177Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.192Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.208Z'
+    from: review
+    to: done
+result: >-
+  Implemented: the composed plaintext-key + RW-mount + open-egress residual is
+  now ONE tracked entry — README 'Known tradeoffs' umbrella item naming the
+  composition and the exit criteria (iron-proxy egress policy OR
+  credential-injected-at-runtime/token broker); this ticket is the tracker.
+  Provider-key mode with a dedicated low-limit key stays the recommended
+  mitigation. The underlying residual remains open by nature.
+error: null

@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261003-013
+kind: manual
+title: >-
+  validator-hardening: validate spec status vocabulary in spec-register/audit —
+  registry carries superseded/planned/designed outside the legal enum and passes
+  silently with no superseded_by pointer
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:23.792Z'
+history:
+  - at: '2026-10-03T08:53:23.792Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:45.947Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:45.963Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:45.979Z'
+    from: review
+    to: done
+result: >-
+  Implemented: spec-register.ts gains the legal status vocabulary
+  (draft|proposed|approved|planned|implemented|superseded|drifted|archived),
+  validateSpecEntry on register AND --update (--superseded-by required for
+  superseded), and audit --spec-check Check 4 Fails on out-of-vocabulary
+  statuses and pointerless superseded rows. Registry normalized: designed→draft,
+  two superseded entries given superseded_by (raw-proxy design id / ADR-0095).
+  216/216 statuses in vocabulary.
+error: null

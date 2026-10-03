@@ -85,7 +85,9 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     if (!user) throw new HttpError(401, "not signed in");
     const body = (await readJsonBody(req)) as Record<string, unknown>;
     const token = typeof body.token === "string" ? body.token.trim() : "";
-    const result = state.users.verifyEmailChange(token);
+    // 2026-10-03 review M4: the pending row must belong to the REQUESTING session's user —
+    // a leaked or phished token must not apply one account's staged change to another.
+    const result = state.users.verifyEmailChange(token, user.id);
     if (!result.ok) {
       throw new HttpError(result.reason === "email_taken" ? 409 : 400, result.reason === "email_taken" ? "an account with this email already exists" : "invalid or expired verification key");
     }
@@ -125,6 +127,10 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
       state.audit.record(loginId || clientIp, "login.failed");
       throw new HttpError(401, "invalid ID or password (or account not yet verified)");
     }
+    // 2026-10-03 review M3: a success clears the per-account bucket, so 10 consecutive
+    // FAILURES lock out but the legitimate user's next successful sign-in re-opens it —
+    // an attacker must keep pumping failures forever to keep a victim out.
+    if (loginId) state.loginLimiter.reset(`login:${loginId.toLowerCase()}`);
     if (state.users.tempPasswordExpired(user)) {
       state.audit.record(user.principal, "login.failed");
       throw new HttpError(403, "temporary password expired — ask your administrator for a new one");

@@ -59,6 +59,9 @@ const cfg = loadConfig({
   // These tests exercise provisioning/chat mechanics anonymously (open mode); the
   // 2026-10-02 gate design defaults that off, so opt the sandbox back in.
   CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+  CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+  CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+  CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
   HERMES_BIN: hermesBin,
   HERMES_BIN_PREFIX: "bun", // T-20260929-001: portable fake runs via bun
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,

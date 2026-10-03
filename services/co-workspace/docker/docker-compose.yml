@@ -20,7 +20,8 @@
 #                                    (defaults to this repo's checkout). Keep it off /tmp.
 #
 # Phase 0 note: the workspace clone is mounted at /workspace (provisioning writes Projects/
-# there); Phase 2 bakes a pinned workspace image instead.
+# there). Baking a pinned workspace image instead was evaluated and REJECTED — see the
+# 2026-10-02 docker-redeploy design §5 (rebuild.sh is the sanctioned image-refresh path).
 
 name: co-workspace
 
@@ -35,6 +36,17 @@ services:
     entrypoint: [] # bypass the base image's s6 init — the server runs as PID 1
     command: ["bun", "src/server.ts"]
     init: true
+    # 2026-10-03 review M11: the broker already came back after a host reboot while the
+    # gateway stayed down — both services restart unless explicitly stopped.
+    restart: unless-stopped
+    # 2026-10-03 review M11: probe GET /health (config summary only, no secrets) instead of
+    # relying on process liveness. Bun ships in the image, so the probe is dependency-free.
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:9030/health').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     user: "${CO_WORKSPACE_GATEWAY_UID:-10000}:${CO_WORKSPACE_GATEWAY_GID:-10000}"
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]

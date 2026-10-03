@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // @description Scans workspace Markdown files for broken relative file links.
 //              Invoked by dev-sync.ts as a pre-flight link validation gate and
 //              spawned by audit.ts as the docs relative-link gate.
@@ -124,7 +124,14 @@ function stripFencedBlocks(content: string): string {
     }
     if (!inFence) kept.push(line);
   }
-  return kept.join("\n");
+  // T-20261003-015: also drop INLINE code spans — CHANGELOG history quotes link SYNTAX
+  // inside backticks (e.g. the A-6 rule's `](docs/context.md)` rewrite), which is prose
+  // about links, never a live link. Strip after fence removal; a span cannot cross lines.
+  return kept
+    .join("\n")
+    .split("\n")
+    .map((line) => line.replace(/`[^`]*`/g, (span) => " ".repeat(span.length)))
+    .join("\n");
 }
 
 /**
@@ -301,6 +308,12 @@ if (dirArg) {
   // recursive. _examples/ is scaffold staging and skipped via
   // TEMPLATE_STAGING_SKIP; template Projects staging lives outside docs/.
   mdFiles.push(...collectMdFiles(TEMPLATE_DOCS_ROOT, true, TEMPLATE_STAGING_SKIP));
+  // T-20261003-015 (2026-10-03 review, standards M3): CHANGELOG entries cite docs/
+  // paths and a dead one (the team-gateway QA review) had survived since 2026-09-27
+  // because the ledger sat outside every scan scope. Its links resolve relative to
+  // the workspace root, same as docs/-root files.
+  const changelog = join(WORKSPACE_ROOT, "CHANGELOG.md");
+  if (existsSync(changelog)) mdFiles.push(changelog);
 }
 
 if (verbose) console.log(`🔍 Scanning ${mdFiles.length} markdown file(s) for broken links...\n`);

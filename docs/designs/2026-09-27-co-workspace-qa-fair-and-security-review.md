@@ -1,5 +1,7 @@
 # Team Gateway (co-workspace) — QA Quality Fair & Security Review Backlog
 
+- **Spec id**: `2026-09-27-co-workspace-qa-fair-and-security-review`
+
 - **Date**: 2026-09-27
 - **Status**: Implemented (Wave 1) + Backlog (deferred items below)
 - **Origin**: user-requested QA fair (4 reviewers) + co-security PM security assessment; consolidated by PM
@@ -19,7 +21,7 @@
 | SEC-02 (HIGH) | Security | Client-controlled `user` field hijacked other users' lazy tenants — identity now bound to the authenticated principal |
 | SEC-03 (HIGH) | Security | `/admin/reload` had no admin gate — admin session required |
 | SEC-04 (HIGH) | Security | Stored XSS (same as QA-06) |
-| SEC-06 (MED) | Security | Session cookie `Secure` when login-required; password change rotates sessions |
+| SEC-06 (MED) | Security | Session cookie `Secure` when login-required; password change rotates sessions. *Amended 2026-10-02:* FORCED (admin temp-password) rotation keeps the rotating session and invalidates only the others — the purge-everything variant dumped the user onto the sign-in card (`docs/designs/2026-10-02-coworkspace-rotation-keeps-session-design.md`); self-service R3 changes were already keep-own-session. |
 | SEC-08 (MED-LOW) | Security | `/health` no longer discloses dataDir/hermesBin paths |
 | SEC-11 (LOW) | Security | Scaffold `description` leading-dash argv injection stripped |
 | SEC-13 (LOW) | Security | `bootstrapAdmin` wired at startup via `CO_WORKSPACE_ADMIN_EMAIL` (was dead code) |
@@ -39,7 +41,7 @@ Still deferred:
 
 | ID | Source | Item | Why deferred |
 |---|---|---|---|
-| SEC-07 | Security | Shared credential store least-privilege (token broker / RO mount + refresh channel) | Upstream Hermes capability dependent |
+| SEC-07 | Security | Shared credential store least-privilege (token broker / RO mount + refresh channel) | Upstream Hermes capability dependent. **Tracked: ticket T-20261003-018** (2026-10-03 review) consolidates this with the plaintext-key/open-egress composition into one residual-risk item with exit criteria. |
 
 ## Verification
 

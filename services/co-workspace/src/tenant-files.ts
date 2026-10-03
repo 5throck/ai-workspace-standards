@@ -124,6 +124,10 @@ export class TurnStore {
   }
 
   record(tenantId: string, turn: Omit<TurnRecord, "tenantId" | "seq" | "at">): void {
+    // SINGLE-PROCESS ONLY (2026-10-03 review): MAX(seq)+1 + INSERT is race-free under the
+    // gateway's one-process + per-tenant chatLock assumptions. A second gateway process
+    // sharing this dataDir would hit PK conflicts AFTER the turn completed. Same invariant
+    // class as RateLimiter's in-memory buckets.
     const row = this.db
       .query("SELECT COALESCE(MAX(seq), 0) AS max FROM turns WHERE tenant_id = ?")
       .get(tenantId) as { max: number };
@@ -172,6 +176,11 @@ export class TurnStore {
 
   deleteTenant(tenantId: string): void {
     this.db.query("DELETE FROM turns WHERE tenant_id = ?").run(tenantId);
+  }
+
+  /** Graceful shutdown (2026-10-03 review H3): checkpoint WAL before process exit. */
+  close(): void {
+    this.db.close();
   }
 
   list(tenantId: string, limit = 50): TurnRecord[] {

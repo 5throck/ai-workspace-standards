@@ -71,12 +71,20 @@ describe("readKeyEntries — T-013", () => {
     }
   });
 
-  test("throws on other errors", () => {
+  test("non-regular path warns once and returns empty (2026-10-03 review M9: no EISDIR boot crash)", () => {
     const dir = join(tmpdir(), `gw-keys-${crypto.randomUUID().slice(0, 8)}`);
     mkdirSync(dir, { recursive: true });
+    const warnCalls: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warnCalls.push(String(args[0]));
+    };
     try {
-      expect(() => readKeyEntries(dir)).toThrow(/cannot read API key file/);
+      expect(readKeyEntries(dir)).toEqual([]);
+      expect(warnCalls.length).toBe(1);
+      expect(warnCalls[0]).toContain("not a regular file");
     } finally {
+      console.warn = originalWarn;
       rmSync(dir, { recursive: true, force: true });
     }
   });

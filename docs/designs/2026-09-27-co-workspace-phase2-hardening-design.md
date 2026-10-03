@@ -1,8 +1,14 @@
 # Team Gateway Phase 2 Hardening Design — Auth, Quotas, Toolset Scoping, Container Isolation
 
-- **Spec id**: `2026-09-27-co-workspace-phase2-hardening`
+> **SUPERSEDED IN PART — pre-rebrand record (2026-10-03 review H6).** Written before the
+> service rename: this document says `services/team-gateway/` and `TEAM_GATEWAY_*` where
+> the shipped code says `services/co-workspace/` and `CO_WORKSPACE_*`. Later decisions
+> (rotation-keeps-session 2026-10-02, gate-anonymous-tenant-provisioning 2026-10-02,
+> ADR-0092 Addenda 14-16) amend individual mechanisms below. Read alongside ADR-0092.
+
+- **Spec id**: `2026-09-27-co-workspace-phase2-hardening-design`
 - **Date**: 2026-09-27
-- **Status**: Approved (Row 0 design; implementation lands in the same PR)
+- **Status**: Implemented (superseded in part — see the banner above)
 - **Related**: ADR-0092 (Team Gateway — this implements its §10 Phase 2 roadmap), ADR-0074 (Universal Design Gate), ADR-0088 (Hermes platform support), T-20260927-019 (pinned-scaffold defect, unrelated but concurrent)
 - **Scope**: Hardening of `services/team-gateway/` — API-key auth, per-tenant quotas with enforcement, first-class toolset scoping, and an opt-in per-tenant container isolation mode (`TEAM_GATEWAY_ISOLATION=docker`) — plus docs. No template changes.
 

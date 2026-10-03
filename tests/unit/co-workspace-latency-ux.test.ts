@@ -55,6 +55,9 @@ const cfg = loadConfig({
   // Anonymous provisioning progress timing is the subject here — opt into the
   // 2026-10-02 gate design's knob so the gate stays out of the way.
   CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+  CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+  CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+  CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
   HERMES_BIN: join(binDir, "fake-hermes.ts"),
   HERMES_BIN_PREFIX: "bun",
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,

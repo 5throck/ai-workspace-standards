@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261003-022
+kind: manual
+title: >-
+  co-workspace code hygiene: delete dead listUsersPaged (wrong total, unused
+  search) and tenantPaths legacy helper, cache per-request key-file reads with
+  mtime check, document the single-process TurnStore invariant, refresh the
+  stale AGENTS.md layout table
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:50.554Z'
+history:
+  - at: '2026-10-03T08:53:50.554Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.358Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.373Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.388Z'
+    from: review
+    to: done
+result: >-
+  Implemented (code hygiene): dead listUsersPaged (wrong total, unused search)
+  and tenantPaths removed; readKeyEntries cached by (path, mtimeMs, size) so
+  key-authenticated requests stop hitting the disk per request;
+  TenantRegistry.create drops the redundant dataDir param (constructor value
+  used; 2 call sites updated); TurnStore single-process invariant documented;
+  service AGENTS.md layout table corrected (registry is SQLite since Phase 3).
+error: null

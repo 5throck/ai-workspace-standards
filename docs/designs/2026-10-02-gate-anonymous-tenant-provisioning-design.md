@@ -1,12 +1,10 @@
 ---
-lang: ko
-lang_reason: source-material
 ---
 
 # Gate Anonymous Tenant Provisioning Design — co-workspace
 
 - **Date**: 2026-10-02
-- **Status**: Implemented 2026-10-02 — D1–D6 recommendations accepted by the user ("진행해줘"); gate, knob, companion hardening, and tests delivered (§5 as built; existing open-mode test sandboxes migrated per §5.5).
+- **Status**: Implemented 2026-10-02 — D1–D6 recommendations accepted by the user (verbal go-ahead, "please proceed"); gate, knob, companion hardening, and tests delivered (§5 as built; existing open-mode test sandboxes migrated per §5.5).
 - **Spec ID**: 2026-10-02-gate-anonymous-tenant-provisioning-design
 - **Related**: `services/co-workspace/src/{access,lifecycle,scaffold,config}.ts`, `services/co-workspace/src/routes/{tenants,compat,gemini}.ts`; incident record `memory/2026-10-02.md` (gw-76f6b4c9c6ff orphan cleanup); prior orphan `memory/2026-09-29.md` (gw-fd71bde230fa); `memory/meeting-2026-10-01-upstream-request-mcp.md` (Q8, `gw-*` as Projects/ residents); ADR-0074 (Design Gate).
 - **Scope**: design of the provisioning gate, the companion hardening (lazy-path tenant cap, provisioning audit, failed-scaffold rollback, boot-time sweep), and the configuration knob. No implementation in this document.

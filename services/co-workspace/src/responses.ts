@@ -2,12 +2,22 @@ import type { TenantRecord } from "./tenant";
 import { anthropicEvent, anthropicStream, messagePayload, messageId } from "./anthropic";
 import { generateContentPayload, geminiError, geminiStream } from "./gemini";
 import { chunkData, completionId, completionPayload, completionUsage, doneData } from "./openai";
-import { jsonResponse } from "./http";
+import { HttpError, jsonResponse } from "./http";
 import { startHeartbeat, sseStream, SSE_HEADERS, sseData, turnProgressComment } from "./sse";
 import { TurnTiming, turnLogKey } from "./timing";
 import type { GatewayState } from "./state";
 import { assertPrincipalQuota, assertQuota } from "./access";
 import { runChat, usageSummary } from "./chat";
+
+/** 2026-10-03 review M1: SSE error frames previously embedded `String(err)` — fs paths,
+ * spawn stderr tails and provider errors went to the client. Intentional rejections
+ * (HttpError: quota 429, access 403, ensureReady 409) keep their message; anything else
+ * is logged server-side and reported generically. */
+function sseErrorMessage(err: unknown): string {
+  if (err instanceof HttpError) return err.message;
+  console.error("[co-workspace] turn stream error:", err);
+  return "internal error during turn";
+}
 
 /** Native chat → raw Hermes events (SSE) + a terminal done event. */
 export function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: string): Response {
@@ -64,7 +74,7 @@ export function nativeChatResponse(state: GatewayState, rec: TenantRecord, messa
           }),
         );
       } catch (err) {
-        sink.enqueue(sseData({ type: "error", error: String((err as Error)?.message ?? err) }));
+        sink.enqueue(sseData({ type: "error", error: sseErrorMessage(err) }));
       }
   });
   return new Response(stream, { headers: SSE_HEADERS });
@@ -154,7 +164,7 @@ export async function openaiChatResponse(
       } catch (err) {
         sink.enqueue(
           enc.encode(
-            `data: ${JSON.stringify({ error: { message: String((err as Error)?.message ?? err) } })}\n\n`,
+            `data: ${JSON.stringify({ error: { message: sseErrorMessage(err) } })}\n\n`,
           ),
         );
         sink.enqueue(enc.encode(doneData()));
@@ -219,7 +229,7 @@ export async function anthropicChatResponse(
         sink.enqueue(
           anthropicEvent("error", {
             type: "error",
-            error: { type: "api_error", message: String((err as Error)?.message ?? err) },
+            error: { type: "api_error", message: sseErrorMessage(err) },
           }),
         );
       }
@@ -274,7 +284,7 @@ export async function geminiChatResponse(
       } catch (err) {
         sink.enqueue(
           new TextEncoder().encode(
-            `data: ${JSON.stringify(geminiError(500, String((err as Error)?.message ?? err)))}\n\n`,
+            `data: ${JSON.stringify(geminiError(500, sseErrorMessage(err)))}\n\n`,
           ),
         );
       }

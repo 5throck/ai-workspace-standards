@@ -14,6 +14,10 @@ const COMPOSE_REL = "services/co-workspace/docker/docker-compose.yml";
  * 2026-09-30, section 7), so the ratchet unions it with the base compose file. */
 const COMPOSE_VOLUME_OVERRIDE_REL = "services/co-workspace/docker/docker-compose.volume.yml";
 const SAMPLE_REL = "services/co-workspace/docker/.env.sample";
+/** T-20261003-014 (2026-10-03 review H9/D): the README configuration table is the third
+ * documentation surface — a switch as consequential as CO_WORKSPACE_ALLOW_ANON_PROVISIONING
+ * must not be real in config but absent from the operator docs. */
+const README_REL = "services/co-workspace/README.md";
 const NAME = "(?:CO_WORKSPACE_|HERMES_|GOOGLE_)[A-Z0-9_]*";
 
 /** Vars read by src/ but intentionally NOT passed through docker-compose.yml. */
@@ -75,6 +79,13 @@ export function collectComposeVars(yml: string): Set<string> {
 export function collectSampleVars(sample: string): Set<string> {
   const out = new Set<string>();
   for (const m of sample.matchAll(/^\s*#?\s*([A-Z][A-Z0-9_]*)=/gm)) out.add(m[1]!);
+  return out;
+}
+
+/** Backticked var names anywhere in the README (config table + prose). */
+export function collectReadmeVars(md: string): Set<string> {
+  const out = new Set<string>();
+  for (const m of md.matchAll(/`((?:CO_WORKSPACE_|HERMES_|GOOGLE_)[A-Z0-9_]*)`/g)) out.add(m[1]!);
   return out;
 }
 
@@ -165,5 +176,17 @@ describe("co-workspace env parity (real files)", () => {
 
   test("every read var is documented in .env.sample or exempt", () => {
     expect(checkParity(read, sample, SAMPLE_EXEMPT, SAMPLE_REL, "SAMPLE_EXEMPT")).toEqual([]);
+  });
+
+  // T-20261003-014 (2026-10-03 review H9): the README config table is the operator doc —
+  // a var the code reads must be documented there or explicitly exempted with a reason.
+  const README_EXEMPT: Record<string, string> = {
+    CO_WORKSPACE_BROKER_PORT: "docker-broker-internal env — set on the broker service in docker-compose.isolation.yml, documented in its header comments",
+    CO_WORKSPACE_BROKER_SOCKET: "docker-broker-internal env — socket path inside the broker container, not an operator knob in the README",
+    CO_WORKSPACE_BROKER_MAX_CONN: "docker-broker-internal env — connection cap, documented in docker-compose.isolation.yml comments",
+  };
+  const readme = collectReadmeVars(readFileSync(join(SVC, "README.md"), "utf8"));
+  test("every read var is documented in README.md or exempt (T-20261003-014)", () => {
+    expect(checkParity(read, readme, README_EXEMPT, README_REL, "README_EXEMPT")).toEqual([]);
   });
 });

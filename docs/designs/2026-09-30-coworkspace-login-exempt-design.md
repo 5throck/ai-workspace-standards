@@ -1,5 +1,7 @@
 # Design: Make API Keys and the Login-Required Web UI Composable
 
+- **Spec id**: `2026-09-30-coworkspace-login-exempt-design`
+
 - **Date**: 2026-09-30
 - **Status**: Implemented
 - **Related**: `services/co-workspace/src/auth.ts`, `services/co-workspace/src/server.ts`, `tests/unit/co-workspace-phase2.test.ts`, `tests/unit/co-workspace-auth-hardening.test.ts`, design `2026-09-27-co-workspace-phase2-hardening` (D1 route gate), Wave B (login-required gate)

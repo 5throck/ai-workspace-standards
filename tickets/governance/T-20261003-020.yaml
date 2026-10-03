@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: T-20261003-020
+kind: manual
+title: >-
+  co-workspace security hardening batch: add CSP to htmlHeaders, escape single
+  quotes in esc() and the donut aria-label, reset login limiter on success
+  (persistent lockout DoS), bind email-change verification to the session user,
+  log+invalidate sessions on bootstrapAdmin promotion, default non-zero quotas
+  when anon provisioning is on, sanitize 403/500/SSE error bodies
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:50.510Z'
+history:
+  - at: '2026-10-03T08:53:50.510Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.268Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.283Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.297Z'
+    from: review
+    to: done
+result: >-
+  Implemented (security batch): CSP on htmlHeaders (script-src 'unsafe-inline' —
+  the app ships inline module scripts; header still blocks external origins,
+  object, framing, base hijack), esc() escapes single quotes + donut aria-label
+  escaped, login limiter resets on success, email-change verification bound to
+  the session user, bootstrapAdmin promotion logs+audits and invalidates the
+  promoted user's sessions, anon provisioning without explicit quotas fails
+  boot, 403 ownership detail → generic message (detail kept in audit),
+  non-HttpError 500s return a generic body with server-side logging, all four
+  SSE error frames sanitized, ensureReady → HttpError 409. New tests in
+  co-workspace-review-remediation.test.ts.
+error: null

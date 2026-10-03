@@ -13,16 +13,26 @@ import { allowlistedEnv } from "./hermes";
 
 export interface ClaudeSpawnOptions {
   claudeBin: string;
+  /** Interpreter prefix for claudeBin — Windows CI passes ["bun"] so a plain .ts fake
+   * binary can stand in for the real executable. Production never sets it. */
+  binPrefix?: string[];
   projectDir: string;
   message: string;
   sessionId?: string;
+  /** 2026-10-03 review H1: enforced EXTERNALLY (kill timer) — `claude -p` has no budget
+   * flag, so an unbounded turn used to wedge the tenant forever (chatLocks never settles,
+   * cancel/delete no-ops). Timed-out turns report exit code 124. */
   timeoutMs?: number;
   extraArgs?: string[];
   env?: Record<string, string | undefined>;
+  /** QA-07 parity (2026-10-03 review H1): register the live process so cancel/delete work
+   * for claude turns exactly as they do for hermes turns. */
+  onSpawn?: (proc: { kill: (code?: number) => void }) => void;
 }
 
 export function claudeArgs(o: ClaudeSpawnOptions): string[] {
   const args = [
+    ...(o.binPrefix ?? []),
     o.claudeBin,
     "-p",
     o.message,
@@ -89,6 +99,20 @@ export async function runClaudeTurn(
     stderr: "pipe",
     env: allowlistedEnv(o.env ?? process.env),
   });
+  o.onSpawn?.(proc);
+
+  // External watchdog (2026-10-03 review H1): the CLI has no budget flag.
+  let timedOut = false;
+  const watchdog = o.timeoutMs
+    ? setTimeout(() => {
+        timedOut = true;
+        try {
+          proc.kill(9);
+        } catch {
+          /* already exited */
+        }
+      }, o.timeoutMs)
+    : undefined;
 
   let sessionId: string | undefined;
   let result: HermesEvent | undefined;
@@ -130,13 +154,14 @@ export async function runClaudeTurn(
     proc.exited,
     readLoop,
   ]);
+  if (watchdog) clearTimeout(watchdog);
 
   if (result && typeof result.text === "string" && result.text) finalText = result.text;
   const rawTokens = (result?.tokens ?? {}) as Record<string, unknown>;
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
   return {
-    exitCode,
+    exitCode: timedOut ? 124 : exitCode,
     sessionId,
     finalText,
     result,

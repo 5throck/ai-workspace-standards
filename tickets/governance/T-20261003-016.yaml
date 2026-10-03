@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261003-016
+kind: manual
+title: >-
+  co-workspace turns: enforce a uniform timeout+kill contract across
+  claude/codex/antigravity runtimes (onSpawn registration, external watchdog)
+  and add graceful SIGTERM/SIGINT shutdown — today a hung claude/codex turn
+  wedges the tenant and orphans survive restart
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-03T08:53:32.461Z'
+history:
+  - at: '2026-10-03T08:53:32.461Z'
+    from: null
+    to: backlog
+  - at: '2026-10-03T09:28:46.086Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T09:28:46.101Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T09:28:46.115Z'
+    from: review
+    to: done
+result: >-
+  Implemented: runClaudeTurn/runCodexTurn/runAntigravityTurn accept onSpawn +
+  timeoutMs (external kill timer, exit 124; binPrefix added to claude/codex for
+  Windows-portable fakes); chat.ts registers every runtime in activeProcs and
+  passes runBudgetSeconds; SIGTERM/SIGINT handlers kill children, drain
+  chatLocks (10s) and close all four SQLite stores. SSE cancel-support comment
+  updated. New tests: watchdog exit-124 for claude/codex, delete-race abort.
+error: null

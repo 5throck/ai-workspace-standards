@@ -107,16 +107,19 @@ export function startProvisioning(state: GatewayState, rec: TenantRecord): Promi
   return promise;
 }
 
-/** Wait for an in-flight provisioning, or reject with a helpful status. */
+/** Wait for an in-flight provisioning, or reject with a helpful status. 409 (not a plain
+ * Error/500): the founding design's "chat on a non-ready tenant" contract, now carried by
+ * HttpError so the message reaches the client through the safe error passthrough
+ * (2026-10-03 review M14 — the streaming path superseded the old 409-with-progress story). */
 export async function ensureReady(state: GatewayState, rec: TenantRecord): Promise<TenantRecord> {
   const inflight = state.provisioning.get(rec.tenantId);
   if (inflight) await inflight;
   const current = state.registry.get(rec.tenantId) ?? rec;
   if (current.status === "ready") return current;
   if (current.status === "failed") {
-    throw new Error(`tenant ${current.tenantId} failed provisioning: ${current.error ?? "unknown"}`);
+    throw new HttpError(409, `tenant ${current.tenantId} failed provisioning: ${current.error ?? "unknown"}`);
   }
-  throw new Error(`tenant ${current.tenantId} is ${current.status}`);
+  throw new HttpError(409, `tenant ${current.tenantId} is ${current.status}`);
 }
 
 /** P7: sanitize a user-supplied project name to what the scaffold engine accepts. */
@@ -202,7 +205,6 @@ export function getOrStartTenant(
   if (existing) return { rec: existing };
   assertTenantCap(state, ownerPrincipal ?? "anonymous");
   const rec = state.registry.create({
-    dataDir: state.cfg.dataDir,
     variant,
     key,
     ownerPrincipal,

@@ -10,6 +10,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "../../services/co-workspace/src/config";
+import { HttpError } from "../../services/co-workspace/src/http";
 import { createServer, createState, openaiChatResponse } from "../../services/co-workspace/src/server";
 
 function tempDir(): string {
@@ -54,6 +55,9 @@ const cfg = loadConfig({
   // Anonymous chat flows exercise cancel semantics, not auth — opt into the
   // 2026-10-02 gate design's provisioning knob so the gate stays out of the way.
   CO_WORKSPACE_ALLOW_ANON_PROVISIONING: "true",
+  CO_WORKSPACE_TENANT_MAX_TURNS: "100",
+  CO_WORKSPACE_TENANT_MAX_TOKENS: "100000",
+  CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "200000",
   HERMES_BIN: hermesBin,
   HERMES_BIN_PREFIX: "bun",
   CO_WORKSPACE_HERMES_SEED_HOME: seedHome,
@@ -168,7 +172,11 @@ describe("provisioning progress interval (H4)", () => {
     try {
       const tenantId = await readyTenant();
       const rec = state.registry.get(tenantId)!;
-      const failing = new Promise<void>((_, reject) => setTimeout(() => reject(new Error("provision boom")), 50));
+      // 2026-10-03 review M1 error sanitization: an INTENTIONAL rejection (HttpError) keeps
+      // its message on the SSE error frame…
+      const failing = new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new HttpError(409, "provision boom")), 50),
+      );
       const res = await openaiChatResponse(state, rec, "hi", true, failing);
       const text = await res.text();
       expect(text).toContain("provision boom");
@@ -178,5 +186,18 @@ describe("provisioning progress interval (H4)", () => {
       globalThis.setInterval = realSet;
       globalThis.clearInterval = realClear;
     }
+  }, T);
+
+  test("non-HttpError rejections are sanitized on the SSE error frame (2026-10-03 review M1)", async () => {
+    const tenantId = await readyTenant();
+    const rec = state.registry.get(tenantId)!;
+    const failing = new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new Error("provision boom /host/secret/path")), 50),
+    );
+    const res = await openaiChatResponse(state, rec, "hi", true, failing);
+    const text = await res.text();
+    expect(text).toContain("internal error during turn");
+    expect(text).not.toContain("provision boom");
+    expect(text).not.toContain("/host/secret/path");
   }, T);
 });
