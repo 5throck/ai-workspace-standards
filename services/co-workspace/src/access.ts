@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { GatewayState } from "./state";
 import { GatewayConfig, runtimeProviderKeyGap } from "./config";
 import { credentialValid, presentedCredential, principalFor } from "./auth";
-import { sessionTokenFromCookie } from "./users";
+import { sessionTokenFromCookie, UserRecord } from "./users";
 import type { TenantRecord } from "./tenant";
 import { HttpError } from "./http";
 
@@ -39,10 +39,35 @@ export function isAdminCaller(state: GatewayState, req: Request): boolean {
   return sessionUser?.role === "admin";
 }
 
+/** T-20261003-027 (sub-feature 4): a session admin whose one-time password set is COMPLETE.
+ * Passwordless (bootstrap/SSO) admins answer false, so admin-wide surfaces refuse them until
+ * they set a password — regular SSO-only users (role "user") are unaffected. */
+export function isPasswordSetAdmin(state: GatewayState, req: Request): boolean {
+  const user = state.users.resolveSession(sessionTokenFromCookie(req));
+  return user?.role === "admin" && Boolean(user.passwordHash);
+}
+
+/** T-20261003-027 (sub-feature 4): admin-route gate that also enforces the first-time
+ * password set. An admin provisioned without a password (CO_WORKSPACE_ADMIN_EMAIL bootstrap,
+ * or SSO-linked) must complete the one-time set (PATCH /auth/me with just the new password —
+ * no current-password check for a null hash, session-hardening D5) before ANY admin action;
+ * previously only the D4 destructive ops refused them. Returns the session admin. */
+export function requireAdminReady(state: GatewayState, req: Request): UserRecord {
+  const user = state.users.resolveSession(sessionTokenFromCookie(req));
+  if (!user || user.role !== "admin") throw new HttpError(403, "admin only");
+  if (!user.passwordHash) {
+    throw new HttpError(403, "set a password first to use admin actions (Account > set password; PATCH /auth/me with the new password)");
+  }
+  return user;
+}
+
 /** SEC-01: tenant access requires owner match, admin role, or the Phase 0 open mode
  * (no keys, no login requirement, anonymous-owned tenant). */
 export function requireTenantAccess(state: GatewayState, req: Request, rec: TenantRecord): void {
-  if (isAdminCaller(state, req)) return;
+  // T-20261003-027 (sub-feature 4): the admin-wide bypass requires the one-time password
+  // set to be complete — a passwordless (bootstrap/SSO) admin keeps only their own access
+  // until they set one. Key-authenticated callers resolve no session, unchanged.
+  if (isPasswordSetAdmin(state, req)) return;
   const openMode = state.cfg.apiKeys.length === 0 && !state.cfg.loginRequired;
   if (openMode && (rec.ownerPrincipal ?? "anonymous") === "anonymous") return;
   const caller = callerPrincipal(state, req);

@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { sessionTokenFromCookie } from "../users";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
-import { callerPrincipal, requireAdminReauth, requireTenantAccess } from "../access";
+import { callerPrincipal, requireAdminReauth, requireAdminReady, requireTenantAccess } from "../access";
 import { deleteTenantData, cachedDirSize } from "../lifecycle";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
@@ -11,8 +11,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   const { path } = ctx;
   // ── Wave B3: admin ──
   if (req.method === "GET" && path === "/admin/stats") {
-    const caller = state.users.resolveSession(sessionTokenFromCookie(req));
-    if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     const tenants = state.registry.list();
     const turnCounts = state.turns.countsByTenant();
     const perUser = new Map<string, { principal: string; tenantCount: number; diskBytes: number; turns: number }>();
@@ -44,8 +43,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   }
 
   if (req.method === "GET" && path === "/admin/users") {
-    const caller = state.users.resolveSession(sessionTokenFromCookie(req));
-    if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     return jsonResponse({ users: state.users.listUsers().map((u) => ({
       id: u.id,
       // principal is the trusted ownership label — the admin panel joins /admin/stats
@@ -72,8 +70,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
 
   const renameRoute = path.match(/^\/admin\/users\/([^/]+)\/name$/);
   if (req.method === "PATCH" && renameRoute) {
-    const caller = state.users.resolveSession(sessionTokenFromCookie(req));
-    if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     const target = state.users.findById(decodeURIComponent(renameRoute[1]));
     if (!target) throw new HttpError(404, "user not found");
     const body = (await readJsonBody(req)) as Record<string, unknown>;
@@ -131,15 +128,13 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   }
 
   if (req.method === "GET" && path === "/admin/audit") {
-    const caller = state.users.resolveSession(sessionTokenFromCookie(req));
-    if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     return jsonResponse({ entries: state.audit.list(200) });
   }
 
   // QA-12: admin outbox viewer — remote signups cannot read a server-local file.
   if (req.method === "GET" && path === "/admin/mail-outbox") {
-    const caller = state.users.resolveSession(sessionTokenFromCookie(req));
-    if (!caller || caller.role !== "admin") throw new HttpError(403, "admin only");
+    const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     const dir = join(state.cfg.dataDir, "mail-outbox");
     const files: Array<{ file: string; content: string }> = [];
     if (existsSync(dir)) {
