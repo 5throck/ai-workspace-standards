@@ -57,25 +57,17 @@ jobs:
 
       - name: Security audit - dependency vulnerabilities
         shell: bash
-        run: |
-          # Fleet dependency-vulnerability gate (2026-10-01 fleet assessment FW-1).
-          # Threshold matches the L0 root gate (.github/workflows/test.yml):
-          # fail on high or critical; low/moderate findings are reported only.
-          # bun audit exits 1 whenever any finding exists, so the exit code
-          # alone cannot separate findings from infrastructure failures — the
-          # severity summary line is the source of truth, and empty output is
-          # treated as a loud infra failure.
-          audit_output=$(bun audit 2>&1) || true
-          echo "$audit_output"
-          if [ -z "$audit_output" ]; then
-            echo "ERROR: bun audit produced no output (possible registry/infrastructure failure)."
-            exit 1
-          fi
-          if echo "$audit_output" | grep -qE '[1-9][0-9]* (high|critical)'; then
-            echo "ERROR: High or critical vulnerabilities found. See audit output above."
-            exit 1
-          fi
-          echo "Security check passed (no high/critical vulnerabilities)."
+        # Fleet dependency-vulnerability gate (2026-10-01 fleet assessment FW-1),
+        # waiver-aware since T-20261003-011. Threshold: fail on high or critical;
+        # low/moderate findings are reported only. The script keeps the old
+        # fail-closed behavior (empty/unparseable audit output = loud infra
+        # failure) and adds a REVIEWED advisory-waiver channel:
+        # .github/dependency-waivers.toml suppresses specific no-fix advisories.
+        # The channel itself fails closed: a malformed file, an expired
+        # revisit-by date, or a stale waiver (advisory no longer in the audit
+        # output, or version drift vs the installed tree) fails the job, so a
+        # waiver can never decay into a silent ignore-all.
+        run: bun scripts/dependency-audit.ts
 
 
   secret-scan:
