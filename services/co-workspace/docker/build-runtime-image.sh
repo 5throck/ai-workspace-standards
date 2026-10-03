@@ -31,7 +31,7 @@ rsync -a --delete \
     --exclude '.env' --exclude '.env.*' --exclude '*.key' --exclude '*.pem' --exclude 'auth.json' \
     "$CHECKOUT/" "$STAGE/hermes-agent/"
 
-echo "[2/3] Building $IMAGE…"
+echo "[2/3] Building ${IMAGE}…"
 docker build -f "$SCRIPT_DIR/Dockerfile.runtime" -t "$IMAGE" "$STAGE"
 
 echo "[3/3] Done. Running turns in docker isolation now use this Hermes build."
