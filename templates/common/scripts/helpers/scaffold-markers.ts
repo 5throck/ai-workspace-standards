@@ -98,15 +98,6 @@ export const COMMON_AGENTS_START = '<!-- COMMON-AGENTS:START -->';
 export const COMMON_AGENTS_END = '<!-- COMMON-AGENTS:END -->';
 
 /**
- * Graft repo-context-graph instruction block (ADR-0076), wrapped in
- * WORKSPACE-MANAGED markers so upgrade-project's MERGE pass keeps it in sync.
- * Searched in templates/common/AGENTS.md by create-l3-scaffold.ts.
- */
-export const GRAFT_BLOCK_OPEN = '<!-- WORKSPACE-MANAGED: graft repo context graph -->';
-/** Generic WORKSPACE-MANAGED close marker (upgrade-project.ts shares this shape). */
-export const WORKSPACE_MANAGED_CLOSE = '<!-- /WORKSPACE-MANAGED -->';
-
-/**
  * Base names of the VARIANT-* injection markers the L3 scaffold emits into the
  * generated AGENTS.md (`<!-- <name>-START -->` / `<!-- <name>-END -->` pairs).
  * The empty marker structure mirrors templates/common/AGENTS.md so
@@ -149,16 +140,6 @@ export const SCAFFOLD_MARKER_SOURCES: readonly ScaffoldMarkerSource[] = [
   {
     marker: COMMON_AGENTS_END,
     purpose: 'create-l3-scaffold extracts the COMMON-AGENTS Language Policy block from this file',
-    sources: ['templates/common/AGENTS.md'],
-  },
-  {
-    marker: GRAFT_BLOCK_OPEN,
-    purpose: 'create-l3-scaffold extracts the graft repo-context-graph block (ADR-0076) from this file',
-    sources: ['templates/common/AGENTS.md'],
-  },
-  {
-    marker: WORKSPACE_MANAGED_CLOSE,
-    purpose: 'closes the WORKSPACE-MANAGED graft block create-l3-scaffold extracts',
     sources: ['templates/common/AGENTS.md'],
   },
   ...VARIANT_SCAFFOLD_MARKER_NAMES.map(

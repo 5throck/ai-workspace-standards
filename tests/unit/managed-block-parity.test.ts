@@ -144,10 +144,9 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
     readFileSync(join(workspaceRoot, 'templates', 'common', 'AGENTS.md'), 'utf-8'),
   );
 
-  test('common carries exactly the two known keys (tier-model-mapping x2, graft x1)', () => {
-    expect([...commonBlocks.keys()].sort()).toEqual(['graft repo context graph', 'tier-model-mapping']);
+  test('common carries exactly the known key (tier-model-mapping x2) — graft block withdrawn (T-20261003-010)', () => {
+    expect([...commonBlocks.keys()].sort()).toEqual(['tier-model-mapping']);
     expect(commonBlocks.get('tier-model-mapping')).toHaveLength(2);
-    expect(commonBlocks.get('graft repo context graph')).toHaveLength(1);
   });
 
   test('the tier-model-mapping block lists 3 models per tier (the T-009 defect shape)', () => {

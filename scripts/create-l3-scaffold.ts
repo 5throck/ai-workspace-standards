@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.16.0
+// @version 1.17.0
+// v1.17.0: stop injecting the graft repo-context-graph block into scaffolded
+//          AGENTS.md (T-20261003-010, design 2026-10-02-self-managed-tool-surfaces):
+//          graft surfaces — including the AGENTS.md block and the skills/graft copy —
+//          are tool-owned artifacts (graft init materializes them); templates stop
+//          carrying the block and the scaffold-marker registry drops the graft markers.
 // v1.16.0: Step 8.5 graft build tries the global `graft` binary before bunx
 //          (spec 2026-09-20-graft-scaffold-resilience) — same rationale as
 //          new-project.ts v1.23.0.
@@ -59,8 +64,6 @@ import { isVariantType } from './helpers/registries/variant-type-registry.ts';
 import {
   COMMON_AGENTS_START,
   COMMON_AGENTS_END,
-  GRAFT_BLOCK_OPEN,
-  WORKSPACE_MANAGED_CLOSE,
   L3_COMMON_OVERLAY_EXCLUDE,
   VARIANT_SCAFFOLD_MARKER_NAMES,
 } from './helpers/scaffold-markers.ts';
@@ -679,18 +682,10 @@ ${variantMarkers}
     // (validate-templates' scaffold-marker-source check also fails on this).
     log(`  ⚠️  COMMON-AGENTS markers not found in templates/common/AGENTS.md — Language Policy block NOT appended to AGENTS.md (marker: ${COMMON_AGENTS_START})`);
   }
-  // Append the graft repo-context-graph instruction block (ADR-0076) — same
-  // marker-extraction pattern as COMMON-AGENTS above. The L1 copy wraps the block
-  // in WORKSPACE-MANAGED markers so upgrade-project's MERGE pass keeps it in sync
-  // for projects created before this landed.
-  const graftStart = commonAgentsMd.indexOf(GRAFT_BLOCK_OPEN);
-  const graftEnd = commonAgentsMd.indexOf(WORKSPACE_MANAGED_CLOSE, graftStart);
-  if (graftStart !== -1 && graftEnd !== -1) {
-    const graftBlock = commonAgentsMd.slice(graftStart, graftEnd) + WORKSPACE_MANAGED_CLOSE + "\n";
-    fs.appendFileSync(path.join(projectDir, "AGENTS.md"), "\n" + graftBlock);
-  } else {
-    log(`  ⚠️  graft block markers not found in templates/common/AGENTS.md — graft instruction block NOT appended to AGENTS.md (marker: ${GRAFT_BLOCK_OPEN})`);
-  }
+  // The graft repo-context-graph block is no longer injected: graft is self-managed
+  // (design 2026-10-02-self-managed-tool-surfaces, T-20261003-010) and the block was
+  // withdrawn from templates/common/AGENTS.md. New scaffolds run `graft init` to
+  // materialize graft surfaces when they want them.
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -16,8 +16,6 @@ import { join } from 'node:path';
 import {
     COMMON_AGENTS_START,
     COMMON_AGENTS_END,
-    GRAFT_BLOCK_OPEN,
-    WORKSPACE_MANAGED_CLOSE,
     VARIANT_SCAFFOLD_MARKER_NAMES,
     SCAFFOLD_MARKER_SOURCES,
     canonicalPmStubBody,
@@ -53,7 +51,7 @@ describe('SCAFFOLD_MARKER_SOURCES (C3)', () => {
 
     test('every exported marker constant is covered by the mapping', () => {
         const mapped = new Set(SCAFFOLD_MARKER_SOURCES.map((e) => e.marker));
-        for (const marker of [COMMON_AGENTS_START, COMMON_AGENTS_END, GRAFT_BLOCK_OPEN, WORKSPACE_MANAGED_CLOSE]) {
+        for (const marker of [COMMON_AGENTS_START, COMMON_AGENTS_END]) {
             expect(mapped.has(marker)).toBe(true);
         }
         for (const name of VARIANT_SCAFFOLD_MARKER_NAMES) {
