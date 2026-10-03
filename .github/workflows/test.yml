@@ -129,6 +129,7 @@ jobs:
           export CO_WORKSPACE_DATA_DIR_HOST=/tmp
           export CO_WORKSPACE_BROKER_TOKEN=ci-stub
           export CO_WORKSPACE_DATA_VOLUME=ci-stub-volume
+          export CO_WORKSPACE_HERMES_SEED_HOME=/tmp/hermes-seed
           export CO_WORKSPACE_TENANT_MAX_TURNS=10
           export CO_WORKSPACE_TENANT_MAX_TOKENS=1000
           export CO_WORKSPACE_PRINCIPAL_MAX_TOKENS=1000
