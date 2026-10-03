@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261003-008
+kind: manual
+title: >-
+  Evidence plane M1 gap (fleet-wide): no project has >=3 decision records with
+  evidence_refs resolving inside its evidence plane — triage whether to seed
+  decision records in co-safety (F3, M2 94d pass), co-newbiz (F2), co-security
+  (F1) to reach PROMOTABLE maturity
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-03T02:39:17.537Z'
+history:
+  - at: '2026-10-03T02:39:17.537Z'
+    from: null
+    to: backlog
+result: null
+error: null

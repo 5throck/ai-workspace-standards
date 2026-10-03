@@ -6,8 +6,9 @@ name: Edu Sync
 # no commits to this repo are needed for state.
 #
 # Requires repository secret EDU_SYNC_PAT: a fine-grained PAT with
-# Contents: read/write on 5throck/intro-to-ai-harness and
-# 5throck/multi-agent-harness-handbook. Without it the agent step skips.
+# Contents: read/write AND Pull requests: read/write on
+# 5throck/intro-to-ai-harness and 5throck/multi-agent-harness-handbook.
+# Without it the agent step skips.
 
 on:
   schedule:

@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261003-005
+kind: manual
+title: >-
+  Fix pre-existing root test failures: .agents-only shortcut back-sync + hermes
+  security-gate parity (bun test 1937 pass / 2 fail on main)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-03T02:39:09.134Z'
+history:
+  - at: '2026-10-03T02:39:09.134Z'
+    from: null
+    to: backlog
+result: null
+error: null

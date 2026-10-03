@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261003-006
+kind: manual
+title: >-
+  Retire tracked graft-mirror leftovers fleet-wide: git rm --cached
+  .claude/skills/graft/SKILL.md in all projects (directory-pattern gitignore +
+  tracked file breaks dev-sync git add when dirtied; co-abap-plugin fixed
+  2026-10-03) and add self-managed-surface skip to sync-skills/dev-sync
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-03T02:39:09.230Z'
+history:
+  - at: '2026-10-03T02:39:09.230Z'
+    from: null
+    to: backlog
+result: null
+error: null
