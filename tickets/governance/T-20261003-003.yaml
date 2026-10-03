@@ -12,12 +12,28 @@ title: >-
   support. Needs Design Gate (trust-boundary change); amend
   2026-10-01-upstream-request-mcp-design and ADR-0097 as needed.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T00:14:50.295Z'
 history:
   - at: '2026-10-03T00:14:50.295Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-03T05:23:24.121Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T05:23:24.238Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T05:23:24.672Z'
+    from: review
+    to: done
+result: >-
+  Completed 2026-10-03. Implementation, design and measurement landed as server
+  v1.9.0 (client_roots tier live, design Appendix E amended 2026-10-03,
+  client_init + roots_probe audit lines) by the upstream-MCP workstream; the
+  remaining ticket requirement — amend ADR-0097 as needed — satisfied in
+  ai-workspace-standards PR #1353 (Decision item 8) together with the
+  T-20261003-004 hardening. Identity source recording on tickets is implemented
+  (upstream.identity_source).
 error: null

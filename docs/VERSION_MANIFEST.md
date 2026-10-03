@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-03T05:18:05.308Z
+**Generated**: 2026-10-03T05:24:04.352Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-02 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-02 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-02 |
-| pm | agents/pm.md | medium | inherit | 2026-10-02 |
+| pm | agents/pm.md | medium | inherit | 2026-10-03 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-02 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-10-02 |
 | skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-10-02 |
