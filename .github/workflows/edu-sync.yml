@@ -164,8 +164,12 @@ jobs:
                affected chapters/sections — keep each repo's existing tone,
                structure, and bilingual conventions (EN files primary; if a
                chapter has a _ko sibling, update it in kind; do not create new
-               locales). Add a short "What's new (2026-09)" callout only where
-               it fits naturally.
+               locales). Add a matching section to every existing locale
+               sibling when a base or _en edit adds or removes a section
+               heading. The handbook-doctor i18n-parity check enforces equal
+               heading counts across locales and fails CI on a mismatch. Add
+               a short "What's new (2026-09)" callout only where it fits
+               naturally.
             3. For each repo you edited: create a branch
                edu-sync/<YYYY-MM-DD>, commit with a conventional message, then
                EXPORT your work as patch bundles — this run has NO push or PR
