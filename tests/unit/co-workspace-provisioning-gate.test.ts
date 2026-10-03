@@ -7,7 +7,7 @@
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "../../services/co-workspace/src/config";
@@ -20,6 +20,7 @@ import {
   removeUnrelocatedScaffold,
   resolveLazyTenant,
   sweepOrphanedScaffolds,
+  sweepOrphanedStorage,
 } from "../../services/co-workspace/src/server";
 
 const tmp = (label: string) => join(tmpdir(), `co-workspace-gate-${label}-${crypto.randomUUID().slice(0, 8)}`);
@@ -180,6 +181,50 @@ describe("failed-scaffold rollback and boot sweep (G5)", () => {
     expect(existsSync(human)).toBe(true);
     const swept = life.state.audit.list(50).find((a) => a.action === "scaffold.sweep" && a.target === orphan);
     expect(swept?.actor).toBe("system");
+  });
+});
+
+// ── T-20261003-026: the same reconcile for the storage tree ──
+describe("storage-tree boot sweep (T-20261003-026)", () => {
+  const sweep = sandbox("storagesweep");
+  const storageRoot = () => join(sweep.state.cfg.dataDir, "storage");
+
+  test("removes storage/<principal>/<name> with no registry row, keeps every registered folder", () => {
+    const rec = sweep.state.registry.create({
+      variant: "co-consult",
+      key: "co-consult::storagesweep",
+      ownerPrincipal: "techcross",
+      name: "provider-test",
+    });
+    mkdirSync(join(storageRoot(), "techcross", "provider-test", "project"), { recursive: true });
+    const stale = join(storageRoot(), "techcross", "provider-stale");
+    mkdirSync(join(stale, "hermes-home"), { recursive: true });
+    writeFileSync(join(stale, "hermes-home", "auth.json"), "{}");
+
+    const result = sweepOrphanedStorage(sweep.state);
+    expect(result.removed).toContain("techcross/provider-stale");
+    expect(existsSync(stale)).toBe(false);
+    expect(existsSync(join(storageRoot(), "techcross", "provider-test"))).toBe(true);
+    expect(sweep.state.registry.get(rec.tenantId)).toBeTruthy();
+    const audited = sweep.state.audit.list(50).find((a) => a.action === "storage.sweep" && a.target === "techcross/provider-stale");
+    expect(audited?.actor).toBe("system");
+  });
+
+  test("guards: stray files, symlinks and a missing storage dir are tolerated, never followed", () => {
+    writeFileSync(join(storageRoot(), "stray-file.txt"), "x");
+    // symlink inside a principal dir: the sweep removes real dirs around it, never the link
+    mkdirSync(join(storageRoot(), "techcross"), { recursive: true });
+    symlinkSync(join(storageRoot(), "techcross", "provider-test"), join(storageRoot(), "techcross", "provider-link"));
+
+    const result = sweepOrphanedStorage(sweep.state);
+    expect(existsSync(join(storageRoot(), "stray-file.txt"))).toBe(true);
+    expect(existsSync(join(storageRoot(), "techcross", "provider-link"))).toBe(true);
+    expect(result.error).toBeUndefined();
+
+    const empty = sandbox("storagesweep-empty");
+    const fresh = sweepOrphanedStorage(empty.state);
+    expect(fresh.removed).toEqual([]);
+    expect(fresh.error).toBeTruthy(); // missing storage dir (volume mode / fresh install) reports, never throws
   });
 });
 

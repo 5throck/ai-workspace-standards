@@ -92,6 +92,11 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Purpose**: Design token compiler for `co-design`. Reads `templates/co-design/tokens.json` and generates CSS custom properties (`:root { --color-primary: ... }`) and TypeScript constant types (`tokens.ts`) for design system consistency. v1.1.0: a reserved top-level `themes` object (e.g. `dark`, `high-contrast`) compiles to `[data-theme="<name>"]` CSS blocks after `:root` plus a `themes` export in the TS output; a tokens file without `themes` compiles unchanged.
 **Usage**: `bun scripts/compile-tokens.ts [--input <path>] [--out-css <path>] [--out-ts <path>] [--watch] [--check]`
 
+#### `dependency-audit.ts`
+**Purpose**: Fleet dependency-vulnerability gate for the CI dependency-audit job (T-20261003-011). Runs `bun audit --json` and fails on any high/critical finding; low/moderate findings are reported only; empty or unparseable output is a loud infrastructure failure (same fail-closed semantics as the previous inline severity grep). Adds a reviewed advisory-waiver channel: `.github/dependency-waivers.toml` suppresses specific no-fix advisories (gitleaks-allowlist precedent). The channel fails closed — a malformed file, unknown keys, expired revisit-by date, stale waiver (advisory no longer present in audit output), installed-version drift, duplicate waivers, or a dev-only scope contradiction fails the run, so a waiver can never decay into a silent ignore-all.
+**Usage**: `bun scripts/dependency-audit.ts [--waiver-file <path>]`
+**Runs automatically**: CI dependency-audit job (`templates/common/.github/workflows/ci.yml`)
+
 #### `generate-ide-rules.ts`
 **Purpose**: IDE context rules generator for `.cursorrules` and `.clauderules`. Generates IDE-specific context rules dynamically based on workspace context and agent rosters.
 **Usage**: `bun scripts/generate-ide-rules.ts [--check] [--force] [--dir <path>]`
@@ -396,4 +401,4 @@ writeFileSync('file.txt', content, 'utf-8');
 ```
 
 ---
-*Last Updated: 2026-10-03*
+*Last Updated: 2026-10-04*

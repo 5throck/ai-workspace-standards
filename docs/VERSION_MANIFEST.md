@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-03T13:25:26.595Z
+**Generated**: 2026-10-03T15:13:28.129Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 56
-- **Scripts**: 118 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 119 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -119,6 +119,7 @@
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.17.0 | scripts/create-l3-scaffold.ts | N/A |
+| dependency-audit.ts | 1.0.0 | scripts/dependency-audit.ts | N/A |
 | design-lint.ts | 2.0.0 | scripts/design-lint.ts | js-yaml |
 | dev-sync.ts | 1.23.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |

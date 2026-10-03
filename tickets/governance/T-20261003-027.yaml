@@ -7,12 +7,21 @@ title: >-
   user-facing session list + revoke-others/all, passwordless-admin first-time
   password set
 priority: high
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-03T12:05:58.363Z'
 history:
   - at: '2026-10-03T12:05:58.363Z'
     from: null
     to: backlog
+  - at: '2026-10-03T13:46:52.808Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T13:46:52.827Z'
+    from: waiting
+    to: running
+  - at: '2026-10-03T14:51:16.794Z'
+    from: running
+    to: review
 result: null
 error: null
