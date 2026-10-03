@@ -14,7 +14,7 @@ title: >-
   (propagate-to-templates.ts replaces the removed publish-to-template.ts) into
   templates/common/SECURITY.md, which currently ships no enforcement section
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T12:08:00.000Z'
 history:
@@ -30,5 +30,10 @@ history:
   - at: '2026-10-03T14:51:34.834Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-03T16:42:34.506Z'
+    from: review
+    to: done
+result: >-
+  Delivery merged; remainder split to T-20261003-030 (backlog) per the ticket's
+  own split note.
 error: null

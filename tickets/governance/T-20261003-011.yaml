@@ -13,7 +13,7 @@ title: >-
   (gitleaks-allowlist precedent), an upstream request for the gate, or a
   co-price lint-chain trade-off decision.
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T17:40:00.000Z'
 history:
@@ -29,5 +29,10 @@ history:
   - at: '2026-10-03T14:51:34.806Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-03T16:42:34.447Z'
+    from: review
+    to: done
+result: >-
+  Delivery merged (overnight governance batch #1375-era landings verified
+  in-tree); closing from review.
 error: null

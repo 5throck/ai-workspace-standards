@@ -7,7 +7,7 @@ title: >-
   user-facing session list + revoke-others/all, passwordless-admin first-time
   password set
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T12:05:58.363Z'
 history:
@@ -23,5 +23,10 @@ history:
   - at: '2026-10-03T14:51:16.794Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-03T16:42:34.484Z'
+    from: review
+    to: done
+result: >-
+  Delivery merged (overnight governance batch #1375-era landings verified
+  in-tree); closing from review.
 error: null
