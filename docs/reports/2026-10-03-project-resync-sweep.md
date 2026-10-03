@@ -63,6 +63,13 @@ Not applicable this cycle: no backport-worthy LOCAL-WORK candidates exist to der
 - `co-price` origin/main still carries `template-version.txt` = 0.9.0 despite merged PR #137 ("v0.10.0 delivery") — the upgrade dry-run in Step 4 must show what it reconciles; flagged for verification.
 - `co-work` origin/main carries exact Bun `1.4.2` pins (the newer deliberate-pin policy) — the upgrade must not regress them to `"1.4.x"`; verify in dry-run.
 
+## Steps 4–5 outcomes (post-run)
+
+- Real upgrades applied to 4 projects (co-export, co-game, co-price, co-work: 0.9.0 → 0.10.0); the 9 already-current projects needed no run. All four verified post-upgrade: `template-version.txt` = 0.10.0, project `audit.ts` exit 0, `verify-scripts.ts --verify` exit 0.
+- **Correction to the co-work pre-note above**: the direction was inverted. co-work/co-export/co-game's exact `1.4.2` pins were the project-local `LOCAL-PATCH(upstream-request: U-20261002-002)`; the template's uniform `"1.4.x"` IS the reviewed upstream resolution (template-authoritative per the ADR-0094 amendment). The upgrade replacing the patch is the sanctioned resolution, not a regression — the LOCAL-PATCH marker is gone post-upgrade.
+- co-price's version-file lag self-healed via the upgrade (0.9.0 → 0.10.0 delivered and merged in PR co-price#138's siblings).
+- Upgrade PRs: co-export #43 MERGED, co-game #42 MERGED, co-work #10 MERGED. **co-price #138 OPEN — blocked** by the fleet Dependency Audit gate (FW-1): `bun audit` high on `braces@3.0.3` (GHSA-vfj7-8cjw-p6xm) via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`. No patched braces exists (3.0.3 latest); eslint-config-next 16.3.8 retested with the same finding; origin/main already carries the same lock entry (the PR exposes, not causes, the failure). Fleet echo: co-price is the only project with this chain. Disposition ticket: `T-20261003-011` (gate waiver channel for no-fix dev-only advisories vs upstream request vs lint-chain trade-off). Merge withheld per the cycle's "merge when checks CLEAN" rule.
+
 ## Next steps
 
 Step 3 (root PR carrying this report) → Step 4 (upgrade dry-run/apply `--prune-removed`) → Step 5 (upgrade PRs) → Step 6 (branch cleanup + final state table).
