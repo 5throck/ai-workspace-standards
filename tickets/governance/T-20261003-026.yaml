@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261003-026
+kind: manual
+title: >-
+  co-workspace: extend the boot orphan sweep to the storage tree —
+  sweepOrphanedScaffolds covers Projects/gw-* only, so
+  storage/<principal>/<name> folders whose registry row is gone (found live:
+  provider-test, 8.8MB with stale auth.json, from 09-29 testing) are never
+  cleaned; sweep dirs with no registry row, excluding every registered tenant's
+  folder, with the same path-guard rules
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-03T11:32:32.890Z'
+history:
+  - at: '2026-10-03T11:32:32.890Z'
+    from: null
+    to: backlog
+result: null
+error: null
