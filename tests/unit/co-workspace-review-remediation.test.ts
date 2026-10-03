@@ -353,6 +353,16 @@ describe("docker-isolated sibling turns for claude/codex (2026-10-03 sibling-tur
   });
 });
 
+describe("CSP header allows the app's own scripts (2026-10-03 CSP correction)", () => {
+  test("script-src includes both 'self' (app-helpers.js module) and 'unsafe-inline' (inline module scripts)", async () => {
+    const { htmlHeaders } = await import("../../services/co-workspace/src/http");
+    const csp = htmlHeaders()["content-security-policy"];
+    expect(csp).toContain("script-src 'self' 'unsafe-inline'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("object-src 'none'");
+  });
+});
+
 describe("admin users table per-user rollup (live bug found 2026-10-03)", () => {
   test("/admin/users carries principal — the /admin/stats perUser join key", async () => {
     const { handleAdmin } = await import("../../services/co-workspace/src/routes/admin");
