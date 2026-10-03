@@ -1,8 +1,11 @@
-// @version 1.0.0
+// @version 1.1.0
 /**
  * Tests for scripts/install-upstream-mcp.ts. Every run is the REAL installer as a subprocess with
  * UPSTREAM_INSTALL_HOME pointing at a temp home (and a fake `codex` first on PATH), so the user's
  * real client configs are never read or written.
+ *
+ * v1.1.0 (2026-10-03): added test 13a (hermesConfigPath detection) with injectable { env, platform, homedir } seam.
+ * v1.0.0 (2026-10-01): initial test suite for install-upstream-mcp.ts.
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { spawnSync } from 'node:child_process';
@@ -217,6 +220,150 @@ describe('hermes target (Hermes Agent + Hermes CLI) via config.yaml', () => {
     writeFileSync(hermesPath(), 'model: [unclosed\n');
     expect(run(['--target', 'hermes']).code).toBe(1);
     expect(readFileSync(hermesPath(), 'utf-8')).toBe('model: [unclosed\n');
+  });
+});
+
+describe('hermesConfigPath detection (test 13a: each branch with injectable seam)', () => {
+  // Import the exported function for direct testing
+  const { hermesConfigPath } = require(join(REPO_ROOT, 'scripts', 'install-upstream-mcp.ts'));
+
+  test('UPSTREAM_INSTALL_HOME wins over everything', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      const upstream = join(tmpHome, 'upstream');
+      const hermesDir = join(upstream, '.hermes');
+      mkdirSync(hermesDir, { recursive: true });
+      writeFileSync(join(hermesDir, 'config.yaml'), 'test');
+
+      // Also set HERMES_HOME and create ~/.hermes to ensure UPSTREAM_INSTALL_HOME wins
+      const homeHermes = join(tmpHome, '.hermes');
+      mkdirSync(homeHermes, { recursive: true });
+      writeFileSync(join(homeHermes, 'config.yaml'), 'test');
+
+      const result = hermesConfigPath({
+        env: { UPSTREAM_INSTALL_HOME: upstream, HERMES_HOME: tmpHome },
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      expect(result).toBe(join(upstream, '.hermes', 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('HERMES_HOME wins over both home paths', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      const hermesHome = join(tmpHome, 'custom-hermes');
+      mkdirSync(hermesHome, { recursive: true });
+      writeFileSync(join(hermesHome, 'config.yaml'), 'test');
+
+      // Also create ~/.hermes to ensure HERMES_HOME wins
+      const homeHermes = join(tmpHome, '.hermes');
+      mkdirSync(homeHermes, { recursive: true });
+      writeFileSync(join(homeHermes, 'config.yaml'), 'test');
+
+      const result = hermesConfigPath({
+        env: { HERMES_HOME: hermesHome },
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      expect(result).toBe(join(hermesHome, 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('~/.hermes is chosen only when its config.yaml exists', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      const homeHermes = join(tmpHome, '.hermes');
+      mkdirSync(homeHermes, { recursive: true });
+      writeFileSync(join(homeHermes, 'config.yaml'), 'test');
+
+      const result = hermesConfigPath({
+        env: {},
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      expect(result).toBe(join(homeHermes, 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('~/.hermes/config.yaml is NOT chosen when it does not exist', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      // Create the directory but not the config.yaml file
+      mkdirSync(join(tmpHome, '.hermes'), { recursive: true });
+
+      const result = hermesConfigPath({
+        env: {},
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      // Should return the default path (which does not exist)
+      expect(result).toBe(join(tmpHome, '.hermes', 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('with platform=win32 and LOCALAPPDATA set, that path is chosen if config.yaml exists', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      const localAppData = join(tmpHome, 'AppData', 'Roaming');
+      const hermesDir = join(localAppData, 'hermes');
+      mkdirSync(hermesDir, { recursive: true });
+      writeFileSync(join(hermesDir, 'config.yaml'), 'test');
+
+      const result = hermesConfigPath({
+        env: { LOCALAPPDATA: localAppData },
+        platform: 'win32',
+        homedir: () => tmpHome,
+      });
+      expect(result).toBe(join(localAppData, 'hermes', 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('with platform=linux, %LOCALAPPDATA% path is NOT chosen even if it exists', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      const localAppData = join(tmpHome, 'AppData', 'Roaming');
+      const hermesDir = join(localAppData, 'hermes');
+      mkdirSync(hermesDir, { recursive: true });
+      writeFileSync(join(hermesDir, 'config.yaml'), 'test');
+
+      const result = hermesConfigPath({
+        env: { LOCALAPPDATA: localAppData },
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      // Should return the default ~/.hermes/config.yaml path (which doesn't exist)
+      expect(result).toBe(join(tmpHome, '.hermes', 'config.yaml'));
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
+  });
+
+  test('no candidate returns default path for not-installed message', () => {
+    const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), 'hermes-test-')));
+    try {
+      // Don't create any Hermes directories
+      const result = hermesConfigPath({
+        env: {},
+        platform: 'linux',
+        homedir: () => tmpHome,
+      });
+      // Should return the default path
+      expect(result).toBe(join(tmpHome, '.hermes', 'config.yaml'));
+      expect(existsSync(result)).toBe(false);
+    } finally {
+      rmSync(tmpHome, { recursive: true, force: true });
+    }
   });
 });
 

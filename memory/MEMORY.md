@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-03](2026-10-03.md) | fix(installer): detect Hermes home on Windows |
 | [2026-10-03](2026-10-03.md) | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | [2026-10-02](2026-10-02.md) | feat(governance): process backlog T-20261001-015..021 — soak exit, triage commands, intake hardening, surface validator |
 | [2026-10-01](2026-10-01.md) | docs(review): daily fleet review 2026-10-01 |

@@ -17,7 +17,7 @@ title: >-
   manual verification and documentation; fix the installer only if a real defect
   shows up.
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-01T10:58:42.664Z'
 history:
@@ -27,6 +27,16 @@ history:
   - at: '2026-10-02T12:11:18.730Z'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-03T00:12:51.833Z'
+    from: waiting
+    to: review
+  - at: '2026-10-03T00:12:59.915Z'
+    from: review
+    to: done
+result: >-
+  Verified on a real Windows host: Claude Code, Claude Desktop chat tab,
+  Antigravity, Codex and Hermes each called upstream_request_status
+  successfully. Found and fixed a real installer defect (Hermes home on Windows,
+  installer 2.2.1, PR #1344). Results recorded in design Appendix B (PR #1345).
+  Gemini CLI remains a documented gap (not installed on the test host).
 error: null
-# BLOCKER (2026-10-02): this ticket requires a real Windows machine (claude_desktop_config.json under %APPDATA%, forward-slash paths, bun.exe as absolute command), a real Gemini CLI install, and interactive client restarts on every surface — none of which are available to an autonomous session. Moved to waiting; scope unchanged (manual verification + documentation; fix the installer only if a real defect shows up).

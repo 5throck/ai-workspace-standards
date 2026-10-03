@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 2.2.0
+// @version 2.2.1
+// v2.2.1 (2026-10-03): hermesConfigPath() now checks candidates in the correct order per design §11 item 9:
+//          UPSTREAM_INSTALL_HOME/.hermes > HERMES_HOME > ~/.hermes if config.yaml exists >
+//          %LOCALAPPDATA%\hermes on win32 if config.yaml exists > otherwise ~/.hermes default.
+//          Takes an optional injectable { env, platform, homedir } for testing.
 // v2.2.0 (2026-10-02, T-20261002-010 M9): codex --force captures the previous registration and RESTORES it when the add fails — a failed force no longer deletes the user's old entry.
 // v2.1.1 (2026-10-02, T-20261002-009): exports TARGET_CONFIG_FILES (registry-facing target->file map) and import-guards main(); no behavior change.
 // v2.1.0 (2026-10-02, T-20261002-006): file-write hardening (review H5) — backupAndWrite
@@ -305,11 +309,44 @@ const codex: Adapter = {
   describe: (e) => `codex mcp add ${SERVER_NAME} -- ${[e.command, ...e.args].join(' ')}`,
 };
 
-function hermesConfigPath(): string {
-  const base = process.env.UPSTREAM_INSTALL_HOME
-    ? join(process.env.UPSTREAM_INSTALL_HOME, '.hermes')
-    : process.env.HERMES_HOME || join(home(), '.hermes');
-  return join(base, 'config.yaml');
+interface HermesPathOptions {
+  env?: NodeJS.ProcessEnv;
+  platform?: string;
+  homedir?: () => string;
+}
+
+export function hermesConfigPath(opts?: HermesPathOptions): string {
+  const env = opts?.env ?? process.env;
+  const plat = opts?.platform ?? platform();
+  const homeDir = opts?.homedir ?? (() => homedir());
+
+  // Order per design §11 item 9:
+  // 1. UPSTREAM_INSTALL_HOME (test seam) gives <UPSTREAM_INSTALL_HOME>/.hermes
+  if (env.UPSTREAM_INSTALL_HOME) {
+    return join(env.UPSTREAM_INSTALL_HOME, '.hermes', 'config.yaml');
+  }
+
+  // 2. HERMES_HOME, when set, is used as is
+  if (env.HERMES_HOME) {
+    return join(env.HERMES_HOME, 'config.yaml');
+  }
+
+  // 3. ~/.hermes is used if ~/.hermes/config.yaml exists
+  const homeHermes = join(homeDir(), '.hermes', 'config.yaml');
+  if (existsSync(homeHermes)) {
+    return homeHermes;
+  }
+
+  // 4. On win32 only, %LOCALAPPDATA%\hermes is used if %LOCALAPPDATA%\hermes\config.yaml exists
+  if (plat === 'win32' && env.LOCALAPPDATA) {
+    const localAppDataHermes = join(env.LOCALAPPDATA, 'hermes', 'config.yaml');
+    if (existsSync(localAppDataHermes)) {
+      return localAppDataHermes;
+    }
+  }
+
+  // 5. Otherwise the target is reported as not installed (return the default path)
+  return homeHermes;
 }
 
 const hermes: Adapter = {

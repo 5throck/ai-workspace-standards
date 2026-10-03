@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-03, T-20261003-003): optional upstream.identity_source (cwd | client_roots |
+//           self_declared) plus upstreamIdentitySource() legacy defaulting (design Appendix E.5).
 // v1.4.0 (2026-10-02, T-20261002-007): upstream cross-field invariants — project
 //           format ^co-[a-z0-9-]{1,40}$, template_version/variant string|null,
 //           triage↔status consistency (inbox ⇒ backlog|done; ready ⇒ waiting|review|done),
@@ -24,6 +26,17 @@ export type Priority = 'low' | 'normal' | 'high' | 'urgent';
 export type RunType = 'skill' | 'script';
 export type UpstreamLayer = 'L1' | 'L2' | 'unsure';
 export type UpstreamTriage = 'inbox' | 'ready';
+export type UpstreamIdentitySource = 'cwd' | 'client_roots' | 'self_declared';
+export const UPSTREAM_IDENTITY_SOURCES: readonly UpstreamIdentitySource[] = ['cwd', 'client_roots', 'self_declared'];
+
+/** Design Appendix E.5.3: a legacy ticket without the field reads as self_declared when its
+ * triage_reasons carry identity:self_declared, otherwise as cwd. */
+export function upstreamIdentitySource(u: { identity_source?: unknown; triage_reasons?: unknown }): UpstreamIdentitySource {
+  if (typeof u.identity_source === 'string' && (UPSTREAM_IDENTITY_SOURCES as readonly string[]).includes(u.identity_source)) {
+    return u.identity_source as UpstreamIdentitySource;
+  }
+  return Array.isArray(u.triage_reasons) && u.triage_reasons.includes('identity:self_declared') ? 'self_declared' : 'cwd';
+}
 
 export interface RunDef {
   type: RunType;
@@ -66,6 +79,7 @@ export interface UpstreamBlock {
   affected_paths: string[];
   local_workaround_diff?: string;
   repro?: string;
+  identity_source?: UpstreamIdentitySource; // who attested the project identity (absent on legacy tickets)
   triage: UpstreamTriage;
   flagged: boolean;
   triage_reasons: string[];                 // failed auto-ready conditions
@@ -222,6 +236,9 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     }
     if (u.repro !== undefined) {
       if (typeof u.repro !== 'string' || u.repro.length > 2000) fail('upstream.repro must be ≤2000 chars');
+    }
+    if (u.identity_source !== undefined && !(UPSTREAM_IDENTITY_SOURCES as readonly unknown[]).includes(u.identity_source)) {
+      fail(`upstream.identity_source must be one of: ${UPSTREAM_IDENTITY_SOURCES.join(', ')}`);
     }
     if (u.triage !== 'inbox' && u.triage !== 'ready') fail('upstream.triage must be inbox | ready');
     // T-20261002-007 (M2): triage↔status consistency — the store writes them in

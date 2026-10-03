@@ -1,7 +1,7 @@
 # Upstream Request MCP Server Design — Project-to-Workspace Root-Cause Reporting
 
 - **Date**: 2026-10-01
-- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record). Amended 2026-10-01: the installer covers every supported surface (Appendix B, ADR-0097). Amended 2026-10-01: the identity marker is platform-independent — canonical at the project root (`template-version.txt`), with `.claude/template-version.txt` kept as a legacy fallback (§6, Appendix C). Amended 2026-10-02 (T-20261002-010 review remediations): `request_sha256` now hashes exactly the STORED request fields (recomputable for the §5.2 audit-immutability check); the first-request trust gate marks a project trusted once the PM resolves a ticket `fixed|local-only`; the Phase-3 LOCAL-PATCH upgrade report is DEFERRED to T-20261002-015.
+- **Status**: Approved (decisions resolved 2026-10-01; see Appendix A — Decision record). Amended 2026-10-01: the installer covers every supported surface (Appendix B, ADR-0097). Amended 2026-10-01: the identity marker is platform-independent — canonical at the project root (`template-version.txt`), with `.claude/template-version.txt` kept as a legacy fallback (§6, Appendix C). Amended 2026-10-02 (T-20261002-010 review remediations): `request_sha256` now hashes exactly the STORED request fields (recomputable for the §5.2 audit-immutability check); the first-request trust gate marks a project trusted once the PM resolves a ticket `fixed|local-only`; the Phase-3 LOCAL-PATCH upgrade report is DEFERRED to T-20261002-015. Amended 2026-10-03 (T-20261003-003, design only): a client-attested `client_roots` identity tier via MCP `roots/list` sits between `cwd` and self-declared `project_root`, rolled out log-only first (Appendix E).
 - **Spec ID**: 2026-10-01-upstream-request-mcp-design
 - **Related**: ADR-0097 (supported-surface registry and multi-surface registration), [2026-09-25-mcp-governance-server-design.md](2026-09-25-mcp-governance-server-design.md) (stdio zero-dep pattern, D5 enforcement honesty), [2026-08-16-governance-backlog-design.md](2026-08-16-governance-backlog-design.md) (`kind: manual` tickets in git-tracked `tickets/governance/`), ADR-0031 (Fork Model), ADR-0074 (Universal Design Gate), AGENTS.md §3.1 (PM Gateway)
 - **Scope**: Design of `scripts/mcp-upstream-server.ts` (new stdio MCP server, name `ai-workspace-upstream`), `scripts/install-upstream-mcp.ts` (user-level registration), ticket schema additions in `scripts/helpers/ticket-schema.ts`, PM triage rules. No implementation in this document.
@@ -343,6 +343,14 @@ Behavior:
 6. Refuse to register `ai-workspace-governance` or any other key (scope guard, per N3).
 7. Print the follow-up instruction per registered client (restart; `claude mcp list`, `gemini mcp list`, `codex mcp list` where the client has one).
 8. Targets: `--target claude|claude-desktop|antigravity|gemini|codex|hermes|all` (default `all`). A client that is not installed is skipped under `all`; an explicit target for an absent client exits 1. Any conflict or failure exits 1.
+9. Hermes config discovery (amended 2026-10-03). `hermesConfigPath()` resolves the Hermes home in this order, and the first match wins:
+   1. `UPSTREAM_INSTALL_HOME` (test seam) gives `<UPSTREAM_INSTALL_HOME>/.hermes`.
+   2. `HERMES_HOME`, when set, is used as is.
+   3. `~/.hermes` is used if `~/.hermes/config.yaml` exists.
+   4. On `win32` only, `%LOCALAPPDATA%\hermes` is used if `%LOCALAPPDATA%\hermes\config.yaml` exists.
+   5. Otherwise the target is reported as not installed.
+
+   Rationale: on a real Windows 11 host the Hermes home is `%LOCALAPPDATA%\hermes` (with `config.yaml`, `SOUL.md` and `auth.json`), and `~/.hermes` does not exist. The previous order checked only steps 1 to 3, so the installer missed an installed Hermes. The function takes an injectable `{ env, platform, homedir }` argument that defaults to `process.env`, `process.platform` and `os.homedir()`. No other installer behavior changes.
 
 Portability notes:
 - The absolute paths are machine-specific, which is why this goes in user-level config and never in a committed `.mcp.json`. The script must be re-run after moving the checkout. It warns if `serverPath` contains spaces (passing argv is fine, but other clients' configs may not be).
@@ -380,6 +388,7 @@ Target `tests/unit/mcp-upstream-server.test.ts`, with the subprocess handshake m
 11. Status scoping: project A cannot see project B's ID ("not found").
 12. Audit log: one JSONL line per attempt, including rejects.
 13. Installer (`tests/unit/install-upstream-mcp.test.ts`, with HOME pointed at a tmp dir): first run writes the entry, second is a no-op, a different entry requires `--force`, other keys are preserved, and `--uninstall` removes only the server's own key.
+13a. Hermes discovery (`tests/unit/install-upstream-mcp.test.ts`): each branch of §11 item 9 uses its own tmp dirs and the injectable `{ env, platform, homedir }` seam. Cases: `UPSTREAM_INSTALL_HOME` wins over everything; `HERMES_HOME` wins over both home paths; `~/.hermes` is chosen only when its `config.yaml` exists; with `platform: 'win32'` and `LOCALAPPDATA` set to a tmp dir holding `hermes/config.yaml`, that path is chosen; the same layout with `platform: 'linux'` is not chosen; no candidate returns not installed.
 14. `bun scripts/audit.ts` and `qa-gate.ts` stay green; the SCRIPTS.md registry includes both new scripts (L0).
 
 ## 14. Rollout / Phases
@@ -439,7 +448,7 @@ Decided by the user: the workspace and all templates must support Claude Code, C
 | `antigravity` | Antigravity IDE; Antigravity CLI | `~/.gemini/config/mcp_config.json` `mcpServers` (shared by IDE and CLI) | JSON merge; only if the file exists | https://antigravity.google/docs/mcp |
 | `gemini` | Gemini CLI (legacy Google path) | `~/.gemini/settings.json` `mcpServers` | JSON merge | https://geminicli.com/docs/tools/mcp-server/ |
 | `codex` | Codex CLI; Codex Desktop App (ChatGPT app) | `~/.codex/config.toml` `[mcp_servers.<name>]` (shared) | `codex mcp get --json` / `add` / `remove` | https://learn.chatgpt.com/docs/extend/mcp?surface=cli |
-| `hermes` | Hermes Agent; Hermes CLI | `~/.hermes/config.yaml` `mcp_servers:` (or `$HERMES_HOME`) | text edit of the block, verified by a YAML parse; the `hermes` CLI is never run | https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp |
+| `hermes` | Hermes Agent; Hermes CLI | `~/.hermes/config.yaml` `mcp_servers:` (or `$HERMES_HOME`; on Windows `%LOCALAPPDATA%\hermes\config.yaml`, see §11 item 9) | text edit of the block, verified by a YAML parse; the `hermes` CLI is never run | https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp |
 
 Notes and gaps:
 
@@ -451,6 +460,28 @@ Notes and gaps:
 - **Vendor re-check (2026-10-01, T-20261001-019).** (1) *Codex subcommands*: `codex mcp get --json` and `remove` are confirmed real — they exist in the installed CLI (verified earlier against the real binary in a temporary `CODEX_HOME`) and in the Codex CLI source (the MCP CLI command handlers cover `add|login|list|get|remove`; community references agree), while the vendor web page still documents only `list|add|login`. Decision: keep using `get --json`/`remove` with the existing loud-fail for an older CLI; re-check again when Codex ships its next major version. (2) *Antigravity create-if-absent*: **decided NO — the installer keeps editing the registry only when Antigravity already created it.** The official page still documents `~/.gemini/config/mcp_config.json` as the global registry shared by the IDE and the CLI, but a vendor-repo issue reports the Antigravity CLI actually reading `~/.gemini/antigravity-cli/mcp_config.json` — creating the file when absent risks registering into a file a CLI version never reads. The `graft init --agents antigravity` pointer in the skip message stays; revisit if the vendor settles the path question. (3) *Claude Desktop paths* re-verified: macOS `~/Library/Application Support/Claude/` and Windows `%APPDATA%\Claude\` only (no Linux build) — unchanged. (4) *Hermes*: `$HERMES_HOME`/`~/.hermes/config.yaml` re-verified against the vendor doc — unchanged.
 - **Not covered by the installer:** project-level files (`.agents/mcp_config.json`, `.gemini/settings.json`, `.codex/config.toml`, `.mcp.json`). The server is machine-global by design (G2).
 
+### Real-machine verification (T-20261001-020, 2026-10-02; finalized 2026-10-03)
+
+The installer was run once per surface with `--apply` after user approval. All evidence comes from one real Windows 11 host, with installer v2.2.1 for Hermes. The server handshake returned `serverInfo.name` `ai-workspace-upstream` and exactly the two tools `upstream_request_create` and `upstream_request_status`.
+
+| Surface | Result | Evidence | Open item |
+|---|---|---|---|
+| Claude Code (Code tab of the Claude Desktop App, `~/.claude.json`) | Verified | `upstream_request_status` was exposed and called. A cwd at the workspace root was rejected, as designed. With `project_root=C:/git/ai_workspace/Projects/co-newbiz` the call returned that project's two requests, `U-20261002-001` and `U-20261001-001`, both `done`. | None. |
+| Antigravity | Verified | The tool was called from `Projects/co-deck`. It returned `requests: []`. The server `instructions` were delivered. | None. |
+| Codex (desktop app) | Verified | `codex mcp get ai-workspace-upstream --json` shows an enabled stdio entry with the `bun.exe` absolute path and no tool filters. Two earlier attempts failed because the model searched source and docs instead of calling the tool. After the prompt "call the MCP tool directly, do not search source or docs", the call returned `{"requests":[]}`. | None. |
+| Claude Desktop App chat tab (`%APPDATA%\Claude\claude_desktop_config.json`) | Verified | The tool loaded and was called. The server resolved project `co-consult` and returned an empty list. | None. |
+| Hermes | Verified | Hermes is installed, and its home is `%LOCALAPPDATA%\hermes`. The earlier "not installed" finding was an installer defect, fixed in installer 2.2.1 (§11 item 9). A call from a non-`co-*` cwd was rejected as designed with the `project_root` hint. With `project_root=C:/git/ai_workspace/Projects/co-design` it returned one request, `U-20261002-002` (status `done`). | None. |
+| Gemini CLI | Not verified | The client is not installed on this machine. | Gap per CONSTITUTION §11.0 rule 1. |
+
+Corrections and notes:
+
+- **Hermes.** The 2026-10-02 finding "not installed" was wrong. The cause was that the installer checked only `~/.hermes`, which does not exist on Windows hosts.
+- **Gemini CLI.** CONSTITUTION §11.0 rule 1 requires a gap row for every unverified surface. Keep this row until a machine with the client is available.
+- **Claude Desktop App chat tab.** The empty result alone does not show whether the identity came from the cwd or from `project_root`.
+- **Codex lesson.** Instruct the client explicitly to call the MCP tool, or the model may search source and docs instead.
+- **`U-20261002-002` is a real request.** It was filed from `co-design`, and its ticket landed in `tickets/governance` via the PR #1342-era `main`. This supersedes the earlier "unverified LOCAL-PATCH marker" note.
+
+Only Gemini CLI remains open.
 
 ## Appendix C — Platform-independent identity marker (2026-10-01)
 
@@ -520,3 +551,168 @@ acting on an UNVERIFIED identity until the PM reviews the flagged ticket. Effect
 
 Operators who need full status fidelity for automation should rely on client-attested
 cwd identity (run the client inside the project directory), not `project_root`.
+
+---
+
+## Appendix E — Client-attested identity via MCP `roots/list` (2026-10-03, T-20261003-003)
+
+### E.1 Problem
+
+A real Windows host was checked on 2026-10-03 (T-20261001-020).
+GUI clients spawn the server outside the project directory.
+The clients involved are the Claude Desktop chat tab, the Codex desktop app and Hermes.
+The cwd identity rule (§6, G3) therefore fails for them.
+The model must then pass `project_root`, which is self-declared (Appendix D).
+Those tickets are always flagged.
+Their status results are redacted (2026-10-02 Addendum).
+This works, but it is brittle.
+It also routes every GUI-filed request through human review.
+MCP lets a client advertise `capabilities.roots`.
+The server can then ask the client for its workspace roots with `roots/list`.
+The client attests those roots, not the model.
+That is stronger evidence than a model-supplied `project_root`.
+
+### E.2 Trust tiers
+
+| Rank | `identity_source` | Who attests | Used when |
+|---|---|---|---|
+| 1 (highest) | `cwd` | client process (spawn cwd) | `resolveProject(cwd)` succeeds. Unchanged; always wins. |
+| 2 | `client_roots` | MCP client via `roots/list` | cwd fails and exactly one root candidate survives E.4. |
+| 3 (lowest) | `self_declared` | the model (`project_root` param) | cwd fails and `client_roots` yields no single candidate. Current Appendix D path. |
+
+A lower tier never overrides a higher one.
+When cwd resolves, the server ignores both roots and `project_root`, as today.
+
+### E.3 JSON-RPC flow on the hand-rolled stdio server
+
+1. On `initialize`, record whether `params.capabilities.roots` is present as `rootsSupported`.
+2. On `initialize`, record `params.capabilities.roots.listChanged` as `rootsListChanged`.
+3. On `initialize`, record `params.clientInfo.name`, sanitized and truncated to 64 characters.
+4. Keep the `initialize` response unchanged; the server advertises no new capability.
+5. On `notifications/initialized`, if `rootsSupported` is true, send `{"jsonrpc":"2.0","id":"srv-roots-<n>","method":"roots/list"}` on stdout.
+6. Prefix server-originated request ids with `srv-` so they never collide with client ids.
+7. Keep a `pendingServerRequests` map from id to resolver and timer.
+8. In the read loop, classify a message that has an `id`, has no `method`, and has `result` or `error` as a response.
+9. Resolve the matching `pendingServerRequests` entry and send nothing back.
+10. Drop a response with an unknown id, log it to stderr, and never reply to it.
+11. Cache the roots result for the session as `rootsCache = { state: 'ok' | 'failed', roots: string[] }`.
+12. Never `await` the roots promise inline in the read loop. The reply arrives on the same stdin loop, so an inline await deadlocks.
+13. Make `tools/call` handling asynchronous: the loop starts the handler and keeps reading lines.
+14. When a `tools/call` needs identity and cwd fails, await the in-flight roots promise, or start one if none was sent.
+15. Allow responses to concurrent `tools/call` requests to complete out of order, which JSON-RPC permits.
+16. Rely on the existing `.intake-lock` directory to serialize ticket writes, so async dispatch adds no write race.
+17. Time out the roots request after 2000 ms (constant `ROOTS_TIMEOUT_MS`; test seam env `UPSTREAM_ROOTS_TIMEOUT_MS`, integer 100 to 10000).
+18. Set `rootsCache.state = 'failed'` on timeout, a JSON-RPC error, a malformed result, or more than 32 roots.
+19. On failure, fail closed to the existing path: continue to `self_declared` or to the registration error, exactly as today.
+20. Retry a failed state at most once per session, on the next `tools/call` that needs it, so a slow client start does not lock in failure.
+21. On `notifications/roots/list_changed`, clear `rootsCache` and re-request `roots/list` lazily on the next identity-needing `tools/call`.
+22. Ignore `list_changed` from a client that did not advertise `roots`.
+
+### E.4 Candidate selection
+
+1. Keep only roots whose `uri` uses the `file:` scheme.
+2. Convert each URI with `fileURLToPath`, which handles `file:///C:/...` on Windows and percent-encoding; drop roots that throw.
+3. Apply the same `sanitize()` used for `project_root`.
+4. Drop paths longer than 200 characters.
+5. Run each path through the unchanged `resolveProject()`. This applies realpath first, the symlink rules, the direct-child-of-`Projects/` walk, the real `.git` directory check, the nested-repo rejection, `REQUESTER_NAME_RE`, and the provenance marker with `variant=`.
+6. Let a root that is a project subdirectory resolve to that project, exactly as a cwd would.
+7. Deduplicate surviving identities by project name.
+8. Accept only when exactly one project name remains.
+9. With zero candidates, fall back to `project_root` (tier 3).
+10. With two or more candidates, fall back to `project_root` (tier 3), because the server cannot tell which project the model is working in.
+11. If `project_root` is also supplied and resolves to a different project than the single root candidate, reject with `-32602` and the message `identity conflict: project_root does not match the client-attested workspace root`.
+12. If `project_root` resolves to the same project, use `client_roots` and ignore `project_root`.
+13. If `project_root` is supplied but fails `resolveProject`, use the single root candidate and record `project_root_ignored: true` in the audit line.
+14. Never store or log raw root paths; the audit log stores a 16-hex sha256 per root, like `cwd_hash`.
+15. Implementation-time hardening (found by test E13f): before calling `resolveProject()`, drop any roots URI whose host is not local, and drop any root whose converted path is UNC-style.
+    - Reason: on Windows, `file://remote-host/share` converts to a UNC path.
+    - `realpathSync` on a UNC path can stall the server and can leak SMB credentials to the remote host.
+    - The pre-existing self-declared `project_root` path has the same exposure.
+    - That exposure is tracked in follow-up ticket T-20261003-004.
+
+### E.5 Ticket schema and policy per tier
+
+1. Add the optional field `upstream.identity_source` with enum `cwd | client_roots | self_declared` in `scripts/helpers/ticket-schema.ts`.
+2. Write the field on every new ticket.
+3. Read a legacy ticket without the field as `self_declared` if `triage_reasons` contains `identity:self_declared`, otherwise as `cwd`.
+4. In audit lines, add `identity_source`.
+5. Keep the old `identity: "cwd" | "declared"` key for one minor version so log readers keep working.
+
+| Tier | `flagged` | Auto-ready | Status result |
+|---|---|---|---|
+| `cwd` | heuristics only (unchanged) | normal §8 table | full |
+| `client_roots` | heuristics only; NOT auto-flagged | not `ready` until the project has at least one PM-resolved ticket with `identity_source` `cwd` or `client_roots`; before that, `triage: inbox` with reason `identity:client_roots_untrusted` | full |
+| `self_declared` | forced `true` with `identity:self_declared` (unchanged) | never (forced inbox, unchanged) | redacted (unchanged) |
+
+The `client_roots` gate reuses the existing first-request trust gate (§6 first-seen and the 2026-10-02 trusted-project rule).
+It is one step stricter.
+A project trusted only through `self_declared` tickets does not unlock auto-ready for `client_roots`.
+
+Residual risk, stated honestly:
+A malicious or compromised client can attest any root it likes.
+That is the same trust the server already places in the local client for cwd.
+Any local process with shell access can already spoof identity (Appendix D spoofing note).
+Scope stays single-machine (N4).
+Attestation stops a model from naming a project root on its own.
+It does not stop a hostile client binary.
+The gate before auto-ready remains the compensating control.
+
+### E.6 Rollout — measurement first
+
+| Phase | Behavior | Exit criterion |
+|---|---|---|
+| A (log-only) | On `initialize`, append audit line `{ outcome: "client_init", client_name, roots_supported, roots_list_changed }`. If roots are supported, send `roots/list` anyway and log `{ outcome: "roots_probe", root_count, candidate_count, would_resolve, latency_ms, state }`. Identity resolution is unchanged. | Two weeks of logs, or one observed `roots_supported: true` per target client (Claude Desktop, Codex desktop, Hermes), whichever comes first. |
+| B (enable) | The `client_roots` tier is live behind constant `ENABLE_CLIENT_ROOTS` (default `true` in Phase B; env `UPSTREAM_CLIENT_ROOTS=0` disables it). | PM review of the first `client_roots` tickets. |
+
+Ship Phase A as one PR with no identity change.
+Ship Phase B as a separate PR after the PM reviews the Phase A data.
+If no target client advertises `roots`, shelve Phase B and keep Appendix D as the only GUI path.
+
+### E.7 Instructions and tool description wording
+
+1. In Phase B, `SERVER_INSTRUCTIONS` states that identity comes from the working directory or from the client's workspace roots.
+2. It states that `project_root` is passed only when the server rejects identity.
+3. It states that such requests are flagged for human review.
+4. The `project_root` property description calls it a last-resort fallback, used only when neither the working directory nor the client's workspace roots resolve to exactly one registered project.
+5. The description states that a `project_root` conflicting with the client's roots is rejected.
+6. The `REGISTRATION_RULE` error suffix names both fallbacks in the same order.
+7. Phase A changes no instruction text.
+
+### E.8 Tests (continue §13 numbering)
+
+Target `tests/unit/mcp-upstream-server.test.ts`.
+The harness must answer server-originated requests on the child's stdin.
+
+13b. Roots handshake success: the client advertises `roots` and answers `roots/list` with one `file://` URI inside `Projects/co-test` from cwd `/`. The ticket has `identity_source: client_roots`, is not flagged, and is `inbox` with `identity:client_roots_untrusted` on the first request.
+13c. Roots absent: without the `roots` capability, no `roots/list` is sent and cwd or `project_root` behavior is unchanged.
+13d. Timeout: the client never answers. With `UPSTREAM_ROOTS_TIMEOUT_MS=200`, the call falls back to `project_root` (flagged) or to the registration error within 1 s. The read loop still answers `ping` while waiting.
+13e. Multiple candidates: roots in `co-test` and `co-test2` fall back to `project_root`.
+13f. Zero candidates: roots outside `Projects/`, non-`file:` URIs, and a `gw-*` project all fall back to `project_root`.
+13g. Conflicting `project_root`: a single root in `co-test` plus `project_root` for `co-test2` returns the `-32602` identity conflict, and the attempt is audit-logged.
+13h. Symlink escape: a root that symlinks into `Projects/co-test` from outside resolves to the real path. A root inside the project that symlinks out is rejected by realpath.
+13i. `list_changed`: after the notification, the next call re-requests `roots/list` and uses the new single candidate.
+13j. `identity_source` recorded: the ticket field and the audit line carry the right tier for `cwd`, `client_roots` and `self_declared`. The ticket passes `validateTicket`, and legacy tickets without the field still validate.
+13k. Phase A log-only: with the tier disabled, `client_init` and `roots_probe` lines are written and identity outcomes match pre-change behavior.
+13l. Status: a `client_roots` identity gets an unredacted status result, and `self_declared` stays redacted.
+
+### E.9 Files that change (implementation PRs, not this design)
+
+- `scripts/mcp-upstream-server.ts`: async dispatch, the server-request map, the roots cache, candidate selection, audit fields, instruction text, and an @version bump in each phase.
+- `scripts/helpers/ticket-schema.ts`: the `upstream.identity_source` enum field.
+- `scripts/helpers/ticket-store.ts`: changed only if legacy defaulting lives there.
+- `tests/unit/mcp-upstream-server.test.ts`: cases 13b to 13l and a harness that answers server requests.
+- `SCRIPTS.md`: @version row bumps for every modified script.
+- `docs/adr/0097-supported-surfaces-registry-and-multi-surface-registration.md`: a short note on which surfaces advertise `roots` (filled from Phase A data); no decision change.
+- `agents/pm.md` and `docs/governance/agents/pm-gateway-workflow.md`: one triage line for the reason `identity:client_roots_untrusted`.
+
+**Implementation notes (2026-10-03)**
+
+- The new tests are named E13b to E13l, not 13b to 13l, because 13b and 13c already name installer tests.
+- In the trust gate, "PM-resolved" means the resolution outcome is `fixed` or `local-only`, matching `trustedByResolution`.
+- The outcomes `rejected` and `duplicate` do not unlock the trust gate.
+
+### E.10 Open questions
+
+- **Q9**: Should `client_roots` become auto-ready after the first trusted request, or stay inbox-only until a later review? *Default:* auto-ready after one PM-resolved `cwd` or `client_roots` ticket (E.5).
+- **Q10**: Should `project_root` narrow multiple candidates (accept when it matches one of them) instead of falling back? *Default:* no; fall back to `self_declared` for simplicity.
+- **Q11**: Is 2 s the right timeout for cold-starting desktop clients? *Default:* 2 s plus one retry per session; revisit with Phase A `latency_ms` data.

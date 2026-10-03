@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (2026-10-03, T-20261003-003): client-attested identity via MCP roots/list (design
+//           Appendix E, Phases A+B). tools/call is now asynchronous so the read loop keeps
+//           answering while a server-originated srv-roots-<n> request is in flight; the
+//           roots result is cached per session (2 s timeout, one retry, list_changed
+//           invalidation). Identity tiers: cwd > client_roots (exactly one registered
+//           project among the roots; never a raw path in logs, 16-hex hashes only) >
+//           self_declared project_root. A project_root that conflicts with the single root
+//           candidate is rejected (-32602). Tickets carry upstream.identity_source; a
+//           client_roots ticket is inbox with identity:client_roots_untrusted until the
+//           project has a PM-resolved cwd/client_roots ticket. Phase A audit lines
+//           client_init and roots_probe. UPSTREAM_CLIENT_ROOTS=0 disables the tier (and
+//           reverts instruction text); UPSTREAM_ROOTS_TIMEOUT_MS is a test seam.
 // v1.8.0 (2026-10-02, T-20261002-010): M5 — intake lock gains an owner token, atomic
 //           stale takeover and FAIL-CLOSED semantics: a lock timeout now answers
 //           retryable -32000 instead of silently proceeding unlocked; M6 — reject-path
@@ -60,12 +72,13 @@ import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import { withTicketLock } from './helpers/ticket-store.ts';
+import { upstreamIdentitySource, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.8.0';
+export const SERVER_VERSION = '1.9.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -106,6 +119,26 @@ function readCap(name: string, fallback: number): number {
 const UPSTREAM_SOFT_CAP = readCap('UPSTREAM_SOFT_CAP', 10);
 const UPSTREAM_HARD_CAP = readCap('UPSTREAM_HARD_CAP', 30);
 const UPSTREAM_GLOBAL_READY_CAP = readCap('UPSTREAM_GLOBAL_READY_CAP', 40);
+
+// Design Appendix E.6: the client_roots tier is live by default (Phase B); the env switch
+// UPSTREAM_CLIENT_ROOTS=0 returns the server to Phase A (log-only: client_init and
+// roots_probe lines are still written, identity resolution and instruction text are the
+// pre-roots behavior).
+const ENABLE_CLIENT_ROOTS = process.env.UPSTREAM_CLIENT_ROOTS !== '0';
+
+// Design Appendix E.3.17: roots/list timeout. Test seam UPSTREAM_ROOTS_TIMEOUT_MS accepts an
+// integer 100..10000; anything else warns and keeps the 2 s default.
+const ROOTS_TIMEOUT_MS = (() => {
+  const raw = process.env.UPSTREAM_ROOTS_TIMEOUT_MS;
+  if (raw === undefined || raw === '') return 2000;
+  if (/^\d{3,5}$/.test(raw.trim())) {
+    const n = parseInt(raw, 10);
+    if (n >= 100 && n <= 10000) return n;
+  }
+  console.error(`[mcp-upstream-server] invalid UPSTREAM_ROOTS_TIMEOUT_MS=${JSON.stringify(raw)}; using default 2000`);
+  return 2000;
+})();
+const MAX_ROOTS = 32;
 
 const TICKETS_DIR = join(WORKSPACE_ROOT, 'tickets', 'governance');
 const LOGS_DIR = join(WORKSPACE_ROOT, 'logs', 'upstream-intake');
@@ -529,32 +562,223 @@ function loadUpstreamTickets(): Array<{ file: string; ticket: any }> {
 
 type Outcome = { result: unknown } | { error: { code: number; message: string } };
 
-function handleCreateRequest(params: unknown, cwd: string): Outcome {
-  // Identity: client-attested cwd first. GUI clients (Claude Desktop App) spawn this
-  // server with cwd=/ and no project env, so when cwd resolution fails the requester
-  // may self-declare its project root via params.project_root — same filesystem checks
-  // apply, and the ticket is forced flagged so PM sees identity was not client-attested.
+// ---------------------------------------------------------------------------------------
+// Client-attested identity via MCP roots/list (design Appendix E).
+// ---------------------------------------------------------------------------------------
+
+interface ClientState { rootsSupported: boolean; rootsListChanged: boolean; clientName: string }
+const clientState: ClientState = { rootsSupported: false, rootsListChanged: false, clientName: '' };
+
+interface RootsCache {
+  state: 'ok' | 'failed';
+  uris: string[];
+  latencyMs: number;
+  failReason?: 'timeout' | 'error' | 'malformed' | 'too_many';
+}
+let rootsCache: RootsCache | null = null;
+let rootsInflight: Promise<RootsCache> | null = null;
+let rootsGeneration = 0;
+let rootsRetryUsed = false;
+let srvSeq = 0;
+
+/** E.3.7: server-originated requests awaiting a client response, keyed by srv- prefixed id. */
+const pendingServerRequests = new Map<string, { timer: ReturnType<typeof setTimeout>; resolve: (msg: JsonRpcMessage) => void }>();
+
+function hash16(s: string): string {
+  return createHash('sha256').update(s, 'utf-8').digest('hex').slice(0, 16);
+}
+
+function parseRootsResponse(msg: JsonRpcMessage): { state: 'ok'; uris: string[] } | { state: 'failed'; failReason: 'error' | 'malformed' | 'too_many' } {
+  if (msg.error !== undefined) return { state: 'failed', failReason: 'error' };
+  const r = msg.result as { roots?: unknown } | null | undefined;
+  if (typeof r !== 'object' || r === null || !Array.isArray(r.roots)) return { state: 'failed', failReason: 'malformed' };
+  if (r.roots.length > MAX_ROOTS) return { state: 'failed', failReason: 'too_many' };
+  const uris: string[] = [];
+  for (const item of r.roots) {
+    if (typeof item === 'object' && item !== null && typeof (item as { uri?: unknown }).uri === 'string') uris.push((item as { uri: string }).uri);
+  }
+  return { state: 'ok', uris };
+}
+
+/** Sends one roots/list request and resolves with the parsed outcome. Never rejects. */
+function fetchRoots(): Promise<RootsCache> {
+  const id = `srv-roots-${++srvSeq}`;
+  const started = Date.now();
+  return new Promise<RootsCache>((res) => {
+    const latency = () => Date.now() - started;
+    const timer = setTimeout(() => {
+      pendingServerRequests.delete(id);
+      res({ state: 'failed', uris: [], latencyMs: latency(), failReason: 'timeout' });
+    }, ROOTS_TIMEOUT_MS);
+    pendingServerRequests.set(id, {
+      timer,
+      resolve: (msg) => {
+        const parsed = parseRootsResponse(msg);
+        res(parsed.state === 'ok'
+          ? { state: 'ok', uris: parsed.uris, latencyMs: latency() }
+          : { state: 'failed', uris: [], latencyMs: latency(), failReason: parsed.failReason });
+      },
+    });
+    console.log(JSON.stringify({ jsonrpc: '2.0', id, method: 'roots/list' }));
+  });
+}
+
+/** E.4: roots -> distinct registered projects. Every path goes through the unchanged resolveProject(). */
+function rootCandidates(uris: string[]): ProjectIdentity[] {
+  const byName = new Map<string, ProjectIdentity>();
+  for (const uri of uris) {
+    if (!/^file:/i.test(uri)) continue;
+    let p: string;
+    try {
+      // Fail closed on non-local hosts: on Windows fileURLToPath turns file://host/share into a
+      // UNC path, and realpathSync on it would open a network connection (stall + credential leak).
+      const host = new URL(uri).hostname;
+      if (host !== '' && host.toLowerCase() !== 'localhost') continue;
+      p = fileURLToPath(uri);
+    } catch { continue; }
+    if (/^[\\/]{2}/.test(p)) continue; // UNC / network-style path, never a project root
+    p = sanitize(p);
+    if (p.length === 0 || p.length > 200) continue;
+    const r = resolveProject(p);
+    if (typeof r === 'string') continue;
+    if (!byName.has(r.name)) byName.set(r.name, r);
+  }
+  return [...byName.values()];
+}
+
+function logRootsProbe(c: RootsCache): void {
+  try {
+    const cands = rootCandidates(c.uris);
+    appendRejectAudit('(roots_probe)', {
+      outcome: 'roots_probe', root_count: c.uris.length, candidate_count: cands.length,
+      would_resolve: cands.length === 1, latency_ms: c.latencyMs, state: c.state,
+      ...(c.failReason ? { fail_reason: c.failReason } : {}), root_hashes: c.uris.map(hash16),
+    });
+  } catch { /* the probe log is best-effort and must never affect serving */ }
+}
+
+/** E.3.11/14/20: cached roots; starts one request when none is cached or in flight; a failed
+ * state is retried at most once per session. Returns null when the client has no roots capability. */
+function ensureRoots(): Promise<RootsCache> | null {
+  if (!clientState.rootsSupported) return null;
+  if (rootsCache && rootsCache.state === 'ok') return Promise.resolve(rootsCache);
+  if (rootsInflight) return rootsInflight;
+  if (rootsCache && rootsCache.state === 'failed') {
+    if (rootsRetryUsed) return Promise.resolve(rootsCache);
+    rootsRetryUsed = true;
+  }
+  const gen = rootsGeneration;
+  const p: Promise<RootsCache> = fetchRoots().then((c) => {
+    if (gen === rootsGeneration) {
+      rootsCache = c;
+      if (rootsInflight === p) rootsInflight = null;
+    }
+    logRootsProbe(c);
+    return c;
+  });
+  rootsInflight = p;
+  return p;
+}
+
+/** E.3.21/22: list_changed invalidates the cache; the next identity-needing call re-requests. */
+function onRootsListChanged(): void {
+  if (!clientState.rootsSupported) return;
+  rootsGeneration++;
+  rootsCache = null;
+  rootsInflight = null;
+}
+
+/** E.3.8-10: route a client response to the matching pending server request; never reply. */
+function handleClientResponse(msg: JsonRpcMessage): void {
+  const key = typeof msg.id === 'string' ? msg.id : undefined;
+  const pending = key === undefined ? undefined : pendingServerRequests.get(key);
+  if (!pending || key === undefined) {
+    console.error('[mcp-upstream-server] dropped a client response with an unknown id');
+    return;
+  }
+  clearTimeout(pending.timer);
+  pendingServerRequests.delete(key);
+  pending.resolve(msg);
+}
+
+interface ResolvedIdentity {
+  project: ProjectIdentity;
+  source: UpstreamIdentitySource;
+  projectRootIgnored: boolean;
+  rootHashes: string[];
+}
+type IdentityResult = { ok: true; id: ResolvedIdentity } | { ok: false; error: { code: number; message: string }; unregistered: boolean };
+
+function unregisteredMessage(rule: string): string {
+  return ENABLE_CLIENT_ROOTS
+    ? `${rule} (identity is taken from the working directory, then from the client's workspace roots; when neither resolves to exactly one registered project — e.g. the Claude Desktop App launches this server outside the project directory — pass the project's absolute path as project_root)`
+    : `${rule} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)`;
+}
+
+/** Identity tiers (E.2): cwd > client_roots > self_declared. A lower tier never overrides a higher one. */
+async function resolveIdentity(params: unknown, cwd: string): Promise<IdentityResult> {
   const cwdResult = resolveProject(cwd);
-  let projResult: ProjectIdentity | string = cwdResult;
-  let declared = false;
-  if (typeof cwdResult === 'string' && typeof params === 'object' && params !== null && !Array.isArray(params)) {
+  if (typeof cwdResult !== 'string') {
+    return { ok: true, id: { project: cwdResult, source: 'cwd', projectRootIgnored: false, rootHashes: [] } };
+  }
+
+  let declaredResult: ProjectIdentity | string | undefined;
+  if (typeof params === 'object' && params !== null && !Array.isArray(params)) {
     const raw = (params as Record<string, unknown>).project_root;
-    if (typeof raw === 'string' && raw.length > 0) {
-      const declaredResult = resolveProject(sanitize(raw));
-      if (typeof declaredResult !== 'string') {
-        projResult = declaredResult;
-        declared = true;
+    if (typeof raw === 'string' && raw.length > 0) declaredResult = resolveProject(sanitize(raw));
+  }
+  const declaredOk = typeof declaredResult === 'object' ? declaredResult : undefined;
+
+  if (ENABLE_CLIENT_ROOTS) {
+    const pending = ensureRoots();
+    if (pending) {
+      const roots = await pending;
+      const cands = roots.state === 'ok' ? rootCandidates(roots.uris) : [];
+      // Q10: with 0 or 2+ candidates the server cannot tell which project the model works in,
+      // and project_root does not narrow — fall through to the self-declared tier.
+      if (cands.length === 1) {
+        const rootHashes = roots.uris.map(hash16);
+        const candidate = cands[0];
+        if (declaredOk && declaredOk.name !== candidate.name) {
+          appendRejectAudit(candidate.name, {
+            project: candidate.name, outcome: 'reject_identity_conflict', identity_source: 'client_roots',
+            declared_project: declaredOk.name, root_hashes: rootHashes,
+          });
+          return { ok: false, unregistered: false, error: { code: -32602, message: 'identity conflict: project_root does not match the client-attested workspace root' } };
+        }
+        // Same project: client_roots wins, project_root is ignored. Unresolvable project_root: ignored too.
+        return { ok: true, id: { project: candidate, source: 'client_roots', projectRootIgnored: declaredResult !== undefined, rootHashes } };
       }
     }
   }
-  if (typeof projResult === 'string') {
-    // Raw cwd is never stored: it may contain arbitrary user paths.
-    const cwdHash = createHash('sha256').update(cwd, 'utf-8').digest('hex').slice(0, 16);
-    appendRejectAudit('', { cwd_hash: cwdHash, outcome: 'reject_unregistered' });
-    return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
-  }
 
-  const { name: project, variant, version, path: projectPath } = projResult;
+  if (declaredOk) return { ok: true, id: { project: declaredOk, source: 'self_declared', projectRootIgnored: false, rootHashes: [] } };
+  return { ok: false, unregistered: true, error: { code: -32602, message: unregisteredMessage(cwdResult) } };
+}
+
+function identityAuditFields(id: ResolvedIdentity): Record<string, unknown> {
+  return {
+    identity: id.source === 'self_declared' ? 'declared' : 'cwd', // legacy key, kept for one minor version
+    identity_source: id.source,
+    ...(id.projectRootIgnored ? { project_root_ignored: true } : {}),
+    ...(id.source === 'client_roots' ? { root_hashes: id.rootHashes } : {}),
+  };
+}
+
+function handleCreateRequest(params: unknown, cwd: string, identity: IdentityResult): Outcome {
+  // Identity: cwd first, then client-attested roots/list, then a self-declared project_root
+  // (resolveIdentity). Self-declared tickets are forced flagged so PM sees identity was not
+  // attested by the client.
+  if (!identity.ok) {
+    if (identity.unregistered) {
+      // Raw cwd is never stored: it may contain arbitrary user paths.
+      appendRejectAudit('', { cwd_hash: hash16(cwd), outcome: 'reject_unregistered' });
+    }
+    return { error: identity.error };
+  }
+  const resolvedId = identity.id;
+  const declared = resolvedId.source === 'self_declared';
+  const { name: project, variant, version, path: projectPath } = resolvedId.project;
   const valResult = validateUpstreamRequest(params);
   if (!valResult.valid) {
     appendRejectAudit(project, { project, outcome: 'reject_invalid' });
@@ -603,7 +827,7 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
       return found;
     });
     if (dup) {
-      appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
+      appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, ...identityAuditFields(resolvedId), reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
       if (dup.ticket.upstream.project !== project) {
         // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.
         return { result: { merged: true, flagged, reasons: flagged ? ['needs_human_review'] : [] } };
@@ -622,6 +846,17 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     const info: string[] = [];
     if (flagged) failReasons.push('needs_human_review');
     if (declared) failReasons.push('identity:self_declared');
+    // E.5: a client_roots identity is not auto-ready until the project has at least one
+    // PM-resolved ticket that itself came from a cwd or client_roots identity (a project
+    // trusted only through self_declared tickets does not unlock it).
+    if (resolvedId.source === 'client_roots') {
+      const clientRootsTrusted = loadUpstreamTickets().some(({ ticket }) =>
+        ticket.upstream.project === project &&
+        ticket.upstream.resolution &&
+        (ticket.upstream.resolution.outcome === 'fixed' || ticket.upstream.resolution.outcome === 'local-only') &&
+        upstreamIdentitySource(ticket.upstream) !== 'self_declared');
+      if (!clientRootsTrusted) failReasons.push('identity:client_roots_untrusted');
+    }
     if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push('project_soft_cap');
 
     const delivered = deliveredFiles(projectPath);
@@ -653,7 +888,7 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
     const upstreamBlock: Record<string, unknown> = {
       project, variant, template_version: version, source: `project/${project}`,
       trust: 'untrusted', suspected_layer: req.suspected_layer, symptom: req.symptom,
-      affected_paths: req.affected_paths,
+      affected_paths: req.affected_paths, identity_source: resolvedId.source,
     };
     if (req.local_workaround_diff !== undefined) upstreamBlock.local_workaround_diff = req.local_workaround_diff;
     if (req.repro !== undefined) upstreamBlock.repro = req.repro;
@@ -693,7 +928,7 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
       saveKnownProjects(knownProjects);
     }
 
-    appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, identity: declared ? 'declared' : 'cwd', reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
+    appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, ...identityAuditFields(resolvedId), reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
 
     return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
     });
@@ -705,23 +940,12 @@ function handleCreateRequest(params: unknown, cwd: string): Outcome {
   }
 }
 
-function handleStatusRequest(params: unknown, cwd: string): Outcome {
-  // Same identity fallback as create: cwd first, then an optional self-declared
-  // project_root for clients that spawn the server outside the project (GUI apps).
-  let projResult: ProjectIdentity | string = resolveProject(cwd);
-  let declared = false;
-  if (typeof projResult === 'string' && typeof params === 'object' && params !== null && !Array.isArray(params)) {
-    const raw = (params as Record<string, unknown>).project_root;
-    if (typeof raw === 'string' && raw.length > 0) {
-      const declaredResult = resolveProject(sanitize(raw));
-      if (typeof declaredResult !== 'string') {
-        projResult = declaredResult;
-        declared = true;
-      }
-    }
-  }
-  if (typeof projResult === 'string') return { error: { code: -32602, message: `${projResult} (when your client launches this server outside the project directory — e.g. the Claude Desktop App — pass the project's absolute path as project_root)` } };
-  const { name: project } = projResult;
+function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome {
+  // Same identity tiers as create (cwd > client_roots > self_declared project_root).
+  if (!identity.ok) return { error: identity.error };
+  const resolvedId = identity.id;
+  const declared = resolvedId.source === 'self_declared';
+  const project = resolvedId.project.name;
 
   const p = (params ?? {}) as Record<string, unknown>;
   if (typeof p !== 'object' || Array.isArray(p)) return { error: { code: -32602, message: 'invalid params: arguments must be an object' } };
@@ -738,7 +962,7 @@ function handleStatusRequest(params: unknown, cwd: string): Outcome {
   // T-20261002-004 (H3): every status call is audit-logged, and a DECLARED identity
   // (self-declared project_root — unverified until PM review) gets redacted results:
   // ids + status/triage only, never another project's resolution summary or PR URL.
-  appendAuditLog({ project, outcome: 'status', identity: declared ? 'declared' : 'cwd' });
+  appendAuditLog({ project, outcome: 'status', ...identityAuditFields(resolvedId) });
 
   const mine = loadUpstreamTickets()
     .filter(({ ticket }) => ticket.upstream.project === project && (p.id === undefined || ticket.id === p.id))
@@ -759,6 +983,8 @@ interface JsonRpcMessage {
   id?: string | number | null;
   method?: string;
   params?: unknown;
+  result?: unknown;
+  error?: unknown;
 }
 
 function sendResponse(id: string | number | null, result?: unknown, error?: { code: number; message: string }): void {
@@ -768,10 +994,28 @@ function sendResponse(id: string | number | null, result?: unknown, error?: { co
   console.log(JSON.stringify(msg));
 }
 
-const SERVER_INSTRUCTIONS = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. If identity resolution rejects your working directory and your client is a GUI app (e.g. the Claude Desktop App spawns servers with cwd=/), retry passing the project\'s absolute path as `project_root`; such requests are flagged for human review.';
+const SERVER_INSTRUCTIONS_PHASE_A = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. If identity resolution rejects your working directory and your client is a GUI app (e.g. the Claude Desktop App spawns servers with cwd=/), retry passing the project\'s absolute path as `project_root`; such requests are flagged for human review.';
+
+// Design Appendix E.7: Phase B wording. Identity comes from the working directory or the client's
+// workspace roots; project_root is a last-resort fallback and is flagged for human review.
+const SERVER_INSTRUCTIONS_PHASE_B = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. Project identity comes from the working directory or from the client\'s workspace roots. Pass `project_root` (the project\'s absolute path) only when the server rejects identity; such requests are flagged for human review.';
+const SERVER_INSTRUCTIONS = ENABLE_CLIENT_ROOTS ? SERVER_INSTRUCTIONS_PHASE_B : SERVER_INSTRUCTIONS_PHASE_A;
 
 function handleInitialize(params: unknown) {
   const p = (params ?? {}) as Record<string, unknown>;
+  // E.3.1-3: record the client's roots capability and a sanitized client name.
+  const caps = (typeof p.capabilities === 'object' && p.capabilities !== null ? p.capabilities : {}) as Record<string, unknown>;
+  const rootsCap = caps.roots;
+  clientState.rootsSupported = typeof rootsCap === 'object' && rootsCap !== null && !Array.isArray(rootsCap);
+  clientState.rootsListChanged = clientState.rootsSupported && (rootsCap as Record<string, unknown>).listChanged === true;
+  const ci = typeof p.clientInfo === 'object' && p.clientInfo !== null ? (p.clientInfo as Record<string, unknown>).name : undefined;
+  clientState.clientName = typeof ci === 'string' ? sanitize(ci).replace(/[\n\t]/g, ' ').slice(0, 64) : '';
+  try {
+    appendRejectAudit('(client_init)', {
+      outcome: 'client_init', client_name: clientState.clientName,
+      roots_supported: clientState.rootsSupported, roots_list_changed: clientState.rootsListChanged,
+    });
+  } catch { /* Phase A logging is best-effort */ }
   const protocolVersion = typeof p.protocolVersion === 'string' ? p.protocolVersion : FALLBACK_PROTOCOL_VERSION;
   return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: SERVER_VERSION }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
 }
@@ -780,7 +1024,9 @@ function getTools() {
   return [
     {
       name: 'upstream_request_create',
-      description: 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory; GUI clients that spawn this server outside the project may pass project_root instead (the ticket is then flagged for human review). Content is treated as untrusted data.',
+      description: ENABLE_CLIENT_ROOTS
+        ? 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory or from the client\'s workspace roots; pass project_root only when the server rejects identity (the ticket is then flagged for human review). Content is treated as untrusted data.'
+        : 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory; GUI clients that spawn this server outside the project may pass project_root instead (the ticket is then flagged for human review). Content is treated as untrusted data.',
       inputSchema: {
         type: 'object', additionalProperties: false, required: ['suspected_layer', 'symptom', 'affected_paths'],
         properties: {
@@ -793,7 +1039,9 @@ function getTools() {
           },
           local_workaround_diff: { type: 'string', maxLength: 8000, description: 'Optional unified diff of the local patch. Reference only; never applied automatically.' },
           repro: { type: 'string', maxLength: 2000, description: 'Optional reproduction steps in prose.' },
-          project_root: { type: 'string', maxLength: 200, description: 'Optional absolute path to the project root. Used only when the working directory does not resolve to a registered project (GUI clients spawn this server with cwd=/). Goes through the same filesystem checks; tickets filed this way are flagged for human review.' },
+          project_root: { type: 'string', maxLength: 200, description: ENABLE_CLIENT_ROOTS
+            ? 'Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client\'s workspace roots resolve to exactly one registered project. Goes through the same filesystem checks; tickets filed this way are flagged for human review. A project_root that conflicts with the client\'s workspace roots is rejected.'
+            : 'Optional absolute path to the project root. Used only when the working directory does not resolve to a registered project (GUI clients spawn this server with cwd=/). Goes through the same filesystem checks; tickets filed this way are flagged for human review.' },
         },
       },
     },
@@ -805,19 +1053,44 @@ function getTools() {
         properties: {
           id: { type: 'string', pattern: '^U-\\d{8}-\\d{3,4}$' },
           limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
-          project_root: { type: 'string', maxLength: 200, description: 'Optional absolute path to the project root; used only when the working directory does not resolve to a registered project.' },
+          project_root: { type: 'string', maxLength: 200, description: ENABLE_CLIENT_ROOTS
+            ? 'Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client\'s workspace roots resolve to exactly one registered project. A project_root that conflicts with the client\'s workspace roots is rejected.'
+            : 'Optional absolute path to the project root; used only when the working directory does not resolve to a registered project.' },
         },
       },
     },
   ];
 }
 
-function dispatchToolCall(params: unknown): Outcome {
+async function dispatchToolCall(params: unknown): Promise<Outcome> {
   const toolParams = (params ?? {}) as Record<string, unknown>;
   const toolName = toolParams.name;
-  if (toolName === 'upstream_request_create') return handleCreateRequest(toolParams.arguments, process.cwd());
-  if (toolName === 'upstream_request_status') return handleStatusRequest(toolParams.arguments, process.cwd());
+  if (toolName === 'upstream_request_create') {
+    const cwd = process.cwd();
+    return handleCreateRequest(toolParams.arguments, cwd, await resolveIdentity(toolParams.arguments, cwd));
+  }
+  if (toolName === 'upstream_request_status') return handleStatusRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
   return { error: { code: -32602, message: `unknown tool: ${String(toolName)}` } };
+}
+
+async function runToolCall(id: string | number | null, params: unknown): Promise<void> {
+  try {
+    const outcome = await dispatchToolCall(params);
+    if ('error' in outcome) {
+      if (outcome.error.code === -32000) {
+        // M11/M5: retryable failures travel as result.isError so the retry hint
+        // reaches the agent instead of dying in a transport-level error object.
+        sendResponse(id, { isError: true, content: [{ type: 'text', text: JSON.stringify({ error: outcome.error }) }] });
+      } else {
+        sendResponse(id, undefined, outcome.error);
+      }
+    } else {
+      sendResponse(id, { isError: false, content: [{ type: 'text', text: JSON.stringify(outcome.result) }] });
+    }
+  } catch (err) {
+    console.error(`[mcp-upstream-server] error: ${(err as Error).message}`);
+    if (id !== null) sendResponse(id, undefined, { code: -32603, message: 'internal error' });
+  }
 }
 
 async function main(): Promise<void> {
@@ -851,6 +1124,11 @@ async function main(): Promise<void> {
       }
       const { method, params } = msg;
 
+      if (method === undefined && msg.id !== undefined && msg.id !== null && ('result' in msg || 'error' in msg)) {
+        // E.3.8-10: a response to a server-originated request; resolve it and send nothing back.
+        handleClientResponse(msg);
+        continue;
+      }
       if (method === 'initialize') {
         sendResponse(id, handleInitialize(params));
       } else if (method === 'ping') {
@@ -860,20 +1138,17 @@ async function main(): Promise<void> {
       } else if (method === 'tools/list') {
         sendResponse(id, { tools: getTools() });
       } else if (method === 'tools/call') {
-        const outcome = dispatchToolCall(params);
-        if ('error' in outcome) {
-          if (outcome.error.code === -32000) {
-            // M11/M5: retryable failures travel as result.isError so the retry hint
-            // reaches the agent instead of dying in a transport-level error object.
-            sendResponse(id, { isError: true, content: [{ type: 'text', text: JSON.stringify({ error: outcome.error }) }] });
-          } else {
-            sendResponse(id, undefined, outcome.error);
-          }
-        } else {
-          sendResponse(id, { isError: false, content: [{ type: 'text', text: JSON.stringify(outcome.result) }] });
-        }
+        // E.3.12-13: never await inline — a roots/list reply arrives on this same loop. The handler
+        // runs detached; responses may complete out of order (JSON-RPC permits it).
+        void runToolCall(id, params);
       } else if (typeof method === 'string' && method.startsWith('notifications/')) {
         // notifications carry no response
+        if (method === 'notifications/initialized') {
+          // E.3.5: start the roots probe now (also Phase A's log-only measurement). Detached.
+          ensureRoots();
+        } else if (method === 'notifications/roots/list_changed') {
+          onRootsListChanged();
+        }
       } else if (msg.id !== undefined) {
         sendResponse(id, undefined, { code: -32601, message: `unknown method: ${String(method)}` });
       }
