@@ -63,3 +63,78 @@ export function speechSynthesisSupported(globalThis) {
   const w = globalThis ?? (typeof window !== "undefined" ? window : {});
   return Boolean(w.speechSynthesis);
 }
+
+/**
+ * Voice Conversation Mode state machine (spec
+ * 2026-10-04-coworkspace-voice-conversation-design). Pure reducer: the DOM wiring
+ * dispatches events, this decides the next state. Benchmark grounding: explicit
+ * named states with defined transitions (WebRTC.ventures 2026-09), half-duplex
+ * turn-taking (recognition never runs while TTS speaks), barge-in as a first-class
+ * event. Unknown events are no-ops that keep the current state.
+ *
+ * States: idle | listening | thinking | speaking
+ * Events: modeOn, modeOff, listenStart, finalTranscript, sendStart, turnDone,
+ *         ttsStart, ttsEnd, bargeIn, error
+ */
+export const VOICE_STATES = ["idle", "listening", "thinking", "speaking"];
+
+/** Should a final transcript be submitted automatically in this state+settings? */
+export function shouldAutoSend(state, opts = {}) {
+  if (state !== "listening") return false;
+  return opts.autoSend === true;
+}
+
+export function voiceTransition(state, event, opts = {}) {
+  switch (event) {
+    case "modeOn":
+      return "listening";
+    case "modeOff":
+    case "error":
+      return "idle";
+    case "listenStart":
+      return state === "idle" || state === "listening" ? "listening" : state;
+    case "finalTranscript":
+      // Half-duplex + benchmark: auto-send chains straight into the turn; manual
+      // mode hands the transcript to the composer and stands down to idle.
+      if (state === "listening") return shouldAutoSend(state, opts) ? "thinking" : "idle";
+      return state;
+    case "sendStart":
+      return state === "listening" || state === "idle" ? "thinking" : state;
+    case "turnDone":
+      // The reply is ready to be spoken; if TTS is unavailable the wiring goes
+      // straight back to listening (voiceMode) or idle.
+      return "speaking";
+    case "ttsStart":
+      return state === "thinking" || state === "speaking" ? "speaking" : state;
+    case "ttsEnd":
+      // Hands-free loop: re-arm listening; when voice mode was turned off mid-answer
+      // (opts.voiceMode false) stand down instead.
+      return opts.voiceMode === false ? "idle" : "listening";
+    case "bargeIn":
+      // Barge-in: from speaking OR listening, drop to a fresh listening turn.
+      return state === "speaking" || state === "listening" ? "listening" : state;
+    default:
+      return state;
+  }
+}
+
+/**
+ * Voice language selection (user review 2026-10-04: per-country language support).
+ * Web Speech API recognizes ONE configured language per session — true spoken-language
+ * auto-detection is not available — so the UI offers a picker and this helper picks the
+ * smart default: the first browser language whose primary subtag matches a supported
+ * voice language, else the fallback.
+ */
+export const VOICE_LANGUAGES = ["ko-KR", "en-US", "ja-JP", "es-ES"];
+
+export function detectVoiceLang(browserLangs, supported = VOICE_LANGUAGES, fallback = "ko-KR") {
+  const langs = Array.isArray(browserLangs) ? browserLangs : [browserLangs];
+  for (const raw of langs) {
+    if (typeof raw !== "string") continue;
+    const primary = raw.replace("_", "-").split("-")[0].toLowerCase();
+    const hit = supported.find((s) => s.toLowerCase() === raw.replace("_", "-").toLowerCase())
+      ?? supported.find((s) => s.toLowerCase().startsWith(primary + "-"));
+    if (hit) return hit;
+  }
+  return fallback;
+}

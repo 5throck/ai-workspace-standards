@@ -94,9 +94,16 @@
   .sendBtn:disabled { opacity: .45; cursor: default; }
   .stopBtn { background: #8b1f1f; color: #fff; border: 0; border-radius: 10px; padding: 7px 14px; font: inherit; cursor: pointer; font-size: .78rem; }
   .stopBtn.hidden { display: none; }
-  .toolBtn { background: transparent; color: var(--fg); border: 1px solid var(--border2); border-radius: 10px; padding: 6px 10px; font: inherit; font-size: .82rem; cursor: pointer; }
-  .toolBtn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-  .toolBtn.hidden { display: none; }
+  .voiceStatus { font-size: .78rem; color: var(--accent); min-width: 64px; text-align: right; }
+  .voiceOrb { background: transparent; border: 1px solid var(--border2); border-radius: 50%; width: 34px; height: 34px; font: inherit; font-size: .95rem; cursor: pointer; line-height: 1; }
+  .voiceOrb.off { opacity: .75; }
+  .voiceOrb.listening { border-color: #2ea043; box-shadow: 0 0 0 3px rgba(46, 160, 67, .25); animation: voicePulse 1.4s ease-in-out infinite; }
+  .voiceOrb.thinking { border-color: #d29922; animation: voiceSpin 1.6s linear infinite; }
+  .voiceOrb.speaking { border-color: #1f6feb; animation: voicePulse .8s ease-in-out infinite; }
+  @keyframes voicePulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(31, 111, 235, .18); } 50% { box-shadow: 0 0 0 5px rgba(31, 111, 235, .32); } }
+  @keyframes voiceSpin { to { transform: rotate(360deg); } }
+  .voiceOrb.hidden { display: none; }
+  @media (prefers-reduced-motion: reduce) { .voiceOrb.listening, .voiceOrb.thinking, .voiceOrb.speaking { animation: none; } }
   textarea { width: 100%; background: transparent; color: var(--fg); border: 0; font: inherit; min-height: 44px; resize: none; outline: none; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
   .chip { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 999px;
@@ -198,8 +205,9 @@
       <div class="composerTools">
         <select id="model" aria-label="Variant" class="modelPick"></select>
         <span style="flex:1"></span>
-        <button type="button" id="ttsBtn" class="toolBtn" aria-pressed="false" title="Read replies aloud (TTS)">🔇</button>
-        <button type="button" id="micBtn" class="toolBtn hidden" aria-pressed="false" title="Dictate (browser speech recognition)">🎙</button>
+        <span id="voiceStatus" aria-live="polite" class="voiceStatus"></span>
+        <select id="voiceLangSel" class="modelPick hidden" aria-label="Voice language" title="Voice language"></select>
+        <button type="button" id="voiceOrb" class="voiceOrb off hidden" aria-pressed="false" title="Voice conversation">🎙</button>
         <button type="button" id="stopBtn" class="stopBtn hidden">■ Stop</button>
         <button type="submit" id="send" class="sendBtn">Send</button>
       </div>
@@ -217,7 +225,7 @@
 <script type="module">
   // T-20260928-012: pure helpers (donut slice math, recency grouping) live in
   // /app-helpers.js so they can be unit-tested without a browser.
-  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, speechRecognitionSupported, speechSynthesisSupported } from "./app-helpers.js";
+  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, speechRecognitionSupported, speechSynthesisSupported, voiceTransition, shouldAutoSend, detectVoiceLang, VOICE_LANGUAGES } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
@@ -508,66 +516,135 @@
     });
   });
 
-  // ── Voice conversation (ADR-0098): TTS reads assistant replies, STT dictates input.
-  // Browser-native Web Speech API only — unsupported browsers hide the controls.
-  const ttsBtn = $("ttsBtn"), micBtn = $("micBtn");
+  // ── Voice Conversation Mode (spec 2026-10-04-coworkspace-voice-conversation-design,
+  // revised per user review: ONE button). Click = enter the conversational loop
+  // (listen -> auto-submit -> reply spoken -> listen again); click again = exit
+  // (cancels TTS/recognition immediately). Half-duplex: the recognizer never runs
+  // while TTS speaks. Browser-native Web Speech API only.
+  const orbBtn = $("voiceOrb"), voiceStatus = $("voiceStatus"), voiceLangSel = $("voiceLangSel");
   const uiLang = document.documentElement.lang || "ko-KR";
-  let ttsEnabled = false;
-  try { ttsEnabled = localStorage.getItem("gw-tts-enabled") === "1"; } catch { /* private mode */ }
-  function applyTtsBtn() {
-    ttsBtn.textContent = ttsEnabled ? "🔊" : "🔇";
-    ttsBtn.setAttribute("aria-pressed", ttsEnabled ? "true" : "false");
-    ttsBtn.title = ttsEnabled ? "Reply reading is ON (click to mute)" : "Read replies aloud (TTS)";
+  const TTS_REARM_DEBOUNCE_MS = 250; // TTS audio tails persist past utterance.onend
+  let voiceState = "idle";
+  let voiceMode = false;
+  let recognition = null, recognizing = false, dictateBase = "";
+  let rearmTimer = null;
+
+  try { voiceMode = localStorage.getItem("gw-voice-mode") === "1"; } catch { /* private mode */ }
+  let voiceLang = localStorage.getItem("gw-voice-lang")
+    || detectVoiceLang(navigator.languages ?? [navigator.language]);
+  if (!VOICE_LANGUAGES.includes(voiceLang)) voiceLang = "ko-KR";
+
+  const STATUS_TEXT = { idle: "", listening: "Listening…", thinking: "Thinking…", speaking: "Speaking…" };
+  function applyVoiceUi() {
+    orbBtn.className = "voiceOrb " + voiceState + (voiceMode ? "" : " off");
+    orbBtn.setAttribute("aria-pressed", voiceMode ? "true" : "false");
+    orbBtn.title = voiceMode ? "Voice conversation ON — click to stop" : "Voice conversation";
+    voiceStatus.textContent = STATUS_TEXT[voiceState] ?? "";
   }
-  if (speechSynthesisSupported(window)) {
-    applyTtsBtn();
-    ttsBtn.addEventListener("click", () => {
-      ttsEnabled = !ttsEnabled;
-      try { localStorage.setItem("gw-tts-enabled", ttsEnabled ? "1" : "0"); } catch { /* private mode */ }
-      if (!ttsEnabled && "speechSynthesis" in window) speechSynthesis.cancel();
-      applyTtsBtn();
-    });
-  } else {
-    ttsBtn.classList.add("hidden");
+
+  function dispatchVoice(event) {
+    // Conversation mode implies hands-free: transcripts auto-submit (the reducer's
+    // autoSend option is always true while the mode is on).
+    voiceState = voiceTransition(voiceState, event, { autoSend: voiceMode, voiceMode });
+    applyVoiceUi();
   }
-  function speakReply(text) {
-    if (!ttsEnabled || !("speechSynthesis" in window) || !text) return;
+
+  function stopRecognition() {
+    recognizing = false;
+    if (recognition) { try { recognition.stop(); } catch { /* already stopped */ } }
+  }
+
+  function startListening() {
+    dispatchVoice("listenStart");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = voiceLang;
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    dictateBase = input.value ? input.value + " " : "";
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (const result of event.results) transcript += result[0].transcript;
+      const isFinal = event.results[event.results.length - 1]?.isFinal;
+      input.value = dictateBase + transcript;
+      input.dispatchEvent(new Event("input"));
+      if (isFinal && transcript.trim()) {
+        const submit = shouldAutoSend(voiceState, { autoSend: voiceMode });
+        dispatchVoice("finalTranscript");
+        stopRecognition();
+        if (submit && currentTenantId) {
+          form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", { cancelable: true }));
+        } else if (!submit) {
+          input.focus();
+        }
+      }
+    };
+    recognition.onend = () => {
+      recognizing = false;
+      // The engine ends after each utterance; keep the loop armed while listening.
+      if (voiceMode && voiceState === "listening" && !rearmTimer) {
+        rearmTimer = setTimeout(() => { rearmTimer = null; if (voiceMode && voiceState === "listening") startListening(); }, 400);
+      }
+    };
+    recognition.onerror = (event) => {
+      recognizing = false;
+      if (event.error === "no-speech" || event.error === "aborted") return; // benign
+      voiceMode = false;
+      try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* private mode */ }
+      dispatchVoice("error");
+      voiceStatus.textContent = event.error === "not-allowed" ? "Microphone permission denied" : `Voice error: ${event.error}`;
+    };
+    recognizing = true;
+    try { recognition.start(); } catch { /* start() throws if already started — benign race */ }
+  }
+
+  function speakReply(text, onDone) {
+    // Conversation mode always speaks; nothing speaks outside it.
+    if (!voiceMode || !("speechSynthesis" in window) || !text) { onDone?.(); return; }
+    stopRecognition();
+    dispatchVoice("ttsStart");
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(speakableText(text).slice(0, 4000));
-    utter.lang = uiLang;
+    utter.lang = voiceLang;
+    utter.onend = () => { setTimeout(() => onDone?.(), TTS_REARM_DEBOUNCE_MS); };
+    utter.onerror = () => { setTimeout(() => onDone?.(), TTS_REARM_DEBOUNCE_MS); };
     speechSynthesis.speak(utter);
   }
 
-  let recognition = null, dictating = false, dictateBase = "";
-  if (speechRecognitionSupported(window)) {
-    micBtn.classList.remove("hidden");
-    micBtn.addEventListener("click", () => {
-      if (dictating) { recognition.stop(); return; }
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SR();
-      recognition.lang = uiLang;
-      recognition.interimResults = true;
-      recognition.continuous = false;
-      dictateBase = input.value ? input.value + " " : "";
-      recognition.onresult = (event) => {
-        let transcript = "";
-        for (const result of event.results) transcript += result[0].transcript;
-        input.value = dictateBase + transcript;
-        input.dispatchEvent(new Event("input"));
-      };
-      recognition.onend = () => {
-        dictating = false;
-        micBtn.setAttribute("aria-pressed", "false");
-        input.focus();
-      };
-      recognition.onerror = () => {
-        dictating = false;
-        micBtn.setAttribute("aria-pressed", "false");
-      };
-      dictating = true;
-      micBtn.setAttribute("aria-pressed", "true");
-      recognition.start();
+  if (speechRecognitionSupported(window) || speechSynthesisSupported(window)) {
+    orbBtn.classList.remove("hidden");
+    if (voiceMode) { voiceMode = false; try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* page reload never resumes mid-loop */ } }
+    orbBtn.addEventListener("click", () => {
+      if (voiceMode) {
+        // Single-button exit: stop everything, stand down.
+        if ("speechSynthesis" in window) speechSynthesis.cancel();
+        voiceMode = false;
+        try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* private mode */ }
+        stopRecognition();
+        dispatchVoice("modeOff");
+        return;
+      }
+      // Single-button entry — or barge-in: clicking while speaking drops the reply
+      // and listens immediately (the mode was already on; handled by the branch above
+      // only for full exit, so speaking state without mode cannot occur).
+      if (voiceState === "speaking" && "speechSynthesis" in window) speechSynthesis.cancel();
+      voiceMode = true;
+      try { localStorage.setItem("gw-voice-mode", "1"); } catch { /* private mode */ }
+      startListening();
     });
+    for (const lang of VOICE_LANGUAGES) {
+      const opt = document.createElement("option");
+      opt.value = lang; opt.textContent = lang;
+      voiceLangSel.appendChild(opt);
+    }
+    voiceLangSel.addEventListener("change", () => {
+      voiceLang = voiceLangSel.value;
+      try { localStorage.setItem("gw-voice-lang", voiceLang); } catch { /* private mode */ }
+      if (voiceMode && voiceState === "listening") { stopRecognition(); startListening(); }
+    });
+    applyVoiceUi();
+  } else {
+    orbBtn.classList.add("hidden");
   }
 
   form.addEventListener("submit", async (event) => {
@@ -575,6 +652,8 @@
     const message = input.value.trim();
     if (!message) return;
     if (!currentTenantId) { openNewTeamModal(message); return; }
+    if (voiceMode) { dispatchVoice("sendStart"); stopRecognition(); }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
     input.value = ""; send.disabled = true;
     $("stopBtn").classList.remove("hidden");
     bubble("user", message);
@@ -636,7 +715,15 @@
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
       reply.classList.remove("pending");
-      if (!errored) speakReply(reply.textContent);
+      if (!errored) {
+        // Hands-free loop: in conversation mode speak the reply, then re-arm
+        // listening. Outside the mode the loop stays idle.
+        dispatchVoice("turnDone");
+        speakReply(reply.textContent, () => {
+          dispatchVoice("ttsEnd");
+          if (voiceMode && voiceState === "listening") startListening();
+        });
+      }
       applyComposerLock();
       $("stopBtn").classList.add("hidden");
     }
