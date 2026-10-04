@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## [Unreleased]
+- **[2026-10-05]**: fix(validators): **validator-hardening batch — registry parity, record versions, stale stamps, language perimeter, porcelain parsing (T-20261004-021/020/023/025/019; spec `2026-10-05-validator-hardening-batch-design`).** verify-skills 1.4.0 adds L0↔L1 SKILLS.md row parity on version AND description (Variant-Exclusive catalog rows excluded; service-design's placeholder common description aligned); skill-lifecycle-audit 1.6.0 adds Check MV (lifecycle-record header/footer/frontmatter version agreement, error) and Check SD (last_reviewed older than the last git content commit — WARN with the agent Check 11 semantics; 20/41 grandfathered-stale skills make error-level a provenance-falsifying non-starter, tightening is a follow-up); validate-md-language 1.13.0 extends the official perimeter to docs/reports/ + docs/guides/ + docs/standards/; resync-audit 1.4.0 fixes the porcelain first-row corruption (whole-output trim consumed the leading status space → truncated "cripts/co-deck*" group key + bogus added-then-modified) and disambiguates the no-HEAD evidence via `cat-file -e` (conservative KEEP both ways). Scratch-repo repro before/after pinned; new unit tests for the record-version parser and the shifted-row shapes.
 - **[2026-10-04]**: feat(co-workspace): **voice conversation mode — one-button hands-free loop (benchmark-grounded design, spec `2026-10-04-coworkspace-voice-conversation-design`).** Explicit state machine (idle/listening/thinking/speaking, pure reducer + tests), half-duplex turn-taking (recognition never runs while TTS speaks — the browser echo class killed at the design level), barge-in on the orb, per-country language selection (ko/en/ja/es with browser-language default detection), and spoken GIST only: the reply's Short Answer / first paragraph (≤100 chars) is read while the full answer stays on screen (3Blue1Brown out loud). Sidebar sign-in form removed in favor of the /login page; static-asset auth exemption fix (app-helpers.js 401'd for unauthenticated browsers → dead shell). Rendered verification evidence: docs/reports/2026-10-04-voice-conversation-verification/.
 - **[2026-10-04]**: feat(tickets): **done-ticket archive — 7-day dwell, per-store archive dirs, archived-id reads (T-20261004-010-era batch; spec `2026-10-04-ticket-archive-design`).** `bun scripts/ticket.ts archive` (dry-run default, --apply, --days, --restore) moves done tickets to tickets/archive (service, local-only) and tickets/governance/archive (git-tracked); doneAtOf derives completion from history (never mtime); resolveTicketLocation falls back to the archive dirs. Project review Critical found archived-id reads broken post-landing — resolver now returns the archive dir as containing dir (regression test pinned). Docs: AGENTS.md §3.7.5 + design addendum.
 - **[2026-10-04]**: feat(governance): **LLM Interaction Standard adopted as SSOT (ADR-0098)** — docs/standards/llm-interaction-standard.md (ASD-STE100 input §2 + structural rules §2.8; 3Blue1Brown output §4–§9), wired into AGENTS.md/CONSTITUTION/templates (new projects inherit) and the co-workspace gateway (§14 short form injected into fresh sessions). Gateway voice mode speaks the §5-style short answer (voice design revision 3).
@@ -1880,8 +1881,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-10-04*
-*Last Updated: 2026-10-04*
+*Last Updated: 2026-10-05*
+*Last Updated: 2026-10-05*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

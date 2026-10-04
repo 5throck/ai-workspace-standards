@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0 (2026-10-05, T-20261004-025): the docs-reorganization destinations
+//           docs/reports/ + docs/guides/ + docs/standards/ join the official
+//           perimeter so undeclared Korean there fails (declared lang files
+//           keep their exception mechanism).
 // v1.12.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
 //           site 4): official patterns gain CODEX.md and the
 //           .agents/{skills,commands}/ + .codex/{skills,prompts}/ trees
@@ -11,7 +15,7 @@
  * Policy: Official documents and governance files must contain English sentences.
  * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md,
  * context.md, CHANGELOG.md, docs/constitution/, docs/governance/, docs/designs/,
- * docs/adr/, docs/decisions/, docs/VERSION_MANIFEST.md, skills/,
+ * docs/adr/, docs/decisions/, docs/reports/, docs/guides/, docs/standards/, docs/VERSION_MANIFEST.md, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
  * templates/, and SECURITY.md. Both `.md` and `.yaml`/`.yml` files under these
  * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
@@ -193,6 +197,12 @@ function isOfficialDocument(filePath: string): boolean {
     /^docs\/designs\/.*\.(md|ya?ml)$/,
     /^docs\/adr\/.*\.(md|ya?ml)$/,
     /^docs\/decisions\/.*\.(md|ya?ml)$/,
+    // T-20261004-025: the 2026-10-05 docs reorganization destinations join the
+    // perimeter — reports/guides/standards carry official prose, so undeclared
+    // Korean there must fail (declared lang: ko files stay exempt).
+    /^docs\/reports\/.*\.(md|ya?ml)$/,
+    /^docs\/guides\/.*\.(md|ya?ml)$/,
+    /^docs\/standards\/.*\.(md|ya?ml)$/,
     /^docs\/VERSION_MANIFEST\.md$/,
     /^skills\/.*\.(md|ya?ml)$/,
     /^\.claude\/skills\/.*\.(md|ya?ml)$/,
