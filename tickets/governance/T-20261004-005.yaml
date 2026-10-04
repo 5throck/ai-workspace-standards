@@ -5,7 +5,7 @@ title: >-
   ticket archive: done tickets leave the live stores after a 7-day dwell
   (archive subcommand, store-level move, archive-aware id resolution)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-04T02:02:03.144Z'
 history:
@@ -18,5 +18,15 @@ history:
   - at: '2026-10-04T02:02:11.060Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-04T02:05:32.281Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1380 on pr/20261004-ticket-archive: ticket.ts 1.9.0 archive
+  subcommand (dry-run default, --apply, --days, --restore), ticket-store.ts
+  1.10.0 (archiveTickets/doneAtOf/restoreTicket, archive-aware
+  resolveTicketLocation), tickets/archive/ gitignored +
+  tickets/governance/archive/ tracked, 20 unit tests, spec
+  2026-10-04-ticket-archive-design registered, full unit suite + audit +
+  typecheck green.
 error: null
