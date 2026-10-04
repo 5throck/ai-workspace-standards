@@ -694,12 +694,15 @@
     const reply = bubble("assistant");
     reply.classList.add("pending");
     let errored = false;
-    // Live hourglass: ⏳ + elapsed seconds until the result arrives (user review —
-    // 시간과 모래시계). Cleared on the first text delta / error / turn end.
+    // Live hourglass: ⏳ + elapsed seconds until the result arrives (user review).
+    // pendWritten marks that the hourglass owns reply.textContent, so the first
+    // delta / error replaces it instead of appending after it.
     const pendStart = Date.now();
+    let pendWritten = false;
     const pendTimer = setInterval(() => {
       if (!reply.classList.contains("pending")) { clearInterval(pendTimer); return; }
       reply.textContent = "⏳ " + formatTurnActivity((Date.now() - pendStart) / 1000);
+      pendWritten = true;
     }, 250);
     const stopPendTimer = () => clearInterval(pendTimer);
     try {
@@ -750,6 +753,7 @@
               // the turn completes and the text is revealed after the speech ends.
               fullText += payload.text;
             } else {
+              if (pendWritten) { reply.textContent = ""; pendWritten = false; }
               reply.textContent += payload.text;
             }
             log.scrollTop = log.scrollHeight;
@@ -765,6 +769,7 @@
       loadSessions();
     } catch (err) {
       errored = true;
+      if (pendWritten) reply.textContent = ""; // drop the hourglass before the error note
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
       clearInterval(pendTimer);
