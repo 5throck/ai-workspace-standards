@@ -1,4 +1,6 @@
-// @version 2.48.0
+// @version 2.48.1
+// v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (CONSTITUTION.md guard) —
+//           the E2E caught scaffold-context leakage (project docs/ are project-scoped).
 // v2.48.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): docs/ folder
 //           manifest gate — spawns validate-doc-folder.ts --workspace (existsSync-guarded,
 //           after the doc-command lint): every docs/ top-level entry must be in the
@@ -1708,7 +1710,9 @@ if (fs.existsSync(path.join('scripts', 'validate-ticket-doc-commands.ts'))) {
 // governance — every directory and loose file under docs/ must be in the manifest
 // (docs/README.md); unknown entries fail instead of accreting. Remedy: move the
 // content to its default home, or add manifest row + decision reference + allowlist.
-if (fs.existsSync(path.join('scripts', 'validate-doc-folder.ts'))) {
+// L0-only: scaffolded projects deliver validate-doc-folder.ts (project mode) but
+// their docs/ tree is project-scoped — the workspace manifest must not apply there.
+if (fs.existsSync(path.join('scripts', 'validate-doc-folder.ts')) && fs.existsSync(path.join('CONSTITUTION.md'))) {
     const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-doc-folder.ts', '--workspace'], { encoding: 'utf-8' });
     if (status !== 0) {
         if (stdout) console.log(stdout);

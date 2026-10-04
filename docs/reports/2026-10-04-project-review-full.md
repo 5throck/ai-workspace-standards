@@ -67,3 +67,7 @@
 - `verify-scripts.ts --verify` — 218 scripts, 0 warnings
 - `lifecycle-sync-audit` — pass (after the pm.md record date fix this review surfaced)
 - service typecheck — clean
+
+## Verification addendum (E2E)
+
+- `scripts/test-new-project.ts` — 41/41 ALL PASSED after propagating the L1 audit.ts guard (the new manifest gate is L0-scoped: scaffolded projects' docs/ trees are project-scoped and must not be judged by the workspace manifest).

@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.11.0
+ * @version 1.11.1
  *         v1.11.0 (2026-10-04, T-20261004-012): findDivergentDuplicateRows — registry-style rows
  *         appearing OUTSIDE the ## Registry span (doc-tail fragments) must agree with the
  *         authoritative version; a script name with >1 distinct version cell is an ERROR.
- *         Exported for tests.
+ *         Exported for tests. v1.11.1: the check is L0-only — scaffolded projects
+ *         inherit SCRIPTS.md with historical doc-tail fragments by design.
  *
  * v1.10.0: ERROR on SCRIPTS.md registry rows with column count ≠ 8. Exported REGISTRY_COLUMN_COUNT and findMalformedRegistryRows for test coverage.
  * v1.8.0 (2026-09-23, adopt-project engine prerequisites): walkScripts() skips
@@ -451,10 +452,14 @@ function verify(): boolean {
     );
   }
 
-  for (const dup of findDivergentDuplicateRows(content)) {
-    errors.push(
-      `Divergent duplicate registry rows: \`${dup.script}\` appears with versions ${dup.versions.join(" vs ")} — doc-tail fragments must match the authoritative ## Registry row`
-    );
+  // L0-only: scaffolded projects inherit SCRIPTS.md with historical doc-tail
+  // fragments by design (the registry span is what projects verify against).
+  if (contextLayer === "L0") {
+    for (const dup of findDivergentDuplicateRows(content)) {
+      errors.push(
+        `Divergent duplicate registry rows: \`${dup.script}\` appears with versions ${dup.versions.join(" vs ")} — doc-tail fragments must match the authoritative ## Registry row`
+      );
+    }
   }
 
   const registeredNames = new Set(registry.map((e) => e.script));
