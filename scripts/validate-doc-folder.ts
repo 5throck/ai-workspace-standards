@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.1.0
+ * @version 1.2.0
+ * v1.2.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): --workspace mode —
+ *           enforces the docs/ top-level manifest (docs/README.md): every directory and
+ *           loose file must be allowlisted, so folder proliferation fails the audit
+ *           instead of accreting. Default mode (no flag) keeps the project-facing
+ *           required-folders check unchanged.
  * Ensures required subdirectories exist in docs/ folder
  */
 
@@ -29,6 +34,47 @@ const OPTIONAL_FOLDERS = [
   'variant',
   'superpowers',
 ];
+
+// ── Workspace manifest (docs/README.md is the human SSOT; this is the machine gate) ──
+
+/** Allowed top-level DIRECTORIES under docs/ at the workspace root. */
+const ALLOWED_DIRS: ReadonlySet<string> = new Set([
+  'adr', 'analysis', 'architecture', 'archive', 'audits', 'constitution', 'decisions',
+  'designs', 'evidence', 'examples', 'governance', 'graph-deltas', 'lifecycle',
+  'reports', 'security', 'specs', 'standards', 'superpowers', 'templates',
+]);
+
+/** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the
+ * machine projections (generator-declared names), and the established top-level
+ * guides indexed in docs/index.md. */
+const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
+  'README.md', 'index.md', 'VERSION_MANIFEST.md',
+  'workspace-schema.json', 'self-managed-surfaces.json', 'skill-graph.json',
+  'skill-graph.md', 'skill-graph.overrides.json', 'surface-gaps.json',
+  'getting-started.md', 'project-upgrade-guide.md', 'creating-a-variant.md',
+  'variant-conversion-guide.md', 'variant-creation-workflow.md',
+  'external-references.md', 'graft-platform-integration.md',
+  'variant-review-report-2026-07-14.md', 'variant-roadmap-2026-q3-q4.md',
+  'variant-benchmark-backlog.md',
+]);
+
+interface WorkspaceFinding {
+  entry: string;
+  kind: 'unknown-dir' | 'unknown-file';
+}
+
+function validateWorkspaceTree(docsPath: string): { findings: WorkspaceFinding[] } {
+  const findings: WorkspaceFinding[] = [];
+  for (const entry of fs.readdirSync(docsPath, { withFileTypes: true })) {
+    if (entry.name === '.DS_Store') continue;
+    if (entry.isDirectory()) {
+      if (!ALLOWED_DIRS.has(entry.name)) findings.push({ entry: `${entry.name}/`, kind: 'unknown-dir' });
+    } else if (!ALLOWED_ROOT_FILES.has(entry.name)) {
+      findings.push({ entry: entry.name, kind: 'unknown-file' });
+    }
+  }
+  return { findings };
+}
 
 function validateDocsFolder(docsPath: string): ValidationResult {
   const result: ValidationResult = {
@@ -69,9 +115,40 @@ function validateDocsFolder(docsPath: string): ValidationResult {
   return result;
 }
 
+function runWorkspaceMode(docsPath: string): void {
+  console.log('🔍 Validating docs/ folder manifest (workspace mode)...');
+  console.log(`   Path: ${docsPath}`);
+  console.log('');
+
+  if (!fs.existsSync(docsPath)) {
+    die('docs/ directory does not exist', 1);
+  }
+
+  const { findings } = validateWorkspaceTree(docsPath);
+  if (findings.length > 0) {
+    console.log('❌ Entries not in the docs/ manifest (docs/README.md):');
+    for (const f of findings) {
+      console.log(`   ❌ docs/${f.entry} — ${f.kind === 'unknown-dir' ? 'unknown directory' : 'unknown root file'}`);
+    }
+    console.log('');
+    console.log('Fix: move the content to its default home (docs/README.md §3 decision table), or —');
+    console.log('when no default home fits — add ALL of: a manifest row, a decision reference');
+    console.log('(ADR or spec-registered design), and an allowlist entry in validate-doc-folder.ts.');
+    die(`${findings.length} unmanifested docs/ entr${findings.length === 1 ? 'y' : 'ies'}`, 1);
+  }
+
+  console.log(`✅ docs/ tree matches the manifest (${ALLOWED_DIRS.size} directories, ${ALLOWED_ROOT_FILES.size} root files allowlisted)`);
+  process.exit(0);
+}
+
 function main(): void {
   const workspaceRoot = resolve(import.meta.dir, '..');
   const docsPath = path.join(workspaceRoot, 'docs');
+
+  // --workspace: enforce the docs/ top-level manifest (L0 folder governance).
+  if (process.argv.includes('--workspace')) {
+    runWorkspaceMode(docsPath);
+  }
 
   console.log('🔍 Validating docs/ folder structure...');
   console.log(`   Path: ${docsPath}`);
