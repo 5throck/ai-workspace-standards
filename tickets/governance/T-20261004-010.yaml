@@ -6,7 +6,7 @@ title: >-
   machine, half-duplex, barge-in) per spec
   2026-10-04-coworkspace-voice-conversation-design
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-04T05:13:22.349Z'
 history:
@@ -19,5 +19,14 @@ history:
   - at: '2026-10-04T05:13:36.402Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-04T05:28:05.184Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1391: one-button voice conversation mode (state machine
+  idle/listening/thinking/speaking, half-duplex, barge-in, per-country language
+  selection ko/en/ja/es with browser-language default detection), sidebar login
+  form removed in favor of the /login page, and the static-asset auth exemption
+  fix. Rendered verification evidence in
+  docs/reports/2026-10-04-voice-conversation-verification/.
 error: null
