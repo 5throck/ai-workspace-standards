@@ -206,6 +206,8 @@ design). In-container background self-updates are inert by design.
 | `CO_WORKSPACE_HERMES_REASONING_EFFORT` | `low` (key mode) | Default effort stamped into team `config.yaml` (`agent.reasoning_effort`) — thinking-mandatory models (glm-5.3-flash) reject effort-less requests, so key-mode turns run with zero operator flags. `low \| high \| max`; an explicitly empty value omits the stamp (compose uses `${VAR-low}`, so empty is kept, not defaulted) |
 | `CO_WORKSPACE_RUN_BUDGET_SECONDS` / `CO_WORKSPACE_MAX_TURNS` | `300` / `100` | Wall-clock and tool-iteration ceilings per turn |
 | `CO_WORKSPACE_INTERACTION_STANDARD` | `true` | Prepend the LLM Interaction Standard short form (docs/standards/llm-interaction-standard.md) to fresh sessions; `false` opts out |
+| `CO_WORKSPACE_MODEL` | — | Runtime-neutral model for turns (claude: `--model`; hermes: config.yaml stamp); `CO_WORKSPACE_HERMES_MODEL` remains as an alias |
+| `CO_WORKSPACE_TURN_EXTRA_ARGS` | — | Extra argv for every turn across runtimes; `CO_WORKSPACE_HERMES_EXTRA_ARGS` remains as an alias. Hot-swappable via `PUT /admin/turn-config` without a restart |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
 | `CO_WORKSPACE_API_KEYS` / `CO_WORKSPACE_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |

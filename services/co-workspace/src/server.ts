@@ -143,6 +143,10 @@ export function createServer(state: GatewayState) {
 if (import.meta.main) {
   console.log(`[co-workspace] running as uid ${process.getuid?.() ?? "n/a"}`);
   const state = createState();
+  if (state.turnOverrides) {
+    console.log(`[co-workspace] turn-config overlay applied: ${state.turnOverrides.applied.join(", ")}`);
+    for (const w of state.turnOverrides.warnings) console.warn(`[co-workspace] turn-config warning: ${w}`);
+  }
   // 2026-10-03 review H3: graceful shutdown — kill running turn children, drain the chat
   // locks with a bound, checkpoint the SQLite WALs, then exit. Docker mode is rescued by
   // the reaper + `init: true`; bare-host process mode previously left orphaned children
