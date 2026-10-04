@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { dump } from 'js-yaml';
@@ -9,6 +9,7 @@ import {
   moveTicket,
   resolveTicketLocation,
   readTicket,
+  archiveCandidates,
   archiveDirFor,
   archiveCandidates,
   archiveTickets,
@@ -299,6 +300,61 @@ describe('ticket.ts CLI (subprocess, TICKET_WORKSPACE_ROOT seam)', () => {
       const bad = runCli(['archive', '--days', 'week'], root);
       expect(bad.code).toBe(1);
       expect(bad.err).toContain('--days must be a non-negative integer');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("archive edge branches (review M7, T-20261004-014)", () => {
+  test("a candidate that vanishes between scan and move is skipped, not fatal", () => {
+    makeAgedDoneTicket(dir, 9, { title: "vanishing" });
+    const candidates = archiveCandidates(dir, DEFAULT_ARCHIVE_DAYS);
+    expect(candidates).toHaveLength(1);
+    rmSync(join(dir, `${candidates[0].ticket.id}.yaml`)); // vanish after scan
+    const moved = archiveTickets(dir, DEFAULT_ARCHIVE_DAYS, { candidates });
+    expect(moved).toHaveLength(0);
+    expect(listTickets(archiveDirFor(dir))).toHaveLength(0);
+  });
+
+  test("an existing archive file with the same id is never overwritten", () => {
+    const t = makeAgedDoneTicket(dir, 9);
+    const archiveDir = archiveDirFor(dir);
+    mkdirSync(archiveDir, { recursive: true });
+    writeFileSync(join(archiveDir, `${t.id}.yaml`), "sentinel: keep\n", "utf-8");
+    expect(() => archiveTickets(dir, DEFAULT_ARCHIVE_DAYS)).toThrow(/refusing to overwrite/);
+    expect(readFileSync(join(archiveDir, `${t.id}.yaml`), "utf-8")).toContain("sentinel: keep");
+  });
+
+  test("a bare id present in BOTH archives is ambiguous", () => {
+    const governance = join(dir, "governance");
+    mkdirSync(governance, { recursive: true });
+    const serviceArchive = archiveDirFor(dir);
+    const governanceArchive = archiveDirFor(governance);
+    mkdirSync(serviceArchive, { recursive: true });
+    mkdirSync(governanceArchive, { recursive: true });
+    for (const d of [serviceArchive, governanceArchive]) {
+      writeFileSync(join(d, "T-20260901-009.yaml"), dump({ schemaVersion: 1, id: "T-20260901-009", kind: "manual", title: "x", priority: "normal", status: "done", attempts: 0, created_at: "2026-09-01T00:00:00Z", history: [], result: null, error: null }), "utf-8");
+    }
+    expect(() => resolveTicketLocation(dir, governance, "T-20260901-009")).toThrow(/BOTH archives/);
+  });
+});
+
+describe("CLI restore failure path (review M7-5)", () => {
+  test("restore on a live (non-archived) id fails with guidance", () => {
+    const root = mkdtempSync(join(tmpdir(), "ticket-cli-restore-fail-"));
+    try {
+      const gov = join(root, "tickets", "governance");
+      mkdirSync(gov, { recursive: true });
+      // A live (fresh, never-archived) done ticket: restore must refuse with guidance.
+      const doneAt = new Date().toISOString();
+      writeFileSync(join(gov, "T-20260901-004.yaml"), dump({ schemaVersion: 1, id: "T-20260901-004", kind: "manual", title: "live work", priority: "normal", status: "done", attempts: 0, created_at: doneAt, history: [{ at: doneAt, from: "review", to: "done" }], result: "recent", error: null }), "utf-8");
+      const proc = Bun.spawnSync(["bun", join(import.meta.dir, "..", "..", "scripts", "ticket.ts"), "archive", "--restore", "T-20260901-004"], {
+        env: { ...process.env, TICKET_WORKSPACE_ROOT: root },
+        stdout: "pipe", stderr: "pipe",
+      });
+      expect(proc.exitCode).toBe(1);
+      expect(proc.stderr.toString()).toContain("is not archived");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

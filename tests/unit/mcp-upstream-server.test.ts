@@ -1401,7 +1401,9 @@ describe('Appendix E: client_roots identity', () => {
     const pending = s.create(good({ project_root: proj }));
     const ping = await s.send('ping');
     expect(ping.result).toEqual({});
-    expect(Date.now() - t0).toBeLessThan(300); // answered while roots/list is still outstanding
+    // Ordering semantics scaled to the configured 500ms roots timeout: the ping
+    // must be answered while roots/list is still outstanding (T-20261004-011).
+    expect(Date.now() - t0).toBeLessThan(450);
     const declared = await pending;
     expect(Date.now() - t0).toBeLessThan(2500);
     expect(declared.body.flagged).toBe(true);

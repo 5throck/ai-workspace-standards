@@ -1,6 +1,6 @@
 ---
-translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
-sync_version: 3
+translated_from_hash: 6ff6317a491dec725937916be12074cea9686d1555c174cdb8b76863adf06156
+sync_version: 4
 ---
 
 **言語**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -195,7 +195,9 @@ C:\git\ (ワークスペースルート - このリポジトリ)
 ├── graft/                   # リポジトリコンテキストグラフ（ADR-0076）
 ├── schemas/                 # 共有JSONスキーマ
 ├── tickets/                 # ガバナンス決定チケット
-├── docs/governance/agents/  # 運用ワークフローリファレンス（AGENTS.mdのポインターターゲット）
+├── docs/                    # ガバナンス文書 — マニフェスト: docs/README.md
+│   ├── governance/agents/   #   運用ワークフローリファレンス
+│   └── standards/           #   標準 (LLMインタラクション標準, ADR-0098)  # 運用ワークフローリファレンス（AGENTS.mdのポインターターゲット）
 └── templates/               # バージョン管理されたAIプロジェクトテンプレート (co-develop, co-design, etc.)
     ├── common/              # すべてのバリアントで共有されるスクリプト、フック、スキル
     ├── co-develop/          # ✅ 安定 — フルソフトウェア開発エージェントチーム

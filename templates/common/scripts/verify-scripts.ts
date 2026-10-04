@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.10.0
+ * @version 1.11.1
+ *         v1.11.0 (2026-10-04, T-20261004-012): findDivergentDuplicateRows — registry-style rows
+ *         appearing OUTSIDE the ## Registry span (doc-tail fragments) must agree with the
+ *         authoritative version; a script name with >1 distinct version cell is an ERROR.
+ *         Exported for tests. v1.11.1: the check is L0-only — scaffolded projects
+ *         inherit SCRIPTS.md with historical doc-tail fragments by design.
  *
  * v1.10.0: ERROR on SCRIPTS.md registry rows with column count ≠ 8. Exported REGISTRY_COLUMN_COUNT and findMalformedRegistryRows for test coverage.
  * v1.8.0 (2026-09-23, adopt-project engine prerequisites): walkScripts() skips
@@ -220,6 +225,25 @@ export function findMalformedRegistryRows(content: string): { script: string; co
   return bad;
 }
 
+/** T-20261004-012: doc-tail fragments repeat registry-style rows outside the
+ * authoritative ## Registry span; when their version cell drifts (historically:
+ * ticket.ts 1.3.0 fragment vs 1.9.1 primary) the file self-contradicts. Any
+ * script name with >1 distinct version anywhere in the file is reported. */
+export function findDivergentDuplicateRows(content: string): { script: string; versions: string[] }[] {
+  const versions = new Map<string, Set<string>>();
+  for (const line of content.split("\n")) {
+    const m = /^\|\s*`([^`]+)`\s*\|\s*L\d[^|]*\|\s*(\d+\.\d+\.\d+)\s*\|/.exec(line);
+    if (m) {
+      const set = versions.get(m[1]) ?? new Set<string>();
+      set.add(m[2]);
+      versions.set(m[1], set);
+    }
+  }
+  return [...versions.entries()]
+    .filter(([, set]) => set.size > 1)
+    .map(([script, set]) => ({ script, versions: [...set].sort() }));
+}
+
 function parseRegistry(content: string): RegistryEntry[] {
   const lines = content.split("\n");
   const entries: RegistryEntry[] = [];
@@ -426,6 +450,16 @@ function verify(): boolean {
     errors.push(
       `Malformed registry row: \`${row.script}\` has ${row.columns} columns, expected ${REGISTRY_COLUMN_COUNT} (script|source|version|status|removal-date|security-advisory|layer|pair)`
     );
+  }
+
+  // L0-only: scaffolded projects inherit SCRIPTS.md with historical doc-tail
+  // fragments by design (the registry span is what projects verify against).
+  if (contextLayer === "L0") {
+    for (const dup of findDivergentDuplicateRows(content)) {
+      errors.push(
+        `Divergent duplicate registry rows: \`${dup.script}\` appears with versions ${dup.versions.join(" vs ")} — doc-tail fragments must match the authoritative ## Registry row`
+      );
+    }
   }
 
   const registeredNames = new Set(registry.map((e) => e.script));

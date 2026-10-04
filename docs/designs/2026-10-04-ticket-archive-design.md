@@ -113,3 +113,13 @@ gate, dev-sync step 3.96b) failed fail-closed. Two-part fix, same spec:
 Known limitation, accepted: other prose (ADRs, memory logs, reports) citing
 live ticket paths is not machine-validated and now names stale paths; the
 archive path is derivable (`tickets/governance/archive/<same name>`).
+
+## Addendum (2026-10-04, project review): archived-id resolution contract
+
+Project review Critical 2 found the design's promise ("show/move keep working on
+archived ids") unimplemented: `resolveTicketLocation` returned the LIVE store dir
+with `archived: true`, and every read path looks in `join(dir, id.yaml)`. Fixed
+contract: an archived id resolves to the ARCHIVE directory as the containing dir
+(bare and explicit forms), `--restore` derives the live store from the archive
+dir's parent, and regression tests pin an archived-not-restored read. Review:
+docs/reports/2026-10-04-project-review-full.md #2.

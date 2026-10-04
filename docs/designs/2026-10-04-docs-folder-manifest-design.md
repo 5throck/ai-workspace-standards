@@ -89,3 +89,17 @@ be consolidated and simplified. Executed on top of the manifest + gate:
   docs-links `--all` clean (one pre-existing dead link to a rotated memory
   transcript fixed in github-first-execution.md); CHANGELOG mentions of old paths
   are historical records and intentionally untouched.
+
+## Addendum 2 (2026-10-04, E2E + review follow-ups): L0-only scoping
+
+The E2E (test-new-project) caught the manifest gate judging a freshly scaffolded
+project's docs/ tree by the WORKSPACE manifest — project docs/ are project-scoped
+(context.md, project.md, handoff specs, benchmark fixtures are legitimate there).
+Fixes, both this spec's scope:
+
+- `audit.ts` 2.48.1: the manifest-gate spawn is L0-only (CONSTITUTION.md marker —
+  scaffolded projects do not carry it).
+- `verify-scripts.ts` 1.11.1: the divergent-duplicate-row check (T-20261004-012
+  ratchet) is likewise L0-only — scaffolded projects inherit SCRIPTS.md with
+  historical doc-tail fragments by design; the registry span is what projects
+  verify against.

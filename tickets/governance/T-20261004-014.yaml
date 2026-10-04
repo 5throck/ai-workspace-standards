@@ -6,12 +6,28 @@ title: >-
   nextSeqGuess archive scan for --days 0, Windows rename retry, ticket-archive
   uncovered branches (review C-M3/M4/M6/M7)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.704Z'
 history:
   - at: '2026-10-04T05:40:33.704Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.198Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.217Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:35:05.301Z'
+    from: review
+    to: done
+result: >-
+  Delivered: (a) single-scan contract — archiveTickets accepts the CLI's
+  pre-computed candidates and the summary reports exactly what was scanned; (b)
+  nextSeqGuess scans both archive dirs so --days 0 cannot re-mint an archived
+  id; (c) renameWithRetry (3 attempts, 100ms backoff) for EBUSY/EPERM/EACCES on
+  archive/restore renames; (d) 4 new edge tests (vanish-skip, overwrite refusal,
+  both-archives ambiguity, CLI restore-live refusal) + the archived-read C1
+  regression.
 error: null

@@ -6,12 +6,27 @@ title: >-
   semantics or scaled budgets (mcp-upstream E13d ping bound; security-validator
   perf tests)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.650Z'
 history:
   - at: '2026-10-04T05:40:33.650Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.012Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.077Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:34:51.974Z'
+    from: review
+    to: done
+result: >-
+  Delivered: E13d ping bound rescaled to the configured 500ms roots timeout
+  (450ms, ordering semantics preserved); security-validator perf bounds given
+  10x headroom (1000/500/5000ms with rationale comments); co-deck
+  verify-new-theme fast-mode gate 3s -> 10s in the TEMPLATE and the delivered
+  project copy (fleet survey found no other wall-clock asserts and no argon2
+  exposure outside co-workspace).
 error: null

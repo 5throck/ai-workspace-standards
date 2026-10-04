@@ -135,3 +135,15 @@ Expect exactly 5 files listed (or fewer if any are already in-sync). Verify no `
 - ADR-0031: L1-L2 Fork Model (variant content management)
 - ADR-0037: propagate-to-templates consolidation
 - `propagation-map.json` `docs` domain history note (2026-07-08 disable rationale)
+
+---
+
+## Amendment (2026-10-04, T-20261004-018): paths updated by the docs consolidation
+
+The 2026-10-04 docs/ consolidation (manifest: `docs/README.md`, gate:
+`validate-doc-folder.ts --workspace`) moved several directories this ADR's Tier-2
+table referenced: `docs/superpowers/` → `docs/archive/superpowers/` (legacy-frozen),
+the 7 root how-to guides → `docs/guides/`, dated analyses/audits → `docs/reports/`.
+Tier-2 policy (propagation classes) is UNCHANGED — only the paths aged. Current
+locations are governed by `docs/README.md`; this amendment exists so future
+amendments cite post-consolidation paths.

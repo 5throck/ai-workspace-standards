@@ -5,12 +5,25 @@ title: >-
   docs: amend ADR-0053 propagation table for the 2026-10-04 docs consolidation
   (superpowers moved, guides relocated)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.768Z'
 history:
   - at: '2026-10-04T05:40:33.768Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.313Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.330Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:35:05.381Z'
+    from: review
+    to: done
+result: >-
+  Delivered: ADR-0053 amended (dated section) — the 2026-10-04 consolidation
+  moved the paths its Tier-2 table cited (superpowers -> archive/superpowers,
+  guides -> guides/, analyses -> reports/); propagation policy unchanged,
+  current locations governed by docs/README.md.
 error: null

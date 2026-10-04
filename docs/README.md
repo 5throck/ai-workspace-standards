@@ -50,10 +50,11 @@ It exists to stop folder proliferation: a folder is a contract, not a scratch sp
 | `standards/` | Cross-cutting normative standards | `llm-interaction-standard.md` (ADR-0098) | decision records, designs |
 | `templates/` | Governance contracts and schemas for the template fleet | `common-contract.json`, propagation schemas | project-facing doc templates (→ L1 docs) |
 
-Root-level loose files are allowed only for: the two indexes (`index.md`, this
-manifest), `VERSION_MANIFEST.md`, the machine projections
-(`workspace-schema.json`, `self-managed-surfaces.json`, `skill-graph*.json`,
-`surface-gaps.json`), and the variant planning pair (`variant-roadmap-2026-q3-q4.md`,
+Root-level loose files are allowed only for: the two indexes (`README.md`,
+`index.md`), `VERSION_MANIFEST.md`, the machine projections
+(`workspace-schema.json`, `self-managed-surfaces.json`, `skill-graph.json`,
+`skill-graph.md`, `skill-graph.overrides.json`, `surface-gaps.json`), and the
+variant planning pair (`variant-roadmap-2026-q3-q4.md`,
 `variant-benchmark-backlog.md`) — indexed in `index.md`. How-to guides live in
 `guides/`; dated reviews live in `reports/` (2026-10-04 consolidation folded
 `analysis/`, `audits/`, and the root guide files; `superpowers/` moved under

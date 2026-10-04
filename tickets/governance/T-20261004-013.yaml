@@ -5,12 +5,25 @@ title: >-
   validator-hardening: bind validate-doc-folder ALLOWED_DIRS/ALLOWED_ROOT_FILES
   to the docs/README.md manifest tables with a parity test
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.688Z'
 history:
   - at: '2026-10-04T05:40:33.688Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.158Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.178Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:34:52.056Z'
+    from: review
+    to: done
+result: >-
+  Delivered: tests/unit/validate-doc-folder.test.ts — 4 parity tests binding
+  ALLOWED_DIRS/ALLOWED_ROOT_FILES to the docs/README.md manifest rows (both
+  directions) and the actual tree; first run surfaced 3 unnamed root files in
+  the manifest, now named explicitly.
 error: null

@@ -50,11 +50,7 @@ describe('createTicket', () => {
     // v1.4.0 read a fixed 3-char slice, so a pre-existing T-<today>-1000.yaml
     // truncated to 1000 -> "100" and the next guess started at 101, colliding
     // its way up; the parse now reads the full digit run.
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const prefix = `T-${yyyy}${mm}${dd}`;
+    const prefix = `T-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
     writeFileSync(join(dir, `${prefix}-1000.yaml`), 'id: dummy\n');
     const t = createTicket(dir, { kind: 'manual', title: 'after 4-digit', priority: 'normal' });
     expect(t.id).toBe(`${prefix}-1001`);

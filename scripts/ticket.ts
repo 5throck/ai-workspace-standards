@@ -391,6 +391,9 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       ];
       const plans = stores.map(s => ({ ...s, list: archiveCandidates(s.dir, days) }));
       const total = plans.reduce((n, p) => n + p.list.length, 0);
+      // Single scan shared by plan and apply (review M3): the summary reports
+      // exactly the candidates this invocation scanned.
+      const candidatesByDir = new Map(plans.map(p => [p.dir, p.list]));
       if (total === 0) {
         console.log(`No tickets done >= ${days}d to archive.`);
         break;
@@ -406,8 +409,9 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
         console.log(`\n${total} ticket(s) eligible (done >= ${days}d). Re-run with --apply to archive.`);
         break;
       }
-      for (const p of plans) archiveTickets(p.dir, days);
-      console.log(`\n✅ archived ${total} ticket(s) (done >= ${days}d). tickets/governance/archive is git-tracked — commit the renames.`);
+      let moved = 0;
+      for (const p of plans) moved += archiveTickets(p.dir, days, { candidates: candidatesByDir.get(p.dir) }).length;
+      console.log(`\n✅ archived ${moved} ticket(s) (done >= ${days}d). tickets/governance/archive is git-tracked — commit the renames.`);
       break;
     }
     default:

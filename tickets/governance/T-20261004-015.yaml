@@ -5,12 +5,25 @@ title: >-
   docs: reconcile UTC today() vs local todayPrefix() date convention in
   ticket-store ready filter
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.721Z'
 history:
   - at: '2026-10-04T05:40:33.721Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.238Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.258Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:35:05.320Z'
+    from: review
+    to: done
+result: >-
+  Delivered: todayPrefix is UTC-normalized (mirrors today()) so ids, created_at
+  and the --ready not_before filter share one convention; the KST 00:30
+  invisible-ticket window is gone; ticket-store test prefix computation updated
+  to match.
 error: null
