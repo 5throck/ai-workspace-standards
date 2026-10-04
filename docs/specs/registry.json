@@ -2071,6 +2071,15 @@
       "source": "manual",
       "created": "2026-10-04",
       "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-05-dependency-audit-manifest-skip-design",
+      "title": "dependency audit manifest skip design",
+      "file": "docs/designs/2026-10-05-dependency-audit-manifest-skip-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
     }
   ]
 }
