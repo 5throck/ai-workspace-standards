@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261004-005
+kind: manual
+title: >-
+  ticket archive: done tickets leave the live stores after a 7-day dwell
+  (archive subcommand, store-level move, archive-aware id resolution)
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T02:02:03.144Z'
+history:
+  - at: '2026-10-04T02:02:03.144Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T02:02:11.043Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T02:02:11.060Z'
+    from: waiting
+    to: review
+result: null
+error: null
