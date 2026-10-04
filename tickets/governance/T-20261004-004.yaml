@@ -5,12 +5,26 @@ title: >-
   registry: triage 2 approved specs stale >14d (upgrade-project-drift-fixes 15d;
   governance-docs-architecture) — implement or archive
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T16:42:34.565Z'
 history:
   - at: '2026-10-03T16:42:34.565Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T04:51:19.749Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T04:51:19.784Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T04:51:31.001Z'
+    from: review
+    to: done
+result: >-
+  Triaged: upgrade-project-drift-fixes is already status=implemented in the
+  registry (delivered since filing — no action); governance-docs-architecture
+  (approved, 4 months stale) archived with a disposition note in the design
+  header — its P2 structural-include approach was overtaken by the COMMON-CLAUDE
+  marker zones + marker-inject engine and ADR-0090 thin dispatchers.
 error: null

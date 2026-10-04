@@ -47,7 +47,7 @@ El soporte de jurisdicción coreana viene incluido con el workspace: un **perfil
 
 **Antes de usar este espacio de trabajo**, asegúrese de tener instalado el software requerido:
 
-> **📖 Guía Detallada**: Vea [Primeros Pasos](docs/getting-started.md) para obtener instrucciones completas de instalación y solución de problemas.
+> **📖 Guía Detallada**: Vea [Primeros Pasos](docs/guides/getting-started.md) para obtener instrucciones completas de instalación y solución de problemas.
 
 ### Herramientas Imprescindibles
 
@@ -73,7 +73,7 @@ bun --version    # Debería mostrar 1.x.x
 gh --version     # Opcional: automatización de PR
 ```
 
-**Instalar herramientas faltantes**: Vea [Primeros Pasos](docs/getting-started.md#-essential-software-must-have) para instrucciones detalladas de instalación.
+**Instalar herramientas faltantes**: Vea [Primeros Pasos](docs/guides/getting-started.md#-essential-software-must-have) para instrucciones detalladas de instalación.
 
 ---
 

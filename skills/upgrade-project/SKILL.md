@@ -150,8 +150,8 @@ git stash pop stash@{0}
 
 ## See Also
 
-- [Project Upgrade Guide](../../docs/project-upgrade-guide.md)
-- [Variant Conversion Guide](../../docs/variant-conversion-guide.md)
+- [Project Upgrade Guide](../../docs/guides/project-upgrade-guide.md)
+- [Variant Conversion Guide](../../docs/guides/variant-conversion-guide.md)
 - [Fork Model (ADR-0031)](../../docs/adr/0031-l1-l2-fork-model.md)
 
 ## Post-Upgrade Verification

@@ -80,5 +80,5 @@ bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform all|cla
 
 - Design: `docs/designs/2026-09-23-adopt-project-conversion-design.md`
 - Meeting: `memory/meeting-2026-09-23-adopt-project-plan-review.md`
-- Manual predecessor: `docs/variant-conversion-guide.md` §3 (Scenario B)
+- Manual predecessor: `docs/guides/variant-conversion-guide.md` §3 (Scenario B)
 - E2E: `bun scripts/test-adopt-project.ts` (`ADOPT_E2E_FULL=1` for the real conversion run)

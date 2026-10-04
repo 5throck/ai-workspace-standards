@@ -1,17 +1,22 @@
 # Fleet Security Assessment Checklist
 
-**Purpose**: Standing checklist for any security assessment of a co-* project (or the fleet). Derived from (1) the verified countermeasure catalog, (2) the 2026-10-01 fleet assessment findings, and (3) the 2026-09 assessment.bizknights.org engagement (F-01…F-06, NF-01/NF-02).
+**Purpose**: Standing checklist for any security assessment of a co-* project (or the fleet). Derived from (1) the verified countermeasure catalog, (2) the 2026-10-01 fleet assessment findings, (3) the 2026-09 assessment.bizknights.org engagement (F-01…F-06, NF-01/NF-02), and (4) the 2026-10-03 co-workspace deployment review (docker-socket broker, workload/spend caps, auth-audit logging, provider-key hygiene).
 
 **Usage**: For each item, record ✅ pass / ❌ fail / ➖ N/A plus the evidence pointer (file:line or request/response). Failures become findings with severity per the report template in `docs/reports/`. Re-verify claimed "FIXED" findings on every retest — a documented control that fails verification is itself a finding (see 2026-10-01 FW-4).
 
 > **Template note**: This is the template copy maintained in `templates/co-security`.
-> Scaffolded projects receive it at `docs/findings/security-checklist.md`. The
-> deployed co-security workspace keeps the evidence-backed sources this checklist
-> was derived from — consult them there when a template-local path does not resolve:
+> Scaffolded projects receive it at `docs/findings/security-checklist.md` (undated
+> standing name; the deployed co-security workspace keeps the dated,
+> evidence-backed source `2026-10-01-fleet-security-checklist.md`). The evidence
+> sources this checklist was derived from live in the deployed workspace — consult
+> them there when a template-local path does not resolve:
 > `2026-10-01-fleet-security-countermeasure-catalog.md` (countermeasure catalog with
 > file:line exemplars), `docs/reports/2026-10-01-co-fleet-security-assessment.md`
-> (fleet findings), `docs/assessment-2026-09-bizknights.md` (prior web-app engagement).
-
+> (fleet findings), `docs/assessment-2026-09-bizknights.md` (prior web-app
+> engagement), `docs/reports/2026-10-03-co-workspace-deployment-review.md`
+> (container/credential caps). Refresh rule: whenever the deployed checklist gains
+> derivations or items, refresh this template copy in the same PR
+> (spec 2026-10-04-co-security-checklist-backport-design).
 ---
 
 ## 1. Secrets & Data at Rest
@@ -23,6 +28,8 @@
 - [ ] If a database or encryption key exists locally: key material lives OUTSIDE the data volume / backup artifact, or is coupled only by a documented procedure (master-key/data separation — catalog B3); key files carry `600` permissions.
 - [ ] Secrets in images: `.dockerignore` excludes `.env*` and `*.db`; no `ARG`-passed secrets in the Dockerfile.
 - [ ] No SQLite/DB files committed in git history (`git log --all -- '**/*.db'`) — historical blobs keep data recoverable even after untracking (2026-10-01 CP-7).
+- [ ] Runtime secret files are not inside any directory bind-mounted into the service container — walk the compose `volumes:` list to each host-side source; a secret under an RW mount (repo checkout, data dir) is readable by a compromised service (catalog B7; 2026-10-03 co-workspace review — accepted single-operator risk).
+- [ ] Metered provider/LLM credentials are dedicated service keys, scope- and spend-limited, with a documented rotation path — never the operator's personal account key (catalog B7).
 
 ## 2. Dependencies
 
@@ -50,6 +57,7 @@
 - [ ] Centralized auth gate that every route handler/server action calls (no middleware-only shortcuts); role matrix enforced centrally incl. admin/content separation.
 - [ ] Object ownership checks on every read/write by ID (IDOR — retest positive control #3 in the 2026-09 engagement).
 - [ ] Approval-gated lifecycle: non-approved accounts rejected at login; SSO auto-provisioning never lands as APPROVED; must-change-password restricted to a minimal endpoint allowlist.
+- [ ] Authentication outcomes are audit-logged (timestamp, actor, action) to a queryable store, and failed-login review has an owner or cadence — a silent auth path hides credential-stuffing (catalog C15).
 
 ## 5. Web Application — Session & CSRF
 
@@ -84,6 +92,8 @@
 - [ ] Schema migration on boot uses `prisma migrate deploy` (never `db push --accept-data-loss`), and failure aborts startup rather than being swallowed (2026-10-01 CP-4).
 - [ ] Services bind loopback by default; broader binding requires an explicit env opt-in with a comment.
 - [ ] Docker compose: no default/weak credentials on non-ephemeral containers; volumes least-privilege (`:ro` where possible); image retention cleanup scheduled.
+- [ ] The Docker socket is never mounted into the application container; container-spawning features go through a policy broker — create-body allowlist with canonical rebuild, label-scoped ref resolution, bind-path symlink walk, endpoint allowlist — or rootless/userns-remap, with the residual TOCTOU documented (catalog D5).
+- [ ] Ephemeral/untrusted containers carry resource caps (memory, cpus, pids), and metered external spend (LLM tokens/turns) carries explicit per-tenant/per-principal caps — anonymous access with uncapped spend must fail boot (catalog D6).
 
 ## 9. Documentation & Process
 
