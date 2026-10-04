@@ -3,7 +3,7 @@
 // and the turn params must not be hermes-named).
 
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync, statSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -90,6 +90,21 @@ describe("overlay file round-trip (data/turn-config.json)", () => {
       const { writeFileSync } = require("node:fs");
       writeFileSync(turnOverridesPath(dir), "{ not json", "utf8");
       expect(() => loadTurnOverrides(baseCfg(), dir)).toThrow(/not valid JSON/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // POSIX permission bits only — Windows stat mode does not carry the unix octal
+  test.skipIf(process.platform === "win32")("persisted file is 0600 — the plaintext apiKey must not depend on umask (T-20261004-026)", () => {
+    const dir = mkdtempSync(join(tmpdir(), "turn-config-"));
+    try {
+      persistTurnOverrides(dir, { apiKey: "sk-secret" });
+      expect(statSync(turnOverridesPath(dir)).mode & 0o777).toBe(0o600);
+      // a pre-existing looser file is tightened on the next persist
+      chmodSync(turnOverridesPath(dir), 0o644);
+      persistTurnOverrides(dir, { apiKey: "sk-secret-2" });
+      expect(statSync(turnOverridesPath(dir)).mode & 0o777).toBe(0o600);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
