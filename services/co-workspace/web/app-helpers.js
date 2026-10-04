@@ -138,3 +138,30 @@ export function detectVoiceLang(browserLangs, supported = VOICE_LANGUAGES, fallb
   }
   return fallback;
 }
+
+/**
+ * Spoken summary for voice mode (user review 2026-10-04): long agent answers must
+ * NOT be read in full — speak the gist (3Blue1Brown: conclusion/intuition first),
+ * leave the detail on screen. Extraction order: an explicit "Short Answer" section
+ * (LLM Interaction Standard §5 Explanation Pattern) → the first non-heading
+ * paragraph → the opening text. Result is markdown-stripped and capped at a
+ * sentence boundary near 320 chars.
+ */
+export function spokenSummary(md, cap = 320) {
+  const text = speakableText(md);
+  if (text.length <= cap) return text;
+  let source = text;
+  const shortMatch = md && /##\s*Short Answer\s*\n+([\s\S]*?)(\n##|\n*$)/i.exec(String(md));
+  if (shortMatch && shortMatch[1].trim()) source = shortMatch[1];
+  else {
+    const firstPara = String(md).split(/\n{2,}/).find((b) => {
+      const t = b.trim();
+      return t && !t.startsWith("#") && !t.startsWith("```") && !t.startsWith("|") && !t.startsWith("-");
+    });
+    if (firstPara) source = firstPara;
+  }
+  const spoken = speakableText(source);
+  if (spoken.length <= cap) return spoken;
+  const cut = spoken.lastIndexOf(".", cap);
+  return (cut > cap * 0.5 ? spoken.slice(0, cut + 1) : spoken.slice(0, cap).trim()) + " …";
+}

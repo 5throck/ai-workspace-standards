@@ -105,3 +105,20 @@ available browser-side. Added `docs/guides`-adjacent language support:
 - `recognition.lang` and TTS `utter.lang` both follow the selection, so spoken
   instructions and spoken replies use the same language; changing it mid-listen
   restarts the recognizer.
+
+## Revision 3 (2026-10-04, user review): speak the gist — 3Blue1Brown out loud
+
+Two corrections from real usage:
+
+1. **Transcript flow confirmed**: the spoken instruction lands in the composer and
+   submits as a normal chat turn (user bubble + streamed reply on screen) — voice
+   is an input channel to the same conversation, never a separate mode.
+2. **Speak the gist, not the dump** (3Blue1Brown out loud): long agent answers are
+   read as a SHORT spoken summary only; the full result stays on screen and a
+   status hint ("Full answer on screen ↑") closes the loop. Extraction
+   (`spokenSummary`, app-helpers.js, unit-tested): an explicit "## Short Answer"
+   section (the LLM Interaction Standard §5 Explanation Pattern) when present,
+   else the first prose paragraph, sentence-boundary-capped near 320 chars.
+   Because gateway sessions answer under the interaction standard (§13.1), the
+   spoken summary naturally leads with conclusion + intuition — the screen
+   carries the Level-3..5 detail (§4.4 progressive disclosure).
