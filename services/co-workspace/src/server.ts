@@ -49,8 +49,8 @@ export {
   isolationPostureWarning,
   runtimeProviderKeyWarning,
 } from "./access";
-export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData, removeUnrelocatedScaffold, sweepOrphanedScaffolds } from "./lifecycle";
-import { sweepOrphanedScaffolds } from "./lifecycle";
+export { provisionTenant, sanitizeProjectName, tenantKeyFor, hostSidePath, getOrStartTenant, resolveLazyTenant, deleteTenantData, removeUnrelocatedScaffold, sweepOrphanedScaffolds, sweepOrphanedStorage } from "./lifecycle";
+import { sweepOrphanedScaffolds, sweepOrphanedStorage } from "./lifecycle";
 export { runChat, resolveAuthDir } from "./chat";
 export { openaiChatResponse } from "./responses";
 
@@ -213,6 +213,14 @@ if (import.meta.main) {
   if (sweptScaffolds.error) console.warn(`[co-workspace] scaffold sweep failed: ${sweptScaffolds.error}`);
   else if (sweptScaffolds.removed.length > 0) {
     console.log(`[co-workspace] scaffold sweep: removed ${sweptScaffolds.removed.join(", ")}`);
+  }
+  // T-20261003-026: the same reconcile for the storage tree — storage/<P>/<N> folders whose
+  // registry row is gone (death between relocation and the next registry write, or a partial
+  // delete) were never cleaned otherwise.
+  const sweptStorage = sweepOrphanedStorage(state);
+  if (sweptStorage.error) console.warn(`[co-workspace] storage sweep failed: ${sweptStorage.error}`);
+  if (sweptStorage.removed.length > 0) {
+    console.log(`[co-workspace] storage sweep: removed ${sweptStorage.removed.join(", ")}`);
   }
   if (state.cfg.isolation === "docker") {
     const probe = dockerProbe(state.cfg.dockerBin);

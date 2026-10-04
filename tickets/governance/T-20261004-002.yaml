@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261004-002
+kind: manual
+title: >-
+  co-workspace: fix the windows-only loginRequired wave-B gate flake (11.7s, PR
+  #1362 run 37116607423) — quarantine/retry policy or windows timeout bump for
+  the co-workspace login gate
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-03T16:42:34.535Z'
+history:
+  - at: '2026-10-03T16:42:34.535Z'
+    from: null
+    to: backlog
+result: null
+error: null
