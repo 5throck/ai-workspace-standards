@@ -200,7 +200,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     commitAt(dir, 'pm.md', 'chore(skills): propagate sync SKILL.md 1.2.1', '2026-09-05');
     commitAt(dir, 'pm.md', 'chore(templates): auto-release v0.8.1', '2026-09-20');
     expect(lastContentCommitDate(join(dir, 'pm.md'), dir)).toBeNull();
-  });
+  }, 20000); // git subprocesses are slow on loaded windows runners (run 37207767453)
 
   test('returns null outside a git repository', () => {
     const dir = mkdtempSync(join(tmpdir(), 'alc-no-git-'));
