@@ -102,7 +102,11 @@ class Session {
   constructor(ws: Workspace, cwd: string, env: Record<string, string> = {}) {
     this.child = spawn('bun', [serverPath], {
       cwd, stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, UPSTREAM_WORKSPACE_ROOT: ws.root, ...env },
+      // TZ=UTC: bun test runs its own frame with TZ=UTC, but this subprocess would
+      // otherwise inherit the machine's local zone — the server's todayStr() audit-log
+      // bucket and this file's date reads then disagree whenever the local day differs
+      // from the UTC day (failing only on non-UTC dev machines; CI is UTC and passed).
+      env: { ...process.env, TZ: 'UTC', UPSTREAM_WORKSPACE_ROOT: ws.root, ...env },
     });
     this.child.stdout!.on('data', (c: Buffer) => {
       this.buf += c.toString('utf-8');
@@ -446,7 +450,11 @@ describe('13.2 identity', () => {
     expect(declaredStatus.body.requests[0].id).toBe(filed.body.id);
     expect(declaredStatus.body.requests[0].status).toBe('done');
     expect(declaredStatus.body.requests[0].resolution).toBeUndefined();
-    // both calls are audit-logged with their identity
+    // both calls are audit-logged with their identity.
+    // UTC is correct here (not local): bun test runs with TZ=UTC, and the server
+    // subprocess is pinned to TZ=UTC below for exactly this reason — without the pin
+    // the server used the machine's local day while this frame used UTC, so the read
+    // ENOENTed whenever the local day differed (KST early mornings; CI never saw it).
     const today = new Date().toISOString().split('T')[0];
     const audit = readFileSync(join(ws.logsDir, `${today}.jsonl`), 'utf-8');
     const lines = audit.trim().split('\n').map((l) => JSON.parse(l));
