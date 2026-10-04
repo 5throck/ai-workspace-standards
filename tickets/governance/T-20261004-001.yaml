@@ -8,12 +8,21 @@ title: >-
   CLI/hooks auto-append — inspect before any further AGENTS.md edit near the
   graft anchors
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-03T16:42:34.521Z'
 history:
   - at: '2026-10-03T16:42:34.521Z'
     from: null
     to: backlog
+  - at: '2026-10-03T18:02:47.221Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T18:02:47.237Z'
+    from: waiting
+    to: running
+  - at: '2026-10-03T18:11:24.868Z'
+    from: running
+    to: review
 result: null
 error: null
