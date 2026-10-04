@@ -13,6 +13,7 @@ import {
   shouldAutoSend,
   detectVoiceLang,
   VOICE_LANGUAGES,
+  spokenSummary,
 } from "../../services/co-workspace/web/app-helpers.js";
 
 describe("recencyGroupLabel", () => {
@@ -184,5 +185,30 @@ describe("detectVoiceLang (voice language selection)", () => {
 
   test("supported set covers the four README languages", () => {
     expect(VOICE_LANGUAGES).toEqual(["ko-KR", "en-US", "ja-JP", "es-ES"]);
+  });
+});
+
+describe("spokenSummary (voice speaks the gist, not the dump)", () => {
+  test("short answers pass through whole", () => {
+    expect(spokenSummary("Deploy is green.")).toBe("Deploy is green.");
+  });
+
+  test("prefers the Short Answer section of the Explanation Pattern", () => {
+    const md = "## Short Answer\n\nMerge it — the gate is green.\n\n## Details\n\n" + "x".repeat(500);
+    expect(spokenSummary(md)).toBe("Merge it — the gate is green.");
+  });
+
+  test("long text truncates at a sentence boundary with an ellipsis", () => {
+    const md = "Sentence one is here. Sentence two follows. " + "y".repeat(400);
+    const out = spokenSummary(md, 120);
+    expect(out.endsWith("…")).toBe(true);
+    expect(out.length).toBeLessThan(160);
+    expect(out).toContain("Sentence one is here.");
+  });
+
+  test("falls back to the first prose paragraph for long sectioned docs", () => {
+    const md = "## Header\n\nFirst paragraph carries the conclusion.\n\n| table | data |\n";
+    const out = spokenSummary(md, 40);
+    expect(out.startsWith("First paragraph")).toBe(true);
   });
 });
