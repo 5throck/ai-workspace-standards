@@ -14,6 +14,7 @@ import {
   detectVoiceLang,
   VOICE_LANGUAGES,
   spokenSummary,
+  formatTurnActivity,
 } from "../../services/co-workspace/web/app-helpers.js";
 
 describe("recencyGroupLabel", () => {
@@ -232,5 +233,26 @@ describe("spokenSummary whole-sentence contract (user review: 200 chars, never c
     const md = "One. Two. Three. Four. Five. Six. Seven.";
     const out = spokenSummary(md, 14);
     expect(out).toBe("One. Two. …");
+  });
+});
+
+describe("formatTurnActivity (turn progress feedback)", () => {
+  test("elapsed seconds under a minute", () => {
+    expect(formatTurnActivity(12)).toBe("12s");
+    expect(formatTurnActivity(0)).toBe("0s");
+  });
+
+  test("minutes format past 90 seconds", () => {
+    expect(formatTurnActivity(95)).toBe("1m 35s");
+    expect(formatTurnActivity(200)).toBe("3m 20s");
+  });
+
+  test("appends the last known activity after the elapsed time", () => {
+    expect(formatTurnActivity(34, "Read")).toBe("34s · Read");
+    expect(formatTurnActivity(95, "Bash done (120ms)")).toBe("1m 35s · Bash done (120ms)");
+  });
+
+  test("negative elapsed clamps to zero", () => {
+    expect(formatTurnActivity(-5)).toBe("0s");
   });
 });

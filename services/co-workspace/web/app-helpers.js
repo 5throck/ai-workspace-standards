@@ -173,3 +173,15 @@ export function spokenSummary(md, cap = 200) {
   out = out.trim();
   return out.length < spoken.trim().length ? out + " …" : out;
 }
+
+/**
+ * Turn activity label (user review 2026-10-04: show progress between query and
+ * answer — benchmark: labeled activity stream + elapsed time is the dominant
+ * pattern in ChatGPT/Claude/Perplexity). Pure formatting: seconds + the last
+ * known tool/activity name.
+ */
+export function formatTurnActivity(elapsedSec, lastActivity) {
+  const secs = Math.max(0, Math.floor(elapsedSec));
+  const base = secs >= 90 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
+  return lastActivity ? `${base} · ${lastActivity}` : base;
+}
