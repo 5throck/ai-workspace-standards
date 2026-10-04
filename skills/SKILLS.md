@@ -56,7 +56,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `context-commonization-review` | 1.1.0 | active | architect | 2026-08-21 | — | Cross-variant docs/<variant>.context.md duplication review — promotes shared content into common docs/context.md (ADR-0050 Part 3) |
 | `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
-| `ci-triage` | 0.1.1 | active | pm | 2026-09-08 | — | CI failure triage and owner routing for scheduled health-check issues |
+| `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
 | `skill-graph-analytics` | 1.1.0 | active | pm | 2026-09-22 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
 | `graft` | 1.0.0 | active | pm | 2026-10-01 | — | — |
 

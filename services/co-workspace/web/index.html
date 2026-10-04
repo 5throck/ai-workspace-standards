@@ -94,6 +94,9 @@
   .sendBtn:disabled { opacity: .45; cursor: default; }
   .stopBtn { background: #8b1f1f; color: #fff; border: 0; border-radius: 10px; padding: 7px 14px; font: inherit; cursor: pointer; font-size: .78rem; }
   .stopBtn.hidden { display: none; }
+  .toolBtn { background: transparent; color: var(--fg); border: 1px solid var(--border2); border-radius: 10px; padding: 6px 10px; font: inherit; font-size: .82rem; cursor: pointer; }
+  .toolBtn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  .toolBtn.hidden { display: none; }
   textarea { width: 100%; background: transparent; color: var(--fg); border: 0; font: inherit; min-height: 44px; resize: none; outline: none; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
   .chip { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 999px;
@@ -195,6 +198,8 @@
       <div class="composerTools">
         <select id="model" aria-label="Variant" class="modelPick"></select>
         <span style="flex:1"></span>
+        <button type="button" id="ttsBtn" class="toolBtn" aria-pressed="false" title="Read replies aloud (TTS)">🔇</button>
+        <button type="button" id="micBtn" class="toolBtn hidden" aria-pressed="false" title="Dictate (browser speech recognition)">🎙</button>
         <button type="button" id="stopBtn" class="stopBtn hidden">■ Stop</button>
         <button type="submit" id="send" class="sendBtn">Send</button>
       </div>
@@ -212,7 +217,7 @@
 <script type="module">
   // T-20260928-012: pure helpers (donut slice math, recency grouping) live in
   // /app-helpers.js so they can be unit-tested without a browser.
-  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel } from "./app-helpers.js";
+  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, speechRecognitionSupported, speechSynthesisSupported } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
@@ -503,6 +508,68 @@
     });
   });
 
+  // ── Voice conversation (ADR-0098): TTS reads assistant replies, STT dictates input.
+  // Browser-native Web Speech API only — unsupported browsers hide the controls.
+  const ttsBtn = $("ttsBtn"), micBtn = $("micBtn");
+  const uiLang = document.documentElement.lang || "ko-KR";
+  let ttsEnabled = false;
+  try { ttsEnabled = localStorage.getItem("gw-tts-enabled") === "1"; } catch { /* private mode */ }
+  function applyTtsBtn() {
+    ttsBtn.textContent = ttsEnabled ? "🔊" : "🔇";
+    ttsBtn.setAttribute("aria-pressed", ttsEnabled ? "true" : "false");
+    ttsBtn.title = ttsEnabled ? "Reply reading is ON (click to mute)" : "Read replies aloud (TTS)";
+  }
+  if (speechSynthesisSupported(window)) {
+    applyTtsBtn();
+    ttsBtn.addEventListener("click", () => {
+      ttsEnabled = !ttsEnabled;
+      try { localStorage.setItem("gw-tts-enabled", ttsEnabled ? "1" : "0"); } catch { /* private mode */ }
+      if (!ttsEnabled && "speechSynthesis" in window) speechSynthesis.cancel();
+      applyTtsBtn();
+    });
+  } else {
+    ttsBtn.classList.add("hidden");
+  }
+  function speakReply(text) {
+    if (!ttsEnabled || !("speechSynthesis" in window) || !text) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(speakableText(text).slice(0, 4000));
+    utter.lang = uiLang;
+    speechSynthesis.speak(utter);
+  }
+
+  let recognition = null, dictating = false, dictateBase = "";
+  if (speechRecognitionSupported(window)) {
+    micBtn.classList.remove("hidden");
+    micBtn.addEventListener("click", () => {
+      if (dictating) { recognition.stop(); return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
+      recognition.lang = uiLang;
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      dictateBase = input.value ? input.value + " " : "";
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (const result of event.results) transcript += result[0].transcript;
+        input.value = dictateBase + transcript;
+        input.dispatchEvent(new Event("input"));
+      };
+      recognition.onend = () => {
+        dictating = false;
+        micBtn.setAttribute("aria-pressed", "false");
+        input.focus();
+      };
+      recognition.onerror = () => {
+        dictating = false;
+        micBtn.setAttribute("aria-pressed", "false");
+      };
+      dictating = true;
+      micBtn.setAttribute("aria-pressed", "true");
+      recognition.start();
+    });
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = input.value.trim();
@@ -513,6 +580,7 @@
     bubble("user", message);
     const reply = bubble("assistant");
     reply.classList.add("pending");
+    let errored = false;
     try {
       // R7: chat targets the selected team explicitly — the web surface never auto-creates.
       const res = await fetch(`/tenants/${currentTenantId}/chat`, {
@@ -564,9 +632,11 @@
       }
       loadSessions();
     } catch (err) {
+      errored = true;
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
       reply.classList.remove("pending");
+      if (!errored) speakReply(reply.textContent);
       applyComposerLock();
       $("stopBtn").classList.add("hidden");
     }

@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261004-006
+kind: manual
+title: >-
+  LLM Interaction Standard SSOT (ADR-0098) + co-workspace voice (STT/TTS) +
+  ci-triage merge-heal step; workspace + template delivery
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T03:04:48.798Z'
+history:
+  - at: '2026-10-04T03:04:48.798Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T03:04:56.906Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T03:04:56.921Z'
+    from: waiting
+    to: review
+result: null
+error: null

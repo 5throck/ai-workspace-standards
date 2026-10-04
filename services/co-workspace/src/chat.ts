@@ -1,6 +1,7 @@
 import { chownSync, copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName, runtimeProviderKeyEnv } from "./config";
+import { interactionAddendum, shouldInjectInteractionAddendum } from "./interaction";
 import { recordTurnUsage, runtimeHomeDir, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
 import { HermesEvent, HermesTurnResult, runHermesTurn, turnContainerName } from "./hermes";
 import { runAntigravityTurn } from "./antigravity";
@@ -19,6 +20,11 @@ export async function runChat(
   onEvent?: (evt: HermesEvent) => void,
   onProc?: (proc: { kill: (code?: number) => void }) => void,
 ): Promise<HermesTurnResult> {
+  // ADR-0098: fresh sessions receive the LLM Interaction Standard short form once;
+  // session continuity carries the directive to later turns of the same session.
+  if (state.cfg.interactionStandard && shouldInjectInteractionAddendum(state.cfg.runtime, Boolean(rec.conversationId), state.turns.list(rec.tenantId).length)) {
+    message = `${interactionAddendum()}\n\n---\n\n${message}`;
+  }
   // T-20260930-011: per-stage timing, keyed by the turn container name so the
   // chat.ts / hermes.ts / responses.ts lines join on one key (research §4).
   const timing = new TurnTiming(turnLogKey(rec.tenantId));

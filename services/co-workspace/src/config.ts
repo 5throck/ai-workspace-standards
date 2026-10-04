@@ -48,6 +48,10 @@ export interface GatewayConfig {
   hermesReasoningEffort?: string;
   runBudgetSeconds: number;
   maxTurns: number;
+  /** LLM Interaction Standard addendum (docs/standards/llm-interaction-standard.md,
+   * ADR-0098): prepend the §14 short form to fresh-session turns. Default on;
+   * `CO_WORKSPACE_INTERACTION_STANDARD=false` opts the deployment out. */
+  interactionStandard: boolean;
   scaffoldTimeoutMs: number;
   hermesExtraArgs: string[];
   /** Phase 2 hardening (design docs/designs/2026-09-27-co-workspace-phase2-hardening-design.md). */
@@ -261,6 +265,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     hermesReasoningEffort: env.CO_WORKSPACE_HERMES_REASONING_EFFORT,
     runBudgetSeconds: num(env.CO_WORKSPACE_RUN_BUDGET_SECONDS, 300),
     maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
+    interactionStandard: env.CO_WORKSPACE_INTERACTION_STANDARD !== "false",
     scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),
     hermesExtraArgs: (env.CO_WORKSPACE_HERMES_EXTRA_ARGS ?? "")
       .split(" ")

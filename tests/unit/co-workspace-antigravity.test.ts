@@ -89,7 +89,7 @@ writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
     // (Windows Bun.spawn cannot exec shebang scripts); prefix support mirrors hermes.
     `import { appendFileSync } from "node:fs";
 const argv = process.argv.slice(2);
-if (process.env.HERMES_FAKE_LOG) appendFileSync(process.env.HERMES_FAKE_LOG, argv.join(" ") + "\\n");
+if (process.env.HERMES_FAKE_LOG) appendFileSync(process.env.HERMES_FAKE_LOG, JSON.stringify(argv) + "\\n");
 await Bun.stdin.text();
 console.log('{"event":"init","conversation_id":"conv-agy","init":{"cwd":"."}}')
 console.log('{"event":"step_update","step_update":{"step_index":1,"state":"ACTIVE","step_type":"agent_response","text_delta":"Hello from fake agy"}}')

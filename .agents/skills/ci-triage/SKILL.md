@@ -11,8 +11,8 @@ description: >
   a scaffold or upgrade command errors; a weekly-health-check ci-failure
   issue needs triage.
 owner: pm
-version: 0.1.1
-last_reviewed: 2026-09-08
+version: 0.2.0
+last_reviewed: 2026-10-04
 prerequisites: []
 metadata:
   type: process
@@ -89,6 +89,31 @@ execute). Never `--no-verify`, never gate bypasses.
    `bun scripts/ticket.ts create --manual "validator-hardening: <one-sentence check>" --priority normal`
 3. Clean up scratch artifacts (`rm -rf` the scratch project; `git status` clean).
 4. Land the fix via the standard `/sync` pipeline.
+
+## Step 6 — Merge with CI watch (merge-time healing)
+
+The merge itself is part of the loop: a PR is not done when it opens, it is done when
+it is merged with green checks. Proven procedure (2026-10-04 wave, PRs #1376-#1382):
+
+1. **Watch, do not walk away**: `gh pr checks <pr> --watch`. Merge only on all-green.
+2. **On red, read the failed job's own log** (`gh run view <run> --log-failed | tail`),
+   then classify:
+   - **Flake / slow-runner timeout** (test timed out at Ns on one OS only, same test
+     green locally and on other OSes) → give the test an explicit timeout with an
+     evidence comment (`}, 15_000);` + "why" comment naming the run), push, re-watch.
+   - **Real defect** → go back to Step 1 (reproduce) on the PR branch.
+   - **Registry/version parity failures** (SCRIPTS.md, VERSION_MANIFEST drift) → run
+     the generator, land via `/sync` on the PR branch.
+3. **Sequential merges**: every `/sync` appends to shared session files
+   (`memory/YYYY-MM-DD.md`), so merging one PR marks the next one conflicting.
+   Merge one PR at a time; before each next merge, update its branch from the new
+   main (`git merge origin/main`, regenerate the version manifest if the pre-push
+   gate says so, land the branch update via `/sync`), then merge.
+4. **GitHub-side stale states**: a CONFLICTING/DIRTY verdict that local
+   `git merge-tree --write-tree` contradicts is usually a stale mergeability cache —
+   update the branch (which re-computes it) instead of hand-resolving phantom conflicts.
+5. Close the PR's governance tickets (`move <id> done --result "Delivered via PR #N…"`)
+   and land the closure through `/sync`.
 
 ## Escalation
 

@@ -186,7 +186,7 @@
     },
     "ci-triage": {
       "source": "skills/ci-triage/SKILL.md",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "overridable": false,
       "description": "Triages CI / audit / scaffold failures: deterministic reproduction, provenance tracing, root-cause fix, re-verification"
     },

@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: ci-triage
 - **Status**: active
-- **Version**: 0.1.1
+- **Version**: 0.2.0
 - **Created**: 2026-09-08
-- **Last Updated**: 2026-09-08
+- **Last Updated**: 2026-10-04
 
 ## Description
 Lightweight CI / audit / scaffold failure triage loop: deterministic reproduction,
@@ -48,5 +48,5 @@ gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 - **Current Phase**: production
 - **Version**: 0.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-08
+- **Last Updated**: 2026-10-04
 - **Last Reviewer**: pm
