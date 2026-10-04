@@ -6,7 +6,7 @@ title: >-
   SSOT and deploy docs/standards/ to new projects (scaffold 1.18.0 + parity
   model 1.8.0)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-04T03:37:47.424Z'
 history:
@@ -19,5 +19,15 @@ history:
   - at: '2026-10-04T03:38:03.321Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-04T03:43:10.082Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1385: SSOT 2.8 is the single normative home of the
+  ASD-STE100 structural rules; pm-gateway-workflow 3.10 / CONSTITUTION / pm.md
+  (root+L1) / context.md COMMON-CONTEXT (+13 variant splices) all now reference
+  docs/standards/llm-interaction-standard.md; the standard is deployed to new
+  projects via templates/common/docs/standards/ (new-project full copy +
+  create-l3-scaffold 1.18.0 explicit copy) and to existing projects via the
+  docs/ SYNC claim on upgrade.
 error: null
