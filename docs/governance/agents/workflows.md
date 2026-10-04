@@ -33,7 +33,7 @@ Request received
 
 #### Cost Optimization (3-Tier Strategy)
 
-The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
+The PM uses the 3-tier model strategy defined in [§3.6 3-Tier Strategy](../../AGENTS.md#36-3-tier-strategy) above to optimize cost and quality. This subsection adds dispatch-time adjustment rules on top of that base definition:
 
 **Tier Adjustment Rules:**
 - The PM can dynamically downgrade an agent's Tier for simple tasks (Assigned <= Baseline) to save costs.

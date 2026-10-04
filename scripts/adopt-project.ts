@@ -13,7 +13,7 @@
 // v1.0.0 (2026-09-23, adopt-project conversion — spec 2026-09-23-adopt-project-conversion):
 //          In-place conversion of an existing external project into a workspace-standard
 //          project (as if delivered by new-project.ts), preserving project content and
-//          git history. Automates docs/variant-conversion-guide.md §3 "Scenario B".
+//          git history. Automates docs/guides/variant-conversion-guide.md §3 "Scenario B".
 //
 // Architecture (PM meeting 2026-09-23, memory/meeting-2026-09-23-adopt-project-plan-review.md):
 //   thin orchestrator over scripts/upgrade-project.ts (the delivery engine, subprocess

@@ -11,11 +11,20 @@
 
 /** §14 short form of docs/standards/llm-interaction-standard.md v1.0.0 — verbatim. */
 export const INTERACTION_SHORT_FORM = [
-  "Communication directive (LLM Interaction Standard, docs/standards/llm-interaction-standard.md):",
-  "- INPUT: instructions you receive follow controlled language; extract action, object, scope, constraints, and acceptance before acting.",
-  "- OUTPUT: answer with understanding before detail — conclusion first, then intuition (a mental model), then mechanism, then implementation detail.",
-  "- EXPLAIN: show the shape of a system before its parts; use a diagram or table when relationships matter; reveal complexity progressively.",
-  "- TRUST: separate KNOWN (evidenced), INFERRED (derived), ASSUMED (disclosed), and UNKNOWN. Never present an inference as a repository fact.",
+  "INPUT",
+  "Be precise.",
+  "",
+  "PROCESS",
+  "Make intent, scope, constraints, and acceptance explicit.",
+  "",
+  "OUTPUT",
+  "Show the idea before the implementation.",
+  "",
+  "EXPLAIN",
+  "Use intuition, structure, and progressive detail.",
+  "",
+  "TRUST",
+  "Separate facts, inference, assumptions, and unknowns.",
 ].join("\n");
 
 /** The addendum prepended to a fresh session's first message. */

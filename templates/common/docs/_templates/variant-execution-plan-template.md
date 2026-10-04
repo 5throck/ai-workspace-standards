@@ -703,7 +703,7 @@ Tier 3  Team Coordination    5%  → Team communication and handoffs
 
 ## 9. References
 
-- **Variant Creation Workflow**: `docs/variant-creation-workflow.md` (3-Phase process)
+- **Variant Creation Workflow**: `docs/guides/variant-creation-workflow.md` (3-Phase process)
 - **Promotion Checklist**: `docs/templates/PROMOTION_CHECKLIST-template.md` (7 criteria)
 - **Quality Gates**: `docs/templates/QUALITY_GATES-template.md` (validation checkpoints)
 - **workspace standards**: Workspace constitution and governance
@@ -720,5 +720,5 @@ Tier 3  Team Coordination    5%  → Team communication and handoffs
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-08-14*
+*Last Updated: 2026-10-04*
 *Status: Active*

@@ -15,7 +15,7 @@ The workspace already supports several surfaces, and each was added by its own A
 
 Two facts found while fixing this changed the design:
 
-- Config paths and formats differ per client, and the local file on one machine is not proof of the documented format. Antigravity's registry path is documented by the vendor, while `docs/graft-platform-integration.md` warns that it varies by version.
+- Config paths and formats differ per client, and the local file on one machine is not proof of the documented format. Antigravity's registry path is documented by the vendor, while `docs/guides/graft-platform-integration.md` warns that it varies by version.
 - Launching the `hermes` CLI starts a self-update and a desktop-app rebuild (observed in a throwaway `HERMES_HOME`, 2026-10-01). A script cannot use it to edit config.
 
 ## Decision
@@ -40,6 +40,6 @@ Two facts found while fixing this changed the design:
 ## References
 
 - Design: `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§11, Appendix B)
-- CONSTITUTION §11.0, `templates/common/docs/context.md` (Supported Surfaces), `templates/common/agents/pm.md` (Upstream Reporting Duty), `docs/governance/agents/pm-gateway-workflow.md` §3.12, `docs/graft-platform-integration.md`
+- CONSTITUTION §11.0, `templates/common/docs/context.md` (Supported Surfaces), `templates/common/agents/pm.md` (Upstream Reporting Duty), `docs/governance/agents/pm-gateway-workflow.md` §3.12, `docs/guides/graft-platform-integration.md`
 - ADR-0077 (Codex platform support), ADR-0088 (Hermes Agent platform support), ADR-0093 (`HERMES.md` instruction file)
 - Vendor documentation (checked 2026-10-01): https://code.claude.com/docs/en/mcp, https://modelcontextprotocol.io/docs/develop/connect-local-servers, https://antigravity.google/docs/mcp, https://geminicli.com/docs/tools/mcp-server/, https://learn.chatgpt.com/docs/extend/mcp?surface=cli, https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp

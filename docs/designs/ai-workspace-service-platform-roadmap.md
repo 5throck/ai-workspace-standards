@@ -3,7 +3,7 @@
 **Date**: 2026-07-16
 **Status**: Proposed (Phase A design approved; Phase B+ not started)
 **Owner**: architect (this document), automation-engineer (Phase A implementation)
-**Related**: [meeting-2026-07-16-ticket-kanban-design-review.md](../../memory/meeting-2026-07-16-ticket-kanban-design-review.md), `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`, superseded: [meeting-2026-05-28-kanban-process-design.md](../../memory/archive/meeting-2026-05-28-kanban-process-design.md)
+**Related**: [meeting-2026-07-16-ticket-kanban-design-review.md](../../memory/meeting-2026-07-16-ticket-kanban-design-review.md), `docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`, superseded: [meeting-2026-05-28-kanban-process-design.md](../../memory/archive/meeting-2026-05-28-kanban-process-design.md)
 
 ---
 

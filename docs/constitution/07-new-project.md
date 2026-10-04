@@ -167,7 +167,7 @@ Variant-specific sections are marked with inject markers:
 > `rm docs/<variant>.context.md && bun scripts/new-project.ts <name> <variant>`
 >
 > **Variant naming convention**: All variant names must follow the `co-` prefix convention enforced
-> by `l3-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/creating-a-variant.md`.
+> by `l3-to-variant-pipeline.ts` (regex: `^co-[a-z][a-z0-9-]{1,30}$`). See `docs/guides/creating-a-variant.md`.
 ```
 
 #### 7.4.5 Variant Scaffolding — File Overlay Mechanics

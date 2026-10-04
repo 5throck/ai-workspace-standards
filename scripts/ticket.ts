@@ -29,7 +29,7 @@
 //         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind),
 //         docs/designs/2026-10-01-upstream-request-mcp-design.md (§14.1)
 
-import { resolve, join } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
   resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
@@ -372,8 +372,10 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
         const id = String(flags.restore);
         const loc = resolveTicketLocation(ticketsDir, governanceDir, id);
         if (!loc.archived) fail(`${loc.id} is not archived — it is live in ${loc.dir === governanceDir ? 'tickets/governance' : 'tickets'}`);
-        restoreTicket(loc.dir, loc.id);
-        console.log(`✅ ${loc.id} restored: ${archiveDirFor(loc.dir)} -> ${loc.dir === governanceDir ? 'tickets/governance' : 'tickets'}`);
+        // Archived ids resolve to the archive dir (review C1); the live store is its parent.
+        const storeDir = dirname(loc.dir);
+        restoreTicket(storeDir, loc.id);
+        console.log(`✅ ${loc.id} restored: ${loc.dir} -> ${storeDir === governanceDir ? 'tickets/governance' : 'tickets'}`);
         break;
       }
       let days = DEFAULT_ARCHIVE_DAYS;

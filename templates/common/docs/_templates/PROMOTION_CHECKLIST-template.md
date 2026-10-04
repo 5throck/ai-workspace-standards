@@ -177,11 +177,11 @@ Use this checklist to verify your variant is ready for promotion from Phase A (P
 
 ## References
 
-- Variant Creation Workflow: `docs/variant-creation-workflow.md`
+- Variant Creation Workflow: `docs/guides/variant-creation-workflow.md`
 - Workspace Audit Script: `scripts/audit.ts`
 - Platform Validation: `scripts/verify-platform-lifecycle.ts`
 
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-09-10*
+*Last Updated: 2026-10-04*

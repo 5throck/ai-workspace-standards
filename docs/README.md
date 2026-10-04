@@ -1,7 +1,7 @@
 # docs/ Folder Manifest & Creation Criteria
 
 **Status:** Active
-**Version:** 1.0.0 (2026-10-04, spec `2026-10-04-docs-folder-manifest-design`)
+**Version:** 1.0.1 (2026-10-04, spec `2026-10-04-docs-folder-manifest-design`; v1.0.1 — §2/§3 rows repointed off the folded `analysis/`/`audits/` directories, found by project review)
 **Machine gate:** `bun scripts/validate-doc-folder.ts --workspace` (wired into `audit.ts`)
 **Purpose:** This manifest is the single source of truth for what each `docs/` top-level
 entry is for, what belongs where by default, and what a new top-level folder requires.
@@ -45,7 +45,7 @@ It exists to stop folder proliferation: a folder is a contract, not a scratch sp
 | `graph-deltas/` | Skill-graph delta projections (ADR-0084 §5.4) | `<YYYY>/…` machine-written delta records | hand-edited JSON |
 | `lifecycle/` | Skill/script lifecycle records | per-component lifecycle records | reports |
 | `reports/` | Dated outcome reports | fleet reviews, resync sweeps, UI verifications | decision records |
-| `security/` | Security policies and security audit records | extends-chain rules, dependency policies, completion reports | general audits (→ `audits/`) |
+| `security/` | Security policies and security audit records | extends-chain rules, dependency policies, completion reports | general audit reports (→ `reports/`) |
 | `specs/` | Design Gate machinery | `registry.json` (spec-register/audit read it) | design prose (→ `designs/`) |
 | `standards/` | Cross-cutting normative standards | `llm-interaction-standard.md` (ADR-0098) | decision records, designs |
 | `templates/` | Governance contracts and schemas for the template fleet | `common-contract.json`, propagation schemas | project-facing doc templates (→ L1 docs) |
@@ -67,8 +67,7 @@ manifest), `VERSION_MANIFEST.md`, the machine projections
 | Architecture-level decision | `adr/NNNN-<slug>.md` |
 | Gate-moment decision with evidence chain | `decisions/DEC-<date>-NN.md` |
 | Dated outcome/verification report | `reports/<date>-<slug>.md` |
-| Project-review audit report | `audits/<date>-<slug>.md` |
-| Pre-action survey or size/feasibility analysis | `analysis/<date>-<slug>.md` |
+| Dated audit / analysis report (project-review, survey, feasibility) | `reports/<date>-<slug>.md` |
 | Normative cross-cutting standard | `standards/<slug>.md` (ADR + manifest row) |
 | Superseded/dead content with provenance | `archive/…` |
 | Machine-written projection | `docs/` root, generator-declared name |

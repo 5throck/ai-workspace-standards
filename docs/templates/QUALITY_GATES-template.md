@@ -272,7 +272,7 @@ Phase C: Template Creation & Validation
 
 ## References
 
-- Variant Creation Workflow: `docs/variant-creation-workflow.md`
+- Variant Creation Workflow: `docs/guides/variant-creation-workflow.md`
 - Promotion Checklist: `docs/templates/PROMOTION_CHECKLIST-template.md`
 - Validate Templates: `scripts/validate-templates.ts`
 - Platform Validation: `scripts/verify-platform-lifecycle.ts`
@@ -281,4 +281,4 @@ Phase C: Template Creation & Validation
 ---
 
 *Template Owner: pm*
-*Last Updated: 2026-06-05*
+*Last Updated: 2026-10-04*

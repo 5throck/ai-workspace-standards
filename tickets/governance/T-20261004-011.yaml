@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261004-011
+kind: manual
+title: >-
+  validator-hardening: pin remaining wall-clock test assertions to ordering
+  semantics or scaled budgets (mcp-upstream E13d ping bound; security-validator
+  perf tests)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-04T05:40:33.650Z'
+history:
+  - at: '2026-10-04T05:40:33.650Z'
+    from: null
+    to: backlog
+result: null
+error: null
