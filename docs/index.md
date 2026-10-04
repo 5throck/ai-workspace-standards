@@ -12,6 +12,7 @@ Core system rules, constitution modules, system architecture, security policies,
   - [`CONSTITUTION.md`](../CONSTITUTION.md) — Workspace constitution and core governance principles
   - [`AGENTS.md`](../AGENTS.md) — Shared agent index (thin dispatcher, ADR-0090): roster, pointer table into [docs/governance/agents/](governance/agents/), and skill routing
   - [`docs/governance/agents/`](governance/agents/) — Operational workflow references (PM Gateway protocol, execution-plan templates, dispatch/lifecycle schedules)
+  - [`docs/standards/`](standards/) — Cross-cutting normative standards ([LLM Interaction Standard](standards/llm-interaction-standard.md), ADR-0098: ASD-STE100 input / 3Blue1Brown output)
   - [`CHANGELOG.md`](../CHANGELOG.md) — Historical version change log and release notes
 - [**Constitution Sections**](constitution/) — Detailed constitutional specification modules:
   - [00 - SSOT Architecture](constitution/00-ssot-architecture.md) — Single Source of Truth rules

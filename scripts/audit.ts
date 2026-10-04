@@ -1,4 +1,8 @@
-// @version 2.47.0
+// @version 2.48.0
+// v2.48.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): docs/ folder
+//           manifest gate — spawns validate-doc-folder.ts --workspace (existsSync-guarded,
+//           after the doc-command lint): every docs/ top-level entry must be in the
+//           docs/README.md manifest, so folder proliferation fails the audit.
 // v2.46.0: Docs relative-link gate — spawns scripts/validate-docs-links.ts
 //           (workspace root only, placed after the docs-cluster checks) covering
 //           docs/ root-level files plus templates/common/docs/** recursively,
@@ -1697,6 +1701,21 @@ if (fs.existsSync(path.join('scripts', 'validate-ticket-doc-commands.ts'))) {
         Fail('ticket.ts doc-command lint: governance docs reference non-existent ticket.ts subcommands (see output above)');
     } else {
         Pass('ticket.ts doc-command lint: governance docs name only real ticket.ts subcommands');
+    }
+}
+
+// 2026-10-04 (spec 2026-10-04-docs-folder-manifest-design): docs/ top-level folder
+// governance — every directory and loose file under docs/ must be in the manifest
+// (docs/README.md); unknown entries fail instead of accreting. Remedy: move the
+// content to its default home, or add manifest row + decision reference + allowlist.
+if (fs.existsSync(path.join('scripts', 'validate-doc-folder.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-doc-folder.ts', '--workspace'], { encoding: 'utf-8' });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('docs/ folder manifest: unmanifested entries present (see output above)');
+    } else {
+        Pass('docs/ folder manifest: tree matches docs/README.md');
     }
 }
 

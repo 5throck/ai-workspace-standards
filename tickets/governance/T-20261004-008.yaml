@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261004-008
+kind: manual
+title: >-
+  docs/ folder manifest + anti-proliferation gate (validate-doc-folder
+  --workspace wired into audit); scratch cleanup; standards entry in index
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T04:02:07.762Z'
+history:
+  - at: '2026-10-04T04:02:07.762Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T04:02:16.797Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T04:02:16.814Z'
+    from: waiting
+    to: review
+result: null
+error: null
