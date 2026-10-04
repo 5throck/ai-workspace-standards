@@ -182,6 +182,9 @@ describe("uniform turn watchdog + onSpawn contract (2026-10-03 review H1)", () =
 });
 
 describe("delete-vs-queued-turn abort (2026-10-03 review M10)", () => {
+  // createState bootstraps the argon2id admin hash — CPU-bound and slow on
+  // windows runners, so the default 5s test timeout flakes (PR #1379 run
+  // 37143647801: 5133ms). Same treatment as the watchdog tests above.
   test("a queued turn whose tenant row vanished aborts without recording history", async () => {
     const cfg = loadConfig({
       CO_WORKSPACE_DATA_DIR: scratch("race"),
@@ -215,7 +218,7 @@ describe("delete-vs-queued-turn abort (2026-10-03 review M10)", () => {
         }
       }
     }
-  });
+  }, 15_000);
 });
 
 describe("CLI provider-key injection (2026-10-03 cli-provider-key design, T-20261003-024)", () => {
