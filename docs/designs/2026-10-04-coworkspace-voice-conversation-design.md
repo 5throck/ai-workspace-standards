@@ -183,3 +183,21 @@ Final control model, replacing revision 7's ambient reading:
   operated, per the user's wording.
 - The settings-modal voice row keeps the language select binding as well (same
   `voiceLang` state).
+
+## Revision 9 (2026-10-04, user review): turn activity feedback — no dead air
+
+User test: between query and answer nothing visible happens, so it is impossible
+to tell the turn is running (claude turns take tens of seconds: container spawn +
+CLI init + hooks). Benchmark (WebRTC.ventures / UXtigers / assistant-ui / UX
+Collective): the dominant pattern is a LABELED ACTIVITY STREAM with elapsed time —
+"what is it doing + for how long" beats a bare spinner for perceived latency.
+
+Implemented (web client only):
+- A sticky activity chip at the top of the chat log while a turn runs:
+  `⏳ {elapsed}s · {last activity}` (formatTurnActivity, pure + tested).
+- Elapsed ticks every second; the SSE `: tool: <name>…` comment frames (already
+  emitted by turnProgressComment) update the activity name. In voice mode the
+  full answer stays held back (voice-first) — the chip IS the intermediate
+  progress the user asked for.
+- Chip hides when the turn settles. No backend change (comment frames already
+  ship). Pure formatter unit-tested (4 cases).

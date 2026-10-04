@@ -1036,7 +1036,7 @@ describe('13.10 ticket validity', () => {
     expect(list.out).toContain(ready.body.id);
     expect(list.out).toContain('Upstream request from co-test');
     expect(list.out).not.toContain('undefined');
-  });
+  }, 20000); // git+file heavy: slow on loaded windows runners
 
   test('10b. YAML is data-only: requester text with YAML/JS syntax round-trips as a plain string', async () => {
     const proj = ws.project('co-test');

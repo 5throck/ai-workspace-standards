@@ -75,7 +75,7 @@
   header select { background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: .85rem; }
   header .pname { color: var(--muted); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
   header .pname b { color: var(--fg); }
-  #log { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+  #log { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; position: relative; }
   .msg { padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; font-size: .92rem; max-width: 82%; }
   .user { background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); align-self: flex-end; }
   .assistant { background: var(--panel); border: 1px solid var(--border2); align-self: stretch; max-width: 100%; }
@@ -190,6 +190,7 @@
   </header>
   <div id="adminView"></div>
   <div id="log">
+    <div id="turnActivity" class="turnActivity hidden">⏳ 0s</div>
     <div class="empty">
       <b>What can the team do for you?</b>
       Create a team from a variant, then chat — teams are private to you and reused when you return.
@@ -227,7 +228,7 @@
 <script type="module">
   // T-20260928-012: pure helpers (donut slice math, recency grouping) live in
   // /app-helpers.js so they can be unit-tested without a browser.
-  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, spokenSummary, speechRecognitionSupported, speechSynthesisSupported, voiceTransition, shouldAutoSend, detectVoiceLang, VOICE_LANGUAGES } from "./app-helpers.js";
+  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, spokenSummary, speechRecognitionSupported, speechSynthesisSupported, voiceTransition, shouldAutoSend, detectVoiceLang, VOICE_LANGUAGES, formatTurnActivity } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
@@ -676,6 +677,17 @@
     const voiceFirst = voiceMode; // voice-first presentation: speak the summary, THEN reveal the full result
     let fullText = "";
     if (voiceMode) { dispatchVoice("sendStart"); stopRecognition(); }
+    // Turn activity feedback (labeled activity stream + elapsed time — the dominant
+    // pattern in ChatGPT/Claude/Perplexity; spec voice-conversation design rev 9):
+    // shows progress between query and answer instead of dead air.
+    const turnStart = Date.now();
+    let lastTool = "";
+    const tick = () => {
+      $("turnActivity").textContent = "⏳ " + formatTurnActivity((Date.now() - turnStart) / 1000, lastTool);
+    };
+    $("turnActivity").classList.remove("hidden");
+    tick();
+    const activityTimer = setInterval(tick, 1000);
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     input.value = ""; send.disabled = true;
     $("stopBtn").classList.remove("hidden");
@@ -708,6 +720,11 @@
           const frame = buffer.slice(0, idx);
           buffer = buffer.slice(idx + 2);
           for (const line of frame.split("\n")) {
+            if (line.startsWith(": tool: ")) {
+              lastTool = line.slice(8).replace(/…$/, "").trim();
+              tick();
+              continue;
+            }
             if (!line.startsWith(": provisioning:")) continue;
             // Live provisioning stages while the team prepares (R7 feedback).
             if (!progressNote) {
@@ -760,6 +777,8 @@
           if (voiceMode && voiceState === "listening") startListening();
         });
       }
+      clearInterval(activityTimer);
+      $("turnActivity").classList.add("hidden");
       applyComposerLock();
       $("stopBtn").classList.add("hidden");
     }
