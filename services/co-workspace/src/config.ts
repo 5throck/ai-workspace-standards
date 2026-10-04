@@ -5,7 +5,7 @@
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
 
-import { existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 export interface GatewayConfig {
@@ -554,12 +554,15 @@ export function loadTurnOverrides(cfg: GatewayConfig, dataDir: string): { applie
   return result;
 }
 
-/** Atomically persists the merged override set (PUT merges over the previous file). */
+/** Atomically persists the merged override set (PUT merges over the previous file).
+ * Written 0600: the file carries a plaintext apiKey, so the permission must not
+ * depend on the deployer's umask (T-20261004-026). */
 export function persistTurnOverrides(dataDir: string, o: TurnOverrides): void {
   const path = turnOverridesPath(dataDir);
   const tmp = `${path}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmp, JSON.stringify(o, null, 2) + "\n", "utf8");
+  writeFileSync(tmp, JSON.stringify(o, null, 2) + "\n", { encoding: "utf8", mode: 0o600 });
   renameSync(tmp, path);
+  chmodSync(path, 0o600); // rename carries the tmp mode on most systems; chmod also repairs a pre-existing looser file
 }
 
 /** Reads the previous override file (PUT merges over it), tolerating absence. */

@@ -36,6 +36,17 @@ only that team's files. See [Security model](#security-model).
 - **Chat** — responses stream live; while a team is provisioning the log shows its
   progress stages (`⏳ [scaffolding] …`). Enter sends, Shift+Enter breaks a line
   (IME-safe: Enter that commits a Korean/Chinese candidate never fires).
+- **Voice conversation** — optional hands-free loop, browser-native Web Speech API
+  (Chrome/Edge-class browsers). Enable the capability in the **Account modal**
+  (`Voice conversation` toggle, persisted) and the composer shows an orb button;
+  clicking it starts the loop **for the current page session** — listen, auto-submit
+  the transcript, speak a short spoken summary (Short Answer / first paragraph,
+  ≤200 chars) while the full answer renders on screen, then re-arm the microphone.
+  Clicking the orb again stops the loop; so does a recognition error (a denied mic
+  permission surfaces as "Microphone permission denied" instead of failing silently).
+  The browser's microphone permission still gates every session, and page loads start
+  silent — the mic never arms by itself (T-20261004-027: the brief ambient design that
+  re-armed on page load, PR #1399, was superseded by this one-button per-session loop).
 - **Account modal** (✎) — password change (current password required) and self-service
   email change with verification. Display names are changed by an admin.
 - **Admin panel** (⚙, admins only) — stat boxes, three composition donuts (tenants by
@@ -237,6 +248,12 @@ design). In-container background self-updates are inert by design.
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | — | Google SSO |
 | `HERMES_BIN` | `hermes` | Hermes binary path |
 | `HERMES_INFERENCE_MODEL` / `_PROVIDER` | — | Passed through to Hermes sessions |
+
+**Data-dir file permissions**: the turn-config overlay the admin API persists
+(`<data dir>/turn-config.json`) carries a plaintext provider apiKey, so the gateway
+writes it with mode `0600` regardless of the deployer's umask (T-20261004-026).
+If you copy or back up the data dir by hand, preserve that mode — a world-readable
+`turn-config.json` leaks the provider key to every local user.
 
 ## Docker deployment
 
