@@ -204,13 +204,13 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 ---
 
 <!-- COMMON-CONTEXT:START -->
-### Instruction Writing Standard (ASD-STE100, ADR-0079)
+### Instruction Standard (LLM Interaction Standard, ADR-0098)
 
-Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+Human-to-LLM instructions and LLM-to-human answers follow the project-local standard `docs/standards/llm-interaction-standard.md` (ADR-0098, extending ADR-0079) — "Precision In, Intuition Out".
 
-- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
-- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
-- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+- **Input (§2)**: one primary action per instruction; explicit verbs; defined terms; structural rules in §2.8 — one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive), active voice with imperative steps, present tense, no idioms, positive phrasing preferred, minimal pronouns. Applies to requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Output (§4–§9)**: conclusion and intuition before implementation detail; mental models before mechanics; facts, inferences, assumptions, and unknowns kept separate.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Decisions: ADR-0079 and ADR-0098 (workspace root `docs/adr/`).
 
 ### PM Team-Management Authority (ADR-0080)
 

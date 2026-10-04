@@ -256,13 +256,13 @@ Each agent must save its deliverables to the designated folder with the specifie
 11. **Portfolio/backtest analytics is out-of-domain for co-consult.** OpenBB-class investment-portfolio capabilities (portfolio construction, strategy backtesting, factor-exposure analysis, P&L attribution, execution analytics) are deliberately NOT part of this variant. co-consult's financial scope is research- and analysis-shaped: company intelligence, financial-statement analysis, and business financial modeling for strategic recommendations, not investment-portfolio management. Operative rule: engagement requests that need portfolio/backtest analytics MUST be scoped out at engagement intake (Phase 1) and recorded in the engagement kickoff artifacts as an external dependency or a follow-up engagement - agents MUST NOT improvise portfolio analytics with `financial-modeling`; that skill models business outcomes (revenue, cost, valuation scenarios), not security portfolios. Decision record: `docs/variant-benchmark-backlog.md` §4, gap closed 2026-08-25 via the record-out-of-domain option (scoping a `portfolio-analytics` skill was rejected: no consulting-workflow consumer, OpenBB parity would drag a data-terminal dependency chain into a strategy variant).
 
 <!-- COMMON-CONTEXT:START -->
-### Instruction Writing Standard (ASD-STE100, ADR-0079)
+### Instruction Standard (LLM Interaction Standard, ADR-0098)
 
-Development-facing instruction text follows ASD-STE100 (Simplified Technical English) structural rules — in every development domain (web, app, API, scripts, documents).
+Human-to-LLM instructions and LLM-to-human answers follow the project-local standard `docs/standards/llm-interaction-standard.md` (ADR-0098, extending ADR-0079) — "Precision In, Intuition Out".
 
-- **Applies to**: requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
-- **Rules**: one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive); active voice with imperative steps; present tense; one term = one meaning (use glossary/registry terms exactly); no idioms; positive phrasing preferred; minimal pronouns; lists for parallel items and tables for structured data.
-- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Full decision: ADR-0079 in the workspace root `docs/adr/`.
+- **Input (§2)**: one primary action per instruction; explicit verbs; defined terms; structural rules in §2.8 — one instruction per sentence (≤ 20 words procedural / ≤ 25 descriptive), active voice with imperative steps, present tense, no idioms, positive phrasing preferred, minimal pronouns. Applies to requirement statements, task briefs, execution-plan task descriptions, agent dispatch prompts, design-doc requirement sections, API endpoint documentation, and how-to steps.
+- **Output (§4–§9)**: conclusion and intuition before implementation detail; mental models before mechanics; facts, inferences, assumptions, and unknowns kept separate.
+- **Enforcement**: advisory — PM conforms task briefs at triage; architect checks requirement sections at Design Gate review. Decisions: ADR-0079 and ADR-0098 (workspace root `docs/adr/`).
 
 ### PM Team-Management Authority (ADR-0080)
 

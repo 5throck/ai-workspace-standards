@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261004-007
+kind: manual
+title: >-
+  Deduplicate Instruction Writing Standard into the LLM Interaction Standard
+  SSOT and deploy docs/standards/ to new projects (scaffold 1.18.0 + parity
+  model 1.8.0)
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T03:37:47.424Z'
+history:
+  - at: '2026-10-04T03:37:47.424Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T03:38:03.305Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T03:38:03.321Z'
+    from: waiting
+    to: review
+result: null
+error: null
