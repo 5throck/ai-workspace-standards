@@ -13,7 +13,11 @@ import { readKeyEntries } from "./config";
 // so gating the sign-in page makes sign-in itself impossible. The page holds no data and
 // POST /auth/login carries its own rate limits; the loginRequired gate still demands a
 // session for everything the page leads to.
-export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health", "GET /login"]);
+// GET /app-helpers.js: the web app's pure-helper module (no tenant data) — without
+// this exemption an unauthenticated browser in key mode gets a dead shell (the
+// module import 401s) instead of the sign-in pointer card (found 2026-10-04,
+// voice-conversation UI verification).
+export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health", "GET /login", "GET /app-helpers.js"]);
 
 function sha256(value: string): Buffer {
   return createHash("sha256").update(value).digest();

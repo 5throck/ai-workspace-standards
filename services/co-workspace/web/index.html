@@ -94,6 +94,7 @@
   .sendBtn:disabled { opacity: .45; cursor: default; }
   .stopBtn { background: #8b1f1f; color: #fff; border: 0; border-radius: 10px; padding: 7px 14px; font: inherit; cursor: pointer; font-size: .78rem; }
   .stopBtn.hidden { display: none; }
+  .voiceLangSel.hidden { display: none; }
   .voiceStatus { font-size: .78rem; color: var(--accent); min-width: 64px; text-align: right; }
   .voiceOrb { background: transparent; border: 1px solid var(--border2); border-radius: 50%; width: 34px; height: 34px; font: inherit; font-size: .95rem; cursor: pointer; line-height: 1; }
   .voiceOrb.off { opacity: .75; }
@@ -540,6 +541,8 @@
     orbBtn.setAttribute("aria-pressed", voiceMode ? "true" : "false");
     orbBtn.title = voiceMode ? "Voice conversation ON — click to stop" : "Voice conversation";
     voiceStatus.textContent = STATUS_TEXT[voiceState] ?? "";
+    voiceLangSel.classList.toggle("hidden", !voiceMode);
+    voiceLangSel.value = voiceLang;
   }
 
   function dispatchVoice(event) {
@@ -998,58 +1001,12 @@
       });
       $("profileBtn").addEventListener("click", () => renderAccountModal());
     } else {
+      // Sign-in lives on the dedicated /login page (ID/password, signup, Google SSO).
+      // The sidebar carries no auth form — just a pointer for signed-out visitors.
       authCard.innerHTML =
-        `<div class="field"><b>Sign in</b></div>` +
-        `<div class="field"><input id="li-id" placeholder="ID"></div>` +
-        `<div class="field"><input id="li-pw" type="password" placeholder="Password"></div>` +
-        `<button id="loginBtn">Sign in</button>` +
-        `<div class="switch" id="toSignup">Create an account →</div>` +
-        (googleConfiguredFlag
-          ? `<button id="glogin" style="background:#5f6368;">Sign in with Google</button>`
-          : "");
-      $("loginBtn").addEventListener("click", () => doLogin($("li-id").value, $("li-pw").value));
-      $("toSignup").addEventListener("click", renderSignupForm);
-      const g = $("glogin");
-      if (g) g.addEventListener("click", () => { location.href = "/auth/google/login"; });
+        `<div class="field"><b>Not signed in</b></div>` +
+        `<div class="field"><a href="/login" style="color:var(--accent);">Go to sign in →</a></div>`;
     }
-  }
-
-  function renderSignupForm() {
-    authCard.innerHTML =
-      `<div class="field"><b>Sign up</b></div>` +
-      `<div class="field"><input id="su-id" placeholder="ID (a-z, 0-9, -)"></div>` +
-      `<div class="field"><input id="su-email" placeholder="Email (verification mail)"></div>` +
-      `<div class="field"><input id="su-pw" type="password" placeholder="Password (8+)"></div>` +
-      `<button id="signupBtn">Sign up</button>` +
-      `<div class="switch" id="toLogin">← Back to sign in</div>` +
-      `<div class="field" id="verifyRow" style="display:none;"><input id="verify-key" placeholder="Verification key from mail"><button id="verifyBtn">Activate</button></div>` +
-      `<div class="hint">A verification mail is generated to the outbox; enter its key here to activate. Your email is discarded after verification (only a hash is kept).</div>`;
-    $("signupBtn").addEventListener("click", async () => {
-      const res = await fetch("/auth/signup", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-        body: JSON.stringify({ loginId: $("su-id").value, email: $("su-email").value, password: $("su-pw").value }),
-      });
-      const body = await res.json();
-      if (res.status === 200) {
-        $("verifyRow").style.display = "flex";
-        $("signupBtn").disabled = true;
-        bubble("assistant", "✉ " + body.message);
-      } else {
-        bubble("assistant", `⚠ ${body.error ?? "signup failed"}`);
-      }
-    });
-    $("verifyBtn").addEventListener("click", async () => {
-      const res = await fetch("/auth/verify", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-        body: JSON.stringify({ token: $("verify-key").value }),
-      });
-      const body = await res.json();
-      bubble("assistant", res.status === 200 ? `✔ ${body.message}` : `⚠ ${body.error}`);
-      if (res.status === 200) renderAuthCard();
-    });
-    $("toLogin").addEventListener("click", renderAuthCard);
   }
 
   // R3: account modal — password change (popup, current credential required) and
@@ -1197,25 +1154,6 @@
     });
   }
 
-  async function doLogin(id, pw) {
-    const res = await fetch("/auth/login", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-requested-with": "co-workspace" },
-      body: JSON.stringify({ loginId: id, password: pw }),
-    });
-    const body = await res.json();
-    if (res.status === 200) {
-      me = body.user;
-      renderAuthCard();
-      applyAdminVisibility();
-      applyComposerLock();
-      loadSessions();
-      if (me.mustChangePassword) forcePasswordChange();
-      else if (me.passwordSetRequired) forcePasswordChange("Your admin account has no password yet. Choose one to unlock admin actions.");
-    } else {
-      bubble("assistant", `⚠ ${body.error ?? "login failed"}`);
-    }
-  }
 
   function applyAdminVisibility() {
     adminMenu.classList.toggle("gws-hidden", me?.role !== "admin");
