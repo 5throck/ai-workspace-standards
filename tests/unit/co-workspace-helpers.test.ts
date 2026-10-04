@@ -9,6 +9,10 @@ import {
   speakableText,
   speechRecognitionSupported,
   speechSynthesisSupported,
+  voiceTransition,
+  shouldAutoSend,
+  detectVoiceLang,
+  VOICE_LANGUAGES,
 } from "../../services/co-workspace/web/app-helpers.js";
 
 describe("recencyGroupLabel", () => {
@@ -104,5 +108,81 @@ describe("speech support probes (ADR-0098 voice surface)", () => {
     expect(speechRecognitionSupported({})).toBe(false);
     expect(speechSynthesisSupported({ speechSynthesis: {} })).toBe(true);
     expect(speechSynthesisSupported({})).toBe(false);
+  });
+});
+
+describe("voiceTransition (2026-10-04 voice conversation design)", () => {
+  test("happy hands-free loop: idle -> listening -> thinking -> speaking -> listening", () => {
+    let st = "idle";
+    st = voiceTransition(st, "modeOn");
+    expect(st).toBe("listening");
+    st = voiceTransition(st, "finalTranscript", { autoSend: true });
+    expect(st).toBe("thinking");
+    st = voiceTransition(st, "ttsStart");
+    expect(st).toBe("speaking");
+    st = voiceTransition(st, "ttsEnd", { voiceMode: true });
+    expect(st).toBe("listening");
+  });
+
+  test("manual-send mode stands down after the transcript, then sendStart re-enters", () => {
+    let st = voiceTransition("listening", "finalTranscript", { autoSend: false });
+    expect(st).toBe("idle");
+    st = voiceTransition(st, "sendStart");
+    expect(st).toBe("thinking");
+  });
+
+  test("barge-in from speaking restarts listening; turnDone enters speaking", () => {
+    expect(voiceTransition("speaking", "bargeIn")).toBe("listening");
+    expect(voiceTransition("thinking", "turnDone")).toBe("speaking");
+  });
+
+  test("modeOff and error land on idle from every state", () => {
+    for (const st of ["listening", "thinking", "speaking"]) {
+      expect(voiceTransition(st, "modeOff")).toBe("idle");
+      expect(voiceTransition(st, "error")).toBe("idle");
+    }
+  });
+
+  test("ttsEnd with voiceMode off stands down; illegal transitions are no-ops", () => {
+    expect(voiceTransition("speaking", "ttsEnd", { voiceMode: false })).toBe("idle");
+    expect(voiceTransition("idle", "bargeIn")).toBe("idle");
+    expect(voiceTransition("thinking", "finalTranscript", { autoSend: true })).toBe("thinking");
+    expect(voiceTransition("speaking", "nonsense-event")).toBe("speaking");
+  });
+
+  test("shouldAutoSend requires listening state and the autoSend flag", () => {
+    expect(shouldAutoSend("listening", { autoSend: true })).toBe(true);
+    expect(shouldAutoSend("listening", {})).toBe(false);
+    expect(shouldAutoSend("thinking", { autoSend: true })).toBe(false);
+  });
+});
+
+describe("detectVoiceLang (voice language selection)", () => {
+  test("exact match wins", () => {
+    expect(detectVoiceLang(["en-US"])).toBe("en-US");
+    expect(detectVoiceLang(["ko-KR"])).toBe("ko-KR");
+  });
+
+  test("primary-subtag match maps regional variants", () => {
+    expect(detectVoiceLang(["en-GB", "ko-KR"])).toBe("en-US");
+    expect(detectVoiceLang(["ja-JP"])).toBe("ja-JP");
+    expect(detectVoiceLang(["es-MX"])).toBe("es-ES");
+  });
+
+  test("first supported browser language wins in order", () => {
+    expect(detectVoiceLang(["fr-FR", "ko-KR", "en-US"])).toBe("ko-KR");
+  });
+
+  test("unsupported languages fall back", () => {
+    expect(detectVoiceLang(["fr-FR", "de-DE"])).toBe("ko-KR");
+    expect(detectVoiceLang(undefined)).toBe("ko-KR");
+  });
+
+  test("underscore variants (navigator edge) normalize", () => {
+    expect(detectVoiceLang(["en_US"])).toBe("en-US");
+  });
+
+  test("supported set covers the four README languages", () => {
+    expect(VOICE_LANGUAGES).toEqual(["ko-KR", "en-US", "ja-JP", "es-ES"]);
   });
 });

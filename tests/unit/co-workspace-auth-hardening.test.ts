@@ -230,3 +230,12 @@ describe("loginRequired wave B gate (design 2026-09-30-coworkspace-login-exempt)
     expect(tenants.status).toBe(401);
   }, 15000);
 });
+
+describe("static-asset exemption (voice-conversation UI verification find)", () => {
+  test("the app's own pure-helper module is exempt so unauthenticated browsers render the sign-in pointer", async () => {
+    const { AUTH_EXEMPT_ROUTES } = await import("../../services/co-workspace/src/auth");
+    expect(AUTH_EXEMPT_ROUTES.has("GET /app-helpers.js")).toBe(true);
+    // Tenant data routes stay gated.
+    expect(AUTH_EXEMPT_ROUTES.has("GET /tenants")).toBe(false);
+  });
+});

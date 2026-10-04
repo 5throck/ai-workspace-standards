@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261004-010
+kind: manual
+title: >-
+  co-workspace voice conversation mode: one-button hands-free loop (state
+  machine, half-duplex, barge-in) per spec
+  2026-10-04-coworkspace-voice-conversation-design
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T05:13:22.349Z'
+history:
+  - at: '2026-10-04T05:13:22.349Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T05:13:36.384Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T05:13:36.402Z'
+    from: waiting
+    to: review
+result: null
+error: null
