@@ -122,3 +122,10 @@ Two corrections from real usage:
    Because gateway sessions answer under the interaction standard (§13.1), the
    spoken summary naturally leads with conclusion + intuition — the screen
    carries the Level-3..5 detail (§4.4 progressive disclosure).
+
+## Revision 4 (2026-10-04, user test): 100-character spoken summary
+
+Live testing showed even the Revision-3 summary read too long. The default cap
+drops 320 → **100 characters**, still sentence-boundary-capped with an ellipsis;
+explicit `cap` overrides remain for future callers. Rationale unchanged: the
+screen carries the detail, the voice carries one breath of gist.

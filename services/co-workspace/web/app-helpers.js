@@ -145,9 +145,10 @@ export function detectVoiceLang(browserLangs, supported = VOICE_LANGUAGES, fallb
  * leave the detail on screen. Extraction order: an explicit "Short Answer" section
  * (LLM Interaction Standard §5 Explanation Pattern) → the first non-heading
  * paragraph → the opening text. Result is markdown-stripped and capped at a
- * sentence boundary near 320 chars.
+ * sentence boundary near 100 chars (user review 2026-10-04: keep the spoken
+ * gist truly short — the screen carries the detail).
  */
-export function spokenSummary(md, cap = 320) {
+export function spokenSummary(md, cap = 100) {
   const text = speakableText(md);
   if (text.length <= cap) return text;
   let source = text;
