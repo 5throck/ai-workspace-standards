@@ -94,3 +94,22 @@ candidate selection (non-done excluded, threshold respected); the move
 archive fallback; `restoreTicket` round-trip; and the id-allocation invariant
 after an apply. A CLI subprocess test drives `archive --apply` through
 `TICKET_WORKSPACE_ROOT`.
+
+## Addendum (2026-10-04, first real sweep): decision-chain validator
+
+The first real `archive --apply` (255 tickets) dangled one DEC knowledge_ref:
+`DEC-20261003-01.md` pointed at `tickets/governance/T-20260912-026.yaml`,
+which had just moved into the archive, and `validate-decisions.ts` (ADR-0061
+gate, dev-sync step 3.96b) failed fail-closed. Two-part fix, same spec:
+
+1. The DEC reference is updated to the archive path (where the file actually
+   lives now).
+2. `validate-decisions.ts` 1.1.0 becomes archive-aware: a `knowledge_ref`
+   matching `tickets/governance/<T|U-id>.yaml` also resolves through
+   `tickets/governance/archive/<id>.yaml`, so every future DEC that cites a
+   closed ticket survives the sweep without hand-editing. Refs already
+   pointing at the archive resolve through the plain existence check.
+
+Known limitation, accepted: other prose (ADRs, memory logs, reports) citing
+live ticket paths is not machine-validated and now names stale paths; the
+archive path is derivable (`tickets/governance/archive/<same name>`).
