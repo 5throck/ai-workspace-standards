@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): `archive`
+//           subcommand — a done ticket dwells >= 7 days (--days N) then moves into
+//           <store>/archive (service: tickets/archive, governance: tickets/governance/archive).
+//           Dry-run by default, --apply executes, --restore <id> reverses one move.
+//           `list --archived` scans the archive directories; ids resolve through the store's
+//           archive fallback so `show` keeps working after archiving; doctor reports the count.
 // v1.8.0 (2026-10-02, T-20261002-010 M10): list — upstream listings sort flagged tickets first, mark them [FLAGGED], and print inbox/ready/flagged counts (design §9 L3).
 // v1.7.0 (2026-10-01, T-20261001-017): `show` falls back to readTicketRaw when schema
 //           validation fails — a corrupt/hand-edited ticket renders with a loud banner
@@ -26,6 +32,7 @@ import { resolve, join } from 'node:path';
 import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
   resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
+  archiveDirFor, archiveCandidates, archiveTickets, restoreTicket, DEFAULT_ARCHIVE_DAYS,
 } from './helpers/ticket-store.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
@@ -55,7 +62,7 @@ function resolveTicketDir(id: string): { dir: string; id: string } {
 
 const [, , cmd, ...rest] = process.argv;
 
-const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed']);
+const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed', 'archived', 'apply']);
 
 function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
   const positional: string[] = [];
@@ -162,10 +169,19 @@ try {
       const listFilter = { status: flags.status as Status | undefined, ready: flags.ready === true ? true : undefined };
       const kindFilter = flags.kind as Kind | undefined;
       const upstreamOnly = flags.upstream === true;
-      let tickets = [
-        ...(kindFilter === 'manual' ? [] : listTickets(ticketsDir, { ...listFilter, kind: 'service' })),
-        ...(kindFilter === 'service' ? [] : listTickets(governanceDir, { ...listFilter, kind: 'manual' })),
-      ];
+      // --archived swaps the scan sources from the live stores to their archive
+      // directories (design 2026-10-04-ticket-archive-design.md); the default
+      // listing is unchanged and shows only live tickets.
+      const archivedMode = flags.archived === true;
+      let tickets = archivedMode
+        ? [
+          ...(kindFilter === 'manual' ? [] : listTickets(archiveDirFor(ticketsDir))),
+          ...(kindFilter === 'service' ? [] : listTickets(archiveDirFor(governanceDir))),
+        ]
+        : [
+          ...(kindFilter === 'manual' ? [] : listTickets(ticketsDir, { ...listFilter, kind: 'service' })),
+          ...(kindFilter === 'service' ? [] : listTickets(governanceDir, { ...listFilter, kind: 'manual' })),
+        ];
       if (upstreamOnly) {
         tickets = tickets.filter(t => t.upstream !== undefined);
       }
@@ -179,7 +195,7 @@ try {
         }
         for (const t of tickets) {
           const flaggedMarker = t.upstream?.flagged ? ' [FLAGGED]' : '';
-          console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}`);
+          console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}${archivedMode ? '  [ARCHIVED]' : ''}`);
         }
         if (upstreamOnly && upstream.length > 0) {
           const inbox = upstream.filter(t => t.upstream!.triage === 'inbox').length;
@@ -317,6 +333,12 @@ try {
         console.log(`\nTickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}) — escalate or dispose:`);
         for (const t of capped) console.log(`🚧  ${t.id} attempts=${t.attempts} [${t.status}] ${t.kind === 'service' ? t.service : (t.title ?? '').slice(0, 80)}`);
       }
+      // Archive visibility (design 2026-10-04-ticket-archive-design.md): archived
+      // tickets leave the live stores, so state them here instead of staying silent.
+      const archivedCount = listTickets(archiveDirFor(ticketsDir)).length + listTickets(archiveDirFor(governanceDir)).length;
+      if (archivedCount > 0) {
+        console.log(`\n${archivedCount} archived ticket(s) in tickets/archive and tickets/governance/archive — list with 'list --archived'.`);
+      }
       break;
     }
     case 'board': {
@@ -340,8 +362,53 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       }
       break;
     }
+    case 'archive': {
+      // v1.9.0 (design 2026-10-04-ticket-archive-design.md): done tickets leave the
+      // live stores after a dwell of DEFAULT_ARCHIVE_DAYS. Dry-run by default —
+      // governance tickets are git-tracked, so the operator reviews the plan first.
+      const { flags } = parseFlags(rest);
+      if (flags.restore !== undefined) {
+        const id = String(flags.restore);
+        const loc = resolveTicketLocation(ticketsDir, governanceDir, id);
+        if (!loc.archived) fail(`${loc.id} is not archived — it is live in ${loc.dir === governanceDir ? 'tickets/governance' : 'tickets'}`);
+        restoreTicket(loc.dir, loc.id);
+        console.log(`✅ ${loc.id} restored: ${archiveDirFor(loc.dir)} -> ${loc.dir === governanceDir ? 'tickets/governance' : 'tickets'}`);
+        break;
+      }
+      let days = DEFAULT_ARCHIVE_DAYS;
+      if (flags.days !== undefined) {
+        if (typeof flags.days !== 'string' || !/^\d+$/.test(flags.days)) {
+          fail(`--days must be a non-negative integer, got: ${flags.days}`);
+        }
+        days = Number(flags.days);
+      }
+      const stores = [
+        { label: 'tickets/governance', dir: governanceDir },
+        { label: 'tickets', dir: ticketsDir },
+      ];
+      const plans = stores.map(s => ({ ...s, list: archiveCandidates(s.dir, days) }));
+      const total = plans.reduce((n, p) => n + p.list.length, 0);
+      if (total === 0) {
+        console.log(`No tickets done >= ${days}d to archive.`);
+        break;
+      }
+      const apply = flags.apply === true;
+      for (const p of plans) {
+        for (const c of p.list) {
+          const label = c.ticket.kind === 'service' ? (c.ticket.service ?? '') : (c.ticket.title ?? '');
+          console.log(`${apply ? '📦' : '[dry-run]'}  ${p.label}/${c.ticket.id}  done ${Math.floor(c.ageDays)}d ago  ${label.slice(0, 80)}`);
+        }
+      }
+      if (!apply) {
+        console.log(`\n${total} ticket(s) eligible (done >= ${days}d). Re-run with --apply to archive.`);
+        break;
+      }
+      for (const p of plans) archiveTickets(p.dir, days);
+      console.log(`\n✅ archived ${total} ticket(s) (done >= ${days}d). tickets/governance/archive is git-tracked — commit the renames.`);
+      break;
+    }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor> ...');
+      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor|archive> ...');
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {
