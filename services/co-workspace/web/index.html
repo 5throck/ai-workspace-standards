@@ -79,7 +79,6 @@
   .msg { padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; font-size: .92rem; max-width: 82%; }
   .user { background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); align-self: flex-end; }
   .assistant { background: var(--panel); border: 1px solid var(--border2); align-self: stretch; max-width: 100%; }
-  .assistant.pending::after { content: "▌"; color: #58a6ff; }
   .progress-inline { color: #e3b341; font-size: .8rem; }
   .composer { padding: 10px 16px 14px; }
   .composerBox { max-width: 780px; margin: 0 auto; background: var(--input-bg); border: 1px solid var(--border2);
@@ -695,6 +694,14 @@
     const reply = bubble("assistant");
     reply.classList.add("pending");
     let errored = false;
+    // Live hourglass: ⏳ + elapsed seconds until the result arrives (user review —
+    // 시간과 모래시계). Cleared on the first text delta / error / turn end.
+    const pendStart = Date.now();
+    const pendTimer = setInterval(() => {
+      if (!reply.classList.contains("pending")) { clearInterval(pendTimer); return; }
+      reply.textContent = "⏳ " + formatTurnActivity((Date.now() - pendStart) / 1000);
+    }, 250);
+    const stopPendTimer = () => clearInterval(pendTimer);
     try {
       // R7: chat targets the selected team explicitly — the web surface never auto-creates.
       const res = await fetch(`/tenants/${currentTenantId}/chat`, {
@@ -737,12 +744,11 @@
           if (!frame.startsWith("data: ")) continue;
           const payload = JSON.parse(frame.slice(6));
           if (payload.type === "text" && typeof payload.text === "string") {
-            reply.classList.remove("pending");
+            clearInterval(pendTimer);
             if (voiceFirst) {
               // Voice-first: hold the full result back; the summary is spoken when
               // the turn completes and the text is revealed after the speech ends.
               fullText += payload.text;
-              reply.textContent = "🔊 Speaking the summary…";
             } else {
               reply.textContent += payload.text;
             }
@@ -761,6 +767,7 @@
       errored = true;
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
+      clearInterval(pendTimer);
       if (!(voiceFirst && !errored)) reply.classList.remove("pending");
       if (!errored) {
         // Voice-first loop: speak the ≤200-char summary BEFORE the full result is
