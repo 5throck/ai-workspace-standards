@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Decision Record Chain Validator (ADR-0061)
- * @version 1.0.0
+ * @version 1.1.0
  */
+// v1.1.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md):
+//           knowledge_refs to an archived governance ticket resolve through the
+//           archive directory (tickets/governance/archive/) — the 2026-10-04
+//           archive sweep moved done tickets out of the live store, which would
+//           otherwise dangle every DEC reference to a closed ticket.
 // Fail-closed validation of docs/decisions/DEC-*.md against the decision chain:
 // Decision -> Evidence (ledger) -> Knowledge (files) -> Rules (variant registries)
 // -> Skills (known skills) -> Agent.
@@ -38,6 +43,16 @@ const colors = {
 const ROOT = cwd();
 const DECISIONS_DIR = join(ROOT, 'docs', 'decisions');
 const LEDGER_PATH = join(ROOT, 'docs', 'evidence', 'ledger.md');
+
+/** True when `ref` points at a governance ticket that now lives in the archive
+ * directory instead of the live store (done tickets move to
+ * tickets/governance/archive/ after their dwell — spec
+ * docs/designs/2026-10-04-ticket-archive-design.md). Existing archive paths
+ * need no help: they resolve through the plain existsSync check. */
+function knowledgeRefArchived(root: string, ref: string): boolean {
+  const match = /^tickets\/governance\/([TU]-\d{8}-\d{3,4}\.yaml)$/.exec(ref);
+  return match !== null && existsSync(join(root, 'tickets', 'governance', 'archive', match[1]));
+}
 
 const REQUIRED_FIELDS = ['id', 'date', 'agent', 'decision', 'alternatives', 'status'];
 const STATUS_VOCABULARY = ['proposed', 'accepted', 'superseded'];
@@ -188,7 +203,7 @@ function validateDecisions(): void {
 
     const knowledgeRefs = parseInlineArray(fm.knowledge_refs);
     for (const ref of knowledgeRefs) {
-      if (!existsSync(join(ROOT, ref))) {
+      if (!existsSync(join(ROOT, ref)) && !knowledgeRefArchived(ROOT, ref)) {
         fail(file, 'knowledge-missing', `${file}: knowledge_refs path "${ref}" does not exist`, 'Fix the path or restore the referenced file');
         fileErrors++;
       }
