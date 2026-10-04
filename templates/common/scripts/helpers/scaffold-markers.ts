@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.7.0
+ * @version 1.8.0
+ * v1.8.0 (2026-10-04, spec 2026-10-04-llm-interaction-standard-design): deriveL3ScaffoldDelivery
+ *          models the docs/standards/ dedicated copy (create-l3-scaffold v1.18.0) — the LLM
+ *          Interaction Standard delivery closes the parity gap instead of widening the
+ *          reviewed-exclusion constant.
  *
  * v1.7.0 (2026-10-03, T-20261003-010): drop the graft repo-context-graph marker
  *          constants and registry entries — the block was withdrawn from
@@ -620,6 +624,11 @@ export function deriveL3ScaffoldDelivery(
   // Step 6: docs/_common flatten + docs/context.md.
   const commonDocs = join(commonDir, 'docs', '_common');
   if (existsSync(commonDocs)) addTree(commonDocs, 'docs');
+
+  // Step 6.5: docs/standards/ — governed doctrine shipped with every project
+  // (create-l3-scaffold v1.18.0, spec 2026-10-04-llm-interaction-standard-design).
+  const standardsDir = join(commonDir, 'docs', 'standards');
+  if (existsSync(standardsDir)) addTree(standardsDir, 'docs/standards');
 
   // Dedicated-step deliveries (stubs / governance record) that collide with
   // common relpaths.

@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.17.0
+// @version 1.18.0
+// v1.18.0 (2026-10-04, spec 2026-10-04-llm-interaction-standard-design): docs/standards/
+//          delivered at scaffold — the LLM Interaction Standard (ADR-0098) ships with every
+//          project so the AGENTS.md pointer resolves project-locally (upgrades refresh it
+//          via the docs/ SYNC claim; new-project's full copyDir already covers its path).
 // v1.17.0: stop injecting the graft repo-context-graph block into scaffolded
 //          AGENTS.md (T-20261003-010, design 2026-10-02-self-managed-tool-surfaces):
 //          graft surfaces — including the AGENTS.md block and the skills/graft copy —
@@ -722,6 +726,13 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
   // this L3 path has to copy it explicitly, or every scaffolded project silently ships without it.
   copyItem(path.join(COMMON_DIR, 'docs', 'context.md'), path.join(projectDir, 'docs', 'context.md'));
   log('  ✅ docs/context.md copied (immutable common project context)');
+
+  // docs/standards/ — governed doctrine shipped with every project (ADR-0098): the
+  // LLM Interaction Standard lands at docs/standards/ so the AGENTS.md pointer and
+  // context.md references resolve project-locally. Recursive copy keeps the door
+  // open for future standards; upgrades refresh the tree via the docs/ SYNC claim.
+  copyItem(path.join(COMMON_DIR, 'docs', 'standards'), path.join(projectDir, 'docs', 'standards'));
+  log('  ✅ docs/standards/ copied (LLM Interaction Standard, ADR-0098)');
 
   // docs/workspace-schema.json — the locale/country registry SSOT the project-side
   // validate-md-language.ts resolves at <project>/docs/workspace-schema.json. Without it
