@@ -6,7 +6,7 @@ title: >-
   #1362 run 37116607423) — quarantine/retry policy or windows timeout bump for
   the co-workspace login gate
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T16:42:34.535Z'
 history:
@@ -22,5 +22,13 @@ history:
   - at: '2026-10-03T18:11:24.854Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-04T02:36:54.756Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1379 (merged a13f40fe): loginRequired wave-B gate test
+  timeout 5s -> 15s in co-workspace-auth-hardening.test.ts (argon2id bootstrap
+  is CPU-bound on slow windows runners); follow-up same-class flake
+  (delete-vs-queued-turn, run 37143647801 5133ms) also bumped to 15s in
+  co-workspace-review-remediation.test.ts.
 error: null
