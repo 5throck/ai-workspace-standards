@@ -1389,17 +1389,21 @@ describe('Appendix E: client_roots identity', () => {
     expect(s.rootsRequests).toBe(0);
   });
 
-  test('E13d. timeout: silent client -> fallback within 1 s, ping still answered while waiting, one retry per session', async () => {
+  test('E13d. timeout: silent client -> fallback promptly, ping still answered while waiting, one retry per session', async () => {
     const proj = ws.project('co-test');
     seedKnown(ws, 'co-test');
-    const s = await rootsSession([uri(proj)], { UPSTREAM_ROOTS_TIMEOUT_MS: '200' }, 'silent');
+    // Timing bounds carry 2.5-5x headroom over the configured 500ms roots timeout:
+    // the semantic assertions (ping answered while the roots call is outstanding,
+    // fallback right after the timeout, one retry per session) held on dev machines,
+    // but wall-clock equality flaked on loaded windows CI (run 37175840451).
+    const s = await rootsSession([uri(proj)], { UPSTREAM_ROOTS_TIMEOUT_MS: '500' }, 'silent');
     const t0 = Date.now();
     const pending = s.create(good({ project_root: proj }));
     const ping = await s.send('ping');
     expect(ping.result).toEqual({});
-    expect(Date.now() - t0).toBeLessThan(180); // answered while roots/list is still outstanding
+    expect(Date.now() - t0).toBeLessThan(300); // answered while roots/list is still outstanding
     const declared = await pending;
-    expect(Date.now() - t0).toBeLessThan(1000);
+    expect(Date.now() - t0).toBeLessThan(2500);
     expect(declared.body.flagged).toBe(true);
     expect(readTicketYaml(declared.body.id).upstream.identity_source).toBe('self_declared');
     expect(s.rootsRequests).toBe(1);
