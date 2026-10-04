@@ -899,12 +899,17 @@
   // self-service email change (verification key from the outbox mail). The display-name
   // self-edit form was removed (renames are an admin action now).
   function renderAccountModal() {
+    // T-20261003-027 (sub-feature 4): a passwordless account (SSO/bootstrap admin) SETS a
+    // password — no current-password field, and the PATCH omits currentPassword (server D5
+    // skips the check for a null hash). The previous unconditional current-password demand
+    // made the remediation path unreachable for exactly the accounts that need it.
+    const setPassword = me?.hasPassword === false;
     const wrap = showModal({ title: `Account — @${me?.loginId ?? ""}`, bodyHtml: `
-      <h3 style="font-size:.85rem; margin: 12px 0 6px;">Change password</h3>
-      <div class="field"><input id="ac-cur" type="password" placeholder="Current password" autocomplete="current-password"></div>
+      <h3 style="font-size:.85rem; margin: 12px 0 6px;">${setPassword ? "Set password" : "Change password"}</h3>
+      ${setPassword ? "" : `<div class="field"><input id="ac-cur" type="password" placeholder="Current password" autocomplete="current-password"></div>`}
       <div class="field"><input id="ac-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
       <div class="field"><input id="ac-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
-      <div class="row" style="justify-content:flex-start;"><button id="ac-pw-save">Change password</button></div>
+      <div class="row" style="justify-content:flex-start;"><button id="ac-pw-save">${setPassword ? "Set password" : "Change password"}</button></div>
       <div class="formErr" id="ac-pw-err" role="alert"></div>
       <h3 style="font-size:.85rem; margin: 14px 0 6px;">Change email</h3>
       <div class="field"><input id="ac-email" type="email" placeholder="New email (a verification key will be sent)" autocomplete="email"></div>
@@ -948,17 +953,18 @@
     wrap.querySelector("#ac-pw-save").addEventListener("click", async () => {
       const err = wrap.querySelector("#ac-pw-err");
       err.textContent = "";
-      const cur = wrap.querySelector("#ac-cur").value;
+      const cur = wrap.querySelector("#ac-cur")?.value ?? "";
       const a = wrap.querySelector("#ac-new").value;
       const b = wrap.querySelector("#ac-new2").value;
-      if (!cur) { err.textContent = "⚠ Current password is required."; return; }
+      if (me?.hasPassword !== false && !cur) { err.textContent = "⚠ Current password is required."; return; }
       if (a.length < 8) { err.textContent = "⚠ New password must be at least 8 characters."; return; }
       if (a !== b) { err.textContent = "⚠ New passwords do not match."; return; }
-      const res = await fetch("/auth/me", { method: "PATCH", headers: authHeaders, body: JSON.stringify({ currentPassword: cur, password: a }) });
+      const res = await fetch("/auth/me", { method: "PATCH", headers: authHeaders, body: JSON.stringify({ ...(me?.hasPassword !== false ? { currentPassword: cur } : {}), password: a }) });
       if (res.status === 200) {
         err.textContent = "";
         err.style.color = "#3fb950";
         err.textContent = "✔ Password changed. Other sessions were signed out.";
+        me = { ...(me ?? {}), hasPassword: true, passwordSetRequired: false };
       } else {
         const body = await res.json().catch(() => ({}));
         err.textContent = `⚠ ${body.error ?? `change failed (HTTP ${res.status})`}`;
@@ -996,13 +1002,16 @@
 
   // R1 forced rotation: a must-change session (admin-issued temp credential) gets a
   // blocking dialog — no overlay click-away, no app use until a new password is set.
+  // T-20261003-027 (sub-feature 4): the same dialog forces a passwordless admin's one-time
+  // password set (the hint differs); every admin action 403s server-side until it completes.
   // The rotation PATCH omits currentPassword (the temp credential was verified at
-  // sign-in) and invalidates every OTHER session server-side; the rotating session
-  // survives, so after the save the app continues signed in as the same user
-  // (2026-10-02 rotation-keeps-session design — no drop to the signed-out card).
-  function forcePasswordChange() {
+  // sign-in; a null hash has none to verify — server D5) and invalidates every OTHER
+  // session server-side; the rotating session survives, so after the save the app
+  // continues signed in as the same user (2026-10-02 rotation-keeps-session design —
+  // no drop to the signed-out card).
+  function forcePasswordChange(hint = "Your sign-in used a temporary password. Choose a new one to continue.") {
     const wrap = showModal({ title: "Set a new password", dismissible: false, bodyHtml: `
-      <div class="hint">Your sign-in used a temporary password. Choose a new one to continue.</div>
+      <div class="hint">${hint}</div>
       <div class="field"><input id="fc-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
       <div class="field"><input id="fc-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
       <div class="row" style="justify-content:flex-start;"><button id="fc-save">Save and continue</button></div>
@@ -1019,7 +1028,7 @@
       const body = await res.json().catch(() => ({}));
       if (res.status === 200) {
         wrap.remove();
-        me = body.user ?? me;
+        me = { ...(me ?? {}), ...(body.user ?? {}), mustChangePassword: false, hasPassword: true, passwordSetRequired: false };
         renderAuthCard();
         applyAdminVisibility();
         applyComposerLock();
@@ -1045,6 +1054,7 @@
       applyComposerLock();
       loadSessions();
       if (me.mustChangePassword) forcePasswordChange();
+      else if (me.passwordSetRequired) forcePasswordChange("Your admin account has no password yet. Choose one to unlock admin actions.");
     } else {
       bubble("assistant", `⚠ ${body.error ?? "login failed"}`);
     }
@@ -1235,6 +1245,7 @@
       me = (await res.json()).user;
       applyAdminVisibility();
       if (me.mustChangePassword) forcePasswordChange();
+      else if (me.passwordSetRequired) forcePasswordChange("Your admin account has no password yet. Choose one to unlock admin actions.");
     }
     renderAuthCard();
     applyComposerLock();

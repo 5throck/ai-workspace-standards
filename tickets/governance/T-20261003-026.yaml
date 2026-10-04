@@ -9,12 +9,26 @@ title: >-
   cleaned; sweep dirs with no registry row, excluding every registered tenant's
   folder, with the same path-guard rules
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T11:32:32.890Z'
 history:
   - at: '2026-10-03T11:32:32.890Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-03T13:46:52.769Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-03T13:46:52.788Z'
+    from: waiting
+    to: running
+  - at: '2026-10-03T14:51:16.765Z'
+    from: running
+    to: review
+  - at: '2026-10-03T16:42:34.466Z'
+    from: review
+    to: done
+result: >-
+  Delivery merged (overnight governance batch #1375-era landings verified
+  in-tree); closing from review.
 error: null

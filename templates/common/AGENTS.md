@@ -138,7 +138,7 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 
 ### §3.7.5 Governance Backlog Dispatch
 
-**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM. Service tickets (`tickets/*.yaml`) are gitignored by design — their `history[]` field is the audit trail; governance tickets (`tickets/governance/`) are tracked in git.
+**Workspace root only** — `scripts/ticket.ts` and `tickets/` do not exist in variant projects (`@l2-propagate: false`); this section intentionally lives in `AGENTS.md` (L0-only SSOT, never propagated) rather than `agents/pm.md`, which extends into every variant's PM. Service tickets (`tickets/*.yaml`) are gitignored by design — their `history[]` field is the audit trail; governance tickets (`tickets/governance/`) are tracked in git. Done tickets leave the live stores after a dwell of 7 days since done: `bun scripts/ticket.ts archive` prints the plan and `--apply` executes it (`--days N` overrides the dwell, `--restore <id>` reverses one move) — `tickets/archive/` (service) stays local-only and `tickets/governance/archive/` (governance) is git-tracked (spec `2026-10-04-ticket-archive-design`).
 
 Deferred governance decisions (e.g. an ADR's soak-period gate) are tracked as `kind: manual` tickets with an optional `not_before` date — see [docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md). When `bun scripts/ticket.ts list --ready --kind manual` surfaces a ticket (at session start or during the Weekly Health Check, [docs/context.md](docs/context.md) and [§9.1](docs/context.md)):
 
@@ -278,44 +278,3 @@ All agents, regardless of their role, must adhere to the following:
 - **v2.0.0 (2026-06-09)**: Restructured as SSOT - Integrated PM Gateway workflow (§3), execution plan templates (§5), and renumbered existing sections. Consolidated duplicate content from pm.md, CLAUDE.md §5, GEMINI.md §5 into single source of truth.
 - **v1.x**: Previous versions maintained agent roster and individual definitions without PM Gateway integration
 
-<!-- graft:start -->
-## Graft — repo context graph
-
-This repo is indexed in `graft/`: small linked markdown nodes that explain each
-system and carry exact file:line spans, kept in sync with the code through git.
-
-For ANY task here — understanding how something works, finding where code lives,
-or scoping a change — get context from the graph before grepping or opening
-source files. Re-ask freely (it's cheap) and reuse literal identifiers you
-already have (symbol, error string, file name) as the query. New to this repo?
-Run `graft map` first — a token-budgeted orientation (dir clusters, hubs,
-hotspots), no LLM, no key.
-
-- Run `graft ask "<your question>" --source` → ranked nodes with the relevant
-  code spans inlined (each hit's ≤8-line crux by default; `--full` for whole
-  definitions when the crux isn't enough). Match the tool to the task shape:
-  for understanding or editing, the top node IS the answer — cite its
-  `covers:` file:line spans and edit straight from `--source`. For
-  exhaustive tasks ("every occurrence / every caller of this pattern"), ranked
-  results are top-N, not complete — run `graft grep "<literal>"` instead
-  (exhaustive over indexed files, grouped by enclosing symbol), falling back
-  to raw `grep -rn` only for unindexed files.
-- `graft skeleton <file>` → every definition's signature + span, ~10× cheaper
-  than reading the file; use it to skim an API surface.
-- `graft callers <symbol>` gives precomputed, exact edges — who calls this.
-  Add `--direction out` for what it calls, or `--depth N` to walk
-  transitively for the full blast radius. For structural questions, skip
-  ranking and use this directly.
-- Or browse: `graft/INDEX.md` lists every node; follow the links.
-- Monorepos and folders of multiple repos rank fairly across sub-projects —
-  hits carry `[scope/]` labels naming which one they're from. Narrow with
-  `graft ask "<task>" --in <scope>/` once you know where you're working.
-
-If a returned span is truncated ("+N more lines"), open the file at that exact
-range before finalizing. Only open source files when a node genuinely lacks a
-needed detail, and then at the exact file:line the node points to — never
-re-read whole files.
-
-After big code changes, refresh the graph with `graft build` (deterministic,
-no API key, $0).
-<!-- graft:end -->

@@ -2008,6 +2008,24 @@
       "source": "manual",
       "created": "2026-10-03",
       "last_updated": "2026-10-03"
+    },
+    {
+      "id": "2026-10-03-dependency-audit-waiver-design",
+      "title": "dependency audit waiver design",
+      "file": "docs/designs/2026-10-03-dependency-audit-waiver-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-03",
+      "last_updated": "2026-10-03"
+    },
+    {
+      "id": "2026-10-04-ticket-archive-design",
+      "title": "ticket archive design",
+      "file": "docs/designs/2026-10-04-ticket-archive-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
     }
   ]
 }

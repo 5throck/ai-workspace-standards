@@ -95,6 +95,16 @@ Every tool above refreshes the graph itself before answering, so what those tool
 return always describes the code as it is right now — including edits you just made
 and have not committed. You do **not** need to run `build` after editing.
 
+**The AGENTS.md graft block is graft-managed** (verified 2026-10-04, T-20261004-001):
+the Claude Code session-start hook runs graft's upkeep, whose `reconcileWiring`
+treats a hand-deleted instruction block as accidental loss and re-appends it
+(`upsertSection` on the `graft:start`/`graft:end` markers — action "appended").
+Hand-editing or withdrawing the block from AGENTS.md is therefore undone at the
+next session start; the durable removal is `graft uninstall -y --keep-cache`
+(wiring only — keeps `graft/` and the index). The block text lives in the graft
+package (`hosts/instructions.js instructionBody()`); this SKILL.md is the doctrine
+SSOT for tool behavior — the AGENTS.md block is a package-rendered summary.
+
 One caveat, if you `grep` the markdown under `graft/` directly: those cards are a
 projection, rebuilt at the end of the turn rather than on each query, so after an edit
 they can lag. The tools above never do — prefer them, and treat a card's spans as

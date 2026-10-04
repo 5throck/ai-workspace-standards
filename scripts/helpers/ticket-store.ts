@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
+// v1.10.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): archive — a done
+//           ticket dwells >= DEFAULT_ARCHIVE_DAYS (7) days, then archiveTickets renames it into
+//           <store>/archive (tickets/archive for the ephemeral service store,
+//           tickets/governance/archive for the tracked governance store) as a pure move with no
+//           content change; doneAtOf derives completion from history (never file mtime);
+//           restoreTicket reverses one move; resolveTicketLocation falls back to the archive
+//           directories so show/move keep finding archived ids.
 // v1.9.0 (2026-10-02, T-20261002-010 M10): the upstream resolution walk for kind manual skips the service-runner running hop — backlog -> waiting -> review -> done (design §5.1).
 // v1.8.0 (2026-10-02, T-20261002-003/-005): withTicketLock — shared per-directory ticket
 //           lock (owner token, fail-closed, atomic stale takeover) wrapping every
@@ -282,12 +289,22 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
  * governance tickets share the `T-YYYYMMDD-NNN` id format but live in different
  * directories, so a bare id can be ambiguous. Accepts the explicit forms
  * `service/<id>` and `governance/<id>`; a bare id resolves only when it exists
- * in exactly one store, and throws naming both paths otherwise. */
+ * in exactly one store, and throws naming both paths otherwise.
+ * v1.10.0: when the live stores miss, the two archive directories
+ * (`<store>/archive`) are searched — an archived ticket resolves to its owning
+ * store with `archived: true`, so `show`/`move` keep working after archiving. */
+export interface TicketLocation {
+  dir: string;
+  kind: Kind;
+  id: string;
+  archived: boolean;
+}
+
 export function resolveTicketLocation(
   serviceDir: string,
   governanceDir: string,
   id: string,
-): { dir: string; kind: Kind; id: string } {
+): TicketLocation {
   const explicit = /^(service|governance)\/([TU]-\d{8}-\d{3,4})$/.exec(id);
   if (explicit) {
     // T-20261001-016: upstream request tickets (U-) are kind: manual by schema —
@@ -295,15 +312,23 @@ export function resolveTicketLocation(
     if (explicit[1] === 'service' && explicit[2].startsWith('U-')) {
       throw new Error(`[ticket-store] upstream request tickets (${explicit[2]}) are kind: manual — use 'governance/${explicit[2]}' or the bare id`);
     }
-    return explicit[1] === 'governance'
-      ? { dir: governanceDir, kind: 'manual', id: explicit[2] }
-      : { dir: serviceDir, kind: 'service', id: explicit[2] };
+    const dir = explicit[1] === 'governance' ? governanceDir : serviceDir;
+    const kind: Kind = explicit[1] === 'governance' ? 'manual' : 'service';
+    if (existsSync(join(dir, `${explicit[2]}.yaml`))) {
+      return { dir, kind, id: explicit[2], archived: false };
+    }
+    if (existsSync(join(archiveDirFor(dir), `${explicit[2]}.yaml`))) {
+      return { dir, kind, id: explicit[2], archived: true };
+    }
+    throw new Error(`[ticket-store] ticket not found: ${explicit[2]} (looked in ${join(dir, explicit[2] + '.yaml')} and ${join(archiveDirFor(dir), explicit[2] + '.yaml')})`);
   }
   if (!TICKET_ID_PATTERN.test(id)) {
     throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN (optionally prefixed service/<id> or governance/<id>)`);
   }
   const servicePath = join(serviceDir, `${id}.yaml`);
   const governancePath = join(governanceDir, `${id}.yaml`);
+  const serviceArchivePath = join(archiveDirFor(serviceDir), `${id}.yaml`);
+  const governanceArchivePath = join(archiveDirFor(governanceDir), `${id}.yaml`);
   const inService = existsSync(servicePath);
   const inGovernance = existsSync(governancePath);
   if (inService && inGovernance) {
@@ -313,9 +338,20 @@ export function resolveTicketLocation(
       `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
     );
   }
-  if (inGovernance) return { dir: governanceDir, kind: 'manual', id };
-  if (inService) return { dir: serviceDir, kind: 'service', id };
-  throw new Error(`[ticket-store] ticket not found: ${id} (looked in ${servicePath} and ${governancePath})`);
+  if (inGovernance) return { dir: governanceDir, kind: 'manual', id, archived: false };
+  if (inService) return { dir: serviceDir, kind: 'service', id, archived: false };
+  const inServiceArchive = existsSync(serviceArchivePath);
+  const inGovernanceArchive = existsSync(governanceArchivePath);
+  if (inServiceArchive && inGovernanceArchive) {
+    throw new Error(
+      `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH archives — ` +
+      `${governanceArchivePath} and ${serviceArchivePath}. ` +
+      `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
+    );
+  }
+  if (inGovernanceArchive) return { dir: governanceDir, kind: 'manual', id, archived: true };
+  if (inServiceArchive) return { dir: serviceDir, kind: 'service', id, archived: true };
+  throw new Error(`[ticket-store] ticket not found: ${id} (looked in ${servicePath}, ${governancePath}, ${serviceArchivePath} and ${governanceArchivePath})`);
 }
 
 export interface MoveOptions {
@@ -489,6 +525,92 @@ export function staleRunningTickets(dir: string, thresholdMinutes: number): Tick
     const ageMinutes = (now - new Date(runningSince).getTime()) / 60000;
     return ageMinutes > thresholdMinutes;
   });
+}
+
+// ——— v1.10.0 archive (spec docs/designs/2026-10-04-ticket-archive-design.md) ———
+
+/** Dwell time before a done ticket becomes archivable. Requirement: done for at
+ * least one week. `--days` overrides per invocation; 0 archives every done ticket. */
+export const DEFAULT_ARCHIVE_DAYS = 7;
+
+/** Archive directory of a store: the service store `tickets/` archives into
+ * `tickets/archive/` (gitignored — service tickets are ephemeral), the governance
+ * store `tickets/governance/` into `tickets/governance/archive/` (git-tracked —
+ * the audit trail survives). */
+export function archiveDirFor(dir: string): string {
+  return join(dir, 'archive');
+}
+
+/** Resolves when a done ticket became done: the `at` of the last history entry
+ * with `to: 'done'`. Fallbacks for a hand-edited legacy ticket whose history
+ * lacks the done entry: the newest history entry's `at`, then `created_at`.
+ * File mtime is deliberately never used — it resets on every clone and would
+ * mis-age candidates on a fresh checkout. */
+export function doneAtOf(ticket: Ticket): string {
+  const doneEntry = [...ticket.history].reverse().find(h => h.to === 'done');
+  if (doneEntry) return doneEntry.at;
+  const last = ticket.history[ticket.history.length - 1];
+  return last?.at ?? ticket.created_at;
+}
+
+export interface ArchiveCandidate {
+  ticket: Ticket;
+  doneAt: string;
+  ageDays: number;
+}
+
+/** Done tickets of one store whose done-dwell reached `days`. Non-done tickets
+ * never qualify, regardless of age. Sorted by id for stable output. */
+export function archiveCandidates(dir: string, days: number, now: number = Date.now()): ArchiveCandidate[] {
+  const dwellMs = days * 86_400_000;
+  return listTickets(dir, { status: 'done' })
+    .map(ticket => {
+      const doneAt = doneAtOf(ticket);
+      return { ticket, doneAt, ageDays: (now - new Date(doneAt).getTime()) / 86_400_000 };
+    })
+    .filter(c => now - new Date(c.doneAt).getTime() >= dwellMs)
+    .sort((a, b) => a.ticket.id.localeCompare(b.ticket.id));
+}
+
+/** Moves every eligible done ticket of one store into its archive directory.
+ * Each move is a rename under the store's ticket lock — the file content is
+ * never modified (the archive state lives in the path, not in the YAML). A
+ * ticket that vanishes between scan and lock is skipped; an existing archive
+ * file with the same id is never overwritten. */
+export function archiveTickets(dir: string, days: number, opts: { now?: number } = {}): Ticket[] {
+  const moved: Ticket[] = [];
+  for (const c of archiveCandidates(dir, days, opts.now)) {
+    withTicketLock(dir, `archive:${c.ticket.id}`, () => {
+      const src = ticketPath(dir, c.ticket.id);
+      if (!existsSync(src)) return; // moved concurrently between scan and lock
+      const archiveDir = archiveDirFor(dir);
+      const dst = ticketPath(archiveDir, c.ticket.id);
+      if (existsSync(dst)) {
+        throw new Error(`[ticket-store] refusing to overwrite an existing archived ticket: ${dst}`);
+      }
+      mkdirSync(archiveDir, { recursive: true });
+      renameSync(src, dst);
+      moved.push(c.ticket);
+    });
+  }
+  return moved;
+}
+
+/** Moves one archived ticket back into its live store. Idempotence guard: a
+ * live file with the same id refuses the restore. */
+export function restoreTicket(dir: string, id: string): Ticket {
+  withTicketLock(dir, `restore:${id}`, () => {
+    const src = ticketPath(archiveDirFor(dir), id);
+    if (!existsSync(src)) {
+      throw new Error(`[ticket-store] no archived ticket ${id} in ${archiveDirFor(dir)}`);
+    }
+    const dst = ticketPath(dir, id);
+    if (existsSync(dst)) {
+      throw new Error(`[ticket-store] a live ticket ${id} already exists — nothing to restore`);
+    }
+    renameSync(src, dst);
+  });
+  return readTicket(dir, id);
 }
 
 export function loadCatalog(catalogPath: string): Catalog {
