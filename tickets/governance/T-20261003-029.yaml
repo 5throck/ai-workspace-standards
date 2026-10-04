@@ -7,7 +7,7 @@ title: >-
   until both land (PROMOTION_CHECKLIST.md still shows Phase A Complete: false,
   so the Phase B template-promotion gate is untouched)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-03T12:08:00.000Z'
 history:
@@ -23,5 +23,13 @@ history:
   - at: '2026-10-03T14:51:34.776Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-04T04:48:48.778Z'
+    from: review
+    to: done
+result: >-
+  Verified complete: both Phase B parts (prompt-injection review across the
+  40-agent roster + threat model) are landed and committed in
+  Projects/co-safety/SECURITY.md (6d7b4a7); no TODO marker remains. Template
+  promotion stays gated as designed (PROMOTION_CHECKLIST Phase A Complete:
+  false) — tracked there, not by this ticket.
 error: null

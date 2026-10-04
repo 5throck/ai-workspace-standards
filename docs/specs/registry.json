@@ -1047,10 +1047,10 @@
       "id": "2026-06-02-governance-docs-architecture-design",
       "title": "governance docs architecture design",
       "file": "docs/designs/2026-06-02-governance-docs-architecture-design.md",
-      "status": "approved",
+      "status": "archived",
       "source": "manual",
       "created": "2026-06-02",
-      "last_updated": "2026-09-18",
+      "last_updated": "2026-10-04",
       "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): adjudicated by evidence — P2 (_shared/_platform fragment assembly) NOT implemented (no templates/common/_shared or _platform dirs, no publish-to-template.ts) and NOT superseded (doc header still 'Design (P2 — pending implementation)'; ADR-0022 references it as the live full P2 design). Left approved; needs human/PM decision: implement or supersede."
     },
     {
@@ -2040,6 +2040,15 @@
       "id": "2026-10-04-docs-folder-manifest-design",
       "title": "docs folder manifest design",
       "file": "docs/designs/2026-10-04-docs-folder-manifest-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-04-co-security-checklist-backport-design",
+      "title": "co security checklist backport design",
+      "file": "docs/designs/2026-10-04-co-security-checklist-backport-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-10-04",

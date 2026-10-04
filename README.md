@@ -1,6 +1,6 @@
 ---
-sync_version: 3
-content_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
+sync_version: 4
+content_hash: ec7418075d0a51c6bb7ab0fbb8842403f4dbcb110ce85ec9afdbd772a1c3c9cf
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -47,7 +47,7 @@ Korean jurisdiction support ships with the workspace: a **KR country profile** (
 
 **Before using this workspace**, ensure you have the required software installed:
 
-> **📖 Detailed Guide**: See [Getting Started](docs/getting-started.md) for complete installation instructions and troubleshooting.
+> **📖 Detailed Guide**: See [Getting Started](docs/guides/getting-started.md) for complete installation instructions and troubleshooting.
 
 ### Must-Have Tools
 
@@ -73,7 +73,7 @@ bun --version    # Should show 1.x.x
 gh --version     # Optional: PR automation
 ```
 
-**Install missing tools**: See [Getting Started](docs/getting-started.md#-essential-software-must-have) for detailed installation instructions.
+**Install missing tools**: See [Getting Started](docs/guides/getting-started.md#-essential-software-must-have) for detailed installation instructions.
 
 ---
 
@@ -193,7 +193,10 @@ C:\git\ (workspace root - this repo)
 ├── graft/                   # Repo context graph (ADR-0076)
 ├── schemas/                 # Shared JSON schemas
 ├── tickets/                 # Governance decision tickets
-├── docs/governance/agents/  # Operational workflow references (AGENTS.md pointer targets)
+├── docs/                    # Governance docs — manifest & creation criteria: docs/README.md
+│   ├── governance/agents/   #   Operational workflow references (AGENTS.md pointer targets)
+│   ├── standards/           #   Cross-cutting standards (LLM Interaction Standard, ADR-0098)
+│   └── adr/ designs/ guides/ reports/ …  #   see the manifest for the full map
 └── templates/               # Versioned AI project templates (co-develop, co-design, etc.)
     ├── common/              # Shared scripts, hooks, and skills across all variants
     ├── co-develop/          # ✅ Stable — full software development agent team
@@ -332,6 +335,9 @@ Checks: agent frontmatter completeness, required sections (`## Meeting Participa
 - **TypeScript-only scripts** - all `scripts/` are `.ts` files executed via `bun` (ADR-0036). No `.sh/.ps1` pairs.
 - **Coding Guidelines are audited** - `audit.ts` fails the build if `## Coding Guidelines` is missing from `docs/context.md`.
 - **Security-First Scaffold** - Projects are automatically equipped with secrets detection (`.gitleaks.toml`), `SECURITY.md`, and secure pre-commit hooks to prevent credential leaks.
+- **LLM Interaction Standard** (ADR-0098) - "Precision In, Intuition Out": instructions follow ASD-STE100 controlled language; answers lead with conclusion and intuition before implementation detail (docs/standards/llm-interaction-standard.md).
+- **docs/ folder manifest** - every docs/ top-level folder has a recorded purpose (docs/README.md); the audit gate fails unmanifested folders, and new projects ship a project-scoped manifest.
+- **Ticket lifecycle with archive** - done tickets leave the live stores after a 7-day dwell (`bun scripts/ticket.ts archive`); governance tickets stay git-tracked under tickets/governance/.
 
 ---
 
@@ -373,4 +379,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*

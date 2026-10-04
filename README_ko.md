@@ -1,6 +1,6 @@
 ---
-translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
-sync_version: 3
+translated_from_hash: ec7418075d0a51c6bb7ab0fbb8842403f4dbcb110ce85ec9afdbd772a1c3c9cf
+sync_version: 4
 ---
 
 **언어**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -46,7 +46,7 @@ sync_version: 3
 
 이 워크스페이스를 사용하기 전에 필수 소프트웨어가 설치되어 있는지 확인하세요.
 
-> **📖 상세 가이드**: 전체 설치 지침 및 문제 해결은 [시작 가이드](docs/getting-started.md)를 참조하세요.
+> **📖 상세 가이드**: 전체 설치 지침 및 문제 해결은 [시작 가이드](docs/guides/getting-started.md)를 참조하세요.
 
 ### 필수 도구
 
@@ -72,7 +72,7 @@ bun --version    # 1.x.x 이상이어야 합니다
 gh --version     # 선택 사항: PR 자동화
 ```
 
-**설치 안내**: 자세한 설치 지침은 [시작 가이드](docs/getting-started.md#-essential-software-must-have)를 참조하세요.
+**설치 안내**: 자세한 설치 지침은 [시작 가이드](docs/guides/getting-started.md#-essential-software-must-have)를 참조하세요.
 
 ---
 
@@ -190,7 +190,9 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── graft/                   # 저장소 컨텍스트 그래프 (ADR-0076)
 ├── schemas/                 # 공유 JSON 스키마
 ├── tickets/                 # 거버넌스 의사결정 티켓
-├── docs/governance/agents/  # 운영 워크플로 참조 (AGENTS.md 포인터 대상)
+├── docs/                    # 거버넌스 문서 — 매니페스트 및 생성 기준: docs/README.md
+│   ├── governance/agents/   #   운영 워크플로 참조 (AGENTS.md 포인터 대상)
+│   └── standards/           #   공통 표준 (LLM 상호작용 표준, ADR-0098)
 └── templates/               # 새 프로젝트 스캐폴딩을 위한 버전 관리 템플릿들
     ├── common/              # 모든 템플릿이 공통으로 사용하는 스크립트/스킬/깃훅
     ├── co-develop/          # ✅ Stable — 종합 소프트웨어 개발 에이전트 팀
@@ -328,6 +330,9 @@ bun scripts/validate-templates.ts
 - **TypeScript 전용 스크립트** - 모든 `scripts/`는 `bun`으로 실행되는 `.ts` 파일입니다 (ADR-0036). `.sh/.ps1` 파일 없음.
 - **코딩 지침 감사** - `docs/context.md`에 `## Coding Guidelines`이 누락된 경우 `audit.ts`가 빌드를 실패 처리합니다.
 - **보안 중심 스캐폴드** - 프로젝트에는 자격 증명 유출을 방지하기 위한 시크릿 탐지(`.gitleaks.toml`), `SECURITY.md`, 그리고 안전한 pre-commit 훅이 자동으로 장착됩니다.
+- **LLM 상호작용 표준** (ADR-0098) - "정밀한 입력, 직관적인 출력": 지시문은 ASD-STE100 제어 언어를 따르고, 답변은 구현 세부보다 결론과 직관을 먼저 제시합니다 (docs/standards/llm-interaction-standard.md).
+- **docs/ 폴더 매니페스트** - docs/의 모든 최상위 폴더는 기록된 목적을 갖습니다 (docs/README.md); 감사 게이트가 미등록 폴더를 차단하고, 새 프로젝트에는 프로젝트용 매니페스트가 함께 제공됩니다.
+- **티켓 라이프사이클 아카이브** - 완료 티켓은 7일 경과 후 라이브 스토어를 떠나며(`bun scripts/ticket.ts archive`), 거버넌스 티켓은 tickets/governance/ 아래 git으로 추적됩니다.
 
 ---
 
@@ -369,4 +374,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*

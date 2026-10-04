@@ -5,7 +5,7 @@ spec-id: 2026-06-02-governance-docs-architecture-design
 
 # Governance Document Architecture: _shared/ + _platform/ Design
 
-**Status**: Design (P2 — pending implementation)
+**Status**: Archived (2026-10-04 triage, T-20261004-004 — P2 was never implemented; the duplication concern it targeted is managed since by the COMMON-CLAUDE marker zones + the marker-inject propagation engine and ADR-0090 thin dispatchers. Kept for provenance; do not implement as written.)
 **Supersedes**: Section marker approach (implemented in P1)
 **Created**: 2026-06-02
 **Owner**: architect

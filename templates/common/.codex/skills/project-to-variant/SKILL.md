@@ -95,5 +95,5 @@ Since `l3-to-variant-pipeline.ts` 1.11.0, `--auto-fix-agents-md` / `--auto-fix-p
 
 - [Variant Creation Skill](../create-variant/SKILL.md)
 - [Variant Promotion Skill](../promote-variant/SKILL.md)
-- [Variant Conversion Guide](../../docs/variant-conversion-guide.md)
+- [Variant Conversion Guide](../../docs/guides/variant-conversion-guide.md)
 - [Variant Review Report (2026-07-14)](../../docs/variant-review-report-2026-07-14.md)

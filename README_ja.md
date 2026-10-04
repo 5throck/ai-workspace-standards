@@ -47,7 +47,7 @@ sync_version: 3
 
 **このワークスペースを使用する前に**、必要なソフトウェアがインストールされていることを確認してください：
 
-> **📖 詳細ガイド**: 完全なインストール手順とトラブルシューティングについては [Getting Started](docs/getting-started.md) を参照してください。
+> **📖 詳細ガイド**: 完全なインストール手順とトラブルシューティングについては [Getting Started](docs/guides/getting-started.md) を参照してください。
 
 ### 必須ツール
 
@@ -73,7 +73,7 @@ bun --version    # 1.x.xが表示されるはず
 gh --version     # オプショナル: PR自動化
 ```
 
-**ツールのインストール**: 詳細なインストール手順については [Getting Started](docs/getting-started.md#-essential-software-must-have) を参照してください。
+**ツールのインストール**: 詳細なインストール手順については [Getting Started](docs/guides/getting-started.md#-essential-software-must-have) を参照してください。
 
 ---
 
@@ -376,4 +376,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-09-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*
