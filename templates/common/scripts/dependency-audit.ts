@@ -2,7 +2,7 @@
 /**
  * dependency-audit.ts — Fleet dependency-vulnerability gate with a reviewed
  * advisory-waiver channel (T-20261003-011).
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Replaces the inline `bun audit` severity grep in the CI dependency-audit job
  * (templates/common/.github/workflows/ci.yml). Gate semantics are unchanged:
@@ -36,17 +36,24 @@
  *   decided_by = "T-... ticket / review" # non-empty review note (required)
  *   revisit_by = "2027-01-03"            # mandatory revisit date (required)
  *
+ * v1.1.0 (2026-10-05, T-20261004-029):
+ *  - Manifest-skip: a repository with no root package.json (docs-only projects
+ *    like co-safety, which declare no npm dependencies) now SKIPS with a
+ *    notice instead of failing on bun's "No package.json was found" error —
+ *    the gate audits declared npm dependencies, and an absent manifest means
+ *    there is nothing to audit.
+ *
  * Usage:
  *   bun scripts/dependency-audit.ts [--waiver-file <path>]
  *
- * Exit codes: 0 = pass, 1 = fail (finding, waiver, or infrastructure).
+ * Exit codes: 0 = pass (or skipped: nothing to audit), 1 = fail (finding, waiver, or infrastructure).
  */
 
 import { readFileSync } from 'node:fs';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 const DEFAULT_WAIVER_FILE = path.join('.github', 'dependency-waivers.toml');
 const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low'];
@@ -361,6 +368,8 @@ Usage:
   bun scripts/dependency-audit.ts [--waiver-file <path>]
 
 Behavior:
+  - Skips with a notice (exit 0) when the repo has no root package.json —
+    nothing to audit (T-20261004-029).
   - Runs \`bun audit --json\`; fails on empty/unparseable output (infrastructure).
   - Fails on any remaining high/critical finding; reports low/moderate.
   - Suppresses findings matching a reviewed waiver in
@@ -390,6 +399,16 @@ async function main(): Promise<number> {
   if (!waiverFile) {
     console.error('[FAIL] --waiver-file requires a path');
     return 1;
+  }
+
+  // 0. Manifest-skip (T-20261004-029): a repo with no root package.json has no
+  //    declared npm dependencies to audit — passing with a notice is correct,
+  //    not a gate bypass (bun audit itself would hard-error on the same input).
+  if (!existsSync(path.join(process.cwd(), 'package.json'))) {
+    console.log(
+      '[SKIP] no package.json at repo root — no declared npm dependencies to audit; gate not applicable (passing with notice).',
+    );
+    return 0;
   }
 
   // 1. Audit output first — an infra failure must surface even with a bad waiver file.
