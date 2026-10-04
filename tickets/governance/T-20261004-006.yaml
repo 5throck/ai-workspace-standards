@@ -5,7 +5,7 @@ title: >-
   LLM Interaction Standard SSOT (ADR-0098) + co-workspace voice (STT/TTS) +
   ci-triage merge-heal step; workspace + template delivery
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-04T03:04:48.798Z'
 history:
@@ -18,5 +18,17 @@ history:
   - at: '2026-10-04T03:04:56.921Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-04T03:10:57.646Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1383 (merged 17d6ffac):
+  docs/standards/llm-interaction-standard.md v1.0.0 SSOT + ADR-0098 +
+  AGENTS.md/CONSTITUTION wiring (templates inherit via COMMON-AGENTS publish);
+  co-workspace interaction addendum (CO_WORKSPACE_INTERACTION_STANDARD,
+  fresh-session gate) + browser STT/TTS with speakableText helpers (6 unit
+  tests; ADR-0070 rendered verification at 1280/720 in
+  docs/reports/2026-10-04-llm-interaction-ui-verification/); ci-triage 0.2.0
+  Step 6 merge-heal, propagated to templates/common with contract+registry rows
+  synced.
 error: null

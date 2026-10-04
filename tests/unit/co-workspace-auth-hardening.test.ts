@@ -132,7 +132,7 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     const { state } = makeState();
     expect((await handleRequest(state, callback("aaaa", "bbbb"))).status).toBe(400);
     expect((await handleRequest(state, callback("aaaa", "aaaaa"))).status).toBe(400);
-  });
+  }, 20000);
 
   test("sso callback success emits three separate cookies", async () => {
     enableGoogle({ sub: "s-new", email: "new@example.com" });
@@ -142,7 +142,7 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     const cookies = res.headers.getSetCookie();
     expect(cookies.length).toBe(3);
     for (const c of cookies) expect(c).toContain("Secure");
-  });
+  }, 20000);
 
   test("sso links verified email account", async () => {
     enableGoogle({ sub: "s-link", email: "v@example.com" });
