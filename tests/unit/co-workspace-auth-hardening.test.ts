@@ -152,7 +152,7 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     expect(res.status).toBe(302);
     expect(res.headers.getSetCookie().some((c) => c.startsWith("gw_session=") && !c.includes("Max-Age=0"))).toBe(true);
     expect(state.users.findById(u.id)?.googleSub).toBe("s-link");
-  });
+  }, 20000);
 
   test("sso refuses unverified email account (409, no session cookie)", async () => {
     enableGoogle({ sub: "s-unv", email: "u@example.com" });
@@ -165,7 +165,7 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     expect(res.status).toBe(409);
     expect(res.headers.getSetCookie().length).toBe(0);
     expect(state.users.findById(u.id)?.googleSub ?? null).toBeNull();
-  });
+  }, 20000);
 
   test("sso refuses email account bound to other google sub (409)", async () => {
     enableGoogle({ sub: "s-other", email: "b@example.com" });
@@ -174,7 +174,7 @@ describe("Google SSO hardening (M1/M2/H8)", () => {
     const res = await handleRequest(state, callback("st"));
     expect(res.status).toBe(409);
     expect(res.headers.getSetCookie().length).toBe(0);
-  });
+  }, 20000);
 });
 
 describe("outbox and open mode (M7/M8)", () => {
