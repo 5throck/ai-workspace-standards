@@ -3,7 +3,7 @@
 - **Spec id**: `2026-10-04-ticket-archive-design`
 - **Date**: 2026-10-04
 - **Status**: Implemented
-- **Related**: `scripts/ticket.ts`, `scripts/helpers/ticket-store.ts`, `tickets/` store layout, `docs/designs/2026-08-16-governance-backlog-design.md` (store semantics), `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md` (Phase A)
+- **Related**: `scripts/ticket.ts`, `scripts/helpers/ticket-store.ts`, `tickets/` store layout, `docs/designs/2026-08-16-governance-backlog-design.md` (store semantics), `docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md` (Phase A)
 
 ## Problem
 

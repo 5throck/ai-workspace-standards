@@ -75,7 +75,7 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#-role-clarification) in `agents/pm.md` and the Task Owner vs Executor Distinction below.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](#38-permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol) — never substitutes for the specialist.
 
 #### §3.1.2 PM Role Boundaries
 

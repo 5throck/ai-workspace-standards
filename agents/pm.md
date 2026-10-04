@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-02
+last_updated: 2026-10-04
 name: pm
 role: orchestrator
 status: active
@@ -22,7 +22,7 @@ last_reviewed: 2026-09-29
 lifecycle:
   phase: production
   created: 2026-05-29
-  last_updated: 2026-10-01
+  last_updated: 2026-10-04
   governance: docs/lifecycle/agents/pm.md
 ---
 

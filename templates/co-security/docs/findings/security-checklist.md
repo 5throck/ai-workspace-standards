@@ -1,6 +1,6 @@
 # Fleet Security Assessment Checklist
 
-**Purpose**: Standing checklist for any security assessment of a co-* project (or the fleet). Derived from (1) the verified countermeasure catalog, (2) the 2026-10-01 fleet assessment findings, (3) the 2026-09 assessment.bizknights.org engagement (F-01…F-06, NF-01/NF-02), and (4) the 2026-10-03 co-workspace deployment review (docker-socket broker, workload/spend caps, auth-audit logging, provider-key hygiene).
+**Purpose**: Standing checklist for any security assessment of a co-* project (or the fleet). Derived from (1) the verified countermeasure catalog, (2) the 2026-10-01 fleet assessment findings, (3) the 2026-09 <target>.example (2026-09 external web engagement) engagement (F-01…F-06, NF-01/NF-02), and (4) the 2026-10-03 co-workspace deployment review (docker-socket broker, workload/spend caps, auth-audit logging, provider-key hygiene).
 
 **Usage**: For each item, record ✅ pass / ❌ fail / ➖ N/A plus the evidence pointer (file:line or request/response). Failures become findings with severity per the report template in `docs/reports/`. Re-verify claimed "FIXED" findings on every retest — a documented control that fails verification is itself a finding (see 2026-10-01 FW-4).
 

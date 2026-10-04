@@ -153,7 +153,8 @@ NUL
 
 # --- Ticket instances (tracked directory, ignored contents — Task 8) ---
 tickets/*.yaml
-# Shared ticket lock (T-20261002-005) — transient, never committed
+# Shared ticket locks (T-20261002-005) — transient, never committed
+tickets/.ticket-lock
 tickets/governance/.ticket-lock
 # Service ticket archive (spec 2026-10-04-ticket-archive-design) — service
 # tickets are ephemeral, so their archive stays local-only like the live store;

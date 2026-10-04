@@ -3,7 +3,7 @@
 - **Date**: 2026-09-25
 - **Type**: Duplication audit report (evidence input to `docs/designs/2026-09-25-agents-md-size-reduction-design.md`; decides nothing by itself)
 - **Method**: section-level self-joins and cross-joins over all 15 AGENTS.md files, CONSTITUTION.md, `templates/common/docs/context.md`, and 13 `templates/co-*/docs/<variant>.context.md`, reusing the workspace's own similarity primitives (`scripts/helpers/context-sections.ts`: `computeLineOverlapSimilarity`, `computeTokenOverlapSimilarity`, `splitIntoSections`). Grades: HIGH ≥ 0.8, MED 0.6–0.8, LOW 0.5–0.6. Managed marker zones reported separately as intentional duplication. Measurement script: one-off (`tests/.temp/`, not shipped).
-- **Companion**: size companion piece in `docs/analysis/2026-09-25-agents-md-size-analysis.md`.
+- **Companion**: size companion piece in `docs/reports/2026-09-25-agents-md-size-analysis.md`.
 
 ---
 

@@ -1051,7 +1051,7 @@
       "source": "manual",
       "created": "2026-06-02",
       "last_updated": "2026-10-04",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): adjudicated by evidence — P2 (_shared/_platform fragment assembly) NOT implemented (no templates/common/_shared or _platform dirs, no publish-to-template.ts) and NOT superseded (doc header still 'Design (P2 — pending implementation)'; ADR-0022 references it as the live full P2 design). Left approved; needs human/PM decision: implement or supersede."
+      "archive_note": "archived 2026-10-04 (T-20261004-004): P2 never implemented; duplication concern now managed by COMMON-CLAUDE marker zones + the marker-inject engine and ADR-0090 thin dispatchers."
     },
     {
       "id": "2026-09-19-local-ticket-runner-migration-design",

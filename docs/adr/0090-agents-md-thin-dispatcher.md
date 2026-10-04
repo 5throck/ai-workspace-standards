@@ -8,7 +8,7 @@ author: PM
 
 ## Context
 
-Every AGENTS.md in the ecosystem exceeds Hermes Agent's default 20,000-char context-file cap (L0 57.0k / L1 49.2k / L2 27.9k–82.1k), silently truncating the governance body for context-file-based consumers (ADR-0088 Addendum 1). The duplication audit (`docs/analysis/2026-09-25-agents-md-duplication-audit.md`, F1–F8) further showed the weight is dual-maintenance liability: the COMMON-AGENTS zone's ADR summaries duplicate owned §3 (tok 0.89–0.97), PM Gateway is double-registered (AGENTS §3 ↔ CONSTITUTION §5.5), §1↔§2 roster restatement is HIGH in all 13 variants, and the context.md `## Agents` sync rule is unenforced and unmet 13/13. A six-role design review (meeting `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md`) amended the approach (amendments A–H); the user selected full restructure (Option 1).
+Every AGENTS.md in the ecosystem exceeds Hermes Agent's default 20,000-char context-file cap (L0 57.0k / L1 49.2k / L2 27.9k–82.1k), silently truncating the governance body for context-file-based consumers (ADR-0088 Addendum 1). The duplication audit (`docs/reports/2026-09-25-agents-md-duplication-audit.md`, F1–F8) further showed the weight is dual-maintenance liability: the COMMON-AGENTS zone's ADR summaries duplicate owned §3 (tok 0.89–0.97), PM Gateway is double-registered (AGENTS §3 ↔ CONSTITUTION §5.5), §1↔§2 roster restatement is HIGH in all 13 variants, and the context.md `## Agents` sync rule is unenforced and unmet 13/13. A six-role design review (meeting `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md`) amended the approach (amendments A–H); the user selected full restructure (Option 1).
 
 ## Decision
 
@@ -30,6 +30,6 @@ Every AGENTS.md in the ecosystem exceeds Hermes Agent's default 20,000-char cont
 ## References
 
 - Design: `docs/designs/2026-09-25-agents-md-size-reduction-design.md` (§1.1/§1.2 amendments, waves, acceptance criteria)
-- Analysis: `docs/analysis/2026-09-25-agents-md-size-analysis.md`, `docs/analysis/2026-09-25-agents-md-duplication-audit.md`
+- Analysis: `docs/reports/2026-09-25-agents-md-size-analysis.md`, `docs/reports/2026-09-25-agents-md-duplication-audit.md`
 - Meeting: `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md` (A–H amendments, verbatim red-team dissent, user decision)
 - ADR-0088 (+Addendum 1 — truncation origin), ADR-0035/ADR-0048 (AGENTS.md structure/SSOT)

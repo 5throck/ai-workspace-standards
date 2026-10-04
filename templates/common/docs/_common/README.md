@@ -7,8 +7,11 @@ This directory contains all project documentation and architecture artifacts.
 | File | Purpose |
 |------|---------|
 | `context.md` | Single source of truth for all AI tools - architecture, tech stack, coding guidelines, multi-agent workflow |
-| `adr/` | Architecture Decision Records - significant technical decisions with rationale |
+| `<variant>.context.md` | Variant-specific context overlay (delivered by the variant scaffold) |
+| `adr/` | Architecture Decision Records - significant technical decisions with rationale (created on first record; no seeds by owner decision 2026-08-25) |
 | `security.md` | Security policies, vulnerability reporting, and secure development guidelines |
+| `standards/` | Cross-cutting normative standards shipped with the project (LLM Interaction Standard, ADR-0098) |
+| `VERSION_MANIFEST.md` | Component-version stub rendered at scaffold time |
 | `_examples/` | Reference templates for creating documentation (NOT copied to new projects) |
 
 ## Folder Manifest & Creation Criteria

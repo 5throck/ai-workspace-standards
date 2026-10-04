@@ -29,7 +29,7 @@ Phase A: Prototype Development
 - **Quality Gates**: Each Phase has explicit validation criteria
 - **Rollback Options**: Clear rollback paths on failure
 - **Documentation**: All decisions and artifacts are version-controlled
-- **Fork Model**: After L2 scaffold from L1, L2 evolves independently. L1 changes do NOT auto-propagate to L2 (see [ADR-0031](adr/0031-l1-l2-fork-model.md))
+- **Fork Model**: After L2 scaffold from L1, L2 evolves independently. L1 changes do NOT auto-propagate to L2 (see [ADR-0031](../adr/0031-l1-l2-fork-model.md))
 
 ---
 

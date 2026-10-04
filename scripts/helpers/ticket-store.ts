@@ -319,7 +319,7 @@ export function resolveTicketLocation(
       return { dir, kind, id: explicit[2], archived: false };
     }
     if (existsSync(join(archiveDirFor(dir), `${explicit[2]}.yaml`))) {
-      return { dir, kind, id: explicit[2], archived: true };
+      return { dir: archiveDirFor(dir), kind, id: explicit[2], archived: true };
     }
     throw new Error(`[ticket-store] ticket not found: ${explicit[2]} (looked in ${join(dir, explicit[2] + '.yaml')} and ${join(archiveDirFor(dir), explicit[2] + '.yaml')})`);
   }
@@ -350,8 +350,10 @@ export function resolveTicketLocation(
       `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
     );
   }
-  if (inGovernanceArchive) return { dir: governanceDir, kind: 'manual', id, archived: true };
-  if (inServiceArchive) return { dir: serviceDir, kind: 'service', id, archived: true };
+  // Archived ids resolve to the ARCHIVE directory as the containing dir, so
+  // readTicket/moveTicket operate on the real file (review C1, 2026-10-04).
+  if (inGovernanceArchive) return { dir: archiveDirFor(governanceDir), kind: 'manual', id, archived: true };
+  if (inServiceArchive) return { dir: archiveDirFor(serviceDir), kind: 'service', id, archived: true };
   throw new Error(`[ticket-store] ticket not found: ${id} (looked in ${servicePath}, ${governancePath}, ${serviceArchivePath} and ${governanceArchivePath})`);
 }
 

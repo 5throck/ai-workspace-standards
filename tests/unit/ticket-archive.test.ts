@@ -8,6 +8,7 @@ import {
   listTickets,
   moveTicket,
   resolveTicketLocation,
+  readTicket,
   archiveDirFor,
   archiveCandidates,
   archiveTickets,
@@ -157,10 +158,12 @@ describe('resolveTicketLocation with archives', () => {
     const t = makeAgedDoneTicket(governance, 9);
     archiveTickets(governance, DEFAULT_ARCHIVE_DAYS);
     const bare = resolveTicketLocation(dir, governance, t.id);
-    expect(bare).toEqual({ dir: governance, kind: 'manual', id: t.id, archived: true });
+    // Archived ids resolve to the ARCHIVE dir as the containing dir (review C1) so
+    // readTicket/moveTicket find the real file.
+    expect(bare).toEqual({ dir: join(governance, 'archive'), kind: 'manual', id: t.id, archived: true });
     const explicit = resolveTicketLocation(dir, governance, `governance/${t.id}`);
     expect(explicit.archived).toBe(true);
-    expect(explicit.dir).toBe(governance);
+    expect(explicit.dir).toBe(join(governance, 'archive'));
   });
 
   test('still throws ticket-not-found when live and archive both miss', () => {
@@ -172,6 +175,17 @@ describe('resolveTicketLocation with archives', () => {
     const loc = resolveTicketLocation(dir, join(dir, 'governance'), t.id);
     expect(loc.archived).toBe(false);
     expect(loc.dir).toBe(dir);
+  });
+});
+
+describe('archived-id read paths (review C1 regression)', () => {
+  test('readTicket works on an archived-not-restored id via the resolved archive dir', () => {
+    const t = makeAgedDoneTicket(dir, 9);
+    archiveTickets(dir, DEFAULT_ARCHIVE_DAYS);
+    const loc = resolveTicketLocation(dir, join(dir, 'governance'), t.id);
+    const ticket = readTicket(loc.dir, loc.id);
+    expect(ticket.id).toBe(t.id);
+    expect(ticket.status).toBe('done');
   });
 });
 

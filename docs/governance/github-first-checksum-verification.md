@@ -244,5 +244,5 @@ jobs:
 
 ## References
 
-- [Meeting Transcript](../../memory/meeting-2026-05-30-github-first-execution.md)
+- [Meeting Transcript(`meeting-2026-05-30-github-first-execution` — rotated out of memory/; recover via git history)
 - [GitHub-First Execution Architecture](./github-first-execution.md)

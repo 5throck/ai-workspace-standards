@@ -229,7 +229,7 @@ These files are always preserved — local modifications are safe:
 
 > Note: `docs/context.md` is **not** preserve-classified — it is version-synced through
 > TEMPLATE TREE SYNC (see the variant context section in
-> [skills/upgrade-project/SKILL.md](../skills/upgrade-project/SKILL.md)).
+> [skills/upgrade-project/SKILL.md](../../skills/upgrade-project/SKILL.md)).
 
 #### 📋 OVERWRITE Files (Governance)
 
@@ -382,12 +382,12 @@ The tool will prompt for confirmation before proceeding. This is expected for pr
 
 ## §8: Related Documentation
 
-- [Upgrade Coverage Policy (ADR-0073)](adr/0073-upgrade-coverage-policy.md) — the deliver-by-default coverage model and its audit gate
-- [Upgrade Policy Coverage Design](designs/2026-09-11-upgrade-policy-coverage-design.md) — gap inventory, decisions D1–D8, Phase C addendum
-- [Upgrade Project Skill](../skills/upgrade-project/SKILL.md) — pass table, managed-block markers, post-upgrade verification
-- [Coverage Validator](../scripts/check-upgrade-coverage.ts) — `bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]`
-- [Variant Creation Guide](../skills/create-variant/SKILL.md) — Phase A: Creating new variants
-- [Variant Promotion Guide](../skills/promote-variant/SKILL.md) — Phase B: Promoting variants
-- [New Project Scaffolding](constitution/07-new-project.md) — Creating new L3 projects
-- [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
-- [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results
+- [Upgrade Coverage Policy (ADR-0073)](../adr/0073-upgrade-coverage-policy.md) — the deliver-by-default coverage model and its audit gate
+- [Upgrade Policy Coverage Design](../designs/2026-09-11-upgrade-policy-coverage-design.md) — gap inventory, decisions D1–D8, Phase C addendum
+- [Upgrade Project Skill](../../skills/upgrade-project/SKILL.md) — pass table, managed-block markers, post-upgrade verification
+- [Coverage Validator](../../scripts/check-upgrade-coverage.ts) — `bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]`
+- [Variant Creation Guide](../../skills/create-variant/SKILL.md) — Phase A: Creating new variants
+- [Variant Promotion Guide](../../skills/promote-variant/SKILL.md) — Phase B: Promoting variants
+- [New Project Scaffolding](../constitution/07-new-project.md) — Creating new L3 projects
+- [Fork Model (ADR-0031)](../adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
+- [Variant Review Report (2026-07-14)](../reports/variant-review-report-2026-07-14.md) — Infrastructure audit results

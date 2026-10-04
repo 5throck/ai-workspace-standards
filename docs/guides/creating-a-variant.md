@@ -111,7 +111,7 @@ templates/co-<variant>/
         └── my-script.ts
 ```
 
-> **Why subdirectory?** The L1 `audit.ts` checks `scripts/` top-level `.ts` files against `scripts/SCRIPTS.md`. Placing variant scripts in a subdirectory keeps them out of that check. See [§6.5 Variant-Specific Scripts](constitution/06.5-script-lifecycle.md).
+> **Why subdirectory?** The L1 `audit.ts` checks `scripts/` top-level `.ts` files against `scripts/SCRIPTS.md`. Placing variant scripts in a subdirectory keeps them out of that check. See [§6.5 Variant-Specific Scripts](../constitution/06.5-script-lifecycle.md).
 
 **Declare in `variant.json`** — required for any variant with custom scripts:
 
@@ -190,7 +190,7 @@ It blocks (exit 1) when any of these fail: `variant.json` schema/status valid; e
 `agents/domains/functional/...` are expected); `PROMOTION_CHECKLIST.md` exists; `README.md` and a
 non-stub `AGENTS.md` (with `VARIANT-*` markers) exist; and — if `docs/countries/` exists —
 `country_config.supported` covers the shipped profiles. See
-[`docs/designs/variant-readiness-gate.md`](designs/variant-readiness-gate.md).
+[`docs/designs/variant-readiness-gate.md`](../designs/variant-readiness-gate.md).
 
 ---
 

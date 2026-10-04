@@ -11,6 +11,24 @@ import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
+/**
+ * Password hashing with a test-mode cost floor (root fix for the windows runner
+ * flake class, 2026-10-04: Bun's default argon2id params are CPU-bound enough to
+ * blow 5s test budgets on loaded runners). `bun test` sets NODE_ENV=test, so the
+ * suite hashes at a low memory cost (milliseconds); every non-test path — server,
+ * CLI, docker — keeps Bun's secure defaults. verify() reads params from the hash,
+ * so cross-mode verification is unaffected.
+ */
+function hashPasswordSync(password: string): string {
+  if (process.env.NODE_ENV === "test") {
+    // Narrow alias: the installed @types/bun declares only the 1-arg overload,
+    // but the runtime accepts the argon2 params object (documented Bun API).
+    type HashWithCost = (password: string, options: { algorithm: "argon2id"; memoryCost: number; timeCost: number }) => string;
+    return (Bun.password.hashSync as HashWithCost)(password, { algorithm: "argon2id", memoryCost: 4096, timeCost: 1 });
+  }
+  return Bun.password.hashSync(password);
+}
+
 export interface UserRecord {
   id: string;
   email: string;
@@ -183,7 +201,7 @@ export class UserStore {
     let principal = principalFromEmail(email);
     if (this.findByPrincipal(principal)) principal = `${principal}-${randomBytes(2).toString("hex")}`;
     const id = `u-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
-    const passwordHash = init.password ? Bun.password.hashSync(init.password) : null;
+    const passwordHash = init.password ? hashPasswordSync(init.password) : null;
     this.db
       .query(
         `INSERT INTO users (id, email, name, principal, login_id, password_hash, google_sub, role, created_at, deleted_at, verified_at)
@@ -255,7 +273,7 @@ export class UserStore {
     if (this.findByEmailHash(emailHash)) return { ok: false, reason: "email_taken" };
     const id = `u-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
     const principal = loginId; // principal unification: login ID is the trusted principal
-    const passwordHash = Bun.password.hashSync(init.password);
+    const passwordHash = hashPasswordSync(init.password);
     this.db
       .query(
         `INSERT INTO users (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at)
@@ -330,7 +348,7 @@ export class UserStore {
   changePassword(userId: string, newPassword: string, keepToken?: string | null): UserRecord | null {
     const user = this.findById(userId);
     if (!user) return null;
-    this.db.query("UPDATE users SET password_hash=? WHERE id=?").run(Bun.password.hashSync(newPassword), userId);
+    this.db.query("UPDATE users SET password_hash=? WHERE id=?").run(hashPasswordSync(newPassword), userId);
     if (keepToken) {
       this.db.query("DELETE FROM sessions WHERE user_id=? AND token_hash != ?").run(userId, hashToken(keepToken));
     } else {
@@ -481,7 +499,7 @@ export class UserStore {
     const temp = `co-${body.slice(0, 4)}-${body.slice(4, 8)}-${body.slice(8)}`;
     this.db
       .query("UPDATE users SET password_hash=?, must_change_password=1, temp_password_expires=? WHERE id=?")
-      .run(Bun.password.hashSync(temp), new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);
+      .run(hashPasswordSync(temp), new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);
     this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
     return temp;
   }
@@ -500,7 +518,7 @@ export class UserStore {
     if (!this.findById(userId)) return null;
     this.db
       .query("UPDATE users SET password_hash=?, must_change_password=0, temp_password_expires=NULL WHERE id=?")
-      .run(Bun.password.hashSync(newPassword), userId);
+      .run(hashPasswordSync(newPassword), userId);
     if (keepToken) {
       this.db.query("DELETE FROM sessions WHERE user_id=? AND token_hash != ?").run(userId, hashToken(keepToken));
     } else {

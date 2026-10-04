@@ -30,7 +30,7 @@ You have an existing standalone project with:
 
 - The project must be a git repository
 - The project should have a clean, well-organized structure
-- You should understand the [3-Layer Architecture](constitution/07-new-project.md)
+- You should understand the [3-Layer Architecture](../constitution/07-new-project.md)
 
 ### Tool
 
@@ -226,7 +226,7 @@ Before `adopt-project.ts` (2026-09-23), this scenario was manual: hand-create `.
 | No automated detection of closest variant | User must identify the right variant | Use the mapping table in §3 |
 | Conversion is one-way | No automated "un-variant" process | Manual file cleanup |
 | Adoption requires a fully committed working tree and bun | Dirty trees or bun-less environments abort pre-flight | Commit/stash first; install bun (`https://bun.sh`) |
-| Conversion copies files as-is — it never authors a user guide | `validate-templates` WS-11 fails until the pair exists | Author `docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard ([variant-contract.md](governance/variant-contract.md)); also add the variant to all 6 index READMEs (WS-12) |
+| Conversion copies files as-is — it never authors a user guide | `validate-templates` WS-11 fails until the pair exists | Author `docs/user-guide.md` + `docs/user-guide_ko.md` per the User-Guide Standard ([variant-contract.md](../governance/variant-contract.md)); also add the variant to all 6 index READMEs (WS-12) |
 
 ---
 
@@ -234,7 +234,7 @@ Before `adopt-project.ts` (2026-09-23), this scenario was manual: hand-create `.
 
 - [Project Upgrade Guide](project-upgrade-guide.md) — Upgrading variant-based projects
 - [Creating a Variant Guide](creating-a-variant.md) — Creating new variants from scratch
-- [Project-to-Variant Skill](../skills/project-to-variant/SKILL.md) — Guided workflow for the Scenario A conversion path (invocable as the `project-to-variant` skill)
-- [Fork Model (ADR-0031)](adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
-- [New Project Scaffolding](constitution/07-new-project.md) — L3 project creation
-- [Variant Review Report (2026-07-14)](variant-review-report-2026-07-14.md) — Infrastructure audit results
+- [Project-to-Variant Skill](../../skills/project-to-variant/SKILL.md) — Guided workflow for the Scenario A conversion path (invocable as the `project-to-variant` skill)
+- [Fork Model (ADR-0031)](../adr/0031-l1-l2-fork-model.md) — L1/L2 propagation philosophy
+- [New Project Scaffolding](../constitution/07-new-project.md) — L3 project creation
+- [Variant Review Report (2026-07-14)](../reports/variant-review-report-2026-07-14.md) — Infrastructure audit results

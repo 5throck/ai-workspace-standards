@@ -4,7 +4,7 @@ name: pm
 formal_name: Project Manager (PM) Agent
 status: active
 version: "1.3.0"
-last_updated: "2026-10-01"
+last_updated: "2026-10-04"
 tier:
   claude: medium
   gemini: medium

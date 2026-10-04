@@ -4,7 +4,7 @@
 
 **Usage**: For each item, record ✅ pass / ❌ fail / ➖ N/A plus the evidence pointer (request/response excerpt, screenshot, or tool output). Failures become findings with severity per the report template in `docs/reports/`. **Stay inside the authorized scope at all times** — a test outside scope is a finding against the assessor, not the target.
 
-**Derived from**: the 2026-09 assessment.bizknights.org engagement (F-01…F-06, NF-01/NF-02), the fleet security checklist §4–§7, and OWASP WSTG v4.2 section mapping (stable identifiers cited per section).
+**Derived from**: the 2026-09 <target>.example (2026-09 external web engagement) engagement (F-01…F-06, NF-01/NF-02), the fleet security checklist §4–§7, and OWASP WSTG v4.2 section mapping (stable identifiers cited per section).
 
 > **Template note**: This is the template copy maintained in `templates/co-security`.
 > Scaffolded projects receive it at `docs/external-web-security-checklist.md`. The

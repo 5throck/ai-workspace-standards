@@ -594,7 +594,7 @@ When modifying a script:
 | `translate-readme.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
 | `typecheck.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `validate-agents.ts` | L0 | 1.3.2 | active | —| —| L0+L1 | —|
-| `validate-doc-folder.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `validate-doc-folder.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
 | `validate-docs-links.ts` | L0 | 1.3.0 | active | v1.3.0 (T-20260927-018): fenced code blocks are dropped before link matching — code-sample placeholders like ${entry.file} inside Markdown-link syntax no longer flag as broken; fence semantics match the v1.1.0 heading skipping (``` / ~~~ toggles). Prior: v1.2.0 (design-foundation v1.2 PR-2): default scope gains templates/common/docs/** recursive — design-foundation.md §8 rotted under review-only checking — with a per-link post-scaffold resolution allowance (target exists at the plain relative path, the same href from the workspace root, the same href inside the template delivery tree, or the delivered docs/ root) plus an _examples/ staging skip; also spawned by audit.ts as the docs relative-link gate. Prior: v1.1.0 anchor-fragment verification against target headings (T-20260910-014) | —| L0+L1 | —|
 | `validate-md-language.ts` | L0 | 1.12.0 | active | official patterns gain CODEX.md + .agents/{skills,commands} + .codex/{skills,prompts} trees (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 4). Prior: scan scope widened to docs/adr/, docs/decisions/, docs/VERSION_MANIFEST.md + generated-region allowlist markers (T-20260912-015) | —| L0+L1 | —|
 | `validate-model-registry.ts` | L0 | 1.4.0 | active | —| —| L0+L1 | —|
