@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261004-019
+kind: manual
+title: >-
+  validator-hardening: resync-audit misclassifies a tracked-modified file as
+  added-then-modified ("no HEAD version") when a HEAD version exists — co-deck
+  verify-new-theme.test.ts on 2026-10-05; the verdict-table group key also
+  renders truncated ("cripts/co-deck*", missing leading char). Wrong note text
+  misleads KEEP-vs-STALE-RESIDUE adjudication; keep the conservative KEEP
+  verdict but fix the classification evidence
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:40:57.693Z'
+history:
+  - at: '2026-10-04T16:40:57.693Z'
+    from: null
+    to: backlog
+result: null
+error: null

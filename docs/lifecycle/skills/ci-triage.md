@@ -15,6 +15,8 @@ gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 
 ## Changelog
 
+- **0.2.0** (2026-10-04): minor bump — adds Step 6 "Merge with CI watch" merge-time healing loop (T-20261004-006).
+
 - **0.1.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 
 - **0.1.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
@@ -46,7 +48,7 @@ gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 
 ## Metadata
 - **Current Phase**: production
-- **Version**: 0.1.0
+- **Version**: 0.2.0
 - **Owner**: pm
 - **Last Updated**: 2026-10-04
 - **Last Reviewer**: pm

@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261004-028
+kind: manual
+title: >-
+  standards: record the L1 verbatim-copy divergence policy for
+  docs/standards/llm-interaction-standard.md — the L1 copy ships to scaffolded
+  projects where referenced paths (services/co-workspace/src/interaction.ts,
+  AGENTS.md glossaries) do not exist; either genericize the standard's
+  repo-specific references or amend design
+  2026-10-04-llm-interaction-standard-design to explicitly accept and scope the
+  divergence
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:21.993Z'
+history:
+  - at: '2026-10-04T16:50:21.993Z'
+    from: null
+    to: backlog
+result: null
+error: null

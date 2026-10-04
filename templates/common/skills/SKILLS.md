@@ -42,7 +42,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `research-analysis` | 1.0.2 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
 | `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
-| `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues |
+| `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
 | `decision-record` | 1.1.0 | active | pm | 2026-08-25 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
 | `evidence-ledger` | 1.1.0 | active | pm | 2026-08-25 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
 | `handbook` | 0.6.0 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |

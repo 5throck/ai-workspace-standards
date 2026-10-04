@@ -7,7 +7,7 @@
 
 > Note: the graft CLI refreshes `skills/graft/SKILL.md` on every release; when the frontmatter version moves, this record moves with it.
 - **Created**: 2026-09 (installed with the graft repo-context-graph tooling)
-- **Last Updated**: 2026-10-02
+- **Last Updated**: 2026-10-04
 
 ## Description
 Usage guide for the graft repo-context-graph MCP/CLI (`graft ask`, `graft map`,

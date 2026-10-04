@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261004-023
+kind: manual
+title: >-
+  validator-hardening: cross-check docs/VERSION_MANIFEST.md modified dates
+  against agent/skill frontmatter last_updated so a content edit without a stamp
+  fails the lifecycle audit (window case: architect.md/docs-writer.md edited
+  2026-10-04 with last_updated left at 2026-09-29; graft SKILL.md doctrine block
+  added with last_reviewed left at 2026-10-01) — all three hand-stamped in the
+  2026-10-05 review
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:01.835Z'
+history:
+  - at: '2026-10-04T16:50:01.835Z'
+    from: null
+    to: backlog
+result: null
+error: null

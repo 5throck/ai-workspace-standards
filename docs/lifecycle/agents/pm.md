@@ -68,6 +68,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-04 (v1.2.2: added Upstream Request Tickets rule section)
+- **Last Updated**: 2026-10-04 (Instruction Duty section reworded to the LLM Interaction Standard, ADR-0098; version stays 1.2.2 — reword-class edit)
 - **Last Reviewer**: lifecycle-manager
 

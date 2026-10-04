@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261004-020
+kind: manual
+title: >-
+  validator-hardening: add a lifecycle-record check that the footer Metadata
+  Version matches the header Metadata Version and the SKILL.md frontmatter
+  (docs/lifecycle/skills/ci-triage.md footer said 0.1.0 while header said 0.2.0
+  after the 2026-10-04 bump)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:49:51.176Z'
+history:
+  - at: '2026-10-04T16:49:51.176Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -127,7 +127,7 @@ Live E2E (hermes-agent v0.21.4, upstream `59004a6`) surfaced an operational find
 
 Truncation keeps only the leading ~20k chars and is silent at the harness UX level (warning in Hermes logs only). Consequence: scaffolded projects lose the governance body that sits beyond the cap — for co-safety the cut lands in the agent roster, dropping ~75% of the file including the entire injected COMMON-AGENTS governance zone.
 
-**Mandatory onboarding step (documented in AGENTS.md §6 platform table and CONSTITUTION §11)**: `hermes config set context_file_max_chars 100000`. A structural remedy (AGENTS.md size reduction across L0/L1/L2) is designed directly — section-level analysis in `docs/analysis/2026-09-25-agents-md-size-analysis.md`, Row 0 design in `docs/designs/2026-09-25-agents-md-size-reduction-design.md`.
+**Mandatory onboarding step (documented in AGENTS.md §6 platform table and CONSTITUTION §11)**: `hermes config set context_file_max_chars 100000`. A structural remedy (AGENTS.md size reduction across L0/L1/L2) is designed directly — section-level analysis in `docs/reports/2026-09-25-agents-md-size-analysis.md`, Row 0 design in `docs/designs/2026-09-25-agents-md-size-reduction-design.md`.
 
 ## 11. References
 

@@ -363,7 +363,7 @@ After completing the installation:
 ## 🆘 Need Help?
 
 - **Installation Issues**: Check [Troubleshooting](#-troubleshooting) section
-- **Usage Questions**: See [README.md](../README.md) or [CONSTITUTION.md](../CONSTITUTION.md)
+- **Usage Questions**: See [README.md](../../README.md) or [CONSTITUTION.md](../../CONSTITUTION.md)
 - **Bug Reports**: Open an issue on GitHub
 - **Community**: Join discussions in GitHub Issues
 

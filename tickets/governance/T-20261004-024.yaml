@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261004-024
+kind: manual
+title: >-
+  validator-hardening: gate validate-docs-links.ts --all (62 broken links across
+  530 files today, mostly historical rot in
+  docs/designs/agents-md-final-structure.md, docs/adr/,
+  docs/architecture/extends-pattern.md) — wire --all into audit.ts with a frozen
+  baseline count that must not grow, triggered on any commit touching docs/**
+  renames; then batch-fix the historical rot so the baseline can tighten
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:12.915Z'
+history:
+  - at: '2026-10-04T16:50:12.915Z'
+    from: null
+    to: backlog
+result: null
+error: null

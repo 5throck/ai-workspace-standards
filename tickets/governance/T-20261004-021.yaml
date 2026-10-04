@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261004-021
+kind: manual
+title: >-
+  validator-hardening: extend verify-skills registry parity from version-only to
+  description parity between skills/SKILLS.md and
+  templates/common/skills/SKILLS.md rows (ci-triage description diverged
+  2026-10-04: root gained '; merge-time CI healing loop', common did not)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:49:51.194Z'
+history:
+  - at: '2026-10-04T16:49:51.194Z'
+    from: null
+    to: backlog
+result: null
+error: null
