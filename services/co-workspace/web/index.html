@@ -609,10 +609,23 @@
     stopRecognition();
     dispatchVoice("ttsStart");
     speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(spokenSummary(text));
+    const spoken = spokenSummary(text);
+    const utter = new SpeechSynthesisUtterance(spoken);
     utter.lang = voiceLang;
-    utter.onend = () => { voiceStatus.textContent = "Full answer on screen ↑"; setTimeout(() => onDone?.(), TTS_REARM_DEBOUNCE_MS); };
-    utter.onerror = () => { setTimeout(() => onDone?.(), TTS_REARM_DEBOUNCE_MS); };
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      onDone?.();
+    };
+    // Chrome can leave the synth suspended so neither onend nor onerror ever
+    // fires, which would keep the full answer hidden forever — resume() unsticks
+    // it and a generous watchdog reveals the answer even if speech never starts.
+    speechSynthesis.resume();
+    const watchdog = setTimeout(() => { speechSynthesis.cancel(); finish(); },
+      Math.min(90_000, 8_000 + spoken.length * 150));
+    utter.onend = () => { clearTimeout(watchdog); voiceStatus.textContent = "Full answer on screen ↑"; setTimeout(finish, TTS_REARM_DEBOUNCE_MS); };
+    utter.onerror = () => { clearTimeout(watchdog); setTimeout(finish, TTS_REARM_DEBOUNCE_MS); };
     speechSynthesis.speak(utter);
   }
 
