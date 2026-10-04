@@ -193,7 +193,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     commitAt(dir, 'pm.md', 'docs(agents): refresh pm.md', '2026-09-01');
     commitAt(dir, 'pm.md', 'chore(upgrade): template sync v0.8.1', '2026-09-20');
     expect(lastContentCommitDate(join(dir, 'pm.md'), dir)).toBe('2026-09-01');
-  });
+  }, 30_000); // git subprocesses on loaded windows runners breach the 5s default (run 37215769652: init+2 commits alone took 7.6s)
 
   test('returns null when every commit touching the file is sync-only', () => {
     const dir = initRepo();
@@ -206,7 +206,7 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     const dir = mkdtempSync(join(tmpdir(), 'alc-no-git-'));
     writeFileSync(join(dir, 'agents.md'), 'no git here\n', 'utf-8');
     expect(lastContentCommitDate(join(dir, 'agents.md'))).toBeNull();
-  });
+  }, 20_000); // still spawns git (which fails fast) — keep it off the 5s default on slow runners
 
   test('metadata-only bump: content commit (d1) then metadata-only bump (d2) -> returns d1', () => {
     const dir = initRepo();
