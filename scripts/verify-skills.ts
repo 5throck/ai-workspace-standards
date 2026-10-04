@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.3.0
+ * @version 1.4.0
  * Verifies all skills in skills/ directory are loadable and properly formatted
  */
 
@@ -104,6 +104,62 @@ async function checkSkillsCatalogSync(): Promise<SkillCheck | null> {
   };
 }
 
+/**
+ * L0 ↔ L1 registry parity (T-20261004-021): for a skill rowed in BOTH
+ * skills/SKILLS.md and templates/common/skills/SKILLS.md, the version AND the
+ * notes/description cell must match. ci-triage's description diverged
+ * 2026-10-04 (root gained "; merge-time CI healing loop", common did not) —
+ * version-only eyes never see that class. Row shape (both files, 7 columns):
+ * | `name` | version | status | owner | last_reviewed | removal-date | notes |
+ * Intersection-only: workspace-only and variant-exclusive rows (the L0
+ * Variant-Exclusive catalog's 7th column is an owner-variant list, not notes)
+ * have no L1 counterpart by DEC-20260829-02 and are skipped naturally.
+ */
+async function checkRegistryL0L1Parity(): Promise<SkillCheck | null> {
+  const l0Path = path.join(projectRoot, 'skills', 'SKILLS.md');
+  const l1Path = path.join(projectRoot, 'templates', 'common', 'skills', 'SKILLS.md');
+  if (!existsSync(l0Path) || !existsSync(l1Path)) return null;
+
+  const parseRows = async (p: string): Promise<Map<string, { version: string; notes: string }>> => {
+    const rows = new Map<string, { version: string; notes: string }>();
+    let content = await Bun.file(p).text();
+    // The Variant-Exclusive catalog's 7th column is an owner-variant list, not
+    // notes — a catalog row (e.g. i18n-audit "co-price only") must never be
+    // compared against a same-named L1 common row. Workspace/common tables only.
+    const catalogStart = content.match(/^###\s+Variant-Exclusive Skills\b.*(?:\n|$)/m);
+    if (catalogStart && catalogStart.index !== undefined) content = content.slice(0, catalogStart.index);
+    for (const line of content.split('\n')) {
+      if (!/^\|\s*`[a-z0-9-]+`\s*\|/.test(line)) continue; // data rows only (skips header/separator)
+      const cells = line.split('|').map((c) => c.trim());
+      // leading + trailing splits give 9 cells for a 7-column row
+      if (cells.length < 9) continue;
+      const name = cells[1].replace(/`/g, '');
+      rows.set(name, { version: cells[2], notes: cells[7] });
+    }
+    return rows;
+  };
+
+  const [l0, l1] = await Promise.all([parseRows(l0Path), parseRows(l1Path)]);
+  const issues: string[] = [];
+  for (const [name, row0] of l0) {
+    const row1 = l1.get(name);
+    if (!row1) continue; // workspace-only or variant-exclusive — no L1 counterpart by design
+    if (row0.version !== row1.version) {
+      issues.push(`registry version drift for '${name}': root=${row0.version}, common=${row1.version} — align the two SKILLS.md rows`);
+    }
+    if (row0.notes !== row1.notes) {
+      issues.push(`registry description drift for '${name}': root="${row0.notes}", common="${row1.notes}" — align the two SKILLS.md rows`);
+    }
+  }
+  if (issues.length === 0) return null;
+  return {
+    name: 'SKILLS.md L0↔L1 parity',
+    path: l0Path,
+    status: 'FAIL',
+    issues,
+  };
+}
+
 async function main(): Promise<void> {
   console.log("🔍 Verifying Skills\n");
 
@@ -116,6 +172,10 @@ async function main(): Promise<void> {
   // Catalog sync: SKILLS.md rows must exist and match frontmatter versions
   const catalogSyncCheck = await checkSkillsCatalogSync();
   if (catalogSyncCheck) checks.push(catalogSyncCheck);
+
+  // T-20261004-021: L0 ↔ L1 registry row parity (version + description)
+  const parityCheck = await checkRegistryL0L1Parity();
+  if (parityCheck) checks.push(parityCheck);
 
   for (const check of checks) {
     const icon = check.status === "PASS" ? "✅" : check.status === "WARN" ? "⚠️" : "❌";

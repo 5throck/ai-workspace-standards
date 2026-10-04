@@ -2,7 +2,20 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.3.0
+ * @version 1.4.0
+ *
+ * v1.4.0 (2026-10-05, T-20261004-019):
+ *  - porcelain first-row fix: git()'s whole-output trim consumed the leading
+ *    status space of the FIRST status row (" M p" → "M p"), shifting
+ *    porcelainPath's slice(3) off by one — the path lost its first character
+ *    (the "cripts/co-deck*" group key) and `git show HEAD:<truncated>` failed,
+ *    misreporting a tracked-modified file as added-then-modified. The parser
+ *    re-anchors on the status-cell shape (well-formed `XY ` at 3, shifted
+ *    `X ` at 2; renames still null).
+ *  - no-HEAD evidence disambiguated: an empty `git show` now cross-checks
+ *    `git cat-file -e HEAD:<file>` — a genuine added-then-modified keeps its
+ *    basis, a git-failure read reports "unresolvable → KEEP" instead of a
+ *    false "no HEAD version" claim. Verdict stays conservative KEEP either way.
  *
  * v1.3.0 (2026-09-26, T-20260926-012 + T-20260926-020):
  *  - rename guard fixed: git status --porcelain emits ASCII "old -> new",
@@ -67,7 +80,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.3.0";
+const VERSION = "1.4.0";
 
 interface FileRow {
   file: string;
@@ -105,6 +118,12 @@ function parseArgs(): { projects: string[]; json: boolean; snapshotDir?: string;
 function git(projectPath: string, args: string[]): string {
   const r = spawnSync("git", ["-C", projectPath, ...args], { encoding: "utf-8" });
   return (r.stdout ?? "").toString().trim();
+}
+
+/** Exit-status-only probe: empty stdout either way, so the status IS the answer. */
+function gitOk(projectPath: string, args: string[]): boolean {
+  const r = spawnSync("git", ["-C", projectPath, ...args], { encoding: "utf-8" });
+  return r.status === 0;
 }
 
 function defaultProjects(): string[] {
@@ -180,9 +199,20 @@ export function walkProjectDir(dir: string): string[] {
  * that is not a real path — they return null and the caller audits the
  * post-move file on a later pass (porcelain emits an ASCII "->", never a
  * unicode arrow).
+ *
+ * v1.4.0 (T-20261004-019): the git() helper trims WHOLE output, which consumes
+ * the leading status space of the FIRST porcelain row (" M path" → "M path")
+ * and shifted slice(3) off by one — the path lost its first character (the
+ * "cripts/co-deck*" group key) and `git show HEAD:<truncated>` failed, so a
+ * tracked-modified file was misreported as "added-then-modified". The parser
+ * now re-anchors on the status-cell shape: well-formed `XY ` rows slice at 3,
+ * a consumed-leading-space first row (`X `) slices at 2.
  */
 export function porcelainPath(line: string): string | null {
-  const relFile = line.slice(3).trim();
+  const wellFormed = /^[A-Z? !]{2} /.test(line);
+  const lostLeadingSpace = /^[A-Z?!] /.test(line);
+  if (!wellFormed && !lostLeadingSpace) return null;
+  const relFile = (wellFormed ? line.slice(3) : line.slice(2)).trim();
   if (relFile.includes("->")) return null;
   return relFile.replace(/^"(.*)"$/, "$1");
 }
@@ -289,7 +319,15 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
   if (state === "modified") {
     const head = git(projectPath, ["show", `HEAD:${relFile}`]);
     if (!head) {
-      row.basis = "modified with no HEAD version (added-then-modified) → KEEP";
+      // T-20261004-019: an empty `git show` is ambiguous — the object may be
+      // genuinely absent (added-then-modified) OR the read may have failed
+      // (transient git error, rev-parse hiccup). `cat-file -e` disambiguates
+      // by exit status; both verdicts stay conservative KEEP, but the
+      // evidence must not claim "no HEAD version" when one exists.
+      const existsInHead = gitOk(projectPath, ["cat-file", "-e", `HEAD:${relFile}`]);
+      row.basis = existsInHead
+        ? "HEAD version exists but could not be read (git failure) — unresolvable → KEEP"
+        : "modified with no HEAD version (added-then-modified) → KEEP";
       return row;
     }
     // T-20260912-030: a ` D` porcelain row means the file is deleted in the

@@ -92,6 +92,18 @@ describe('porcelainPath — rename-row parsing (v1.3.0, T-20260926-012)', () => 
     // a file genuinely named with '→' must still parse.
     expect(porcelainPath(' M docs/a → b.md')).toBe('docs/a → b.md');
   });
+
+  test('first row with consumed leading status space still parses (v1.4.0, T-20261004-019)', () => {
+    // Whole-output trim upstream eats the leading space of the FIRST porcelain
+    // row: " M p" → "M p". slice(3) then truncated the path ("cripts/…") and
+    // git show HEAD:<truncated> failed → bogus added-then-modified.
+    expect(porcelainPath('M scripts/co-deck/tests/verify-new-theme.test.ts')).toBe(
+      'scripts/co-deck/tests/verify-new-theme.test.ts',
+    );
+    expect(porcelainPath('D docs/plain.md')).toBe('docs/plain.md');
+    // a rename row in the shifted form must still return null (the "->" check wins)
+    expect(porcelainPath('R docs/old.md -> docs/new.md')).toBeNull();
+  });
 });
 
 describe('corroboratedStale — empty-file guard (v1.3.0, T-20260926-020a)', () => {

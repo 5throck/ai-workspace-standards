@@ -9,11 +9,20 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.5.2
+ * @version 1.6.0
+ * v1.6.0 (2026-10-05, T-20261004-020 + T-20261004-023): Check MV — an active
+ *         skill's lifecycle record must carry matching header/footer Metadata
+ *         Version lines and both must equal the SKILL.md frontmatter version
+ *         (the ci-triage footer said 0.1.0 against a 0.2.0 bump and nothing
+ *         caught it); Check SD — WARN when an active skill's last_reviewed is
+ *         older than its last git content commit (agent Check 11 semantics:
+ *         sync-only and metadata-only commits skipped; archived/self-managed
+ *         exempt; WARN not ERROR because 20 of 41 root skills are grandfathered
+ *         stale and mass-stamping would falsify review provenance).
  * v1.5.1: scope validation accepts the project's variant name from
  *         .claude/template-version.txt (project dir name != variant name);
  *         orphaned-owner WARN gated to the workspace-root authoring surface.
- * @last_updated 2026-09-21
+ * @last_updated 2026-10-05
  * @license MIT
  */
 
@@ -21,6 +30,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { isSelfManagedPath } from './lib/self-managed-tools.ts';
+import { lastContentCommitDate } from './agent-lifecycle-audit.ts';
 
 interface SkillFrontmatter {
   name: string;
@@ -306,6 +316,25 @@ function loadReferenceAllowlist(): ReferenceAllowlistEntry[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * Header/footer Metadata Version of a lifecycle record (Check MV, v1.6.0,
+ * T-20261004-020). Records carry two `## Metadata` sections — the FIRST is
+ * the header (Skill/Status/Version/Created/Last Updated), the LAST is the
+ * footer (Current Phase/Version/Owner/...). Returns null when fewer than
+ * two blocks or an unparseable version line: shape drift belongs to the
+ * record-creation guidance, not this parity check.
+ */
+export function lifecycleRecordVersions(content: string): { header: string; footer: string } | null {
+  const blocks = content.split(/^##\s+Metadata\s*$/m).slice(1);
+  if (blocks.length < 2) return null;
+  const pick = (block: string): string | null =>
+    block.match(/^\s*-\s+\*\*Version\*\*:\s*(\S+)/m)?.[1] ?? null;
+  const header = pick(blocks[0]);
+  const footer = pick(blocks[blocks.length - 1]);
+  if (!header || !footer) return null;
+  return { header, footer };
 }
 
 /**
@@ -653,15 +682,53 @@ function auditSkills(jsonMode = false): AuditResult {
       // owned by the tool, not the workspace) is exempt; the tool refreshes it on every
       // version bump and a hand-maintained record would just drift.
       const selfManaged = isSelfManagedPath(relPath);
-      if (frontmatter.status === 'active' && !selfManaged && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
+      const lifecycleRecordPath = join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`);
+      if (frontmatter.status === 'active' && !selfManaged && !existsSync(lifecycleRecordPath)) {
         warnings.push({
           level: 'warning',
           file: relPath,
           message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
           fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata)`,
         });
-      } else if (frontmatter.status === 'active' && selfManaged && !existsSync(join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`))) {
+      } else if (frontmatter.status === 'active' && selfManaged && !existsSync(lifecycleRecordPath)) {
         if (!jsonMode) console.log(`  ℹ️  lifecycle: ${relPath} is self-managed (docs/self-managed-surfaces.json) — lifecycle record not required`);
+      } else if (frontmatter.status === 'active' && existsSync(lifecycleRecordPath)) {
+        // Check MV (v1.6.0, T-20261004-020): the record's footer Metadata Version
+        // must match the header Metadata Version and the SKILL.md frontmatter —
+        // the ci-triage footer said 0.1.0 while header/frontmatter said 0.2.0
+        // after the 2026-10-04 bump and nothing caught it.
+        const versions = lifecycleRecordVersions(readFileSync(lifecycleRecordPath, 'utf-8'));
+        if (versions) {
+          const fmVersion = frontmatter.version ?? '—';
+          if (versions.header !== versions.footer || versions.footer !== fmVersion) {
+            errors.push({
+              level: 'error',
+              file: relPath,
+              message: `Lifecycle record version drift for ${frontmatter.name}: header=${versions.header}, footer=${versions.footer}, SKILL.md=${fmVersion} (docs/lifecycle/skills/${frontmatter.name}.md)`,
+              fix: 'Align both Metadata Version lines in the lifecycle record with the SKILL.md frontmatter version',
+            });
+          }
+        }
+      }
+
+      // Check SD (v1.6.0, T-20261004-023): stale last_reviewed — the SKILL.md's
+      // git content history moved past its declared last_reviewed without a
+      // stamp refresh (the graft doctrine-block window case). Same semantics as
+      // agent-lifecycle-audit Check 11 (T-20260909-004): the shared
+      // lastContentCommitDate helper skips sync-only pipeline commits and
+      // metadata-only (stamp-only) commits; archived and self-managed skills are
+      // exempt (tool-owned SKILL.md content moves without review stamps).
+      if (frontmatter.status === 'active' && !selfManaged) {
+        const reviewed = frontmatter.last_reviewed;
+        const commitDate = lastContentCommitDate(skillFile);
+        if (reviewed && /^\d{4}-\d{2}-\d{2}$/.test(reviewed) && commitDate && reviewed < commitDate) {
+          warnings.push({
+            level: 'warning',
+            file: relPath,
+            message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
+            fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
+          });
+        }
       }
     }
   }
