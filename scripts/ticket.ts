@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.9.1
+// v1.9.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.9.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): `archive`
 //           subcommand — a done ticket dwells >= 7 days (--days N) then moves into
 //           <store>/archive (service: tickets/archive, governance: tickets/governance/archive).
@@ -24,7 +25,7 @@
 //   move <id>: <id> may be bare (resolved against both stores; ambiguous ids error)
 //   or explicitly prefixed as service/<id> / governance/<id> (T-20261001-009).
 //   show <id>: display full ticket with upstream request boundary tags when present.
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind),
 //         docs/designs/2026-10-01-upstream-request-mcp-design.md (§14.1)
 

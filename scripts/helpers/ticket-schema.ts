@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.5.1
+// v1.5.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.5.0 (2026-10-03, T-20261003-003): optional upstream.identity_source (cwd | client_roots |
 //           self_declared) plus upstreamIdentitySource() legacy defaulting (design Appendix E.5).
 // v1.4.0 (2026-10-02, T-20261002-007): upstream cross-field invariants — project
@@ -16,7 +17,7 @@
 // @l2-propagate: false
 // ticket-schema.ts — Pure schema types, state machine, and validation for the
 // Phase A Service Ticket + Kanban system. No file I/O here (see ticket-store.ts).
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
 
 export const CURRENT_SCHEMA_VERSION = 1;
 

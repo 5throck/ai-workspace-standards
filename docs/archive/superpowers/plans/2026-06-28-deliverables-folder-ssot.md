@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript (Node.js `fs`, `path`), Markdown, existing scaffolding tooling (`bun`)
 
-**Spec:** `docs/superpowers/specs/2026-06-28-deliverables-folder-ssot-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-06-28-deliverables-folder-ssot-design.md`
 
 ---
 

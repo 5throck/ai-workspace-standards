@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.10.1
+// v1.10.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.10.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): archive — a done
 //           ticket dwells >= DEFAULT_ARCHIVE_DAYS (7) days, then archiveTickets renames it into
 //           <store>/archive (tickets/archive for the ephemeral service store,
@@ -24,7 +25,7 @@
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
 // fixed workspace location.
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md (§A)
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync, rmSync } from 'node:fs';

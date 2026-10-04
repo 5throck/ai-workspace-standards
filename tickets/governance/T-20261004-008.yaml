@@ -5,7 +5,7 @@ title: >-
   docs/ folder manifest + anti-proliferation gate (validate-doc-folder
   --workspace wired into audit); scratch cleanup; standards entry in index
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-04T04:02:07.762Z'
 history:
@@ -18,5 +18,12 @@ history:
   - at: '2026-10-04T04:02:16.814Z'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-04T04:12:45.859Z'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1387 (merged 1e46b090): docs/README.md manifest + creation
+  criteria; validate-doc-folder 1.2.0 --workspace allowlist gate wired into
+  audit 2.48.0 (19 dirs / 20 root files); index.md standards entry; scratch dir
+  removed; windows E13d timing flake fixed with headroom.
 error: null

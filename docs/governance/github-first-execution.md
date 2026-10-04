@@ -2,7 +2,7 @@
 
 **Status**: Design Phase
 **Created**: 2026-05-30
-**Meeting**: [meeting-2026-05-30-github-first-execution](../../memory/meeting-2026-05-30-github-first-execution.md)
+**Meeting**: `meeting-2026-05-30-github-first-execution` (transcript since rotated out of memory/ — recover via git history)
 
 ## Overview
 
@@ -183,6 +183,6 @@ workspace/                          # L0 - Root
 
 ## References
 
-- [Meeting Transcript](../../memory/meeting-2026-05-30-github-first-execution.md)
+- Meeting Transcript: `meeting-2026-05-30-github-first-execution` (rotated out of memory/ — recover via git history)
 - [CONSTITUTION.md §5.6 - Agent Lifecycle](../../CONSTITUTION.md#56-agent-lifecycle-management)
 - [CONSTITUTION.md §6.5 - Script Lifecycle](../../CONSTITUTION.md#65-script-lifecycle-management)

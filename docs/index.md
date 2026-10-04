@@ -45,12 +45,12 @@ Core system rules, constitution modules, system architecture, security policies,
 
 Standard operating procedures, developer guides, variant creation workflows, and external framework references.
 
-- [**Getting Started Guide**](getting-started.md) — Comprehensive onboarding guide for workspace setup, setup commands, and initial workflows
-- [**Project Upgrade & Template Syncing Guide**](project-upgrade-guide.md) — Detailed procedure for upgrading projects and synchronizing common templates
-- [**Creating a Variant Guide**](creating-a-variant.md) — Step-by-step guide for scaffolding and initializing a new variant project
-- [**Variant Conversion Guide**](variant-conversion-guide.md) — Operational guide for converting existing non-variant repositories into workspace variants
-- [**Variant Creation Workflow**](variant-creation-workflow.md) — Detailed workflow stages and lifecycle milestones for variant initialization
-- [**External Framework References**](external-references.md) — Mappings, integrations, and compatibility references for external tools and frameworks
+- [**Getting Started Guide**](guides/getting-started.md) — Comprehensive onboarding guide for workspace setup, setup commands, and initial workflows
+- [**Project Upgrade & Template Syncing Guide**](guides/project-upgrade-guide.md) — Detailed procedure for upgrading projects and synchronizing common templates
+- [**Creating a Variant Guide**](guides/creating-a-variant.md) — Step-by-step guide for scaffolding and initializing a new variant project
+- [**Variant Conversion Guide**](guides/variant-conversion-guide.md) — Operational guide for converting existing non-variant repositories into workspace variants
+- [**Variant Creation Workflow**](guides/variant-creation-workflow.md) — Detailed workflow stages and lifecycle milestones for variant initialization
+- [**External Framework References**](guides/external-references.md) — Mappings, integrations, and compatibility references for external tools and frameworks
 
 ---
 
@@ -119,7 +119,7 @@ Lifecycle registries for workspace components, audit reports, historical reviews
 - [**Workspace Audit Reports**](reports/) — Workspace evaluation, governance diet, and audit reports:
   - [Governance Docs Diet Analysis](reports/governance-docs-diet-analysis.md) — Optimization and consolidation audit of governance docs
   - [Variant Promotion Roadmap 2026-07](reports/variant-promotion-roadmap-2026-07.md) — Variant promotion status and targets (July 2026)
-- [**Historical Variant Review Report**](variant-review-report-2026-07-14.md) — Comprehensive audit and historical evaluation of variant infrastructure (July 14, 2026)
+- [**Historical Variant Review Report**](reports/variant-review-report-2026-07-14.md) — Comprehensive audit and historical evaluation of variant infrastructure (July 14, 2026)
 - [**Variant Roadmap 2026 Q3-Q4**](variant-roadmap-2026-q3-q4.md) — Official 3-phase execution roadmap for workspace variants (2026 Q3–Q4)
 
 ---
@@ -128,6 +128,5 @@ Lifecycle registries for workspace components, audit reports, historical reviews
 
 Documentation for the Superpowers extension framework, including implementation plans and design specifications.
 
-- [**Superpowers Documentation**](superpowers/) — Core documentation for the Superpowers extension ecosystem:
-  - [Superpowers Execution Plans](superpowers/plans/) — Concrete implementation plans and task breakdown documents
-  - [Superpowers Design Specifications](superpowers/specs/) — Technical design specs for superpower features and deliverables SSOT
+- [**Superpowers Documentation (legacy)**](archive/superpowers/) — Frozen provenance of the 2026-07 superpowers pipeline (archived 2026-10-04; new designs go to designs/):
+  - [Execution Plans](archive/superpowers/plans/) · [Design Specifications](archive/superpowers/specs/)
