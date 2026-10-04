@@ -70,7 +70,7 @@
   .modal .ntOption:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border-color: var(--accent); }
   .modal .ntOption.selected { background: #1f6feb; color: #fff; border-color: #1f6feb; }
   /* ── main column ── */
-  section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  section { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
   header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
   header select { background: var(--bg); color: var(--fg); border: 1px solid #30363d; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: .85rem; }
   header .pname { color: var(--muted); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
@@ -188,9 +188,9 @@
     <button class="collapsebtn" id="themeBtn" title="Toggle theme">◐</button>
     <button class="collapsebtn" id="collapseRight" title="Toggle artifacts panel">▤ Artifacts</button>
   </header>
+  <div id="turnActivity" class="turnActivity hidden">⏳ 0s</div>
   <div id="adminView"></div>
   <div id="log">
-    <div id="turnActivity" class="turnActivity hidden">⏳ 0s</div>
     <div class="empty">
       <b>What can the team do for you?</b>
       Create a team from a variant, then chat — teams are private to you and reused when you return.
