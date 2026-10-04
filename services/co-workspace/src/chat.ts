@@ -257,9 +257,11 @@ export async function runChat(
     const current = state.registry.get(rec.tenantId) ?? rec;
     if (state.cfg.runtime !== "hermes") current.conversationId = result.sessionId;
     // Auto-title (ChatGPT pattern): a session with no user-provided name takes its title
-    // from the first message that drove a completed turn.
+    // from the first message that drove a completed turn. The interaction addendum
+    // (fresh sessions only) is stripped so titles read like the user's own words.
     if (!current.name && message.trim()) {
-      current.name = message.replace(/\s+/g, " ").trim().slice(0, 48) || current.tenantId;
+      const titleSource = message.includes("\n---\n\n") ? message.split("\n---\n\n").pop()! : message;
+      current.name = titleSource.replace(/\s+/g, " ").trim().slice(0, 48) || current.tenantId;
     }
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
