@@ -202,12 +202,11 @@ export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind
   );
 }
 
+/** UTC-normalized (T-20261004-015): ids, created_at and the --ready not_before
+ * filter all read as UTC dates, so a 00:30 KST ticket cannot carry a local date
+ * that disagrees with its own created_at day. Mirrors today() above. */
 function todayPrefix(): string {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `T-${yyyy}${mm}${dd}`;
+  return `T-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
 }
 
 function nextSeqGuess(dir: string, prefix: string): number {
@@ -530,6 +529,24 @@ export function staleRunningTickets(dir: string, thresholdMinutes: number): Tick
   });
 }
 
+// ─── v1.10.0 archive (spec docs/designs/2026-10-04-ticket-archive-design.md) ───
+
+/** renameSync with a bounded retry for transient Windows locks (Defender/indexer
+ * holding the yaml — review M6; same lesson as 6725f7bb's EBUSY close-before-delete).
+ * POSIX EXDEV is impossible here: the archive dir is a child of the store dir. */
+function renameWithRetry(src: string, dst: string, attempts = 3): void {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      renameSync(src, dst);
+      return;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (attempt >= attempts || !["EBUSY", "EPERM", "EACCES"].includes(code ?? "")) throw err;
+      Bun.sleepSync(100 * attempt);
+    }
+  }
+}
+
 // ——— v1.10.0 archive (spec docs/designs/2026-10-04-ticket-archive-design.md) ———
 
 /** Dwell time before a done ticket becomes archivable. Requirement: done for at
@@ -580,9 +597,12 @@ export function archiveCandidates(dir: string, days: number, now: number = Date.
  * never modified (the archive state lives in the path, not in the YAML). A
  * ticket that vanishes between scan and lock is skipped; an existing archive
  * file with the same id is never overwritten. */
-export function archiveTickets(dir: string, days: number, opts: { now?: number } = {}): Ticket[] {
+export function archiveTickets(dir: string, days: number, opts: { now?: number; candidates?: ArchiveCandidate[] } = {}): Ticket[] {
   const moved: Ticket[] = [];
-  for (const c of archiveCandidates(dir, days, opts.now)) {
+  // Single-scan contract (review M3): callers that already ran archiveCandidates
+  // (the CLI plan) pass them here, so the summary reports exactly what was scanned.
+  const candidates = opts.candidates ?? archiveCandidates(dir, days, opts.now);
+  for (const c of candidates) {
     withTicketLock(dir, `archive:${c.ticket.id}`, () => {
       const src = ticketPath(dir, c.ticket.id);
       if (!existsSync(src)) return; // moved concurrently between scan and lock
@@ -592,7 +612,7 @@ export function archiveTickets(dir: string, days: number, opts: { now?: number }
         throw new Error(`[ticket-store] refusing to overwrite an existing archived ticket: ${dst}`);
       }
       mkdirSync(archiveDir, { recursive: true });
-      renameSync(src, dst);
+      renameWithRetry(src, dst);
       moved.push(c.ticket);
     });
   }
@@ -611,7 +631,7 @@ export function restoreTicket(dir: string, id: string): Ticket {
     if (existsSync(dst)) {
       throw new Error(`[ticket-store] a live ticket ${id} already exists — nothing to restore`);
     }
-    renameSync(src, dst);
+    renameWithRetry(src, dst);
   });
   return readTicket(dir, id);
 }

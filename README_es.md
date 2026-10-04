@@ -1,6 +1,6 @@
 ---
-translated_from_hash: 4936f0646e7d956a936bb648e9ab14836bfe11eaf83c5b71bc18cd6e1f31ae67
-sync_version: 3
+translated_from_hash: 6ff6317a491dec725937916be12074cea9686d1555c174cdb8b76863adf06156
+sync_version: 4
 ---
 
 **Idiomas**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -191,7 +191,9 @@ C:\git\ (raíz del workspace - este repo)
 ├── graft/                   # Grafo de contexto del repo (ADR-0076)
 ├── schemas/                 # Esquemas JSON compartidos
 ├── tickets/                 # Tickets de decisiones de gobernanza
-├── docs/governance/agents/  # Referencias operativas de flujos de trabajo (destinos de punteros de AGENTS.md)
+├── docs/                    # Documentación de gobernanza — manifiesto: docs/README.md
+│   ├── governance/agents/   #   Referencias operativas del flujo de trabajo
+│   └── standards/           #   Estándares (LLM Interaction Standard, ADR-0098)  # Referencias operativas de flujos de trabajo (destinos de punteros de AGENTS.md)
 └── templates/               # Plantillas de proyectos de IA versionadas (co-develop, co-design, etc.)
     ├── common/              # Scripts, hooks y habilidades compartidas entre todas las variantes
     ├── co-develop/          # ✅ Estable — equipo de agentes para desarrollo completo de software

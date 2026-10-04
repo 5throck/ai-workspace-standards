@@ -5,12 +5,24 @@ title: >-
   docs: translate the 3 new README principles into README_es/README_ja and
   refresh their translated_from_hash (sync_version 4)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.737Z'
 history:
   - at: '2026-10-04T05:40:33.737Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:34:40.276Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:34:40.295Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:35:05.346Z'
+    from: review
+    to: done
+result: >-
+  Delivered: README_es/README_ja carry the 3 new principle bullets (translated),
+  the docs/ tree lines, sync_version 4 and refreshed translated_from_hash —
+  verify-readme-sync all valid.
 error: null

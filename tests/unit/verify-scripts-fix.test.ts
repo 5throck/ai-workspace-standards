@@ -8,6 +8,7 @@
  * @version 1.0.0
  */
 import { describe, test, expect } from 'bun:test';
+import { findDivergentDuplicateRows } from "../../scripts/verify-scripts.ts";
 import {
   extractHeaderVersion,
   buildFixRow,
@@ -60,5 +61,32 @@ describe('insertRowsIntoRegistry', () => {
 
   test('returns null when no Registry table exists (leave the file untouched)', () => {
     expect(insertRowsIntoRegistry('# no registry\n', ['| `x.ts` | L0 | 1.0.0 | active | — | — | — | — |'])).toBeNull();
+  });
+});
+
+describe("findDivergentDuplicateRows (T-20261004-012)", () => {
+  test("reports a script whose doc-tail fragment disagrees with the primary row", () => {
+    const content = [
+      "## Registry",
+      "| Script | Source | Version | Status | Removal | Advisory | Layer | Pair |",
+      "|---|---|---|---|---|---|---|---|",
+      "| `ticket.ts` | L0 | 1.9.1 | active | — | — | L0 | — |",
+      "## Tail",
+      "| `ticket.ts` | L0 | 1.3.0 | active | — | — | L0 | — |",
+    ].join("\n");
+    expect(findDivergentDuplicateRows(content)).toEqual([
+      { script: "ticket.ts", versions: ["1.3.0", "1.9.1"] },
+    ]);
+  });
+
+  test("consistent duplicates and single rows pass", () => {
+    const content = [
+      "## Registry",
+      "| `a.ts` | L0 | 2.0.0 | active | — | — | L0 | — |",
+      "## Tail",
+      "| `a.ts` | L0 | 2.0.0 | active | — | — | L0 | — |",
+      "| `b.ts` | L0 | 1.0.0 | active | — | — | L0 | — |",
+    ].join("\n");
+    expect(findDivergentDuplicateRows(content)).toEqual([]);
   });
 });

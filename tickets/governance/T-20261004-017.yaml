@@ -6,12 +6,28 @@ title: >-
   template checklists (generalized to <target>.example in this pass — confirm or
   keep)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T05:40:33.752Z'
 history:
   - at: '2026-10-04T05:40:33.752Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T06:32:48.990Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T06:32:49.009Z'
+    from: waiting
+    to: review
+  - at: '2026-10-04T06:32:49.028Z'
+    from: review
+    to: done
+result: >-
+  Disposition: keep the generalized <target>.example naming in the TEMPLATE
+  copies (safest default for a public AGPL repo — a named client host with a
+  public vulnerability timeline is exposure surface the checklist's own ROE
+  section warns about). The deployed co-security workspace keeps the
+  evidence-backed client-named sources; reverting to named targets requires
+  written owner approval. Generalization applied in PR #1390-era batch; this
+  ticket records the standing decision.
 error: null

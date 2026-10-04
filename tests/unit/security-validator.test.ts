@@ -492,7 +492,7 @@ describe('Performance Tests', () => {
     );
     const elapsed = performance.now() - start;
 
-    expect(elapsed).toBeLessThan(100); // Should complete in <100ms
+    expect(elapsed).toBeLessThan(1000); // Perf smoke: <1s (T-20261004-011 — 10x headroom for loaded CI; the gate is gross regression, not microseconds)
     expect(result.valid).toBe(true);
   });
 
@@ -504,7 +504,7 @@ describe('Performance Tests', () => {
     );
     const elapsed = performance.now() - start;
 
-    expect(elapsed).toBeLessThan(50); // Should complete in <50ms
+    expect(elapsed).toBeLessThan(500); // Perf smoke: <0.5s (T-20261004-011 headroom)
     expect(result.valid).toBe(true);
   });
 
@@ -517,7 +517,7 @@ describe('Performance Tests', () => {
     );
     const elapsed = performance.now() - start;
 
-    expect(elapsed).toBeLessThan(500); // Should complete in <500ms
+    expect(elapsed).toBeLessThan(5000); // Perf smoke: <5s for 140KB content (T-20261004-011 headroom)
     expect(result.valid).toBe(true);
   });
 });
