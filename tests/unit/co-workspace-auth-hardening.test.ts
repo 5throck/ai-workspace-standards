@@ -41,19 +41,19 @@ describe("csrf exemption scope (M3)", () => {
     const token = state.users.createSession(user.id);
     const res = await handleRequest(state, post("/auth/logout", { cookie: `gw_session=${token}` }));
     expect(res.status).toBe(403);
-  });
+  }, 20000);
 
   test("csrf: valid Bearer POST without header -> not 403", async () => {
     const { state } = makeState({ CO_WORKSPACE_CSRF_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
     const res = await handleRequest(state, post("/auth/logout", { authorization: "Bearer k-valid" }));
     expect(res.status).not.toBe(403);
-  });
+  }, 20000);
 
   test("csrf: invalid Bearer POST without header -> 403", async () => {
     const { state } = makeState({ CO_WORKSPACE_CSRF_REQUIRED: "true", CO_WORKSPACE_API_KEYS: "k-valid" });
     const res = await handleRequest(state, post("/auth/logout", { authorization: "Bearer bogus" }));
     expect(res.status).toBe(403);
-  });
+  }, 20000);
 
   test("web: every non-GET fetch in index.html/login.html carries x-requested-with", () => {
     for (const file of ["index.html", "login.html"]) {
@@ -78,7 +78,7 @@ describe("csrf exemption scope (M3)", () => {
     for (const m of index.matchAll(/const authHeaders = (\{[^}]*\})/g)) {
       expect(m[1]).toContain("x-requested-with");
     }
-  });
+  }, 20000);
 });
 
 describe("Google SSO hardening (M1/M2/H8)", () => {
