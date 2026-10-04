@@ -213,18 +213,24 @@ describe("spokenSummary (voice speaks the gist, not the dump)", () => {
   });
 });
 
-describe("spokenSummary default cap (user review: 100 chars)", () => {
-  test("default cap truncates to ~100 chars at a sentence boundary", () => {
-    const md = "첫 문장입니다. 두 번째 문장은 길게 이어져서 " + "아주 긴 내용 ".repeat(30);
-    const out = spokenSummary(md);
-    expect(out.endsWith("…")).toBe(true);
-    expect(out.length).toBeLessThanOrEqual(105);
+describe("spokenSummary whole-sentence contract (user review: 200 chars, never cut mid-sentence)", () => {
+  test("assembles whole sentences up to the cap", () => {
+    const md = "First complete sentence stays. Second sentence fits too. " + "Third sentence rambles well past the budget ".repeat(6) + "and keeps going.";
+    const out = spokenSummary(md, 200);
+    expect(out).toBe("First complete sentence stays. Second sentence fits too. …");
   });
 
-  test("an explicit Short Answer over 100 chars also truncates", () => {
-    const md = "## Short Answer\n\n" + "요약 문장이 이렇게 길게 이어집니다. ".repeat(10);
-    const out = spokenSummary(md);
-    expect(out.length).toBeLessThanOrEqual(105);
-    expect(out.endsWith("…")).toBe(true);
+  test("the FIRST sentence is always spoken in full, even when it alone exceeds the cap", () => {
+    const md = "A single very long sentence without any terminator " + "keeps going and going ".repeat(10) + "and finally ends.";
+    const out = spokenSummary(md, 100);
+    expect(out.startsWith("A single very long sentence")).toBe(true);
+    expect(out).not.toContain("…");
+    expect(out.endsWith("ends.")).toBe(true);
+  });
+
+  test("truncation appends the ellipsis after a complete sentence", () => {
+    const md = "One. Two. Three. Four. Five. Six. Seven.";
+    const out = spokenSummary(md, 14);
+    expect(out).toBe("One. Two. …");
   });
 });
