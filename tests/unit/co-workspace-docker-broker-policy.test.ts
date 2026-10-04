@@ -763,3 +763,24 @@ describe("validateCreate: claude/codex runtime profiles (2026-10-03 sibling-turn
     expectReject(validateCreate(JSON.stringify(b), CFG, NAME), "more than one provider key");
   });
 });
+
+describe("ANTHROPIC_AUTH_TOKEN in claude provider-key turns (2026-10-04)", () => {
+  test("allowed alongside ANTHROPIC_API_KEY without tripping the one-provider-key limit", () => {
+    const res = run((b) => {
+      // the hermes fixture ships OPENAI_API_KEY — swap it for the claude pair
+      b.Env = b.Env.map((e) => (e.startsWith("OPENAI_API_KEY=") ? "ANTHROPIC_API_KEY=sk-ant-test" : e));
+      b.Env.push("ANTHROPIC_AUTH_TOKEN=sk-ant-test");
+    });
+    expect(res.ok).toBe(true);
+    expect(res.canonical.Env).toContain("ANTHROPIC_AUTH_TOKEN=sk-ant-test");
+    expect(res.canonical.Env).toContain("ANTHROPIC_API_KEY=sk-ant-test");
+  });
+
+  test("an unknown env is still rejected", () => {
+    const res = run((b) => {
+      b.Env.push("ANTHROPIC_AUTH_TOKEN=sk-ant-test");
+      b.Env.push("SOME_RANDOM_TOKEN=zzz");
+    });
+    expect(res.ok).toBe(false);
+  });
+});
