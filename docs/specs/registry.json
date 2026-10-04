@@ -2062,6 +2062,15 @@
       "source": "manual",
       "created": "2026-10-04",
       "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-04-turn-runtime-hotswap-design",
+      "title": "turn runtime hotswap design",
+      "file": "docs/designs/2026-10-04-turn-runtime-hotswap-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
     }
   ]
 }

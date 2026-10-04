@@ -4,6 +4,14 @@ import { sessionTokenFromCookie } from "../users";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { callerPrincipal, requireAdminReauth, requireAdminReady, requireTenantAccess } from "../access";
 import { deleteTenantData, cachedDirSize } from "../lifecycle";
+import {
+  applyTurnOverrides,
+  maskApiKey,
+  persistTurnOverrides,
+  readTurnOverrides,
+  runtimeProviderKeyGap,
+  validateTurnOverridesBody,
+} from "../config";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
 
@@ -130,6 +138,46 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   if (req.method === "GET" && path === "/admin/audit") {
     const caller = requireAdminReady(state, req); // T-20261003-027: password-set force (sub-feature 4)
     return jsonResponse({ entries: state.audit.list(200) });
+  }
+
+  // ── Turn-runtime hot-swap (spec 2026-10-04-turn-runtime-hotswap-design): the
+  // runtime + credential selection is hot-applied to the running gateway and
+  // persisted to data/turn-config.json (overrides env at next boot). GET masks the key.
+  if (req.method === "GET" && path === "/admin/turn-config") {
+    const caller = requireAdminReady(state, req);
+    const cfg = state.cfg;
+    return jsonResponse({
+      runtime: cfg.runtime,
+      provider: cfg.llmProvider ?? "none",
+      apiKeyMasked: maskApiKey(cfg.llmApiKey),
+      baseUrl: cfg.llmBaseUrl ?? null,
+      model: cfg.hermesModel ?? null,
+      extraArgs: cfg.hermesExtraArgs,
+      credentialGap: runtimeProviderKeyGap(cfg.runtime, cfg),
+      note: "PUT applies immediately (new turns) and persists across restarts; omit apiKey to keep the current one",
+    });
+  }
+
+  if (req.method === "PUT" && path === "/admin/turn-config") {
+    const caller = requireAdminReady(state, req);
+    await requireAdminReauth(state, req); // session-hardening D4: credential changes re-present the password
+    const body = (await readJsonBody(req)) as Record<string, unknown>;
+    const patch = validateTurnOverridesBody(body);
+    if (Object.keys(patch).length === 0) throw new HttpError(400, "turn-config: no fields to update");
+    const merged = { ...readTurnOverrides(state.cfg.dataDir), ...patch };
+    const { applied, warnings } = applyTurnOverrides(state.cfg, merged);
+    persistTurnOverrides(state.cfg.dataDir, merged);
+    state.audit.record(caller.principal, "turn-config.update", applied.join(","), `runtime=${state.cfg.runtime}`);
+    return jsonResponse({
+      applied,
+      warnings,
+      runtime: state.cfg.runtime,
+      provider: state.cfg.llmProvider ?? "none",
+      apiKeyMasked: maskApiKey(state.cfg.llmApiKey),
+      baseUrl: state.cfg.llmBaseUrl ?? null,
+      model: state.cfg.hermesModel ?? null,
+      extraArgs: state.cfg.hermesExtraArgs,
+    });
   }
 
   // QA-12: admin outbox viewer — remote signups cannot read a server-local file.

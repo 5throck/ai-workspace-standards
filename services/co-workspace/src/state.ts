@@ -1,13 +1,15 @@
 /** Gateway state: configuration, registries, and rate limiters. */
 
 import { mkdirSync } from "node:fs";
-import { GatewayConfig, loadConfig } from "./config";
+import { GatewayConfig, loadConfig, loadTurnOverrides } from "./config";
 import { TenantRegistry } from "./registry-db";
 import { TurnStore } from "./tenant-files";
 import { UserStore } from "./users";
 import { AuditLog, RateLimiter } from "./hardening";
 
 export interface GatewayState {
+  /** Turn-runtime overlay result (null = no overlay file). */
+  turnOverrides: { applied: string[]; warnings: string[] } | null;
   cfg: GatewayConfig;
   registry: TenantRegistry;
   turns: TurnStore;
@@ -24,7 +26,11 @@ export interface GatewayState {
 
 export function createState(cfg: GatewayConfig = loadConfig()): GatewayState {
   mkdirSync(cfg.dataDir, { recursive: true });
+  // Turn-runtime hot-swap (spec 2026-10-04-turn-runtime-hotswap-design): the operator's
+  // persisted overlay (data/turn-config.json) overrides env at boot — loud on invalid.
+  const turnOverrides = loadTurnOverrides(cfg, cfg.dataDir);
   return {
+    turnOverrides,
     cfg,
     turns: new TurnStore(cfg.dataDir),
     users: new UserStore(cfg.dataDir, cfg.sessionTtlMs, cfg.sessionIdleMs),

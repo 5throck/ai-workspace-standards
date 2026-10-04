@@ -5,7 +5,7 @@
  *   secrets → seeded into each tenant HERMES_HOME (tenant.ts); never echoed by any endpoint
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 export interface GatewayConfig {
@@ -258,7 +258,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     hermesSeedHome: env.CO_WORKSPACE_HERMES_SEED_HOME || undefined,
     hermesAuthDir: env.CO_WORKSPACE_HERMES_AUTH_DIR || undefined,
     hermesAuthDirHost: env.CO_WORKSPACE_HERMES_AUTH_DIR_HOST || undefined,
-    hermesModel: env.CO_WORKSPACE_HERMES_MODEL || undefined,
+    hermesModel: (env.CO_WORKSPACE_MODEL ?? env.CO_WORKSPACE_HERMES_MODEL) || undefined,
     llmBaseUrl: env.CO_WORKSPACE_LLM_BASE_URL || undefined,
     llmApiKey: env.CO_WORKSPACE_LLM_API_KEY || undefined,
     llmProvider: env.CO_WORKSPACE_LLM_PROVIDER || undefined,
@@ -267,7 +267,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     maxTurns: num(env.CO_WORKSPACE_MAX_TURNS, 100),
     interactionStandard: env.CO_WORKSPACE_INTERACTION_STANDARD !== "false",
     scaffoldTimeoutMs: num(env.CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS, 600_000),
-    hermesExtraArgs: (env.CO_WORKSPACE_HERMES_EXTRA_ARGS ?? "")
+    // Neutral aliases (2026-10-04, turn-runtime hot-swap design): the turn params are
+    // runtime-shared — the hermes-named envs remain as deprecated aliases.
+    hermesExtraArgs: (env.CO_WORKSPACE_TURN_EXTRA_ARGS ?? env.CO_WORKSPACE_HERMES_EXTRA_ARGS ?? "")
       .split(" ")
       .map((s) => s.trim())
       .filter(Boolean),
@@ -456,4 +458,136 @@ function parseCookieSecure(raw: string | undefined): boolean | "auto" {
   if (v === "true" || v === "1") return true;
   if (v === "false" || v === "0") return false;
   return "auto";
+}
+
+// ── Turn-runtime hot-swap (2026-10-04, spec 2026-10-04-turn-runtime-hotswap-design) ──
+// The runtime + credential selection used to be env-only, so switching it meant editing
+// .env and recreating the containers. The overlay file (data/turn-config.json) now
+// carries the operator's choice: it overrides env at boot AND is written by the admin
+// API (PUT /admin/turn-config), which applies it to the running gateway immediately —
+// no restart, no compose edit.
+
+export type TurnRuntime = "hermes" | "claude" | "codex" | "antigravity";
+export const TURN_RUNTIMES: readonly TurnRuntime[] = ["hermes", "claude", "codex", "antigravity"];
+
+export interface TurnOverrides {
+  runtime?: TurnRuntime;
+  /** Credential provider family — must speak the runtime's protocol (see
+   * RUNTIME_PROVIDER_FAMILIES); "none" disables key injection. */
+  provider?: string;
+  apiKey?: string;
+  baseUrl?: string;
+  /** Model passed to the runtime (claude: `--model`; hermes: config.yaml stamp). */
+  model?: string;
+  extraArgs?: string[];
+}
+
+export function turnOverridesPath(dataDir: string): string {
+  return join(dataDir, "turn-config.json");
+}
+
+/** Applies a validated override set to the live config. Returns the applied field
+ * names plus non-fatal warnings (protocol-family gaps surface at boot/PUT but do
+ * not block — the operator may be preparing a switch). */
+export function applyTurnOverrides(
+  cfg: GatewayConfig,
+  o: TurnOverrides,
+): { applied: string[]; warnings: string[] } {
+  const applied: string[] = [];
+  const warnings: string[] = [];
+  if (o.runtime !== undefined) {
+    if (!TURN_RUNTIMES.includes(o.runtime)) throw new Error(`turn-config: runtime must be one of ${TURN_RUNTIMES.join(", ")}`);
+    cfg.runtime = o.runtime;
+    applied.push("runtime");
+  }
+  if (o.provider !== undefined) {
+    if (typeof o.provider !== "string" || !/^([a-z0-9-]+|none)$/.test(o.provider)) {
+      throw new Error(`turn-config: provider must match [a-z0-9-]+ or "none"`);
+    }
+    cfg.llmProvider = o.provider;
+    applied.push("provider");
+  }
+  if (o.apiKey !== undefined) {
+    if (typeof o.apiKey !== "string" || o.apiKey.trim() === "") throw new Error("turn-config: apiKey must be a non-empty string (use null removal via the API omitting it)");
+    cfg.llmApiKey = o.apiKey.trim();
+    applied.push("apiKey");
+  }
+  if (o.baseUrl !== undefined) {
+    if (typeof o.baseUrl !== "string" || !/^https:\/\//.test(o.baseUrl)) throw new Error("turn-config: baseUrl must be an https URL");
+    cfg.llmBaseUrl = o.baseUrl;
+    applied.push("baseUrl");
+  }
+  if (o.model !== undefined) {
+    if (typeof o.model !== "string" || o.model.trim() === "" || o.model.length > 120) throw new Error("turn-config: model must be 1-120 characters");
+    cfg.hermesModel = o.model.trim();
+    applied.push("model");
+  }
+  if (o.extraArgs !== undefined) {
+    if (!Array.isArray(o.extraArgs) || !o.extraArgs.every((a) => typeof a === "string")) {
+      throw new Error("turn-config: extraArgs must be an array of strings");
+    }
+    cfg.hermesExtraArgs = o.extraArgs;
+    applied.push("extraArgs");
+  }
+  const gap = runtimeProviderKeyGap(cfg.runtime, cfg);
+  if (gap) warnings.push(gap);
+  return { applied, warnings };
+}
+
+/** Reads + applies the overlay file. Corrupt or invalid files fail LOUD at boot —
+ * a silently ignored config would make the gateway run with the wrong credentials. */
+export function loadTurnOverrides(cfg: GatewayConfig, dataDir: string): { applied: string[]; warnings: string[] } | null {
+  const path = turnOverridesPath(dataDir);
+  if (!existsSync(path)) return null;
+  const raw = readFileSync(path, "utf8");
+  let parsed: TurnOverrides;
+  try {
+    parsed = JSON.parse(raw) as TurnOverrides;
+  } catch (err) {
+    throw new Error(`turn-config file ${path} is not valid JSON — fix or remove it (boot refused): ${(err as Error).message}`);
+  }
+  const result = applyTurnOverrides(cfg, parsed);
+  return result;
+}
+
+/** Atomically persists the merged override set (PUT merges over the previous file). */
+export function persistTurnOverrides(dataDir: string, o: TurnOverrides): void {
+  const path = turnOverridesPath(dataDir);
+  const tmp = `${path}.tmp-${process.pid}-${Date.now()}`;
+  writeFileSync(tmp, JSON.stringify(o, null, 2) + "\n", "utf8");
+  renameSync(tmp, path);
+}
+
+/** Reads the previous override file (PUT merges over it), tolerating absence. */
+export function readTurnOverrides(dataDir: string): TurnOverrides {
+  const path = turnOverridesPath(dataDir);
+  if (!existsSync(path)) return {};
+  try {
+    return JSON.parse(readFileSync(path, "utf8")) as TurnOverrides;
+  } catch {
+    return {}; // a corrupt file fails loudly in loadTurnOverrides at boot; PUT starts clean
+  }
+}
+
+/** Masked rendering for the admin GET — secrets never leave the process in full. */
+export function maskApiKey(key: string | undefined): string | null {
+  return key ? `•••${key.slice(-4)}` : null;
+}
+
+/** Validates a PUT body into a TurnOverrides patch. Thin + exported for tests. */
+export function validateTurnOverridesBody(body: Record<string, unknown>): TurnOverrides {
+  const o: TurnOverrides = {};
+  if (body.runtime !== undefined) o.runtime = body.runtime as TurnRuntime;
+  if (body.provider !== undefined) o.provider = body.provider as string;
+  if (body.apiKey !== undefined) o.apiKey = body.apiKey as string;
+  if (body.baseUrl !== undefined) o.baseUrl = body.baseUrl as string;
+  if (body.model !== undefined) o.model = body.model as string;
+  if (body.extraArgs !== undefined) {
+    if (typeof body.extraArgs === "string") {
+      o.extraArgs = body.extraArgs.split(" ").map((x) => x.trim()).filter(Boolean);
+    } else {
+      o.extraArgs = body.extraArgs as string[];
+    }
+  }
+  return o;
 }

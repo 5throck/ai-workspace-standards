@@ -145,7 +145,12 @@ export async function runChat(
             projectDir: rec.projectDir,
             message,
             sessionId: rec.conversationId,
-            extraArgs: state.cfg.hermesExtraArgs,
+            // Runtime-neutral model (turn-runtime hot-swap design): hermes stamps it
+            // into config.yaml; claude takes `--model` on the argv.
+            extraArgs: [
+              ...(state.cfg.hermesExtraArgs ?? []),
+              ...(state.cfg.hermesModel ? ["--model", state.cfg.hermesModel] : []),
+            ],
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
             env: cliContainer ? undefined : cliEnv,
