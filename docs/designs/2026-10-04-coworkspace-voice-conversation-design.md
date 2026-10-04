@@ -167,3 +167,19 @@ listening re-arms, speak the next instruction). Returning users get the mic arme
 on load (permission already granted); a denied permission exits gracefully. The
 composer shows feedback only WHILE the loop operates (status text + the language
 select moved into the Account modal's voice row).
+
+## Revision 8 (2026-10-04, user review): settings toggles VISIBILITY; the orb toggles the loop
+
+Final control model, replacing revision 7's ambient reading:
+
+- **Account-modal toggle = capability visibility** (persisted,
+  `gw-voice-enabled`): ON shows the voice button + language select in the
+  composer; OFF hides every voice control. Hiding also stops a running loop.
+- **Composer orb = the conversation loop** (per session): click starts (speak →
+  auto-submit → summary spoken → listen again), click again stops. Pressed state
+  mirrors the loop; state text appears only while operating.
+- The language select lives in the composer next to the orb (both hidden
+  together by the settings toggle) — where the feature appears is where it is
+  operated, per the user's wording.
+- The settings-modal voice row keeps the language select binding as well (same
+  `voiceLang` state).

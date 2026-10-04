@@ -97,6 +97,15 @@
   .updateChip { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; background: #1f6feb; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
   .updateChip.hidden { display: none; }
   .voiceStatus { font-size: .78rem; color: var(--accent); min-width: 64px; text-align: right; }
+  .voiceOrb { background: transparent; border: 1px solid var(--border2); border-radius: 50%; width: 34px; height: 34px; font: inherit; font-size: .95rem; cursor: pointer; line-height: 1; }
+  .voiceOrb[aria-pressed="true"] { border-color: var(--accent); }
+  .voiceOrb.listening { border-color: #2ea043; box-shadow: 0 0 0 3px rgba(46, 160, 67, .25); animation: voicePulse 1.4s ease-in-out infinite; }
+  .voiceOrb.thinking { border-color: #d29922; animation: voiceSpin 1.6s linear infinite; }
+  .voiceOrb.speaking { border-color: #1f6feb; animation: voicePulse .8s ease-in-out infinite; }
+  @keyframes voicePulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(31, 111, 235, .18); } 50% { box-shadow: 0 0 0 5px rgba(31, 111, 235, .32); } }
+  @keyframes voiceSpin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .voiceOrb.listening, .voiceOrb.thinking, .voiceOrb.speaking { animation: none; } }
+  .voiceOrb.hidden, .voiceLangSel.hidden { display: none; }
   textarea { width: 100%; background: transparent; color: var(--fg); border: 0; font: inherit; min-height: 44px; resize: none; outline: none; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
   .chip { background: var(--panel); color: var(--fg); border: 1px solid var(--border2); border-radius: 999px;
@@ -199,6 +208,8 @@
         <select id="model" aria-label="Variant" class="modelPick"></select>
         <span style="flex:1"></span>
         <span id="voiceStatus" aria-live="polite" class="voiceStatus"></span>
+        <select id="voiceLangSel" class="modelPick hidden" aria-label="Voice language" title="Voice language"></select>
+        <button type="button" id="voiceOrb" class="voiceOrb hidden" aria-pressed="false" title="Voice conversation">🎙</button>
         <button type="button" id="stopBtn" class="stopBtn hidden">■ Stop</button>
         <button type="submit" id="send" class="sendBtn">Send</button>
       </div>
@@ -512,15 +523,16 @@
   // (listen -> auto-submit -> reply spoken -> listen again); click again = exit
   // (cancels TTS/recognition immediately). Half-duplex: the recognizer never runs
   // while TTS speaks. Browser-native Web Speech API only.
-  const voiceStatus = $("voiceStatus");
+  const voiceStatus = $("voiceStatus"), orbBtn = $("voiceOrb"), voiceLangSel = $("voiceLangSel");
   const uiLang = document.documentElement.lang || "ko-KR";
   const TTS_REARM_DEBOUNCE_MS = 250; // TTS audio tails persist past utterance.onend
   let voiceState = "idle";
-  let voiceMode = false;
+  let voiceMode = false;      // the conversation loop (orb toggles it per session)
+  let voiceEnabled = false;   // the capability's visibility (Account settings toggle)
   let recognition = null, recognizing = false, dictateBase = "";
   let rearmTimer = null;
 
-  try { voiceMode = localStorage.getItem("gw-voice-mode") === "1"; } catch { /* private mode */ }
+  try { voiceEnabled = localStorage.getItem("gw-voice-enabled") === "1"; } catch { /* private mode */ }
   let voiceLang = localStorage.getItem("gw-voice-lang")
     || detectVoiceLang(navigator.languages ?? [navigator.language]);
   if (!VOICE_LANGUAGES.includes(voiceLang)) voiceLang = "ko-KR";
@@ -528,6 +540,11 @@
   const STATUS_TEXT = { idle: "", listening: "Listening…", thinking: "Thinking…", speaking: "Speaking…" };
   function applyVoiceUi() {
     voiceStatus.textContent = STATUS_TEXT[voiceState] ?? "";
+    // Visibility follows the SETTINGS toggle; the orb's pressed state follows the loop.
+    orbBtn.classList.toggle("hidden", !voiceEnabled);
+    voiceLangSel.classList.toggle("hidden", !voiceEnabled);
+    orbBtn.setAttribute("aria-pressed", voiceMode ? "true" : "false");
+    orbBtn.title = voiceMode ? "Voice conversation ON — click to stop" : "Voice conversation";
   }
 
   function dispatchVoice(event) {
@@ -605,7 +622,6 @@
       // Single-button exit (or settings toggle off): stop everything, stand down.
       if ("speechSynthesis" in window) speechSynthesis.cancel();
       voiceMode = false;
-      try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* private mode */ }
       stopRecognition();
       dispatchVoice("modeOff");
       return;
@@ -613,17 +629,26 @@
     // Entering while a reply is speaking cancels TTS first (barge-in = exit-while-speaking).
     if (voiceState === "speaking" && "speechSynthesis" in window) speechSynthesis.cancel();
     voiceMode = true;
-    try { localStorage.setItem("gw-voice-mode", "1"); } catch { /* private mode */ }
     startListening();
   }
 
   if (speechRecognitionSupported(window) || speechSynthesisSupported(window)) {
-    // The toggle PERSISTS across reloads: with it on, voice is simply part of
-    // chatting — the loop re-arms after every reply and no visible control is
-    // needed. Returning users (mic permission already granted) get the mic armed
-    // on load; a denied permission exits gracefully via the recognition error path.
-    if (voiceMode) startListening();
+    // The orb sits in the composer only while the capability is enabled in
+    // settings; clicking it starts/stops the conversation loop (per session).
+    orbBtn.addEventListener("click", () => setVoiceMode(!voiceMode));
+    for (const lang of VOICE_LANGUAGES) {
+      const opt = document.createElement("option");
+      opt.value = lang; opt.textContent = lang;
+      voiceLangSel.appendChild(opt);
+    }
+    voiceLangSel.addEventListener("change", () => {
+      voiceLang = voiceLangSel.value;
+      try { localStorage.setItem("gw-voice-lang", voiceLang); } catch { /* private mode */ }
+      if (voiceMode && voiceState === "listening") { stopRecognition(); startListening(); }
+    });
     applyVoiceUi();
+  } else {
+    orbBtn.classList.add("hidden");
   }
 
   // ── Stale-tab guard (voice design rev 6): a redeployed gateway bumps webBuild —
@@ -1035,7 +1060,7 @@
       <div class="formErr" id="ac-pw-err" role="alert"></div>
       <h3 style="font-size:.85rem; margin: 14px 0 6px;">Voice conversation</h3>
       <div class="row" style="justify-content:flex-start; gap:8px;">
-        <button id="ac-voice-toggle" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">${voiceMode ? "Voice conversation: ON — click to turn off" : "Voice conversation: OFF — click to turn on"}</button>
+        <button id="ac-voice-toggle" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">${voiceEnabled ? "Voice conversation: enabled — shows the voice button in the composer" : "Voice conversation: disabled — no voice controls in the composer"}</button>
         <select id="ac-voice-lang" class="modelPick" aria-label="Voice language" title="Voice language"></select>
       </div>
       <h3 style="font-size:.85rem; margin: 14px 0 6px;">Change email</h3>
@@ -1088,10 +1113,18 @@
     const voiceToggle = wrap.querySelector("#ac-voice-toggle");
     if (voiceToggle) {
       const paint = () => {
-        voiceToggle.textContent = voiceMode ? "Voice conversation: ON — click to turn off" : "Voice conversation: OFF — click to turn on";
+        voiceToggle.textContent = voiceEnabled
+          ? "Voice conversation: enabled — shows the voice button in the composer"
+          : "Voice conversation: disabled — no voice controls in the composer";
       };
       paint();
-      voiceToggle.addEventListener("click", () => { setVoiceMode(!voiceMode); paint(); });
+      voiceToggle.addEventListener("click", () => {
+        voiceEnabled = !voiceEnabled;
+        try { localStorage.setItem("gw-voice-enabled", voiceEnabled ? "1" : "0"); } catch { /* private mode */ }
+        if (!voiceEnabled) setVoiceMode(false); // hiding the controls also stops a running loop
+        applyVoiceUi();
+        paint();
+      });
     }
     const voiceLangPick = wrap.querySelector("#ac-voice-lang");
     if (voiceLangPick) {
