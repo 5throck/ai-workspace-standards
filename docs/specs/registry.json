@@ -2026,6 +2026,15 @@
       "source": "manual",
       "created": "2026-10-04",
       "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-04-llm-interaction-standard-design",
+      "title": "llm interaction standard design",
+      "file": "docs/designs/2026-10-04-llm-interaction-standard-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
     }
   ]
 }

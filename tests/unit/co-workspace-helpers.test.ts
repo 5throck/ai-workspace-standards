@@ -6,6 +6,9 @@ import {
   RECENCY_GROUP_ORDER,
   prepareDonutSlices,
   recencyGroupLabel,
+  speakableText,
+  speechRecognitionSupported,
+  speechSynthesisSupported,
 } from "../../services/co-workspace/web/app-helpers.js";
 
 describe("recencyGroupLabel", () => {
@@ -55,5 +58,51 @@ describe("prepareDonutSlices", () => {
     const { top, total } = prepareDonutSlices([{ label: "x", value: 0 }]);
     expect(top).toEqual([]);
     expect(total).toBe(0);
+  });
+});
+
+describe("speakableText (ADR-0098 TTS surface)", () => {
+  test("plain prose passes through unchanged", () => {
+    const prose = "The gateway runs one turn at a time per tenant.";
+    expect(speakableText(prose)).toBe(prose);
+  });
+
+  test("fenced code blocks are announced and omitted", () => {
+    const md = "Before.\n```js\nconst x = 1;\nconsole.log(x);\n```\nAfter.";
+    expect(speakableText(md)).toBe("Before. (code block omitted) After.");
+  });
+
+  test("links keep their text; inline code unwraps", () => {
+    expect(speakableText("See [the README](https://example.com) for `runChat`.")).toBe(
+      "See the README for runChat."
+    );
+  });
+
+  test("table rows flatten to speakable words", () => {
+    const md = "| name | value |\n| ---- | ----- |\n| runs | 300   |";
+    const out = speakableText(md);
+    expect(out).toContain("name value");
+    expect(out).toContain("runs 300");
+    expect(out).not.toContain("|");
+  });
+
+  test("headings, list markers, emphasis and HTML tags flatten", () => {
+    const md = "## Title\n- item one\n1. item two\n**bold** and *soft* <br> text";
+    const out = speakableText(md);
+    expect(out).toBe("Title item one item two bold and soft text");
+  });
+
+  test("null/undefined input becomes an empty string", () => {
+    expect(speakableText(null)).toBe("");
+    expect(speakableText(undefined)).toBe("");
+  });
+});
+
+describe("speech support probes (ADR-0098 voice surface)", () => {
+  test("detect recognition and synthesis surfaces without a real browser", () => {
+    expect(speechRecognitionSupported({ webkitSpeechRecognition: function () {} })).toBe(true);
+    expect(speechRecognitionSupported({})).toBe(false);
+    expect(speechSynthesisSupported({ speechSynthesis: {} })).toBe(true);
+    expect(speechSynthesisSupported({})).toBe(false);
   });
 });

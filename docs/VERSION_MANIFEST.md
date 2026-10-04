@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-04T02:37:11.282Z
+**Generated**: 2026-10-04T03:06:06.480Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -40,7 +40,7 @@
 | adopt-project | 1.1.0 | active | skills/adopt-project/SKILL.md | workspace | adopt external project, adopt project to standard, convert external project to workspace standard, onboard existing project | scaffolding-expert |
 | agent-lifecycle-manager | 1.3.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
 | api-documentation | 1.0.2 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
-| ci-triage | 0.1.1 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
+| ci-triage | 0.2.0 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
 | create-variant | 1.4.2 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, variant creation, scaffold new variant, new co- project | pm |
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
