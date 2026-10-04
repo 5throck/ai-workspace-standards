@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261004-009
+kind: manual
+title: >-
+  docs/ physical consolidation: analysis+audits folded into reports, superpowers
+  archived, guides/ folder for root how-tos (17 dirs / 11 root files)
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-04T04:15:20.868Z'
+history:
+  - at: '2026-10-04T04:15:20.868Z'
+    from: null
+    to: backlog
+  - at: '2026-10-04T04:15:20.885Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T04:15:20.902Z'
+    from: waiting
+    to: review
+result: null
+error: null

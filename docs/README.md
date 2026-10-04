@@ -33,15 +33,14 @@ It exists to stop folder proliferation: a folder is a contract, not a scratch sp
 | Folder | Purpose | Belongs | Does NOT belong |
 |---|---|---|---|
 | `adr/` | Architecture Decision Records (ADR index inside) | accepted/rejected/superseded ADRs, `templates/` | decision-support analyses, designs |
-| `analysis/` | Decision-support analyses and audits that precede action | one-off survey/audit analyses cited by tickets | outcome reports (→ `reports/`) |
 | `architecture/` | Structural pattern references | extends-pattern, layer differences, diagrams | time-boxed designs (→ `designs/`) |
 | `archive/` | Dead content kept for provenance | superseded trees, stale test snapshots | anything still referenced as current |
-| `audits/` | Audit-flavored project reviews (recorded convention, design 2026-09-08-project-review-v1.2 §persist) | project-review audit reports | general outcome reports (→ `reports/`) |
 | `constitution/` | Constitutional specification modules | §-module drafts referenced by CONSTITUTION.md | policies with their own home |
 | `decisions/` | Gate-moment decision records (ADR-0061 chain) | `DEC-*.md` with evidence_refs | architecture decisions (→ `adr/`) |
 | `designs/` | Spec-registered technical designs | `YYYY-MM-DD-*-design.md` (Design Gate, ADR-0074) | unregistered prose |
 | `evidence/` | Evidence ledger for the decision chain (ADR-0061) | `ledger.md` (validate-decisions reads it) | reports |
 | `examples/` | Committed example configs referenced by operator prompts | sample files that document current defaults | real runtime state (gitignored paths) |
+| `guides/` | Workspace how-to guides (moved from docs/ root, 2026-10-04) | getting-started, upgrade/variant guides, external references | dated reports (→ `reports/`) |
 | `governance/` | Governance SSOT documents (ADR-0090 pointer targets) | agents/, variant contracts, workflow references | project-specific procedure docs |
 | `graph-deltas/` | Skill-graph delta projections (ADR-0084 §5.4) | `<YYYY>/…` machine-written delta records | hand-edited JSON |
 | `lifecycle/` | Skill/script lifecycle records | per-component lifecycle records | reports |
@@ -49,19 +48,16 @@ It exists to stop folder proliferation: a folder is a contract, not a scratch sp
 | `security/` | Security policies and security audit records | extends-chain rules, dependency policies, completion reports | general audits (→ `audits/`) |
 | `specs/` | Design Gate machinery | `registry.json` (spec-register/audit read it) | design prose (→ `designs/`) |
 | `standards/` | Cross-cutting normative standards | `llm-interaction-standard.md` (ADR-0098) | decision records, designs |
-| `superpowers/` | LEGACY — frozen provenance of the 2026-07 superpowers pipeline | historical plans/specs referenced by code comments | new content (use `designs/`) |
 | `templates/` | Governance contracts and schemas for the template fleet | `common-contract.json`, propagation schemas | project-facing doc templates (→ L1 docs) |
 
 Root-level loose files are allowed only for: the two indexes (`index.md`, this
 manifest), `VERSION_MANIFEST.md`, the machine projections
 (`workspace-schema.json`, `self-managed-surfaces.json`, `skill-graph*.json`,
-`surface-gaps.json`), and the established top-level guides
-(`getting-started.md`, `project-upgrade-guide.md`, `creating-a-variant.md`,
-`variant-conversion-guide.md`, `variant-creation-workflow.md`,
-`external-references.md`, `graft-platform-integration.md`,
-`variant-review-report-2026-07-14.md`, `variant-roadmap-2026-q3-q4.md`,
-`variant-benchmark-backlog.md`) — indexed in `index.md`; new guides go into an existing
-folder unless §1.2 is satisfied.
+`surface-gaps.json`), and the variant planning pair (`variant-roadmap-2026-q3-q4.md`,
+`variant-benchmark-backlog.md`) — indexed in `index.md`. How-to guides live in
+`guides/`; dated reviews live in `reports/` (2026-10-04 consolidation folded
+`analysis/`, `audits/`, and the root guide files; `superpowers/` moved under
+`archive/`).
 
 ## 3. Default homes (decision table)
 

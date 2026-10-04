@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.2.0
+ * @version 1.2.1
+ * v1.2.1 (2026-10-04): allowlist aligned with the docs consolidation (guides/ added;
+ *           analysis/audits/superpowers removed from the manifest and the gate).
  * v1.2.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): --workspace mode —
  *           enforces the docs/ top-level manifest (docs/README.md): every directory and
  *           loose file must be allowlisted, so folder proliferation fails the audit
@@ -39,9 +41,9 @@ const OPTIONAL_FOLDERS = [
 
 /** Allowed top-level DIRECTORIES under docs/ at the workspace root. */
 const ALLOWED_DIRS: ReadonlySet<string> = new Set([
-  'adr', 'analysis', 'architecture', 'archive', 'audits', 'constitution', 'decisions',
-  'designs', 'evidence', 'examples', 'governance', 'graph-deltas', 'lifecycle',
-  'reports', 'security', 'specs', 'standards', 'superpowers', 'templates',
+  'adr', 'architecture', 'archive', 'constitution', 'decisions',
+  'designs', 'evidence', 'examples', 'governance', 'graph-deltas', 'guides', 'lifecycle',
+  'reports', 'security', 'specs', 'standards', 'templates',
 ]);
 
 /** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the
@@ -51,11 +53,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   'README.md', 'index.md', 'VERSION_MANIFEST.md',
   'workspace-schema.json', 'self-managed-surfaces.json', 'skill-graph.json',
   'skill-graph.md', 'skill-graph.overrides.json', 'surface-gaps.json',
-  'getting-started.md', 'project-upgrade-guide.md', 'creating-a-variant.md',
-  'variant-conversion-guide.md', 'variant-creation-workflow.md',
-  'external-references.md', 'graft-platform-integration.md',
-  'variant-review-report-2026-07-14.md', 'variant-roadmap-2026-q3-q4.md',
-  'variant-benchmark-backlog.md',
+  'variant-roadmap-2026-q3-q4.md', 'variant-benchmark-backlog.md',
 ]);
 
 interface WorkspaceFinding {

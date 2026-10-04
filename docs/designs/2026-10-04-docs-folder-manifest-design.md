@@ -62,3 +62,30 @@ piece — added).
   indexed).
 - Enforcing per-subfolder naming inside `designs/` etc. (already governed by the
   Design Gate and spec-register).
+
+## Addendum (2026-10-04, user directive): physical consolidation executed
+
+The user review went further than the manifest: the docs/ folders themselves should
+be consolidated and simplified. Executed on top of the manifest + gate:
+
+- `docs/analysis/` (3 files) and `docs/audits/` (1 file) folded into `docs/reports/`
+  — both were dated documents and the audits/ "convention" existed only in one
+  design-doc sentence; no script or skill writes to either path.
+- `docs/superpowers/` (10 files) moved under `docs/archive/superpowers/` — the
+  manifest already marked it LEGACY-frozen; internal self-references, the
+  ticket-run SKILL.md provenance line, and the three ticket-system script headers
+  updated to the archive path (provenance-comment bumps, no behavior change:
+  `scripts/ticket.ts` 1.9.1, `scripts/helpers/ticket-store.ts` 1.10.1,
+  `scripts/helpers/ticket-schema.ts` 1.5.1; `scripts/validate-doc-folder.ts`
+  1.2.1 re-aligns its allowlist with the new tree).
+- Root how-to guides (`getting-started.md`, `project-upgrade-guide.md`,
+  `creating-a-variant.md`, `variant-conversion-guide.md`,
+  `variant-creation-workflow.md`, `external-references.md`,
+  `graft-platform-integration.md`) moved to `docs/guides/`;
+  `variant-review-report-2026-07-14.md` moved to `docs/reports/` (it is a dated
+  review). index.md §2 links updated.
+- Net: 19 → 17 top-level directories, 20 → 11 root files. Manifest rows and the
+  validator allowlists rewritten to the new shape; `--workspace` gate green;
+  docs-links `--all` clean (one pre-existing dead link to a rotated memory
+  transcript fixed in github-first-execution.md); CHANGELOG mentions of old paths
+  are historical records and intentionally untouched.

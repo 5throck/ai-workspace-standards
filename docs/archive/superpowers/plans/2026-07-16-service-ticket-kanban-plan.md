@@ -8,7 +8,7 @@
 
 **Tech Stack:** Bun + TypeScript, `js-yaml` (already a workspace devDependency), `bun:test`. No new dependencies.
 
-**Spec:** `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`
 **Roadmap:** `docs/designs/ai-workspace-service-platform-roadmap.md`
 
 ---
@@ -179,7 +179,7 @@ Expected: FAIL — `Cannot find module '../../scripts/helpers/ticket-schema.ts'`
 // @l2-propagate: false
 // ticket-schema.ts — Pure schema types, state machine, and validation for the
 // Phase A Service Ticket + Kanban system. No file I/O here (see ticket-store.ts).
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
@@ -496,7 +496,7 @@ Expected: FAIL — `Cannot find module '../../scripts/helpers/ticket-store.ts'`
 // ticket-store.ts — Atomic file I/O for the Phase A ticket queue. Every function
 // takes an explicit directory/path so callers (CLI, skill, tests) never assume a
 // fixed workspace location.
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -731,7 +731,7 @@ Expected: prints the parsed catalog object, no thrown error
 // @l2-propagate: false
 // ticket.ts — CLI for the Phase A Service Ticket + Kanban system (workspace root only).
 // Usage: bun scripts/ticket.ts <command> [args]
-// Design: docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
+// Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md
 
 import { resolve, join } from 'node:path';
 import {
@@ -916,7 +916,7 @@ metadata:
 
 ## Context
 
-Executes exactly one `kind: service` ticket per invocation (no internal polling loop — repeated processing is the caller's responsibility). Never touches `kind: manual` tickets. Design: `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`.
+Executes exactly one `kind: service` ticket per invocation (no internal polling loop — repeated processing is the caller's responsibility). Never touches `kind: manual` tickets. Design: `docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`.
 
 ## Execution Steps
 
@@ -1010,7 +1010,7 @@ Use the `/changelog` skill (per this repo's policy) to add one `[Unreleased]` en
 
 - [ ] **Step 4: Confirm the design docs already written this session are included**
 
-Files already on disk from the brainstorming phase (no action needed, just confirm they exist before committing): `docs/designs/ai-workspace-service-platform-roadmap.md`, `docs/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`, `memory/meeting-2026-07-16-ticket-kanban-design-review.md`, the supersede-note edit in `memory/archive/meeting-2026-05-28-kanban-process-design.md`, and the `memory/MEMORY.md` index line update.
+Files already on disk from the brainstorming phase (no action needed, just confirm they exist before committing): `docs/designs/ai-workspace-service-platform-roadmap.md`, `docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md`, `memory/meeting-2026-07-16-ticket-kanban-design-review.md`, the supersede-note edit in `memory/archive/meeting-2026-05-28-kanban-process-design.md`, and the `memory/MEMORY.md` index line update.
 
 - [ ] **Step 5: Single commit via `/sync`**
 
