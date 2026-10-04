@@ -1,6 +1,6 @@
 /**
  * Dependency-audit waiver-gate tests (T-20261003-011)
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Covers the pure logic of scripts/dependency-audit.ts:
  * - strict waiver-file parsing (fail-closed schema)
@@ -8,6 +8,7 @@
  * - waiver matching, suppression, stale-waiver and version-drift guards
  * - scope contradiction detection
  * - bun audit --json parsing tolerance
+ * - manifest-skip: no root package.json passes with a notice (T-20261004-029)
  * - L0 ↔ L1 script pair stays in sync (mirror identity)
  */
 
@@ -287,6 +288,34 @@ describe('parseAuditJson', () => {
   });
   test('garbage fails closed via GateError', () => {
     expect(() => parseAuditJson('not json at all')).toThrow(GateError);
+  });
+});
+
+describe('manifest-skip (T-20261004-029)', () => {
+  test('a repo with no root package.json exits 0 with a SKIP notice (docs-only projects)', async () => {
+    const bare = mkdtempSync(join(tmpdir(), 'dep-audit-bare-')); // no package.json
+    const proc = Bun.spawn(['bun', join(workspaceRoot, 'scripts', 'dependency-audit.ts')], {
+      cwd: bare,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('[SKIP] no package.json at repo root');
+  });
+
+  test('a repo with a package.json does not take the skip path', async () => {
+    const withPkg = mkdtempSync(join(tmpdir(), 'dep-audit-pkg-'));
+    writeFileSync(join(withPkg, 'package.json'), JSON.stringify({ name: 'probe', version: '1.0.0' }));
+    const proc = Bun.spawn(['bun', join(workspaceRoot, 'scripts', 'dependency-audit.ts')], {
+      cwd: withPkg,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    const stdout = await new Response(proc.stdout).text();
+    await proc.exited;
+    expect(stdout).not.toContain('[SKIP]');
   });
 });
 
