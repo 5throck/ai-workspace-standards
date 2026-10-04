@@ -701,7 +701,14 @@
           const payload = JSON.parse(frame.slice(6));
           if (payload.type === "text" && typeof payload.text === "string") {
             reply.classList.remove("pending");
-            reply.textContent += payload.text;
+            if (voiceFirst) {
+              // Voice-first: hold the full result back; the summary is spoken when
+              // the turn completes and the text is revealed after the speech ends.
+              fullText += payload.text;
+              reply.textContent = "🔊 Speaking the summary…";
+            } else {
+              reply.textContent += payload.text;
+            }
             log.scrollTop = log.scrollHeight;
           } else if (payload.type === "error") {
             throw new Error(payload.error ?? "stream error");
@@ -717,12 +724,18 @@
       errored = true;
       reply.textContent += (reply.textContent ? "\n\n" : "") + `⚠ ${err.message}`;
     } finally {
-      reply.classList.remove("pending");
+      if (!(voiceFirst && !errored)) reply.classList.remove("pending");
       if (!errored) {
-        // Hands-free loop: in conversation mode speak the reply, then re-arm
-        // listening. Outside the mode the loop stays idle.
+        // Voice-first loop: speak the ≤200-char summary BEFORE the full result is
+        // revealed; the screen then carries the detail (progressive disclosure).
         dispatchVoice("turnDone");
-        speakReply(reply.textContent, () => {
+        const answer = voiceFirst ? fullText : reply.textContent;
+        speakReply(spokenSummary(answer), () => {
+          if (voiceFirst) {
+            reply.textContent = answer;
+            reply.classList.remove("pending");
+            log.scrollTop = log.scrollHeight;
+          }
           dispatchVoice("ttsEnd");
           if (voiceMode && voiceState === "listening") startListening();
         });

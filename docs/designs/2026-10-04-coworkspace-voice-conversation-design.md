@@ -129,3 +129,15 @@ Live testing showed even the Revision-3 summary read too long. The default cap
 drops 320 → **100 characters**, still sentence-boundary-capped with an ellipsis;
 explicit `cap` overrides remain for future callers. Rationale unchanged: the
 screen carries the detail, the voice carries one breath of gist.
+
+## Revision 5 (2026-10-04, user review): voice-first presentation + whole-sentence 200-char cap
+
+1. **Speak first, reveal after.** In voice mode the streaming reply text is held
+   back (the pending bubble shows the answering indicator); when the turn
+   completes, the ≤200-char summary is SPOKEN first and the full answer is
+   revealed on screen only after the speech ends. Text mode streams unchanged.
+2. **Cap 100 → 200 chars, and the spoken cut NEVER breaks mid-sentence.** The
+   summary is assembled from WHOLE SENTENCES up to the cap; the first sentence is
+   always spoken in full even when it alone exceeds the cap (completeness beats
+   the budget). Sentence terminators include Korean sentence-final endings, so
+   Korean replies cut cleanly too.

@@ -144,11 +144,12 @@ export function detectVoiceLang(browserLangs, supported = VOICE_LANGUAGES, fallb
  * NOT be read in full — speak the gist (3Blue1Brown: conclusion/intuition first),
  * leave the detail on screen. Extraction order: an explicit "Short Answer" section
  * (LLM Interaction Standard §5 Explanation Pattern) → the first non-heading
- * paragraph → the opening text. Result is markdown-stripped and capped at a
- * sentence boundary near 100 chars (user review 2026-10-04: keep the spoken
- * gist truly short — the screen carries the detail).
+ * paragraph → the opening text. The result is markdown-stripped, then assembled
+ * from WHOLE SENTENCES up to 200 chars (user review: the spoken cut must never
+ * break mid-sentence — the first sentence is always spoken in full, even when it
+ * alone exceeds the cap).
  */
-export function spokenSummary(md, cap = 100) {
+export function spokenSummary(md, cap = 200) {
   const text = speakableText(md);
   if (text.length <= cap) return text;
   let source = text;
@@ -163,6 +164,12 @@ export function spokenSummary(md, cap = 100) {
   }
   const spoken = speakableText(source);
   if (spoken.length <= cap) return spoken;
-  const cut = spoken.lastIndexOf(".", cap);
-  return (cut > cap * 0.5 ? spoken.slice(0, cut + 1) : spoken.slice(0, cap).trim()) + " …";
+  const sentences = spoken.match(/[^.!?:\n]+[.!?]*\s*/g) ?? [spoken];
+  let out = "";
+  for (const sentence of sentences) {
+    if (out && out.length + sentence.length > cap) break;
+    out += sentence;
+  }
+  out = out.trim();
+  return out.length < spoken.trim().length ? out + " …" : out;
 }
