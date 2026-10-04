@@ -56,6 +56,10 @@ export const MAX_CREATE_BODY_BYTES = 64 * 1024;
 const MAX_JSON_DEPTH = 32;
 const MAX_FILTERS_LEN = 4096;
 const PROVIDER_KEY_ENVS = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY", "ZAI_API_KEY"];
+/** 2026-10-04: claude provider-key turns inject ANTHROPIC_AUTH_TOKEN alongside
+ * ANTHROPIC_API_KEY (bearer-gateway support) — same credential, so it does not
+ * count toward the one-provider-key limit. */
+const PROVIDER_TOKEN_ENVS = ["ANTHROPIC_AUTH_TOKEN"];
 const MOUNT_PROJECT = "/work/project";
 const MOUNT_HERMES_HOME = "/work/hermes-home";
 
@@ -447,6 +451,8 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
         if (v !== profile.requiredEnv[k]) rej(`Env ${k} must be ${profile.requiredEnv[k]}`);
       } else if (k === "ANTHROPIC_BASE_URL" && epRaw === "claude") {
         if (!isValidRuntimeBaseUrl(v)) rej("Env ANTHROPIC_BASE_URL must be a https URL (<= 300 chars, no whitespace/quotes)");
+      } else if (PROVIDER_TOKEN_ENVS.includes(k)) {
+        // bearer-token variant of the same credential — allowed, not counted as a second provider key
       } else if (PROVIDER_KEY_ENVS.includes(k)) {
         if (++providerCount > 1) rej("Env has more than one provider key");
       } else {
