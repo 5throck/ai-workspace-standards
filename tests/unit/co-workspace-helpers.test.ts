@@ -212,3 +212,19 @@ describe("spokenSummary (voice speaks the gist, not the dump)", () => {
     expect(out.startsWith("First paragraph")).toBe(true);
   });
 });
+
+describe("spokenSummary default cap (user review: 100 chars)", () => {
+  test("default cap truncates to ~100 chars at a sentence boundary", () => {
+    const md = "첫 문장입니다. 두 번째 문장은 길게 이어져서 " + "아주 긴 내용 ".repeat(30);
+    const out = spokenSummary(md);
+    expect(out.endsWith("…")).toBe(true);
+    expect(out.length).toBeLessThanOrEqual(105);
+  });
+
+  test("an explicit Short Answer over 100 chars also truncates", () => {
+    const md = "## Short Answer\n\n" + "요약 문장이 이렇게 길게 이어집니다. ".repeat(10);
+    const out = spokenSummary(md);
+    expect(out.length).toBeLessThanOrEqual(105);
+    expect(out.endsWith("…")).toBe(true);
+  });
+});
