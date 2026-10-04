@@ -157,3 +157,13 @@ screen carries the detail, the voice carries one breath of gist.
    "voice comes last" report: the tab was still executing pre-voice-first JS
    (static assets ship `cache-control: no-cache`, but a tab open across a
    redeploy never revalidates until reloaded).
+
+## Revision 7 (2026-10-04, user review): the feature disappears from the UI
+
+Final control model: NO voice control in the composer at all — the orb is removed.
+The Account-modal toggle turns the capability on/off and PERSISTS across reloads;
+while on, voice is simply part of chatting (spoken summary after every reply,
+listening re-arms, speak the next instruction). Returning users get the mic armed
+on load (permission already granted); a denied permission exits gracefully. The
+composer shows feedback only WHILE the loop operates (status text + the language
+select moved into the Account modal's voice row).
