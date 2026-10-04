@@ -162,7 +162,7 @@ continuity handle → credential model → isolation matrix → provider disclos
 | Runtime | Wire protocol | Continuity | Credentials | Process isolation | Docker-isolated turns |
 |---|---|---|---|---|---|
 | hermes (default) | `hermes chat --format stream-json` | named threads | provider-key (config.yaml stamp) or OAuth shared store | ✅ | ✅ (runtime image carries hermes) |
-| claude | `claude -p --output-format stream-json` | `--resume <id>` | **provider-key → `ANTHROPIC_API_KEY` (+`ANTHROPIC_BASE_URL`)** or login mount | ✅ (gateway image carries the CLI) | ❌ not delivered (T-20261003-023 follow-up) |
+| claude | `claude -p --output-format stream-json` | `--resume <id>` | **provider-key → `ANTHROPIC_API_KEY` + `ANTHROPIC_AUTH_TOKEN` (+`ANTHROPIC_BASE_URL`)** or login mount | ✅ (gateway image carries the CLI) | ❌ not delivered (T-20261003-023 follow-up) |
 | codex | `codex exec --json` | `exec resume <id>` | **provider-key → `OPENAI_API_KEY`** (custom base URL = `~/.codex/config.toml` stanza, operator-side) or login mount | ✅ (gateway image carries the CLI) | ❌ not delivered (same) |
 | antigravity (agy) | `agy -p --output-format stream-json` | `--conversation <id>` | Google sign-in ONLY — the CLI exposes no API-key surface; login home mounted RO via `docker-compose.creds.yml` (binary baked via Google's official installer) | ✅ (agy baked in the gateway image) | ❌ blocked — no API-key credential path; mounting operator login state into a tenant container is a SEC-07-class exposure |
 

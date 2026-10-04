@@ -407,8 +407,12 @@ export function runtimeProviderKeyEnv(
   const families = RUNTIME_PROVIDER_FAMILIES[runtime];
   if (!families || !families.includes(provider)) return null;
   if (runtime === "claude") {
+    // ANTHROPIC_AUTH_TOKEN too (2026-10-04): deployments behind gateways that
+    // authenticate with a static bearer token set this instead of an API key —
+    // claude sends it as `Authorization: Bearer` alongside the x-api-key header.
     return {
       ANTHROPIC_API_KEY: cfg.llmApiKey,
+      ANTHROPIC_AUTH_TOKEN: cfg.llmApiKey,
       ...(cfg.llmBaseUrl ? { ANTHROPIC_BASE_URL: cfg.llmBaseUrl } : {}),
     };
   }

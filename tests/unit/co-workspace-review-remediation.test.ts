@@ -224,13 +224,13 @@ describe("delete-vs-queued-turn abort (2026-10-03 review M10)", () => {
 describe("CLI provider-key injection (2026-10-03 cli-provider-key design, T-20261003-024)", () => {
   const key = { llmApiKey: "sk-test-123", llmProvider: undefined, llmBaseUrl: undefined };
 
-  test("claude + anthropic: ANTHROPIC_API_KEY, no BASE_URL without llmBaseUrl", () => {
+  test("claude + anthropic: ANTHROPIC_API_KEY + AUTH_TOKEN, no BASE_URL without llmBaseUrl", () => {
     const env = runtimeProviderKeyEnv("claude", { ...key, llmProvider: "anthropic" });
-    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123" });
+    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123", ANTHROPIC_AUTH_TOKEN: "sk-test-123" });
   });
   test("claude + zai/custom with base URL: ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL", () => {
     const env = runtimeProviderKeyEnv("claude", { ...key, llmProvider: "zai", llmBaseUrl: "https://api.z.ai/api/anthropic" });
-    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123", ANTHROPIC_BASE_URL: "https://api.z.ai/api/anthropic" });
+    expect(env).toEqual({ ANTHROPIC_API_KEY: "sk-test-123", ANTHROPIC_AUTH_TOKEN: "sk-test-123", ANTHROPIC_BASE_URL: "https://api.z.ai/api/anthropic" });
     expect(runtimeProviderKeyEnv("claude", { ...key, llmProvider: "custom", llmBaseUrl: "https://proxy.example/v1" })?.ANTHROPIC_BASE_URL).toBe("https://proxy.example/v1");
   });
   test("codex + openai/custom: OPENAI_API_KEY (base URL is config.toml-side, not injected)", () => {
