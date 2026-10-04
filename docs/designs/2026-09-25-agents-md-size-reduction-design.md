@@ -2,18 +2,18 @@
 
 - **Date**: 2026-09-25
 - **Status**: Approved (user decision 2026-09-26, Option 1 — full restructure; see meeting `memory/meeting-2026-09-26-agents-md-thinning-plan-review.md`)
-- **Related**: ADR-0088 (Hermes platform support — truncation origin), ADR-0074 (Design Gate), ADR-0043/Fork-Model (variant agents), `docs/analysis/2026-09-25-agents-md-size-analysis.md` (measurement input — required reading)
+- **Related**: ADR-0088 (Hermes platform support — truncation origin), ADR-0074 (Design Gate), ADR-0043/Fork-Model (variant agents), `docs/reports/2026-09-25-agents-md-size-analysis.md` (measurement input — required reading)
 - **Scope**: Structural remedy for the context-cap truncation finding. Changes AGENTS.md structure at L0/L1/L2, the propagation machinery, and validators. Does NOT change any governance rule's content — rules move or get pointerized, never weakened.
 
 ---
 
 ## 1. Problem
 
-Every AGENTS.md exceeds Hermes Agent's default 20,000-char context-file cap (L0 57,018 / L1 49,190 / L2 27,927–82,099), so context-file-based consumers silently lose everything past the cap — in 11 of 13 variants the loss lands inside the COMMON-AGENTS governance zone (Design Gate, LLM routing, STE100, PM authority). The interim remedy (`context_file_max_chars 100000`, documented AGENTS.md §6 / CONSTITUTION §11) is user-side and per-harness; it does not generalize. The measurement and cut-position map are in `docs/analysis/2026-09-25-agents-md-size-analysis.md` (key facts: zero byte-identical H2 sections across the 13 variant bodies — fork-drift, not copy-paste; §3 PM Gateway + §4 Other Workflows + §2 agent definitions + rosters carry the weight; rosters restate `variant.json`/`agents/*.md` SSOT data).
+Every AGENTS.md exceeds Hermes Agent's default 20,000-char context-file cap (L0 57,018 / L1 49,190 / L2 27,927–82,099), so context-file-based consumers silently lose everything past the cap — in 11 of 13 variants the loss lands inside the COMMON-AGENTS governance zone (Design Gate, LLM routing, STE100, PM authority). The interim remedy (`context_file_max_chars 100000`, documented AGENTS.md §6 / CONSTITUTION §11) is user-side and per-harness; it does not generalize. The measurement and cut-position map are in `docs/reports/2026-09-25-agents-md-size-analysis.md` (key facts: zero byte-identical H2 sections across the 13 variant bodies — fork-drift, not copy-paste; §3 PM Gateway + §4 Other Workflows + §2 agent definitions + rosters carry the weight; rosters restate `variant.json`/`agents/*.md` SSOT data).
 
 ### 1.1 Duplication-audit evidence (2026-09-25)
 
-The companion duplication audit (`docs/analysis/2026-09-25-agents-md-duplication-audit.md`) confirms the weight is also a dual-maintenance liability: the L0 COMMON-AGENTS zone's ADR-0078/0079/0080 summaries are near-verbatim copies of owned §3 subsections (tok 0.89–0.97); PM Gateway is double-registered in AGENTS §3 vs CONSTITUTION §5.5 (tok 0.66); §1↔§2 roster restatement is HIGH (0.83–0.94) in all 13 variants; the context.md `## Agents` sync rule is unenforced and unmet 13/13 (strict subsets); and audit.ts check #29 silently skips 3 of 12 projects whose AGENTS.md lacks the exact `## §6: Skills` heading.
+The companion duplication audit (`docs/reports/2026-09-25-agents-md-duplication-audit.md`) confirms the weight is also a dual-maintenance liability: the L0 COMMON-AGENTS zone's ADR-0078/0079/0080 summaries are near-verbatim copies of owned §3 subsections (tok 0.89–0.97); PM Gateway is double-registered in AGENTS §3 vs CONSTITUTION §5.5 (tok 0.66); §1↔§2 roster restatement is HIGH (0.83–0.94) in all 13 variants; the context.md `## Agents` sync rule is unenforced and unmet 13/13 (strict subsets); and audit.ts check #29 silently skips 3 of 12 projects whose AGENTS.md lacks the exact `## §6: Skills` heading.
 
 ### 1.2 Design-review amendments (2026-09-26, six-role meeting — A–H)
 
@@ -97,8 +97,8 @@ Each wave lands as its own PR per the Sequential Branch Dependency Rule.
 
 ## 9. References
 
-- Analysis input: `docs/analysis/2026-09-25-agents-md-size-analysis.md` (measurement, cut map)
-- Duplication audit: `docs/analysis/2026-09-25-agents-md-duplication-audit.md` (F1–F8 findings feeding D3/D4/D5 and the new size-budget validator)
+- Analysis input: `docs/reports/2026-09-25-agents-md-size-analysis.md` (measurement, cut map)
+- Duplication audit: `docs/reports/2026-09-25-agents-md-duplication-audit.md` (F1–F8 findings feeding D3/D4/D5 and the new size-budget validator)
 - ADR-0088 + its Addendum 1 (truncation origin, config remedy); COMMON-AGENTS marker mechanism (AGENTS.md injection, `propagate-to-templates.ts`)
 - CONSTITUTION §6 (skill lifecycle), `docs/VERSION_MANIFEST.md` (skills SSOT), `variant.json` schema (roster SSOT)
 

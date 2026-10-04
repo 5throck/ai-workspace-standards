@@ -6,7 +6,7 @@ description: >
   a change breaks, or scoping an edit, get your context from graft before
   grepping or reading source files.
 version: 1.0.0
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 status: active
 scope: common
 l2_propagate: false

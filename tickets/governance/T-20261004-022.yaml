@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261004-022
+kind: manual
+title: >-
+  validator-hardening: detect equal-version content divergence between
+  scripts/audit.ts+dev-sync.ts L0 copies and templates/common/scripts L1 copies
+  (both @version 2.48.1/1.23.0 but ~10 lines differ via systematic
+  context.md→CONSTITUTION.md substitution; version-only gates are blind to it;
+  also fix templates/common/scripts/audit.ts:2 header comment that says
+  'context.md guard' over CONSTITUTION.md-checking code, and the mixed internal
+  keying at ~line 925) — either normalize or declare the substitution a
+  sanctioned publish-time canonicalization
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:01.816Z'
+history:
+  - at: '2026-10-04T16:50:01.816Z'
+    from: null
+    to: backlog
+result: null
+error: null

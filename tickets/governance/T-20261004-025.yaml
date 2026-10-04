@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261004-025
+kind: manual
+title: >-
+  validator-hardening: extend validate-md-language.ts allowlist to the
+  reorganized destinations docs/reports/, docs/guides/, docs/standards/ (current
+  perimeter: constitution|governance|designs|adr|decisions only) so undeclared
+  Korean outside the allowlist is caught — two reports declared lang: ko in the
+  2026-10-05 review, gate the rest
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:12.933Z'
+history:
+  - at: '2026-10-04T16:50:12.933Z'
+    from: null
+    to: backlog
+result: null
+error: null

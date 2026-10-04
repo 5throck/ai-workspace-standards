@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Project Review — co-workspace (시안 + service) — 2026-10-03
 
 **Date**: 2026-10-03

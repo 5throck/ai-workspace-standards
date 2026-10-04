@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # /meeting Command Retirement — Reference Audit (2026-09-26)
 
 - **Purpose**: ADR-0090 프로그램 이후 `/meeting` 슬래시 커맨드 폐기에 따른 전 계층 참조 실태 조사 (user directive 2026-09-26)

@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261004-026
+kind: manual
+title: >-
+  co-workspace: persist data/turn-config.json with restrictive file mode —
+  writeFileSync with { mode: 0o600 } plus chmodSync after rename, a test
+  asserting the mode, and a README note documenting the expected 0600 permission
+  for the data dir (currently umask-derived 0644 with a plaintext apiKey inside;
+  gitignored and admin-gated, but the file mode should not depend on the
+  deployer's umask)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:50:12.952Z'
+history:
+  - at: '2026-10-04T16:50:12.952Z'
+    from: null
+    to: backlog
+result: null
+error: null

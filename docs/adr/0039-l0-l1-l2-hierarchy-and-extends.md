@@ -870,7 +870,7 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 - **[ADR-0038: Auto-Mode Deprecation](0038-deprecate-auto-mode.md)**: Auto-Mode removal from L0
 
 ### Supporting Documentation
-- **[Variant Creation Workflow](../variant-creation-workflow.md)**: End-to-end variant creation process
+- **[Variant Creation Workflow](../guides/variant-creation-workflow.md)**: End-to-end variant creation process
 - **[PM Agent Role](../../lifecycle/agents/pm.md)**: Full PM agent specification (L0)
 - **[Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)**: Governance framework
 - **[Agent Lifecycle](../../constitution/05.6-agent-lifecycle.md)**: Agent management lifecycle

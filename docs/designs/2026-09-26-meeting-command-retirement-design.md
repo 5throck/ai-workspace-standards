@@ -4,7 +4,7 @@
 - **Date**: 2026-09-26
 - **Status**: implemented
 - **Decision ticket**: T-20260926-027
-- **References**: `docs/analysis/2026-09-26-meeting-command-retirement-audit.md`, AGENTS.md §6 retirement note (2026-09-26, PR #1092), T-20260925-003 (`.agents/commands` L0-resident ruling), T-20260910-022 (co-safety fork-model adjudication)
+- **References**: `docs/reports/2026-09-26-meeting-command-retirement-audit.md`, AGENTS.md §6 retirement note (2026-09-26, PR #1092), T-20260925-003 (`.agents/commands` L0-resident ruling), T-20260910-022 (co-safety fork-model adjudication)
 
 ## 1. Decision
 
