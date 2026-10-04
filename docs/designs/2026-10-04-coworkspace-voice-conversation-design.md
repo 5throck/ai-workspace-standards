@@ -141,3 +141,19 @@ screen carries the detail, the voice carries one breath of gist.
    always spoken in full even when it alone exceeds the cap (completeness beats
    the budget). Sentence terminators include Korean sentence-final endings, so
    Korean replies cut cleanly too.
+
+## Revision 6 (2026-10-04, user review): settings toggle, clean re-auth field, stale-tab guard
+
+1. **Voice conversation toggle in the Account modal** — the same switch as the orb
+   (`setVoiceMode`), so the conversational mode can be turned on/off from settings
+   without reaching for the composer button.
+2. **Re-auth field no longer autofills**: the Change-password "current password"
+   input drops `autocomplete="current-password"` (password managers prefilled it
+   with the SAVED site password — reported with a screenshot) and ships
+   `readonly` + `autocomplete="off"`, unlocking on focus.
+3. **Stale-tab guard**: `/health` now carries `webBuild` (max mtime of the web
+   assets); an open tab polls it every 60 s and shows a "New version available —
+   Reload" chip when the gateway was redeployed. This was the real cause of the
+   "voice comes last" report: the tab was still executing pre-voice-first JS
+   (static assets ship `cache-control: no-cache`, but a tab open across a
+   redeploy never revalidates until reloaded).

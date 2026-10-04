@@ -95,6 +95,8 @@
   .stopBtn { background: #8b1f1f; color: #fff; border: 0; border-radius: 10px; padding: 7px 14px; font: inherit; cursor: pointer; font-size: .78rem; }
   .stopBtn.hidden { display: none; }
   .voiceLangSel.hidden { display: none; }
+  .updateChip { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; background: #1f6feb; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+  .updateChip.hidden { display: none; }
   .voiceStatus { font-size: .78rem; color: var(--accent); min-width: 64px; text-align: right; }
   .voiceOrb { background: transparent; border: 1px solid var(--border2); border-radius: 50%; width: 34px; height: 34px; font: inherit; font-size: .95rem; cursor: pointer; line-height: 1; }
   .voiceOrb.off { opacity: .75; }
@@ -614,27 +616,28 @@
     speechSynthesis.speak(utter);
   }
 
+  function setVoiceMode(on) {
+    if (on === voiceMode) return;
+    if (!on) {
+      // Single-button exit (or settings toggle off): stop everything, stand down.
+      if ("speechSynthesis" in window) speechSynthesis.cancel();
+      voiceMode = false;
+      try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* private mode */ }
+      stopRecognition();
+      dispatchVoice("modeOff");
+      return;
+    }
+    // Entering while a reply is speaking cancels TTS first (barge-in = exit-while-speaking).
+    if (voiceState === "speaking" && "speechSynthesis" in window) speechSynthesis.cancel();
+    voiceMode = true;
+    try { localStorage.setItem("gw-voice-mode", "1"); } catch { /* private mode */ }
+    startListening();
+  }
+
   if (speechRecognitionSupported(window) || speechSynthesisSupported(window)) {
     orbBtn.classList.remove("hidden");
     if (voiceMode) { voiceMode = false; try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* page reload never resumes mid-loop */ } }
-    orbBtn.addEventListener("click", () => {
-      if (voiceMode) {
-        // Single-button exit: stop everything, stand down.
-        if ("speechSynthesis" in window) speechSynthesis.cancel();
-        voiceMode = false;
-        try { localStorage.setItem("gw-voice-mode", "0"); } catch { /* private mode */ }
-        stopRecognition();
-        dispatchVoice("modeOff");
-        return;
-      }
-      // Single-button entry — or barge-in: clicking while speaking drops the reply
-      // and listens immediately (the mode was already on; handled by the branch above
-      // only for full exit, so speaking state without mode cannot occur).
-      if (voiceState === "speaking" && "speechSynthesis" in window) speechSynthesis.cancel();
-      voiceMode = true;
-      try { localStorage.setItem("gw-voice-mode", "1"); } catch { /* private mode */ }
-      startListening();
-    });
+    orbBtn.addEventListener("click", () => setVoiceMode(!voiceMode));
     for (const lang of VOICE_LANGUAGES) {
       const opt = document.createElement("option");
       opt.value = lang; opt.textContent = lang;
@@ -649,6 +652,23 @@
   } else {
     orbBtn.classList.add("hidden");
   }
+
+  // ── Stale-tab guard (voice design rev 6): a redeployed gateway bumps webBuild —
+  // an open tab running old JS polls /health and offers a reload instead of
+  // silently diverging from the deployed app (the "voice comes last" report of
+  // 2026-10-04 was exactly this: a tab still executing pre-voice-first code).
+  const bootWebBuild = Number((await (await fetch("/health")).json()).webBuild ?? 0);
+  const updateChip = document.createElement("button");
+  updateChip.className = "updateChip hidden";
+  updateChip.textContent = "↻ New version available — Reload";
+  updateChip.addEventListener("click", () => location.reload());
+  document.body.appendChild(updateChip);
+  setInterval(async () => {
+    try {
+      const build = Number((await (await fetch("/health")).json()).webBuild ?? 0);
+      if (bootWebBuild && build && build !== bootWebBuild) updateChip.classList.remove("hidden");
+    } catch { /* server briefly down — keep polling */ }
+  }, 60_000);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1033,11 +1053,15 @@
     const setPassword = me?.hasPassword === false;
     const wrap = showModal({ title: `Account — @${me?.loginId ?? ""}`, bodyHtml: `
       <h3 style="font-size:.85rem; margin: 12px 0 6px;">${setPassword ? "Set password" : "Change password"}</h3>
-      ${setPassword ? "" : `<div class="field"><input id="ac-cur" type="password" placeholder="Current password" autocomplete="current-password"></div>`}
+      ${setPassword ? "" : `<div class="field"><input id="ac-cur" type="password" placeholder="Current password" autocomplete="off" readonly></div>`}
       <div class="field"><input id="ac-new" type="password" placeholder="New password (8+)" autocomplete="new-password"></div>
       <div class="field"><input id="ac-new2" type="password" placeholder="Repeat new password" autocomplete="new-password"></div>
       <div class="row" style="justify-content:flex-start;"><button id="ac-pw-save">${setPassword ? "Set password" : "Change password"}</button></div>
       <div class="formErr" id="ac-pw-err" role="alert"></div>
+      <h3 style="font-size:.85rem; margin: 14px 0 6px;">Voice conversation</h3>
+      <div class="row" style="justify-content:flex-start;">
+        <button id="ac-voice-toggle" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">${voiceMode ? "Voice conversation: ON — click to turn off" : "Voice conversation: OFF — click to turn on"}</button>
+      </div>
       <h3 style="font-size:.85rem; margin: 14px 0 6px;">Change email</h3>
       <div class="field"><input id="ac-email" type="email" placeholder="New email (a verification key will be sent)" autocomplete="email"></div>
       <div class="row" style="justify-content:flex-start;"><button id="ac-email-send" class="ghost" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">Send verification</button></div>
@@ -1077,6 +1101,22 @@
       if (res.status === 200) { wrap.remove(); location.href = "/login"; }
       else sessErr.textContent = "⚠ revoke-all failed";
     });
+    // Autofill guard: password managers fill `readonly` fields never; the field
+    // unlocks on focus so the user still types the current password normally.
+    const curField = wrap.querySelector("#ac-cur");
+    if (curField) {
+      curField.setAttribute("readonly", "");
+      curField.addEventListener("focus", () => curField.removeAttribute("readonly"));
+    }
+    // Voice conversation toggle — same switch as the composer orb (voice design rev 6).
+    const voiceToggle = wrap.querySelector("#ac-voice-toggle");
+    if (voiceToggle) {
+      const paint = () => {
+        voiceToggle.textContent = voiceMode ? "Voice conversation: ON — click to turn off" : "Voice conversation: OFF — click to turn on";
+      };
+      paint();
+      voiceToggle.addEventListener("click", () => { setVoiceMode(!voiceMode); paint(); });
+    }
     wrap.querySelector("#ac-pw-save").addEventListener("click", async () => {
       const err = wrap.querySelector("#ac-pw-err");
       err.textContent = "";

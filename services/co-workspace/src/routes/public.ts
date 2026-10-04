@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { SERVICE_ROOT } from "../config";
 import { googleConfigured } from "../google-sso";
 import { HttpError, jsonResponse, htmlHeaders } from "../http";
@@ -33,6 +33,23 @@ export async function handlePublic(state: GatewayState, req: Request, ctx: Ctx):
     throw new HttpError(404, "app helpers not found");
   }
 
+/** Max mtime across the web app's static files — the page polls /health with this
+ * (stale-tab guard, voice-conversation design revision 6): a redeployed gateway
+ * bumps webBuild, the open tab notices and offers a reload instead of running
+ * days-old JS. */
+function webBuildStamp(): number {
+  const dir = join(SERVICE_ROOT, "web");
+  let max = 0;
+  for (const name of ["index.html", "login.html", "app-helpers.js"]) {
+    try {
+      max = Math.max(max, statSync(join(dir, name)).mtimeMs);
+    } catch {
+      /* missing file — skip */
+    }
+  }
+  return Math.round(max);
+}
+
   if (req.method === "GET" && path === "/health") {
     return jsonResponse({
       ok: true,
@@ -44,6 +61,7 @@ export async function handlePublic(state: GatewayState, req: Request, ctx: Ctx):
       runtime: state.cfg.runtime,
       variants: state.cfg.variants,
       templateVersion: state.cfg.templateVersion ?? "head",
+      webBuild: webBuildStamp(),
       tenants: state.registry.list().length,
     });
   }
