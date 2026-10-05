@@ -1,7 +1,21 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.11.1
+ * @version 1.12.0
+ *         v1.12.0 (2026-10-05, T-20261004-022): equal-version L0/L1 content gate —
+ *         detectDrift now canonicalizes the L0 side with the SAME sanctioned
+ *         scrub the propagator applies (scripts/lib/constitution-scrub.ts:
+ *         comments scrubbed CONSTITUTION.md→context.md, functional string
+ *         literals preserved) and compares against the RAW L1 bytes. A pair
+ *         whose @version headers MATCH but whose canonical bytes diverge is an
+ *         ERROR (verify) and exits 1 (--check-drift, dev-sync Step 3.7) — the
+ *         previous blanket replace on BOTH sides was blind to it (it scrubbed
+ *         the L0 functional literals too, hiding the audit.ts/dev-sync.ts
+ *         mixed-marker keying). Version-skew drift stays warn-only (publish
+ *         pending). classifyL0L1Pair exported for unit tests. v1.11.1: the
+ *         divergent-row check is L0-only — scaffolded projects inherit
+ *         SCRIPTS.md with historical doc-tail fragments by design.
+ *
  *         v1.11.0 (2026-10-04, T-20261004-012): findDivergentDuplicateRows — registry-style rows
  *         appearing OUTSIDE the ## Registry span (doc-tail fragments) must agree with the
  *         authoritative version; a script name with >1 distinct version cell is an ERROR.
@@ -43,7 +57,7 @@
  *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
  *   bun scripts/verify-scripts.ts --generate    # Generate Registry draft from filesystem
  *   bun scripts/verify-scripts.ts --report      # Human-readable status report
- *   bun scripts/verify-scripts.ts --check-drift # Detect scripts in package.json missing from scripts/ directory
+ *   bun scripts/verify-scripts.ts --check-drift # L0/L1 drift report; exits 1 on equal-version content divergence (T-20261004-022)
  *
  * Exit codes:
  *   0 = all checks passed
@@ -57,8 +71,10 @@
  */
 
 import * as fs from "fs";
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "fs";
 import { join, dirname, relative } from "path";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
 
 // ── --fix helpers (ADR-0081 / T-20260919-002; pure, unit-tested) ────────────
 
@@ -346,14 +362,65 @@ function isLayerRelevant(entry: RegistryEntry): boolean {
 
 // ── Drift Detection ──────────────────────────────────────────────────────────
 
-interface DriftResult {
-  script: string;
-  l0Lines: number;
-  l1Lines: number;
+/**
+ * L0/L1 pair classification (T-20261004-022).
+ * - "in-sync": canonical(L0) === L1 byte-for-byte (any version combination —
+ *   a version-only bump with identical canonical bytes needs no content gate).
+ * - "equal-version-divergence": @version headers MATCH but canonical(L0) !== L1
+ *   — both copies claim the same content version yet the bytes differ. This is
+ *   the mixed-marker corruption class (e.g. a functional existsSync literal
+ *   scrubbed in one copy only) and it FAILS the gate.
+ * - "pending-publish": version-skew with content difference — the ordinary
+ *   pre-propagation state; warn-only.
+ */
+export type DriftClassification = "in-sync" | "pending-publish" | "equal-version-divergence";
+
+export interface L0L1Classification {
+  classification: DriftClassification;
+  l0Version: string;
+  l1Version: string;
 }
 
-function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean: string[] } {
-  const drifted: DriftResult[] = [];
+/**
+ * Canonicalize the L0 copy exactly the way the propagator does (comments
+ * scrubbed, functional string literals preserved) and classify the pair.
+ * NOTE: a naive blanket CONSTITUTION.md→context.md replace on BOTH sides would
+ * normalize away the literal-class divergence this gate exists to catch — the
+ * canonicalization must be applied to the L0 side only, with the same
+ * implementation the publisher uses.
+ */
+export function classifyL0L1Pair(l0Content: string, l1Content: string, l0Path: string, l1Path: string): L0L1Classification {
+  const l0Version = extractHeaderVersion(l0Content);
+  const l1Version = extractHeaderVersion(l1Content);
+  const canonicalL0 = scrubConstitutionRefs(l0Content, l0Path, l1Path);
+  if (canonicalL0 === l1Content) {
+    return { classification: "in-sync", l0Version, l1Version };
+  }
+  return {
+    classification: l0Version === l1Version ? "equal-version-divergence" : "pending-publish",
+    l0Version,
+    l1Version,
+  };
+}
+
+/** Short sha256 prefix for compact drift reports. */
+export function shortContentHash(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 12);
+}
+
+interface DriftPair {
+  script: string;
+  classification: DriftClassification;
+  l0Version: string;
+  l1Version: string;
+  l0Lines: number;
+  l1Lines: number;
+  l0Hash: string;
+  l1Hash: string;
+}
+
+function detectDrift(registry: RegistryEntry[]): { drifted: DriftPair[]; clean: string[] } {
+  const drifted: DriftPair[] = [];
   const clean: string[] = [];
 
   for (const entry of registry) {
@@ -373,20 +440,20 @@ function detectDrift(registry: RegistryEntry[]): { drifted: DriftResult[]; clean
       continue;
     }
 
-    // context.md references are intentionally scrubbed in L1 (templates/common/).
-    // Normalize BOTH sides: the L1 scrub may or may not have replaced
-    // context.md (scrub misses are the L0-leakage audit check's job, not drift's).
-    const l0Normalized = l0Content.replace(/CONSTITUTION\.md/g, 'context.md');
-    const l1Normalized = l1Content.replace(/CONSTITUTION\.md/g, 'context.md');
-
-    if (l0Normalized !== l1Normalized) {
+    const cls = classifyL0L1Pair(l0Content, l1Content, l0Path, l1Path);
+    if (cls.classification === "in-sync") {
+      clean.push(entry.script);
+    } else {
       drifted.push({
         script: entry.script,
+        classification: cls.classification,
+        l0Version: cls.l0Version,
+        l1Version: cls.l1Version,
         l0Lines: l0Content.split("\n").length,
         l1Lines: l1Content.split("\n").length,
+        l0Hash: shortContentHash(l0Content),
+        l1Hash: shortContentHash(l1Content),
       });
-    } else {
-      clean.push(entry.script);
     }
   }
 
@@ -405,16 +472,30 @@ function checkDriftReport(): void {
 
   console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
 
-  if (drifted.length === 0) {
+  const equalVersion = drifted.filter((d) => d.classification === "equal-version-divergence");
+  const pending = drifted.filter((d) => d.classification === "pending-publish");
+
+  if (equalVersion.length === 0 && pending.length === 0) {
     console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
   } else {
-    console.log(`⚠️  Unintentional drift (${drifted.length} script(s)):`);
-    for (const d of drifted) {
-      const diff = d.l1Lines - d.l0Lines;
-      const sign = diff >= 0 ? "+" : "";
-      console.log(`   ${d.script}  L0: ${d.l0Lines} lines  L1: ${d.l1Lines} lines  (${sign}${diff})`);
+    if (equalVersion.length > 0) {
+      console.log(`❌ Equal-version content divergence (${equalVersion.length} script(s)) — BLOCKING:`);
+      for (const d of equalVersion) {
+        console.log(`   ${d.script}  @${d.l0Version}  L0 ${d.l0Hash} (${d.l0Lines} lines)  vs  L1 ${d.l1Hash} (${d.l1Lines} lines)`);
+      }
+      console.log("\n   Same-@version copies must be byte-identical modulo the sanctioned");
+      console.log("   CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts).");
+      console.log("   Fix: correct the diverged copy or re-publish: bun run propagate:apply\n");
     }
-    console.log("\n   Fix: edit L0 (workspace scripts/) then run bun run propagate:apply to push to L1.\n");
+    if (pending.length > 0) {
+      console.log(`⚠️  Unintentional drift — publish pending (${pending.length} script(s)):`);
+      for (const d of pending) {
+        const diff = d.l1Lines - d.l0Lines;
+        const sign = diff >= 0 ? "+" : "";
+        console.log(`   ${d.script}  L0 @${d.l0Version}: ${d.l0Lines} lines  L1 @${d.l1Version}: ${d.l1Lines} lines  (${sign}${diff})`);
+      }
+      console.log("\n   Fix: edit L0 (workspace scripts/) then run bun run propagate:apply to push to L1.\n");
+    }
   }
 
   if (clean.length > 0) {
@@ -423,7 +504,12 @@ function checkDriftReport(): void {
   }
 
   console.log();
-  process.exit(0); // drift is warn-only
+
+  // T-20261004-022: equal-version content divergence is a real corruption of
+  // the mirror, not a pending publish — it exits 1 so dev-sync Step 3.7 and
+  // CI block on it. Version-skew drift stays warn-only (exit 0).
+  if (equalVersion.length > 0) process.exit(1);
+  process.exit(0);
 }
 
 
@@ -511,14 +597,23 @@ function verify(): boolean {
     }
   }
 
-  // Check 6a: L0/L1 drift (warning only — mark 'intentional' in SCRIPTS.md to suppress)
-  // In L2/L3, skip entirely — templates/common/scripts/ is not comparable from a variant template or project.
+  // Check 6a: L0/L1 drift (T-20261004-022). Version-skew drift is warning-only
+  // (publish pending). Equal-version content divergence is an ERROR: both
+  // copies claim the same @version yet the canonical bytes differ — the
+  // mixed-marker corruption class. In L2/L3, skip entirely —
+  // templates/common/scripts/ is not comparable from a variant template or project.
   if (contextLayer === "L0" || contextLayer === "L1") {
     const { drifted } = detectDrift(registry);
     for (const d of drifted) {
-      warnings.push(
-        `L0/L1 drift: \`${d.script}\` — L0 ${d.l0Lines} lines, L1 ${d.l1Lines} lines.`
-      );
+      if (d.classification === "equal-version-divergence") {
+        errors.push(
+          `Equal-version L0/L1 content divergence: \`${d.script}\` @${d.l0Version} — L0 ${d.l0Hash} (${d.l0Lines} lines) vs L1 ${d.l1Hash} (${d.l1Lines} lines). Same-@version copies must be byte-identical modulo the sanctioned CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts); fix the diverged copy or re-publish with propagate-to-templates`
+        );
+      } else {
+        warnings.push(
+          `L0/L1 drift (publish pending): \`${d.script}\` — L0 @${d.l0Version} (${d.l0Lines} lines), L1 @${d.l1Version} (${d.l1Lines} lines).`
+        );
+      }
     }
   }
 
