@@ -63,7 +63,8 @@ window.__THEMES_MANIFEST__ = {
         "classic",
         "minimal",
         "premium-dark",
-        "academic"
+        "academic",
+        "white-bubble"
       ],
       "partial_styles": []
     }
@@ -73,6 +74,7 @@ window.__THEMES_MANIFEST__ = {
     "classic",
     "minimal",
     "premium-dark",
-    "visual-heavy"
+    "visual-heavy",
+    "white-bubble"
   ]
 };

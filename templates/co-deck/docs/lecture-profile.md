@@ -49,14 +49,15 @@ instructor:
 #   - pitch            : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
 #   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all 5 styles; visual-heavy: partial)
 #   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar with TOC drawer, IntersectionObserver, all 5 styles (visual-heavy: full)
-#   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 3 bullets (classic/minimal/premium-dark; visual-heavy, academic: incompatible)
+#   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 5 bullets (classic/minimal/premium-dark/academic/white-bubble; visual-heavy: incompatible)
 # style   — CSS visual variable set (color, font, spacing)
-#   Options: premium-dark | classic | minimal | visual-heavy | academic
+#   Options: premium-dark | classic | minimal | visual-heavy | academic | white-bubble
 #   - premium-dark : dark navy + gold accent + serif typography (default; all themes)
 #   - classic      : text left, image right panel
 #   - minimal      : text-only, clean whitespace
 #   - visual-heavy : full-bleed images with text overlay (partial for PPT themes)
 #   - academic     : dense layout for research/thesis (all themes except pitch)
+#   - white-bubble : vivid photos + white bubble cards + orange keyword highlights (zen only)
 # tocStyle — Table-of-contents visual style (glass-drawer | solid-drawer, default: glass-drawer)
 # Compatibility: see docs/html-themes/THEMES.md for valid theme × style combinations.
 presentation:

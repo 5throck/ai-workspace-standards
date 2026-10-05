@@ -116,3 +116,38 @@
   font-size: 2rem;
   letter-spacing: -0.01em;
 }
+
+/* ── Zen pairing: "Sepia Manuscript" ─────────────────────────────────
+   Scoped to [data-theme="zen"] — other themes are unaffected.
+   Warm sepia overlay + cream serif + double scholarly frame on all
+   non-cover slides, so zen × academic reads as an academic document. */
+[data-theme="zen"] {
+  --zen-overlay-color-top:    rgba(62, 48, 32, 0.88);
+  --zen-overlay-color-bottom: rgba(62, 48, 32, 0.80);
+  --cover-text:               #F3E9D2;
+  --text-on-dark:             #F3E9D2;
+  --divider-text:             #F3E9D2;
+  --cover-subtitle-text:      rgba(243, 233, 210, 0.72);
+  --accent-color:             #D4A94E;
+}
+[data-theme="zen"] .slide-card .slide-title { font-family: 'Noto Serif KR', 'Batang', serif; letter-spacing: 0.03em; }
+[data-theme="zen"] .slide-card .slide-subtitle { color: rgba(243, 233, 210, 0.72); }
+[data-theme="zen"] .slide-card .bullet-item { color: rgba(243, 233, 210, 0.82); }
+[data-theme="zen"] .slide-card .cover-meta,
+[data-theme="zen"] .slide-card .contact-item { color: rgba(212, 169, 78, 0.8); }
+[data-theme="zen"] .slide[data-type]:not([data-type="cover"]) .slide-card::before {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(243, 233, 210, 0.30);
+  pointer-events: none;
+  z-index: 0;
+}
+[data-theme="zen"] .slide[data-type]:not([data-type="cover"]) .slide-card::after {
+  content: '';
+  position: absolute;
+  inset: 26px;
+  border: 1px solid rgba(212, 169, 78, 0.35);
+  pointer-events: none;
+  z-index: 0;
+}

@@ -9268,12 +9268,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
-      "to": "slide-layout-gate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/docs/co-deck.context.md",
       "to": "storyline",
       "source": "workflow-doc"
     },

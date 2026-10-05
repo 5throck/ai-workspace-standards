@@ -3,6 +3,8 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Changed
+- **[2026-10-05]**: feat(zen) [co-deck]: sync from Projects/co-deck — zen overlay-above-text fix (`.slide-content` z-index), zen-scoped style differentiation (classic/minimal/premium-dark/academic), new zen-only `white-bubble` style (white bubble cards + orange `**keyword**` highlights, from the 2008 Corporate Culture Revolution reference), `inlineTitle()` markup+newline support in titles, content rules raised to 50-char titles / 5 bullets, zen baselines regenerated. Designs: `2026-10-05-zen-style-differentiation`, `2026-10-05-white-bubble-style`, `2026-10-05-zen-content-rules-50-5`.
 
 ## [0.12.0] - 2026-10-04
 ### Changed

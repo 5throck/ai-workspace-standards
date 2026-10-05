@@ -44,6 +44,10 @@
   align-items: center;
   text-align: center;
   gap: 0.75rem;
+  /* Paint above .zen-overlay (positioned, z-index 0) — without this the
+     overlay washes out the text, fatal on light-overlay styles */
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Header hidden for zen aesthetic ────────────────────────────────── */
@@ -55,6 +59,9 @@
 .slide-title {
   color: var(--text-on-dark, #ffffff);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* Two-line titles: 50-char limit means long titles wrap or break on \n */
+  line-height: 1.25;
+  overflow-wrap: break-word;
 }
 
 .slide-subtitle {

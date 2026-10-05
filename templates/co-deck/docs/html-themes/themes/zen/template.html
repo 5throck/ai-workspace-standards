@@ -14,7 +14,7 @@
     4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
 
   CONTENT RULES (from theme.json):
-    - max 3 bullets per slide, max 30 chars in title
+    - max 5 bullets per slide, max 50 chars in title
     - Background image expected on every slide for visual storytelling
     - No side image panel — background covers entire slide
 
@@ -110,18 +110,32 @@
 
     // ── Zen slide renderer ─────────────────────────────────────
     // Presentation Zen style: fullscreen background image with gradient overlay
-    // and centered key message. Max 3 bullets as subtle secondary text.
+    // and centered key message. Max 5 bullets as subtle secondary text.
     // No visualImage/right-panel rendering — background covers entire slide.
 
     function buildBullets_zen(parent, arr) {
       var container = el("div", "bullets-container");
-      var bullets = Array.isArray(arr) ? arr.slice(0, 3) : [];
+      var bullets = Array.isArray(arr) ? arr.slice(0, 5) : [];
       bullets.forEach(function(b) {
         var item = el("div", "bullet-item");
         appendInline(item, b);
         container.appendChild(item);
       });
       parent.appendChild(container);
+    }
+
+    // Titles support **keyword** markup like bullets, plus explicit line
+    // breaks: "\n" in slideData titles renders <br> so a 50-char title can
+    // break into two lines at the author-chosen point (long titles also wrap
+    // naturally via CSS).
+    function inlineTitle(tag, text) {
+      var node = el(tag, "slide-title");
+      var parts = String(text == null ? '' : text).split('\n');
+      for (var i = 0; i < parts.length; i++) {
+        if (i > 0) node.appendChild(document.createElement('br'));
+        appendInline(node, parts[i]);
+      }
+      return node;
     }
 
     function slideType(d) {
@@ -157,7 +171,7 @@
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h2", "slide-title", title));
+        content.appendChild(inlineTitle("h2", title));
         card.appendChild(content);
         slide.appendChild(card);
         return;
@@ -167,7 +181,7 @@
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.subtitle != null) content.appendChild(el("p", "slide-subtitle", data.subtitle));
         if (data.meta != null) content.appendChild(el("p", "cover-meta", data.meta));
         card.appendChild(content);
@@ -180,7 +194,7 @@
         addZenOverlay(card);
         var content = el("div", "slide-content");
         if (data.partNum != null) content.appendChild(el("div", "part-number", data.partNum));
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.desc != null) content.appendChild(el("p", "slide-subtitle", data.desc));
         card.appendChild(content);
         slide.appendChild(card);
@@ -196,7 +210,7 @@
           avatar.className = "profile-avatar";
           content.appendChild(avatar);
         }
-        content.appendChild(el("h1", "slide-title", data.speakerName || data.profileName || title));
+        content.appendChild(inlineTitle("h1", data.speakerName || data.profileName || title));
         if (data.speakerTitle || data.profileTitle) content.appendChild(el("p", "slide-subtitle", data.speakerTitle || data.profileTitle));
         if (data.speakerBio) content.appendChild(el("p", "slide-subtitle", data.speakerBio));
         card.appendChild(content);
@@ -208,7 +222,7 @@
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.contactEmail) content.appendChild(el("p", "contact-item", data.contactEmail));
         if (data.contactLinkedIn) content.appendChild(el("p", "contact-item", data.contactLinkedIn));
         if (data.contactPhone) content.appendChild(el("p", "contact-item", data.contactPhone));
@@ -220,7 +234,7 @@
       var card = el("div", "slide-card");
       addZenOverlay(card);
       var content = el("div", "slide-content");
-      content.appendChild(el("h2", "slide-title", title));
+      content.appendChild(inlineTitle("h2", title));
       if (data.subtitle != null) content.appendChild(el("p", "slide-subtitle", data.subtitle));
       buildBullets_zen(content, data.bullets);
       card.appendChild(content);

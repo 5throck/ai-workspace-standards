@@ -75,12 +75,12 @@
   "toc": null,
   "content_constraints": {
     "standard": {
-      "max_bullets": 3,
-      "max_title_chars": 30,
+      "max_bullets": 5,
+      "max_title_chars": 50,
       "max_body_chars": 80
     },
     "punchline": {
-      "max_title_chars": 30,
+      "max_title_chars": 50,
       "max_subtitle_chars": 60
     }
   },

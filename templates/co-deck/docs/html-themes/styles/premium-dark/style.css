@@ -68,3 +68,23 @@
   --nav-btn-bg:           rgba(255, 255, 255, 0.06);
   --nav-btn-hover:        rgba(255, 255, 255, 0.14);
 }
+
+/* ── Zen pairing: "Noir Gold" ────────────────────────────────────────
+   Scoped to [data-theme="zen"] — other themes are unaffected.
+   Deepens the overlay toward black and pushes the serif title into
+   warm cream with a stronger gold glow. */
+[data-theme="zen"] {
+  --zen-overlay-color-top:    rgba(4, 7, 14, 0.84);
+  --zen-overlay-color-bottom: rgba(4, 7, 14, 0.68);
+  --cover-text:               #F5E9CE;
+  --text-on-dark:             #F5E9CE;
+  --divider-text:             #F5E9CE;
+  --cover-subtitle-text:      rgba(245, 233, 206, 0.72);
+  --accent-color:             #E8A93E;
+  --title-text-shadow:        0 0 28px rgba(217, 119, 6, 0.6);
+}
+[data-theme="zen"] .slide-card .slide-title { font-family: 'MaruBuri', 'Noto Serif KR', 'Georgia', serif; letter-spacing: 0.01em; }
+[data-theme="zen"] .slide-card .slide-subtitle { color: rgba(245, 233, 206, 0.72); }
+[data-theme="zen"] .slide-card .bullet-item { color: rgba(245, 233, 206, 0.85); }
+[data-theme="zen"] .slide-card .cover-meta,
+[data-theme="zen"] .slide-card .contact-item { color: rgba(217, 169, 62, 0.75); }
