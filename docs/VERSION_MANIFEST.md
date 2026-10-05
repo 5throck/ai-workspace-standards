@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-05T01:28:12.985Z
+**Generated**: 2026-10-05T01:59:18.795Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -192,7 +192,7 @@
 | ticket.ts | 1.9.1 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.62.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.63.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
@@ -211,7 +211,7 @@
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
-| verify-country-prune.ts | 1.1.0 | scripts/verify-country-prune.ts | N/A |
+| verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | N/A |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.6.0 | scripts/verify-platform-lifecycle.ts | N/A |

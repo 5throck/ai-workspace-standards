@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
 /**
  * verify-country-prune.ts
- * @version 1.1.0
- * @last_updated 2026-09-25
+ * @version 1.2.0
+ * @last_updated 2026-10-05
+ *
+ * v1.2.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
+ *  new reference-shape regression test — a variant context doc carrying inline-code,
+ *  bold-table-row, and skill-path mentions of pruned skills must lose all three
+ *  while neighbor rows survive; runPrune accepts the optional variant argument the
+ *  pruner takes as argv[4].
  *
  * v1.1.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 7 / D7): fixture harness adopts PLATFORM_SKILL_BASES — .codex/skills
@@ -150,8 +156,10 @@ function assertFileContent(path: string, expectedContent: string, testName: stri
 /**
  * Run prune helper and check exit code
  */
-function runPrune(targetDir: string, country: string): { success: boolean; stdout: string; stderr: string } {
-  const result = spawnSync('bun', [PRUNE_SCRIPT, targetDir, country], {
+function runPrune(targetDir: string, country: string, variant?: string): { success: boolean; stdout: string; stderr: string } {
+  const args = [PRUNE_SCRIPT, targetDir, country];
+  if (variant) args.push(variant);
+  const result = spawnSync('bun', args, {
     cwd: ROOT,
     encoding: 'utf-8',
   });
@@ -343,6 +351,97 @@ API_KEY=sample_key
 }
 
 /**
+ * Create AGENTS.md + docs/<variant>.context.md fixtures carrying every reference
+ * shape the scrubber must catch (spec 2026-10-05-country-prune-context-scrub-design.md):
+ * inline-code name, bold table row (with and without a skill path), and the
+ * path-form AGENTS.md row — plus neighbor rows that must survive.
+ */
+function createReferenceShapeFixtures(dir: string, variant: string): void {
+  mkdirSync(join(dir, 'docs'), { recursive: true });
+
+  const contextDoc = [
+    '# Co-consult Context',
+    '',
+    '**Phase 1 — Research & Analysis**',
+    '',
+    '| Skill | File | Owner |',
+    '|-------|------|-------|',
+    '| **Research Analysis** | `skills/research-analysis/SKILL.md` | research-analyst |',
+    '| **k-dart** | `skills/k-dart/SKILL.md` | strategy-analyst |',
+    '| **k-dart** | DART OpenAPI queries | strategy-analyst |',
+    '| `k-law` | `skills/k-law/SKILL.md` | compliance-analyst |',
+    '| **Insight Synthesis** | `skills/insight-synthesis/SKILL.md` | strategy-analyst |',
+    '',
+  ].join('\n');
+  writeFileSync(join(dir, 'docs', `${variant}.context.md`), contextDoc, 'utf-8');
+
+  const agentsDoc = [
+    '# Agents',
+    '',
+    '| **K-DART** | `skills/k-dart/SKILL.md` | DART queries (KR profile only) |',
+    '| **Research Analysis** | `skills/research-analysis/SKILL.md` | research |',
+    '',
+  ].join('\n');
+  writeFileSync(join(dir, 'AGENTS.md'), agentsDoc, 'utf-8');
+}
+
+/**
+ * Test 5: context-doc scrub reference shapes (region-neutral + variant arg) —
+ * bold-form and skill-path rows must be scrubbed like inline-code rows; the
+ * neighbor rows must survive intact.
+ */
+function testContextDocScrubShapes(): void {
+  const testName = 'Test 5: context-doc scrub reference shapes';
+  const tempDir = createTempDir();
+
+  try {
+    createSkillFixtures(tempDir);
+    createReferenceShapeFixtures(tempDir, 'co-consult');
+
+    const result = runPrune(tempDir, 'none', 'co-consult');
+
+    if (!result.success) {
+      results.push({ name: testName, passed: false, details: `Prune failed for none: ${result.stderr}` });
+      return;
+    }
+
+    let allPassed = true;
+
+    const ctxPath = join(tempDir, 'docs', 'co-consult.context.md');
+    const ctxContent = readFileSync(ctxPath, 'utf-8');
+
+    // All three reference shapes of pruned skills must be gone
+    if (ctxContent.includes('**k-dart**') || ctxContent.includes('`k-law`') ||
+        ctxContent.includes('skills/k-dart/SKILL.md')) {
+      results.push({ name: testName, passed: false, details: 'Context doc still references a pruned skill (bold/inline-code/path shape survived)' });
+      allPassed = false;
+    }
+
+    // Neighbor rows must survive
+    if (!ctxContent.includes('**Research Analysis**') || !ctxContent.includes('**Insight Synthesis**')) {
+      results.push({ name: testName, passed: false, details: 'Non-scoped neighbor rows must survive the scrub' });
+      allPassed = false;
+    }
+
+    const agentsContent = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+    if (agentsContent.includes('skills/k-dart/SKILL.md')) {
+      results.push({ name: testName, passed: false, details: 'AGENTS.md path-form row should have been scrubbed' });
+      allPassed = false;
+    }
+    if (!agentsContent.includes('**Research Analysis**')) {
+      results.push({ name: testName, passed: false, details: 'AGENTS.md neighbor row must survive the scrub' });
+      allPassed = false;
+    }
+
+    if (allPassed) {
+      results.push({ name: testName, passed: true, details: 'All three reference shapes scrubbed, neighbors intact' });
+    }
+  } finally {
+    cleanupTempDir(tempDir);
+  }
+}
+
+/**
  * Run all tests
  */
 function runAllTests(): void {
@@ -352,6 +451,7 @@ function runAllTests(): void {
   testNoneRegionNeutral();
   testKRMatching();
   testUnbalancedMarker();
+  testContextDocScrubShapes();
 
   console.log('\n📊 Test Results:\n');
 
