@@ -865,18 +865,18 @@ function validateExtendsSecurity(filePath: string): ValidationResult {
 
 ### Primary References
 - **[PM.md Variant-Specific Content Injection Design](../designs/pm-md-variant-specific-content-injection-design.md)**: Complete Layout Reconstruction architecture
-- **[L2 PM YAML Schema](../common/docs/variants/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
+- **[L2 PM YAML Schema](../../templates/common/docs/variants/pm-yaml-schema.md)**: Complete YAML frontmatter specification for L2 variants
 - **[ADR-0031: L1-L2 Fork Model](0031-l1-l2-fork-model.md)**: 5 Fork Model Principles + Layout Reconstruction trigger points
 - **[ADR-0038: Auto-Mode Deprecation](0038-deprecate-auto-mode.md)**: Auto-Mode removal from L0
 
 ### Supporting Documentation
 - **[Variant Creation Workflow](../guides/variant-creation-workflow.md)**: End-to-end variant creation process
-- **[PM Agent Role](../../lifecycle/agents/pm.md)**: Full PM agent specification (L0)
-- **[Multi-Agent Architecture](../../constitution/05-multi-agent-architecture.md)**: Governance framework
-- **[Agent Lifecycle](../../constitution/05.6-agent-lifecycle.md)**: Agent management lifecycle
+- **[PM Agent Role](../lifecycle/agents/pm.md)**: Full PM agent specification (L0)
+- **[Multi-Agent Architecture](../constitution/05-multi-agent-architecture.md)**: Governance framework
+- **[Agent Lifecycle](../constitution/05.6-agent-lifecycle.md)**: Agent management lifecycle
 
 ### Schema Documentation
-- **[templates/common/docs/variants/pm-yaml-schema.md](../common/docs/variants/pm-yaml-schema.md)**: Complete YAML schema with:
+- **[templates/common/docs/variants/pm-yaml-schema.md](../../templates/common/docs/variants/pm-yaml-schema.md)**: Complete YAML schema with:
   - Root-level fields (`extends`, `variant`, `variant_overrides`)
   - `variant_overrides` structure (5 override types)
   - Validation rules and examples

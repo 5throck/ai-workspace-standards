@@ -7,7 +7,7 @@
 
 > **✅ MIGRATION COMPLETE (2026-09-18)** — this guide is preserved as history.
 > The marker→extends migration landed through [ADR-0047](../adr/0047-variant-pm-extends-redundant-body-cleanup.md)
-> and [ADR-0048](../adr/0048-variant-pm-extends-redundant-body-cleanup.md)
+> and [ADR-0048](../adr/0048-variant-pm-agents-md-workflow-ssot.md)
 > (agentic cleanup wave): every variant `pm.md` is now a frontmatter-only
 > extends stub, enforced by `validate-pm-extends.ts` and the
 > managed-block-parity checks. Details below reflect the plan at authoring
@@ -930,7 +930,7 @@ git cherry-pick <phase-2-commit-hash>
 - [ADR-0048: Variant PM Architecture — AGENTS.md as Workflow SSOT](../adr/0048-variant-pm-agents-md-workflow-ssot.md)
 - [ADR-0031: L1-L2 Fork Model](../adr/0031-l1-l2-fork-model.md)
 - [Variant PM Specification](../templates/variant-pm-spec.md)
-- [Scaffold Script Documentation](../scripts/create-l3-scaffold.ts)
+- [Scaffold Script Documentation](../../scripts/create-l3-scaffold.ts)
 
 ## Support and Questions
 

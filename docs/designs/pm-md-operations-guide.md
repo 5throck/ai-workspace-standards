@@ -86,10 +86,10 @@ This section provides immediate guidance for different user personas and current
 → 🟢 Stable Path → See [Common Pitfalls & Solutions](#common-pitfalls--solutions) → [Pitfall 1: L0 Role Leakage](#pitfall-1-l0-role-leakage)
 
 **"I want to understand the architecture"**
-→ See [Architecture Overview](#architecture-overview) → [ADR-0033](docs/adr/0033-l0-l1-l2-hierarchy.md)
+→ See [Architecture Overview](#architecture-overview) → [ADR-0039](../adr/0039-l0-l1-l2-hierarchy-and-extends.md)
 
 **"I'm implementing variant_sections"**
-→ 🟡 Experimental Path → See [ADR-0034](docs/adr/0034-pm-md-architecture-evolution.md) → Phase 1 implementation guide
+→ 🟡 Experimental Path → See [ADR-0034](../adr/0034-pm-md-architecture-evolution.md) → Phase 1 implementation guide
 
 ---
 

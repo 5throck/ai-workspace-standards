@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-05T00:52:52.116Z
+**Generated**: 2026-10-05T00:46:41.348Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -109,7 +110,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.48.1 | scripts/audit.ts | bun |
+| audit.ts | 2.48.2 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.0.2 | scripts/backport-diff.ts | N/A |

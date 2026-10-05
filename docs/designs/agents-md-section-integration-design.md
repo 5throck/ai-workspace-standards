@@ -164,6 +164,6 @@ AGENTS.md contains duplicate or separated sections, making the document structur
 
 ## Related Documentation
 
-- [Meeting Transcript: AGENTS.md Duplicate Section Integration Review](../../memory/meeting-2026-06-09-agents-md-duplication-review.md)
+- Meeting Transcript: `meeting-2026-06-09-agents-md-duplication-review.md` (since purged from memory/)
 - [AGENTS.md](../../AGENTS.md)
 - [agents/pm.md](../../agents/pm.md)

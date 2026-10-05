@@ -1,9 +1,25 @@
 # LLM Interaction Standard
 
 **Status:** Adopted
-**Version:** 1.0.0 (2026-10-04, ADR-0098; spec `2026-10-04-llm-interaction-standard-design`)
+**Version:** 1.1.0 (2026-10-05, T-20261004-028: Layer Scoping note added; rules unchanged. 1.0.0 (2026-10-04, ADR-0098; spec `2026-10-04-llm-interaction-standard-design`))
 **Scope:** Every surface where a human and an LLM exchange work in this workspace — interactive agent sessions, specialist subagent dispatch, and co-workspace gateway turns/API calls.
 **Supersedes:** Nothing. ADR-0079 (ASD-STE100, development-domain instructions) stays authoritative for its domain and is extended to the full loop by this standard.
+
+> **Layer scoping (T-20261004-028).** This standard ships verbatim to every layer: the
+> workspace root keeps it at `docs/standards/`, and scaffolded projects receive the same
+> bytes at their own `docs/standards/` (ADR-0098; `create-l3-scaffold`). Some references
+> therefore describe the ORIGIN workspace, not the reading project:
+>
+> - §2.5 names the workspace registries of the origin workspace (AGENTS.md glossary
+>   roles, skill names, script names). A scaffolded project binds the same rule to its
+>   own local registries (its AGENTS.md, its script registry).
+> - §13.1 points at the gateway implementation (`services/co-workspace/src/interaction.ts`).
+>   That path exists only in the origin workspace; in a scaffolded project it documents
+>   provenance, not a local dependency.
+>
+> The behavioral rules (§1–§14) apply unchanged at every layer. Recorded policy: the L1
+> copy is a verbatim mirror by design — repo-specific references stay and are scoped by
+> this note, not genericized or excluded (spec `2026-10-05-llm-standard-layer-scoping-design`).
 
 ---
 
