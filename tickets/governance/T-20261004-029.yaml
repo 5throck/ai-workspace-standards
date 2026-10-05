@@ -9,12 +9,27 @@ title: >-
   job red on PR #197; main passed only because the old script tolerated it. Fix
   at root, release as 0.12.1, re-run co-safety's upgrade
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T17:26:25.365Z'
 history:
   - at: '2026-10-04T17:26:25.365Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:07.826Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:07.841Z'
+    from: waiting
+    to: running
+  - at: '2026-10-04T23:46:07.856Z'
+    from: running
+    to: review
+  - at: '2026-10-04T23:46:07.872Z'
+    from: review
+    to: done
+result: >-
+  Merged via PR #1417 (validators batch: registry parity, record versions, stale
+  stamps, language perimeter, porcelain parsing) — CI green post-merge-conflict
+  resolution; landed in main 8b582b0a lineage.
 error: null

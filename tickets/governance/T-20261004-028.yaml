@@ -10,12 +10,30 @@ title: >-
   2026-10-04-llm-interaction-standard-design to explicitly accept and scope the
   divergence
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:50:21.993Z'
 history:
   - at: '2026-10-04T16:50:21.993Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:14.469Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:14.483Z'
+    from: waiting
+    to: running
+  - at: '2026-10-05T00:18:42.676Z'
+    from: running
+    to: review
+  - at: '2026-10-05T00:51:36.904Z'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1419 (admin-merged: windows M5 flake). Policy: accept-and-scope
+  — L1 copy stays a verbatim mirror; a Layer-scoping note inside the standard
+  itself (both copies byte-identical, v1.1.0) declares registry names and the
+  services/ path as origin-workspace references, binding project readers to
+  local registries. Matches the pm-gateway-workflow.md inline-scoping precedent;
+  no validator allowlist needed. Design doc registered.
 error: null

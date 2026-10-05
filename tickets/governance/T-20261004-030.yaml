@@ -8,12 +8,29 @@ title: >-
   1.4.2 without any package.json change in the upgrade diff is unexplained;
   watch for the same class in other projects with nested playground locks
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T17:26:25.381Z'
 history:
   - at: '2026-10-04T17:26:25.381Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:14.497Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:14.511Z'
+    from: waiting
+    to: running
+  - at: '2026-10-04T23:47:55.101Z'
+    from: running
+    to: review
+  - at: '2026-10-05T00:51:36.947Z'
+    from: review
+    to: done
+result: >-
+  No-op: drift already fixed on main by co-design PR #31 commit 5361921; first
+  green CI run 37220853663; bun install --frozen-lockfile in playground verified
+  exit 0 locally. Residual: bun 1.4.2 lockfile-resolve divergence root cause
+  still unexplained (flagged in ticket); nested-lock CI guard (ci.yml 137-142)
+  mitigates recurrence.
 error: null
