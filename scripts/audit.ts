@@ -1,4 +1,10 @@
-// @version 2.48.2
+// @version 2.49.0
+// v2.49.0 (2026-10-05, T-20261005-002, spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md):
+//           spec-check Check 5 — docs/specs/registry.json must be in canonical
+//           id order (canonicalOrderViolation from spec-register.ts). The
+//           concurrent-registration merge model relies on content-derived
+//           insertion; a hand-spliced or tail-appended file fails the gate and
+//           is re-sorted by the next spec-register write.
 // v2.48.2 (2026-10-05, T-20261004-024): the docs relative-link gate now also
 //           enforces `validate-docs-links.ts --all` (every docs/ subdirectory —
 //           adr/, designs/, architecture/, governance/). The historical-rot
@@ -173,6 +179,7 @@ import * as os from 'node:os';
 import * as crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import { canonicalOrderViolation } from './spec-register.ts';
 import { AGENT_LAYER1_SECTIONS } from './helpers/golden-reference-loader.ts';
 import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
@@ -3266,6 +3273,17 @@ if (SPEC_CHECK) {
         }
         if (badStatus.length === 0 && supersededNoPointer.length === 0 && registry.specs.length > 0) {
             Pass(`Spec check: all ${registry.specs.length} spec status(es) within the vocabulary`);
+        }
+
+        // Check 5 (T-20261005-002): canonical id order — concurrent registrations
+        // merge cleanly only while every writer inserts content-derived (sorted);
+        // a hand-spliced or tail-appended file breaks that model. The next
+        // spec-register write canonicalizes the array (saveRegistry re-sorts).
+        const orderViolation = canonicalOrderViolation(registry.specs);
+        if (orderViolation) {
+            Fail(`Spec check: docs/specs/registry.json is not in canonical id order (${orderViolation}) — the next spec-register.ts write re-sorts it`);
+        } else if (registry.specs.length > 0) {
+            Pass(`Spec check: all ${registry.specs.length} registry entries in canonical id order`);
         }
         }
     }

@@ -14,12 +14,33 @@ title: >-
   Acceptance: two branches each registering a different spec merge cleanly
   without manual splicing.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:12:00.000Z'
 history:
   - at: '2026-10-04T16:12:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-05T02:37:06.930Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T02:37:06.946Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T02:37:06.961Z'
+    from: review
+    to: done
+result: >-
+  Fixed in this change set: spec-register.ts v1.4.0 -> v1.5.0 — content-derived
+  insertion (insertSpecSorted, id ascending) + saveRegistry canonicalizes the
+  array on every write (live 234-entry registry healed: 91 out-of-order pairs ->
+  0 on this design's own registration); audit.ts v2.49.0 spec-check Check 5
+  fails non-canonical order naming the first offending pair;
+  tests/unit/spec-registry-canonical-order.test.ts 7/7 (different-gaps
+  concurrent-writer pin + same-gap rebase residual); acceptance demonstrated
+  end-to-end with a two-branch git merge (different ids -> both merges clean,
+  final file sorted). Residual: same-gap adjacent ids still collide at line
+  level on a simultaneous push — rebase replays stably; full elimination needs
+  one-file-per-spec storage (documented non-goal). Design:
+  docs/designs/2026-10-05-spec-registry-canonical-order-design.md
 error: null
