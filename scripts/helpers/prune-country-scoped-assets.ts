@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 0.3.4
+// @version 0.4.0
+// v0.4.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
+//         the context-doc reference scrub now matches every reference shape the
+//         variant context docs use — inline-code names (`k-dart`), bold table
+//         rows (**k-dart**), and skill-path mentions (skills/k-dart/SKILL.md).
+//         The inline-code-only filter let co-consult's `**k-dart**` table row
+//         survive region-neutral scaffolds as a dangling reference (observed and
+//         reproduced 2026-10-05; co-consult is the only variant whose context doc
+//         carries a country-scoped skill row). AGENTS.md filter unchanged — its
+//         path-form match already covers the row shape there.
 // v0.3.4 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
 //         behavior-neutral constant adoption — the multi-line 5-element
 //         skill-dir literal in pruneSkill() becomes PLATFORM_SKILL_BASES
@@ -281,8 +290,15 @@ function scrubPrunedSkillReferences(): void {
   for (const ctxPath of ctxCandidates) {
     if (!existsSync(ctxPath)) continue;
     const lines = readFileSync(ctxPath, 'utf-8').split('\n');
+    // Match all three reference shapes the context docs use (spec
+    // 2026-10-05-country-prune-context-scrub-design.md): an inline-code name, a
+    // bold table row, or a skill-path mention. The inline-code-only filter let
+    // co-consult's bold-form k-dart table row survive region-neutral scaffolds.
     const kept = lines.filter(line =>
-      !prunedSkillNames.some(n => line.includes(`\`${n}\``)));
+      !prunedSkillNames.some(n =>
+        line.includes(`\`${n}\``) ||
+        line.includes(`**${n}**`) ||
+        line.includes(`skills/${n}/SKILL.md`)));
     if (kept.length !== lines.length) {
       writeFileSync(ctxPath, kept.join('\n'), 'utf-8');
       scrubbed += lines.length - kept.length;

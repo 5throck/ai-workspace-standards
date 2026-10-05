@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.62.0
+// @version 1.63.0
+// v1.63.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
+//          the COUNTRY-SCOPED SKILL PRUNE context-doc scrub filter now matches
+//          bold table rows (**k-dart**) and skill-path mentions
+//          (skills/k-dart/SKILL.md) in addition to inline-code names — parity
+//          with helpers/prune-country-scoped-assets.ts v0.4.0. Pre-fix
+//          region-neutral scaffolds (e.g. co-consult's dangling `**k-dart**`
+//          row) self-heal on the next upgrade. AGENTS.md filter unchanged.
 // v1.61.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094): `.github/workflows/ci.yml` joins the
 //          MERGE pass (upgrade-policy v1.20.0 claim) via lib/ci-workflow-merge.ts —
 //          template-owned jobs authoritative, PROJECT-JOBS region preserved, legacy
@@ -2890,8 +2897,15 @@ let countryPrunedSkills = 0;
     const ctxPath = join(projectDir, 'docs', `${variant}.context.md`);
     if (existsSync(ctxPath)) {
       const lines = readFileSync(ctxPath, 'utf8').split('\n');
+      // Match all three reference shapes the context docs use (spec
+      // 2026-10-05-country-prune-context-scrub-design.md) — inline-code name,
+      // bold table row, skill-path mention — so pre-fix scaffolds lose their
+      // dangling row on the next upgrade.
       const kept = lines.filter(line =>
-        !prunedCountrySkills.some((n: string) => line.includes(`\`${n}\``)));
+        !prunedCountrySkills.some((n: string) =>
+          line.includes(`\`${n}\``) ||
+          line.includes(`**${n}**`) ||
+          line.includes(`skills/${n}/SKILL.md`)));
       if (kept.length !== lines.length) {
         writeFileSync(ctxPath, kept.join('\n'), 'utf8');
         console.log(`  SCRUB  docs/${variant}.context.md — removed ${lines.length - kept.length} pruned-skill line(s)`);
