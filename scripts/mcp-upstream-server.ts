@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.9.1
+// @version 1.9.2
+// v1.9.2 (2026-10-05, T-20261005-001): Windows M5 parallel-intake flake — ticket-id
+//           publication via linkSync fails EPERM on Windows under file-system
+//           filter/AV pressure, throwing inside the accept path (1 of 6 parallel
+//           intakes died as an uncounted -32603: accepted=2/rate-limited=3 on
+//           windows-latest, PR #1419 merge run). EPERM now falls back to the O_EXCL
+//           exclusive create ('wx'), the cross-platform atomic-take primitive;
+//           -32603 responses carry the underlying message for diagnosability.
 // v1.9.1 (2026-10-03, T-20261003-004): resolveProject rejects UNC / extended-length device
 //           paths (\\server\share, \\?\UNC\, \\?\C:\) on the raw string BEFORE realpathSync —
 //           closing the same stall + SMB credential-leak class E.4 already drops for
@@ -70,6 +77,7 @@ import { createHash } from 'node:crypto';
 import {
   existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, realpathSync,
   renameSync, appendFileSync, linkSync, unlinkSync, statSync, lstatSync, rmSync,
+  openSync, writeSync, closeSync,
 } from 'node:fs';
 import { join, dirname, resolve, basename, isAbsolute, sep } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -82,7 +90,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.9.1';
+export const SERVER_VERSION = '1.9.2';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -921,13 +929,33 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
       const ticketPath = join(TICKETS_DIR, `${id}.yaml`);
       const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
       writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8');
+      // T-20261005-001: hard-link publication is atomic on POSIX but fails EPERM on
+      // Windows under file-system filter/AV pressure — the 2026-10-05 windows-latest
+      // M5 flake lost 1 of 6 parallel intakes to exactly that (the throw surfaced as
+      // a -32603 the cap test counts as neither accepted nor rate-limited). On EPERM,
+      // fall back to the O_EXCL exclusive create ('wx') — the cross-platform
+      // atomic-take primitive; EEXIST there means another process took the id.
       try {
-        linkSync(tmpPath, ticketPath); // fails with EEXIST if another process took this id
+        linkSync(tmpPath, ticketPath); // POSIX: atomic, EEXIST when the id is taken
         written = true;
       } catch (err) {
-        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') { unlinkSync(tmpPath); throw err; }
+        const code = (err as NodeJS.ErrnoException).code;
+        if (code === 'EEXIST') {
+          // id taken — retry below with the next sequence number
+        } else if (code === 'EPERM') {
+          try {
+            const fd = openSync(ticketPath, 'wx');
+            try { writeSync(fd, readFileSync(tmpPath)); } finally { closeSync(fd); }
+            written = true;
+          } catch (err2) {
+            if ((err2 as NodeJS.ErrnoException).code !== 'EEXIST') { unlinkSync(tmpPath); throw err2; }
+          }
+        } else {
+          unlinkSync(tmpPath);
+          throw err;
+        }
       }
-      unlinkSync(tmpPath);
+      try { unlinkSync(tmpPath); } catch { /* consumed by a successful publish */ }
     }
     if (!written) throw new Error('could not allocate a ticket id');
 
@@ -1098,7 +1126,7 @@ async function runToolCall(id: string | number | null, params: unknown): Promise
     }
   } catch (err) {
     console.error(`[mcp-upstream-server] error: ${(err as Error).message}`);
-    if (id !== null) sendResponse(id, undefined, { code: -32603, message: 'internal error' });
+    if (id !== null) sendResponse(id, undefined, { code: -32603, message: `internal error: ${err instanceof Error ? err.message : String(err)}` });
   }
 }
 
@@ -1163,7 +1191,7 @@ async function main(): Promise<void> {
       }
     } catch (err) {
       console.error(`[mcp-upstream-server] error: ${(err as Error).message}`);
-      if (id !== null) sendResponse(id, undefined, { code: -32603, message: 'internal error' });
+      if (id !== null) sendResponse(id, undefined, { code: -32603, message: `internal error: ${err instanceof Error ? err.message : String(err)}` });
     }
   }
 }
