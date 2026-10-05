@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20261005-003
+kind: manual
+title: >-
+  docs-hygiene: scripts/SCRIPTS.md carries three full duplicate copies of the
+  document tail (footer + registry row dump + Layer Classification + Ownership +
+  Lifecycle + Guide + Version Bump Policy) after the first Version Bump Policy
+  section — 1346 of 2043 lines are stale duplicates with drifted note text
+  (footers still say 2026-09-20). Discovered 2026-10-05 while bumping registry
+  rows for the country-prune scrub fix. All fragment registry rows verified to
+  be a subset of the live ## Registry (no unique content); the three SCRIPTS.md
+  consumers (verify-scripts.ts --verify, write-scripts- snapshot.ts,
+  generate-scripts-readme.ts) each parse only the first
+  Registry/Guide/Version-Bump-Policy section, so deleting the copies is
+  behavior-neutral. Acceptance: SCRIPTS.md ends after the first footer;
+  verify-scripts.ts --verify, generate-scripts-readme.ts, and
+  write-scripts-snapshot.ts all pass unchanged.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-05T03:10:00.000Z'
+history:
+  - at: '2026-10-05T03:10:00.000Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T02:13:30.414Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T02:13:30.433Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T02:13:30.481Z'
+    from: review
+    to: done
+result: >-
+  Fixed in this change set: SCRIPTS.md truncated after the live footer (line
+  697; was 2043) removing three duplicated document-tail copies; all fragment
+  rows pre-verified as a subset of the live Registry; verify-scripts.ts
+  --verify, generate-scripts-readme.ts (README byte-unchanged), and
+  write-scripts-snapshot.ts parser scope confirmed first-section-only before
+  deletion. Design: docs/designs/2026-10-05-scripts-hygiene-batch-design.md
+error: null

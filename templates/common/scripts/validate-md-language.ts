@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0 (2026-10-05, T-20261005-004, spec docs/designs/2026-10-05-scripts-hygiene-batch-design.md):
+//           inline-code stripping extracted to the exported pure helper
+//           stripCodeForLanguageScan() and hardened for CommonMark
+//           double-backtick spans (`` `x` ``) — they are consumed before the
+//           single-backtick pass, whose stray-run pairing previously shifted
+//           parity for the rest of the file and unmasked Korean living inside
+//           intentional inline-code tokens (language-gate false positive on
+//           an English-only CHANGELOG entry). analyzeFile() exported for the
+//           regression test; single-span semantics unchanged.
 // v1.13.0 (2026-10-05, T-20261004-025): the docs-reorganization destinations
 //           docs/reports/ + docs/guides/ + docs/standards/ join the official
 //           perimeter so undeclared Korean there fails (declared lang files
@@ -261,6 +270,22 @@ function isExcludedPath(filePath: string): boolean {
 }
 
 /**
+ * Strip fenced code blocks and inline code from content before Korean
+ * detection (T-20261005-004). Multi-backtick code spans (`` `x` ``) must be
+ * consumed BEFORE the single-backtick pass: the single-span regex cannot pair
+ * double-backtick delimiters, and the resulting stray runs shift pairing
+ * parity for the rest of the file — swallowing or unmasking Korean that sits
+ * inside intentional inline-code tokens further down.
+ */
+export function stripCodeForLanguageScan(content: string): string {
+  return content
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/``[\s\S]*?``/g, "")
+    .replace(/`[^`]+`/g, "")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, "");
+}
+
+/**
  * Analyze file content for language violations using 4-stage judgment.
  *
  * Stage 1 (exception folder) is handled upstream by isExcludedPath / isOfficialDocument.
@@ -268,7 +293,7 @@ function isExcludedPath(filePath: string): boolean {
  * Stage 3: lang: ko frontmatter → PASS+INFO (valid reason) or FAIL (missing/invalid)
  * Stage 4: No declaration → FAIL
  */
-function analyzeFile(filePath: string): Violation | null {
+export function analyzeFile(filePath: string): Violation | null {
   try {
     let content = readFileSync(filePath, "utf-8");
 
@@ -278,9 +303,7 @@ function analyzeFile(filePath: string): Violation | null {
     content = content.replace(ALLOWLIST_REGION_PATTERN, "");
 
     // Remove code blocks and inline code from analysis
-    const contentWithoutCode = content.replace(/```[\s\S]*?```/g, "")
-      .replace(/`[^`]+`/g, "")
-      .replace(/\[[^\]]+\]\([^)]+\)/g, "");
+    const contentWithoutCode = stripCodeForLanguageScan(content);
 
     const hasKorean = KOREAN_PATTERN.test(contentWithoutCode);
     if (!hasKorean) return null;
