@@ -622,7 +622,7 @@ if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
 // `scripts/typecheck.ts`: `tsc --noEmit` over scripts/ vs the recorded baseline
 // (0 since the 2026-09-11 Phase 2 triage) — fails on ANY type error. The
 // baseline file is a root-context asset; scaffolded projects (no baseline)
-// skip cleanly inside typecheck.ts itself. Inline CONSTITUTION.md check (the
+// skip cleanly inside typecheck.ts itself. Inline workspace-root marker check (the
 // shared isL0Context const is declared further below).
 if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('scripts/typecheck.ts')) {
     console.log('📋 Step 3.95b: Typecheck gate (tsc --noEmit over scripts/)...');
@@ -708,7 +708,7 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
 // 4.5 L0→L1 publish — must run BEFORE audit gate so that CONSTITUTION scrub
 //     is applied to templates/common/ files before the L0-leakage check.
 const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
-// L0 context: CONSTITUTION.md exists at workspace root — publish failures are fatal here.
+// L0 context: the workspace-root marker exists — publish failures are fatal here.
 const isL0Context = fs.existsSync('CONSTITUTION.md');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
