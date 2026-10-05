@@ -9,12 +9,27 @@ title: >-
   gitignored and admin-gated, but the file mode should not depend on the
   deployer's umask)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:50:12.952Z'
 history:
   - at: '2026-10-04T16:50:12.952Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:07.411Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:07.427Z'
+    from: waiting
+    to: running
+  - at: '2026-10-04T23:46:07.443Z'
+    from: running
+    to: review
+  - at: '2026-10-04T23:46:07.457Z'
+    from: review
+    to: done
+result: >-
+  Merged via PR #1416 (turn-config 0600 persistence with chmod-after-rename +
+  test, voice-mode README) — CI 8/8 green across ubuntu/macos/windows; landed in
+  main 8b582b0a lineage.
 error: null

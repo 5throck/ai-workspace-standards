@@ -9,12 +9,27 @@ title: >-
   misleads KEEP-vs-STALE-RESIDUE adjudication; keep the conservative KEEP
   verdict but fix the classification evidence
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:40:57.693Z'
 history:
   - at: '2026-10-04T16:40:57.693Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:07.528Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:07.542Z'
+    from: waiting
+    to: running
+  - at: '2026-10-04T23:46:07.557Z'
+    from: running
+    to: review
+  - at: '2026-10-04T23:46:07.571Z'
+    from: review
+    to: done
+result: >-
+  Merged via PR #1417 (validators batch: registry parity, record versions, stale
+  stamps, language perimeter, porcelain parsing) — CI green post-merge-conflict
+  resolution; landed in main 8b582b0a lineage.
 error: null

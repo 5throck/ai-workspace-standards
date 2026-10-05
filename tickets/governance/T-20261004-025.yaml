@@ -8,12 +8,27 @@ title: >-
   Korean outside the allowlist is caught — two reports declared lang: ko in the
   2026-10-05 review, gate the rest
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:50:12.933Z'
 history:
   - at: '2026-10-04T16:50:12.933Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-04T23:46:07.765Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-04T23:46:07.780Z'
+    from: waiting
+    to: running
+  - at: '2026-10-04T23:46:07.795Z'
+    from: running
+    to: review
+  - at: '2026-10-04T23:46:07.810Z'
+    from: review
+    to: done
+result: >-
+  Merged via PR #1417 (validators batch: registry parity, record versions, stale
+  stamps, language perimeter, porcelain parsing) — CI green post-merge-conflict
+  resolution; landed in main 8b582b0a lineage.
 error: null
