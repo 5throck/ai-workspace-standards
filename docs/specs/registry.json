@@ -2,54 +2,46 @@
   "version": "1.0.0",
   "specs": [
     {
-      "id": "2026-06-24-workflow-integrated-methodology-design",
-      "title": "workflow integrated methodology design",
-      "file": "docs/designs/workflow-integrated-methodology-design.md",
+      "id": "2026-06-01-version-manifest-implementation-plan",
+      "title": "version manifest implementation plan",
+      "file": "docs/designs/version-manifest-implementation-plan.md",
       "status": "implemented",
-      "source": "brainstorming",
-      "created": "2026-06-24",
-      "last_updated": "2026-08-28"
-    },
-    {
-      "id": "2026-06-28-execution-plan-design-gate",
-      "title": "execution plan design gate",
-      "file": "docs/designs/execution-plan-design-gate-design.md",
-      "status": "implemented",
-      "source": "brainstorming",
-      "created": "2026-06-28",
-      "last_updated": "2026-08-28"
-    },
-    {
-      "id": "2026-07-08-variant-registry-architecture",
-      "title": "variant registry architecture",
-      "file": "docs/designs/variant-registry-architecture-design.md",
-      "status": "implemented",
-      "source": "pm-orchestration",
-      "created": "2026-07-08",
-      "last_updated": "2026-08-28"
-    },
-    {
-      "id": "2026-08-09-l2-pipeline-governance-fixes",
-      "title": "l2 pipeline governance fixes",
-      "file": "docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md",
-      "status": "proposed",
-      "source": "architect",
-      "created": "2026-08-09",
-      "last_updated": "2026-08-09"
-    },
-    {
-      "id": "2026-08-16-august-regression-coverage-design",
-      "title": "august regression coverage design",
-      "file": "docs/designs/2026-08-16-august-regression-coverage-design.md",
-      "status": "proposed",
       "source": "manual",
       "created": "2026-08-16",
       "last_updated": "2026-08-16"
     },
     {
-      "id": "2026-08-16-spec-registry-enforcement-design",
-      "title": "spec registry enforcement design",
-      "file": "docs/designs/2026-08-16-spec-registry-enforcement-design.md",
+      "id": "2026-06-02-governance-docs-architecture-design",
+      "title": "governance docs architecture design",
+      "file": "docs/designs/2026-06-02-governance-docs-architecture-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-06-02",
+      "last_updated": "2026-10-04",
+      "archive_note": "archived 2026-10-04 (T-20261004-004): P2 never implemented; duplication concern now managed by COMMON-CLAUDE marker zones + the marker-inject engine and ADR-0090 thin dispatchers."
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-conversion-pipeline",
+      "title": "l2 to variant conversion pipeline",
+      "file": "docs/designs/l2-to-variant-conversion-pipeline.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-06-03",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-design-checklist",
+      "title": "l2 to variant pipeline design checklist",
+      "file": "docs/designs/l2-to-variant-pipeline-design-checklist.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-03-l2-to-variant-pipeline-executive-summary",
+      "title": "l2 to variant pipeline executive summary",
+      "file": "docs/designs/l2-to-variant-pipeline-executive-summary.md",
       "status": "archived",
       "source": "manual",
       "created": "2026-08-16",
@@ -57,10 +49,55 @@
       "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
     },
     {
+      "id": "2026-06-03-mvp-wave-1-summary",
+      "title": "mvp wave 1 summary",
+      "file": "docs/designs/mvp-wave-1-summary.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
       "id": "2026-06-07-adr-0033-implementation-summary",
       "title": "adr 0033 implementation summary",
       "file": "docs/designs/adr-0033-implementation-summary.md",
       "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-deploy-to-l1-script-design",
+      "title": "deploy to l1 script design",
+      "file": "docs/designs/deploy-to-l1-script-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-group-type-mapping-spec",
+      "title": "pm md group type mapping spec",
+      "file": "docs/designs/pm-md-group-type-mapping-spec.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-operations-guide",
+      "title": "pm md operations guide",
+      "file": "docs/designs/pm-md-operations-guide.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-09-pm-md-variant-specific-content-injection-design",
+      "title": "pm md variant specific content injection design",
+      "file": "docs/designs/pm-md-variant-specific-content-injection-design.md",
+      "status": "drifted",
       "source": "manual",
       "created": "2026-08-16",
       "last_updated": "2026-08-16"
@@ -78,44 +115,6 @@
       "id": "2026-06-10-agents-md-section-integration-design",
       "title": "agents md section integration design",
       "file": "docs/designs/agents-md-section-integration-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-16-ai-workspace-service-platform-roadmap",
-      "title": "ai workspace service platform roadmap",
-      "file": "docs/designs/ai-workspace-service-platform-roadmap.md",
-      "status": "proposed",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-11-beta-lifecycle-variant-sync-design",
-      "title": "beta lifecycle variant sync design",
-      "file": "docs/designs/beta-lifecycle-variant-sync-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-06-25-co-deck-theme-reduction-design",
-      "title": "co deck theme reduction design",
-      "file": "docs/designs/co-deck-theme-reduction-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-06-25-co-deck-theme-reduction-plan",
-      "title": "co deck theme reduction plan",
-      "file": "docs/designs/co-deck-theme-reduction-plan.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-08-16",
@@ -140,10 +139,224 @@
       "last_updated": "2026-08-16"
     },
     {
-      "id": "2026-06-09-deploy-to-l1-script-design",
-      "title": "deploy to l1 script design",
-      "file": "docs/designs/deploy-to-l1-script-design.md",
+      "id": "2026-06-19-l1-agent-format-spec",
+      "title": "l1 agent format spec",
+      "file": "docs/designs/l1-agent-format-spec.md",
       "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-agent-structure",
+      "title": "variant specialist agent structure",
+      "file": "docs/designs/variant-specialist-agent-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-19-variant-specialist-skill-structure",
+      "title": "variant specialist skill structure",
+      "file": "docs/designs/variant-specialist-skill-structure.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-22-extract-slidedata-fix-plan",
+      "title": "extract slidedata fix plan",
+      "file": "docs/designs/extract-slidedata-fix-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-narration-engine-tts-design",
+      "title": "narration engine tts design",
+      "file": "docs/designs/narration-engine-tts-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-06-23-thumbnail-to-headline-nav-design",
+      "title": "thumbnail to headline nav design",
+      "file": "docs/designs/thumbnail-to-headline-nav-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-23-tts-autoplay-separation-design",
+      "title": "tts autoplay separation design",
+      "file": "docs/designs/tts-autoplay-separation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-thumbnail-to-headline-nav-plan",
+      "title": "thumbnail to headline nav plan",
+      "file": "docs/designs/thumbnail-to-headline-nav-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-tts-autoplay-separation-plan",
+      "title": "tts autoplay separation plan",
+      "file": "docs/designs/tts-autoplay-separation-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-24-upgrade-project-content-sync-plan",
+      "title": "upgrade project content sync plan",
+      "file": "docs/designs/upgrade-project-content-sync-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-17"
+    },
+    {
+      "id": "2026-06-24-workflow-integrated-methodology-design",
+      "title": "workflow integrated methodology design",
+      "file": "docs/designs/workflow-integrated-methodology-design.md",
+      "status": "implemented",
+      "source": "brainstorming",
+      "created": "2026-06-24",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-design",
+      "title": "co deck theme reduction design",
+      "file": "docs/designs/co-deck-theme-reduction-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-06-25-co-deck-theme-reduction-plan",
+      "title": "co deck theme reduction plan",
+      "file": "docs/designs/co-deck-theme-reduction-plan.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-06-28-execution-plan-design-gate",
+      "title": "execution plan design gate",
+      "file": "docs/designs/execution-plan-design-gate-design.md",
+      "status": "implemented",
+      "source": "brainstorming",
+      "created": "2026-06-28",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-07-02-retry-handler-fail-fast-design",
+      "title": "retry handler fail fast design",
+      "file": "docs/designs/retry-handler-fail-fast-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-03-project-review-2026-07-03-improvement-plan",
+      "title": "project review 2026 07 03 improvement plan",
+      "file": "docs/designs/project-review-2026-07-03-improvement-plan.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-07-08-l0-l2-deployment-audit-design",
+      "title": "l0 l2 deployment audit design",
+      "file": "docs/designs/l0-l2-deployment-audit-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-08-variant-registry-architecture",
+      "title": "variant registry architecture",
+      "file": "docs/designs/variant-registry-architecture-design.md",
+      "status": "implemented",
+      "source": "pm-orchestration",
+      "created": "2026-07-08",
+      "last_updated": "2026-08-28"
+    },
+    {
+      "id": "2026-07-11-beta-lifecycle-variant-sync-design",
+      "title": "beta lifecycle variant sync design",
+      "file": "docs/designs/beta-lifecycle-variant-sync-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-07-11-governance-docs-consolidation-design",
+      "title": "governance docs consolidation design",
+      "file": "docs/designs/governance-docs-consolidation-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-07-11-m11-m12-m15-and-beta-lifecycle-design",
+      "title": "m11 m12 m15 and beta lifecycle design",
+      "file": "docs/designs/m11-m12-m15-and-beta-lifecycle-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-07-11-sequential-pr-merge-policy-design",
+      "title": "sequential pr merge policy design",
+      "file": "docs/designs/sequential-pr-merge-policy-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-07-11-workspace-hardening-design",
+      "title": "workspace hardening design",
+      "file": "docs/designs/workspace-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-07-16-ai-workspace-service-platform-roadmap",
+      "title": "ai workspace service platform roadmap",
+      "file": "docs/designs/ai-workspace-service-platform-roadmap.md",
+      "status": "proposed",
       "source": "manual",
       "created": "2026-08-16",
       "last_updated": "2026-08-16"
@@ -189,228 +402,6 @@
       "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
     },
     {
-      "id": "2026-06-22-extract-slidedata-fix-plan",
-      "title": "extract slidedata fix plan",
-      "file": "docs/designs/extract-slidedata-fix-plan.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-11-governance-docs-consolidation-design",
-      "title": "governance docs consolidation design",
-      "file": "docs/designs/governance-docs-consolidation-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-07-08-l0-l2-deployment-audit-design",
-      "title": "l0 l2 deployment audit design",
-      "file": "docs/designs/l0-l2-deployment-audit-design.md",
-      "status": "proposed",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-19-l1-agent-format-spec",
-      "title": "l1 agent format spec",
-      "file": "docs/designs/l1-agent-format-spec.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-03-l2-to-variant-conversion-pipeline",
-      "title": "l2 to variant conversion pipeline",
-      "file": "docs/designs/l2-to-variant-conversion-pipeline.md",
-      "status": "draft",
-      "source": "manual",
-      "created": "2026-06-03",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-03-l2-to-variant-pipeline-design-checklist",
-      "title": "l2 to variant pipeline design checklist",
-      "file": "docs/designs/l2-to-variant-pipeline-design-checklist.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-03-l2-to-variant-pipeline-executive-summary",
-      "title": "l2 to variant pipeline executive summary",
-      "file": "docs/designs/l2-to-variant-pipeline-executive-summary.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-07-11-m11-m12-m15-and-beta-lifecycle-design",
-      "title": "m11 m12 m15 and beta lifecycle design",
-      "file": "docs/designs/m11-m12-m15-and-beta-lifecycle-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-06-03-mvp-wave-1-summary",
-      "title": "mvp wave 1 summary",
-      "file": "docs/designs/mvp-wave-1-summary.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-23-narration-engine-tts-design",
-      "title": "narration engine tts design",
-      "file": "docs/designs/narration-engine-tts-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-06-09-pm-md-group-type-mapping-spec",
-      "title": "pm md group type mapping spec",
-      "file": "docs/designs/pm-md-group-type-mapping-spec.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-09-pm-md-operations-guide",
-      "title": "pm md operations guide",
-      "file": "docs/designs/pm-md-operations-guide.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-09-pm-md-variant-specific-content-injection-design",
-      "title": "pm md variant specific content injection design",
-      "file": "docs/designs/pm-md-variant-specific-content-injection-design.md",
-      "status": "drifted",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-03-project-review-2026-07-03-improvement-plan",
-      "title": "project review 2026 07 03 improvement plan",
-      "file": "docs/designs/project-review-2026-07-03-improvement-plan.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-08-12-project-review-fixes-design",
-      "title": "project review fixes design",
-      "file": "docs/designs/project-review-fixes-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-02-retry-handler-fail-fast-design",
-      "title": "retry handler fail fast design",
-      "file": "docs/designs/retry-handler-fail-fast-design.md",
-      "status": "proposed",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-11-sequential-pr-merge-policy-design",
-      "title": "sequential pr merge policy design",
-      "file": "docs/designs/sequential-pr-merge-policy-design.md",
-      "status": "archived",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-09-06",
-      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
-    },
-    {
-      "id": "2026-06-23-thumbnail-to-headline-nav-design",
-      "title": "thumbnail to headline nav design",
-      "file": "docs/designs/thumbnail-to-headline-nav-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-24-thumbnail-to-headline-nav-plan",
-      "title": "thumbnail to headline nav plan",
-      "file": "docs/designs/thumbnail-to-headline-nav-plan.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-23-tts-autoplay-separation-design",
-      "title": "tts autoplay separation design",
-      "file": "docs/designs/tts-autoplay-separation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-24-tts-autoplay-separation-plan",
-      "title": "tts autoplay separation plan",
-      "file": "docs/designs/tts-autoplay-separation-plan.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-24-upgrade-project-content-sync-plan",
-      "title": "upgrade project content sync plan",
-      "file": "docs/designs/upgrade-project-content-sync-plan.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-17"
-    },
-    {
-      "id": "2026-06-19-variant-specialist-agent-structure",
-      "title": "variant specialist agent structure",
-      "file": "docs/designs/variant-specialist-agent-structure.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-06-19-variant-specialist-skill-structure",
-      "title": "variant specialist skill structure",
-      "file": "docs/designs/variant-specialist-skill-structure.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
       "id": "2026-08-06-variant-templates-advancement-design",
       "title": "variant templates advancement design",
       "file": "docs/designs/variant-templates-advancement-design.md",
@@ -429,24 +420,6 @@
       "last_updated": "2026-08-16"
     },
     {
-      "id": "2026-06-01-version-manifest-implementation-plan",
-      "title": "version manifest implementation plan",
-      "file": "docs/designs/version-manifest-implementation-plan.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
-      "id": "2026-07-11-workspace-hardening-design",
-      "title": "workspace hardening design",
-      "file": "docs/designs/workspace-hardening-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-16",
-      "last_updated": "2026-08-16"
-    },
-    {
       "id": "2026-08-06-workspace-q3-improvements-design",
       "title": "workspace q3 improvements design",
       "file": "docs/designs/workspace-q3-improvements-design.md",
@@ -456,9 +429,46 @@
       "last_updated": "2026-08-16"
     },
     {
+      "id": "2026-08-09-l2-pipeline-governance-fixes",
+      "title": "l2 pipeline governance fixes",
+      "file": "docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md",
+      "status": "proposed",
+      "source": "architect",
+      "created": "2026-08-09",
+      "last_updated": "2026-08-09"
+    },
+    {
+      "id": "2026-08-12-project-review-fixes-design",
+      "title": "project review fixes design",
+      "file": "docs/designs/project-review-fixes-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
+      "id": "2026-08-16-august-regression-coverage-design",
+      "title": "august regression coverage design",
+      "file": "docs/designs/2026-08-16-august-regression-coverage-design.md",
+      "status": "proposed",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-08-16"
+    },
+    {
       "id": "2026-08-16-governance-backlog-design",
       "title": "governance backlog design",
       "file": "docs/designs/2026-08-16-governance-backlog-design.md",
+      "status": "archived",
+      "source": "manual",
+      "created": "2026-08-16",
+      "last_updated": "2026-09-06",
+      "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
+    },
+    {
+      "id": "2026-08-16-spec-registry-enforcement-design",
+      "title": "spec registry enforcement design",
+      "file": "docs/designs/2026-08-16-spec-registry-enforcement-design.md",
       "status": "archived",
       "source": "manual",
       "created": "2026-08-16",
@@ -486,15 +496,6 @@
       "archive_note": "governance sweep 2026-09-06: approved >14d without implementation — archived; reopen by setting status back to approved/proposed"
     },
     {
-      "id": "2026-08-24-skill-relationship-graph-infrastructure-design",
-      "title": "skill relationship graph infrastructure design",
-      "file": "docs/designs/2026-08-24-skill-relationship-graph-infrastructure-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-23",
-      "last_updated": "2026-08-23"
-    },
-    {
       "id": "2026-08-24-decision-chain-standard-design",
       "title": "decision chain standard design",
       "file": "docs/designs/2026-08-24-decision-chain-standard-design.md",
@@ -502,6 +503,15 @@
       "source": "manual",
       "created": "2026-08-23",
       "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-handbook-i18n-parity-gate-design",
+      "title": "handbook i18n parity gate design",
+      "file": "docs/designs/2026-08-24-handbook-i18n-parity-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
     },
     {
       "id": "2026-08-24-i18n-specialist-suite-design",
@@ -513,36 +523,9 @@
       "last_updated": "2026-08-23"
     },
     {
-      "id": "2026-08-24-variant-i18n-consolidation-design",
-      "title": "variant i18n consolidation design",
-      "file": "docs/designs/2026-08-24-variant-i18n-consolidation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-24",
-      "last_updated": "2026-08-24"
-    },
-    {
       "id": "2026-08-24-marker-propagation-engine-design",
       "title": "marker propagation engine design",
       "file": "docs/designs/2026-08-24-marker-propagation-engine-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-24",
-      "last_updated": "2026-08-24"
-    },
-    {
-      "id": "2026-08-24-user-guide-hash-gate-design",
-      "title": "user guide translated_from_hash gate design",
-      "file": "docs/designs/2026-08-24-user-guide-hash-gate-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-24",
-      "last_updated": "2026-08-24"
-    },
-    {
-      "id": "2026-08-24-handbook-i18n-parity-gate-design",
-      "title": "handbook i18n parity gate design",
-      "file": "docs/designs/2026-08-24-handbook-i18n-parity-gate-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-08-24",
@@ -556,6 +539,42 @@
       "source": "manual",
       "created": "2026-08-24",
       "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-skill-relationship-graph-infrastructure-design",
+      "title": "skill relationship graph infrastructure design",
+      "file": "docs/designs/2026-08-24-skill-relationship-graph-infrastructure-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-23",
+      "last_updated": "2026-08-23"
+    },
+    {
+      "id": "2026-08-24-user-guide-hash-gate-design",
+      "title": "user guide translated_from_hash gate design",
+      "file": "docs/designs/2026-08-24-user-guide-hash-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-24-variant-i18n-consolidation-design",
+      "title": "variant i18n consolidation design",
+      "file": "docs/designs/2026-08-24-variant-i18n-consolidation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-24",
+      "last_updated": "2026-08-24"
+    },
+    {
+      "id": "2026-08-25-pipeline-cascade-repass-design",
+      "title": "Pipeline cascade re-pass design (dev-sync step 4.62)",
+      "file": "docs/designs/2026-08-25-pipeline-cascade-repass-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-25",
+      "last_updated": "2026-08-25"
     },
     {
       "id": "2026-08-25-skill-graph-document-layer-design",
@@ -576,15 +595,6 @@
       "last_updated": "2026-08-25"
     },
     {
-      "id": "2026-08-25-pipeline-cascade-repass-design",
-      "title": "Pipeline cascade re-pass design (dev-sync step 4.62)",
-      "file": "docs/designs/2026-08-25-pipeline-cascade-repass-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-25",
-      "last_updated": "2026-08-25"
-    },
-    {
       "id": "2026-08-28-project-doc-marker-drift-detection-design",
       "title": "project doc marker drift detection design",
       "file": "docs/designs/2026-08-28-project-doc-marker-drift-detection-design.md",
@@ -592,15 +602,6 @@
       "source": "manual",
       "created": "2026-08-28",
       "last_updated": "2026-08-28"
-    },
-    {
-      "id": "skillhygiene",
-      "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
-      "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-08-28",
-      "last_updated": "2026-08-29"
     },
     {
       "id": "2026-08-29-relation-graph-evolution-and-decision-chain",
@@ -639,9 +640,9 @@
       "last_updated": "2026-09-01"
     },
     {
-      "id": "2026-09-06-yaml-language-validation-design",
-      "title": "yaml language validation design",
-      "file": "docs/designs/2026-09-06-yaml-language-validation-design.md",
+      "id": "2026-09-06-resync-hardening-design",
+      "title": "resync hardening design",
+      "file": "docs/designs/2026-09-06-resync-hardening-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-06",
@@ -657,9 +658,9 @@
       "last_updated": "2026-09-06"
     },
     {
-      "id": "2026-09-06-resync-hardening-design",
-      "title": "resync hardening design",
-      "file": "docs/designs/2026-09-06-resync-hardening-design.md",
+      "id": "2026-09-06-yaml-language-validation-design",
+      "title": "yaml language validation design",
+      "file": "docs/designs/2026-09-06-yaml-language-validation-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-06",
@@ -673,6 +674,15 @@
       "source": "manual",
       "created": "2026-09-09",
       "last_updated": "2026-09-09"
+    },
+    {
+      "id": "2026-09-10-context-purification-design",
+      "title": "context purification design",
+      "file": "docs/designs/2026-09-10-context-purification-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-10",
+      "last_updated": "2026-09-10"
     },
     {
       "id": "2026-09-10-marker-engine-remediation-design",
@@ -693,9 +703,18 @@
       "last_updated": "2026-09-10"
     },
     {
-      "id": "2026-09-10-context-purification-design",
-      "title": "context purification design",
-      "file": "docs/designs/2026-09-10-context-purification-design.md",
+      "id": "2026-09-11-k-skills-advancement-design",
+      "title": "k skills advancement design",
+      "file": "docs/designs/2026-09-11-k-skills-advancement-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-11",
+      "last_updated": "2026-09-11"
+    },
+    {
+      "id": "2026-09-11-nightly-ticket-batch-automation-design",
+      "title": "nightly ticket batch automation design",
+      "file": "docs/designs/2026-09-11-nightly-ticket-batch-automation-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-10",
@@ -709,24 +728,6 @@
       "source": "manual",
       "created": "2026-09-10",
       "last_updated": "2026-09-10"
-    },
-    {
-      "id": "2026-09-11-nightly-ticket-batch-automation-design",
-      "title": "nightly ticket batch automation design",
-      "file": "docs/designs/2026-09-11-nightly-ticket-batch-automation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-10",
-      "last_updated": "2026-09-10"
-    },
-    {
-      "id": "2026-09-11-k-skills-advancement-design",
-      "title": "k skills advancement design",
-      "file": "docs/designs/2026-09-11-k-skills-advancement-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-11",
-      "last_updated": "2026-09-11"
     },
     {
       "id": "2026-09-11-upgrade-policy-coverage-design",
@@ -756,12 +757,12 @@
       "last_updated": "2026-09-11"
     },
     {
-      "id": "2026-09-12-universal-design-gate-design",
-      "title": "universal design gate design",
-      "file": "docs/designs/2026-09-12-universal-design-gate-design.md",
+      "id": "2026-09-12-graft-wiring-refresh-design",
+      "title": "graft wiring refresh design",
+      "file": "docs/designs/2026-09-12-graft-wiring-refresh-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-09-11",
+      "created": "2026-09-12",
       "last_updated": "2026-09-12"
     },
     {
@@ -774,12 +775,12 @@
       "last_updated": "2026-09-12"
     },
     {
-      "id": "2026-09-12-graft-wiring-refresh-design",
-      "title": "graft wiring refresh design",
-      "file": "docs/designs/2026-09-12-graft-wiring-refresh-design.md",
+      "id": "2026-09-12-universal-design-gate-design",
+      "title": "universal design gate design",
+      "file": "docs/designs/2026-09-12-universal-design-gate-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-09-12",
+      "created": "2026-09-11",
       "last_updated": "2026-09-12"
     },
     {
@@ -792,15 +793,6 @@
       "last_updated": "2026-09-12"
     },
     {
-      "id": "2026-09-13-llm-work-routing-design",
-      "title": "llm work routing design",
-      "file": "docs/designs/2026-09-13-llm-work-routing-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-13",
-      "last_updated": "2026-09-13"
-    },
-    {
       "id": "2026-09-13-cosafety-zone-reconciliation-design",
       "title": "cosafety zone reconciliation design",
       "file": "docs/designs/2026-09-13-cosafety-zone-reconciliation-design.md",
@@ -810,9 +802,9 @@
       "last_updated": "2026-09-13"
     },
     {
-      "id": "2026-09-13-variant-context-fleet-inclusion-design",
-      "title": "variant context fleet inclusion design",
-      "file": "docs/designs/2026-09-13-variant-context-fleet-inclusion-design.md",
+      "id": "2026-09-13-llm-work-routing-design",
+      "title": "llm work routing design",
+      "file": "docs/designs/2026-09-13-llm-work-routing-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-13",
@@ -828,27 +820,27 @@
       "last_updated": "2026-09-13"
     },
     {
-      "id": "2026-09-15-agent-tier-drift-check-design",
-      "title": "agent tier drift check design",
-      "file": "docs/designs/2026-09-15-agent-tier-drift-check-design.md",
+      "id": "2026-09-13-variant-context-fleet-inclusion-design",
+      "title": "variant context fleet inclusion design",
+      "file": "docs/designs/2026-09-13-variant-context-fleet-inclusion-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-09-15",
-      "last_updated": "2026-09-15"
-    },
-    {
-      "id": "2026-09-15-root-stray-cleanup-design",
-      "title": "root stray cleanup design",
-      "file": "docs/designs/2026-09-15-root-stray-cleanup-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-15",
-      "last_updated": "2026-09-15"
+      "created": "2026-09-13",
+      "last_updated": "2026-09-13"
     },
     {
       "id": "2026-09-15-agent-metadata-drift-check-design",
       "title": "agent metadata drift check design",
       "file": "docs/designs/2026-09-15-agent-metadata-drift-check-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-15",
+      "last_updated": "2026-09-15"
+    },
+    {
+      "id": "2026-09-15-agent-tier-drift-check-design",
+      "title": "agent tier drift check design",
+      "file": "docs/designs/2026-09-15-agent-tier-drift-check-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-15",
@@ -864,13 +856,13 @@
       "last_updated": "2026-09-15"
     },
     {
-      "id": "2026-09-15-upgrade-project-drift-fixes-design",
-      "title": "upgrade project drift fixes design",
-      "file": "docs/designs/2026-09-15-upgrade-project-drift-fixes-design.md",
+      "id": "2026-09-15-root-stray-cleanup-design",
+      "title": "root stray cleanup design",
+      "file": "docs/designs/2026-09-15-root-stray-cleanup-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-15",
-      "last_updated": "2026-10-01"
+      "last_updated": "2026-09-15"
     },
     {
       "id": "2026-09-15-template-fleet-review-remediations-design",
@@ -882,81 +874,18 @@
       "last_updated": "2026-09-15"
     },
     {
-      "id": "2026-09-16-registry-version-parity-hardening-design",
-      "title": "registry version parity hardening design",
-      "file": "docs/designs/2026-09-16-registry-version-parity-hardening-design.md",
+      "id": "2026-09-15-upgrade-project-drift-fixes-design",
+      "title": "upgrade project drift fixes design",
+      "file": "docs/designs/2026-09-15-upgrade-project-drift-fixes-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-15",
-      "last_updated": "2026-09-15"
-    },
-    {
-      "id": "2026-09-16-scaffold-delivery-validation-design",
-      "title": "scaffold delivery validation design",
-      "file": "docs/designs/2026-09-16-scaffold-delivery-validation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-15",
-      "last_updated": "2026-09-15"
-    },
-    {
-      "id": "2026-09-16-propagation-target-derivation-design",
-      "title": "propagation target derivation design",
-      "file": "docs/designs/2026-09-16-propagation-target-derivation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
-    },
-    {
-      "id": "2026-09-16-variant-ization-overlay-guard-design",
-      "title": "variant ization overlay guard design",
-      "file": "docs/designs/2026-09-16-variant-ization-overlay-guard-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
-    },
-    {
-      "id": "2026-09-16-upgrade-target-realpath-guard-design",
-      "title": "upgrade target realpath guard design",
-      "file": "docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
+      "last_updated": "2026-10-01"
     },
     {
       "id": "2026-09-16-lifecycle-gate-and-pm-role-completion-design",
       "title": "lifecycle gate and pm role completion design",
       "file": "docs/designs/2026-09-16-lifecycle-gate-and-pm-role-completion-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
-    },
-    {
-      "id": "2026-09-16-scaffold-fresh-audit-remediation-design",
-      "title": "scaffold fresh audit remediation design",
-      "file": "docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
-    },
-    {
-      "id": "2026-09-16-template-tree-infra-consistency-design",
-      "title": "template tree infra consistency design",
-      "file": "docs/designs/2026-09-16-template-tree-infra-consistency-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-16",
-      "last_updated": "2026-09-16"
-    },
-    {
-      "id": "2026-09-16-new-project-provenance-alignment-design",
-      "title": "new project provenance alignment design",
-      "file": "docs/designs/2026-09-16-new-project-provenance-alignment-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-16",
@@ -981,6 +910,15 @@
       "last_updated": "2026-09-16"
     },
     {
+      "id": "2026-09-16-new-project-provenance-alignment-design",
+      "title": "new project provenance alignment design",
+      "file": "docs/designs/2026-09-16-new-project-provenance-alignment-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
+    },
+    {
       "id": "2026-09-16-pre-push-deletion-skip-design",
       "title": "pre push deletion skip design",
       "file": "docs/designs/2026-09-16-pre-push-deletion-skip-design.md",
@@ -990,9 +928,63 @@
       "last_updated": "2026-09-16"
     },
     {
-      "id": "2026-09-17-project-review-remediations-design",
-      "title": "project review remediations design",
-      "file": "docs/designs/2026-09-17-project-review-remediations-design.md",
+      "id": "2026-09-16-propagation-target-derivation-design",
+      "title": "propagation target derivation design",
+      "file": "docs/designs/2026-09-16-propagation-target-derivation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-registry-version-parity-hardening-design",
+      "title": "registry version parity hardening design",
+      "file": "docs/designs/2026-09-16-registry-version-parity-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-15",
+      "last_updated": "2026-09-15"
+    },
+    {
+      "id": "2026-09-16-scaffold-delivery-validation-design",
+      "title": "scaffold delivery validation design",
+      "file": "docs/designs/2026-09-16-scaffold-delivery-validation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-15",
+      "last_updated": "2026-09-15"
+    },
+    {
+      "id": "2026-09-16-scaffold-fresh-audit-remediation-design",
+      "title": "scaffold fresh audit remediation design",
+      "file": "docs/designs/2026-09-16-scaffold-fresh-audit-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-template-tree-infra-consistency-design",
+      "title": "template tree infra consistency design",
+      "file": "docs/designs/2026-09-16-template-tree-infra-consistency-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-upgrade-target-realpath-guard-design",
+      "title": "upgrade target realpath guard design",
+      "file": "docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
+    },
+    {
+      "id": "2026-09-16-variant-ization-overlay-guard-design",
+      "title": "variant ization overlay guard design",
+      "file": "docs/designs/2026-09-16-variant-ization-overlay-guard-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-16",
@@ -1008,15 +1000,6 @@
       "last_updated": "2026-09-16"
     },
     {
-      "id": "2026-09-17-instruction-policy-wiring-design",
-      "title": "instruction policy wiring design",
-      "file": "docs/designs/2026-09-17-instruction-policy-wiring-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-17",
-      "last_updated": "2026-09-17"
-    },
-    {
       "id": "2026-09-17-instruction-lint-probe-design",
       "title": "instruction lint probe design",
       "file": "docs/designs/2026-09-17-instruction-lint-probe-design.md",
@@ -1026,13 +1009,22 @@
       "last_updated": "2026-09-17"
     },
     {
-      "id": "2026-09-18-pm-team-management-authority-design",
-      "title": "pm team management authority design",
-      "file": "docs/designs/2026-09-18-pm-team-management-authority-design.md",
+      "id": "2026-09-17-instruction-policy-wiring-design",
+      "title": "instruction policy wiring design",
+      "file": "docs/designs/2026-09-17-instruction-policy-wiring-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-09-18",
-      "last_updated": "2026-09-18"
+      "created": "2026-09-17",
+      "last_updated": "2026-09-17"
+    },
+    {
+      "id": "2026-09-17-project-review-remediations-design",
+      "title": "project review remediations design",
+      "file": "docs/designs/2026-09-17-project-review-remediations-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-16",
+      "last_updated": "2026-09-16"
     },
     {
       "id": "2026-09-18-delivery-pipeline-hardening-design",
@@ -1044,14 +1036,23 @@
       "last_updated": "2026-09-18"
     },
     {
-      "id": "2026-06-02-governance-docs-architecture-design",
-      "title": "governance docs architecture design",
-      "file": "docs/designs/2026-06-02-governance-docs-architecture-design.md",
-      "status": "archived",
+      "id": "2026-09-18-pm-team-management-authority-design",
+      "title": "pm team management authority design",
+      "file": "docs/designs/2026-09-18-pm-team-management-authority-design.md",
+      "status": "implemented",
       "source": "manual",
-      "created": "2026-06-02",
-      "last_updated": "2026-10-04",
-      "archive_note": "archived 2026-10-04 (T-20261004-004): P2 never implemented; duplication concern now managed by COMMON-CLAUDE marker zones + the marker-inject engine and ADR-0090 thin dispatchers."
+      "created": "2026-09-18",
+      "last_updated": "2026-09-18"
+    },
+    {
+      "id": "2026-09-19-actor-model-and-evidence-backport-design",
+      "title": "actor model and evidence backport design",
+      "file": "docs/designs/2026-09-19-actor-model-and-evidence-backport-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-19",
+      "last_updated": "2026-09-19",
+      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
     },
     {
       "id": "2026-09-19-local-ticket-runner-migration-design",
@@ -1073,19 +1074,9 @@
       "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
     },
     {
-      "id": "2026-09-19-actor-model-and-evidence-backport-design",
-      "title": "actor model and evidence backport design",
-      "file": "docs/designs/2026-09-19-actor-model-and-evidence-backport-design.md",
-      "status": "approved",
-      "source": "architect",
-      "created": "2026-09-19",
-      "last_updated": "2026-09-19",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
-    },
-    {
-      "id": "2026-09-20-platform-flag-all-rename-design",
-      "title": "platform flag all rename design",
-      "file": "docs/designs/2026-09-20-platform-flag-all-rename-design.md",
+      "id": "2026-09-20-gitattributes-lf-enforcement-design",
+      "title": "gitattributes lf enforcement design",
+      "file": "docs/designs/2026-09-20-gitattributes-lf-enforcement-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-20",
@@ -1101,18 +1092,27 @@
       "last_updated": "2026-09-20"
     },
     {
-      "id": "2026-09-20-skill-session-review-reporting-fixes-design",
-      "title": "skill session review reporting fixes design",
-      "file": "docs/designs/2026-09-20-skill-session-review-reporting-fixes-design.md",
+      "id": "2026-09-20-handbook-skill-maintenance-mode-design",
+      "title": "handbook skill maintenance mode design",
+      "file": "docs/designs/2026-09-20-handbook-skill-maintenance-mode-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
     },
     {
-      "id": "2026-09-20-handbook-skill-maintenance-mode-design",
-      "title": "handbook skill maintenance mode design",
-      "file": "docs/designs/2026-09-20-handbook-skill-maintenance-mode-design.md",
+      "id": "2026-09-20-platform-flag-all-rename-design",
+      "title": "platform flag all rename design",
+      "file": "docs/designs/2026-09-20-platform-flag-all-rename-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-20-skill-session-review-reporting-fixes-design",
+      "title": "skill session review reporting fixes design",
+      "file": "docs/designs/2026-09-20-skill-session-review-reporting-fixes-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-20",
@@ -1128,9 +1128,36 @@
       "last_updated": "2026-09-20"
     },
     {
-      "id": "2026-09-20-gitattributes-lf-enforcement-design",
-      "title": "gitattributes lf enforcement design",
-      "file": "docs/designs/2026-09-20-gitattributes-lf-enforcement-design.md",
+      "id": "2026-09-21-agent-skill-lifecycle-modernization-design",
+      "title": "agent skill lifecycle modernization design",
+      "file": "docs/designs/2026-09-21-agent-skill-lifecycle-modernization-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-20",
+      "last_updated": "2026-09-20"
+    },
+    {
+      "id": "2026-09-21-governance-backlog-batch-2-design",
+      "title": "governance backlog batch 2 design",
+      "file": "docs/designs/2026-09-21-governance-backlog-batch-2-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-21",
+      "last_updated": "2026-09-21"
+    },
+    {
+      "id": "2026-09-21-project-review-remediation-design",
+      "title": "project review remediation design",
+      "file": "docs/designs/2026-09-21-project-review-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-21",
+      "last_updated": "2026-09-21"
+    },
+    {
+      "id": "2026-09-21-upgrade-project-rollout-hardening-design",
+      "title": "upgrade project rollout hardening design",
+      "file": "docs/designs/2026-09-21-upgrade-project-rollout-hardening-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-20",
@@ -1144,42 +1171,6 @@
       "source": "manual",
       "created": "2026-09-20",
       "last_updated": "2026-09-20"
-    },
-    {
-      "id": "2026-09-21-agent-skill-lifecycle-modernization-design",
-      "title": "agent skill lifecycle modernization design",
-      "file": "docs/designs/2026-09-21-agent-skill-lifecycle-modernization-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-20",
-      "last_updated": "2026-09-20"
-    },
-    {
-      "id": "2026-09-21-upgrade-project-rollout-hardening-design",
-      "title": "upgrade project rollout hardening design",
-      "file": "docs/designs/2026-09-21-upgrade-project-rollout-hardening-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-20",
-      "last_updated": "2026-09-20"
-    },
-    {
-      "id": "2026-09-21-project-review-remediation-design",
-      "title": "project review remediation design",
-      "file": "docs/designs/2026-09-21-project-review-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-21",
-      "last_updated": "2026-09-21"
-    },
-    {
-      "id": "2026-09-21-governance-backlog-batch-2-design",
-      "title": "governance backlog batch 2 design",
-      "file": "docs/designs/2026-09-21-governance-backlog-batch-2-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-21",
-      "last_updated": "2026-09-21"
     },
     {
       "id": "2026-09-22-agent-persona-integrity-gate-design",
@@ -1200,6 +1191,24 @@
       "last_updated": "2026-09-21"
     },
     {
+      "id": "2026-09-22-variant-mirror-stale-orphan-check-design",
+      "title": "variant mirror stale orphan check design",
+      "file": "docs/designs/2026-09-22-variant-mirror-stale-orphan-check-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-23-adopt-project-conversion-design",
+      "title": "adopt project conversion design",
+      "file": "docs/designs/2026-09-23-adopt-project-conversion-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-09-23",
+      "last_updated": "2026-09-23"
+    },
+    {
       "id": "2026-09-23-codex-twin-parity-automation-design",
       "title": "codex twin parity automation design",
       "file": "docs/designs/2026-09-23-codex-twin-parity-automation-design.md",
@@ -1209,9 +1218,9 @@
       "last_updated": "2026-09-22"
     },
     {
-      "id": "2026-09-23-adopt-project-conversion-design",
-      "title": "adopt project conversion design",
-      "file": "docs/designs/2026-09-23-adopt-project-conversion-design.md",
+      "id": "2026-09-23-migrate-project-design",
+      "title": "migrate project design",
+      "file": "docs/designs/2026-09-23-migrate-project-design.md",
       "status": "draft",
       "source": "manual",
       "created": "2026-09-23",
@@ -1227,10 +1236,10 @@
       "last_updated": "2026-09-23"
     },
     {
-      "id": "2026-09-23-migrate-project-design",
-      "title": "migrate project design",
-      "file": "docs/designs/2026-09-23-migrate-project-design.md",
-      "status": "draft",
+      "id": "2026-09-23-promotion-skill-asset-parity-design",
+      "title": "promotion skill asset parity design",
+      "file": "docs/designs/2026-09-23-promotion-skill-asset-parity-design.md",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-23",
       "last_updated": "2026-09-23"
@@ -1254,24 +1263,6 @@
       "last_updated": "2026-09-23"
     },
     {
-      "id": "2026-09-23-promotion-skill-asset-parity-design",
-      "title": "promotion skill asset parity design",
-      "file": "docs/designs/2026-09-23-promotion-skill-asset-parity-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-23",
-      "last_updated": "2026-09-23"
-    },
-    {
-      "id": "2026-09-24-template-hygiene-audit-design",
-      "title": "template hygiene audit design",
-      "file": "docs/designs/2026-09-24-template-hygiene-audit-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-23",
-      "last_updated": "2026-09-23"
-    },
-    {
       "id": "2026-09-24-constitution-s33-context-injection-design",
       "title": "constitution s33 context injection design",
       "file": "docs/designs/2026-09-24-constitution-s33-context-injection-design.md",
@@ -1281,20 +1272,38 @@
       "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-24-variant-skill-mirror-drift-remediation-design",
-      "title": "variant skill mirror drift remediation design",
-      "file": "docs/designs/2026-09-24-variant-skill-mirror-drift-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
-    },
-    {
       "id": "2026-09-24-context-md-self-containment-remediation-design",
       "title": "context md self containment remediation design",
       "file": "docs/designs/2026-09-24-context-md-self-containment-remediation-design.md",
       "status": "implemented",
       "source": "architect",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-platform-parity-p1-bugfixes-design",
+      "title": "platform parity p1 bugfixes design",
+      "file": "docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-platform-ssot-constant-design",
+      "title": "platform ssot constant design",
+      "file": "docs/designs/2026-09-24-platform-ssot-constant-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
+    },
+    {
+      "id": "2026-09-24-scaffold-hygiene-bundle-design",
+      "title": "scaffold hygiene bundle design",
+      "file": "docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md",
+      "status": "implemented",
+      "source": "manual",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
     },
@@ -1317,58 +1326,31 @@
       "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-24-scaffold-hygiene-bundle-design",
-      "title": "scaffold hygiene bundle design",
-      "file": "docs/designs/2026-09-24-scaffold-hygiene-bundle-design.md",
+      "id": "2026-09-24-template-hygiene-audit-design",
+      "title": "template hygiene audit design",
+      "file": "docs/designs/2026-09-24-template-hygiene-audit-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-23",
+      "last_updated": "2026-09-23"
+    },
+    {
+      "id": "2026-09-24-variant-skill-mirror-drift-remediation-design",
+      "title": "variant skill mirror drift remediation design",
+      "file": "docs/designs/2026-09-24-variant-skill-mirror-drift-remediation-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-24-platform-ssot-constant-design",
-      "title": "platform ssot constant design",
-      "file": "docs/designs/2026-09-24-platform-ssot-constant-design.md",
-      "status": "implemented",
+      "id": "2026-09-25-agents-md-size-reduction-design",
+      "title": "agents md size reduction design",
+      "file": "docs/designs/2026-09-25-agents-md-size-reduction-design.md",
+      "status": "proposed",
       "source": "architect",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
-    },
-    {
-      "id": "2026-09-24-platform-parity-p1-bugfixes-design",
-      "title": "platform parity p1 bugfixes design",
-      "file": "docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
-    },
-    {
-      "id": "2026-09-25-verifier-platform-expansion-design",
-      "title": "verifier platform expansion design",
-      "file": "docs/designs/2026-09-25-verifier-platform-expansion-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
-    },
-    {
-      "id": "2026-09-22-variant-mirror-stale-orphan-check-design",
-      "title": "variant mirror stale orphan check design",
-      "file": "docs/designs/2026-09-22-variant-mirror-stale-orphan-check-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
-    },
-    {
-      "id": "2026-09-25-variant-hygiene-batch-design",
-      "title": "variant hygiene batch design",
-      "file": "docs/designs/2026-09-25-variant-hygiene-batch-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-24",
-      "last_updated": "2026-09-24"
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
     },
     {
       "id": "2026-09-25-codex-merge-claim-routing-design",
@@ -1380,18 +1362,47 @@
       "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-25-propagation-engine-batch-design",
-      "title": "propagation engine batch design",
-      "file": "docs/designs/2026-09-25-propagation-engine-batch-design.md",
+      "id": "2026-09-25-daily-fleet-review-resync-design",
+      "title": "daily fleet review resync design",
+      "file": "docs/designs/2026-09-25-daily-fleet-review-resync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
+    },
+    {
+      "id": "2026-09-25-hermes-agent-platform-support-design",
+      "title": "hermes agent platform support design",
+      "file": "docs/designs/2026-09-25-hermes-agent-platform-support-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25",
+      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+    },
+    {
+      "id": "2026-09-25-inventory-decisions-batch-design",
+      "title": "inventory decisions batch design",
+      "file": "docs/designs/2026-09-25-inventory-decisions-batch-design.md",
       "status": "implemented",
       "source": "architect",
       "created": "2026-09-24",
       "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-25-inventory-decisions-batch-design",
-      "title": "inventory decisions batch design",
-      "file": "docs/designs/2026-09-25-inventory-decisions-batch-design.md",
+      "id": "2026-09-25-mcp-governance-server-design",
+      "title": "mcp governance server design",
+      "file": "docs/designs/2026-09-25-mcp-governance-server-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25",
+      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+    },
+    {
+      "id": "2026-09-25-propagation-engine-batch-design",
+      "title": "propagation engine batch design",
+      "file": "docs/designs/2026-09-25-propagation-engine-batch-design.md",
       "status": "implemented",
       "source": "architect",
       "created": "2026-09-24",
@@ -1407,120 +1418,27 @@
       "last_updated": "2026-09-25"
     },
     {
-      "id": "2026-09-25-hermes-agent-platform-support-design",
-      "title": "hermes agent platform support design",
-      "file": "docs/designs/2026-09-25-hermes-agent-platform-support-design.md",
-      "status": "approved",
-      "source": "architect",
-      "created": "2026-09-25",
-      "last_updated": "2026-09-25",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
-    },
-    {
-      "id": "2026-09-25-mcp-governance-server-design",
-      "title": "mcp governance server design",
-      "file": "docs/designs/2026-09-25-mcp-governance-server-design.md",
-      "status": "approved",
-      "source": "architect",
-      "created": "2026-09-25",
-      "last_updated": "2026-09-25",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
-    },
-    {
-      "id": "2026-09-25-daily-fleet-review-resync-design",
-      "title": "daily fleet review resync design",
-      "file": "docs/designs/2026-09-25-daily-fleet-review-resync-design.md",
+      "id": "2026-09-25-variant-hygiene-batch-design",
+      "title": "variant hygiene batch design",
+      "file": "docs/designs/2026-09-25-variant-hygiene-batch-design.md",
       "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-25",
-      "last_updated": "2026-09-25"
-    },
-    {
-      "id": "2026-09-25-agents-md-size-reduction-design",
-      "title": "agents md size reduction design",
-      "file": "docs/designs/2026-09-25-agents-md-size-reduction-design.md",
-      "status": "proposed",
       "source": "architect",
-      "created": "2026-09-25",
-      "last_updated": "2026-09-25"
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     },
     {
-      "id": "2026-09-26-kr-llm-config-standardization-design",
-      "title": "kr llm config standardization design",
-      "file": "docs/designs/2026-09-26-kr-llm-config-standardization-design.md",
-      "status": "approved",
+      "id": "2026-09-25-verifier-platform-expansion-design",
+      "title": "verifier platform expansion design",
+      "file": "docs/designs/2026-09-25-verifier-platform-expansion-design.md",
+      "status": "implemented",
       "source": "architect",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
-    },
-    {
-      "id": "2026-09-26-review-remediation-design",
-      "title": "review remediation design",
-      "file": "docs/designs/2026-09-26-review-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-runner-lock-retry-enforcement-design",
-      "title": "runner lock retry enforcement design",
-      "file": "docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md",
-      "status": "draft",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-l3-pipeline-roster-regex-design",
-      "title": "l3 pipeline roster regex design",
-      "file": "docs/designs/2026-09-26-l3-pipeline-roster-regex-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
     },
     {
       "id": "2026-09-26-co-abap-newreq-backport-design",
       "title": "co abap newreq backport design",
       "file": "docs/designs/2026-09-26-co-abap-newreq-backport-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-regen-agents-md-l3-skill-prune-design",
-      "title": "regen agents md l3 skill prune design",
-      "file": "docs/designs/2026-09-26-regen-agents-md-l3-skill-prune-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-upgrade-variant-json-delivery-design",
-      "title": "upgrade variant json delivery design",
-      "file": "docs/designs/2026-09-26-upgrade-variant-json-delivery-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-sync-skills-ghost-cleanup-design",
-      "title": "sync skills ghost cleanup design",
-      "file": "docs/designs/2026-09-26-sync-skills-ghost-cleanup-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-26-dev-sync-unborn-main-bootstrap-design",
-      "title": "dev sync unborn main bootstrap design",
-      "file": "docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-26",
@@ -1547,9 +1465,37 @@
       "meeting_ref": "memory/meeting-2026-09-26-design-foundation-improvements.md"
     },
     {
+      "id": "2026-09-26-dev-sync-unborn-main-bootstrap-design",
+      "title": "dev sync unborn main bootstrap design",
+      "file": "docs/designs/2026-09-26-dev-sync-unborn-main-bootstrap-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
       "id": "2026-09-26-graft-helper-1048-propagation-design",
       "title": "graft helper 1048 propagation design",
       "file": "docs/designs/2026-09-26-graft-helper-1048-propagation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-kr-llm-config-standardization-design",
+      "title": "kr llm config standardization design",
+      "file": "docs/designs/2026-09-26-kr-llm-config-standardization-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26",
+      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+    },
+    {
+      "id": "2026-09-26-l3-pipeline-roster-regex-design",
+      "title": "l3 pipeline roster regex design",
+      "file": "docs/designs/2026-09-26-l3-pipeline-roster-regex-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-26",
@@ -1565,6 +1511,51 @@
       "last_updated": "2026-09-30"
     },
     {
+      "id": "2026-09-26-regen-agents-md-l3-skill-prune-design",
+      "title": "regen agents md l3 skill prune design",
+      "file": "docs/designs/2026-09-26-regen-agents-md-l3-skill-prune-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-review-remediation-design",
+      "title": "review remediation design",
+      "file": "docs/designs/2026-09-26-review-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-runner-lock-retry-enforcement-design",
+      "title": "runner lock retry enforcement design",
+      "file": "docs/designs/2026-09-26-runner-lock-retry-enforcement-design.md",
+      "status": "draft",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-sync-skills-ghost-cleanup-design",
+      "title": "sync skills ghost cleanup design",
+      "file": "docs/designs/2026-09-26-sync-skills-ghost-cleanup-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-26-upgrade-variant-json-delivery-design",
+      "title": "upgrade variant json delivery design",
+      "file": "docs/designs/2026-09-26-upgrade-variant-json-delivery-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
       "id": "2026-09-27-auto-template-release-design",
       "title": "auto template release design",
       "file": "docs/designs/2026-09-27-auto-template-release-design.md",
@@ -1572,42 +1563,6 @@
       "source": "manual",
       "created": "2026-09-26",
       "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-27-docs-current-state-sync-design",
-      "title": "docs current state sync design",
-      "file": "docs/designs/2026-09-27-docs-current-state-sync-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-26",
-      "last_updated": "2026-09-26"
-    },
-    {
-      "id": "2026-09-27-co-workspace-service-design",
-      "title": "team gateway service design",
-      "file": "docs/designs/2026-09-27-co-workspace-service-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-27",
-      "last_updated": "2026-09-27"
-    },
-    {
-      "id": "2026-09-27-hermes-md-instruction-file-design",
-      "title": "hermes md instruction file design",
-      "file": "docs/designs/2026-09-27-hermes-md-instruction-file-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-27",
-      "last_updated": "2026-09-27"
-    },
-    {
-      "id": "2026-09-27-new-project-skill-design",
-      "title": "new project skill design",
-      "file": "docs/designs/2026-09-27-new-project-skill-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-09-27",
-      "last_updated": "2026-09-27"
     },
     {
       "id": "2026-09-27-co-workspace-phase2-hardening-design",
@@ -1619,9 +1574,18 @@
       "last_updated": "2026-09-27"
     },
     {
-      "id": "2026-09-27-hermes-merge-marker-design",
-      "title": "hermes merge marker design",
-      "file": "docs/designs/2026-09-27-hermes-merge-marker-design.md",
+      "id": "2026-09-27-co-workspace-qa-fair-and-security-review",
+      "title": "team gateway qa fair and security review",
+      "file": "docs/designs/2026-09-27-co-workspace-qa-fair-and-security-review.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-27",
+      "last_updated": "2026-09-28"
+    },
+    {
+      "id": "2026-09-27-co-workspace-service-design",
+      "title": "team gateway service design",
+      "file": "docs/designs/2026-09-27-co-workspace-service-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-27",
@@ -1637,9 +1601,36 @@
       "last_updated": "2026-09-27"
     },
     {
-      "id": "2026-09-28-sound-synth-orphan-mirror-cleanup-design",
-      "title": "sound synth orphan mirror cleanup design",
-      "file": "docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md",
+      "id": "2026-09-27-docs-current-state-sync-design",
+      "title": "docs current state sync design",
+      "file": "docs/designs/2026-09-27-docs-current-state-sync-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-26",
+      "last_updated": "2026-09-26"
+    },
+    {
+      "id": "2026-09-27-hermes-md-instruction-file-design",
+      "title": "hermes md instruction file design",
+      "file": "docs/designs/2026-09-27-hermes-md-instruction-file-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-27",
+      "last_updated": "2026-09-27"
+    },
+    {
+      "id": "2026-09-27-hermes-merge-marker-design",
+      "title": "hermes merge marker design",
+      "file": "docs/designs/2026-09-27-hermes-merge-marker-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-27",
+      "last_updated": "2026-09-27"
+    },
+    {
+      "id": "2026-09-27-new-project-skill-design",
+      "title": "new project skill design",
+      "file": "docs/designs/2026-09-27-new-project-skill-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-27",
@@ -1655,13 +1646,13 @@
       "last_updated": "2026-10-01"
     },
     {
-      "id": "2026-09-27-co-workspace-qa-fair-and-security-review",
-      "title": "team gateway qa fair and security review",
-      "file": "docs/designs/2026-09-27-co-workspace-qa-fair-and-security-review.md",
+      "id": "2026-09-28-sound-synth-orphan-mirror-cleanup-design",
+      "title": "sound synth orphan mirror cleanup design",
+      "file": "docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-09-27",
-      "last_updated": "2026-09-28"
+      "last_updated": "2026-09-27"
     },
     {
       "id": "2026-09-29-co-workspace-provider-key-config-design",
@@ -1682,14 +1673,23 @@
       "last_updated": "2026-09-29"
     },
     {
-      "id": "2026-09-30-validator-gap-port-design",
-      "title": "validator gap port design",
-      "file": "docs/designs/2026-09-30-validator-gap-port-design.md",
-      "status": "approved",
+      "id": "2026-09-30-coworkspace-docker-broker-design",
+      "title": "coworkspace docker broker design",
+      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-design.md",
+      "status": "superseded",
       "source": "manual",
       "created": "2026-09-30",
       "last_updated": "2026-09-30",
-      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+      "superseded_by": "2026-09-30-coworkspace-docker-broker-raw-proxy-design"
+    },
+    {
+      "id": "2026-09-30-coworkspace-docker-broker-raw-proxy-design",
+      "title": "coworkspace docker broker raw proxy design",
+      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-raw-proxy-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
     },
     {
       "id": "2026-09-30-coworkspace-latency-ux-design",
@@ -1699,6 +1699,43 @@
       "source": "manual",
       "created": "2026-09-30",
       "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-login-exempt-design",
+      "title": "coworkspace login exempt design",
+      "file": "docs/designs/2026-09-30-coworkspace-login-exempt-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-coworkspace-volume-subpath-design",
+      "title": "coworkspace volume subpath design",
+      "file": "docs/designs/2026-09-30-coworkspace-volume-subpath-design.md",
+      "status": "implemented",
+      "source": "architect",
+      "created": "2026-09-30",
+      "last_updated": "2026-10-03"
+    },
+    {
+      "id": "2026-09-30-coworkspace-web-split-plan",
+      "title": "coworkspace web split plan",
+      "file": "docs/designs/2026-09-30-coworkspace-web-split-plan.md",
+      "status": "planned",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30"
+    },
+    {
+      "id": "2026-09-30-pm-extends-pointer-retarget-design",
+      "title": "pm extends pointer retarget design",
+      "file": "docs/designs/2026-09-30-pm-extends-pointer-retarget-design.md",
+      "status": "superseded",
+      "source": "manual",
+      "created": "2026-09-30",
+      "last_updated": "2026-09-30",
+      "superseded_by": "ADR-0095"
     },
     {
       "id": "2026-09-30-region-profiles-upgrade-claim-design",
@@ -1719,60 +1756,23 @@
       "last_updated": "2026-09-30"
     },
     {
-      "id": "2026-09-30-coworkspace-docker-broker-design",
-      "title": "coworkspace docker broker design",
-      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-design.md",
-      "status": "superseded",
+      "id": "2026-09-30-validator-gap-port-design",
+      "title": "validator gap port design",
+      "file": "docs/designs/2026-09-30-validator-gap-port-design.md",
+      "status": "approved",
       "source": "manual",
       "created": "2026-09-30",
       "last_updated": "2026-09-30",
-      "superseded_by": "2026-09-30-coworkspace-docker-broker-raw-proxy-design"
+      "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
     },
     {
-      "id": "2026-09-30-coworkspace-web-split-plan",
-      "title": "coworkspace web split plan",
-      "file": "docs/designs/2026-09-30-coworkspace-web-split-plan.md",
-      "status": "planned",
-      "source": "manual",
-      "created": "2026-09-30",
-      "last_updated": "2026-09-30"
-    },
-    {
-      "id": "2026-09-30-coworkspace-docker-broker-raw-proxy-design",
-      "title": "coworkspace docker broker raw proxy design",
-      "file": "docs/designs/2026-09-30-coworkspace-docker-broker-raw-proxy-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-30",
-      "last_updated": "2026-09-30"
-    },
-    {
-      "id": "2026-09-30-coworkspace-volume-subpath-design",
-      "title": "coworkspace volume subpath design",
-      "file": "docs/designs/2026-09-30-coworkspace-volume-subpath-design.md",
-      "status": "implemented",
-      "source": "architect",
-      "created": "2026-09-30",
-      "last_updated": "2026-10-03"
-    },
-    {
-      "id": "2026-09-30-coworkspace-login-exempt-design",
-      "title": "coworkspace login exempt design",
-      "file": "docs/designs/2026-09-30-coworkspace-login-exempt-design.md",
+      "id": "2026-10-01-agents-md-read-first-directive-design",
+      "title": "agents md read first directive design",
+      "file": "docs/designs/2026-10-01-agents-md-read-first-directive-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-09-30",
-      "last_updated": "2026-09-30"
-    },
-    {
-      "id": "2026-09-30-pm-extends-pointer-retarget-design",
-      "title": "pm extends pointer retarget design",
-      "file": "docs/designs/2026-09-30-pm-extends-pointer-retarget-design.md",
-      "status": "superseded",
-      "source": "manual",
-      "created": "2026-09-30",
-      "last_updated": "2026-09-30",
-      "superseded_by": "ADR-0095"
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
     },
     {
       "id": "2026-10-01-ci-template-unit-test-job-design",
@@ -1781,6 +1781,15 @@
       "status": "implemented",
       "source": "architect",
       "created": "2026-09-30",
+      "last_updated": "2026-10-01"
+    },
+    {
+      "id": "2026-10-01-fleet-security-remediation-design",
+      "title": "fleet security remediation design",
+      "file": "docs/designs/2026-10-01-fleet-security-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
       "last_updated": "2026-10-01"
     },
     {
@@ -1794,54 +1803,9 @@
       "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
     },
     {
-      "id": "2026-10-01-fleet-security-remediation-design",
-      "title": "fleet security remediation design",
-      "file": "docs/designs/2026-10-01-fleet-security-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
-      "id": "2026-10-01-upstream-request-mcp-design",
-      "title": "upstream request mcp design",
-      "file": "docs/designs/2026-10-01-upstream-request-mcp-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-02"
-    },
-    {
-      "id": "2026-10-01-agents-md-read-first-directive-design",
-      "title": "agents md read first directive design",
-      "file": "docs/designs/2026-10-01-agents-md-read-first-directive-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
       "id": "2026-10-01-scoped-staging-soak-exit-design",
       "title": "scoped staging soak exit design",
       "file": "docs/designs/2026-10-01-scoped-staging-soak-exit-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
-      "id": "2026-10-01-upstream-triage-commands-design",
-      "title": "upstream triage commands design",
-      "file": "docs/designs/2026-10-01-upstream-triage-commands-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
-      "id": "2026-10-01-upstream-intake-hardening-design",
-      "title": "upstream intake hardening design",
-      "file": "docs/designs/2026-10-01-upstream-intake-hardening-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-10-01",
@@ -1857,6 +1821,33 @@
       "last_updated": "2026-10-01"
     },
     {
+      "id": "2026-10-01-upstream-intake-hardening-design",
+      "title": "upstream intake hardening design",
+      "file": "docs/designs/2026-10-01-upstream-intake-hardening-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
+    },
+    {
+      "id": "2026-10-01-upstream-request-mcp-design",
+      "title": "upstream request mcp design",
+      "file": "docs/designs/2026-10-01-upstream-request-mcp-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-02"
+    },
+    {
+      "id": "2026-10-01-upstream-triage-commands-design",
+      "title": "upstream triage commands design",
+      "file": "docs/designs/2026-10-01-upstream-triage-commands-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
+    },
+    {
       "id": "2026-10-01-upstream-vendor-recheck-design",
       "title": "upstream vendor recheck design",
       "file": "docs/designs/2026-10-01-upstream-vendor-recheck-design.md",
@@ -1866,18 +1857,18 @@
       "last_updated": "2026-10-01"
     },
     {
+      "id": "2026-10-01-variant-phase-ownership-design",
+      "title": "variant phase ownership design",
+      "file": "docs/designs/2026-10-01-variant-phase-ownership-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
+    },
+    {
       "id": "2026-10-02-context-footer-bump-design",
       "title": "context footer bump design",
       "file": "docs/designs/2026-10-02-context-footer-bump-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
-      "id": "2026-10-02-self-managed-tool-surfaces-design",
-      "title": "self managed tool surfaces design",
-      "file": "docs/designs/2026-10-02-self-managed-tool-surfaces-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-10-01",
@@ -1893,15 +1884,6 @@
       "last_updated": "2026-10-01"
     },
     {
-      "id": "2026-10-02-gate-anonymous-tenant-provisioning-design",
-      "title": "gate anonymous tenant provisioning design",
-      "file": "docs/designs/2026-10-02-gate-anonymous-tenant-provisioning-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-01",
-      "last_updated": "2026-10-01"
-    },
-    {
       "id": "2026-10-02-coworkspace-rotation-keeps-session-design",
       "title": "coworkspace rotation keeps session design",
       "file": "docs/designs/2026-10-02-coworkspace-rotation-keeps-session-design.md",
@@ -1911,6 +1893,15 @@
       "last_updated": "2026-10-02"
     },
     {
+      "id": "2026-10-02-gate-anonymous-tenant-provisioning-design",
+      "title": "gate anonymous tenant provisioning design",
+      "file": "docs/designs/2026-10-02-gate-anonymous-tenant-provisioning-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
+    },
+    {
       "id": "2026-10-02-pm-role-bootstrap-design",
       "title": "pm role bootstrap design",
       "file": "docs/designs/2026-10-02-pm-role-bootstrap-design.md",
@@ -1918,6 +1909,15 @@
       "source": "manual",
       "created": "2026-10-02",
       "last_updated": "2026-10-02"
+    },
+    {
+      "id": "2026-10-02-self-managed-tool-surfaces-design",
+      "title": "self managed tool surfaces design",
+      "file": "docs/designs/2026-10-02-self-managed-tool-surfaces-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-01",
+      "last_updated": "2026-10-01"
     },
     {
       "id": "2026-10-02-upstream-review-backlog-remediations-design",
@@ -1938,54 +1938,9 @@
       "last_updated": "2026-10-02"
     },
     {
-      "id": "2026-10-03-validator-warning-fixes-design",
-      "title": "validator warning fixes design",
-      "file": "docs/designs/2026-10-03-validator-warning-fixes-design.md",
-      "status": "draft",
-      "source": "manual",
-      "created": "2026-10-02",
-      "last_updated": "2026-10-02"
-    },
-    {
-      "id": "2026-10-01-variant-phase-ownership-design",
-      "title": "variant phase ownership design",
-      "file": "docs/designs/2026-10-01-variant-phase-ownership-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-02",
-      "last_updated": "2026-10-02"
-    },
-    {
-      "id": "2026-10-03-edu-sync-publisher-base-reset-design",
-      "title": "edu sync publisher base reset design",
-      "file": "docs/designs/2026-10-03-edu-sync-publisher-base-reset-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-02",
-      "last_updated": "2026-10-02"
-    },
-    {
-      "id": "2026-10-03-coworkspace-review-remediation-design",
-      "title": "coworkspace review remediation design",
-      "file": "docs/designs/2026-10-03-coworkspace-review-remediation-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-03",
-      "last_updated": "2026-10-03"
-    },
-    {
       "id": "2026-10-03-coworkspace-cli-provider-key-design",
       "title": "coworkspace cli provider key design",
       "file": "docs/designs/2026-10-03-coworkspace-cli-provider-key-design.md",
-      "status": "approved",
-      "source": "manual",
-      "created": "2026-10-03",
-      "last_updated": "2026-10-03"
-    },
-    {
-      "id": "2026-10-03-coworkspace-sibling-turns-design",
-      "title": "coworkspace sibling turns design",
-      "file": "docs/designs/2026-10-03-coworkspace-sibling-turns-design.md",
       "status": "approved",
       "source": "manual",
       "created": "2026-10-03",
@@ -2001,9 +1956,27 @@
       "last_updated": "2026-10-03"
     },
     {
+      "id": "2026-10-03-coworkspace-review-remediation-design",
+      "title": "coworkspace review remediation design",
+      "file": "docs/designs/2026-10-03-coworkspace-review-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-03",
+      "last_updated": "2026-10-03"
+    },
+    {
       "id": "2026-10-03-coworkspace-session-hardening-design",
       "title": "coworkspace session hardening design",
       "file": "docs/designs/2026-10-03-coworkspace-session-hardening-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-10-03",
+      "last_updated": "2026-10-03"
+    },
+    {
+      "id": "2026-10-03-coworkspace-sibling-turns-design",
+      "title": "coworkspace sibling turns design",
+      "file": "docs/designs/2026-10-03-coworkspace-sibling-turns-design.md",
       "status": "approved",
       "source": "manual",
       "created": "2026-10-03",
@@ -2019,31 +1992,22 @@
       "last_updated": "2026-10-03"
     },
     {
-      "id": "2026-10-04-ticket-archive-design",
-      "title": "ticket archive design",
-      "file": "docs/designs/2026-10-04-ticket-archive-design.md",
+      "id": "2026-10-03-edu-sync-publisher-base-reset-design",
+      "title": "edu sync publisher base reset design",
+      "file": "docs/designs/2026-10-03-edu-sync-publisher-base-reset-design.md",
       "status": "implemented",
       "source": "manual",
-      "created": "2026-10-04",
-      "last_updated": "2026-10-04"
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
     },
     {
-      "id": "2026-10-04-llm-interaction-standard-design",
-      "title": "llm interaction standard design",
-      "file": "docs/designs/2026-10-04-llm-interaction-standard-design.md",
-      "status": "implemented",
+      "id": "2026-10-03-validator-warning-fixes-design",
+      "title": "validator warning fixes design",
+      "file": "docs/designs/2026-10-03-validator-warning-fixes-design.md",
+      "status": "draft",
       "source": "manual",
-      "created": "2026-10-04",
-      "last_updated": "2026-10-04"
-    },
-    {
-      "id": "2026-10-04-docs-folder-manifest-design",
-      "title": "docs folder manifest design",
-      "file": "docs/designs/2026-10-04-docs-folder-manifest-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-04",
-      "last_updated": "2026-10-04"
+      "created": "2026-10-02",
+      "last_updated": "2026-10-02"
     },
     {
       "id": "2026-10-04-co-security-checklist-backport-design",
@@ -2064,6 +2028,33 @@
       "last_updated": "2026-10-04"
     },
     {
+      "id": "2026-10-04-docs-folder-manifest-design",
+      "title": "docs folder manifest design",
+      "file": "docs/designs/2026-10-04-docs-folder-manifest-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-04-llm-interaction-standard-design",
+      "title": "llm interaction standard design",
+      "file": "docs/designs/2026-10-04-llm-interaction-standard-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-04-ticket-archive-design",
+      "title": "ticket archive design",
+      "file": "docs/designs/2026-10-04-ticket-archive-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-04",
+      "last_updated": "2026-10-04"
+    },
+    {
       "id": "2026-10-04-turn-runtime-hotswap-design",
       "title": "turn runtime hotswap design",
       "file": "docs/designs/2026-10-04-turn-runtime-hotswap-design.md",
@@ -2071,6 +2062,15 @@
       "source": "manual",
       "created": "2026-10-04",
       "last_updated": "2026-10-04"
+    },
+    {
+      "id": "2026-10-05-country-prune-context-scrub-design",
+      "title": "country prune context scrub design",
+      "file": "docs/designs/2026-10-05-country-prune-context-scrub-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-05",
+      "last_updated": "2026-10-05"
     },
     {
       "id": "2026-10-05-coworkspace-data-hygiene-design",
@@ -2100,15 +2100,6 @@
       "last_updated": "2026-10-05"
     },
     {
-      "id": "2026-10-05-llm-standard-layer-scoping-design",
-      "title": "llm standard layer scoping design",
-      "file": "docs/designs/2026-10-05-llm-standard-layer-scoping-design.md",
-      "status": "implemented",
-      "source": "manual",
-      "created": "2026-10-05",
-      "last_updated": "2026-10-05"
-    },
-    {
       "id": "2026-10-05-equal-version-l0l1-drift-gate-design",
       "title": "equal version l0l1 drift gate design",
       "file": "docs/designs/2026-10-05-equal-version-l0l1-drift-gate-design.md",
@@ -2118,9 +2109,9 @@
       "last_updated": "2026-10-05"
     },
     {
-      "id": "2026-10-05-country-prune-context-scrub-design",
-      "title": "country prune context scrub design",
-      "file": "docs/designs/2026-10-05-country-prune-context-scrub-design.md",
+      "id": "2026-10-05-llm-standard-layer-scoping-design",
+      "title": "llm standard layer scoping design",
+      "file": "docs/designs/2026-10-05-llm-standard-layer-scoping-design.md",
       "status": "implemented",
       "source": "manual",
       "created": "2026-10-05",
@@ -2134,6 +2125,24 @@
       "source": "manual",
       "created": "2026-10-05",
       "last_updated": "2026-10-05"
+    },
+    {
+      "id": "2026-10-05-spec-registry-canonical-order-design",
+      "title": "spec registry canonical order design",
+      "file": "docs/designs/2026-10-05-spec-registry-canonical-order-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-05",
+      "last_updated": "2026-10-05"
+    },
+    {
+      "id": "skillhygiene",
+      "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
+      "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-08-28",
+      "last_updated": "2026-08-29"
     }
   ]
 }

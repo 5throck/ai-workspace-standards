@@ -1,4 +1,14 @@
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-05, T-20261005-002, spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md):
+//           content-derived insertion — registerSpec() places new entries by id
+//           (insertSpecSorted) instead of appending at the shared array tail,
+//           and saveRegistry() canonicalizes the whole array (id ascending) on
+//           every write, so concurrent registrations from independent branches
+//           land in different array regions instead of colliding at the same
+//           locus (the append conflicts that forced 5 hand-splices on
+//           2026-10-05). canonicalOrderViolation() is exported for the audit
+//           gate (Check 5) to fail out-of-band non-canonical files.
+
 /**
  * spec-register.ts
  *
@@ -95,8 +105,35 @@ export function loadRegistry(): Registry {
 }
 
 export function saveRegistry(registry: Registry): void {
+  // T-20261005-002: canonicalize on every write — the array is kept sorted by
+  // id so concurrent registrations land in content-derived positions and the
+  // file self-heals from historical arrival-order on the next save.
+  registry.specs.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
   fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+}
+
+/** T-20261005-002: place a new entry at its content-derived position (id
+ * ascending) instead of the shared array tail — the tail append made every
+ * concurrent registration conflict deterministically. */
+export function insertSpecSorted(specs: SpecEntry[], entry: SpecEntry): SpecEntry[] {
+  const idx = specs.findIndex(s => s.id > entry.id);
+  if (idx === -1) specs.push(entry);
+  else specs.splice(idx, 0, entry);
+  return specs;
+}
+
+/** T-20261005-002: the registry array is canonical when ids ascend. Returns a
+ * message naming the first offending pair, or null. Consumed by the audit
+ * spec-check (Check 5) to fail files hand-spliced out of band; the next
+ * spec-register write re-sorts them. */
+export function canonicalOrderViolation(specs: { id: string }[]): string | null {
+  for (let i = 1; i < specs.length; i++) {
+    if (specs[i - 1].id > specs[i].id) {
+      return `entry ${i + 1} ("${specs[i].id}") sorts before its predecessor ("${specs[i - 1].id}")`;
+    }
+  }
+  return null;
 }
 
 export function slugFromPath(filePath: string): string {
@@ -159,7 +196,7 @@ export function registerSpec(options: {
     last_updated: today(),
   };
   if (options.meetingRef) entry.meeting_ref = options.meetingRef.split('\\').join('/');
-  registry.specs.push(entry);
+  insertSpecSorted(registry.specs, entry);
   saveRegistry(registry);
   console.log(`${GREEN}Registered spec: ${id}${RESET}`);
   return { id, updated: false };
