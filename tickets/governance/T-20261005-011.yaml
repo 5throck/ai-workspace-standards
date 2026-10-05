@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261005-011
+kind: manual
+title: >-
+  validator-hardening: add a co-deck contract-truth check diffing variant.json
+  theme_manifest and numeric claims (themes/styles/default, agent and skill
+  counts, status wording, betaLifecycleSummary-null-if-stable, process_manifest
+  path existence) against disk scans
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.341Z'
+history:
+  - at: '2026-10-05T10:13:00.341Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.925Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.940Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.955Z'
+    from: review
+    to: done
+result: >-
+  validator checks b/d landed; theme_manifest restructured 6x6 with
+  default_theme/default_style; evidence_models_dir=null; validate-templates D3
+  tolerance (L0+L1 @1.51.0)
+error: null

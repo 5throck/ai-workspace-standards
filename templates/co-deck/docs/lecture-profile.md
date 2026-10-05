@@ -44,11 +44,12 @@ instructor:
 
 # Presentation rendering settings (used by html-build and storyline agents)
 # theme   — HTML structure and navigation paradigm
-#   Options: outline | pitch | pitch-enhanced | vertical | zen
-#   - outline          : Research Notebook — text-only, no image panel, TOC drawer, all 5 styles (visual-heavy: partial)
+#   Options: outline | outlook | pitch | pitch-enhanced | vertical | zen
+#   - outline          : Research Notebook — text-only, no image panel, TOC drawer (all styles except white-bubble)
+#   - outlook          : Horizontal Scroll — slides laid out horizontally, TOC overlay panel + footer bar (all styles except white-bubble)
 #   - pitch            : floating card + speaker notes + TOC drawer (classic/minimal/premium-dark only)
-#   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all 5 styles; visual-heavy: partial)
-#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar with TOC drawer, IntersectionObserver, all 5 styles (visual-heavy: full)
+#   - pitch-enhanced   : PPT Presenter View — pitch aesthetics + TOC drawer + transitions + timer (all styles except white-bubble; visual-heavy: partial)
+#   - vertical         : True Vertical Scroll — all slides stacked, sticky top bar with TOC drawer, IntersectionObserver (all styles except white-bubble)
 #   - zen              : Presentation Zen — full-bleed backgrounds, centered message, max 5 bullets (classic/minimal/premium-dark/academic/white-bubble; visual-heavy: incompatible)
 # style   — CSS visual variable set (color, font, spacing)
 #   Options: premium-dark | classic | minimal | visual-heavy | academic | white-bubble

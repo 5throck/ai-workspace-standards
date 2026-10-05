@@ -4,7 +4,7 @@ generated_from: procedures/
 rows:
   - stage: S1
     activity: procedure.co-deck.source-research
-    accountable: version
+    accountable: research
     responsible:
       - research
   - stage: S1
@@ -12,16 +12,9 @@ rows:
     accountable: version
     responsible:
       - version
-  - stage: S2
-    activity: procedure.co-deck.deck-build-and-export
-    accountable: version
-    responsible:
-      - html-build
-      - measure
-      - pdf-export
-  - stage: S2
+  - stage: S1
     activity: procedure.co-deck.lecture-deck-production
-    accountable: version
+    accountable: pm
     responsible:
       - design
       - html-build
@@ -30,36 +23,43 @@ rows:
       - storyline
   - stage: S2
     activity: procedure.co-deck.storyline-development
-    accountable: version
+    accountable: storyline
     responsible:
       - storyline
-  - stage: S2
-    activity: procedure.co-deck.version-export-control
-    accountable: version
-    responsible:
-      - version
-  - stage: S2
-    activity: procedure.co-deck.version-production-control
-    accountable: version
-    responsible:
-      - version
   - stage: S2
     activity: procedure.co-deck.version-research-control
     accountable: version
     responsible:
       - version
-  - stage: S2
+  - stage: S3
     activity: procedure.co-deck.version-storyline-control
     accountable: version
     responsible:
       - version
-  - stage: S3
+  - stage: S5
+    activity: procedure.co-deck.deck-build-and-export
+    accountable: html-build
+    responsible:
+      - html-build
+      - measure
+      - pdf-export
+  - stage: S4
+    activity: procedure.co-deck.version-production-control
+    accountable: version
+    responsible:
+      - version
+  - stage: S11
     activity: procedure.co-deck.deck-publish-and-version
     accountable: pdf-export
     responsible:
       - pdf-export
       - version
-  - stage: S4
+  - stage: S11
+    activity: procedure.co-deck.version-export-control
+    accountable: version
+    responsible:
+      - version
+  - stage: S11
     activity: procedure.co-deck.version-retrospective-control
     accountable: version
     responsible:

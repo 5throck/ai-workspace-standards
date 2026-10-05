@@ -1,6 +1,6 @@
 # co-deck Agent Roster
 
-This folder contains the 13 specialized agents (PM + 12 specialists) for the lecture/presentation material production workflow and handbook document production.
+This folder contains the 14 specialized agents (PM + 10 slide-pipeline specialists + 2 handbook specialists + 1 i18n-specialist) for the lecture/presentation material production workflow and handbook document production.
 
 ## Agent Index
 
@@ -8,6 +8,7 @@ This folder contains the 13 specialized agents (PM + 12 specialists) for the lec
 |-------|------|--------|---------------|
 | PM | `pm.md` | 0-11, H-0~H-7 (all) | → all agents |
 | Version | `version.md` | cross-cutting | ← all agents |
+| I18N Specialist | `i18n-specialist.md` | cross-cutting | ← all agents |
 | Research | `research.md` | 1, H-1 | pm → research → source-verifier |
 | Source Verifier | `source-verifier.md` | 1.5 | research → source-verifier → storyline (optional) |
 | Storyline | `storyline.md` | 2-3 | source-verifier → storyline → design |
@@ -49,7 +50,7 @@ H-7: PM — Secret scan + deploy + verify
 - `image-curator` is **optional** — skip if all slides use `image_role: none`
 - `diagram-specialist` is **optional** — skip if no `visual_spec` fields exist in slide_deck.md
 - `image-curator` and `diagram-specialist` run **in parallel** at Stage 3.5
-- Gates **1.5** (source trust), **2**, **5** require approval; Gates 3, 4 are optional (Gate 1 retired)
+- Gates **2** (content/storyline approval) and **5** (sample PDF approval) are mandatory; Gates **1.5** (source trust), **3** (design lock), and **4** (layout) are optional review-then-proceed (Gate 1 retired)
 - `project_state.json` is the **single source of truth** for lecture progress
 - `handbook-writer` and `handbook-reviewer` are **only dispatched in H-Stage** — never in 11-Stage pipeline
 

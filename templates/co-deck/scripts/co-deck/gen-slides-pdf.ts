@@ -16,8 +16,8 @@
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
 // Merges gen_full.py + gen_sample5.py — use --sample N to limit slide count.
 // Usage:
-//   bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
-//   bun scripts/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+//   bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
+//   bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
 //   --auto-calibrate  estimate fonts/line_heights from CSS and print layout_overrides YAML (no PDF)
 //   --project  project folder (relative to workspace root)
 //   --out      output PDF filename (default: <folder>.pdf or <folder>_sample<N>.pdf)
@@ -62,7 +62,11 @@ const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
 // ── Frontmatter parser ────────────────────────────────────────────────────────
 
 function parseFrontmatter(content: string): Record<string, any> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  // Normalize CRLF/CR line endings (Windows-saved lecture-profile.md) so the
+  // `---` delimiter regex matches; otherwise frontmatter is silently dropped
+  // and theme/style reset to defaults.
+  const normalized = content.replace(/\r\n?/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const frontmatterContent = match[1];
   const lines = frontmatterContent.split('\n');
@@ -269,6 +273,8 @@ class Renderer {
   private curColor: RGB;
   readonly pageW: number;   // pts
   readonly pageH: number;   // pts
+  /** Count of image embed failures (missing/corrupt files) — surfaced at exit. */
+  imageFailures = 0;
 
   constructor(regular: PDFFont, bold: PDFFont, pageWMm: number, pageHMm: number, defaultColor: RGB,
               fallbackRegular?: PDFFont | null, fallbackBold?: PDFFont | null,
@@ -532,6 +538,7 @@ class Renderer {
       this.drawEmbeddedImage(img, ix, iy, iw, ih);
       this.page.pushOperators(popGraphicsState());
     } catch (e: any) {
+      this.imageFailures++;
       console.warn(`  img err: ${e.message}`);
     }
   }
@@ -547,6 +554,7 @@ class Renderer {
       const iy = yMm + (mhMm - ih) / 2;
       this.drawEmbeddedImage(img, ix, iy, iw, ih);
     } catch (e: any) {
+      this.imageFailures++;
       console.warn(`  img err: ${e.message}`);
     }
   }
@@ -1386,6 +1394,11 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
     const profile = parseFrontmatter(readFileSync(profilePath, 'utf-8'));
     theme = profile.theme ?? 'pitch-enhanced';
     style = profile.style ?? 'premium-dark';
+    if (!profile.theme || !profile.style) {
+      console.warn(`[frontmatter] ${profilePath} has no theme/style frontmatter — assuming defaults (pitch-enhanced / premium-dark).`);
+    }
+  } else {
+    console.warn(`[frontmatter] ${profilePath} not found — assuming default theme/style.`);
   }
 
   // CSS files to read (in cascade order: base → theme → style)
@@ -1541,10 +1554,12 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir presentations/assets/fonts/] [--data path/to/slidedata.json]');
-    console.error('       bun scripts/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>');
+    console.error('Usage: bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir presentations/assets/fonts/] [--data path/to/slidedata.json]');
+    console.error('       bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>');
     process.exit(1);
   }
+
+  const workspaceRoot = resolve(dirname(import.meta.path), '../..');
 
   // ── --auto-calibrate mode: estimate layout_overrides from CSS ─────────────
   if (args.includes('--auto-calibrate')) {
@@ -1552,7 +1567,6 @@ async function main() {
     return;
   }
 
-  const workspaceRoot = resolve(dirname(import.meta.path), '../..');
   const projectDir    = resolve(workspaceRoot, projectArg);
   if (!existsSync(projectDir)) {
     console.error(`Project folder not found: ${projectDir}`); process.exit(1);
@@ -1566,6 +1580,11 @@ async function main() {
     const profileContent = readFileSync(lectureProfilePath, 'utf-8');
     lectureProfile = parseFrontmatter(profileContent);
     bgImageConfig = parseBackgroundImage(profileContent);
+    if (!lectureProfile.theme || !lectureProfile.style) {
+      console.warn(`[frontmatter] ${lectureProfilePath} has no theme/style frontmatter — assuming defaults (pitch-enhanced / premium-dark).`);
+    }
+  } else {
+    console.warn(`[frontmatter] ${lectureProfilePath} not found — assuming default theme/style.`);
   }
 
   const theme = lectureProfile.theme ?? 'pitch-enhanced';
@@ -1637,7 +1656,7 @@ async function main() {
 
   if (!existsSync(dataPath)) {
     console.error(`slidedata.json not found: ${dataPath}`);
-    console.error('   Run bun scripts/extract_slidedata.mjs <html> first.');
+    console.error('   Run bun scripts/co-deck/extract_slidedata.mjs <html> first.');
     process.exit(1);
   }
 
@@ -1819,6 +1838,7 @@ async function main() {
             renderer.fillRectOverlay(0, 0, pageWmm, pageHmm, rgb(or / 255, og / 255, ob / 255), bgImageConfig.overlay.opacity);
           }
         } catch (e: any) {
+          renderer.imageFailures++;
           console.warn(`  bg image err (slide ${idx + 1}): ${e.message}`);
         }
       }
@@ -1869,6 +1889,15 @@ async function main() {
   const sizeKb = Math.round(statSync(outPath).size / 1024);
   console.log(`\nSaved -> ${outPath}`);
   console.log(`   Size: ${sizeKb}KB`);
+
+  // Loud summary + non-zero exit when any slide lost its visual: the PDF is
+  // still written (useful for inspection), but callers must not treat a deck
+  // with missing images as a successful render.
+  if (renderer.imageFailures > 0) {
+    console.error(`\n❌ ${renderer.imageFailures} image embed failure(s) — affected slides render WITHOUT their visual.`);
+    console.error('   Check the image paths in slidedata.json / image-manifest.json (SVG visuals need a PNG sibling).');
+    process.exitCode = 1;
+  }
 }
 
 main().catch(err => { console.error('Error:', err); process.exit(1); });

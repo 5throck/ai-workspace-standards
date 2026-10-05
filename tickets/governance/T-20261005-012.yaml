@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261005-012
+kind: manual
+title: >-
+  validator-hardening: extend the variant doc lint to phantom skill/agent paths
+  (skills/name/SKILL.md mentions, docs links inside templates), retired command
+  mentions, and owner-agent-in-roster validation for process manifests
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.356Z'
+history:
+  - at: '2026-10-05T10:13:00.356Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.970Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.985Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.999Z'
+    from: review
+    to: done
+result: >-
+  validator checks a/c/e/g landed; stale agent-lifecycle-manager sub-check
+  generalized into AGENTS.md skill-resolution check
+error: null

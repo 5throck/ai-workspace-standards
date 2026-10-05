@@ -48,7 +48,11 @@ function deepMerge(base: any, override: any): any {
 }
 
 function parseFrontmatter(content: string): Record<string, any> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  // Normalize CRLF/CR line endings (Windows-saved lecture-profile.md) so the
+  // `---` delimiter regex matches; otherwise frontmatter is silently dropped
+  // and theme/style reset to defaults.
+  const normalized = content.replace(/\r\n?/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const fm = match[1];
   const lines = fm.split('\n');
@@ -483,6 +487,9 @@ async function main() {
 
   const theme = profile.theme ?? 'pitch-enhanced';
   const style = profile.style ?? 'premium-dark';
+  if (!profile.theme || !profile.style) {
+    console.warn(`[frontmatter] ${lectureProfilePath} has no theme/style frontmatter — assuming defaults (pitch-enhanced / premium-dark).`);
+  }
   const hasOverrides = !!profile.layout_overrides && Object.keys(profile.layout_overrides).length > 0;
 
   console.log(`\n📐 PDF Layout Estimation`);

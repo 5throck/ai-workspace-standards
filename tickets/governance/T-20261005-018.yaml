@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261005-018
+kind: manual
+title: >-
+  Clean up co-deck script hygiene: SCRIPTS.md drift rows (vendored copy claim,
+  undocumented --all flag, missing puppeteer-core), define test:visual and
+  test:smoke scripts, stale in-script usage paths, theme-builder script-tag
+  escaping, html-to-pdf traversal guard prefix, Windows-safe execFileSync in
+  theme-visual-regression.test, and derive the test compat matrix from
+  theme.json
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.442Z'
+history:
+  - at: '2026-10-05T10:13:00.442Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.237Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.251Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.266Z'
+    from: review
+    to: done
+result: >-
+  SCRIPTS.md drift fixed (+snake_case rationale); test:visual/test:smoke
+  defined; stale usage paths fixed; script-tag escaping; execFileSync; matrix
+  derived from theme.json; preview exit 1 on errors; manifest no-op fails;
+  settings.json deduped + graft existence guards
+error: null

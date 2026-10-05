@@ -1,21 +1,21 @@
 ---
 sync_version: 1
-content_hash: f48046a0de84d77ebea3884b21c730a71736b9e961ff184c7411ceb04eef864f
+content_hash: b82f43b402b059532dd7ba5176536f81a8e069bbf1f109632f0adcd8a7e34abf
 ---
 
 # co-deck
 
 > **Language**: **English** · [한국어](README_ko.md)
 > **Status**: ✅ Stable — v0.2.3
-> Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.
+> Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 14 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists + 1 i18n-specialist) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (6 themes), layout measurement, PDF export, and handbook authoring/review.
 
 ## Overview
 
-Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review. See docs/context.md for full architecture and standards.
+Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 14 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists + 1 i18n-specialist) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (6 themes), layout measurement, PDF export, and handbook authoring/review. See docs/context.md for full architecture and standards.
 
 ## Quick Start
 
-This is a beta variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
+This is a stable variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
 
 ### For Claude Code users:
 
@@ -27,7 +27,7 @@ See `GEMINI.md` for detailed instructions.
 
 ## Team Mission
 
-**Mission:** Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 13 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (5 themes), layout measurement, PDF export, and handbook authoring/review.
+**Mission:** Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF, plus an independent H-Stage handbook pipeline. Includes 14 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists + 1 i18n-specialist) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (6 themes), layout measurement, PDF export, and handbook authoring/review.
 
 ## Meet the AI Team
 
@@ -35,7 +35,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | Medium | inherit |
 | **version** | Version snapshots before any edit; restores prior states on demand | low | inherit |
 | **research** | Gathers web sources and organizes content for storyline design | medium | inherit |
 | **source-verifier** | Validates research URLs; produces source-verification.md + Trust Score | medium | inherit |
@@ -48,6 +48,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **pdf-export** | Generates sample and full PDF from slidedata via pdf-lib | medium | inherit |
 | **handbook-writer** | Writes handbook chapters, course overview, and instructor guide | medium | inherit |
 | **handbook-reviewer** | Quality gate — runs validation scripts and applies fixes | medium | inherit |
+| **i18n-specialist** | Localization review, locale config, and translation-sync for locale mirrors (common extends-stub; outside the slide/handbook pipelines) | medium | inherit |
 
 ## Skills
 
@@ -56,11 +57,11 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **storyline**: Designs lecture storyline and slide deck composition. Produces storyline.md and slide_deck.md.
 - **design**: Locks visual design style. Decides layout, color palette, font family and saves design_spec.md.
 - **html-build**: Generates HTML slides from slide_deck.md and design_spec.md. Applies theme, binds images, inserts special pages.
-- **measure**: Auto-measures HTML slides with Playwright to extract coordinates for PDF generation. Deprecated — superseded by prep-pdf.
 - **prep-pdf**: Playwright-free PDF preparation. Resolves the 4-layer spec merge, validates fonts, outputs a layout summary.
 - **pdf-export**: Generates PDF from slide data using pdf-lib. Extracts slidedata, runs sample then full PDF generation.
+- **slide-layout-gate**: Slide content conformance gate. Runs estimate-layout.ts --lint against the merged spec's content constraints; exit 1 blocks PDF export.
 - **theme-authoring**: Entry point for creating a new co-deck theme or style. Dispatches Style Workflow or T-Stage.
-- **handbook**: Document production workflow — generates searchable, themed handbooks as static sites. H-Stage pipeline (H-0 through H-7).
+- **handbook**: Provided by the common template via inherits_common (promoted 2026-08-30). Document production workflow — generates searchable, themed handbooks as static sites. H-Stage pipeline (H-0 through H-7).
 - **presenter-mode**: Dual-window presenter state synchronization using browser BroadcastChannel API.
 
 ## How to Collaborate
@@ -87,7 +88,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `meeting-facilitation` — Run a structured, inline multi-agent discussion (skill; the legacy `/meeting` slash command is retired).
 
 ## Variant Type
 
@@ -95,14 +96,6 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 
 This variant focuses on lecture and presentation material production — from research to print-ready PDF, plus themed handbooks as static sites.
 
-> **⚠️ Beta variant** — not for production use.
-
-- **Client Engagements**: 0/2 (see variant governance rules)
-- **Beta Duration**: 0/2 months
-- **Additional Checks**: Pending
-
-See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
-
 ---
 
-*Last Updated: 2026-09-06*
+*Last Updated: 2026-10-05*

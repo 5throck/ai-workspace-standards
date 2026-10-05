@@ -1,4 +1,7 @@
-// @version 0.1.0
+// @version 0.2.0 — compat matrix now derived from theme.json compatible_styles via
+//   loadThemePackage() (single source of truth, no hardcoded pair list); browser
+//   subprocess invoked via execFileSync (no shell string join — safe with paths
+//   containing spaces).
 // theme-visual-regression.test.ts — visual regression tests for theme×style pairs.
 //
 // Tests fully compatible theme×style combinations by:
@@ -22,9 +25,11 @@
 // because bun has issues with Playwright subprocess handling on Windows.
 
 import { test, describe, expect, beforeAll } from 'bun:test';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve, dirname } from 'path';
+import { loadThemePackage } from '../lib/theme-contract.js';
+import { listThemeDirs, listStyleDirs, normalizeStyleEntry } from '../lib/theme-utils.js';
 
 // ── Workspace root & paths ─────────────────────────────────────────────
 
@@ -45,38 +50,44 @@ const updateBaselines = args.includes('--update-baselines') || !!process.env.UPD
 // ── Theme × Style compatibility matrix (fully compatible only) ─────────
 //
 // Partial and incompatible pairs are excluded from visual regression.
-// This matrix is derived from the theme.json files' compatible_styles arrays,
-// filtered to only include entries that appear in compatible_styles (not
-// partial_styles or incompatible_styles).
+// The matrix is DERIVED from each theme.json's compatible_styles via the
+// existing loader (loadThemePackage), filtered to exclude partial_styles and
+// incompatible_styles entries — the same dynamic discovery the smoke test
+// uses — so the two suites cannot silently diverge.
 
-const FULLY_COMPATIBLE_PAIRS: Array<{ theme: string; style: string }> = [
-  // outline — all 5 styles compatible
-  { theme: 'outline', style: 'classic' },
-  { theme: 'outline', style: 'premium-dark' },
-  { theme: 'outline', style: 'minimal' },
-  { theme: 'outline', style: 'academic' },
-  { theme: 'outline', style: 'visual-heavy' },
-  // pitch — classic, minimal, premium-dark (academic and visual-heavy are incompatible)
-  { theme: 'pitch', style: 'classic' },
-  { theme: 'pitch', style: 'premium-dark' },
-  { theme: 'pitch', style: 'minimal' },
-  // pitch-enhanced — classic, minimal, premium-dark, academic (visual-heavy is partial)
-  { theme: 'pitch-enhanced', style: 'classic' },
-  { theme: 'pitch-enhanced', style: 'premium-dark' },
-  { theme: 'pitch-enhanced', style: 'minimal' },
-  { theme: 'pitch-enhanced', style: 'academic' },
-  // vertical — all 5 styles compatible
-  { theme: 'vertical', style: 'classic' },
-  { theme: 'vertical', style: 'premium-dark' },
-  { theme: 'vertical', style: 'minimal' },
-  { theme: 'vertical', style: 'academic' },
-  { theme: 'vertical', style: 'visual-heavy' },
-  // zen — classic, minimal, premium-dark, academic (visual-heavy is incompatible)
-  { theme: 'zen', style: 'classic' },
-  { theme: 'zen', style: 'premium-dark' },
-  { theme: 'zen', style: 'minimal' },
-  { theme: 'zen', style: 'academic' },
-];
+const themes = listThemeDirs(root).sort();
+const styles = listStyleDirs(root).sort();
+
+const FULLY_COMPATIBLE_PAIRS: Array<{ theme: string; style: string }> = (() => {
+  const pairs: Array<{ theme: string; style: string }> = [];
+  for (const theme of themes) {
+    const { pkg } = loadThemePackage(root, theme);
+    if (!pkg) continue;
+    const meta = pkg.metadata;
+
+    const compatible = (Array.isArray(meta.compatible_styles) ? meta.compatible_styles : [])
+      .map(normalizeStyleEntry)
+      .filter((s): s is string => s !== null);
+    const partial = new Set(
+      (Array.isArray(meta.partial_styles) ? meta.partial_styles : [])
+        .map(normalizeStyleEntry)
+        .filter((s): s is string => s !== null),
+    );
+    const incompatible = new Set(
+      (Array.isArray(meta.incompatible_styles) ? meta.incompatible_styles : [])
+        .map(normalizeStyleEntry)
+        .filter((s): s is string => s !== null),
+    );
+
+    for (const style of compatible) {
+      if (partial.has(style) || incompatible.has(style)) continue;
+      // Only include styles that exist on disk (the render universe).
+      if (!styles.includes(style)) continue;
+      pairs.push({ theme, style });
+    }
+  }
+  return pairs;
+})();
 
 // ── Playwright availability check ───────────────────────────────────────
 
@@ -120,25 +131,37 @@ interface BrowserResult {
 }
 
 function runBrowserSubprocess(mode: string, theme?: string, style?: string): BrowserResult {
-  const cmdParts = ['node', browserScript.replace(/\\/g, '/'), mode];
-  if (theme) cmdParts.push(theme);
-  if (style) cmdParts.push(style);
+  // execFileSync (no shell): argv passed directly, so paths containing spaces
+  // are safe without manual quoting.
+  const cmdArgs = [browserScript, mode];
+  if (theme) cmdArgs.push(theme);
+  if (style) cmdArgs.push(style);
+
+  const parseResult = (output: string): BrowserResult | null => {
+    const start = output.indexOf('%%RESULT_START%%');
+    const end = output.indexOf('%%RESULT_END%%');
+    if (start === -1 || end === -1) return null;
+    return JSON.parse(output.substring(start + '%%RESULT_START%%'.length, end).trim());
+  };
 
   try {
-    const output = execSync(cmdParts.join(' '), {
+    const output = execFileSync('node', cmdArgs, {
       cwd: root,
       encoding: 'utf-8',
       timeout: 300000, // 5 min timeout for all pairs
       stdio: ['pipe', 'pipe', 'pipe'],
     });
-
-    const start = output.indexOf('%%RESULT_START%%');
-    const end = output.indexOf('%%RESULT_END%%');
-    if (start === -1 || end === -1) {
+    const parsed = parseResult(output);
+    if (!parsed) {
       return { mode, total: 0, passed: 0, failed: 1, results: [{ theme: 'unknown', style: 'unknown', status: 'error', errors: ['Failed to parse browser output'] }] };
     }
-    return JSON.parse(output.substring(start + '%%RESULT_START%%'.length, end).trim());
+    return parsed;
   } catch (err: any) {
+    // execFileSync throws on non-zero exit; the browser script still prints the
+    // %%RESULT%% payload when comparisons fail — parse it before giving up.
+    const thrownOutput = typeof err.stdout === 'string' ? err.stdout : '';
+    const parsed = thrownOutput ? parseResult(thrownOutput) : null;
+    if (parsed) return parsed;
     return { mode, total: 0, passed: 0, failed: 1, results: [{ theme: 'unknown', style: 'unknown', status: 'error', errors: [err.message] }] };
   }
 }

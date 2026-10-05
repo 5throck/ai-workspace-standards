@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261005-007
+kind: manual
+title: >-
+  Declare co-deck script runtime dependencies (pdf-lib, @pdf-lib/fontkit,
+  fflate, @resvg/resvg-js, puppeteer-core, playwright) in a package.json the
+  scaffolded project resolves - today gen-slides-pdf fails at import on a fresh
+  scaffold
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-10-05T10:12:42.519Z'
+history:
+  - at: '2026-10-05T10:12:42.519Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.747Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.762Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.777Z'
+    from: review
+    to: done
+result: >-
+  package.json created (pdf-lib, @pdf-lib/fontkit, fflate, @resvg/resvg-js,
+  puppeteer-core, pdf-to-png-converter; playwright devDep) + test scripts;
+  scaffold delivery verified in new-project.ts overlay; validator check i green
+error: null

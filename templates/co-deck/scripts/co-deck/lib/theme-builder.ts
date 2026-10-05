@@ -194,7 +194,9 @@ export function buildThemeDeck(options: BuildOptions): BuildResult {
   html = html.replace(MARKERS.slides, '');
 
   // 9. Replace // <!-- INJECT:slideData --> with const slideData = JSON.stringify(...)
-  const slideDataJson = JSON.stringify(options.slideData, null, 2);
+  // Escape "</" (as "<\/") so a slide string containing `</script>` cannot
+  // terminate the inline <script> tag early.
+  const slideDataJson = JSON.stringify(options.slideData, null, 2).replace(/<\//g, '<\\/');
   const slideDataStatement = `const slideData = ${slideDataJson};`;
   html = html.replace(MARKERS.slideData, slideDataStatement);
 

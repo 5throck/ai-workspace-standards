@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261005-014
+kind: manual
+title: >-
+  validator-hardening: extend the L1-to-L2 drift check to variant AGENTS.md
+  boilerplate sections (sections 6-10 thin-dispatcher form, section 7 baseline
+  bullets, retired invocations)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.385Z'
+history:
+  - at: '2026-10-05T10:13:00.385Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.058Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.073Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.087Z'
+    from: review
+    to: done
+result: >-
+  validator check j landed; AGENTS.md regenerated to thin-dispatcher boilerplate
+  (sections 6-10, section 7 bullets, ordering, placeholders removed)
+error: null

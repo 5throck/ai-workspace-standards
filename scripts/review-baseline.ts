@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.0.2
+// @version 1.1.0
 /**
  * review-baseline.ts — consolidated read-only runner for the project-review
  * Step 0 baseline battery (T-20260912-030).
  *
- * Runs the six baseline validators in guaranteed read-only mode and prints a
+ * Runs the seven baseline validators in guaranteed read-only mode and prints a
  * PASS/FAIL summary. Each validator is invoked exactly the way the
  * project-review skill's Step 0 documents them; nothing here mutates the tree.
  *
@@ -14,6 +14,7 @@
  *   4. bun run agent-lifecycle-audit                      # agent health
  *   5. bun run skill-lifecycle-audit                      # skill health
  *   6. bun scripts/propagate-to-templates.ts --check-drift # L1↔L2 drift
+ *   7. bun scripts/validate-variant-claims.ts             # variant contract-truth (D6, T-20261005-011..014)
  *
  * Exit codes: 0 = all green, 1 = one or more validators failed.
  * Known-tolerated noise (not failures): propagate --check-drift exits 1 on
@@ -39,6 +40,11 @@ const validators: Array<{
   // exits 1, and mapping it to "tolerated" would green-light a drift check
   // that never ran. Mirrors the test.yml drift step's contract.
   { name: "propagate-to-templates --check-drift (L1↔L2 drift)", cmd: ["bun", "scripts/propagate-to-templates.ts", "--check-drift", "--json"], tolerateExit1: true, driftJsonContract: true },
+  // D6 (2026-10-05 co-deck remediation): contract-truth battery entry —
+  // prose claims and semantic bindings the structural validators above do
+  // not see (roster/theme/status/process claims, phantom paths, boilerplate
+  // drift). Runs against the default template (co-deck); exit 1 = findings.
+  { name: "validate-variant-claims.ts (variant contract-truth: roster/theme/status/process claims)", cmd: ["bun", "scripts/validate-variant-claims.ts"] },
 ];
 
 const quiet = process.argv.includes("--quiet");

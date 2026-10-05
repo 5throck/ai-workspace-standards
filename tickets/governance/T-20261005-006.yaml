@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261005-006
+kind: manual
+title: >-
+  Fix gen-slides-pdf --auto-calibrate TDZ crash: workspaceRoot is used at
+  scripts/co-deck/gen-slides-pdf.ts:1551 before its line-1555 declaration, so
+  every --auto-calibrate invocation exits 1
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-10-05T10:12:42.504Z'
+history:
+  - at: '2026-10-05T10:12:42.504Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.702Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.717Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.732Z'
+    from: review
+    to: done
+result: >-
+  TDZ fixed: workspaceRoot hoisted above the --auto-calibrate branch
+  (gen-slides-pdf.ts:1554); flag verified live end-to-end
+error: null

@@ -82,3 +82,18 @@
 [data-theme="zen"] .slide-card .bullet-item { color: rgba(26, 26, 46, 0.80); }
 [data-theme="zen"] .slide-card .cover-meta,
 [data-theme="zen"] .slide-card .contact-item { color: rgba(26, 26, 46, 0.5); }
+
+/* Text panel — semi-opaque box behind slide text (readability fix) */
+[data-theme="zen"] .slide:not([data-type="cover"]) .slide-content {
+  /* Hug the text box only — not the full content region.
+     flex:0 0 auto undoes base.css `flex: 1 1 auto`, which was stretching
+     the box to the full card width regardless of width. */
+  flex: 0 0 auto;
+  width: fit-content;
+  margin-inline: auto;
+  max-width: 88%;
+  background: rgba(248, 246, 241, 0.72);
+  border-radius: 14px;
+  padding: 1.75rem 2.5rem;
+  box-shadow: 0 8px 28px rgba(26, 26, 46, 0.10);
+}

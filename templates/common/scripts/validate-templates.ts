@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.50.5
+ * @version 1.51.0
  *
  * v1.50.5 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
  *          repoint size-budget Fix string to HERMES.md "Hermes Platform Mechanics" +
@@ -753,10 +753,19 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       }
 
       // B-04: theme_manifest CSS file existence check
+      // D3 tolerance (2026-10-05 co-deck remediation design): theme_manifest
+      // carries EITHER the retired shape (available: style names + default)
+      // OR the migrated shape (themes[]/styles[]/default_theme/default_style).
+      // Both are checked for on-disk CSS; a manifest may not mix the two
+      // lists' semantics (available[] holds styles, themes[] holds themes).
       const themeManifest = raw.theme_manifest as {
         base_css?: string;
+        themes_dir?: string;
+        styles_dir?: string;
         overrides_dir?: string;
         available?: string[];
+        themes?: string[];
+        styles?: string[];
       } | undefined;
       if (themeManifest) {
         if (themeManifest.base_css) {
@@ -782,6 +791,46 @@ function checkVariantManifests(): Map<string, VariantManifest> {
               pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${nestedRelPath} ✓`);
             } else {
               fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`, `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`);
+            }
+          }
+        }
+        // D3 migrated shape: themes[] and styles[] resolve under their
+        // declared base dir, tolerating both key conventions (a *_dir that is
+        // the html-themes ROOT — co-deck: themes live at <root>/themes/<t>/ —
+        // and one that points straight at the entries), nested or flat.
+        // overrides_dir is the fallback base when the dedicated dirs are not
+        // declared (keeps old-shape templates byte-identical in behavior).
+        if (Array.isArray(themeManifest.themes)) {
+          const base = themeManifest.themes_dir ?? themeManifest.overrides_dir;
+          for (const theme of themeManifest.themes) {
+            if (typeof theme !== 'string' || !base) continue;
+            const candidates = [
+              `${base}/themes/${theme}/theme.css`,
+              `${base}/${theme}/theme.css`,
+              `${base}/${theme}.css`,
+            ];
+            const hit = candidates.find((c) => existsSync(join(TEMPLATES_DIR, dir, c)));
+            if (hit) {
+              pass(`templates/${dir}/variant.json theme_manifest.themes["${theme}"] → ${hit} ✓`);
+            } else {
+              fail(dir, 'theme-manifest', `theme_manifest.themes "${theme}": CSS not found (${candidates.join(' | ')})`, `Create theme.css at one of templates/${dir}/${candidates.join(' or templates/' + dir + '/')}`);
+            }
+          }
+        }
+        if (Array.isArray(themeManifest.styles)) {
+          const base = themeManifest.styles_dir ?? themeManifest.overrides_dir;
+          for (const style of themeManifest.styles) {
+            if (typeof style !== 'string' || !base) continue;
+            const candidates = [
+              `${base}/${style}/style.css`,
+              `${base}/styles/${style}/style.css`,
+              `${base}/${style}.css`,
+            ];
+            const hit = candidates.find((c) => existsSync(join(TEMPLATES_DIR, dir, c)));
+            if (hit) {
+              pass(`templates/${dir}/variant.json theme_manifest.styles["${style}"] → ${hit} ✓`);
+            } else {
+              fail(dir, 'theme-manifest', `theme_manifest.styles "${style}": CSS not found (${candidates.join(' | ')})`, `Create style.css at one of templates/${dir}/${candidates.join(' or templates/' + dir + '/')}`);
             }
           }
         }
@@ -1448,16 +1497,39 @@ function checkContextSync(variant: string): void {
     fail(variant, 'broken-paths', `AGENTS.md contains broken '../common/skills/' paths`, `Change to 'skills/'`);
   }
 
-  // Check for Agent Lifecycle Manager existence
-  if (!agentsMd.includes('agent-lifecycle-manager/SKILL.md')) {
-    fail(variant, 'missing-lifecycle-manager', `AGENTS.md is missing 'agent-lifecycle-manager' skill`);
-  }
-
   // Find all skills in AGENTS.md
   const skillRegex = /`([a-zA-Z0-9-./_]+\/SKILL\.md)`/g;
   const expectedSkills = new Set<string>();
   for (const match of agentsMd.matchAll(skillRegex)) {
     expectedSkills.add(match[1]);
+  }
+
+  // Every skill AGENTS.md references must resolve to a real skill dir —
+  // variant-local skills/, inherited templates/common/skills/ (inherits_common-
+  // aware), or one of the variant's platform mirrors. Replaces the retired
+  // hardcoded agent-lifecycle-manager expectation (T-20261005-015): that skill
+  // is L0-only and does not ship in templates; variants declare the
+  // platform-lifecycle-manager pair instead.
+  let commonSkillsAllowed = true;
+  try {
+    const vjson = JSON.parse(readFileSync(join(TEMPLATES_DIR, variant, 'variant.json'), 'utf-8')) as { inherits_common?: unknown };
+    commonSkillsAllowed = vjson.inherits_common !== false;
+  } catch { /* unparseable/absent variant.json: default to common-allowed */ }
+  const skillHomeBases = [
+    join(TEMPLATES_DIR, variant, 'skills'),
+    ...(commonSkillsAllowed ? [join(TEMPLATES_DIR, 'common', 'skills')] : []),
+    ...PLATFORM_MIRROR_DIRS.map((m) => join(TEMPLATES_DIR, variant, m, 'skills')),
+  ];
+  const unresolvedSkillRefs: string[] = [];
+  for (const ref of expectedSkills) {
+    const name = ref.split('/').slice(-2, -1)[0] ?? ref;
+    if (skillHomeBases.some((base) => existsSync(join(base, name, 'SKILL.md')))) continue;
+    unresolvedSkillRefs.push(ref);
+  }
+  if (unresolvedSkillRefs.length > 0) {
+    fail(variant, 'phantom-skill-ref', `AGENTS.md references skills that resolve to no skill dir: ${unresolvedSkillRefs.join(', ')}`, 'Fix the path (variant skills/, templates/common/skills/, or a platform mirror) or remove the reference');
+  } else if (expectedSkills.size > 0) {
+    pass(`${variant}/AGENTS.md skill references resolve (${expectedSkills.size} referenced)`);
   }
 
   // If DYNAMIC_SKILLS markers are present, inject-skills.ts handles sync at scaffold time — skip static check

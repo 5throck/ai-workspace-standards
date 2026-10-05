@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261005-016
+kind: manual
+title: >-
+  Sync co-deck theme-system claims: restructure variant.json theme_manifest (6
+  themes x 6 styles, default_theme pitch-enhanced, default_style premium-dark),
+  fix context.md, lecture-profile.md and PROMOTION_CHECKLIST theme rows and the
+  v1.7.0-to-v1.9.0 version note, delete the stray baselines/outlook directory,
+  regenerate preview decks
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.414Z'
+history:
+  - at: '2026-10-05T10:13:00.414Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.147Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.162Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.177Z'
+    from: review
+    to: done
+result: >-
+  theme claims synced (context matrix 6x6, lecture-profile, v1.9.0); stray
+  outlook baselines removed (broken captures, rationale corrected from review);
+  zen_white-bubble deck built; preview inventory 28/28
+error: null

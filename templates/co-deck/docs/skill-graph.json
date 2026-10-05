@@ -257,6 +257,21 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "stage.co-deck.S1.5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S10",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S11",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "stage.co-deck.S2",
       "type": "stage",
       "layer": "variant:co-deck"
@@ -267,7 +282,37 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "stage.co-deck.S3.5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "stage.co-deck.S4",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S6",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S7",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S8",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S9",
       "type": "stage",
       "layer": "variant:co-deck"
     },
@@ -511,6 +556,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "html-build",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "raci_matrix"
+    },
+    {
       "type": "composes_with",
       "from": "html-build",
       "to": "research",
@@ -632,6 +683,12 @@
       "from": "pdf-export",
       "to": "version",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pm",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -768,7 +825,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.deck-build-and-export",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S5",
       "source": "process_schema"
     },
     {
@@ -799,7 +856,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.deck-publish-and-version",
-      "to": "stage.co-deck.S3",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -876,7 +933,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.lecture-deck-production",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S1",
       "source": "process_schema"
     },
     {
@@ -975,7 +1032,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-export-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -1043,7 +1100,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-production-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S4",
       "source": "process_schema"
     },
     {
@@ -1111,7 +1168,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-retrospective-control",
-      "to": "stage.co-deck.S4",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -1148,7 +1205,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-storyline-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S3",
       "source": "process_schema"
     },
     {
@@ -1175,6 +1232,12 @@
       "from": "research",
       "to": "phase1",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "research",
+      "to": "procedure.co-deck.source-research",
+      "source": "raci_matrix"
     },
     {
       "type": "used_by",
@@ -1253,38 +1316,26 @@
     {
       "type": "stage_follows",
       "from": "stage.co-deck.S1",
+      "to": "stage.co-deck.S1.5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S1.5",
       "to": "stage.co-deck.S2",
       "source": "process_schema"
     },
     {
       "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-01",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
+      "from": "stage.co-deck.S10",
       "to": "gate.co-deck.DG-DECK-02",
       "source": "decision_model"
     },
     {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-03",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-04",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-05",
-      "source": "decision_model"
+      "type": "stage_follows",
+      "from": "stage.co-deck.S10",
+      "to": "stage.co-deck.S11",
+      "source": "process_schema"
     },
     {
       "type": "stage_follows",
@@ -1293,9 +1344,75 @@
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-deck.S3",
+      "to": "gate.co-deck.DG-DECK-04",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-deck.S3",
+      "to": "stage.co-deck.S3.5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S3.5",
       "to": "stage.co-deck.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S4",
+      "to": "stage.co-deck.S5",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S5",
+      "to": "gate.co-deck.DG-DECK-05",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S5",
+      "to": "stage.co-deck.S6",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S6",
+      "to": "stage.co-deck.S7",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S7",
+      "to": "stage.co-deck.S8",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S8",
+      "to": "gate.co-deck.DG-DECK-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S8",
+      "to": "stage.co-deck.S9",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S9",
+      "to": "gate.co-deck.DG-DECK-03",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S9",
+      "to": "stage.co-deck.S10",
       "source": "process_schema"
     },
     {
@@ -1326,6 +1443,12 @@
       "from": "storyline",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "storyline",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "raci_matrix"
     },
     {
       "type": "requires",
@@ -1480,30 +1603,6 @@
       "from": "version",
       "to": "phase6",
       "source": "skill_manifest"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.deck-build-and-export",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.lecture-deck-production",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.source-research",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.storyline-development",
-      "source": "raci_matrix"
     },
     {
       "type": "accountable_for",

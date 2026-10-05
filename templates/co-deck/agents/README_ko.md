@@ -1,11 +1,13 @@
 ---
+sync_version: 1
+translated_from_hash: f1d642ca86e4e63546ce774f1fe29359fef10fb1b26168c5098403cab7da17e7
 lang: ko
 lang_reason: source-material
 ---
 
 # co-deck 에이전트 목록
 
-이 폴더에는 강연/발표 자료 제작 워크플로우 및 핸드북 문서 제작을 위한 13개의 전문 에이전트 (PM + 12명의 전문가)가 있습니다.
+이 폴더에는 강연/발표 자료 제작 워크플로우 및 핸드북 문서 제작을 위한 14개의 전문 에이전트 (PM + 10명의 슬라이드 파이프라인 전문가 + 2명의 핸드북 전문가 + 1명의 i18n-specialist)가 있습니다.
 
 ## 에이전트 인덱스
 
@@ -13,6 +15,7 @@ lang_reason: source-material
 |---------|------|------|----------|
 | PM | `pm.md` | 0-11, H-0~H-7 (전체) | → 전체 에이전트 |
 | Version | `version.md` | 횡단 | ← 전체 에이전트 |
+| I18N Specialist | `i18n-specialist.md` | 횡단 | ← 전체 에이전트 |
 | Research | `research.md` | 1, H-1 | pm → research → source-verifier |
 | Source Verifier | `source-verifier.md` | 1.5 | research → source-verifier → storyline (선택) |
 | Storyline | `storyline.md` | 2-3 | source-verifier → storyline → design |
@@ -54,7 +57,7 @@ H-7: PM — 시크릿 스캔 + 배포 + 검증
 - `image-curator`는 **선택** — 모든 슬라이드가 `image_role: none`인 경우 건너뜀
 - `diagram-specialist`는 **선택** — slide_deck.md에 `visual_spec` 필드가 없으면 건너뜀
 - `image-curator`와 `diagram-specialist`는 Stage 3.5에서 **병렬 실행**
-- Gate **1.5** (소스 신뢰도), **2**, **5**는 사용자 명시적 승인 필요; Gate 3, 4는 선택 (Gate 1은 폐기)
+- Gate **2** (콘텐츠/스토리라인 승인)와 **5** (샘플 PDF 승인)는 필수; Gate **1.5** (소스 신뢰도), **3** (디자인 확정), **4** (레이아웃)는 선택 — 검토 후 자동 진행 (Gate 1은 폐기)
 - `project_state.json`은 강연 진행 상태의 **단일 진실 공급원**
 - `handbook-writer`와 `handbook-reviewer`는 **H-Stage에서만 dispatch** — 11-Stage 파이프라인에서는 사용 불가
 

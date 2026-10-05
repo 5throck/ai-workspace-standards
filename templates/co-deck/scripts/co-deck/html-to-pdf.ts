@@ -6,7 +6,7 @@
 //   --pages N: only render first N sections (useful for sample/preview PDF)
 
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
-import { resolve, dirname, join } from 'path';
+import { resolve, dirname, join, sep } from 'path';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { platform } from 'os';
 
@@ -106,6 +106,7 @@ function getMime(path: string): string {
 async function main() {
   let browser: Browser | null = null;
   let server: ReturnType<typeof Bun.serve> | null = null;
+  let hadError = false;
 
   try {
     const execPath = findChrome();
@@ -126,7 +127,10 @@ async function main() {
         relativePath = relativePath.replace(/^\//, '').replace(/\//g, '/');
         const fullPath = join(serveDir, relativePath);
 
-        if (!fullPath.startsWith(serveDir)) {
+        // Traversal guard: require fullPath to be inside serveDir (a sibling
+        // directory sharing the string prefix must NOT pass).
+        const resolvedFull = resolve(fullPath);
+        if (!resolvedFull.startsWith(serveDir + sep)) {
           return new Response('Forbidden', { status: 403 });
         }
         if (!existsSync(fullPath) || !statSync(fullPath).isFile()) {
@@ -423,7 +427,10 @@ async function main() {
 
   } catch (err) {
     console.error('❌ Error generating PDF:', err);
-    process.exit(1);
+    // Flag the failure instead of process.exit(1): an in-catch exit would
+    // bypass the finally block below and orphan the headless Chrome process
+    // and the listening Bun server. Exit non-zero after cleanup.
+    hadError = true;
   } finally {
     if (browser) {
       await browser.close();
@@ -431,6 +438,9 @@ async function main() {
     if (server) {
       server.stop();
     }
+  }
+  if (hadError) {
+    process.exit(1);
   }
 }
 

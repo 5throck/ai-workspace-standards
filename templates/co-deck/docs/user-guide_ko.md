@@ -1,5 +1,5 @@
 ---
-translated_from_hash: af214ac64b02edf3eabb1f223d0815806549563fdd1a2379c3968716771d7638
+translated_from_hash: 1e4166c20381e8c4bc5ca129dc92025ab565f455abf5136edb83f283e5ab11db
 ---
 # co-deck 사용자 가이드
 
@@ -38,7 +38,7 @@ co-deck는 워크스페이스의 **PM Gateway** 패턴을 따릅니다 — 전�
 | 슬라이드 이미지 검색·다운로드 (Pixabay/Unsplash/Pexels) | `image-curator` | (전용 SKILL.md 없음; 에이전트 전용) | `assets/images/` + `image-manifest.json` 출력; Stage 3.5, 선택, diagram-specialist와 병렬 실행 |
 | SVG 컨셉 다이어그램 또는 데이터 차트 생성 | `diagram-specialist` | (전용 SKILL.md 없음; 에이전트 전용) | 6개 다이어그램 유형(cycle/flow/matrix/pyramid/timeline/comparison) + 3개 차트 유형(bar/line/pie); Stage 3.5, 선택 |
 | 실제 HTML 슬라이드 덱 빌드/생성 | `html-build` | `html-build` | `data-theme` 적용, 6개 테마(`outline`, `outlook`, `pitch`, `pitch-enhanced`, `vertical`, `zen`) 및 2개 목차 서랍 스타일(`glass-drawer`, `solid-drawer`) 지원, 이미지 주입, 강연자 소개, 연락처 슬라이드 삽입; Stages 5-8 |
-| PDF 출력을 위한 렌더링된 레이아웃 측정 (레거시, Playwright) | `measure` | `measure` | **Deprecated** — `prep-pdf`로 대체됨 |
+| PDF 출력을 위한 렌더링된 레이아웃 측정 (레거시, Playwright) | `measure` | `prep-pdf` | **Deprecated** — `prep-pdf`로 대체됨; `measure` 에이전트는 Playwright 없이 동작하며 필수 스킬은 `prep-pdf`입니다 |
 | Playwright 없이 PDF 출력 준비 | `pdf-export` | `prep-pdf` | 4계층 스펙 병합(base → theme → style → overrides) 해석; Stages 9-10 |
 | 샘플 또는 최종 인쇄용 PDF 생성 | `pdf-export` | `pdf-export` | `pdf-lib`을 통해 샘플(5슬라이드) 후 전체 PDF 생성; Stage 11 |
 | 핸드북 / 문서 사이트 / 코스 사이트 빌드 | `handbook-writer`, `handbook-reviewer` | `handbook` | 독립적인 H-Stage 파이프라인 (H-0~H-7); 아래 §3 참고 |
@@ -67,7 +67,7 @@ H-7: PM               — 시크릿 스캔, 배포, 검증
 - `source-verification.md`의 참고문헌 (참고문헌 캐시)
 - `_versions/` 스냅샷 (버전 캐시)
 
-전체 파이프라인 스펙: `skills/handbook/SKILL.md`.
+전체 파이프라인 스펙: 공용 `handbook` 스킬 (`templates/common/skills/handbook` — `inherits_common`으로 해석).
 
 ## 4. 인게이지먼트 / 프로덕션 단계 구조
 
@@ -143,6 +143,6 @@ co-deck은 `docs/html-themes/preview/preview.html`에 브라우저 기반의 대
 # 매니페스트(themes-manifest.js) 재생성
 bun scripts/co-deck/generate-themes-manifest.ts
 
-# docs/html-themes/preview/decks/ 폴더 내 전체 27개 미리보기 HTML 덱 재생성
+# docs/html-themes/preview/decks/ 폴더 내 등록된 모든 테마×스타일 조합의 미리보기 덱 재생성
 bun scripts/co-deck/build-theme-preview.ts
 ```

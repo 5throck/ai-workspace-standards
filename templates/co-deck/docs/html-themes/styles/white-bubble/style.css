@@ -82,7 +82,11 @@
 
 /* White bubble card on every slide except the cover */
 [data-theme="zen"] .slide:not([data-type="cover"]) .slide-content {
-  background: rgba(255, 255, 255, 0.93);
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 88%;
+  margin-inline: auto;
+  background: rgba(255, 255, 255, 0.97);
   border-radius: 14px;
   padding: 2rem 2.75rem;
   box-shadow: 0 10px 34px rgba(20, 20, 20, 0.22);

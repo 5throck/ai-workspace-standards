@@ -234,9 +234,17 @@ async function convertPdfToImages(pdfPath: string, outputDir: string, maxPages: 
     }
 
     return true;
-  } catch {
-    console.log('   ⚠️  pdf-to-png-converter not available — skipping image conversion');
-    console.log('   Install with: bun add pdf-to-png-converter');
+  } catch (err: any) {
+    // Distinguish "optional dependency not installed" from a real conversion
+    // failure — only the former is an acceptable skip.
+    const notInstalled = err?.code === 'ERR_MODULE_NOT_FOUND'
+      || /cannot find (module|package)/i.test(String(err?.message ?? ''));
+    if (notInstalled) {
+      console.log('   ⚠️  pdf-to-png-converter not installed — skipping image conversion');
+      console.log('   Install with: bun add pdf-to-png-converter');
+    } else {
+      console.error(`   ❌ PDF-to-image conversion failed: ${err?.message ?? err}`);
+    }
     return false;
   }
 }

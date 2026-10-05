@@ -42,18 +42,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start; fi",
             "timeout": 8000
-          }
-        ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "git config core.hooksPath .githooks",
-            "statusMessage": "Configuring git hooks..."
           }
         ]
       },
@@ -88,7 +78,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" post-edit",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" post-edit; fi",
             "timeout": 10000
           }
         ]
@@ -98,23 +88,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" tool-savings",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" tool-savings; fi",
             "timeout": 8000
           }
         ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "async": true,
-            "asyncRewake": true,
-            "statusMessage": "Running post-edit lifecycle check..."
-          }
-        ],
-        "timeout": 60
       }
     ],
     "TeammateIdle": [
@@ -130,19 +107,6 @@
             "statusMessage": "Running teammate idle lifecycle check..."
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "async": true,
-            "asyncRewake": true,
-            "statusMessage": "Running teammate idle lifecycle check..."
-          }
-        ],
-        "timeout": 60
       }
     ],
     "WorktreeCreate": [
@@ -170,18 +134,6 @@
             "statusMessage": "Running QA audit on task completion..."
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/audit.ts",
-            "timeout": 60,
-            "async": true,
-            "statusMessage": "Running QA audit on task completion..."
-          }
-        ]
       }
     ],
     "PreToolUse": [
@@ -202,7 +154,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" prompt",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" prompt; fi",
             "timeout": 15000
           }
         ]
@@ -213,7 +165,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" stop",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" stop; fi",
             "timeout": 8000
           }
         ]
@@ -225,11 +177,11 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
+    "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\"; fi"
   },
   "subagentStatusLine": {
     "type": "command",
-    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
+    "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\" ]; then node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\"; fi"
   },
   "footerLinksRegexes": [
     "graft/[\\w./-]+\\.md"

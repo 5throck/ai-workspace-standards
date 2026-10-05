@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261005-009
+kind: manual
+title: >-
+  Remove the stale beta warning block from co-deck README.md/README_ko.md and
+  recount the agent roster 13 to 14 across the variant.json description, both
+  READMEs, the agents/README index (add i18n-specialist), and
+  docs/co-deck.context.md
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T10:12:42.548Z'
+history:
+  - at: '2026-10-05T10:12:42.548Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.836Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.851Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.866Z'
+    from: review
+    to: done
+result: >-
+  Roster 13-to-14 across description/READMEs/context; README+ko beta blocks
+  removed (verify-readme-sync PASS); PM tier Medium; i18n manifest note; root
+  lifecycle criteria refreshed
+error: null
