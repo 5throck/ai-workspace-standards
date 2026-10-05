@@ -241,7 +241,7 @@ const msg = (msgArgs.join(' ') || "chore: update")
 // silently swallowed by the PR-creation fallback below). Shared detector also catches
 // Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
 if (hasNonEnglish(msg)) {
-    console.log(`${RED}❌ Commit message / PR title must be written in English (context.md §3).${RESET}`);
+    console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
     console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
     if (import.meta.main) {
       process.exit(1);
@@ -622,7 +622,7 @@ if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
 // `scripts/typecheck.ts`: `tsc --noEmit` over scripts/ vs the recorded baseline
 // (0 since the 2026-09-11 Phase 2 triage) — fails on ANY type error. The
 // baseline file is a root-context asset; scaffolded projects (no baseline)
-// skip cleanly inside typecheck.ts itself. Inline context.md check (the
+// skip cleanly inside typecheck.ts itself. Inline workspace-root marker check (the
 // shared isL0Context const is declared further below).
 if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('scripts/typecheck.ts')) {
     console.log('📋 Step 3.95b: Typecheck gate (tsc --noEmit over scripts/)...');
@@ -693,7 +693,7 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
     if (govRes.exitCode !== 0) {
         console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
         console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references, or marker-drift findings exist.${RESET}`);
-        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to context.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
+        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
         console.error(`${YELLOW}   For marker-drift: Review the duplicated section, update it if stale, then re-seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes${RESET}`);
         if (import.meta.main) {
             process.exit(1);
@@ -708,15 +708,15 @@ if (fs.existsSync('scripts/verify-adr-governance.ts')) {
 // 4.5 L0→L1 publish — must run BEFORE audit gate so that CONSTITUTION scrub
 //     is applied to templates/common/ files before the L0-leakage check.
 const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
-// L0 context: context.md exists at workspace root — publish failures are fatal here.
-const isL0Context = fs.existsSync('context.md');
+// L0 context: the workspace-root marker exists — publish failures are fatal here.
+const isL0Context = fs.existsSync('CONSTITUTION.md');
 if (isWorkspaceRoot) {
     console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
     try {
         const publishRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
         if (publishRes.exitCode !== 0) {
             if (isL0Context) {
-                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (context.md present)${RESET}`);
+                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
                 if (import.meta.main) {
                   process.exit(1);
                 }
@@ -726,7 +726,7 @@ if (isWorkspaceRoot) {
         }
     } catch (e) {
         if (isL0Context) {
-            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (context.md present)${RESET}`);
+            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
             if (import.meta.main) {
               process.exit(1);
             }
@@ -1414,7 +1414,7 @@ if (existingPrUrl) {
             } else {
                 // Same English gate as the commit message above.
                 if (hasNonEnglish(agentBody)) {
-                    console.log(`${RED}❌ Agent-written PR body must be written in English (context.md §3).${RESET}`);
+                    console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
                     console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
                     if (import.meta.main) {
                         process.exit(1);

@@ -1,6 +1,14 @@
-// @version 1.0.0
+// @version 1.1.0
 /**
  * constitution-scrub.ts — shared CONSTITUTION.md reference scrubber
+ *
+ * v1.1.0 (2026-10-05, T-20261004-022): code-branch state machine no longer lets
+ *          a `//` line corrupt block-comment state — a `/*`-shaped glob inside a
+ *          // comment (e.g. `docs/**` in a path list) used to wedge the machine
+ *          into block-comment mode and blanket-scrub FUNCTIONAL string literals
+ *          further down (audit.ts verify-memory guard, dev-sync/validate-templates
+ *          literals). Full-line // comments are now classified first and scrubbed
+ *          without touching the state; only real block-comment markers drive it.
  *
  * Single source for the L0→L1+ reference transform applied when workspace-root
  * (L0) content is propagated into templates/ (L1/L2), where CONSTITUTION.md is
@@ -85,13 +93,28 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
     let inBlockComment = false;
     const scrubbedLines = lines.map((line) => {
       const trimmed = line.trim();
+      // T-20261004-022: a full-line `//` comment is scrubbed as comment text
+      // WITHOUT consulting or corrupting the block-comment state machine.
+      // Previously a `/*`-shaped glob inside a // line (e.g. `docs/**` in a
+      // path list) matched the block-opener heuristic and wedged the machine
+      // into block-comment mode, so every following functional string literal
+      // was blanket-scrubbed — the divergence class that shipped context.md
+      // into audit.ts/dev-sync.ts existsSync guards and message strings.
+      if (trimmed.startsWith('//')) {
+        return line.replace(/CONSTITUTION\.md/g, 'context.md');
+      }
       const wasInBlockComment = inBlockComment;
-      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf('/*') + 2))) {
+      // The closer probe starts at idx+1 (not idx+2) so an OVERLAPPING `/*/`
+      // glob in functional code (e.g. `templates/*/skills/` in a message
+      // string) counts as balanced instead of wedging the machine open
+      // (T-20261004-022: this wedge blanket-scrubbed dev-sync.ts literals
+      // between the glob line and the next real block close).
+      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf('/*') + 1))) {
         inBlockComment = true;
       } else if (wasInBlockComment && /\*\//.test(line)) {
         inBlockComment = false;
       }
-      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith('//') || trimmed.startsWith('*');
+      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith('*');
 
       if (isFullLineComment) {
         return line.replace(/CONSTITUTION\.md/g, 'context.md');

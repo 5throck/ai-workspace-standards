@@ -6,7 +6,7 @@
 //           real targets (or dead targets demoted to inline-code text), so the
 //           deep scan exits 0 and any regrowth fails the audit. Same spawn
 //           contract as before (workspace-root only, existsSync-guarded).
-// v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (context.md guard) —
+// v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (workspace-root marker guard) —
 //           the E2E caught scaffold-context leakage (project docs/ are project-scoped).
 // v2.48.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): docs/ folder
 //           manifest gate — spawns validate-doc-folder.ts --workspace (existsSync-guarded,
@@ -929,7 +929,7 @@ if (hasBun) {
         else
             Pass("README lifecycle audit: all READMEs healthy");
     }
-    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('context.md') && !SKIP_MEMORY) {
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md') && !SKIP_MEMORY) {
         // explicitly skip any files located in memory/archive/
         const memoryFiles = fs.readdirSync('memory')
             .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
