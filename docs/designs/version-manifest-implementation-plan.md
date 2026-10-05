@@ -191,7 +191,7 @@ Once PM approves this plan:
 6. **AC-03**: Verify manifest generation integrates with `/sync` pipeline
 7. **AC-04**: Verify constitution docs reference manifest system
 
-See [meeting-2026-06-01-lifecycle-version-improvements.md](../../memory/meeting-2026-06-01-lifecycle-version-improvements.md) for full action item table.
+See `meeting-2026-06-01-lifecycle-version-improvements.md` (purged memory log; no archive copy survives) for full action item table.
 
 ---
 

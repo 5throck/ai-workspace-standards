@@ -128,6 +128,6 @@ To resolve the detected parity issues:
 
 ### References
 
-- [ADR-0033: Platform Parity Governance](./adr/0033-platform-parity-governance.md)
-- [Platform Parity Rules](./platform-parity-rules.md)
-- [CONSTITUTION.md §10: Cross-Platform Deployment Rule](../CONSTITUTION.md#10-cross-platform-deployment-rule)
+- [ADR-0033: Variant-Specific Skills & Scripts Blueprint](../adr/0033-variant-specific-skills-scripts-blueprint.md)
+- [Platform Parity Rules](../governance/platform-parity-rules.md)
+- [CONSTITUTION.md](../../CONSTITUTION.md)
