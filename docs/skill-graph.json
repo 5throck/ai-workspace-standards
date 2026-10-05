@@ -8176,12 +8176,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/AGENTS.md",
       "to": "decision-record",
       "source": "workflow-doc"
     },
@@ -8236,12 +8230,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/AGENTS.md",
       "to": "sap-co",
       "source": "workflow-doc"
     },
@@ -8279,12 +8267,6 @@
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-abap/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -8602,12 +8584,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/AGENTS.md",
       "to": "explain-me",
       "source": "workflow-doc"
     },
@@ -8668,19 +8644,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -9310,12 +9274,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/AGENTS.md",
       "to": "design",
       "source": "workflow-doc"
     },
@@ -9382,12 +9340,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/AGENTS.md",
       "to": "research",
       "source": "workflow-doc"
     },
@@ -9395,12 +9347,6 @@
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -9778,12 +9724,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/AGENTS.md",
       "to": "explain-me",
       "source": "workflow-doc"
     },
@@ -9844,19 +9784,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -9952,12 +9880,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/AGENTS.md",
       "to": "explain-me",
       "source": "workflow-doc"
     },
@@ -10000,19 +9922,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-develop/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -12520,12 +12430,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
-      "to": "create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/AGENTS.md",
       "to": "explain-me",
       "source": "workflow-doc"
     },
@@ -12586,19 +12490,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
-      "to": "promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/AGENTS.md",
       "to": "security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/AGENTS.md",
-      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {

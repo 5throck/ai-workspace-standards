@@ -229,9 +229,6 @@ Explicit invocation: the `meeting-facilitation` skill with the meeting topic and
 | `project-review` | `skills/project-review/` | Multi-agent parallel project review |
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
-| `create-variant` | `skills/create-variant/` | New variant scaffolding — workspace-root (L0) only, not shipped in scaffolds |
-| `promote-variant` | `skills/promote-variant/` | Variant promotion to official — workspace-root (L0) only, not shipped in scaffolds |
-| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) — workspace-root (L0) only, not shipped in scaffolds |
 | `explain-me` | `skills/explain-me/` | Single-file interactive HTML report generation (inspired by beret21/reportme) |
 
 > **Complete Skill Registry**: The table above is a curated subset — see the workspace `VERSION_MANIFEST.md` for the complete registry of all workspace-level skills with versions, status, and lifecycle metadata.
