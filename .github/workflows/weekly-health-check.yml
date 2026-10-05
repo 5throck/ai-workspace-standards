@@ -45,6 +45,16 @@ jobs:
       - name: Verify scripts registry
         run: bun run verify-scripts
 
+      - name: Ticket archive dry-run (report-only)
+        # T-20261005-003 follow-up, spec docs/designs/2026-10-05-ticket-archive-weekly-check-design.md:
+        # done tickets leave the live stores after a 7-day dwell (AGENTS.md §3.7.5), but
+        # the eligible set is invisible until someone runs the tool — observed 2026-10-05:
+        # 18 tickets had accumulated past dwell before the first manual archive. The
+        # dry-run is non-mutating (always exits 0) and deliberately does NOT gate this
+        # workflow: applying is a maintainer decision (`bun scripts/ticket.ts archive
+        # --apply`, reversible per ticket via `archive --restore <id>`).
+        run: bun scripts/ticket.ts archive
+
       - name: Validate templates (variant manifests + country profiles)
         run: bun run validate-templates
 

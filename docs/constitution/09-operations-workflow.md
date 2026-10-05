@@ -25,6 +25,10 @@ bun scripts/spec-backfill.ts --check
 
 # Check for ready governance-backlog items (deferred decisions whose soak/review date has passed)
 bun scripts/ticket.ts list --ready --kind manual
+
+# Ticket archive dry-run — surface done tickets past the 7-day dwell (AGENTS.md §3.7.5);
+# the Weekly Health Check workflow runs the same report automatically (report-only)
+bun scripts/ticket.ts archive
 ```
 
 **Checklist**:
@@ -34,6 +38,7 @@ bun scripts/ticket.ts list --ready --kind manual
 - [ ] Deprecated items list is current
 - [ ] No design docs missing from `docs/specs/registry.json` (or run `bun scripts/spec-backfill.ts` to close the gap)
 - [ ] No ready governance-backlog tickets ignored — action them or explicitly defer (update `not_before`)
+- [ ] Ticket archive dry-run reviewed — past-dwell done tickets applied (`bun scripts/ticket.ts archive --apply`) or consciously deferred
 
 **Output**: Log findings to `memory/YYYY-MM-DD.md` with section "## Weekly Health Check"
 
