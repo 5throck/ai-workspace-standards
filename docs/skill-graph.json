@@ -960,6 +960,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "doc:co-deck/docs/phase-definitions.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "doc:co-deck/docs/user-guide_ko.md",
       "type": "doc",
       "layer": "variant:co-deck"
@@ -3935,6 +3940,21 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "stage.co-deck.S1.5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S10",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S11",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "stage.co-deck.S2",
       "type": "stage",
       "layer": "variant:co-deck"
@@ -3945,7 +3965,37 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "stage.co-deck.S3.5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "stage.co-deck.S4",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S5",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S6",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S7",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S8",
+      "type": "stage",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "stage.co-deck.S9",
       "type": "stage",
       "layer": "variant:co-deck"
     },
@@ -9094,13 +9144,31 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
       "to": "design",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
       "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "handbook-sync-audit",
       "source": "workflow-doc"
     },
     {
@@ -9124,13 +9192,49 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
       "to": "prep-pdf",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
       "to": "research",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
@@ -9143,6 +9247,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
       "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -9226,13 +9336,13 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
-      "to": "graft",
+      "to": "handbook",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
-      "to": "handbook",
+      "to": "handbook-sync-audit",
       "source": "workflow-doc"
     },
     {
@@ -9250,7 +9360,25 @@
     {
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
       "to": "prep-pdf",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "presenter-mode",
       "source": "workflow-doc"
     },
     {
@@ -9263,6 +9391,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/docs/co-deck.context.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/co-deck.context.md",
+      "to": "slide-layout-gate",
       "source": "workflow-doc"
     },
     {
@@ -9305,6 +9439,18 @@
       "type": "cites_skill",
       "from": "doc:co-deck/docs/lecture-profile.md",
       "to": "storyline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/phase-definitions.md",
+      "to": "pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/docs/phase-definitions.md",
+      "to": "prep-pdf",
       "source": "workflow-doc"
     },
     {
@@ -9419,6 +9565,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/README.md",
       "to": "html-build",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -9437,6 +9589,12 @@
       "type": "cites_skill",
       "from": "doc:co-deck/README.md",
       "to": "presenter-mode",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/README.md",
+      "to": "slide-layout-gate",
       "source": "workflow-doc"
     },
     {
@@ -13991,6 +14149,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "html-build",
+      "to": "procedure.co-deck.deck-build-and-export",
+      "source": "raci_matrix"
+    },
+    {
       "type": "composes_with",
       "from": "html-build",
       "to": "research",
@@ -17432,6 +17596,12 @@
     {
       "type": "accountable_for",
       "from": "pm",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pm",
       "to": "procedure.co-export.export-shipment-compliance",
       "source": "raci_matrix"
     },
@@ -18481,7 +18651,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.deck-build-and-export",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S5",
       "source": "process_schema"
     },
     {
@@ -18512,7 +18682,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.deck-publish-and-version",
-      "to": "stage.co-deck.S3",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -18589,7 +18759,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.lecture-deck-production",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S1",
       "source": "process_schema"
     },
     {
@@ -18688,7 +18858,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-export-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -18756,7 +18926,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-production-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S4",
       "source": "process_schema"
     },
     {
@@ -18824,7 +18994,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-retrospective-control",
-      "to": "stage.co-deck.S4",
+      "to": "stage.co-deck.S11",
       "source": "process_schema"
     },
     {
@@ -18861,7 +19031,7 @@
     {
       "type": "in_stage",
       "from": "procedure.co-deck.version-storyline-control",
-      "to": "stage.co-deck.S2",
+      "to": "stage.co-deck.S3",
       "source": "process_schema"
     },
     {
@@ -21955,6 +22125,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "research",
+      "to": "procedure.co-deck.source-research",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "research",
       "to": "research",
@@ -23519,38 +23695,26 @@
     {
       "type": "stage_follows",
       "from": "stage.co-deck.S1",
+      "to": "stage.co-deck.S1.5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S1.5",
       "to": "stage.co-deck.S2",
       "source": "process_schema"
     },
     {
       "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-01",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
+      "from": "stage.co-deck.S10",
       "to": "gate.co-deck.DG-DECK-02",
       "source": "decision_model"
     },
     {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-03",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-04",
-      "source": "decision_model"
-    },
-    {
-      "type": "gated_by",
-      "from": "stage.co-deck.S2",
-      "to": "gate.co-deck.DG-DECK-05",
-      "source": "decision_model"
+      "type": "stage_follows",
+      "from": "stage.co-deck.S10",
+      "to": "stage.co-deck.S11",
+      "source": "process_schema"
     },
     {
       "type": "stage_follows",
@@ -23559,9 +23723,75 @@
       "source": "process_schema"
     },
     {
+      "type": "gated_by",
+      "from": "stage.co-deck.S3",
+      "to": "gate.co-deck.DG-DECK-04",
+      "source": "decision_model"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-deck.S3",
+      "to": "stage.co-deck.S3.5",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S3.5",
       "to": "stage.co-deck.S4",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S4",
+      "to": "stage.co-deck.S5",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S5",
+      "to": "gate.co-deck.DG-DECK-05",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S5",
+      "to": "stage.co-deck.S6",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S6",
+      "to": "stage.co-deck.S7",
+      "source": "process_schema"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S7",
+      "to": "stage.co-deck.S8",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S8",
+      "to": "gate.co-deck.DG-DECK-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S8",
+      "to": "stage.co-deck.S9",
+      "source": "process_schema"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S9",
+      "to": "gate.co-deck.DG-DECK-03",
+      "source": "decision_model"
+    },
+    {
+      "type": "stage_follows",
+      "from": "stage.co-deck.S9",
+      "to": "stage.co-deck.S10",
       "source": "process_schema"
     },
     {
@@ -23956,6 +24186,12 @@
       "from": "storyline",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "storyline",
+      "to": "procedure.co-deck.storyline-development",
+      "source": "raci_matrix"
     },
     {
       "type": "requires",
@@ -24918,30 +25154,6 @@
       "from": "version",
       "to": "phase6",
       "source": "skill_manifest"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.deck-build-and-export",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.lecture-deck-production",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.source-research",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "version",
-      "to": "procedure.co-deck.storyline-development",
-      "source": "raci_matrix"
     },
     {
       "type": "accountable_for",

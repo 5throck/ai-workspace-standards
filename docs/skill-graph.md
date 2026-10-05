@@ -366,7 +366,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-consult/docs/user-guide_ko.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
 | `doc:co-consult/docs/user-guide.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
 | `doc:co-consult/README.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `hwp-document-processing`, `insight-synthesis`, `mece-logic-auditor`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `sample-driven-report-writing`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
-| `doc:co-deck/AGENTS.md` | doc | `agent-lifecycle-manager`, `design`, `handbook`, `html-build`, `meeting-facilitation`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `storyline`, `version` | — | — |
+| `doc:co-deck/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `design`, `explain-me`, `handbook`, `handbook-sync-audit`, `html-build`, `meeting-facilitation`, `pdf-export`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `prep-pdf`, `project-review`, `promote-variant`, `research`, `security-scan`, `simulate-pipeline`, `skill-lifecycle-manager`, `storyline`, `sync`, `version` | — | — |
 | `doc:co-deck/agents/design.md` | doc | `design` | — | — |
 | `doc:co-deck/agents/html-build.md` | doc | `html-build` | — | — |
 | `doc:co-deck/agents/image-curator.md` | doc | `html-build` | — | — |
@@ -376,11 +376,12 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/agents/research.md` | doc | `research` | — | — |
 | `doc:co-deck/agents/storyline.md` | doc | `storyline` | — | — |
 | `doc:co-deck/agents/version.md` | doc | `version` | — | — |
-| `doc:co-deck/docs/co-deck.context.md` | doc | `agent-lifecycle-manager`, `design`, `graft`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `storyline`, `theme-authoring`, `version` | — | — |
+| `doc:co-deck/docs/co-deck.context.md` | doc | `agent-lifecycle-manager`, `design`, `handbook`, `handbook-sync-audit`, `html-build`, `pdf-export`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `prep-pdf`, `presenter-mode`, `research`, `skill-lifecycle-manager`, `slide-layout-gate`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/docs/lecture-profile.md` | doc | `html-build`, `pdf-export`, `research`, `storyline` | — | — |
+| `doc:co-deck/docs/phase-definitions.md` | doc | `pdf-export`, `prep-pdf` | — | — |
 | `doc:co-deck/docs/user-guide_ko.md` | doc | `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/docs/user-guide.md` | doc | `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `storyline`, `theme-authoring`, `version` | — | — |
-| `doc:co-deck/README.md` | doc | `html-build`, `pdf-export`, `prep-pdf`, `presenter-mode`, `theme-authoring` | — | — |
+| `doc:co-deck/README.md` | doc | `html-build`, `meeting-facilitation`, `pdf-export`, `prep-pdf`, `presenter-mode`, `slide-layout-gate`, `theme-authoring` | — | — |
 | `doc:co-design/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/co-design.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `project-review` | — | — |
