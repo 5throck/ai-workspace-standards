@@ -2125,6 +2125,15 @@
       "source": "manual",
       "created": "2026-10-05",
       "last_updated": "2026-10-05"
+    },
+    {
+      "id": "2026-10-05-scripts-hygiene-batch-design",
+      "title": "scripts hygiene batch design",
+      "file": "docs/designs/2026-10-05-scripts-hygiene-batch-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-05",
+      "last_updated": "2026-10-05"
     }
   ]
 }

@@ -1,0 +1,43 @@
+schemaVersion: 1
+id: T-20261005-004
+kind: manual
+title: >-
+  validator-hardening: validate-md-language.ts inline-code stripper assumes
+  single-backtick delimiters (`/`[^`]+`/g`) and cannot parse CommonMark
+  double-backtick inline code (`` `x` ``). Observed 2026-10-05: a CHANGELOG
+  entry using double-backtick markup left stray unpaired backticks whose global
+  regex pairing swallowed/exposed later spans, unmasking Korean that lives
+  inside intentional inline-code tokens in older entries and failing the
+  language gate on an English-only edit (false positive; the same file passes
+  without the new entry). Direction: strip multi-backtick code spans (lazy
+  ``...`` match) BEFORE the single-backtick pass so delimiter runs are consumed
+  whole, plus a regression test pinning (a) double-backtick spans containing
+  Korean are exempt and (b) Korean outside code spans still fails. Acceptance: a
+  CHANGELOG-style file whose only Korean sits inside double-backtick inline code
+  passes the validator; Korean in plain prose still fails.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-05T03:10:00.000Z'
+history:
+  - at: '2026-10-05T03:10:00.000Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T02:13:30.449Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T02:13:30.465Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T02:13:30.502Z'
+    from: review
+    to: done
+result: >-
+  Fixed in this change set: validate-md-language.ts v1.13.0 -> v1.14.0 —
+  inline-code stripping extracted to exported stripCodeForLanguageScan()
+  consuming multi-backtick spans lazily before the single-backtick pass; L1
+  mirror republished via propagate-to-templates (scrub-canonical form);
+  regression test tests/unit/validate-md-language-code-spans.test.ts pins both
+  directions (5/5 pass). Design:
+  docs/designs/2026-10-05-scripts-hygiene-batch-design.md
+error: null
