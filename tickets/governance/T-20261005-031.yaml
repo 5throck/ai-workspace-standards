@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261005-031
+kind: manual
+title: >-
+  Unify the co-abap phase model on the phase-definitions scheme: fix
+  sap-investigator/security-monitor frontmatter and the variant.json notes
+  outlier, add decision records for the mandatory QA chain and user approval
+  with a decider other than the implementer, and retitle/re-scope stages S1-S2
+  to match the six procedures
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.259Z'
+history:
+  - at: '2026-10-05T13:23:12.259Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.164Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.178Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.192Z'
+    from: review
+    to: done
+result: >-
+  co-abap phase model unified on phase-definitions: sap-investigator [1],
+  security-monitor [5] (phase 0 removed), manifest notes rewritten, DG-ABAP-01
+  untruncated with test-runner decider, DG-ABAP-02 QA-chain gate added
+  (custom-dev-delivery decision_points updated), stages S1/S2 retitled with zero
+  PENDING_REVIEW, raci transport-release accountable devops-admin
+error: null

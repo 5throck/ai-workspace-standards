@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.0.3
+// @version 1.1.0
+// v1.1.0: Honest installs (spec docs/designs/2026-10-05-consult-abap-develop-review-remediation-design.md D4):
+//         uv branch uses `uv pip install --python .venv` (uv install is not a subcommand) and
+//         targets the created .venv; every pass() is preceded by an exit-code check and a
+//         failed required step makes the overall exit non-zero; rtk install is gated behind
+//         --with-rtk; Windows python detection uses exitCode fallthrough (nothrow never throws).
 // v1.0.3: UNKNOWN-STACK guidance routes tool installation through the PM with the
 //         security-review clause (spec docs/designs/2026-09-25-variant-hygiene-batch-design.md,
 //         R3b) — the previous text invoked a setup agent this variant never shipped.
@@ -22,14 +27,17 @@
 //              Makefile              → info only (not run automatically)
 //   Unknown    (none of the above)   → manual setup via PM-approved tool installation
 //
-// Usage: bun scripts/setup.ts [--skip-install] [--skip-license-check] [--skip-commit] [--with-gemini-plugins]
+// Usage: bun scripts/co-abap/setup.ts [--skip-install] [--skip-license-check] [--skip-commit]
+//        [--with-gemini-plugins] [--with-rtk]
 
 import path from "node:path";
 import * as fs from "node:fs";
 import { $ } from "bun";
 
 const scriptDir = path.dirname(import.meta.path);
-const projectRoot = path.resolve(scriptDir, "..");
+// scripts/co-abap/ → project root (two levels up): .env, .venv, manifests and the
+// git repo all live at the project root, not under scripts/.
+const projectRoot = path.resolve(scriptDir, "..", "..");
 
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
@@ -48,6 +56,13 @@ const SKIP_LICENSE = args.includes("--skip-license-check");
 const SKIP_COMMIT = args.includes("--skip-commit");
 // Remote-code installs are opt-in: they clone/download and execute third-party code.
 const WITH_GEMINI_PLUGINS = args.includes("--with-gemini-plugins");
+// Global tool install (brew/cargo compiles third-party code and writes outside the
+// project) — same opt-in policy as the gemini-plugins section above.
+const WITH_RTK = args.includes("--with-rtk");
+
+// Required install steps that failed. A failure here must make the overall exit
+// non-zero — "PASS" is only printed when a step actually succeeded.
+let requiredFailures = 0;
 
 function pass(msg: string) {
   console.log(`${GREEN}[PASS]${RESET} ${msg}`);
@@ -57,6 +72,11 @@ function info(msg: string) {
 }
 function warn(msg: string) {
   console.log(`${YELLOW}[WARN]${RESET} ${msg}`);
+}
+/** Record a failed required step: warn (not pass) and count toward a non-zero exit. */
+function failStep(msg: string) {
+  warn(msg);
+  requiredFailures++;
 }
 
 /** Check if a command exists on PATH */
@@ -96,7 +116,7 @@ async function licenseAuditNode() {
   }
 }
 
-async function licenseAuditPython() {
+async function licenseAuditPython(attemptInstall = true) {
   if (SKIP_LICENSE) {
     info("Skipping license audit (--skip-license-check)");
     return;
@@ -122,16 +142,60 @@ async function licenseAuditPython() {
       warn("pip-licenses failed - skipping audit");
     }
   } else {
+    if (!attemptInstall) {
+      // Guard against infinite recursion: installing pip-licenses (e.g. into .venv
+      // via uv) does not necessarily put it on PATH, so a retry would loop forever.
+      warn("pip-licenses unavailable after install attempt - skipping Python license audit");
+      warn("   Manual check: pip install pip-licenses && pip-licenses --format=csv");
+      return;
+    }
     info("pip-licenses not installed - installing for audit...");
-    const pipCmd = (await cmdExists("uv")) ? "uv" : "pip";
-    const installed = await run(pipCmd, "install", "pip-licenses", "--quiet");
+    // `uv install` is not a subcommand - uv exposes pip-compatible installs via
+    // `uv pip install` (which auto-discovers .venv in the project root).
+    const installed = (await cmdExists("uv"))
+      ? await run("uv", "pip", "install", "pip-licenses", "--quiet")
+      : await run("pip", "install", "pip-licenses", "--quiet");
     if (installed) {
-      await licenseAuditPython();
+      await licenseAuditPython(false);
     } else {
       warn("Could not install pip-licenses - skipping Python license audit");
       warn("   Manual check: pip install pip-licenses && pip-licenses --format=csv");
     }
   }
+}
+
+/** Create .venv in the project root if missing. Returns true when .venv exists afterwards. */
+async function ensurePythonVenv(hasUv: boolean, hasPython: boolean): Promise<boolean> {
+  if (fs.existsSync(".venv")) return true;
+  if (hasUv) {
+    info("Creating Python virtual environment with uv (.venv)...");
+    const { exitCode } = await $`uv venv .venv`.quiet().nothrow();
+    if (exitCode === 0) {
+      pass(".venv created (uv)");
+      return true;
+    }
+    failStep("uv venv failed - create it manually: uv venv .venv");
+    return false;
+  }
+  if (hasPython) {
+    info("uv not found - creating .venv with python3 -m venv (fallback)...");
+    const { exitCode } = await $`python3 -m venv .venv`.quiet().nothrow();
+    if (exitCode === 0) {
+      pass(".venv created (venv)");
+      return true;
+    }
+    failStep("python3 -m venv failed - create it manually: python3 -m venv .venv");
+    return false;
+  }
+  failStep("Neither uv nor Python 3 found - cannot create .venv");
+  return false;
+}
+
+/** Path of the interpreter inside the project-root .venv (POSIX layout vs Windows layout). */
+function venvPythonPath(): string {
+  return process.platform === "win32"
+    ? path.join(".venv", "Scripts", "python.exe")
+    : path.join(".venv", "bin", "python");
 }
 
 async function main() {
@@ -151,18 +215,14 @@ async function main() {
 
   // ── Python toolchain resolution ──────────────────────────────────────────────
   const hasUv = await cmdExists("uv");
-  let hasPython = false;
-  try {
-    const { exitCode } = await $`python3 --version`.quiet().nothrow();
-    hasPython = exitCode === 0;
-  } catch {
-    try {
-      const { exitCode } = await $`python --version`.quiet().nothrow();
-      const { stdout } = await $`python --version`.quiet().nothrow();
-      hasPython = exitCode === 0 && stdout.toString().includes("Python 3");
-    } catch {
-      hasPython = false;
-    }
+  // exitCode-based fallthrough: .nothrow() shells never throw, so the previous
+  // try/catch was dead code and Windows `python` was never probed. `python3`
+  // wins when present; on Windows fall back to `python`, which may be the
+  // Store alias (exit code 9009 / non-Python-3 banner) — hence the banner check.
+  let hasPython = (await $`python3 --version`.quiet().nothrow()).exitCode === 0;
+  if (!hasPython) {
+    const py = await $`python --version`.quiet().nothrow();
+    hasPython = py.exitCode === 0 && py.stdout.toString().includes("Python 3");
   }
 
   // ── 1. .env.sample → .env ─────────────────────────────────────────────────────
@@ -181,6 +241,7 @@ async function main() {
         info("Agent orchestration (Bun) detected - running bun install in scripts/");
         const { exitCode } = await $`cd scripts && bun install`.quiet().nothrow();
         if (exitCode === 0) pass("bun install complete");
+        else failStep("bun install in scripts/ failed - agent orchestration deps missing");
       }
     }
 
@@ -188,51 +249,52 @@ async function main() {
     if (fs.existsSync("package.json")) {
       if (await cmdExists("bun")) {
         info("Node.js project detected - running bun install");
-        await $`bun install`.quiet().nothrow();
-        pass("bun install complete");
+        const { exitCode } = await $`bun install`.quiet().nothrow();
+        if (exitCode === 0) pass("bun install complete");
+        else failStep("bun install failed - Node.js dependencies missing");
         await licenseAuditNode();
       } else {
-        warn("bun not found - install Bun from https://bun.sh");
+        failStep("bun not found - install Bun from https://bun.sh");
       }
     }
 
     // ── Python (requirements.txt) ──────────────────────────────────────────────
     if (fs.existsSync("requirements.txt")) {
       info("Python project detected (requirements.txt)");
-      // venv creation
-      if (hasUv) {
-        if (!fs.existsSync(".venv")) {
-          info("Creating Python virtual environment with uv (.venv)...");
-          await $`uv venv .venv`.quiet().nothrow();
-          pass(".venv created (uv)");
-        }
-      } else if (hasPython) {
-        if (!fs.existsSync(".venv")) {
-          info("uv not found - creating .venv with python -m venv (fallback)");
-          await $`python3 -m venv .venv`.quiet().nothrow();
-          pass(".venv created (venv)");
+      if (await ensurePythonVenv(hasUv, hasPython)) {
+        // Install requirements INTO the created .venv. `uv install` is not a
+        // subcommand — uv exposes pip-compatible installs via `uv pip install`,
+        // pointed at .venv explicitly. Plain pip has no venv awareness, so go
+        // through the venv's own interpreter instead.
+        const reqResult = hasUv
+          ? await $`uv pip install -r requirements.txt --python .venv`.quiet().nothrow()
+          : await $`${venvPythonPath()} -m pip install -r requirements.txt`.quiet().nothrow();
+        if (reqResult.exitCode === 0) {
+          pass(`Dependencies installed (requirements.txt) via ${hasUv ? "uv pip" : "venv pip"}`);
+          await licenseAuditPython();
+        } else {
+          failStep("Python dependency install failed (requirements.txt) - review the errors above and re-run");
         }
       } else {
-        warn("Neither uv nor Python 3 found - skipping venv");
-      }
-
-      // Install requirements
-      const pipCmd = hasUv ? "uv" : "pip";
-      const { exitCode } = await $`${pipCmd} install -r requirements.txt`.quiet().nothrow();
-      if (exitCode === 0) {
-        pass(`Dependencies installed (requirements.txt) via ${pipCmd}`);
-        await licenseAuditPython();
+        failStep("No .venv available - Python dependencies not installed");
       }
     }
 
     // ── Python (pyproject.toml, no requirements.txt) ──────────────────────────
     if (fs.existsSync("pyproject.toml") && !fs.existsSync("requirements.txt")) {
       info("Python project detected (pyproject.toml)");
-      const pipCmd = hasUv ? "uv" : "pip";
-      const { exitCode } = await $`${pipCmd} install -e .`.quiet().nothrow();
-      if (exitCode === 0) {
-        pass(`Dependencies installed (pyproject.toml) via ${pipCmd}`);
-        await licenseAuditPython();
+      if (await ensurePythonVenv(hasUv, hasPython)) {
+        const reqResult = hasUv
+          ? await $`uv pip install -e . --python .venv`.quiet().nothrow()
+          : await $`${venvPythonPath()} -m pip install -e .`.quiet().nothrow();
+        if (reqResult.exitCode === 0) {
+          pass(`Dependencies installed (pyproject.toml) via ${hasUv ? "uv pip" : "venv pip"}`);
+          await licenseAuditPython();
+        } else {
+          failStep("Python dependency install failed (pyproject.toml) - review the errors above and re-run");
+        }
+      } else {
+        failStep("No .venv available - Python dependencies not installed");
       }
     }
 
@@ -240,8 +302,9 @@ async function main() {
     if (fs.existsSync("Gemfile")) {
       if (await cmdExists("bundle")) {
         info("Ruby project detected - running bundle install");
-        await $`bundle install`.quiet().nothrow();
-        pass("bundle install complete");
+        const { exitCode } = await $`bundle install`.quiet().nothrow();
+        if (exitCode === 0) pass("bundle install complete");
+        else failStep("bundle install failed - Ruby dependencies missing");
         if (!SKIP_LICENSE && (await cmdExists("licensee"))) {
           info("Running Ruby license audit (licensee)...");
           await $`licensee detect --json`.quiet().nothrow();
@@ -273,10 +336,11 @@ async function main() {
     if (dotnetFiles.length > 0) {
       if (await cmdExists("dotnet")) {
         info(`.NET project detected (${dotnetFiles[0]}) - running dotnet restore`);
-        await $`dotnet restore`.quiet().nothrow();
-        pass("dotnet restore complete");
+        const { exitCode } = await $`dotnet restore`.quiet().nothrow();
+        if (exitCode === 0) pass("dotnet restore complete");
+        else failStep("dotnet restore failed - .NET dependencies missing");
       } else {
-        warn("dotnet not found - install .NET SDK from https://dotnet.microsoft.com/download");
+        failStep("dotnet not found - install .NET SDK from https://dotnet.microsoft.com/download");
       }
     }
 
@@ -284,10 +348,11 @@ async function main() {
     if (fs.existsSync("pom.xml")) {
       if (await cmdExists("mvn")) {
         info("Maven project detected - running mvn dependency:resolve -q");
-        await $`mvn dependency:resolve -q`.quiet().nothrow();
-        pass("mvn dependency:resolve complete");
+        const { exitCode } = await $`mvn dependency:resolve -q`.quiet().nothrow();
+        if (exitCode === 0) pass("mvn dependency:resolve complete");
+        else failStep("mvn dependency:resolve failed - check pom.xml and repository access");
       } else {
-        warn("mvn not found - install Maven from https://maven.apache.org");
+        failStep("mvn not found - install Maven from https://maven.apache.org");
       }
     }
 
@@ -296,10 +361,11 @@ async function main() {
       const gradleCmd = fs.existsSync("./gradlew") ? "./gradlew" : "gradle";
       if (await cmdExists(gradleCmd)) {
         info(`Gradle project detected - running ${gradleCmd} dependencies (quiet)`);
-        await $`${gradleCmd} dependencies -q`.quiet().nothrow();
-        pass("Gradle dependencies resolved");
+        const { exitCode } = await $`${gradleCmd} dependencies -q`.quiet().nothrow();
+        if (exitCode === 0) pass("Gradle dependencies resolved");
+        else failStep("Gradle dependency resolution failed - check the build file");
       } else {
-        warn("Gradle not found - install from https://gradle.org");
+        failStep("Gradle not found - install from https://gradle.org");
       }
     }
 
@@ -307,10 +373,11 @@ async function main() {
     if (fs.existsSync("go.mod")) {
       if (await cmdExists("go")) {
         info("Go project detected - running go mod download");
-        await $`go mod download`.quiet().nothrow();
-        pass("go mod download complete");
+        const { exitCode } = await $`go mod download`.quiet().nothrow();
+        if (exitCode === 0) pass("go mod download complete");
+        else failStep("go mod download failed - check go.mod and module proxy access");
       } else {
-        warn("go not found - install Go from https://go.dev/dl/");
+        failStep("go not found - install Go from https://go.dev/dl/");
       }
     }
 
@@ -318,10 +385,11 @@ async function main() {
     if (fs.existsSync("Cargo.toml")) {
       if (await cmdExists("cargo")) {
         info("Rust project detected - running cargo fetch");
-        await $`cargo fetch`.quiet().nothrow();
-        pass("cargo fetch complete");
+        const { exitCode } = await $`cargo fetch`.quiet().nothrow();
+        if (exitCode === 0) pass("cargo fetch complete");
+        else failStep("cargo fetch failed - check Cargo.toml and registry access");
       } else {
-        warn("cargo not found - install Rust from https://rustup.rs");
+        failStep("cargo not found - install Rust from https://rustup.rs");
       }
     }
 
@@ -329,10 +397,11 @@ async function main() {
     if (fs.existsSync("mix.exs")) {
       if (await cmdExists("mix")) {
         info("Elixir project detected - running mix deps.get");
-        await $`mix deps.get`.quiet().nothrow();
-        pass("mix deps.get complete");
+        const { exitCode } = await $`mix deps.get`.quiet().nothrow();
+        if (exitCode === 0) pass("mix deps.get complete");
+        else failStep("mix deps.get failed - check mix.exs and hex.pm access");
       } else {
-        warn("mix not found - install Elixir from https://elixir-lang.org");
+        failStep("mix not found - install Elixir from https://elixir-lang.org");
       }
     }
 
@@ -340,11 +409,12 @@ async function main() {
     if (fs.existsSync("CMakeLists.txt")) {
       if (await cmdExists("cmake")) {
         info("CMake project detected - configuring build (cmake -B build)");
-        await $`cmake -B build -S .`.quiet().nothrow();
-        pass("CMake configure complete - build artifacts in build/");
+        const { exitCode } = await $`cmake -B build -S .`.quiet().nothrow();
+        if (exitCode === 0) pass("CMake configure complete - build artifacts in build/");
+        else failStep("cmake configure failed - review CMakeLists.txt errors above");
         info("  To build: cmake --build build");
       } else {
-        warn("cmake not found - install from https://cmake.org");
+        failStep("cmake not found - install from https://cmake.org");
       }
     }
 
@@ -411,16 +481,23 @@ async function main() {
     info("Skipping Gemini superpowers plugin install (pass --with-gemini-plugins to enable).");
   }
 
-  // ── 4. Install RTK (Rust Token Killer) ─────────────────────────────────────────
-  if (osType === "macos" || osType === "linux") {
+  // ── 4. Install RTK (Rust Token Killer) — opt-in: --with-rtk ─────────────────
+  // `brew install` / `cargo install --git` compile third-party code and write
+  // outside the project, so they never run by default (same policy as the
+  // --with-gemini-plugins section above: no tool install without user opt-in).
+  if (!WITH_RTK) {
+    info("Skipping rtk install (pass --with-rtk to enable).");
+  } else if (osType === "macos" || osType === "linux") {
     if (!(await cmdExists("rtk"))) {
       info("Installing rtk (Rust Token Killer) for AI token optimization...");
       if (await cmdExists("brew")) {
-        await $`brew install rtk`.quiet().nothrow();
-        pass("rtk installed via Homebrew");
+        const { exitCode } = await $`brew install rtk`.quiet().nothrow();
+        if (exitCode === 0) pass("rtk installed via Homebrew");
+        else warn("brew install rtk failed - install manually or continue without rtk");
       } else if (await cmdExists("cargo")) {
-        await $`cargo install --git https://github.com/rtk-ai/rtk`.quiet().nothrow();
-        pass("rtk installed via Cargo");
+        const { exitCode } = await $`cargo install --git https://github.com/rtk-ai/rtk`.quiet().nothrow();
+        if (exitCode === 0) pass("rtk installed via Cargo");
+        else warn("cargo install rtk failed - install manually or continue without rtk");
       } else {
         warn("Neither Homebrew nor Cargo found - skipping rtk installation.");
       }
@@ -486,6 +563,16 @@ async function main() {
     }
   } else {
     info("Skipping initial commit (--skip-commit)");
+  }
+
+  if (requiredFailures > 0) {
+    console.error("");
+    console.error(
+      `${RED}❌ Setup finished with ${requiredFailures} failed required step(s).${RESET}`
+    );
+    console.error("   Review the [WARN] lines above, fix the causes, then re-run setup.ts.");
+    process.exitCode = 1;
+    return;
   }
 
   console.log("");

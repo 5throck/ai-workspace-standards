@@ -160,6 +160,10 @@ PM does NOT execute finalization updates for: pure documentation changes (body t
 
 > **For Agent Lifecycle procedures**: See [CONSTITUTION.md §5.6 - Agent Lifecycle Management](../../../CONSTITUTION.md#56-agent-lifecycle-management) for detailed lifecycle procedures.
 
+### Variant Status Admission (ADR-0099)
+
+Template variant status promotion follows two documented paths. **New (non-migrated) variants** follow the beta-first path: draft → beta → stable with the PROMOTION_CHECKLIST criteria evidenced (co-safety convention). **Migrated variants** (converted from a proven project per `skills/project-to-variant`) may enter directly at stable under the migration fast-track per [ADR-0099](../../adr/0099-template-migration-admission-policy.md): the source project's conversion eligibility replaces the beta-window criteria, which are explicitly waived ("N/A per ADR-0099", never "met") in the PROMOTION_CHECKLIST with a ratification row in Review History. A `stable` checklist with unwaived Pending criteria, or a short-window promotion without an ADR-0099 attestation row, is a validator finding (`validate-variant-claims.ts` checks k/l). Vocabulary: variant `stable` ≡ lifecycle-record `production`; variant `beta` ≡ `review` (mapping SSOT: `docs/lifecycle/README.md`).
+
 ---
 
 

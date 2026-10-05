@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261005-032
+kind: manual
+title: >-
+  Repair co-abap asset and path drift: vsp-publish source base and asset list,
+  ship the deliverables tree the docs and new-requirement.ts expect, standardize
+  scripts/co-abap paths in docs and usage headers, fix scratch-cleanup
+  archive-days default, resolve or remove the phantom slash commands, add the
+  missing abap-code-review skill row and i18n row, and register the co-abap key
+  in workspace-schema variant_scoped_skills
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.272Z'
+history:
+  - at: '2026-10-05T13:23:12.272Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.206Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.220Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.234Z'
+    from: review
+    to: done
+result: >-
+  co-abap asset drift fixed: vsp-publish base and 6-entry asset list verified
+  against layout with hard failure on missing assets, deliverables tree shipped
+  (3 templates + RTM seed matching insertRtmRow), stale flat paths zeroed in
+  docs and usage headers, scratch-cleanup archive default 30 with NaN/EISDIR
+  fixes, new-requirement truthful completion with exit codes, phantom commands
+  reworded as PM conventions across 5 files, abap-code-review skill row and i18n
+  row added, workspace-schema co-abap key registered
+error: null

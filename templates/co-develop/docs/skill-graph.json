@@ -123,16 +123,6 @@
       "layer": "variant:co-develop"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-develop"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-develop"
-    },
-    {
       "id": "refactoring",
       "type": "skill",
       "layer": "variant:co-develop"

@@ -103,17 +103,22 @@ The final Markdown report is your deliverable-ready artifact. Hand it to `commun
 
 ## 4. Engagement Phase Structure
 
-Per `AGENTS.md` §3.5 and §4.2, work moves through phases; the PM only actively orchestrates Phases 0, 2, and 5-6 — specialists work autonomously within their assigned phase.
+Per `AGENTS.md` §3.5 and `docs/phase-definitions.md` (the phase-model SSOT), work moves through phases; the PM actively orchestrates Phases 0, 1.5, 2, and 5–6 — specialists work autonomously within their assigned phase.
 
 | Phase | Name | Who |
 |---|---|---|
-| 0 | Project Initiation | PM |
-| 1 | Strategy & Research | strategy-analyst, industry-expert, data-analyst, sme, change-management-partner |
-| 2 | Design Validation | industry-expert, sme, change-management-partner — PM validates and gates |
-| 3 | Solution & Narrative Design | communications-lead, solutions-architect, sme |
-| 4 | Execution & Delivery | delivery-manager, workstream-lead, technology-specialist |
+| 0 | Initiation | PM |
+| 1 | Research & Analysis | strategy-analyst, industry-expert, data-analyst, sme, change-management-partner |
+| 1.5 | Cross-Validation | Peer validators per the Cross-Validation Matrix in `docs/engagement-orchestration.md` — read-only, PM-dispatched |
+| 2 | Design Review & Approval | industry-expert, sme, change-management-partner — PM validates and gates |
+| 3 | Content Creation | communications-lead, solutions-architect, sme, data-analyst |
+| 4 | Coordination & Delivery | delivery-manager, workstream-lead, technology-specialist |
 | 5 | Lifecycle Finalization | PM (updates governance records, logs to memory/) |
-| 6 | QA & Finalization | PM (runs `bun scripts/audit.ts`, then `/sync`) |
+| 6 | Quality Assurance & Finalization | PM (runs `bun scripts/audit.ts`, then `/sync`) |
+
+Phase 1.5 runs after all Phase 1 deliverables are complete and before `insight-synthesis`: validators cross-check peer deliverables, report findings without modifying them, and each deliverable gets at most 1 revision cycle (unresolved findings are logged as accepted risk).
+
+The governance stage model (`process/stages.yaml`, S1–S4) rolls these phases into four delivery stages for engagement tracking — see `docs/phase-definitions.md § Governance Stage Mapping`.
 
 **Iterative loops**: `financial-modeling` ↔ `technical-feasibility` may iterate up to 2 times to reconcile cost/ROI assumptions with technical risk before moving to Phase 4.
 

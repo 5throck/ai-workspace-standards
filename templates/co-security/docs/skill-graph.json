@@ -123,16 +123,6 @@
       "layer": "variant:co-security"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-security"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-security"
-    },
-    {
       "id": "red-team-lead",
       "type": "agent",
       "layer": "variant:co-security"
@@ -628,18 +618,6 @@
       "from": "procedure.co-security.threat-model-and-report",
       "to": "verify-authorization",
       "source": "procedure_schema"
-    },
-    {
-      "type": "references",
-      "from": "README",
-      "to": "verify-authorization",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "README_ko",
-      "to": "verify-authorization",
-      "source": "prose"
     },
     {
       "type": "accountable_for",

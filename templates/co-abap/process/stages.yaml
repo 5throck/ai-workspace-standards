@@ -2,20 +2,32 @@ schema_version: '1.0'
 variant: co-abap
 stages:
   - id: S1
-    title: SAP Solution Blueprint
+    title: Blueprint & Requirements
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Analyze functional requirements across SAP modules, establish the security
+      readiness baseline, and design the solution blueprint that feeds the build.
     entry_criteria:
-      - PENDING_REVIEW
+      - "Business requirement documented and scoped by pm (requirements-analysis preconditions)."
+      - "Target SAP landscape and access boundaries known (security-readiness-baseline preconditions)."
     exit_criteria:
-      - PENDING_REVIEW
+      - "All impacted modules have impact notes before the solution blueprint (requirements-analysis acceptance)."
+      - "Security baseline documented before any system access or development work proceeds (security-readiness-baseline acceptance)."
+      - "Blueprint reviewed against every module impact note (solution-blueprint acceptance)."
     owner_agent: architect
   - id: S2
-    title: Transport Release and Acceptance
+    title: Delivery, Security & Release
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Deliver the custom ABAP implementation through the mandatory QA chain and
+      Clean ABAP review, close out the security review, and release through CTS
+      transports with acceptance confirmation.
     entry_criteria:
-      - PENDING_REVIEW
+      - "Requirement clarified with the functional analyst and scoped by pm (custom-dev-delivery preconditions)."
+      - "Approved solution blueprint available (custom-dev-delivery input: functional_requirement backed by S1 exit)."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Clean ABAP checklist review completed with no open critical findings (DG-ABAP-01)."
+      - "Mandatory post-write QA chain passed: SyntaxCheck, unit tests, coverage >= 70% on new objects, ATC zero P1 (DG-ABAP-02)."
+      - "No high-severity security finding remains open at closeout (security-closeout-review acceptance)."
+      - "Post-transport smoke tests pass in the target system (transport-release acceptance)."
     owner_agent: code-writer

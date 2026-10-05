@@ -1,14 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 /**
  * Scratch Workspace Cleanup CLI
  * Manages scratch/ directory hygiene — temp purging, task archival, and status reporting.
  *
  * Usage:
- *   bun scripts/scratch-cleanup.ts --status                  Show directory overview
- *   bun scripts/scratch-cleanup.ts --temp [--days 7]         Purge temp/ files older than N days
- *   bun scripts/scratch-cleanup.ts --archive-tasks [--days 30]  Archive completed tasks
- *   bun scripts/scratch-cleanup.ts --dry-run <any flags>     Preview without making changes
+ *   bun scripts/co-abap/scratch-cleanup.ts --status                  Show directory overview
+ *   bun scripts/co-abap/scratch-cleanup.ts --temp [--days 7]         Purge temp/ files older than N days
+ *   bun scripts/co-abap/scratch-cleanup.ts --archive-tasks [--days 30]  Archive completed tasks
+ *   bun scripts/co-abap/scratch-cleanup.ts --dry-run <any flags>     Preview without making changes
+ *
+ * v1.1.0: --archive-tasks default threshold fixed to 30 days (7 applied to both modes
+ *         before); --days validated (non-finite/negative values exit 1); purgeTemp skips
+ *         non-file entries (directories no longer crash with EISDIR).
  *
  * @module scratch-cleanup
  */
@@ -17,7 +21,8 @@ import path from "node:path";
 import * as fs from "node:fs";
 
 const scriptDir = path.dirname(import.meta.path);
-const projectRoot = path.resolve(scriptDir, "..");
+// scripts/co-abap/ → project root (two levels up): scratch/ lives at the project root.
+const projectRoot = path.resolve(scriptDir, "..", "..");
 
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
@@ -144,6 +149,12 @@ function purgeTemp(maxAgeDays: number, dryRun: boolean, root: string = projectRo
   for (const entry of entries) {
     const fullPath = path.join(tempDir, entry);
     const stat = fs.statSync(fullPath);
+    // Skip non-files (stray subdirectories) — deleting them with unlinkSync
+    // crashes with EISDIR; they are left in place and reported.
+    if (!stat.isFile()) {
+      results.push({ action: "skip", file: entry, reason: "not a file (left in place)" });
+      continue;
+    }
     if (stat.mtimeMs < cutoff) {
       results.push({ action: "delete", file: entry, reason: `${Math.floor((Date.now() - stat.mtimeMs) / 86400000)} days old` });
     } else {
@@ -245,6 +256,24 @@ function archiveTasks(maxAgeDays: number, dryRun: boolean, root: string = projec
   console.log(`\n  Summary: ${toArchive.length} archived, ${toSkip.length} kept`);
 }
 
+/**
+ * Resolve the --days value against the mode's default. --temp defaults to 7,
+ * --archive-tasks to 30 (matching the documented help text). A --days value
+ * that is not a finite non-negative number is a usage error (exit 1).
+ */
+function resolveDays(args: string[], fallbackDays: number): number {
+  const daysIdx = args.indexOf("--days");
+  if (daysIdx < 0 || args[daysIdx + 1] === undefined) return fallbackDays;
+  const parsed = Number(args[daysIdx + 1]);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    console.error(
+      `${RED}Error: --days expects a non-negative number, got '${args[daysIdx + 1]}'${RESET}`
+    );
+    process.exit(1);
+  }
+  return parsed;
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
@@ -252,9 +281,9 @@ function main(): void {
   const tempIdx = args.indexOf("--temp");
   const archiveIdx = args.indexOf("--archive-tasks");
   const statusIdx = args.indexOf("--status");
-  const daysIdx = args.indexOf("--days");
 
-  const days = daysIdx >= 0 && args[daysIdx + 1] ? parseInt(args[daysIdx + 1], 10) : 7;
+  // Mode-aware default: 7 days for temp purge, 30 days for task archival.
+  const days = resolveDays(args, tempIdx >= 0 ? 7 : 30);
 
   if (args.length === 0 || statusIdx >= 0) {
     displayStatus();
@@ -273,7 +302,7 @@ function main(): void {
 
   // Default: show help
   console.log(`
-Usage: bun scripts/scratch-cleanup.ts <command> [options]
+Usage: bun scripts/co-abap/scratch-cleanup.ts <command> [options]
 
 Commands:
   --status                Show scratch/ directory overview (default)

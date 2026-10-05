@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261005-027
+kind: manual
+title: >-
+  Repair the co-consult report chain: template package.json (docx,
+  mdast-util-from-markdown, yaml, gfm extensions), GFM table parsing with real
+  docx Table rendering, the skipFirstH1 all-H1s-dropped bug, project-relative
+  path resolution with in-project --out, per-file failure exit code, spawn error
+  handlers, financial-pipeline output dir, financial-report optional-chaining
+  crash, winQuote on the script path
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.203Z'
+history:
+  - at: '2026-10-05T13:23:12.203Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:21.993Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.008Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.022Z'
+    from: review
+    to: done
+result: >-
+  co-consult report chain repaired: template package.json (5 deps incl. GFM),
+  GFM table parsing with real docx Table rendering, first-H1-only skip,
+  project-relative paths with cwd-anchored args, per-file failure exit code,
+  spawn error handlers on all 7 spawners, financial-pipeline output dir,
+  financial-report optional-chaining guards, winQuote on script paths,
+  stale-DART overwrite; end-to-end render verified (table in document.xml, exit
+  1 on partial failure)
+error: null

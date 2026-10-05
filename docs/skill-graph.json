@@ -428,6 +428,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0099",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent-lifecycle-manager",
       "type": "skill",
       "layer": "L0"
@@ -1727,6 +1732,11 @@
     },
     {
       "id": "gate.co-abap.DG-ABAP-01",
+      "type": "decision_gate",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "gate.co-abap.DG-ABAP-02",
       "type": "decision_gate",
       "layer": "variant:co-abap"
     },
@@ -6576,12 +6586,6 @@
       "source": "raci_matrix"
     },
     {
-      "type": "accountable_for",
-      "from": "code-writer",
-      "to": "procedure.co-abap.transport-release",
-      "source": "raci_matrix"
-    },
-    {
       "type": "references",
       "from": "coke-oven-pah-heat-stress-planner",
       "to": "chemical-risk-assessment",
@@ -6629,6 +6633,12 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
       "type": "follows",
       "from": "company-intelligence",
       "to": "financial-modeling",
@@ -6661,6 +6671,12 @@
         "field": "required_skills",
         "index": 0
       }
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "industry-expert",
+      "source": "skill_manifest"
     },
     {
       "type": "follows",
@@ -6713,6 +6729,12 @@
         "field": "required_skills",
         "index": 1
       }
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "sme",
+      "source": "skill_manifest"
     },
     {
       "type": "used_by",
@@ -8002,6 +8024,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "accountable_for",
+      "from": "devops-admin",
+      "to": "procedure.co-abap.transport-release",
+      "source": "raci_matrix"
+    },
+    {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
       "to": "agent-lifecycle-manager",
@@ -8142,6 +8170,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "decision-record",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
       "to": "desktop-app-fallback",
       "source": "workflow-doc"
     },
@@ -8154,6 +8194,24 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
       "to": "performance-tuning",
       "source": "workflow-doc"
     },
@@ -8161,6 +8219,18 @@
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
       "to": "post-write-chain",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "promote-variant",
       "source": "workflow-doc"
     },
     {
@@ -8202,6 +8272,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
       "to": "skill-lifecycle-manager",
       "source": "workflow-doc"
     },
@@ -8209,6 +8291,12 @@
       "type": "cites_skill",
       "from": "doc:co-abap/AGENTS.md",
       "to": "source-command-celebrate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -8448,7 +8536,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-abap/README.md",
+      "to": "abap-code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
       "to": "abap-dev",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "code-review",
       "source": "workflow-doc"
     },
     {
@@ -8461,6 +8561,12 @@
       "type": "cites_skill",
       "from": "doc:co-abap/README.md",
       "to": "dump-monitor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/README.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -8490,13 +8596,31 @@
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
       "to": "finishing-a-development-branch",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
-      "to": "hwp-document-processing",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "handbook-sync-audit",
       "source": "workflow-doc"
     },
     {
@@ -8526,13 +8650,43 @@
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
-      "to": "sample-driven-report-writing",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "simulate-pipeline",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -9085,6 +9239,12 @@
       "type": "cites_skill",
       "from": "doc:co-consult/README.md",
       "to": "mece-logic-auditor",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/README.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -9690,13 +9850,79 @@
     {
       "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-develop/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -9811,6 +10037,30 @@
       "type": "cites_skill",
       "from": "doc:co-develop/README.md",
       "to": "code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/README.md",
+      "to": "skill-lifecycle-manager",
       "source": "workflow-doc"
     },
     {
@@ -13525,6 +13775,18 @@
       "type": "decides_on",
       "from": "gate.co-abap.DG-ABAP-01",
       "to": "output_type.implementation_package",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-abap.DG-ABAP-02",
+      "to": "output_type.implementation_package",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-abap.DG-ABAP-02",
+      "to": "output_type.test_report",
       "source": "decision_model"
     },
     {
@@ -23666,6 +23928,12 @@
       "type": "gated_by",
       "from": "stage.co-abap.S2",
       "to": "gate.co-abap.DG-ABAP-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-abap.S2",
+      "to": "gate.co-abap.DG-ABAP-02",
       "source": "decision_model"
     },
     {

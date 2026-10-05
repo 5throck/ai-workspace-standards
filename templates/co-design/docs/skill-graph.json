@@ -123,16 +123,6 @@
       "layer": "variant:co-design"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-design"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-design"
-    },
-    {
       "id": "service-design",
       "type": "skill",
       "layer": "variant:co-design"

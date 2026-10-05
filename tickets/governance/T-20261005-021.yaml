@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261005-021
+kind: manual
+title: >-
+  Adopt a migration-attestation policy (ADR) and reconcile the three unattested
+  stable promotions - co-consult (same-day, no ADR), co-abap (ADR-0051 asserts
+  criteria met against an empty checklist and cites a nonexistent CONSTITUTION
+  lifecycle), co-develop (4-day review-to-production, no ADR) - with completed
+  PROMOTION_CHECKLISTs per the co-deck pattern and a status-to-lifecycle-phase
+  vocabulary mapping in docs/lifecycle/README.md
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.122Z'
+history:
+  - at: '2026-10-05T13:23:12.122Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:21.729Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:21.744Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:21.759Z'
+    from: review
+    to: done
+result: >-
+  ADR-0099 (template migration admission policy) written and spec-anchored; all
+  3 PROMOTION_CHECKLISTs reconciled per policy (Beta Since corrected to creation
+  dates, criteria 6/8/10 waived as N/A per ADR-0099, ratification rows in Review
+  History); status-to-phase vocabulary mapping added to
+  docs/lifecycle/README.md; ADR-0051 correction embedded in the co-abap
+  checklist record
+error: null

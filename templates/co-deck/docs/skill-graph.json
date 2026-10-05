@@ -218,16 +218,6 @@
       "layer": "variant:co-deck"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-deck"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-deck"
-    },
-    {
       "id": "research",
       "type": "agent",
       "layer": "variant:co-deck",

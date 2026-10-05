@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 // @version 1.0.1
 // vsp-task.ts - Creates a new task file in scratch/tasks/ from template
-// Usage: bun scripts/vsp-task.ts [task-name]
+// Usage: bun scripts/co-abap/vsp-task.ts [task-name]
 
 import path from "node:path";
 import * as fs from "node:fs";
 
 const scriptDir = path.dirname(import.meta.path);
-const projectRoot = path.resolve(scriptDir, "..");
+// scripts/co-abap/ → project root (two levels up): scratch/ and docs/ live at the project root.
+const projectRoot = path.resolve(scriptDir, "..", "..");
 
 const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";

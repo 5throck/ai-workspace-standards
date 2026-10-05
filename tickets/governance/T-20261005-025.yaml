@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261005-025
+kind: manual
+title: >-
+  Reconcile i18n-specialist across all roster surfaces in co-consult, co-abap
+  and co-develop (README and agents-README tables, context tables,
+  phase-definitions placement, lifecycle-record counts, co-develop phases field
+  and dispatch note) and backfill co-abap's missing pm lifecycle record
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.176Z'
+history:
+  - at: '2026-10-05T13:23:12.176Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:21.905Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:21.918Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:21.937Z'
+    from: review
+    to: done
+result: >-
+  i18n-specialist rows added to all roster surfaces in 3 templates (README
+  en/ko, agents-README en/ko, context tables, phase-definitions placement);
+  co-abap pm.md lifecycle record backfilled; root lifecycle records corrected to
+  12/21/8 agents with full name lists and ADR-0099 ratification rows
+error: null

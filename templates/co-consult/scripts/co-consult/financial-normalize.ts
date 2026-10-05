@@ -53,7 +53,7 @@ function main() {
   const scriptPath = resolve(scriptDir, "..", "..", "python", "normalize.py");
   const pythonBin = process.platform === "win32" ? "python" : "python3";
 
-  const proc = spawn(pythonBin, [scriptPath, winQuote(dartPath), winQuote(mappingPath)], {
+  const proc = spawn(pythonBin, [winQuote(scriptPath), winQuote(dartPath), winQuote(mappingPath)], {
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env },
     shell: process.platform === "win32",
@@ -64,6 +64,14 @@ function main() {
 
   proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
   proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
+  // The "error" event fires when the process itself could not be spawned
+  // (e.g. python3 not installed) — without this handler the promise chain
+  // hangs forever instead of failing fast.
+  proc.on("error", (err) => {
+    console.error(`Failed to spawn ${pythonBin}: ${err.message}`);
+    process.exit(1);
+  });
 
   proc.on("close", (code) => {
     if (code !== 0) {

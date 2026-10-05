@@ -61,7 +61,12 @@
       },
       {
         "matcher": "Write|Edit",
-        "command": "bun scripts/sync-md.ts"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/sync-md.ts"
+          }
+        ]
       }
     ],
     "SessionStart": [

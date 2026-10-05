@@ -27,7 +27,7 @@
 | `ci-triage` | L0 | — | — | — | — | — |
 | `code-review` | variant:co-develop | code-writer, game-debugger, game-developer | phase3, phase4, phase5 | refactoring (composes_with) | — | — |
 | `coke-oven-pah-heat-stress-planner` | variant:co-safety | — | — | — | — | — |
-| `company-intelligence` | variant:co-consult | data-analyst, industry-expert, pm, sme, strategy-analyst, strategy-analyst | phase1 | competitive-intelligence (composes_with), financial-modeling (follows), financial-statement-analysis (composes_with), insight-synthesis (follows), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | — | — |
+| `company-intelligence` | variant:co-consult | data-analyst, data-analyst, industry-expert, industry-expert, pm, sme, sme, strategy-analyst, strategy-analyst | phase1 | competitive-intelligence (composes_with), financial-modeling (follows), financial-statement-analysis (composes_with), insight-synthesis (follows), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | — | — |
 | `compensation-benchmarking` | variant:co-hr | compensation-benefits-analyst, compensation-benefits-analyst | phase2 | consulting-report-writing (composes_with), hr-metrics-analysis (follows), learning-curriculum-design (follows), org-design-framework (composes_with), org-readiness-assessment (composes_with), performance-system-design (composes_with), stakeholder-alignment (composes_with) | — | — |
 | `competency-modeling` | variant:co-hr | career-succession-consultant, learning-development-specialist, performance-management-consultant | phase2 | — | — | — |
 | `competitive-intelligence` | variant:co-consult | industry-expert, industry-expert, strategy-analyst, strategy-analyst | phase1, phase2 | company-intelligence (composes_with), financial-modeling (composes_with), insight-synthesis (composes_with) | — | — |
@@ -333,6 +333,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0096` | adr | — | project-review | — |
 | `adr:0097` | adr | — | — | — |
 | `adr:0098` | adr | — | — | — |
+| `adr:0099` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `decision-record` | — | — |
@@ -342,7 +343,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261003-01` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `decision-record`, `evidence-ledger`, `explain-me`, `handbook`, `handbook-sync-audit`, `i18n-audit`, `i18n-formatting`, `i18n-layout`, `i18n-locale-config`, `meeting-facilitation`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-graph-analytics`, `skill-lifecycle-manager`, `sync` | — | — |
 | `doc:CLAUDE.md` | doc | `meeting-facilitation` | — | — |
-| `doc:co-abap/AGENTS.md` | doc | `abap-code-review`, `abap-dev`, `agent-lifecycle-manager`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-co`, `sap-fi`, `sap-le`, `sap-mm`, `sap-pp`, `sap-sd`, `skill-lifecycle-manager`, `source-command-celebrate` | — | — |
+| `doc:co-abap/AGENTS.md` | doc | `abap-code-review`, `abap-dev`, `agent-lifecycle-manager`, `create-variant`, `decision-record`, `desktop-app-fallback`, `dump-monitor`, `explain-me`, `handbook`, `meeting-facilitation`, `performance-tuning`, `post-write-chain`, `project-review`, `promote-variant`, `sap-co`, `sap-fi`, `sap-le`, `sap-mm`, `sap-pp`, `sap-sd`, `security-scan`, `simulate-pipeline`, `skill-lifecycle-manager`, `source-command-celebrate`, `sync` | — | — |
 | `doc:co-abap/agents/co-analyst.md` | doc | `sap-co` | — | — |
 | `doc:co-abap/agents/dba.md` | doc | `performance-tuning` | — | — |
 | `doc:co-abap/agents/devops-admin.md` | doc | `dump-monitor` | — | — |
@@ -355,8 +356,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/docs/transport-release-checklist.md` | doc | `abap-dev` | — | — |
 | `doc:co-abap/docs/user-guide_ko.md` | doc | `abap-dev`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-le`, `sap-sd` | — | — |
 | `doc:co-abap/docs/user-guide.md` | doc | `abap-dev`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `sap-le`, `sap-sd` | — | — |
-| `doc:co-abap/README.md` | doc | `abap-dev`, `desktop-app-fallback`, `dump-monitor`, `performance-tuning`, `post-write-chain`, `source-command-celebrate` | — | — |
-| `doc:co-consult/AGENTS.md` | doc | `agent-lifecycle-manager`, `finishing-a-development-branch`, `hwp-document-processing`, `k-dart`, `k-law`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `sample-driven-report-writing`, `skill-lifecycle-manager` | — | — |
+| `doc:co-abap/README.md` | doc | `abap-code-review`, `abap-dev`, `code-review`, `desktop-app-fallback`, `dump-monitor`, `meeting-facilitation`, `performance-tuning`, `post-write-chain`, `source-command-celebrate` | — | — |
+| `doc:co-consult/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `explain-me`, `finishing-a-development-branch`, `handbook`, `handbook-sync-audit`, `k-dart`, `k-law`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-lifecycle-manager`, `sync` | — | — |
 | `doc:co-consult/docs/co-consult.context.md` | doc | `agent-lifecycle-manager`, `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `documentation-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `meeting-facilitation`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `project-review`, `research-analysis`, `skill-lifecycle-manager`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `team-builder`, `technical-feasibility` | — | — |
 | `doc:co-consult/docs/disclosure-ingestion-contract.md` | doc | `financial-statement-analysis`, `k-dart` | — | — |
 | `doc:co-consult/docs/engagement-orchestration.md` | doc | `change-impact-assessment`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `insight-synthesis`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
@@ -365,7 +366,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-consult/docs/phase-definitions.md` | doc | `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `insight-synthesis`, `narrative-framework`, `project-review`, `solution-design` | — | — |
 | `doc:co-consult/docs/user-guide_ko.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
 | `doc:co-consult/docs/user-guide.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `insight-synthesis`, `k-dart`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
-| `doc:co-consult/README.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `hwp-document-processing`, `insight-synthesis`, `mece-logic-auditor`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `sample-driven-report-writing`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
+| `doc:co-consult/README.md` | doc | `change-impact-assessment`, `company-intelligence`, `competitive-intelligence`, `consulting-report-writing`, `executive-presentation`, `financial-modeling`, `financial-statement-analysis`, `hwp-document-processing`, `insight-synthesis`, `mece-logic-auditor`, `meeting-facilitation`, `narrative-framework`, `org-readiness-assessment`, `project-delivery`, `sample-driven-report-writing`, `solution-design`, `stakeholder-alignment`, `stakeholder-review-management`, `technical-feasibility` | — | — |
 | `doc:co-deck/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `design`, `explain-me`, `handbook`, `handbook-sync-audit`, `html-build`, `meeting-facilitation`, `pdf-export`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `prep-pdf`, `project-review`, `promote-variant`, `research`, `security-scan`, `simulate-pipeline`, `skill-lifecycle-manager`, `storyline`, `sync`, `version` | — | — |
 | `doc:co-deck/agents/design.md` | doc | `design` | — | — |
 | `doc:co-deck/agents/html-build.md` | doc | `html-build` | — | — |
@@ -388,13 +389,13 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/docs/user-guide_ko.md` | doc | `service-design`, `ui-ux-design-intelligence` | — | — |
 | `doc:co-design/docs/user-guide.md` | doc | `service-design`, `ui-ux-design-intelligence` | — | — |
 | `doc:co-design/README.md` | doc | `accessibility-audit`, `service-design`, `ui-ux-design-intelligence` | — | — |
-| `doc:co-develop/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `skill-lifecycle-manager` | — | — |
+| `doc:co-develop/AGENTS.md` | doc | `agent-lifecycle-manager`, `create-variant`, `explain-me`, `handbook`, `handbook-sync-audit`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `project-review`, `promote-variant`, `security-scan`, `simulate-pipeline`, `skill-lifecycle-manager`, `sync` | — | — |
 | `doc:co-develop/agents/designer.md` | doc | `code-review`, `refactoring`, `swe-solve`, `test-driven-development`, `ui-ux-design-intelligence` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-develop/docs/phase-definitions.md` | doc | `project-review` | — | — |
 | `doc:co-develop/docs/user-guide_ko.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
 | `doc:co-develop/docs/user-guide.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
-| `doc:co-develop/README.md` | doc | `code-review`, `swe-solve`, `test-driven-development` | — | — |
+| `doc:co-develop/README.md` | doc | `code-review`, `finishing-a-development-branch`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `skill-lifecycle-manager`, `swe-solve`, `test-driven-development` | — | — |
 | `doc:co-export/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `source-command-commit-push-pr`, `sync` | — | — |
 | `doc:co-export/docs/co-export.context.md` | doc | `agent-lifecycle-manager`, `customs-duty-drawback-workflow`, `export-control-screening`, `foreign-regulation-monitoring`, `fta-origin-determination`, `halal-certification-workflow`, `hs-classification-workflow`, `logistics-coordination`, `market-entry-strategy`, `skill-lifecycle-manager`, `trade-documentation-checklist` | — | — |
 | `doc:co-export/docs/phase-definitions.md` | doc | `customs-duty-drawback-workflow`, `project-review` | — | — |

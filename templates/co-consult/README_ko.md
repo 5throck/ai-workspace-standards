@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: cc09362013b1713a5a450fdaf1b5c98c7df1d4fd1c7e684fae1da860202e1340
+translated_from_hash: 4e790c3f0dc79f712e4df8ca33c442753a83e5c28531770a8c7f0e1f6b0967c0
 lang: ko
 lang_reason: source-material
 ---
@@ -39,11 +39,12 @@ lang_reason: source-material
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
-| **PM** | 프로젝트 매니저 — 워크플로 조율, 디스패치, 품질 게이트 | high | inherit |
+| **PM** | 프로젝트 매니저 — 워크플로 조율, 디스패치, 품질 게이트 | medium | inherit |
 | **change-management-partner** | 조직 변화 관리, 문화 변화, 이해관계자 조율 주도 | medium | inherit |
 | **communications-lead** | 대고객 커뮤니케이션, 프레젠테이션, 전략적 내러티브 작성 | medium | inherit |
-| **data-analyst** | 데이터 분석, 통계 모델링, 시각화 지원 제공 | low | inherit |
+| **data-analyst** | 데이터 분석, 통계 모델링, 시각화 지원 제공 | medium | inherit |
 | **delivery-manager** | 프로젝트 딜리버리, 운영 조율, 실행 품질 관리 | low | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 | **industry-expert** | 산업별 심층 인사이트 및 경쟁 역학 분석 제공 | high | inherit |
 | **sme** | HR, 재무, 운영 등 직무 전문성 제공 | medium | inherit |
 | **solutions-architect** | 기술 솔루션, 시스템 아키텍처, 구현 로드맵 설계 | medium | inherit |
@@ -95,7 +96,7 @@ lang_reason: source-material
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- 다중 에이전트 토론: `meeting-facilitation` 스킬을 명시적으로 호출합니다 (레거시 `/meeting` 슬래시 명령은 2026-09-26부로 폐지되었습니다).
 
 ## 변형 유형
 
@@ -105,4 +106,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-08-09*
+*최근 갱신: 2026-10-06*

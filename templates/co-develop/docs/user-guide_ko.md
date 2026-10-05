@@ -1,11 +1,11 @@
 ---
-translated_from_hash: 08780f074f99e9f05df795e2117ef856ae13fc508903bef2907ecc8774f23b14
+translated_from_hash: 9e236e5c4ed54e5d8d659393a25944f879e8a8ebb83b24d8163ca8493632e1db
 ---
 # co-develop 사용자 가이드
 
 **Language**: [English](user-guide.md) · **한국어**
 
-> co-develop 에이전트 팀 사용을 위한 실전 중심 가이드입니다. 팀 개요와 구성원 목록은 [README_ko.md](../README_ko.md)를, 거버넌스 및 디스패치 규칙은 [AGENTS.md](../AGENTS.md) 및 [CLAUDE.md](../CLAUDE.md) / [GEMINI.md](../GEMINI.md)를 참고하세요.
+> co-develop 에이전트 팀 사용을 위한 실전 중심 가이드입니다. 팀 개요와 구성원 목록은 [README_ko.md](../README_ko.md)를, 거버넌스 및 디스패치 규칙은 [AGENTS.md](../AGENTS.md)(제공되는 지침 파일; `CLAUDE.md` / `GEMINI.md`는 프로젝트 생성 시 `templates/common`에서 전달됨)를 참고하세요.
 
 ---
 
@@ -62,7 +62,7 @@ co-develop은 고정된 **파이프라인 순서**를 따릅니다: `architect �
 2. **Designer (Phase 3, 선택)** — 작업이 UI/UX와 관련이 있으면 와이어프레임/컴포넌트 스펙/디자인 토큰을 산출합니다. 순수 백엔드/로직 변경에서는 건너뜁니다.
 3. **Stack-setup (Phase 0-1, 선택)** — 프로젝트의 기술 스택이 인식되지 않을 때만 트리거됩니다. 스택을 식별하고, *공식* 설정 문서를 조사하며, 모든 명령에 대해 필수 보안 검토를 실행(`curl | sh` 형태의 pipe-to-shell 패턴을 HIGH 위험으로 표시)하고, 사용자가 명시적 승인 키워드(`APPROVE`, 또는 표시된 단계에 대해서는 `CONFIRM HIGH RISK`)를 입력하기 전까지는 아무것도 실행하지 않습니다.
 4. **Code-writer (Phase 4)** — 승인된 계획에 엄격히 따라 구현합니다. 설계를 하지 않고 범위를 결정하지 않습니다 — 외과적(surgical) 변경만 수행합니다.
-5. **Test-runner (Phase 4)** — `bun scripts/audit.ts`(문서/라이프사이클 게이트)와 프로젝트의 테스트 명령을 실행한 후, 각 인수 기준을 개별적으로 체크합니다. `READY FOR PR` 또는 `BLOCKED` 판정을 보고합니다. PM에게 에스컬레이션하기 전까지 최대 2회의 QA 반복이 허용됩니다.
+5. **Test-runner (Phase 4)** — `bun scripts/audit.ts`(문서/라이프사이클 게이트)와 프로젝트의 테스트 명령을 실행한 후, 각 인수 기준을 개별적으로 체크합니다. `READY FOR PR` 또는 `BLOCKED` 판정을 보고합니다. PM에게 에스컬레이션하기 전까지 최대 3회의 QA 반복이 허용됩니다.
 6. **Security-monitor (Phase 0, Phase 5)** — 초기에 기준선 스캔을, 후반에 PR 전 권고 점검을 실행하며, 특히 인증, 시크릿, 인프라와 관련된 사항에 집중합니다.
 7. **PM 마무리** — 결정 사항을 `memory/YYYY-MM-DD.md`에 기록하고, Phase 5 라이프사이클 트리거(에이전트/스킬/스크립트가 변경되었는가? variant 상태가 변경되었는가?)를 확인한 후 `/sync "type(scope): message"`를 실행합니다.
 
@@ -82,16 +82,17 @@ bun scripts/audit.ts              # QA / 문서화 게이트 (반드시 exit 0)
 
 ## 4. 참여(Engagement) / 프로젝트 단계 구조
 
-co-develop은 선형적이고 게이트가 있는 단계 모델을 사용합니다 (`AGENTS.md` §3.5 및 `docs/co-develop.context.md` 참고):
+co-develop은 표준 선형적이고 게이트가 있는 7단계 모델을 사용합니다 (`AGENTS.md` §3.5, `docs/phase-definitions.md`, `docs/co-develop.context.md` 참고):
 
 | 단계 | 이름 | 진행 내용 | 게이트 기준 |
 |-------|------|---------------|---------------|
-| 0 | 팀 구성 / 착수 | PM이 요구사항을 평가하고 필요시 에이전트/스킬을 생성; 프로젝트 스캐폴딩 및 개발 환경 검증 | 프로젝트 스캐폴딩 완료, 개발 환경 검증 완료, CI 파이프라인 구성 완료 |
-| 1 | 분류(Triage) | PM이 요청을 분류하고 리서치/분석을 위해 읽기 전용 에이전트를 병렬로 디스패치 | — |
-| 2 | 분석 / 계획 | PM이 조사 결과를 요구사항과 인수 기준으로 종합; 아키텍처 및 기술 스택 확정 | 아키텍처 검토 승인, 기술 스택 확정, 스프린트 계획 정의 |
-| 3 | 설계 | Architect가 구현 계획과 ADR을 산출; 범위에 있으면 Designer가 UI/UX 스펙 산출 | — |
-| 4 | 구현 / 실행 | Code Writer가 구현; Test Runner가 검증; 실패 시 최대 3회 반복 | 코드 검토 통과, 테스트 그린, 심각한 린트 오류 없음 |
-| 5 | 마무리 | PM이 결정 사항을 기록하고 `/sync`를 실행하여 PR을 오픈; 배포 검증; 문서 갱신 | 배포 검증 완료, 문서 갱신 완료, 회고 완료 |
+| 0 | 팀 구성 및 환경 기준선 | PM이 요구사항을 평가하고 필요시 에이전트/스킬을 생성; 프로젝트 스캐폴딩 및 개발 환경 검증; 보안 기준선 스캔 | 프로젝트 스캐폴딩 완료, 개발 환경 검증 완료, CI 파이프라인 구성 완료 |
+| 1 | 분석 및 스택 설정 | PM이 요청을 분류; `architect`가 요구사항과 인수 기준을 분석; 읽기 전용 에이전트를 병렬로 디스패치하여 리서치 | — |
+| 2 | 설계 검토 및 승인 | `architect`가 구현 계획 + ADR을 산출; PM이 명시적 사용자 승인을 위해 제시 | 아키텍처 검토 승인, 기술 스택 확정, 스프린트 계획 정의 |
+| 3 | UI/UX 설계 | 범위에 있을 때 `designer`(선택)가 UI/UX 스펙, 와이어프레임, 디자인 토큰을 산출 | — |
+| 4 | 구현 및 QA 게이트 | Code Writer가 구현; Test Runner가 검증; 실패 시 최대 3회 반복 | 코드 검토 통과, 테스트 그린, 심각한 린트 오류 없음 |
+| 5 | 보안 검토 및 라이프사이클 마무리 | `security-monitor`가 PR 전 권고 점검을 실행; PM이 결정을 기록하고 거버넌스 기록을 갱신 | 인증/시크릿/인프라 변경에 대한 보안 권고 점검 통과, 거버넌스 기록 갱신 |
+| 6 | 품질 보증 및 최종 마무리 | PM이 audit과 `/sync`를 실행하고 PR을 오픈; 배포 검증; 문서 갱신 | 배포 검증 완료, 문서 갱신 완료, 회고 완료 |
 
 **티어 상한 규칙**: 에이전트의 티어는 간단한 작업에 대해 낮출 수 있지만, 정의된 기준선보다 절대 높일 수 없습니다 (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
 

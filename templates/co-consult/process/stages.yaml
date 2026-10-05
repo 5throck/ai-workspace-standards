@@ -1,39 +1,50 @@
 schema_version: '1.0'
 variant: co-consult
+# Stage <-> phase mapping (SSOT: docs/phase-definitions.md "Stage-to-Phase Mapping"):
+#   S1 ≈ Phase 1 (Research & Analysis)          — procedure: current-state-diagnosis
+#   S2 ≈ Phase 2 (Design Review & Approval)     — procedure: diagnosis-to-recommendation
+#   S3 ≈ Phase 3 (Content Creation)             — procedures: solution-design, solution-delivery
+#   S4 ≈ Phases 4-6 (Coordination & Delivery through finalization) — procedure: engagement-closeout
 stages:
   - id: S1
     title: Current State Diagnosis
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: "Establish a fact-based current-state picture of the client: market position, organizational readiness, and the diagnosed problem area."
     entry_criteria:
-      - PENDING_REVIEW
+      - Engagement kickoff completed (Phase 0) and access to client data granted.
     exit_criteria:
-      - PENDING_REVIEW
+      - Diagnosis findings cite verifiable sources and are reviewed by strategy-analyst.
+      - Phase 1 deliverables pass Phase 1.5 cross-validation; unresolved findings are logged as accepted risk.
     owner_agent: strategy-analyst
   - id: S2
     title: Diagnosis to Recommendation
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: Convert validated diagnosis findings into an evidence-traced recommendation set, gated by the logic audit and client approval before solution work begins.
     entry_criteria:
-      - PENDING_REVIEW
+      - S1 exit criteria met — reviewed diagnosis findings and a cross-validated evidence base are available.
     exit_criteria:
-      - PENDING_REVIEW
+      - Every recommendation traces to at least one verified evidence item.
+      - DG-CONSULT-01 passed — logic audit completed before executive presentation work begins (decisions/gates.yaml).
+      - Client/user approves the recommendation set at the Phase 2 approval gate.
     owner_agent: strategy-analyst
   - id: S3
     title: Solution Delivery
     order: 3
-    purpose: PENDING_REVIEW
+    purpose: Design and deliver the approved solution — develop and select solution options, then produce the implementation blueprint and client-facing deliverables.
     entry_criteria:
-      - PENDING_REVIEW
+      - S2 exit criteria met — approved recommendation set and client selection of the strategic approach recorded.
     exit_criteria:
-      - PENDING_REVIEW
+      - Every solution option carries feasibility notes and a change impact map before selection.
+      - Workstream reviews confirm blueprint and analyses are consistent.
+      - Client deliverables (reports, presentations) complete per the approved plan.
     owner_agent: strategy-analyst
   - id: S4
     title: Engagement Closeout
     order: 4
-    purpose: PENDING_REVIEW
+    purpose: Close the engagement — complete final reviews, obtain client sign-off, archive deliverables, and finalize governance records.
     entry_criteria:
-      - PENDING_REVIEW
+      - S3 exit criteria met — final solution-delivery workstream reviews completed.
     exit_criteria:
-      - PENDING_REVIEW
+      - Client sign-off recorded on all acceptance criteria.
+      - Deliverables archived and governance records updated; final audit and /sync pipeline completed (Phase 6).
     owner_agent: delivery-manager

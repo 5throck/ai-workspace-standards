@@ -19,6 +19,20 @@ This document defines the workflow phases used by the `co-consult` variant. It f
 
 ---
 
+## Governance Stage Mapping (process/stages.yaml)
+
+The governance stage model (`process/stages.yaml`, wired via `variant.json → process_manifest`, owners per `governance/raci.yaml`) rolls the phases above into four delivery stages. It is a coarser engagement-tracking view — PM orchestration always follows the phase numbers above.
+
+| Stage | Title | Maps to Phases | Accountable Owner | Procedure(s) |
+|-------|-------|----------------|-------------------|--------------|
+| S1 | Current State Diagnosis | ≈ Phase 1 | `strategy-analyst` | `procedures/current-state-diagnosis` |
+| S2 | Diagnosis to Recommendation | ≈ Phase 2 | `strategy-analyst` | `procedures/diagnosis-to-recommendation` (gate `DG-CONSULT-01`) |
+| S3 | Solution Delivery | ≈ Phase 3 (with Phase 4 workstream-coordination overlap) | `strategy-analyst` | `procedures/solution-design`, `procedures/solution-delivery` |
+| S4 | Engagement Closeout | ≈ Phases 4–6 | `delivery-manager` | `procedures/engagement-closeout` |
+
+---
+
+
 ## Phase Details
 
 ### Phase 0 — Initiation
@@ -33,7 +47,7 @@ This document defines the workflow phases used by the `co-consult` variant. It f
 - `industry-expert` (Tier: High, when engaged) provides sector-specific insight and competitive dynamics
 - `change-management-partner` (Tier: Medium, when engaged) assesses organizational readiness and stakeholder landscape
 - `sme` (Tier: Medium, when engaged) contributes functional expertise
-- `data-analyst` (Tier: Low, when engaged) performs statistical analysis and data modeling
+- `data-analyst` (Tier: Medium, when engaged) performs statistical analysis and data modeling
 - PM intervenes only if quality standards are not met
 - **Output**: market/org analysis, findings brief
 - **Gate**: none — phase ends when agents signal completion, then Phase 1.5 begins
@@ -59,7 +73,7 @@ This document defines the workflow phases used by the `co-consult` variant. It f
 - `communications-lead` (Tier: Medium) transforms findings into the strategy report, narrative, and client-facing content — always engaged
 - `solutions-architect` (Tier: Medium, when engaged) translates the approved approach into a technical design and implementation roadmap
 - `sme` (Tier: Medium, when engaged) continues functional design support
-- `data-analyst` (Tier: Low, when engaged) builds supporting data visualizations and models
+- `data-analyst` (Tier: Medium, when engaged) builds supporting data visualizations and models
 - Agents may hand off directly to each other without PM intervention (e.g. `solution-design` → `narrative-framework` → `consulting-report-writing` → `executive-presentation`)
 - **Output**: strategy report, technical specs, executive presentation
 
@@ -99,13 +113,14 @@ Per each agent's frontmatter `phases:` field in `templates/co-consult/agents/*.m
 | `change-management-partner` | 1, 2 | Medium | Extended (organizational change) |
 | `industry-expert` | 1, 2 | High | Specialist (deep industry knowledge) |
 | `sme` | 1, 2, 3 | Medium | Specialist (functional depth) |
-| `data-analyst` | 1, 3 | Low | Specialist (quantitative modeling) |
+| `data-analyst` | 1, 3 | Medium | Specialist (quantitative modeling) |
 | `solutions-architect` | 3 | Medium | Extended (technical solutions) |
 | `delivery-manager` | 4 | Low | Extended (multi-workstream coordination) |
 | `technology-specialist` | 4 | Low | Extended (platform/tool implementation) |
 | `workstream-lead` | 4 | Medium | Extended (3+ parallel workstreams) |
+| `i18n-specialist` | — (as dispatched) | Medium | Infrastructure (extends common; locale documentation and translation-sync, outside the consulting pipeline) |
 
-Core-vs-Extended-vs-Specialist classification per `docs/team-configuration-guide.md § Core Team vs. Extended Team`; `variant.json → agent_manifest.optional` is currently empty, meaning PM decides team composition per engagement scope rather than a hardcoded optional-agent list.
+Core-vs-Extended-vs-Specialist classification per `docs/team-configuration-guide.md § Core Team vs. Extended Team`; `variant.json → agent_manifest.optional` lists the when-engaged specialists (`data-analyst`, `industry-expert`, `sme`) — PM decides team composition per engagement scope within that model.
 
 ---
 

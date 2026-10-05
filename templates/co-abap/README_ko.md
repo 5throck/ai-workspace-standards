@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 83d126771e650e8c047fbcfe58b31870a584c5a0fb63abe2b10207a3a9c552b1
+translated_from_hash: 96cbdc1c519e1fa9751ec438bc2d8defca5ca43bcebcf7554c5a3600a2e3c161
 lang: ko
 lang_reason: source-material
 ---
@@ -20,10 +20,12 @@ lang_reason: source-material
 이것은 워크스페이스 템플릿의 stable 변형입니다. `templates/common`에서 상속하며 변형별 맞춤 설정을 포함합니다.
 
 1. 이 변형 템플릿을 복제/스캐폴드합니다
-2. `vsp.exe`를 프로젝트 루트에 배치합니다
+2. `vsp` 바이너리(Windows에서는 `vsp.exe`)를 프로젝트 루트에 배치합니다
 3. `.env`에 SAP 자격 증명을 구성합니다
 4. git hooks 활성화: `git config core.hooksPath .githooks`
-5. `/triage <요청>`으로 시작합니다
+5. PM 트라이아지 요청으로 시작합니다 — 요청을 일상 언어로 PM에게 전달하세요
+   (`/triage <요청>` 워크플로 컨벤션; PM이 분류하고 태스크 파일을 만들어
+   병렬 리서치를 디스패치합니다 — [docs/user-guide.md](docs/user-guide.md) 참고)
 
 ### Claude Code 사용자:
 
@@ -45,7 +47,7 @@ lang_reason: source-material
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
-| **PM** | 프로젝트 매니저 — 워크플로 오케스트레이션, 디스패치, 품질 게이트, 라이프사이클 관리 | high | inherit |
+| **PM** | 프로젝트 매니저 — 워크플로 오케스트레이션, 디스패치, 품질 게이트, 라이프사이클 관리 | medium | inherit |
 | **sd-analyst** | 판매 및 배포(SD) 모듈 분석 — SD 트리거 키워드에 따라 활성화 | medium | inherit |
 | **mm-analyst** | 자재 관리(MM) 모듈 분석 — MM 트리거 키워드에 따라 활성화 | medium | inherit |
 | **fi-analyst** | 재무 회계(FI) 모듈 분석 — FI 트리거 키워드에 따라 활성화 | medium | inherit |
@@ -56,7 +58,7 @@ lang_reason: source-material
 | **code-writer** | WriteSource/EditSource를 통한 ABAP 구현, 구문 검사 | low | inherit |
 | **test-runner** | QA 검증 — 단위 테스트, 코드 커버리지, ATC 체크 | low | inherit |
 | **dba** | 테이블/CDS/인덱스 설계, SQL 성능 튜닝, ERD 정규화 | medium | inherit |
-| **devops-admin** | 전송 관리, 인프라 설치, 시스템 감사 | low | inherit |
+| **devops-admin** | 전송 관리, 인프라 설치, 시스템 감사 | medium | inherit |
 | **sap-investigator** | 코드베이스 패턴 스캔, 기존 설계 추출 (읽기 전용) | medium | inherit |
 | **read-only-analyst** | 비즈니스 데이터 쿼리, 초안 AC를 포함한 AS-IS 분석 (읽기 전용) | medium | inherit |
 | **schema-inspector** | 테이블/CDS 구조 검사, 의존성 맵 (읽기 전용) | medium | inherit |
@@ -65,11 +67,13 @@ lang_reason: source-material
 | **form-expert** | SAP Script, Smart Forms, Adobe Forms 설계 및 인쇄 프로그램 | medium | inherit |
 | **security-monitor** | 보안 정책 시행 및 안전한 의존성 감사 | low | inherit |
 | **gui-scripter** | BDC / VBS 자동화 — BAPI/OData/RFC 대안이 없는 경우 최후 수단 | low | inherit |
+| **i18n-specialist** | 로캘 미러의 현지화 검토, 로캘 구성, 번역 동기화 (횡단 관심사; SAP 개발 파이프라인 외부) | medium | inherit |
 
 ## 스킬
 
 - **abap-dev**: BAPI 탐색, 전송 관리, 단위 테스트, 성능 분석, 영향도 아키텍처 분석 및 문서 감사를 포함한 전문화된 SAP ABAP 개발 워크플로.
-- **dump-monitor**: ListDumps/GetDump를 사용하여 ABAP short dump를 감지하고 /triage로 라우팅하는 표준화된 SAP 시스템 헬스 체크.
+- **abap-code-review**: 네이밍, pretty-printer 규칙, 안티패턴을 검토하는 Clean ABAP 리뷰 패스. ATC 교차 참조 포함.
+- **dump-monitor**: ListDumps/GetDump를 사용하여 ABAP short dump를 감지하고 PM 트라이아지로 라우팅하는 표준화된 SAP 시스템 헬스 체크.
 - **performance-tuning**: 느린 ABAP 프로그램 및 비용이 많이 드는 SQL 문 진단을 위한 TraceExecution, ListSQLTraces, GetCallGraph 워크플로.
 - **post-write-chain**: 모든 WriteSource/EditSource/Activate 작업 후 강제되는 필수 품질 게이트: SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck.
 - **sap-co**: 비용 중심, 내부 주문, CO-PA 수익성 분석, 비용 배분을 위한 CO 모듈 프로세스 플로, 테이블 관계, 쿼리 패턴.
@@ -100,13 +104,14 @@ lang_reason: source-material
 
 ### C. 사용 가능한 명령어
 
-일상적인 작업은 슬래시 명령어(Claude Code 및 Gemini CLI에서 Skill로 등록됨)로 구동됩니다:
+일상적인 작업은 등록된 `/sync` 스킬과 그 동반 명령어로 구동됩니다:
 
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
-- `/triage <request>` — 요청 자동 분류 및 태스크 파일 생성.
+- `meeting-facilitation` 스킬 — 구조화된 인라인 다중 에이전트 토론 진행 (스킬 직접 호출; 레거시 `/meeting` 슬래시 명령어는 2026-09-26에 폐기됨).
+
+세 가지 워크플로 단계는 **PM이 조율하는 이름 있는 컨벤션**입니다 (등록된 명령어가 아님): **PM 트라이아지** (`/triage <요청>` 축약 표현 — PM이 요청을 분류하고 태스크 파일을 만들어 병렬 리서치를 디스패치), **post-write QA 체인** (`/post-write` 축약 표현 — SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck, 훅을 사용할 수 없을 때 수동 실행), **트랜스포트 단계** (`/transport` 축약 표현 — PM이 devops-admin을 디스패치하여 CTS 트랜스포트를 생성/릴리스).
 
 ## 변형 유형
 
@@ -116,4 +121,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-08-15*
+*최근 갱신: 2026-10-05*

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // new-requirement.ts - Scaffold a new requirement folder under deliverables/ (RTM Stage 1)
 // and register it in deliverables/index.md.
 //
@@ -13,7 +13,9 @@
 //   deliverables/REQ-NNN-<slug>/06_release_report.md  (Stage 5 — release closure, filled at the end)
 //   (copied from deliverables/templates/<file>, placeholders filled with REQ-NNN / title)
 //
-// Appends a row to the RTM table in deliverables/index.md with Stage 1 / status Draft.
+// Appends a row to the RTM table in deliverables/index.md with Stage 1 / Draft.
+// Exits non-zero when a required template is missing — the completion message
+// only ever claims what was actually scaffolded.
 //
 // Referenced by: /triage (Step 7 — for requests classified as new functional scope)
 // Design: docs/designs/2026-09-26-new-requirement-scaffolding-design.md
@@ -86,7 +88,7 @@ function scaffoldRequirement(
   title: string,
   module: string,
   owner: string
-): { reqId: string; folderPath: string; scaffolded: string[] } {
+): { reqId: string; folderPath: string; scaffolded: string[]; missingTemplates: string[]; rtmUpdated: boolean } {
   const deliverablesDir = path.join(projectRoot, "deliverables");
   const templatesDir = path.join(deliverablesDir, "templates");
   const indexPath = path.join(deliverablesDir, "index.md");
@@ -99,10 +101,12 @@ function scaffoldRequirement(
   fs.mkdirSync(folderPath, { recursive: true });
 
   const scaffolded: string[] = [];
+  const missingTemplates: string[] = [];
   for (const file of SCAFFOLD_FILES) {
     const templatePath = path.join(templatesDir, file);
     if (!fs.existsSync(templatePath)) {
       console.log(`${YELLOW}⚠️  deliverables/templates/${file} not found — skipped.${RESET}`);
+      missingTemplates.push(file);
       continue;
     }
     const template = fs.readFileSync(templatePath, "utf-8");
@@ -110,15 +114,17 @@ function scaffoldRequirement(
     scaffolded.push(file);
   }
 
+  let rtmUpdated = false;
   if (fs.existsSync(indexPath)) {
     const indexContent = fs.readFileSync(indexPath, "utf-8");
     const updated = insertRtmRow(indexContent, reqId, title, module, owner, folderName);
     fs.writeFileSync(indexPath, updated, "utf-8");
+    rtmUpdated = true;
   } else {
-    console.log(`${YELLOW}⚠️  deliverables/index.md not found — skipping RTM row insertion.${RESET}`);
+    console.log(`${YELLOW}⚠️  deliverables/index.md not found — RTM row NOT added.${RESET}`);
   }
 
-  return { reqId, folderPath, scaffolded };
+  return { reqId, folderPath, scaffolded, missingTemplates, rtmUpdated };
 }
 
 /** Flags that take a value — used to exclude "--flag value" pairs from the title. */
@@ -161,12 +167,29 @@ async function main() {
     process.exit(1);
   }
 
-  const { reqId, folderPath, scaffolded } = scaffoldRequirement(defaultProjectRoot, title, module, owner);
+  const { reqId, folderPath, scaffolded, missingTemplates, rtmUpdated } = scaffoldRequirement(
+    defaultProjectRoot, title, module, owner
+  );
 
   console.log(`${GREEN}✓ Created ${reqId}: ${title}${RESET}`);
   console.log(`  Folder: ${path.relative(defaultProjectRoot, folderPath)}`);
-  console.log(`  Scaffolded: ${scaffolded.join(", ") || "(none — templates missing)"}`);
-  console.log(`  RTM row added to deliverables/index.md (Stage 1 / Draft).`);
+  // Report exactly what was scaffolded — never claim more than happened.
+  if (scaffolded.length > 0) {
+    console.log(`  Scaffolded: ${scaffolded.join(", ")}`);
+  } else {
+    console.log(`  Scaffolded: (none — all required templates missing)`);
+  }
+  if (rtmUpdated) {
+    console.log(`  RTM row added to deliverables/index.md (Stage 1 / Draft).`);
+  } else {
+    console.log(`  RTM row NOT added (deliverables/index.md not found).`);
+  }
+
+  if (missingTemplates.length > 0) {
+    console.error(`${RED}✗ ${missingTemplates.length} required template(s) missing from deliverables/templates/: ${missingTemplates.join(", ")}${RESET}`);
+    console.error(`  ${reqId} is incomplete — create the templates (or the files) before starting the requirement.`);
+    process.exitCode = 1;
+  }
 }
 
 if (import.meta.main) {

@@ -68,6 +68,11 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "gate.co-abap.DG-ABAP-02",
+      "type": "decision_gate",
+      "layer": "variant:co-abap"
+    },
+    {
       "id": "gui-scripter",
       "type": "agent",
       "layer": "variant:co-abap"
@@ -229,16 +234,6 @@
     },
     {
       "id": "read-only-analyst",
-      "type": "agent",
-      "layer": "variant:co-abap"
-    },
-    {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-abap"
-    },
-    {
-      "id": "README_ko",
       "type": "agent",
       "layer": "variant:co-abap"
     },
@@ -696,12 +691,6 @@
       "source": "raci_matrix"
     },
     {
-      "type": "accountable_for",
-      "from": "code-writer",
-      "to": "procedure.co-abap.transport-release",
-      "source": "raci_matrix"
-    },
-    {
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",
@@ -724,6 +713,12 @@
       "from": "desktop-app-fallback",
       "to": "test-runner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "accountable_for",
+      "from": "devops-admin",
+      "to": "procedure.co-abap.transport-release",
+      "source": "raci_matrix"
     },
     {
       "type": "follows",
@@ -842,6 +837,18 @@
       "type": "decides_on",
       "from": "gate.co-abap.DG-ABAP-01",
       "to": "output_type.implementation_package",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-abap.DG-ABAP-02",
+      "to": "output_type.implementation_package",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-abap.DG-ABAP-02",
+      "to": "output_type.test_report",
       "source": "decision_model"
     },
     {
@@ -1976,6 +1983,12 @@
       "type": "gated_by",
       "from": "stage.co-abap.S2",
       "to": "gate.co-abap.DG-ABAP-01",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-abap.S2",
+      "to": "gate.co-abap.DG-ABAP-02",
       "source": "decision_model"
     }
   ]

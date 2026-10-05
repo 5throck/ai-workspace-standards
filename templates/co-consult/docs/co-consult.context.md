@@ -40,6 +40,7 @@
 | **Workstream Lead** | `agents/workstream-lead.md` | Workstream management, team coordination, progress tracking | active |
 | **Delivery Manager** | `agents/delivery-manager.md` | Project delivery, operations coordination, resource allocation | active |
 | **Technology Specialist** | `agents/technology-specialist.md` | Collaboration platforms, workflow automation, digital transformation | active |
+| **I18N Specialist** | `agents/i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout guidance (extends common) | active |
 | **Data Analyst** | `agents/data-analyst.md` | Statistical analysis, data modeling, visualization | active |
 
 > Lifecycle management: `bun scripts/agent-lifecycle-audit.ts`
@@ -140,14 +141,14 @@ Engagement Leader
 
 | Phase | Name | What Happens | Primary Owner |
 |-------|------|--------------|---------------|
-| 0 | Engagement Initiation | Engagement Leader defines scope, assembles team, confirms client objectives | Engagement Leader |
-| 1 | Research & Data Gathering | Strategy Analyst conducts market/competitive research; Change Management Partner assesses org readiness | Strategy Analyst, Change Management Partner |
+| 0 | Initiation | Engagement Leader defines scope, assembles team, confirms client objectives | Engagement Leader |
+| 1 | Research & Analysis | Strategy Analyst conducts market/competitive research; Change Management Partner assesses org readiness | Strategy Analyst, Change Management Partner |
 | 1.5 | Cross-Validation | Validator agents cross-check Phase 1 deliverables for consistency before synthesis | PM (dispatches validators) |
 | 2 | Design Review & Approval | Proposed approach presented to client/user; **approval gate** — no execution without sign-off | Engagement Leader |
 | 3 | Content Creation | Communications Lead drafts client deliverables; Solutions Architect designs technical solutions (parallel) | Communications Lead, Solutions Architect |
-| 4 | Platform Delivery | Delivery Manager coordinates stakeholder reviews; Technology Specialist implements M365 workflows | Delivery Manager, Technology Specialist |
-| 5 | QA & Finalization | Engagement Leader runs audit scripts, validates all deliverables meet quality standards | Engagement Leader |
-| 6 | PR & Handoff | Engagement Leader runs `/sync`, creates PR, delivers final output to client | Engagement Leader |
+| 4 | Coordination & Delivery | Delivery Manager coordinates stakeholder reviews and delivery; Technology Specialist implements collaboration-platform workflows | Delivery Manager, Technology Specialist |
+| 5 | Lifecycle Finalization | PM updates governance records for changed artifacts and logs decisions to `memory/` | Engagement Leader (PM) |
+| 6 | Quality Assurance & Finalization | PM runs audit scripts, runs `/sync`, opens the PR, and delivers final output to client | Engagement Leader (PM) |
 
 ---
 
@@ -158,9 +159,9 @@ See [`docs/team-configuration-guide.md`](team-configuration-guide.md) for full s
 | Scenario | Core Agents | Duration | Best For |
 |----------|------------|---------|----------|
 | **Quick Assessment** | Engagement Leader + Strategy Analyst + Communications Lead | 1–2 weeks | Rapid diagnostics, feasibility studies |
-| **Standard Engagement** | 5 core agents | 4–8 weeks | Strategy development, operational improvement |
-| **Complex Transformation** | Full team (11 agents) | 8–16 weeks | Digital transformation, large-scale restructuring |
-| **Specialized Expert** | 3–4 agents + expert | 2–4 weeks | Deep industry or functional focus |
+| **Standard Engagement** | Engagement Leader + Strategy Analyst + Change Management Partner + Communications Lead + Solutions Architect + Delivery Manager | 4–8 weeks | Strategy development, operational improvement |
+| **Complex Transformation** | Full team (12 agents) | 8–16 weeks | Digital transformation, large-scale restructuring |
+| **Specialized Expert** | Engagement Leader + focused expert pod (team-configuration-guide Scenario 4) | 2–4 weeks | Deep industry or functional focus |
 
 ---
 
@@ -249,7 +250,7 @@ Each agent must save its deliverables to the designated folder with the specifie
 5. Change management assessments must include organizational readiness scores.
 6. All agent-produced deliverables MUST be saved to their designated output folder per the **Output Destination Mapping** table above. Agents MUST read this table before saving any file. Do not hard-code output paths in agent or skill definitions — this table is the single source of truth. Create the destination folder if it does not exist.
 7. **Deliverable language follows the active country profile (KR default: Korean)**. Unless the client explicitly requests another language, all deliverables MUST be written in the default language and saved with the `_ko.md` file suffix (e.g., `semiconductor-trends-2026-06-28_ko.md`). English-language deliverables use `.md` without suffix only when requested.
-8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX reports using `bun scripts/co-consult/md-to-report.ts <file.md>`. Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`). Requires project dependency (`docx`) installed via `bun install`. PDF conversion is out of scope for this script — convert DOCX to PDF manually via Word or any office application.
+8. Markdown deliverables in `deliverables/` can be converted to client-ready DOCX or PDF reports using `bun scripts/co-consult/md-to-report.ts <file.md> [--format docx|pdf|both]` (default `docx`). Output is saved alongside the source file (e.g., `report_ko.md` → `report_ko.docx`); PDF export (v1.1.0) converts the DOCX via LibreOffice CLI when LibreOffice is installed locally. Requires project dependencies installed via `bun install`.
 9. Ingested quantitative market data MUST conform to `docs/market-data-schema.json` (canonical financial model: column, unit, and currency contract) before entering the KPI pipeline — `financial-kpi.ts`, `financial-driver-tree.ts`, and the `financial-modeling` skill consume only schema-valid canonical models. **[CONSULT-R2]**
 9. Phase 1 research deliverables MUST pass cross-validation before entering `insight-synthesis`. PM dispatches validator agents per the Cross-Validation Matrix in [`engagement-orchestration.md`](engagement-orchestration.md). See Phase 1.5 Cross-Validation section for checklist and re-execution triggers.
 10. **Korean-terminology reference assets are SSOT'd at `docs/terms-ko.json`** (workspace root — not per-skill). Any skill that needs a Korean-original ↔ English glossary (business/financial/corporate-research terms not covered by the workspace English-only doc policy) MUST read/link `docs/terms-ko.json` rather than maintaining a local `references/terms-ko.json` copy. Rationale: a skill-local copy is duplicated 4× across platform mirrors (`skills/`, `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`) and, when two or more skills need overlapping terms (e.g. `company-intelligence` and `financial-statement-analysis` both need financial-statement account names), those per-skill copies drift out of sync with no audit check catching it. Extending an entry: add it directly to `docs/terms-ko.json` under the relevant category (create a new category if none fits); do not add category duplicates. Currently consumed by: `company-intelligence`, `financial-statement-analysis`.

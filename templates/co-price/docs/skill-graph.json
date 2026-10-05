@@ -341,16 +341,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-price"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-price"
-    },
-    {
       "id": "scenario-comparison",
       "type": "skill",
       "layer": "variant:co-price",

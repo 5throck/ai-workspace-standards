@@ -113,16 +113,6 @@
       "layer": "variant:co-work"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-work"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-work"
-    },
-    {
       "id": "research-analysis",
       "type": "skill",
       "layer": "L0"

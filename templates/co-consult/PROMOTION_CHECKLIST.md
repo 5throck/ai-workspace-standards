@@ -5,23 +5,33 @@
 **Beta Since:** 2026-06-03
 **Phase A Complete:** true
 
-## Promotion Criteria (beta -> stable)
+> **Post-promotion ratification record.** co-consult was created and entered
+> stable on 2026-06-03 as a generation-1 migration from a proven consulting
+> project, before the beta-lifecycle machinery existed. Its stable status is
+> admitted under the migration fast-track policy, **ADR-0099**
+> (`docs/adr/0099-template-migration-admission-policy.md`): the beta-window
+> criteria (6, 8, 10) are explicitly waived rather than claimed as met, and the
+> remaining criteria are verified against the 2026-10-05 scoped review.
+> `variant.json` → `promotionChecklist` points here as the governance record;
+> the `lifecycle` history in `variant.json` is retained as recorded.
+
+## Promotion Criteria (beta -> stable) — reconciled 2026-10-05 per ADR-0099
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
-| 1 | **Phase A complete** | Done | `phaseAComplete` in variant.json; agent manifest (11), skill manifest (18), documentation present. |
-| 2 | **Agent roster completeness** | Pending | All 11 agents defined; verify each agent file has substantive content. |
-| 3 | **Skills coverage** | Pending | 18 variant-specific skills; verify each SKILL.md is complete and operational. |
-| 4 | **Documentation completeness** | Pending | README.md present and accurate; AGENTS.md reflects the actual roster; variant.json fields accurate. |
-| 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` passes with 0 errors. |
-| 6 | **Real engagements** | Pending | Minimum 1 successful end-to-end engagement. |
-| 7 | **README accuracy** | Pending | README reflects current capability set and agent roster. |
-| 8 | **Minimum beta duration** | Pending | 3 months in beta status. |
-| 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
-| 10 | **User feedback** | Pending | Positive feedback from beta users; no critical complaints. |
+| 1 | **Phase A complete** | Done | Phase A artifacts present in `variant.json`: `agents[]` (12 agents), `skills[]` (18 skills), `script_manifest.local` (9 scripts), documentation set (README, user-guide, phase-definitions, context), and the process/governance/decisions manifests. Verified in the 2026-10-05 scoped review (`docs/reports/2026-10-05-project-review-scoped-co-consult-co-abap-co-develop.md`, machine baseline 7/7 green). |
+| 2 | **Agent roster completeness** | Done | All 12 agents defined with substantive content; per-agent lifecycle records complete (12/12) per the 2026-10-05 scoped review (Strengths: "Per-agent lifecycle records complete in co-consult (12/12)"). |
+| 3 | **Skills coverage** | Done | 18 variant-specific skills registered in `variant.json` `skills[]`; registry three-way consistency (`skills[]` = skill directories = SKILLS.md, matching @versions) verified in the 2026-10-05 scoped review. |
+| 4 | **Documentation completeness** | Done | README.md, docs/co-consult.context.md, docs/user-guide.md, docs/phase-definitions.md, and AGENTS.md present and maintained. The 2026-10-05 scoped review logged descriptive-claim drift; remediation is tracked via T-20261005-021..028. |
+| 5 | **Audit pass rate** | Done | Machine baseline 7/7 green as of 2026-10-05 (`bun scripts/review-baseline.ts`, incl. `audit.ts` with 0 errors). |
+| 6 | **Real engagements** | N/A per ADR-0099 — migration fast-track | Variant migrated from a conversion-eligible source project (tested in 2+ engagements per `skills/project-to-variant`); the migration basis replaces the beta-engagement attestation. |
+| 7 | **README accuracy** | Done | README.md / README_ko.md carry the ✅ Stable v1.0.0 badge and current inventories (12 agents, 18 skills); tier/roster drift found by the 2026-10-05 scoped review fixed 2026-10-05 (T-20261005-025/-028). |
+| 8 | **Minimum beta duration** | N/A per ADR-0099 — migration fast-track | co-consult entered directly at stable on its creation date (2026-06-03); no beta window applies under the migration fast-track. |
+| 9 | **Zero unresolved bugs** | Done | No open bug reports recorded at promotion (2026-06-03). Defects surfaced by the 2026-10-05 scoped review (report chain, HWP pipeline) are remediation tickets (T-20261005-026/-027), not unresolved promotion bugs. |
+| 10 | **User feedback** | N/A per ADR-0099 — migration fast-track | Not separately logged; under the migration fast-track the source project's conversion-eligibility bar (2+ engagements) replaces beta-user feedback. |
 
 ## Review History
 
-| Date | Reviewer | Outcome | Notes |
-|------|----------|---------|-------|
-| | | | |
+| Date | Outcome | Status | Notes | Reviewer |
+|------|---------|--------|-------|----------|
+| 2026-10-05 | stable (ratified) | stable | Migration admission ratified per ADR-0099; criteria 6/8/10 waived; remainder verified in the 2026-10-05 scoped review | pm |

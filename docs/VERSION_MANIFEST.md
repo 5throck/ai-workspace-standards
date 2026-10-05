@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-05T11:21:47.384Z
+**Generated**: 2026-10-05T22:14:39.805Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -134,7 +134,7 @@
 | generate-raci.ts | 1.1.0 | scripts/generate-raci.ts | js-yaml |
 | generate-scripts-mirror.ts | 1.0.0 | scripts/generate-scripts-mirror.ts | N/A |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.14.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 1.15.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.10.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
@@ -207,7 +207,7 @@
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
 | validate-templates.ts | 1.51.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
-| validate-variant-claims.ts | 1.0.0 | scripts/validate-variant-claims.ts | js-yaml |
+| validate-variant-claims.ts | 1.2.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
@@ -218,7 +218,7 @@
 | verify-platform-lifecycle.ts | 1.6.0 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.12.0 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 1.6.0 | scripts/verify-skill-graph.ts | N/A |
+| verify-skill-graph.ts | 1.7.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.4.0 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 

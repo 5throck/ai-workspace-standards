@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "co-consult",
+  "version": "1.0.0",
+  "description": "co-consult variant — consulting deliverable scripts (DOCX/PDF report generation, HWP/HWPX pipeline, financial statement analysis)",
+  "private": true,
+  "dependencies": {
+    "docx": "^9.8.1",
+    "mdast-util-from-markdown": "^2.1.0",
+    "mdast-util-gfm-table": "^2.0.0",
+    "micromark-extension-gfm": "^3.0.0",
+    "yaml": "^2.9.1"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

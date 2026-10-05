@@ -2,7 +2,7 @@
 
 **Language**: **English** · [한국어](user-guide_ko.md)
 
-> Practical, task-oriented guide for using the co-develop agent team. For the team overview and roster, see [README.md](../README.md). For governance and dispatch rules, see [AGENTS.md](../AGENTS.md) and [CLAUDE.md](../CLAUDE.md) / [GEMINI.md](../GEMINI.md).
+> Practical, task-oriented guide for using the co-develop agent team. For the team overview and roster, see [README.md](../README.md). For governance and dispatch rules, see [AGENTS.md](../AGENTS.md) (the shipped instruction file; `CLAUDE.md` / `GEMINI.md` arrive from `templates/common` at project creation).
 
 ---
 
@@ -59,7 +59,7 @@ co-develop follows a fixed **pipeline order**: `architect → designer → stack
 2. **Designer (Phase 3, optional)** — if the task touches UI/UX, produces wireframes/component specs/design tokens. Skipped for pure backend/logic changes.
 3. **Stack-setup (Phase 0-1, optional)** — only triggers when the project's tech stack is unrecognized. It identifies the stack, researches the *official* setup docs, runs a mandatory security review on every command (flagging `curl | sh`-style pipe-to-shell patterns as HIGH risk), and will not execute anything until you type an explicit approval keyword (`APPROVE`, or `CONFIRM HIGH RISK` for flagged steps).
 4. **Code-writer (Phase 4)** — implements strictly from the approved plan. Does not design, does not decide scope — surgical changes only.
-5. **Test-runner (Phase 4)** — runs `bun scripts/audit.ts` (documentation/lifecycle gate) plus the project's test command, then checks off each acceptance criterion individually. Reports a `READY FOR PR` or `BLOCKED` verdict. Maximum 2 QA iterations before escalating back to PM.
+5. **Test-runner (Phase 4)** — runs `bun scripts/audit.ts` (documentation/lifecycle gate) plus the project's test command, then checks off each acceptance criterion individually. Reports a `READY FOR PR` or `BLOCKED` verdict. Maximum 3 QA iterations before escalating back to PM.
 6. **Security-monitor (Phase 0, Phase 5)** — runs a baseline scan early and a pre-PR advisory check late, particularly for anything touching auth, secrets, or infrastructure.
 7. **PM finalizes** — logs decisions to `memory/YYYY-MM-DD.md`, checks the Phase 5 lifecycle triggers (did an agent/skill/script change? did a variant status change?), and runs `/sync "type(scope): message"`.
 
@@ -79,16 +79,17 @@ bun scripts/audit.ts              # QA / documentation gate (must exit 0)
 
 ## 4. Engagement / Project Phase Structure
 
-co-develop uses a linear, gated phase model (see `AGENTS.md` §3.5 and `docs/co-develop.context.md`):
+co-develop uses the canonical linear, gated 7-phase model (see `AGENTS.md` §3.5, `docs/phase-definitions.md`, and `docs/co-develop.context.md`):
 
 | Phase | Name | What Happens | Gate Criteria |
 |-------|------|---------------|---------------|
-| 0 | Team Assembly / Initiation | PM assesses requirements, creates agents/skills if needed; project scaffolded and dev environment verified | Project scaffolded, dev environment verified, CI pipeline configured |
-| 1 | Triage | PM classifies the request; dispatches read-only agents in parallel for research/analysis | — |
-| 2 | Analysis / Planning | PM synthesizes findings into requirements + acceptance criteria; architecture and tech stack confirmed | Architecture review approved, tech stack confirmed, sprint plan defined |
-| 3 | Design | Architect produces implementation plan + ADR; Designer produces UI/UX specs if in scope | — |
-| 4 | Implementation / Execution | Code Writer implements; Test Runner verifies; loop up to 3x on failures | Code review passed, tests green, no critical lint errors |
-| 5 | Finalization | PM logs decisions, runs `/sync`, opens PR; deployment verified; documentation updated | Deployment verified, documentation updated, retrospective completed |
+| 0 | Team Assembly & Environment Baseline | PM assesses requirements, creates agents/skills if needed; project scaffolded and dev environment verified; security baseline scan | Project scaffolded, dev environment verified, CI pipeline configured |
+| 1 | Analysis & Stack Setup | PM classifies the request; `architect` analyzes requirements and acceptance criteria; read-only agents dispatched in parallel for research | — |
+| 2 | Design Review & Approval | `architect` produces the implementation plan + ADR; PM presents it for explicit user approval | Architecture review approved, tech stack confirmed, sprint plan defined |
+| 3 | UI/UX Design | `designer` (optional) produces UI/UX specs, wireframes, and design tokens when in scope | — |
+| 4 | Implementation & QA Gate | Code Writer implements; Test Runner verifies; loop up to 3x on failures | Code review passed, tests green, no critical lint errors |
+| 5 | Security Review & Lifecycle Finalization | `security-monitor` runs the pre-PR advisory check; PM logs decisions and updates governance records | Security advisory check clear for auth/secrets/infra changes, governance records updated |
+| 6 | Quality Assurance & Finalization | PM runs the audit, `/sync`, opens PR; deployment verified; documentation updated | Deployment verified, documentation updated, retrospective completed |
 
 **Tier ceiling rule**: an agent's tier can be downgraded for simple tasks but never upgraded above its defined baseline (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
 

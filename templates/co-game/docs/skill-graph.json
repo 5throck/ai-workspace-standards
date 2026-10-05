@@ -198,16 +198,6 @@
       "layer": "variant:co-game"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-game"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-game"
-    },
-    {
       "id": "refactoring",
       "type": "skill",
       "layer": "variant:co-game"

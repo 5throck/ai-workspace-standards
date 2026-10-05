@@ -1,6 +1,17 @@
 schema_version: "1.0"
 variant: co-consult
+generated_from: procedures/
+# Decision-record coverage: DG-CONSULT-01 is the only DEC-recorded decision
+# point in the co-consult flow (record_kind: DEC). Other decision points —
+# the Phase 2 client/user approval gate, the solution-option selection at the
+# S2->S3 handoff, and the Phase 1.5 cross-validation accept/rework outcomes —
+# are recorded in engagement artifacts (project charter, stakeholder review
+# logs, memory/YYYY-MM-DD.md), not as DEC records.
 gates:
+  # Stage binding S2 is verified: the diagnosis-to-recommendation procedure
+  # (procedure_id: co-consult-diagnosis-to-recommendation, stage: S2) owns the
+  # "logic audit passes before executive presentation" acceptance criterion;
+  # the presentation itself is produced downstream in S3.
   - id: DG-CONSULT-01
     title: "Logic audit passes before executive presentation."
     stage: S2

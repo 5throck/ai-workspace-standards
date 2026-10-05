@@ -44,7 +44,7 @@ rows:
       - security-monitor
   - stage: S2
     activity: procedure.co-abap.transport-release
-    accountable: code-writer
+    accountable: devops-admin
     responsible:
       - devops-admin
       - test-runner

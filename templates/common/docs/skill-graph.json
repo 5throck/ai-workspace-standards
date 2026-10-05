@@ -3,11 +3,6 @@
   "graph_profile": "deg/v1",
   "nodes": [
     {
-      "id": "_COMMON",
-      "type": "agent",
-      "layer": "common"
-    },
-    {
       "id": "accessibility-audit",
       "type": "skill",
       "layer": "common"

@@ -1,13 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // vsp-publish.ts - Harness Packaging & Publishing Hook
 // Standardized packaging script to sanitize and copy core framework assets to the plugin repository.
-// Usage: bun scripts/vsp-publish.ts "feat: align with main reference implementation"
+// Usage: bun scripts/co-abap/vsp-publish.ts "feat: align with main reference implementation"
 //   (requires CLAUDE_PLUGIN_ROOT env var pointing at the target co-abap_plugin checkout)
 //
-// TypeScript port of vsp-publish.sh / vsp-publish.ps1 (ADR-0036) — also corrects the
-// asset list, which still referenced scripts/*.ps1 and scripts/*.sh files that no
-// longer exist in this repo (all scripts migrated to .ts) and were silently skipped.
+// v1.1.0 (spec docs/designs/2026-10-05-consult-abap-develop-review-remediation-design.md, AH6):
+//   - sourceDir is the PROJECT ROOT (two levels up from scripts/co-abap/), not scripts/ —
+//     agents/, skills/, docs/ paths resolve correctly now
+//   - ASSETS rebuilt against the actual template layout: dropped entries that do not
+//     exist (.claude/commands, docs/prd-template.md, docs/task-template.md,
+//     docs/plugin-setup.md, scripts/sync-md.ts, .mcp.json.sample) and moved the vsp
+//     scripts to their real scripts/co-abap/ paths; added atc-rulepack.json
+//     (vsp-audit.ts's data dependency)
+//   - a missing required source asset is an ERROR that aborts the run, not a warn-skip
 
 import { $ } from "bun";
 import * as fs from "node:fs";
@@ -22,7 +28,9 @@ const GRAY = "\x1b[90m";
 const RESET = "\x1b[0m";
 
 const scriptDir = path.dirname(import.meta.path);
-const sourceDir = path.resolve(scriptDir, "..");
+// scripts/co-abap/ → project root (two levels up), so agents/skills/scripts
+// paths in ASSETS resolve against the scaffolded project layout.
+const sourceDir = path.resolve(scriptDir, "..", "..");
 
 interface Asset {
   source: string;
@@ -30,18 +38,14 @@ interface Asset {
   isFolder: boolean;
 }
 
+// Every entry verified to exist in the template layout (2026-10-06).
 const ASSETS: Asset[] = [
   { source: "agents", target: "agents", isFolder: true },
   { source: "skills", target: "skills", isFolder: true },
-  { source: path.join(".claude", "commands"), target: "commands", isFolder: true },
-  { source: path.join("docs", "prd-template.md"), target: path.join("docs", "prd-template.md"), isFolder: false },
-  { source: path.join("docs", "task-template.md"), target: path.join("docs", "task-template.md"), isFolder: false },
-  { source: path.join("docs", "plugin-setup.md"), target: path.join("docs", "plugin-setup.md"), isFolder: false },
-  { source: path.join("scripts", "install-vsp.ts"), target: path.join("scripts", "install-vsp.ts"), isFolder: false },
-  { source: path.join("scripts", "sync-md.ts"), target: path.join("scripts", "sync-md.ts"), isFolder: false },
-  { source: path.join("scripts", "vsp-audit.ts"), target: path.join("scripts", "vsp-audit.ts"), isFolder: false },
-  { source: path.join("scripts", "vsp-task.ts"), target: path.join("scripts", "vsp-task.ts"), isFolder: false },
-  { source: ".mcp.json.sample", target: ".mcp.json.sample", isFolder: false },
+  { source: path.join("scripts", "co-abap", "install-vsp.ts"), target: path.join("scripts", "co-abap", "install-vsp.ts"), isFolder: false },
+  { source: path.join("scripts", "co-abap", "vsp-audit.ts"), target: path.join("scripts", "co-abap", "vsp-audit.ts"), isFolder: false },
+  { source: path.join("scripts", "co-abap", "vsp-task.ts"), target: path.join("scripts", "co-abap", "vsp-task.ts"), isFolder: false },
+  { source: path.join("scripts", "co-abap", "atc-rulepack.json"), target: path.join("scripts", "co-abap", "atc-rulepack.json"), isFolder: false },
 ];
 
 function listFilesRecursive(dir: string): string[] {
@@ -61,15 +65,19 @@ function md5(filePath: string): string {
   return crypto.createHash("md5").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-function syncAssets(targetDir: string): void {
+function syncAssets(targetDir: string): boolean {
   console.log(`${GREEN}Copying core assets to plugin...${RESET}`);
+  let missingRequired = false;
 
   for (const asset of ASSETS) {
     const srcPath = path.join(sourceDir, asset.source);
     const tgtPath = path.join(targetDir, asset.target);
 
     if (!fs.existsSync(srcPath)) {
-      console.warn(`${YELLOW}  [!] Source path '${srcPath}' not found. Skipping.${RESET}`);
+      // Required asset missing from the source tree is fatal — publishing a
+      // partial plugin silently is worse than failing loudly.
+      console.error(`${RED}  [!] Required source asset not found: ${srcPath}${RESET}`);
+      missingRequired = true;
       continue;
     }
 
@@ -85,6 +93,8 @@ function syncAssets(targetDir: string): void {
       console.log(`${GRAY}  [+] Synced File  : ${asset.source} -> ${asset.target}${RESET}`);
     }
   }
+
+  return !missingRequired;
 }
 
 function verifyAssets(targetDir: string): boolean {
@@ -168,7 +178,7 @@ async function main() {
   const targetDir = process.env.CLAUDE_PLUGIN_ROOT;
   if (!targetDir) {
     console.error(`${RED}  [!] CLAUDE_PLUGIN_ROOT is not set.${RESET}`);
-    console.error(`  [!] Usage: CLAUDE_PLUGIN_ROOT=/path/to/co-abap_plugin bun scripts/vsp-publish.ts "<message>"`);
+    console.error(`  [!] Usage: CLAUDE_PLUGIN_ROOT=/path/to/co-abap_plugin bun scripts/co-abap/vsp-publish.ts "<message>"`);
     process.exit(1);
   }
   if (!fs.existsSync(targetDir)) {
@@ -176,7 +186,10 @@ async function main() {
     process.exit(1);
   }
 
-  syncAssets(targetDir);
+  if (!syncAssets(targetDir)) {
+    console.error(`${RED}Asset sync FAILED - required source assets are missing. Aborting.${RESET}`);
+    process.exit(1);
+  }
 
   if (!verifyAssets(targetDir)) {
     console.error(`${RED}Integrity check FAILED. Assets do not match.${RESET}`);

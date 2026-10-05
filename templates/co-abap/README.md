@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 83d126771e650e8c047fbcfe58b31870a584c5a0fb63abe2b10207a3a9c552b1
+content_hash: 96cbdc1c519e1fa9751ec438bc2d8defca5ca43bcebcf7554c5a3600a2e3c161
 ---
 
 # co-abap
@@ -18,10 +18,12 @@ Welcome to the **co-abap** workspace — your dedicated AI SAP ABAP development 
 This is a stable variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
 
 1. Clone/scaffold this variant template
-2. Place `vsp.exe` in the project root
+2. Place the `vsp` binary (`vsp.exe` on Windows) in the project root
 3. Configure SAP credentials in `.env`
 4. Activate git hooks: `git config core.hooksPath .githooks`
-5. Start with `/triage <request>`
+5. Open with a PM triage request — hand your request to the PM in plain language
+   (the `/triage <request>` workflow convention; the PM classifies it, creates the
+   task file, and dispatches parallel research — see [docs/user-guide.md](docs/user-guide.md))
 
 ### For Claude Code users:
 
@@ -43,7 +45,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| **PM** | Project Manager — workflow orchestration, dispatch, quality gates, lifecycle management | high | inherit |
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates, lifecycle management | medium | inherit |
 | **sd-analyst** | Sales & Distribution module analysis — activates on SD trigger keywords | medium | inherit |
 | **mm-analyst** | Materials Management module analysis — activates on MM trigger keywords | medium | inherit |
 | **fi-analyst** | Financial Accounting module analysis — activates on FI trigger keywords | medium | inherit |
@@ -54,7 +56,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **code-writer** | ABAP implementation via WriteSource/EditSource, syntax check | low | inherit |
 | **test-runner** | QA verification — unit tests, code coverage, ATC check | low | inherit |
 | **dba** | Table/CDS/index design, SQL performance tuning, ERD normalization | medium | inherit |
-| **devops-admin** | Transport management, infrastructure install, system audit | low | inherit |
+| **devops-admin** | Transport management, infrastructure install, system audit | medium | inherit |
 | **sap-investigator** | Codebase pattern scan, historical design extraction (read-only) | medium | inherit |
 | **read-only-analyst** | Business data queries, AS-IS analysis with draft AC (read-only) | medium | inherit |
 | **schema-inspector** | Table/CDS structure inspection, dependency maps (read-only) | medium | inherit |
@@ -63,10 +65,12 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **form-expert** | SAP Script, Smart Forms, Adobe Forms design and print programs | medium | inherit |
 | **security-monitor** | Security policies enforcement and safe dependency audit | low | inherit |
 | **gui-scripter** | BDC / VBS automation — LAST RESORT when no BAPI/OData/RFC alternative exists | low | inherit |
+| **i18n-specialist** | Localization review, locale config, and translation-sync for locale mirrors (cross-cutting; outside the SAP delivery pipeline) | medium | inherit |
 
 ## Skills
 
 - **abap-dev**: Specialized SAP ABAP development workflows — BAPI exploration, transport management, unit testing, performance analysis, impact architecture analysis, and documentation audits.
+- **abap-code-review**: Clean ABAP review pass over naming, pretty-printer rules, and anti-patterns, with ATC cross-reference.
 - **dump-monitor**: Standardized SAP system health check using ListDumps/GetDump to detect ABAP short dumps and route new findings into /triage.
 - **performance-tuning**: Diagnose slow ABAP programs and expensive SQL statements using TraceExecution, ListSQLTraces, and GetCallGraph workflows.
 - **post-write-chain**: Mandatory quality gate enforced after every WriteSource/EditSource/Activate: SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck.
@@ -98,13 +102,14 @@ Always start your requests by talking to the **PM**. Do not invoke specialist ag
 
 ### C. Available Commands
 
-Our daily operations are driven by slash commands (registered as Skills by Claude Code and Gemini CLI):
+Our daily operations are driven by the registered `/sync` skill and its companion commands:
 
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
-- `/triage <request>` — Auto-classify a request and create the task file.
+- `meeting-facilitation` skill — Run a structured, inline multi-agent discussion (explicit skill invocation; the legacy `/meeting` slash command was retired 2026-09-26).
+
+Three further workflow steps are named conventions the **PM orchestrates** (not registered commands): **PM triage** (the `/triage <request>` shorthand — PM classifies the request, creates the task file, dispatches parallel research), the **post-write QA chain** (`/post-write` shorthand — SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck, run manually when hooks are unavailable), and the **transport step** (`/transport` shorthand — PM dispatches devops-admin to create/release the CTS transport).
 
 ## Variant Type
 
@@ -114,4 +119,4 @@ This variant focuses on AI-assisted SAP ABAP development using the vsp MCP serve
 
 ---
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-10-06*

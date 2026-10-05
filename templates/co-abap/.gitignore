@@ -1,0 +1,92 @@
+# co-abap variant-specific ignore patterns (outside the managed block — preserved on upgrade)
+# scratch/: co-abap scratch space, cleaned by scripts/co-abap/scratch-cleanup.ts
+scratch/
+
+<!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
+# Secrets — never commit
+.env
+.env.*
+!.env.sample
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+# Generated IDE rule files (scripts/generate-ide-rules.ts) — regenerable, not committed
+.cursorrules
+.clauderules
+
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates — never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Databases
+*.sqlite
+*.db
+
+
+# Antigravity/ZCode session-local state (plans, config — never shared)
+.zcode/
+
+# Windows reserved device name artifacts (created by git hooks on cmd.exe)
+nul
+NUL
+
+# --- Sandbox for testing ---
+.sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/
+
+# Ignore test temp directories
+tests/.temp/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# graft helper machine-local override (issue #1048) — untracked by design.
+.claude/helpers/graft.local.json
+# graft tool-owned mirrors + helpers (self-managed, design 2026-10-02-self-managed-tool-surfaces):
+.claude/skills/graft/
+.agents/skills/graft/
+.codex/skills/graft/
+.gemini/skills/graft/
+.hermes/skills/graft/
+.claude/helpers/graft-hooks.cjs
+.claude/helpers/graft-statusline.cjs
+<!-- /WORKSPACE-MANAGED -->

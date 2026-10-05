@@ -38,92 +38,89 @@ All agent handoffs use a structured JSON format to ensure clear communication an
 
 ## Agent-Specific Handoff Formats
 
-### PM → Business Analyst
+The sequential handoff chain is `pm → architect → (designer, optional) → code-writer → test-runner → security-monitor → pm`. Phase names follow `docs/phase-definitions.md`.
+
+### PM → Architect
 
 ```json
 {
   "handoff_version": "1.0",
   "task_id": "TASK-2025-001",
   "from_agent": "pm",
-  "to_agent": "sd-analyst",
+  "to_agent": "architect",
   "timestamp": "2025-01-15T10:30:00Z",
-  "phase": "business-analysis",
+  "phase": "analysis",
   "status": "in_progress",
   "data": {
     "request": "User request description",
-    "trigger_keywords": ["Sales Order", "Billing"],
+    "acceptance_criteria": [
+      {
+        "id": "AC-001",
+        "description": "Criteria description",
+        "priority": "must-have"
+      }
+    ],
     "context": {
       "user": "username",
       "priority": "high"
     },
     "expected_output": {
-      "prd": true,
-      "acceptance_criteria": true
+      "implementation_plan": true,
+      "adr": true
     }
   }
 }
 ```
 
-### Business Analyst → Architect
+### Architect → Designer (optional, Phase 3 only)
 
-```json
-{
-  "handoff_version": "1.0",
-  "task_id": "TASK-2025-001",
-  "from_agent": "sd-analyst",
-  "to_agent": "architect",
-  "timestamp": "2025-01-15T11:00:00Z",
-  "phase": "technical-design",
-  "status": "in_progress",
-  "data": {
-    "prd": {
-      "title": "Feature title",
-      "requirements": ["Requirement 1", "Requirement 2"],
-      "acceptance_criteria": [
-        {
-          "id": "AC-001",
-          "description": "Criteria description",
-          "priority": "must-have"
-        }
-      ]
-    },
-    "business_context": {
-      "module": "SD",
-      "key_tables": ["VBAK", "VBAP"],
-      "constraints": []
-    }
-  }
-}
-```
-
-### Architect → Code Writer
+Dispatched only when a UI/UX component is in scope; skipped otherwise.
 
 ```json
 {
   "handoff_version": "1.0",
   "task_id": "TASK-2025-001",
   "from_agent": "architect",
+  "to_agent": "designer",
+  "timestamp": "2025-01-15T11:00:00Z",
+  "phase": "ui-ux-design",
+  "status": "in_progress",
+  "data": {
+    "implementation_plan": {
+      "title": "Feature title",
+      "requirements": ["Requirement 1", "Requirement 2"],
+      "design_scope": ["registration flow", "dashboard layout"],
+      "adr": "docs/adr/0001-feature-title.md"
+    },
+    "expected_output": {
+      "design_specification": true,
+      "wireframes": true,
+      "design_tokens": true
+    }
+  }
+}
+```
+
+### Designer → Code Writer
+
+When the designer is skipped (no UI/UX component in scope), the architect hands off directly to the code-writer using this format with the implementation plan in place of the design specification.
+
+```json
+{
+  "handoff_version": "1.0",
+  "task_id": "TASK-2025-001",
+  "from_agent": "designer",
   "to_agent": "code-writer",
   "timestamp": "2025-01-15T11:30:00Z",
   "phase": "implementation",
   "status": "in_progress",
   "data": {
-    "implementation_plan": {
-      "pattern": "A | B | C",
-      "objects": [
-        {
-          "type": "PROG | CLASS | TABLE | CDS",
-          "name": "object_name",
-          "action": "create | modify | delete",
-          "description": "Object description"
-        }
-      ],
-      "dependencies": []
-    },
+    "design_specification": "docs/specs/0001-feature-title-ui-spec.md",
+    "implementation_plan_ref": "docs/specs/0001-feature-title-design.md",
     "constraints": {
-      "max_objects_per_iteration": 5,
-      "require_syntax_check": true,
-      "require_unit_test": true
+      "surgical_changes_only": true,
+      "no_scope_creep": true,
+      "require_tests": true
     }
   }
 }
@@ -138,59 +135,79 @@ All agent handoffs use a structured JSON format to ensure clear communication an
   "from_agent": "code-writer",
   "to_agent": "test-runner",
   "timestamp": "2025-01-15T12:00:00Z",
-  "phase": "verification",
+  "phase": "implementation",
   "status": "in_progress",
   "data": {
-    "implemented_objects": [
+    "implemented_changes": [
       {
-        "type": "PROG",
-        "name": "ZPROG_SBOOK_QUERY",
-        "url": "/sap/bc/adt/programs/programs/zprog_sbook_query"
+        "file": "src/routes/auth.py",
+        "action": "create | modify | delete",
+        "summary": "Added /register and /login endpoints"
       }
     ],
     "acceptance_criteria": [
       {
         "id": "AC-001",
         "description": "Criteria description",
-        "verification_method": "unit_test | manual | atc_check"
+        "verification_method": "unit_test | integration_test | manual"
       }
     ],
     "test_instructions": {
-      "unit_tests": ["test_class_1", "test_class_2"],
-      "atc_priority": "P1 | P2 | P3"
+      "test_command": "bun test",
+      "colocated_tests": ["src/routes/auth.test.py"]
     }
   }
 }
 ```
 
-### Test Runner → PM
+### Test Runner → Security Monitor
+
+Dispatched when the QA gate passes and the change touches auth, secrets, or infrastructure (the pre-PR advisory check is required for those changes per `docs/co-develop.context.md § Domain Rules`).
 
 ```json
 {
   "handoff_version": "1.0",
   "task_id": "TASK-2025-001",
   "from_agent": "test-runner",
+  "to_agent": "security-monitor",
+  "timestamp": "2025-01-15T12:15:00Z",
+  "phase": "security-review",
+  "status": "in_progress",
+  "data": {
+    "qa_verdict": "READY_FOR_PR | BLOCKED",
+    "test_results": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    "acceptance_criteria_met": true,
+    "change_summary": "Auth endpoints touching secret handling - advisory check required"
+  }
+}
+```
+
+### Security Monitor → PM
+
+```json
+{
+  "handoff_version": "1.0",
+  "task_id": "TASK-2025-001",
+  "from_agent": "security-monitor",
   "to_agent": "pm",
   "timestamp": "2025-01-15T12:30:00Z",
   "phase": "finalization",
   "status": "completed",
   "data": {
-    "test_results": {
-      "unit_tests": {
-        "total": 10,
-        "passed": 10,
-        "failed": 0
-      },
-      "atc_checks": {
-        "priority_1": 0,
-        "priority_2": 2,
-        "priority_3": 5
-      }
+    "security_report": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 5
     },
-    "acceptance_criteria_met": true,
+    "advisory_verdict": "clear | findings_attached",
     "blockers": [],
     "recommendations": [
-      "Address P2 findings before merge"
+      "Address medium-severity findings in a follow-up"
     ]
   }
 }
@@ -209,9 +226,9 @@ All agent handoffs use a structured JSON format to ensure clear communication an
   "status": "blocked",
   "data": {
     "error": {
-      "type": "syntax_error | compilation_error | runtime_error | dependency_error",
+      "type": "test_failure | build_error | runtime_error | dependency_error",
       "message": "Error description",
-      "object": "object_name",
+      "file": "path/to/file.ext",
       "line_number": 123
     },
     "recovery_attempts": 1,
