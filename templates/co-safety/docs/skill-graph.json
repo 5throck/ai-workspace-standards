@@ -313,16 +313,6 @@
       "layer": "variant:co-safety"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-safety"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "risk-assessment",
       "type": "skill",
       "layer": "variant:co-safety"

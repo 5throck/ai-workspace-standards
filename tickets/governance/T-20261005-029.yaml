@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261005-029
+kind: manual
+title: >-
+  Repair co-abap setup.ts: use uv pip install with the created venv (uv install
+  is not a subcommand), check exit codes before every pass() line, ship a
+  .gitignore (.env, .venv, scratch) before the git add -A commit step, and fix
+  the Windows python detection fallback
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.230Z'
+history:
+  - at: '2026-10-05T13:23:12.230Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.080Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.094Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.108Z'
+    from: review
+    to: done
+result: >-
+  co-abap setup.ts 1.1.0: uv pip install against the created venv, exit-code
+  honesty via failStep counter (exit 1 on required failures), RTK gated behind
+  --with-rtk, Windows python detection via exitCode fallthrough; bonus:
+  projectRoot off-by-one fixed in 4 scripts
+  (setup/scratch-cleanup/vsp-task/install-vsp resolved one level short)
+error: null

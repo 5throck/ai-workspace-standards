@@ -241,16 +241,6 @@
       "layer": "variant:co-consult"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-consult"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-consult"
-    },
-    {
       "id": "sample-driven-report-writing",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -422,6 +412,12 @@
       "source": "required_skills"
     },
     {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "data-analyst",
+      "source": "skill_manifest"
+    },
+    {
       "type": "follows",
       "from": "company-intelligence",
       "to": "financial-modeling",
@@ -449,6 +445,12 @@
       "from": "company-intelligence",
       "to": "industry-expert",
       "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "industry-expert",
+      "source": "skill_manifest"
     },
     {
       "type": "follows",
@@ -496,6 +498,12 @@
       "from": "company-intelligence",
       "to": "sme",
       "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "company-intelligence",
+      "to": "sme",
+      "source": "skill_manifest"
     },
     {
       "type": "used_by",
@@ -655,6 +663,12 @@
       "type": "accountable_for",
       "from": "delivery-manager",
       "to": "procedure.co-consult.engagement-closeout",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.solution-delivery",
       "source": "raci_matrix"
     },
     {
@@ -1980,12 +1994,6 @@
       "type": "accountable_for",
       "from": "strategy-analyst",
       "to": "procedure.co-consult.diagnosis-to-recommendation",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "strategy-analyst",
-      "to": "procedure.co-consult.solution-delivery",
       "source": "raci_matrix"
     },
     {

@@ -7,12 +7,24 @@ title: >-
   truncated gate titles, AGENTS.md boilerplate) - the same drift classes
   remediated for co-deck in T-20261005-006..018
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-05T10:56:58.997Z'
 history:
   - at: '2026-10-05T10:56:58.997Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-05T22:59:11.729Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T22:59:11.744Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T22:59:11.759Z'
+    from: review
+    to: done
+result: >-
+  co-design remediated: 28 findings cleared to PASS 0 (ADR-0099 checklist
+  ratification, stages S1-S5 real criteria, gates titles restored, i18n rows,
+  AGENTS.md thin-dispatcher regen, lifecycle record 9 agents/4 skills)
 error: null

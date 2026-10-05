@@ -1,14 +1,35 @@
 schema_version: "1.0"
 variant: co-abap
+# DEC-recorded decision gates. Note: the user-approval checkpoint (orchestration step 3,
+# "Governance & Implementation Approval") is deliberately NOT a DEC gate here — it remains
+# an acceptance criterion inside the hosted procedures (e.g. custom-dev-delivery
+# preconditions) and the PM facilitation protocol (docs/phase-definitions.md), because it
+# is a human sign-off on scope rather than an agent-adjudicated quality decision.
 gates:
   - id: DG-ABAP-01
-    title: "Clean ABAP checklist review completed with no open critical "
+    title: "Clean ABAP checklist review completed with no open critical findings."
     stage: S2
-    decider_agent: code-writer
+    decider_agent: test-runner
     inputs:
       - implementation_package
     criteria:
       - "Clean ABAP checklist review completed with no open critical findings."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC
+  - id: DG-ABAP-02
+    title: "Mandatory post-write QA chain passed: SyntaxCheck clean, RunUnitTests green, GetCodeCoverage >= 70% on new objects, RunATCCheck zero P1 findings."
+    stage: S2
+    decider_agent: test-runner
+    inputs:
+      - implementation_package
+      - test_report
+    criteria:
+      - "SyntaxCheck executed with no errors after the final write."
+      - "RunUnitTests executed with all tests passing."
+      - "GetCodeCoverage reports >= 70% coverage on all new objects."
+      - "RunATCCheck executed with zero Priority 1 findings."
     outcomes:
       - proceed
       - rework

@@ -1,48 +1,56 @@
 schema_version: '1.0'
 variant: co-design
+# Stage <-> phase mapping (SSOT: docs/phase-definitions.md "Phase Overview"):
+#   S1 Narrative Discovery              ≈ Phase 1 (User Research & Narrative Foundation) — storyteller
+#   S2 UX Discovery                     ≈ Phase 1 (User Research & Narrative Foundation) — ux-researcher
+#   S3 Design Definition                ≈ Phase 2 (Design Direction & Approval) — design-lead
+#   S4 Visual and Service Implementation ≈ Phase 3 (Design System & Execution) — visual-designer
+#   S5 Prototype Validation             ≈ Phase 4 (Prototyping & Handoff) — prototype-engineer
 stages:
   - id: S1
     title: Narrative Discovery
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: "Articulate the design philosophy, brand narrative, and first principles that ground later design decisions — a prerequisite for coherent Phase 2 direction, not an afterthought."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Phase 0 intake complete — design objective, scope, and team assignment confirmed by PM (docs/phase-definitions.md, Phase 0)."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Design philosophy statement / narrative grounding produced and reviewed against the design principles document (storyteller output per docs/phase-definitions.md, Phase 1)."
     owner_agent: storyteller
   - id: S2
     title: UX Discovery
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: "Establish the empirical foundation: user interviews, usability studies, and research synthesis producing personas, journey inputs, and validated user needs."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Research scope and interview/study plan confirmed with PM at Phase 1 kickoff."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Research findings, personas, and validated user needs delivered; research rigor reviewed by PM before Phase 2 begins."
     owner_agent: ux-researcher
   - id: S3
     title: Design Definition
     order: 3
-    purpose: PENDING_REVIEW
+    purpose: "Synthesize research and narrative inputs into design direction — token architecture, component philosophy, and system-level decisions — and obtain explicit user approval before any execution work."
     entry_criteria:
-      - PENDING_REVIEW
+      - "S1/S2 outputs available — research findings, personas, and the design philosophy statement."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Approved design direction brief and design token architecture delivered (docs/phase-definitions.md, Phase 2 output)."
+      - "DG-DESIGN-01 passed — design direction approved at the phase 2 gate before implementation (decisions/gates.yaml); user approval recorded."
     owner_agent: design-lead
   - id: S4
     title: Visual and Service Implementation
     order: 4
-    purpose: PENDING_REVIEW
+    purpose: "Execute the approved direction: high-fidelity screen designs, design tokens, component specifications, service blueprints, and the type system, with design-lead governing system consistency."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Approved design direction and token architecture available (S3 exit)."
     exit_criteria:
-      - PENDING_REVIEW
+      - "High-fidelity designs, specifications, and service blueprints reviewed by design-lead for consistency with the approved system."
+      - "DG-DESIGN-02 passed — token usage lint passes and design-lead reviews the full set (decisions/gates.yaml)."
     owner_agent: visual-designer
   - id: S5
     title: Prototype Validation
     order: 5
-    purpose: PENDING_REVIEW
+    purpose: "Build interactive prototypes from the approved visual designs, simulate user flows, and validate technical feasibility of interactions ahead of developer/stakeholder handoff."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Approved visual designs and specifications available (S4 exit)."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Interactive prototypes, interaction specifications, and developer handoff documentation delivered; open feasibility flags resolved or returned to S4."
     owner_agent: prototype-engineer

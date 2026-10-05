@@ -2,6 +2,8 @@
 
 Curated registry for the co-develop variant-exclusive skills (T-20260924-009). One row per variant-exclusive skill directory; values come from each skill's SKILL.md frontmatter.
 
+> **SSOT note**: This registry is the single source of truth for co-develop variant-exclusive skill lifecycle records (`version`, `status`, ownership). Per-skill history notes in `docs/lifecycle/skills/<name>.md` are supporting records and must stay consistent with this registry.
+
 ## Registry
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |

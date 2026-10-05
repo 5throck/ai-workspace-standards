@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 0df9b2d0ec4ee6dfa57a0d87c2357919331fce6c18c072cecbd78d23c18e7f64
+content_hash: 659ec0a6ff91dbaf4ebc89869504016c5d3f7b6e9059d37067244b2d10475d06
 ---
 
 # co-security
@@ -38,17 +38,21 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
-| **Red Team Lead** | Attack methodology owner | high | inherit |
-| **Threat Modeler** | STRIDE analysis, MITRE ATT&CK mapping, and risk scoring | high | inherit |
-| **Pentester** | Hands-on vulnerability discovery and PoC development | medium | inherit |
-| **Patch Engineer** | Ansible-based cross-platform patch automation (Windows/macOS/Linux via SSH) | medium | inherit |
-| **Report Writer** | Pentest reports and executive summaries | medium | inherit |
+| **red-team-lead** | Attack methodology owner | high | inherit |
+| **threat-modeler** | STRIDE analysis, MITRE ATT&CK mapping, and risk scoring | high | inherit |
+| **pentester** | Hands-on vulnerability discovery and PoC development | medium | inherit |
+| **patch-engineer** | Ansible-based cross-platform patch automation (Windows/macOS/Linux via SSH) | medium | inherit |
+| **report-writer** | Pentest reports and executive summaries | medium | inherit |
+| **i18n-specialist** | Locale config, locale-specific formatting, and text layout guidance for locale mirrors (common extends-stub; outside the engagement pipeline) | medium | inherit |
 
 ## Skills
 
 - **sarif-exporter**: Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 (Static Analysis Results Interchange Format) JSON reports.
 - **stride-threat-matrix**: Automated STRIDE threat matrix generation and DREAD risk scoring framework for architecture, API endpoints, data flows, and infrastructure models.
 - **verify-authorization**: Hard gate that confirms a signed authorization document exists and contains all required fields before allowing any Phase 1+ (recon, exploitation, patching) activity to proceed. Blocks work if authorization is missing or incomplete.
+- **finding-reconciliation**: Merges duplicate and overlapping security findings from multiple scan passes and tools into one deduplicated finding set keyed by code location and rule identity, ready for reporting and SARIF export.
+- **samm-maturity**: OWASP SAMM maturity self-assessment producing a scored 15-stream posture roadmap across five business functions with a three-level maturity rubric.
+- **spdx-sbom**: SPDX 2.3 (ISO/IEC 5962) Software Bill of Materials generation from dependency manifests, producing standard JSON SBOMs for compliance and vulnerability analysis.
 
 ## How to Collaborate
 
@@ -92,4 +96,4 @@ This variant focuses on security review, pentesting, threat modeling, and patch 
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-10-06*

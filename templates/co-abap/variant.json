@@ -354,7 +354,7 @@
       "form-expert",
       "gui-scripter"
     ],
-    "notes": "6-step harness lifecycle: Triage → Business Analysis → Governance → Tech Design → Implementation → Finalization. Phase 1 (parallel read-only): investigator + analyst + schema-inspector. Phase 2 (serial write): architect → code-writer. Phase 3 (verification): test-runner. Optional agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
+    "notes": "6-step harness lifecycle: 1 Triage → 2 Business Analysis → 3 Governance → 4 Tech Design → 5 Implementation → 6 Finalization. Agent phases follow docs/phase-definitions.md (steps 1-2 = agent phase 1: parallel read-only research by sap-investigator + read-only-analyst + schema-inspector + module analysts; steps 3-4 = agent phase 2: design & approval gate, architect/dba/interface-expert + PM sign-off; step 5 = agent phases 3-4: code-writer implements serially, then test-runner runs the QA chain; step 6 = agent phases 5-6: PM finalization, /sync and reporting; late-stage skills such as dump-monitor declare phase 6). Optional agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
   },
   "script_manifest": {
     "variant_scripts_dir": "scripts/co-abap",
@@ -410,13 +410,14 @@
     ],
     "external": []
   },
+  "phaseAComplete": true,
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "governed",
   "process_manifest": {
     "stages_file": "process/stages.yaml",
     "raci_file": "governance/raci.yaml",
     "gates_file": "decisions/gates.yaml",
-    "evidence_models_dir": "evidence-models/"
+    "evidence_models_dir": null
   },
   "country_config": {
     "profiles_dir": "docs/countries",

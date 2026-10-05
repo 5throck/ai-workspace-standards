@@ -44,7 +44,7 @@ function runPythonScript(
     const scriptPath = resolve(scriptDir, "..", "..", "python", scriptName);
     const pythonBin = process.platform === "win32" ? "python" : "python3";
     const quotedArgs = args.map(winQuote);
-    const proc = spawn(pythonBin, [scriptPath, ...quotedArgs], {
+    const proc = spawn(pythonBin, [winQuote(scriptPath), ...quotedArgs], {
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env },
       shell: process.platform === "win32",
@@ -55,6 +55,13 @@ function runPythonScript(
 
     proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
     proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
+    // The "error" event fires when the process itself could not be spawned
+    // (e.g. python3 not installed) — without this handler the promise never
+    // settles and the pipeline hangs forever.
+    proc.on("error", (err) => {
+      reject(new Error(`Failed to spawn ${pythonBin} for ${scriptName}: ${err.message}`));
+    });
 
     proc.on("close", (code) => {
       if (code !== 0) {
@@ -93,7 +100,7 @@ async function main() {
   const scriptDir = dirname(process.argv[1]);
   const outputDir = outputDirFlagIdx >= 0 && args[outputDirFlagIdx + 1]
     ? resolve(args[outputDirFlagIdx + 1])
-    : resolve(scriptDir, "..", "deliverables", companyName);
+    : resolve(scriptDir, "..", "..", "deliverables", companyName);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -103,14 +110,14 @@ async function main() {
     mkdirSync(join(outputDir, dir), { recursive: true });
   }
 
-  // Also symlink/copy dart data
+  // Copy today's DART snapshot into the deliverable — overwrite a stale
+  // same-day file rather than skipping so re-runs always reflect the latest
+  // k-dart fetch.
   const dartDestDir = join(outputDir, "dart");
-  if (!existsSync(dartDestDir)) {
-    mkdirSync(dartDestDir, { recursive: true });
-    const dartData = readFileSync(dartPath, "utf-8");
-    writeFileSync(join(dartDestDir, `dart-${today}.json`), dartData, "utf-8");
-    console.log(`📋 DART data copied to: ${dartDestDir}`);
-  }
+  mkdirSync(dartDestDir, { recursive: true });
+  const dartData = readFileSync(dartPath, "utf-8");
+  writeFileSync(join(dartDestDir, `dart-${today}.json`), dartData, "utf-8");
+  console.log(`📋 DART data copied to: ${dartDestDir}`);
 
   console.log(`\n🚀 Financial Statement Analysis Pipeline`);
   console.log(`   Company: ${companyName}`);

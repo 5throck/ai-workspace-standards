@@ -134,6 +134,8 @@ Created: 2026-05-15
 - **production**: Available for use in production environment
 - **deprecated**: No longer in use (usually has a replacement)
 
+**Vocabulary mapping (ADR-0099 era, SSOT)**: a template variant's `variant.json status: "stable"` is the same lifecycle state as this record's **production** phase (pre-production: variant `beta` ≡ record `review`). Record the state in both places consistently; a migration fast-track admission is ratified per [ADR-0099](../adr/0099-template-migration-admission-policy.md).
+
 **Example**:
 ```markdown
 ## Phase History

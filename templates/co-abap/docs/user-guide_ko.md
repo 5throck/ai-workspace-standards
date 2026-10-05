@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a763d4380
+translated_from_hash: 39d43dac487a275a91a12f4c5ed53576680ffaf2f6e6a69c463d3ee633b3edb0
 ---
 # Co-ABAP 사용자 가이드
 
@@ -12,9 +12,10 @@ translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a76
 
 ## 1. 빠른 시작
 
-1. `/triage <request>`로 시작하세요 — PM이 요청을 분류하고 태스크 파일을 만든 뒤
-   병렬 리서치를 시작합니다. 일상 언어로 기술하면 됩니다: *"영업조직 1000용 신규
-> 가격 리포트 추가"* 또는 *"ZPROG_MM_STOCK_UPLOAD 덤프 수정"* 처럼요.
+1. PM 트라이아지 요청으로 시작하세요 — 요청을 일상 언어로 PM에게 전달합니다
+   (`/triage <요청>` 워크플로 컨벤션: PM이 요청을 분류하고 태스크 파일을 만든 뒤
+   병렬 리서치를 시작합니다): *"영업조직 1000용 신규 가격 리포트 추가"* 또는
+   *"ZPROG_MM_STOCK_UPLOAD 덤프 수정"* 처럼요.
 2. 해당 **모듈 애널리스트**(SD / MM / FI / CO / PP / LE)가 비즈니스 요청을 요구사항
    (`deliverables/REQ-NNN-[slug]/01_srs.md`)으로 변환합니다.
 3. 멀티 에이전트 작업의 경우 PM은 **실행 계획 표**를 보여주고 승인을 기다린 뒤
@@ -23,15 +24,16 @@ translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a76
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
    | 모듈 요구사항 분석 | sd-analyst | Medium | claude-sonnet-5-5 | Claude Code |
-   | ABAP 구현 | code-writer | Medium | claude-sonnet-5-5 | Claude Code |
+   | ABAP 구현 | code-writer | Low | claude-haiku-4-5 | Claude Code |
    | QA 체인 | test-runner | Low | claude-haiku-4-5 | Claude Code |
 
 4. 구현은 `code-writer`가 수행하며, 모든 `WriteSource` / `EditSource` 직후에
    **post-write 필수 체인**(`SyntaxCheck → RunUnitTests → GetCodeCoverage →
    RunATCCheck`)이 실행됩니다.
-5. QA는 `04_qa_report.md`를 산출하고, `/transport`로 CTS 트랜스포트를 생성/릴리스
-   합니다.
-6. `/sync`로 마감합니다 — 유일하게 지원되는 커밋 경로이며, 항상 `/transport`
+5. QA는 `04_qa_report.md`를 산출하고, PM이 이어서 **devops-admin**을 디스패치하여
+   CTS 트랜스포트를 생성/릴리스합니다 (`/transport` 단계 — PM이 조율하는 컨벤션이며
+   등록된 명령어가 아님).
+6. `/sync`로 마감합니다 — 유일하게 지원되는 커밋 경로이며, 항상 트랜스포트 단계
    **이후에** 실행되어 CTS 트랜스포트와 git 커밋이 어긋나지 않습니다.
 
 > **경험칙**: 비즈니스 모듈에 닿는 요청은 모듈 애널리스트에게 먼저, 순수 기술
@@ -56,7 +58,7 @@ translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a76
 ## 3. 표준 다단계 워크플로우
 
 ```
-/triage (PM 분류, 태스크 파일 생성, 병렬 리서치)
+PM 트라이아지 (PM 분류, 태스크 파일 생성, 병렬 리서치)
         │
         ▼
 비즈니스 분석 (모듈 애널리스트 → 01_srs.md)
@@ -71,18 +73,21 @@ translated_from_hash: 615086131b378c7048584d0be427ac29dae1e341578f93c23d6fc67a76
 QA 및 검증 (test-runner → 04_qa_report.md)
         │
         ▼
-/transport (CTS 트랜스포트 생성/릴리스)
+트랜스포트 단계 (PM이 devops-admin 디스패치 — CTS 트랜스포트 생성/릴리스)
         │
         ▼
 /sync (memlog → changelog → audit → commit → PR)
 ```
 
-핵심 커맨드:
+핵심 컨벤션 — PM이 조율하는 워크플로 축약 표현, **등록된 명령어가 아님**:
 
-- `/triage <request>` — 태스크 시작; PM 분류 + 태스크 파일
-- `/post-write` — 수동 post-write QA 체인 (Desktop App처럼 훅이 없는 환경 — `desktop-app-fallback` 참고)
-- `/transport` — CTS 트랜스포트 생성/릴리스
-- `/sync "feat: ..."` — 전체 파이프라인; `/transport` **이후에** 실행, 절대 그 전에 안 됨
+- **PM 트라이아지** (`/triage <요청>` 축약 표현) — 태스크 시작; PM 분류 + 태스크 파일
+- **Post-write QA 체인** (`/post-write` 축약 표현) — Desktop App처럼 훅이 없는 환경의 수동 체인 — `desktop-app-fallback` 참고
+- **트랜스포트 단계** (`/transport` 축약 표현) — PM이 devops-admin을 디스패치하여 CTS 트랜스포트를 생성/릴리스
+
+등록된 명령어:
+
+- `/sync "feat: ..."` — 전체 파이프라인; 트랜스포트 단계 **이후에** 실행, 절대 그 전에 안 됨
 
 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원시 `git commit` /
 `git push`도 실행하지 마세요 — 훅이 거부합니다.
@@ -118,5 +123,5 @@ QA 및 검증 (test-runner → 04_qa_report.md)
 - `WriteSource` **전에 항상** `SyntaxCheck` 실행; 작은 변경에는 `EditSource` 사용.
 - post-write 체인은 모든 로직 변경 후 필수입니다 — ATC Priority 1 결과는 배포를
   차단하고, 신규 오브젝트 커버리지 70% 미만이면 ATC 진행이 차단됩니다.
-- `/transport`가 `/sync`보다 항상 먼저 — CTS 트랜스포트와 git 이력이 어긋나면
+- 트랜스포트 단계가 `/sync`보다 항상 먼저 — CTS 트랜스포트와 git 이력이 어긋나면
   안 됩니다.

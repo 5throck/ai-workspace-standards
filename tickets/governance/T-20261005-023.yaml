@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261005-023
+kind: manual
+title: >-
+  Regenerate variant AGENTS.md files onto the common skeleton - fix the stale
+  section-10 L0-only script block at the injection source (all 10 variants),
+  remove placeholder dispatch rows and phantom references (section 4.2, Subagent
+  Roster table), and decide co-abap's skeleton numbering vs forking the HERMES
+  map
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.149Z'
+history:
+  - at: '2026-10-05T13:23:12.149Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:21.817Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:21.832Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:21.846Z'
+    from: review
+    to: done
+result: >-
+  AGENTS.md regenerated onto the common skeleton in all 3 templates
+  (thin-dispatcher sections 4/5/8-10, full section 7 baseline bullets, retired
+  /meeting phrasing, placeholder rows and phantom references removed, L0-only
+  section-10 block gone, co-abap custom section 3 preserved and renumbered);
+  HERMES.md phantom section refs now resolve
+error: null

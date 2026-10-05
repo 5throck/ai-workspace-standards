@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 0df9b2d0ec4ee6dfa57a0d87c2357919331fce6c18c072cecbd78d23c18e7f64
+translated_from_hash: 659ec0a6ff91dbaf4ebc89869504016c5d3f7b6e9059d37067244b2d10475d06
 lang: ko
 lang_reason: source-material
 ---
@@ -40,17 +40,21 @@ lang_reason: source-material
 | 에이전트 | 역할 | 티어 | 모델 |
 |----------|------|------|------|
 | **PM** | 프로젝트 매니저 — 워크플로 조율, 디스패치, 품질 게이트 | high | inherit |
-| **Red Team Lead** | 공격 전략 수립, 취약점 공격 총괄 | high | inherit |
-| **Threat Modeler** | STRIDE/PASTA 분석, 공격 트리 구성 | high | inherit |
-| **Pentester** | 실무 모의 해킹, PoC(개념 증명) 개발 | medium | inherit |
-| **Patch Engineer** | 조치 스크립트 개발, 앤서블(Ansible) 플레이북 작성 | medium | inherit |
-| **Report Writer** | 기술 및 요약 보고서 작성, CVSS 점수 산정 | medium | inherit |
+| **red-team-lead** | 공격 전략 수립, 취약점 공격 총괄 | high | inherit |
+| **threat-modeler** | STRIDE/PASTA 분석, 공격 트리 구성 | high | inherit |
+| **pentester** | 실무 모의 해킹, PoC(개념 증명) 개발 | medium | inherit |
+| **patch-engineer** | 조치 스크립트 개발, 앤서블(Ansible) 플레이북 작성 | medium | inherit |
+| **report-writer** | 기술 및 요약 보고서 작성, CVSS 점수 산정 | medium | inherit |
+| **i18n-specialist** | 로캘 미러의 로캘 구성, 로캘별 포맷팅, 텍스트 레이아웃 가이던스 (common extends-stub; 인게이지먼트 파이프라인 외부) | medium | inherit |
 
 ## 스킬
 
 - **sarif-exporter**: 보안 스캔 결과, 위협 매트릭스, 취약점 발견 사항을 표준 SARIF v2.1.0(정적 분석 결과 교환 형식) JSON 보고서로 내보냅니다.
 - **stride-threat-matrix**: 아키텍처, API 엔드포인트, 데이터 흐름, 인프라 모델을 위한 자동화된 STRIDE 위협 매트릭스 생성 및 DREAD 위험 평가 프레임워크입니다.
 - **verify-authorization**: 필수 게이트 — 서명된 승인 문서가 존재하고 모든 필수 필드를 포함하는지 확인한 후에야 Phase 1 이상(정찰, 취약점 공격, 패치) 작업을 진행할 수 있습니다. 승인이 누락되거나 불완전하면 작업을 차단합니다.
+- **finding-reconciliation**: 여러 스캔 패스와 도구에서 수집된 중복·중첩 보안 발견 사항을 코드 위치와 규칙 식별자 기준으로 하나의 중복 제거된 발견 세트로 병합하여 보고 및 SARIF 내보내기에 사용합니다.
+- **samm-maturity**: OWASP SAMM 성숙도 자가 평가 — 5개 비즈니스 함수 전반의 15개 스트림에 대해 3단계 성숙도 루브릭으로 점수를 산정하고 개선 로드맵을 생성합니다.
+- **spdx-sbom**: 의존성 매니페스트에서 SPDX 2.3(ISO/IEC 5962) 소프트웨어 BOM을 생성하여 규정 준수와 취약점 분석에 사용하는 표준 JSON SBOM을 만듭니다.
 
 ## 협업 방법
 

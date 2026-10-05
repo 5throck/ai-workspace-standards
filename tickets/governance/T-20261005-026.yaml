@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261005-026
+kind: manual
+title: >-
+  Restore or deprecate co-consult's HWP pipeline: promote extract_hwp.py and
+  generate_hwpx.py from Projects/co-consult into the template, or mark
+  hwp-extract/hwpx-generate deprecated in SCRIPTS.md and update the 3 skills
+  that instruct running them
+priority: urgent
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.189Z'
+history:
+  - at: '2026-10-05T13:23:12.189Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:21.951Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:21.965Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:21.979Z'
+    from: review
+    to: done
+result: >-
+  HWP pipeline promoted: extract_hwp.py and generate_hwpx.py copied from
+  Projects/co-consult into the template with provenance; both scripts stay
+  active; instructing skills verified to cite correct paths
+error: null

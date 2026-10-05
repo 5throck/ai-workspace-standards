@@ -4,7 +4,7 @@ generated_from: procedures/
 rows:
   - stage: S1
     activity: procedure.co-game.game-architecture-design
-    accountable: stack-setup
+    accountable: architect
     responsible:
       - arcade-designer
       - architect
@@ -12,7 +12,7 @@ rows:
       - puzzle-designer
   - stage: S1
     activity: procedure.co-game.game-concept-design
-    accountable: stack-setup
+    accountable: game-designer
     responsible:
       - arcade-designer
       - architect
@@ -21,14 +21,14 @@ rows:
       - stack-setup
   - stage: S1
     activity: procedure.co-game.game-content-production
-    accountable: stack-setup
+    accountable: designer
     responsible:
       - designer
       - sound-designer
       - visual-artist
   - stage: S1
     activity: procedure.co-game.game-release-verification
-    accountable: stack-setup
+    accountable: game-debugger
     responsible:
       - game-debugger
       - game-developer
@@ -41,7 +41,7 @@ rows:
       - stack-setup
   - stage: S1
     activity: procedure.co-game.game-security-retrospective
-    accountable: stack-setup
+    accountable: security-monitor
     responsible:
       - security-monitor
   - stage: S2

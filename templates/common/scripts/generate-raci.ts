@@ -3,8 +3,19 @@
  * generate-raci.ts — RACI Matrix Generator (ADR-0083, Design §6, §13.2 P4)
  *
  * Generates templates/<variant>/governance/raci.yaml files from procedures and stages.
- * Derives Accountable (A) from stage owner_agent and Responsible (R) from step agent_keys.
+ * v1.2.0 (T-20261005-019b): Accountable (A) is derived from the PROCEDURE's
+ * owner_agent — the rule the curated matrices ship with (procedure.owner_agent
+ * reproduces co-deck 11/11, co-consult 4/5, co-hr/co-design/co-export 100% of
+ * rows; the prior hard-coded stage.owner_agent attributed cross-cutting control
+ * procedures to their pipeline stage's owner, flipping 7 co-deck rows).
+ * stage.owner_agent is the documented FALLBACK only, used when the procedure
+ * declares no owner_agent. Responsible (R) derives from step agent_keys.
  * Consulted (C) and Informed (I) are read from procedure raci.consulted/raci.informed if present.
+ *
+ * Dry-run drift report: when a committed governance/raci.yaml already exists,
+ * the regeneration is compared against it row-by-row (activity set + A/R/stage
+ * cells). Drift lines are informational — they name exactly what a --write
+ * would change and never affect the exit code (DEG-R-05 evidence aid).
  *
  * RACI invariants validated (§6.3, §3.4, ADR-0083, ADR-0084):
  *   DEG-R-01: Each activity declares exactly one accountable agent.
@@ -20,7 +31,7 @@
  *   - Sets schema_version: "1.1" only for variants shipping _human-roles.yaml
  *
  * @usage bun scripts/generate-raci.ts [--variant co-consult|all] [--root <dir>] [--write]
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
@@ -231,7 +242,9 @@ function generateMatrix(
 
   // Standard procedure: group by stage and activity
   for (const proc of procedures) {
-    if (!proc.procedure_id || !proc.owner_agent || !proc.steps || !proc.stage) {
+    // owner_agent is NOT required on the procedure: when absent, the mapped
+    // stage's owner_agent is the documented fallback for Accountable (v1.2.0).
+    if (!proc.procedure_id || !proc.steps || !proc.stage) {
       const procNodeId = proc.procedure_id ? getProcedureNodeId(proc.procedure_id) : 'unknown';
       if (!proc.stage) {
         issues.push({
@@ -270,7 +283,12 @@ function generateMatrix(
       continue;
     }
 
-    const accountable = stage.owner_agent;
+    // Accountable derivation (v1.2.0, T-20261005-019b): the PROCEDURE's
+    // owner_agent is the rule the curated matrices ship with — the prior
+    // hard-coded stage.owner_agent attributed cross-cutting control procedures
+    // to their pipeline stage's owner (flipped 7 co-deck rows). Stage-derived
+    // accountable is the documented fallback only.
+    const accountable = proc.owner_agent || stage.owner_agent;
     const responsible = Array.from(responsibleAgents).sort();
 
     // DEG-R-01: exactly one accountable
@@ -278,7 +296,7 @@ function generateMatrix(
       issues.push({
         rule: 'DEG-R-01',
         activity: getProcedureNodeId(proc.procedure_id),
-        message: `Stage ${proc.stage} missing owner_agent (accountable)`
+        message: `no accountable derivable — procedure ${proc.procedure_id} declares no owner_agent and stage ${proc.stage} has no owner_agent`
       });
       continue;
     }
@@ -360,11 +378,57 @@ function writeMatrix(variant: string, matrix: RACIMatrix, root: string): string 
   return outputPath;
 }
 
+/**
+ * Drift report (v1.2.0, DEG-R-05 evidence aid): compare the fresh regeneration
+ * against the committed governance/raci.yaml row-by-row. Informational only —
+ * never affects exit codes.
+ */
+function compareWithCommitted(variant: string, matrix: RACIMatrix, root: string): string[] {
+  const committedPath = join(root, 'templates', variant, 'governance', 'raci.yaml');
+  if (!existsSync(committedPath)) return [];
+  let committed: RACIMatrix | null = null;
+  try {
+    committed = loadYaml(committedPath) as RACIMatrix | null;
+  } catch {
+    return [`committed ${join('governance', 'raci.yaml')} is unparseable — drift comparison skipped`];
+  }
+  if (!committed || !Array.isArray(committed.rows)) return [];
+
+  const out: string[] = [];
+  const committedByActivity = new Map(committed.rows.map(r => [r.activity, r]));
+  const freshByActivity = new Map(matrix.rows.map(r => [r.activity, r]));
+
+  for (const r of matrix.rows) {
+    const c = committedByActivity.get(r.activity);
+    if (!c) {
+      out.push(`+ ${r.activity}: new row (accountable=${r.accountable}) — absent from committed matrix`);
+      continue;
+    }
+    if ((c.accountable ?? '') !== (r.accountable ?? '')) {
+      out.push(`~ ${r.activity}: accountable committed=${c.accountable} fresh=${r.accountable}`);
+    }
+    const cr = (c.responsible ?? []).slice().sort().join(',');
+    const fr = (r.responsible ?? []).slice().sort().join(',');
+    if (cr !== fr) {
+      out.push(`~ ${r.activity}: responsible committed=[${cr}] fresh=[${fr}]`);
+    }
+    if ((c.stage ?? '') !== (r.stage ?? '')) {
+      out.push(`~ ${r.activity}: stage committed=${c.stage} fresh=${r.stage}`);
+    }
+  }
+  for (const c of committed.rows) {
+    if (!freshByActivity.has(c.activity)) {
+      out.push(`- ${c.activity}: committed row (accountable=${c.accountable}) absent from fresh regeneration`);
+    }
+  }
+  return out;
+}
+
 export function generateAllRACIMatrices(
   root: string,
   targetVariant?: string,
   writeFiles = false
-): Map<string, { matrix: RACIMatrix; issues: ValidationIssue[]; written: boolean }> {
+): Map<string, { matrix: RACIMatrix; issues: ValidationIssue[]; drift: string[]; written: boolean }> {
   const results = new Map<string, any>();
   const variants = discoverGovernedVariants(root)
     .filter(v => !targetVariant || v === targetVariant);
@@ -376,6 +440,7 @@ export function generateAllRACIMatrices(
     const procedures = loadProcedures(variantDir, variant);
     const humanRoles = loadHumanRoles(variantDir);
     const { matrix, issues } = generateMatrix(variant, stages, procedures, humanRoles, root);
+    const drift = compareWithCommitted(variant, matrix, root);
 
     let written = false;
     if (writeFiles && issues.filter(i => i.rule.startsWith('DEG-R')).length === 0) {
@@ -387,7 +452,7 @@ export function generateAllRACIMatrices(
       }
     }
 
-    results.set(variant, { matrix, issues, written });
+    results.set(variant, { matrix, issues, drift, written });
   }
 
   return results;
@@ -416,8 +481,9 @@ function main(): void {
 
   let totalIssues = 0;
   let criticalIssues = 0;
+  let totalDrift = 0;
 
-  for (const [variant, { matrix, issues, written }] of results) {
+  for (const [variant, { matrix, issues, drift, written }] of results) {
     const critical = issues.filter(i => i.rule.startsWith('DEG-R'));
     const warnings = issues.filter(i => !i.rule.startsWith('DEG-R'));
 
@@ -440,6 +506,12 @@ function main(): void {
       console.log(`\n${variant}: OK (${matrix.rows.length} rows)${written ? ' ✓ WRITTEN' : ''}`);
     }
 
+    if (drift.length > 0) {
+      console.log(`\n${variant}: DRIFT vs committed governance/raci.yaml (${drift.length} line(s), informational):`);
+      for (const d of drift) console.log(`  ${d}`);
+      totalDrift += drift.length;
+    }
+
     totalIssues += issues.length;
   }
 
@@ -447,10 +519,10 @@ function main(): void {
     console.error(`\nFAIL: ${criticalIssues} critical RACI invariant violation(s).`);
     process.exit(1);
   } else if (totalIssues > 0) {
-    console.warn(`\nWARN: ${totalIssues} warning(s) found. Review before committing.`);
+    console.warn(`\nWARN: ${totalIssues} warning(s), ${totalDrift} drift line(s) found. Review before committing.`);
     process.exit(0);
   } else {
-    console.log('\nOK: All RACI matrices valid.');
+    console.log(`\nOK: All RACI matrices valid.${totalDrift > 0 ? ` ${totalDrift} drift line(s) vs committed matrices (informational — pass --write to converge).` : ''}`);
     process.exit(0);
   }
 }

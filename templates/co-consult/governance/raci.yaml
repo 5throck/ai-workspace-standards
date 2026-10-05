@@ -18,7 +18,7 @@ rows:
       - strategy-analyst
   - stage: S3
     activity: procedure.co-consult.solution-delivery
-    accountable: strategy-analyst
+    accountable: delivery-manager
     responsible:
       - communications-lead
       - data-analyst

@@ -11,6 +11,7 @@
 | 2026-08-15 | - | production | Initial creation — SAP ABAP development variant (migrated from co-abap project, stable at 1.0.0) | pm |
 | 2026-09-10 | production | production | Lifecycle record created (retroactive) | lifecycle-manager |
 | 2026-09-28 | production | production | Record refreshed (T-20260927-013): ADR-0091 R3 uniform country_config declaration delivered to variant.json (commit 6551e7c7, 2026-09-27, T-20260927-002); phase unchanged | governance-ticket-runner |
+| 2026-10-05 | production | production | Record refreshed (T-20261005-025): roster count corrected 20 → 21 with i18n-specialist named (roster-surface reconciliation); pm lifecycle record backfilled variant-locally; phase unchanged | pm |
 
 ## Summary
 
@@ -21,7 +22,7 @@ AI-assisted SAP ABAP development harness using the vsp MCP server (ADT REST APIs
 ### Production Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 20 agents present (architect, pm, co-analyst, code-writer, dba, devops-admin, fi-analyst, fiori-developer, form-expert, gui-scripter, interface-expert, le-analyst, mm-analyst, pp-analyst, read-only-analyst, sap-investigator, schema-inspector, sd-analyst, security-monitor, test-runner)
+- [x] All 21 agents present (architect, pm, i18n-specialist, co-analyst, code-writer, dba, devops-admin, fi-analyst, fiori-developer, form-expert, gui-scripter, interface-expert, le-analyst, mm-analyst, pp-analyst, read-only-analyst, sap-investigator, schema-inspector, sd-analyst, security-monitor, test-runner)
 - [x] All 13 ABAP skills present (abap-code-review, abap-dev, dump-monitor, performance-tuning, post-write-chain, sap-co, sap-fi, sap-le, sap-mm, sap-pp, sap-sd, etc.)
 - [x] inherits_common correctly points to templates/common
 
@@ -35,5 +36,5 @@ AI-assisted SAP ABAP development harness using the vsp MCP server (ADT REST APIs
 - **Current Phase**: production
 - **Version**: 1.0.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-28
-- **Last Reviewer**: governance-ticket-runner
+- **Last Updated**: 2026-10-05
+- **Last Reviewer**: pm

@@ -20,7 +20,7 @@ HR & Labor Relations multi-agent team covering labor-law compliance via per-juri
 ### Review Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 11 agents present (career-succession-consultant, change-management-partner, compensation-benefits-analyst, data-analyst, labor-compliance-analyst, labor-relations-specialist, learning-development-specialist, org-design-consultant, performance-management-consultant, safety-health-officer, talent-acquisition-specialist)
+- [x] All 13 agents present (career-succession-consultant, change-management-partner, compensation-benefits-analyst, data-analyst, i18n-specialist, labor-compliance-analyst, labor-relations-specialist, learning-development-specialist, org-design-consultant, performance-management-consultant, pm, safety-health-officer, talent-acquisition-specialist)
 - [x] All 12 HR skills present (competency-modeling, hr-metrics-analysis with ISO 30414 taxonomy mapping, labor-compliance-audit, org-design-framework, etc.)
 - [x] inherits_common correctly points to templates/common
 - [ ] Stable promotion pending — currently beta
@@ -42,5 +42,5 @@ HR & Labor Relations multi-agent team covering labor-law compliance via per-juri
 - **Current Phase**: review
 - **Version**: 0.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-10
+- **Last Updated**: 2026-10-06
 - **Last Reviewer**: lifecycle-manager

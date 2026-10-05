@@ -143,16 +143,6 @@
       "layer": "variant:co-news"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-news"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-news"
-    },
-    {
       "id": "reporter",
       "type": "agent",
       "layer": "variant:co-news"

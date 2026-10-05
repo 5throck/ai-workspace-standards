@@ -86,6 +86,7 @@ Per each agent's frontmatter `phases:` field in `templates/co-develop/agents/*.m
 | `code-writer` | 4 | Low | No |
 | `test-runner` | 4 | Medium | No |
 | `security-monitor` | 0, 5 | Medium | No |
+| `i18n-specialist` | 5 | Medium | Yes — engaged on demand for locale deliverables (common extends-stub; not part of the sequential pipeline) |
 
 `designer` and `stack-setup` are declared optional in `variant.json → agent_manifest.optional`, matching the "(optional)" annotations in `AGENTS.md` Agent Roster and Dispatch Trigger tables.
 

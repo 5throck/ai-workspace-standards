@@ -21,6 +21,7 @@
 | DevOps & CI/CD Admin | `devops-admin.md` | Bun 툴체인, Docker 스테이지, git 훅 | High |
 | Global Strategy & L10N Auditor | `l10n-auditor.md` | 16로케일 패리티, 용어집 준수, RTL 안전 | Medium |
 | Security Monitor | `security-monitor.md` | 취약점/권고 스캔, gitleaks, 의존성 정책 | Medium |
+| i18n-specialist | `i18n-specialist.md` | 로케일 구성, 로케일별 포맷팅, 텍스트 레이아웃 가이던스 | Medium |
 
 ## 에이전트 생성
 

@@ -1,7 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.6.0
+ * @version 1.7.0
+ *
+ * v1.7.0 (2026-10-06, T-20261005-022 / D8 of docs/designs/2026-10-05-consult-
+ * abap-develop-review-remediation-design.md): scope-mode verification inherits
+ * the generator's README- and underscore-prefix agent exclusion —
+ * verifyScopeGraph() derives via the imported buildScopeGraph() (no
+ * independent re-derivation), so the v1.15.0 generator fix removes the README
+ * "agent" nodes from the scope comparison and the regenerated
+ * co-consult/co-abap/co-develop artifacts verify.
  *
  * v1.6.0 (2026-09-11): term-node invariants per ADR-0072 — `term:` id
  * namespacing, uniqueness, and every term node must carry at least one

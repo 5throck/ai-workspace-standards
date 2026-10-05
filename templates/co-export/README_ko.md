@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 640b8a19681fdba7a7ce939040c9ef5d34cff2c8a6f9d56b7156b8c2583dbbae
+translated_from_hash: 3ac43055fb94f5a1c927cb56389020d5dfc22db01a8250c9aa2dfc2cd32a2f3d
 lang: ko
 lang_reason: source-material
 ---
@@ -47,6 +47,7 @@ lang_reason: source-material
 | **logistics-coordinator** | Incoterms selection, freight/forwarding, and bonded warehouse logistics | low | inherit |
 | **market-entry-strategist** | Overseas market entry strategy, buyer discovery, and market research | medium | inherit |
 | **trade-documentation-specialist** | Trade documentation and customs clearance paperwork specialist | medium | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 
 ## 스킬
 
@@ -56,8 +57,10 @@ lang_reason: source-material
 - **fta-origin-determination**: Guides the FTA/Origin Analyst through determining whether goods qualify for preferential tariff treatment under a specific Free Trade Agreement — origin criterion selection, non-originating material assessment, and origin certification method identification.
 - **halal-certification-workflow**: Guides the Halal Certification Specialist through determining whether halal certification is required for a destination market and product category, identifying the recognized certifying body (JAKIM, BPJPH/MUI, ESMA, GSO), and mapping the certification/audit process and renewal cycle.
 - **hs-classification-workflow**: Guides the HS Classification Specialist through GRI-ordered Harmonized System classification, customs valuation basis determination, and tariff rate lookup. Ensures classification reasoning is reproducible and defensible under a customs post-clearance audit.
+- **landed-cost-calculation**: Defines the landed-cost computation convention for export engagements: a formula ledger decomposing customs value, duty, freight, insurance, and ancillary charges, plus an assumption ledger tracking every input's source and sensitivity. All arithmetic is executed by a bun/TypeScript script in the scaffolded project — never performed by the agent.
 - **logistics-coordination**: Guides the Logistics Coordinator through Incoterms term selection (2020 default, with 2000/2010 version recognition for legacy contracts), freight mode/forwarder comparison, and bonded-warehouse/customs clearance logistics planning, ending in final engagement delivery handoff.
 - **market-entry-strategy**: Guides the Market Entry Strategist through destination-market demand assessment, competitive landscape analysis, entry channel comparison, and buyer/distributor discovery — synthesized with compliance findings into a single go-to-market recommendation.
+- **roo-qualification-worksheet**: Produces a per-shipment Rules of Origin qualification worksheet from the FTA skill's determination — converts origin analysis into an auditable artifact for customs post-clearance audits and FTA retention requirements.
 - **trade-documentation-checklist**: Guides the Trade Documentation Specialist through assembling a complete, internally consistent trade document package (invoice, packing list, B/L, certificate of origin) and reviewing letter-of-credit terms against UCP 600 for discrepancy risk.
 
 ## 협업 방법
@@ -84,7 +87,7 @@ lang_reason: source-material
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `/meeting` — 2026-09-26부로 폐지되었습니다; 구조화된 인라인 다중 에이전트 토론은 `meeting-facilitation` 스킬을 명시적으로 호출하세요.
 
 ## 변형 유형
 
@@ -102,4 +105,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-08-09*
+*최근 갱신: 2026-10-06*

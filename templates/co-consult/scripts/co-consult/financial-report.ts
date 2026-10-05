@@ -255,12 +255,14 @@ export function generateReport(
   }
 
   const roicEntry = kpi[latestYear]?.profitability?.roic;
-  if (roicEntry?.value !== null) {
+  // Guard the entry object itself — `entry?.value !== null` is true when the
+  // entry is missing (undefined), crashing on the fmt() call below.
+  if (roicEntry && roicEntry.value !== null) {
     lines.push(`- **ROIC** (latest): ${fmt(roicEntry.value)}%`);
   }
 
   const deEntry = kpi[latestYear]?.leverage_liquidity?.de_ratio;
-  if (deEntry?.value !== null) {
+  if (deEntry && deEntry.value !== null) {
     lines.push(`- **D/E Ratio** (latest): ${fmt(deEntry.value, 2)}x`);
   }
 

@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261005-034
+kind: manual
+title: >-
+  Repair co-develop registry and records: regenerate docs/skill-graph.json with
+  the current generator and port the README exclusion into verify-skill-graph's
+  scope derivation, refresh the lifecycle record to 8 agents and 4 skills,
+  settle the skill-lifecycle SSOT convention and swe-solve's false
+  VERSION_MANIFEST criterion, add a version-bump policy note for post-promotion
+  content changes, and fix the phantom command and file references
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.301Z'
+history:
+  - at: '2026-10-05T13:23:12.301Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.290Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.304Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.318Z'
+    from: review
+    to: done
+result: >-
+  co-develop registry and records: skill-graph regenerated with shared exclusion
+  (31 nodes, verifier PASS), lifecycle record corrected to 8 agents/4 skills
+  with phase-history rows, skill-lifecycle SSOT declared in SKILLS.md, swe-solve
+  false VERSION_MANIFEST criterion fixed and 5-stage wording propagated,
+  promotion checklist reconciled per ADR-0099, phantom command and file
+  references repaired, version-bump policy noted via lifecycle rows
+error: null

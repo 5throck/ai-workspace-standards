@@ -14,14 +14,14 @@
 
 ## Summary
 
-Pricing management & consulting simulator variant. Multi-product, multi-channel pricing with double-entry P&L projection, benchmark diagnostics, market research analytics (Van Westendorp / Gabor-Granger), cost-shock sensitivity, and distribution trade-line management. 15-agent roster across five groups (engineering, audit, strategy, market intelligence, UX/security).
+Pricing management & consulting simulator variant. Multi-product, multi-channel pricing with double-entry P&L projection, benchmark diagnostics, market research analytics (Van Westendorp / Gabor-Granger), cost-shock sensitivity, and distribution trade-line management. 16-agent roster across five groups (engineering, audit, strategy, market intelligence, UX/security).
 
 ## Acceptance Criteria
 
 ### Review Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 14 agents present (core-engine-dev, cost-asset-mgmt, cpa-auditor, devops-admin, engagement-director, finance-strategy-lead, l10n-auditor, lead-architect, market-intelligence-analyst, pricing-strategist, qa-tester, security-auditor, security-monitor, ux-specialist)
+- [x] All 16 agents present (pm, i18n-specialist, core-engine-dev, cost-asset-mgmt, cpa-auditor, devops-admin, engagement-director, finance-strategy-lead, l10n-auditor, lead-architect, market-intelligence-analyst, pricing-strategist, qa-tester, security-auditor, security-monitor, ux-specialist)
 - [x] All 22 pricing/simulation skills present (van-westendorp-psm, gabor-granger, double-entry-reconciliation, cost-shock-analysis, price-waterfall-analysis, trade-promotion-roi, etc.)
 - [x] inherits_common correctly points to templates/common
 - [ ] Stable promotion pending — currently beta (Phase B conversion in progress; Phase C template promotion deferred until v10.1 feature phases land, per variant.json lifecycle notes)
@@ -43,5 +43,5 @@ Pricing management & consulting simulator variant. Multi-product, multi-channel 
 - **Current Phase**: review
 - **Version**: 4.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-28
-- **Last Reviewer**: governance-ticket-runner
+- **Last Updated**: 2026-10-06
+- **Last Reviewer**: pm

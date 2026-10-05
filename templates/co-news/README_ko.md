@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: e0b5b9ede505da17fdc38000d1630a7476fdcfb25baf549cdbaa991a44eee456
+translated_from_hash: 047afe244ebd81f512e6875592ff0ec5e9401af080ebfa731e3b7cf26c50f50c
 lang: ko
 lang_reason: source-material
 ---
@@ -37,12 +37,14 @@ Business/finance journalism variant for economics reporters covering listed comp
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | medium | inherit |
 | **fact-checker** | Fact-checker - the newsroom's citation gatekeeper | medium | inherit |
 | **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | medium | inherit |
 | **legal-researcher** | Legal researcher - runs the k-law skill against the National Law Information Cen | medium | inherit |
 | **reporter** | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | medium | inherit |
 | **style-editor** | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | medium | inherit |
 | **visual-editor** | Visual editor - turns the financial-analyst's narrative brief into inline SVG fi | medium | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 
 ## 스킬
 
@@ -76,7 +78,7 @@ Business/finance journalism variant for economics reporters covering listed comp
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `/meeting` — 2026-09-26부로 폐지되었습니다; 구조화된 인라인 다중 에이전트 토론은 `meeting-facilitation` 스킬을 명시적으로 호출하세요.
 
 ## 변형 유형
 
@@ -94,4 +96,4 @@ Business/finance journalism variant for economics reporters covering listed comp
 
 ---
 
-*최근 갱신: 2026-08-11*
+*최근 갱신: 2026-10-06*

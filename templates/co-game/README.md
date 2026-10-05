@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: a8f2cf58a3d98c95d87d24d074eed39ef8adab2182c324e60ae2c814448a1d13
+content_hash: 91bbf3f6c043c33f9446d18a5bd43e968e0c4848f5cbbcabdd31f13a0b359505
 ---
 
 # co-game
@@ -48,6 +48,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **test-runner** | QA and verification — runs tests, validates acceptance criteria. | medium | inherit |
 | **security-monitor** | Security monitor — scans vulnerabilities, advisories, secret leaks. | medium | inherit |
 | **stack-setup** | Stack setup — environment config, build setup, stack recovery. | low | inherit |
+| **i18n-specialist** | Locale config, locale-specific formatting, and text layout guidance for locale mirrors (common extends-stub; outside the game pipeline) | medium | inherit |
 
 ## Skills
 
@@ -55,6 +56,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **refactoring**: Improves code structure and design while preserving behavior using systematic refactoring techniques.
 - **test-driven-development**: Implements software using Test-Driven Development (TDD) methodology with red-green-refactor cycle.
 - **sound-synth**: Procedural 8-bit retro sound effect and audio synthesis rules using Web Audio API and jsfxr parameter specifications for games and interactive web apps.
+- **arcade-physics**: Arcade physics rules — deterministic fixed-timestep integration, collision response, and genre-tuned movement constants for Canvas games.
 
 ## How to Collaborate
 
@@ -94,4 +96,4 @@ Promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 
 ---
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-10-06*

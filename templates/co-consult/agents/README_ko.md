@@ -6,8 +6,8 @@
 
 | 에이전트 | 파일 | 역할 | Tier |
 |---------|------|------|------|
-| Engagement Leader | `pm.md` | 인게이지먼트 오케스트레이션, 클라이언트 인터페이스, 최종 의사결정, QA | High |
-| Change Management Partner | `change-management-partner.md` | 조직 변화 관리, 문화 전략, 이해관계자 정렬 | High |
+| Engagement Leader | `pm.md` | 인게이지먼트 오케스트레이션, 클라이언트 인터페이스, 최종 의사결정, QA | Medium |
+| Change Management Partner | `change-management-partner.md` | 조직 변화 관리, 문화 전략, 이해관계자 정렬 | Medium |
 | Strategy Analyst | `strategy-analyst.md` | 시장 분석, 경쟁 조사, 재무 모델링 | Medium |
 | Industry Expert | `industry-expert.md` | 산업별 전문 지식, 경쟁 동향, 규제 환경 | High |
 | Subject Matter Expert | `sme.md` | 기능별 전문가 (HR, Finance, Operations 등) | Medium |
@@ -16,7 +16,8 @@
 | Workstream Lead | `workstream-lead.md` | 워크스트림 관리, 팀 조율, 진행 추적 | Medium |
 | Delivery Manager | `delivery-manager.md` | 프로젝트 인도, 운영 조율, 일정 관리 | Low |
 | Technology Specialist | `technology-specialist.md` | M365 플랫폼, 워크플로우 자동화, 디지털 전환 지원 | Low |
-| Data Analyst | `data-analyst.md` | 통계 분석, 데이터 모델링, 시각화 | Low |
+| I18N Specialist | `i18n-specialist.md` | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 | Medium |
+| Data Analyst | `data-analyst.md` | 통계 분석, 데이터 모델링, 시각화 | Medium |
 
 ## 에이전트 생성
 

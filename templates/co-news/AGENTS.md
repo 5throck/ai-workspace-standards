@@ -234,7 +234,7 @@ When a user request matches a skill trigger, apply this priority order — **enf
 | "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
 
 When ambiguous, prefer the higher-priority (workspace-level) skill and confirm intent with the user.
-Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
+Explicit invocation: the `meeting-facilitation` skill with the meeting topic and options (`--agents a,b`, `--rounds N`, `--dialogue`) — the legacy `/meeting` slash command is retired (2026-09-26).
 
 **Common workspace-level skills** (see `docs/VERSION_MANIFEST.md` for versions):
 
@@ -245,19 +245,14 @@ Explicit invocation: `/meeting "topic" [--agents a,b] [--rounds N] [--dialogue]`
 | `meeting-facilitation` | `skills/meeting-facilitation/` | Multi-agent meeting orchestration |
 | `security-scan` | `skills/security-scan/` | Security and secret detection |
 
-### Platform Skills Distribution
+### Platform Skills Registry
 
-Skills are distributed to all three platform directories via `scripts/sync-skills.ts`:
+| Skill | Location | Purpose |
+|-------|----------|---------|
+| **Platform Command Lifecycle Manager** | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` | Managing platform command lifecycle — creating, registering, and propagating commands in `.claude/commands/` and `.gemini/commands/` |
+| **Platform Skill Lifecycle Manager** | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` | Managing platform skill lifecycle — creating, versioning, and propagating skills in `.claude/skills/` and `.gemini/skills/` |
 
-| Platform | Directory | Registration | Shortcut Skills |
-|----------|-----------|--------------|-----------------|
-| Claude Code | `.claude/skills/` | `.claude/skills.json` | `sync`, `meeting` |
-| Gemini CLI | `.gemini/skills/` | `.gemini/skills.json` | `sync`, `meeting` |
-| Antigravity | `.agents/skills/` | `.agents/skills.json` | `sync`, `meeting`, `source-command-commit-push-pr` |
-
-- **Phase 1**: Every `skills/*/SKILL.md` directory is copied to all three platform directories.
-- **Phase 2**: Shortcut skills that only exist in `.agents/skills/` are back-synced to `.claude/skills/` and `.gemini/skills/`.
-- **Special**: `meeting-facilitation` SKILL.md is also synced to `.claude/commands/meeting.md` and `.gemini/commands/meeting.md`.
+> **Note**: The `agent-lifecycle-manager` and `skill-lifecycle-manager` skills named in the ADR-0080 procedures above are workspace-root (L0) operator skills — agent-lifecycle-manager/SKILL.md lives in the workspace `.agents/skills/` mirror, not in this project's `.claude/skills/`, and is not shipped in scaffolded projects. Variant-level agent/skill lifecycle procedures live in [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md).
 
 ---
 
@@ -283,94 +278,17 @@ All agents, regardless of their role, must adhere to the following:
 
 ## §8: Lifecycle Management
 
-### Phase 5 Lifecycle Finalization
-
-At **Phase 5 (Lifecycle Finalization)**, PM **must** execute finalization when any of the following occurred in the session:
-
-| Trigger | Dispatch lifecycle-manager? |
-|---------|---------------------------|
-| Agent added, modified, or deprecated | ✅ Yes |
-| Skill added, modified, or deprecated | ✅ Yes |
-| Script status changed in SCRIPTS.md | ✅ Yes |
-| Variant status changed (draft→beta, beta→stable, etc.) | ✅ Yes |
-| Governance tool updated (audit.ts, validate-templates.ts, etc.) | ✅ Yes |
-| `.claude/commands/*.md` or `.gemini/commands/*.md` added or removed | ✅ Yes |
-| `.claude/skills/*/SKILL.md` or `.gemini/skills/*/SKILL.md` added or modified | ✅ Yes |
-| `templates/common/.claude/` or `templates/common/.gemini/` structure changed | ✅ Yes |
-| `common-contract.json` or `docs/templates/*.json` governance files modified | ✅ Yes |
-| README/documentation-only changes | ❌ No |
-| Memory log entries only | ❌ No |
-
-PM will produce either a **"no drift" confirmation** or a **drift report + governance document updates**.
-
-PM does NOT execute finalization updates for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
-
-> **For Agent Lifecycle procedures**: See [docs/context.md](docs/context.md) for detailed lifecycle procedures.
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090) — Read it before lifecycle finalization. Trigger table: agent/skill/script/variant/governance-tool changes dispatch lifecycle-manager; docs-only and memory-log-only changes do not.
 
 ---
-
 
 ## §9: Maintenance Rule
 
-When a new `agents/<name>.md` is created, **the developer or AI agent responsible for the change** must:
-1. Use the `agent-lifecycle-manager` skill to guide the process.
-2. Add a row to the Agent Roster table above.
-3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [docs/context.md](docs/context.md).
-5. If the agent uses a skill, add a row to the Skills table above.
-
-When a new skill is created in `skills/` or `.claude/skills/`:
-1. Use the `skill-lifecycle-manager` skill to guide the process.
-2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [docs/context.md](docs/context.md).
-
-> **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [docs/context.md](docs/context.md).
-
----
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090 W1b) — new-agent and new-skill maintenance duties live there. Read it before adding agents or skills.
 
 ## §10: Periodic Skill Review Schedule
 
-**Frequency**: Quarterly (every 3 months)  
-**Owner**: pm  
-**Tool**: `bun scripts/skill-dependency-analysis.ts --report`
-
-### Review Cadence
-
-| Quarter | Target Month | Scope |
-|---------|-------------|-------|
-| Q1 | March | All active skills — full health report |
-| Q2 | June | All active skills — full health report |
-| Q3 | September | All active skills — full health report |
-| Q4 | December | All active skills — full health report + deprecation sweep |
-
-### Review Steps
-
-1. **Generate health report**
-   ```
-   bun scripts/skill-dependency-analysis.ts --report
-   bun scripts/validate-skills.ts
-   ```
-
-2. **Triage findings** by severity:
-   - 🔴 Broken dependencies or circular references → fix before quarter ends
-   - 🟡 Deprecated dependency usage → fix within 2 weeks
-   - 🟢 Wording or example improvements → batch in next release cycle
-
-3. **Apply modifications** following the review and triage steps defined inline in this section (§10)
-
-4. **Update governance records** in `docs/lifecycle/skills/<name>.md` for every skill modified
-
-5. **Deprecation sweep** (Q4 only): review skills with `last_updated` older than 12 months — evaluate whether they remain relevant or should be deprecated
-
-6. **Log results** in the quarterly memory log: `memory/YYYY-MM-DD.md` with `## Skill Review Q[N] YYYY` heading
-
-### Trigger Conditions (Outside Quarterly Cadence)
-
-A skill health check should also be run outside the quarterly schedule when:
-- A tool, agent, or script referenced by any skill is renamed or removed
-- A new skill is added that may introduce dependency cycles
-- CI reports skill validation failures on any branch
+**Moved to [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md)** (ADR-0090) — quarterly cadence, review steps, trigger conditions, and the deprecation sweep live there. Read it before any quarterly skill review.
 
 ---
 

@@ -20,7 +20,7 @@ EHS (Environmental Health & Safety) AI agent platform for South Korean regulator
 ### Review Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 2 agents present (safety-governance-manager, safety-workflow-manager)
+- [x] All 4 agents present (pm, safety-governance-manager, safety-workflow-manager, i18n-specialist)
 - [x] All 60 safety skills present (permit-to-work, risk-assessment, chemical-risk-assessment, ghs-classifier, msds-parser, psm-loto, psm-moc, audit-preparation, compliance-gap, etc.)
 - [x] inherits_common correctly points to templates/common
 - [x] Variant skill scope declared (L0+L1+L2)
@@ -43,5 +43,5 @@ EHS (Environmental Health & Safety) AI agent platform for South Korean regulator
 - **Current Phase**: review
 - **Version**: 0.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-10
-- **Last Reviewer**: lifecycle-manager
+- **Last Updated**: 2026-10-06
+- **Last Reviewer**: pm

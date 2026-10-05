@@ -6,7 +6,7 @@ This directory contains agent definition files for the co-abap SAP ABAP harness 
 
 | Agent | File | Role | Tier |
 |-------|------|------|------|
-| Project Manager (PM) | `pm.md` | Workflow orchestration, dispatch, quality gates, lifecycle management | High |
+| Project Manager (PM) | `pm.md` | Workflow orchestration, dispatch, quality gates, lifecycle management | Medium |
 | SD Analyst | `sd-analyst.md` | Sales & Distribution module analysis — activates on SD trigger keywords | Medium |
 | MM Analyst | `mm-analyst.md` | Materials Management module analysis — activates on MM trigger keywords | Medium |
 | FI Analyst | `fi-analyst.md` | Financial Accounting module analysis — activates on FI trigger keywords | Medium |
@@ -17,7 +17,7 @@ This directory contains agent definition files for the co-abap SAP ABAP harness 
 | Code Writer | `code-writer.md` | ABAP implementation via WriteSource/EditSource, syntax check | Low |
 | Test Runner | `test-runner.md` | QA verification — unit tests, code coverage, ATC check | Low |
 | DBA | `dba.md` | Table/CDS/index design, SQL performance tuning, ERD normalization | Medium |
-| DevOps Admin | `devops-admin.md` | Transport management, infrastructure install, system audit | Low |
+| DevOps Admin | `devops-admin.md` | Transport management, infrastructure install, system audit | Medium |
 | SAP Investigator | `sap-investigator.md` | Codebase pattern scan, historical design extraction (read-only) | Medium |
 | Read-Only Analyst | `read-only-analyst.md` | Business data queries, AS-IS analysis with draft AC (read-only) | Medium |
 | Schema Inspector | `schema-inspector.md` | Table/CDS structure inspection, dependency maps (read-only) | Medium |
@@ -26,6 +26,7 @@ This directory contains agent definition files for the co-abap SAP ABAP harness 
 | Form Expert | `form-expert.md` | SAP Script, Smart Forms, Adobe Forms design and print programs | Medium |
 | Security Monitor | `security-monitor.md` | Security policies enforcement and safe dependency audit | Low |
 | GUI Scripter | `gui-scripter.md` | BDC / VBS automation — LAST RESORT when no BAPI/OData/RFC alternative exists | Low |
+| I18N Specialist | `i18n-specialist.md` | Localization review, locale config, and translation-sync for locale mirrors (cross-cutting; outside the SAP delivery pipeline) | Medium |
 
 ## Creating New Agents
 

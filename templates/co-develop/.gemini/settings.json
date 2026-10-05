@@ -55,13 +55,5 @@
     "format",
     "fdisk",
     "mkfs"
-  ],
-  "mcpServers": {
-    "graft": {
-      "command": "graft",
-      "args": [
-        "mcp"
-      ]
-    }
-  }
+  ]
 }

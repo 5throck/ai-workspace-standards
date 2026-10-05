@@ -23,6 +23,7 @@
 | 테스트 실행자 | `test-runner.md` | 수락 기준 확인 |
 | 보안 모니터 | `security-monitor.md` | 보안 정책 시행 |
 | 스택 설정 | `stack-setup.md` | 알 수 없는 스택 식별 및 설정 |
+| I18N 스페셜리스트 | `i18n-specialist.md` | 로캘 문서 및 로캘 미러 번역 동기화 (common extends-stub; 필요 시 투입) |
 
 ## 새 에이전트 생성
 
@@ -33,12 +34,12 @@ bun run agent:create <name> --role "표시 이름" --group <group>
 
 # 예시:
 bun run agent:create data-analyst --role "데이터 분석가" --group Technical
-bun run agent:create ui-reviewer --group Design
+bun run agent:create ui-reviewer --role "UI 리뷰어" --group Design
 ```
 
 ### 방법 2: 수동
 
-1. `_examples/agents/analyst-example.md` 템플릿을 복사
+1. `docs/_examples/agents/analyst-example.md` 템플릿을 복사 (프로젝트 생성 시 `templates/common`에서 전달됨)
 2. 이 디렉토리에 `<name>.md` 파일 생성
 3. 템플릿 구조를 따라 에이전트 정의 작성
 
@@ -70,8 +71,13 @@ bun run agent:delete <name> --force  # 확인 건너뛰기
 - **디자인** - 아키텍트, 디자이너
 - **실행** - 코드 작성자, 테스트 실행자
 - **보안/설정** - 스택 설정
+- **현지화** - I18N 스페셜리스트
 
 전체 워크플로우와 디스패치 프로토콜은 `AGENTS.md`를 참조하세요.
+
+## 핸드오프 명세
+
+에이전트 간 JSON 기반 핸드오프 형식은 [`handoff-spec.md`](../docs/handoff-spec_ko.md)를 참고하세요.
 
 ---
 

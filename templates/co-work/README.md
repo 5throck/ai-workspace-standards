@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: b4544c21a73694d38bf8db048d2ace3e1acf314cfef6b174864f7e2d0030ccce
+content_hash: ef6fb8bdda12ab229a52f0a1bd51bf74690bc6b98744e0fc67cb7161e1002d86
 ---
 
 # co-work
@@ -40,6 +40,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
 | **analyst** | Research analyst — investigation, data synthesis, and evidence gathering | medium | inherit |
 | **content-writer** | Content writer — research-to-documentation transformation and communications | medium | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 | **ms365-expert** | Microsoft 365 expert — guidance on Outlook, Word, Excel, PowerPoint, Teams | low | inherit |
 | **project-coordinator** | Project coordinator — schedules, stakeholder communication, delivery logistics | low | inherit |
 | **storyteller** | Organizational storyteller — culture, change narratives, institutional knowledge | medium | inherit |
@@ -74,7 +75,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `/meeting-facilitation` — Run a structured, inline multi-agent discussion (skill; the legacy `/meeting` slash command is retired).
 
 ## Variant Type
 
@@ -84,4 +85,4 @@ This variant focuses on general work, research, documentation, and project coord
 
 ---
 
-*Last Updated: 2026-08-09*
+*Last Updated: 2026-10-06*

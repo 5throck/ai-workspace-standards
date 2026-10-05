@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-06](2026-10-06.md) | chore: update |
 | [2026-10-05](2026-10-05.md) | chore: update |
 | [2026-10-04](2026-10-04.md) | chore: update |
 | [2026-10-03](2026-10-03.md) | fix(installer): detect Hermes home on Windows |
@@ -14,7 +15,7 @@
 | [2026-10-01](2026-10-01.md) | docs(review): daily fleet review 2026-10-01 |
 | [2026-09-30](2026-09-30.md) | fix(services): stop docker-mode turn containers on cancel and reap orphans on restart |
 | [2026-09-29](2026-09-29.md) | docs(review): daily fleet review 2026-09-29 |
-| [2026-09-28](2026-09-28.md) | chore: update |
+| 2026-09-28 | chore: update |
 | 2026-09-27 | docs(review): daily fleet review 2026-09-27 |
 | 2026-09-26 | docs(analysis): AGENTS.md duplication audit + §6 gap remediation |
 | 2026-09-25 | fix(platform): fix six P1 platform-parity bugs (codex omission/overwrite class) |

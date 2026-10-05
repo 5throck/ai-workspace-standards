@@ -5,23 +5,36 @@
 **Beta Since:** 2026-05-28
 **Phase A Complete:** true
 
-## Promotion Criteria (beta -> stable)
+> **Post-promotion ratification record.** co-work was created and entered
+> stable the same day (2026-05-28) as a generation-1 same-day promotion,
+> predating the beta-lifecycle machinery (shipped 2026-07-11) and the
+> beta-first admission convention. Its stable status is ratified under the
+> migration fast-track admission policy, **ADR-0099**
+> (`docs/adr/0099-template-migration-admission-policy.md`), which names the
+> same-day co-work/co-design promotions as ratifiable in a follow-up: the
+> beta-window criteria (6, 8, 10) are explicitly waived rather than claimed as
+> met, and the remaining criteria are verified against the 2026-10-06
+> remediation pass. `variant.json` → `promotionChecklist` points here as the
+> governance record; the `lifecycle` history in `variant.json` is retained as
+> recorded.
+
+## Promotion Criteria (beta -> stable) — reconciled 2026-10-06 per ADR-0099
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
-| 1 | **Phase A complete** | Done | `phaseAComplete` in variant.json; agent manifest (7), skill manifest (4), documentation present. |
-| 2 | **Agent roster completeness** | Pending | All 7 agents defined; verify each agent file has substantive content. |
-| 3 | **Skills coverage** | Pending | 4 variant-specific skills; verify each SKILL.md is complete and operational. |
-| 4 | **Documentation completeness** | Pending | README.md present and accurate; AGENTS.md reflects the actual roster; variant.json fields accurate. |
-| 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` passes with 0 errors. |
-| 6 | **Real engagements** | Pending | Minimum 1 successful end-to-end engagement. |
-| 7 | **README accuracy** | Pending | README reflects current capability set and agent roster. |
-| 8 | **Minimum beta duration** | Pending | 3 months in beta status. |
-| 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
-| 10 | **User feedback** | Pending | Positive feedback from beta users; no critical complaints. |
+| 1 | **Phase A complete** | Done | Phase A artifacts present in `variant.json`: `agents[]` (8 agents), `skills[]` (1 skill), and the documentation set (README, user-guide, phase-definitions, context). `process_manifest` stage/raci/gates/evidence paths are intentionally null for this core-conformance variant — no hand-authored governance files are shipped (co-develop precedent). |
+| 2 | **Agent roster completeness** | Done | All 8 agents defined with substantive content, including `pm` and `i18n-specialist`; roster rows present on README.md / README_ko.md / agents/README.md (i18n-specialist rows added 2026-10-06); `validate-variant-claims` roster checks green. |
+| 3 | **Skills coverage** | Done | 1 variant-specific skill registered in `variant.json` `skills[]` (standup-synthesizer, workspace layer, required platform parity). The collaboration skills listed in the README (api-documentation, documentation-writing, research-analysis) are common-inherited L1 assets resolving via `inherits_common`, not variant-specific skills. |
+| 4 | **Documentation completeness** | Done | README.md, docs/co-work.context.md, docs/user-guide.md, docs/phase-definitions.md, and AGENTS.md present and maintained; AGENTS.md regenerated onto the common thin-dispatcher skeleton 2026-10-06 (ADR-0099 ratification remediation). |
+| 5 | **Audit pass rate** | Done | Machine verification green as of 2026-10-06: `bun scripts/validate-variant-claims.ts --template co-work` PASS with 0 findings; `bun scripts/validate-templates.ts` no new failures. |
+| 6 | **Real engagements** | N/A per ADR-0099 — migration fast-track | Variant is a generation-1 same-day promotion (created 2026-05-28, stable 2026-05-28); under ADR-0099 the beta-engagement attestation is waived rather than simulated. |
+| 7 | **README accuracy** | Done | README.md / README_ko.md carry the ✅ Stable v1.0.0 badge and current inventories (8 agents incl. i18n-specialist; skill inventory spans the variant skill and common-inherited collaboration skills); hash pair re-verified 2026-10-06 via `bun scripts/verify-readme-sync.ts`. |
+| 8 | **Minimum beta duration** | N/A per ADR-0099 — migration fast-track | co-work entered directly at stable on its creation date (2026-05-28); no beta window applies under the migration fast-track. |
+| 9 | **Zero unresolved bugs** | Done | No open bug reports recorded at promotion (2026-05-28). Claim drift found by the 2026-10-06 remediation pass (dangling process_manifest paths, count claims, missing roster rows) is fixed in this wave; `validate-variant-claims` reports 0 findings. |
+| 10 | **User feedback** | N/A per ADR-0099 — migration fast-track | Not separately logged; under the migration fast-track no beta-user feedback record exists to claim. |
 
 ## Review History
 
-| Date | Reviewer | Outcome | Notes |
-|------|----------|---------|-------|
-| | | | |
+| Date | Outcome | Status | Notes | Reviewer |
+|------|---------|--------|-------|----------|
+| 2026-10-06 | stable (ratified) | stable | Migration admission ratified per ADR-0099; criteria 6/8/10 waived; remainder verified in the 2026-10-06 remediation pass | pm |

@@ -341,16 +341,6 @@
       "layer": "variant:co-price"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-price"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-price"
-    },
-    {
       "id": "scenario-comparison",
       "type": "skill",
       "layer": "variant:co-price",
@@ -645,12 +635,6 @@
       "type": "accountable_for",
       "from": "engagement-director",
       "to": "procedure.co-price.engagement-review",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "engagement-director",
-      "to": "procedure.co-price.pricing-security-closeout",
       "source": "raci_matrix"
     },
     {
@@ -949,24 +933,6 @@
     {
       "type": "accountable_for",
       "from": "lead-architect",
-      "to": "procedure.co-price.pricing-analysis",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
-      "to": "procedure.co-price.pricing-security-bootstrap",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
-      "to": "procedure.co-price.release-assurance",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
       "to": "procedure.co-price.scenario-modeling",
       "source": "raci_matrix"
     },
@@ -1086,6 +1052,12 @@
       "from": "pricing-strategist",
       "to": "pricing-governance",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pricing-strategist",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "raci_matrix"
     },
     {
       "type": "produces",
@@ -1586,6 +1558,12 @@
       "actor_type": "agent"
     },
     {
+      "type": "accountable_for",
+      "from": "qa-tester",
+      "to": "procedure.co-price.release-assurance",
+      "source": "raci_matrix"
+    },
+    {
       "type": "enables",
       "from": "scenario-comparison",
       "to": "pricing-governance",
@@ -1618,6 +1596,18 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-price.pricing-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-price.pricing-security-closeout",
+      "source": "raci_matrix"
     },
     {
       "type": "gated_by",

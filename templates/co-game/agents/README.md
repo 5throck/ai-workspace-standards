@@ -29,6 +29,7 @@ Each agent is defined as a markdown file (`<name>.md`) with:
 | Test Runner | `test-runner.md` | Verifies acceptance criteria |
 | Security Monitor | `security-monitor.md` | Enforces security policies |
 | Stack Setup | `stack-setup.md` | Identifies and sets up unknown stacks |
+| I18N Specialist | `i18n-specialist.md` | Locale mirrors: locale config, locale-specific formatting, text layout (cross-cutting) |
 
 ## Creating New Agents
 

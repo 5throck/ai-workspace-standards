@@ -1,6 +1,6 @@
 ---
 name: sap-investigator
-phases: [3]
+phases: [1]
 role: SAP Codebase Intelligence Scanner (read-only)
 model: inherit
 color: magenta

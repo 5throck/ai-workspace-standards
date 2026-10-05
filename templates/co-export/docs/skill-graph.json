@@ -213,16 +213,6 @@
       "layer": "variant:co-export"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-export"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-export"
-    },
-    {
       "id": "roo-qualification-worksheet",
       "type": "skill",
       "layer": "variant:co-export"

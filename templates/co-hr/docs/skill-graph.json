@@ -238,16 +238,6 @@
       "layer": "variant:co-hr"
     },
     {
-      "id": "README",
-      "type": "agent",
-      "layer": "variant:co-hr"
-    },
-    {
-      "id": "README_ko",
-      "type": "agent",
-      "layer": "variant:co-hr"
-    },
-    {
       "id": "safety-health-officer",
       "type": "agent",
       "layer": "variant:co-hr"

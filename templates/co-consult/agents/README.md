@@ -6,8 +6,8 @@ This directory contains agent definition files for the co-consult engagement wor
 
 | Agent | File | Role | Tier |
 |-------|------|------|------|
-| Engagement Leader | `pm.md` | Engagement orchestration, client interface, final decisions, QA | High |
-| Change Management Partner | `change-management-partner.md` | Organizational transformation, culture strategy, stakeholder alignment | High |
+| Engagement Leader | `pm.md` | Engagement orchestration, client interface, final decisions, QA | Medium |
+| Change Management Partner | `change-management-partner.md` | Organizational transformation, culture strategy, stakeholder alignment | Medium |
 | Strategy Analyst | `strategy-analyst.md` | Market analysis, competitive research, financial modeling | Medium |
 | Industry Expert | `industry-expert.md` | Industry-specific insights, competitive dynamics, regulatory landscape | High |
 | Subject Matter Expert | `sme.md` | Functional expertise (HR, Finance, Operations, Marketing) | Medium |
@@ -16,7 +16,8 @@ This directory contains agent definition files for the co-consult engagement wor
 | Workstream Lead | `workstream-lead.md` | Workstream management, team coordination, progress tracking | Medium |
 | Delivery Manager | `delivery-manager.md` | Project delivery, operations coordination, resource allocation | Low |
 | Technology Specialist | `technology-specialist.md` | Collaboration platforms, workflow automation, digital transformation | Low |
-| Data Analyst | `data-analyst.md` | Statistical analysis, data modeling, visualization | Low |
+| I18N Specialist | `i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout guidance | Medium |
+| Data Analyst | `data-analyst.md` | Statistical analysis, data modeling, visualization | Medium |
 
 ## Creating New Agents
 

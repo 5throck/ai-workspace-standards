@@ -8,12 +8,27 @@ title: >-
   derivation needs a procedure-owner fallback (hard-coded stage.owner_agent
   flips 7 cross-cutting rows)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-05T10:56:58.979Z'
 history:
   - at: '2026-10-05T10:56:58.979Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-05T22:59:11.683Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T22:59:11.698Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T22:59:11.714Z'
+    from: review
+    to: done
+result: >-
+  Generator guards landed: bootstrap-stages.ts 1.1.0 refuses when a curated
+  stages.yaml exists (exit 1 + guidance, --force escape; --report-only and
+  --variants actually implemented now), generate-raci.ts 1.2.0 derives
+  accountable from procedure owner first (reproduces co-deck 11/11 exactly; 4
+  divergent rows in co-consult/co-abap reported as explicit drift lines for
+  owners to converge via --write) plus compareWithCommitted drift report
 error: null

@@ -4,7 +4,7 @@ generated_from: procedures/
 rows:
   - stage: S1
     activity: procedure.co-abap.requirements-analysis
-    accountable: architect
+    accountable: co-analyst
     responsible:
       - architect
       - co-analyst
@@ -17,7 +17,7 @@ rows:
       - sd-analyst
   - stage: S1
     activity: procedure.co-abap.security-readiness-baseline
-    accountable: architect
+    accountable: security-monitor
     responsible:
       - security-monitor
   - stage: S1
@@ -39,12 +39,12 @@ rows:
       - test-runner
   - stage: S2
     activity: procedure.co-abap.security-closeout-review
-    accountable: code-writer
+    accountable: security-monitor
     responsible:
       - security-monitor
   - stage: S2
     activity: procedure.co-abap.transport-release
-    accountable: code-writer
+    accountable: devops-admin
     responsible:
       - devops-admin
       - test-runner

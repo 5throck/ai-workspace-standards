@@ -2,7 +2,7 @@ schema_version: "1.0"
 variant: co-price
 gates:
   - id: DG-PRICE-01
-    title: "Engine outputs reconcile with waterfall checks within tolera"
+    title: "Engine–waterfall reconciliation gate"
     stage: S1
     decider_agent: lead-architect
     inputs:
@@ -14,7 +14,7 @@ gates:
       - rework
     record_kind: DEC
   - id: DG-PRICE-02
-    title: "Recommendation reconciles with the waterfall model within to"
+    title: "Recommendation–waterfall reconciliation gate"
     stage: S1
     decider_agent: lead-architect
     inputs:

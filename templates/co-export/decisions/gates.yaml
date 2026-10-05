@@ -2,7 +2,7 @@ schema_version: "1.0"
 variant: co-export
 gates:
   - id: DG-EXPORT-01
-    title: "Document set passes checklist with zero missing mandatory fi"
+    title: "Document set passes checklist with zero missing mandatory fields."
     stage: S3
     decider_agent: pm
     inputs:

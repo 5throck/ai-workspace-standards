@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261005-030
+kind: manual
+title: >-
+  Close the co-abap vsp supply-chain split: reconcile the installer repo
+  (oisee/vibing-steampunk) with the documented source (5throck/vsp), make
+  checksum verification fail closed, pin the vsp version in variant config, and
+  flag-gate the default RTK global install behind explicit user consent
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.245Z'
+history:
+  - at: '2026-10-05T13:23:12.245Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.122Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.136Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.150Z'
+    from: review
+    to: done
+result: >-
+  co-abap vsp supply chain: canonical repo verified via GitHub API
+  (oisee/vibing-steampunk v2.60.0 with real assets; 5throck/vsp is 404), version
+  pinned, checksums fail-closed against checksums.txt, fetch timeouts and res.ok
+  checks, RTK opt-in; context.md download reference corrected to the canonical
+  repo
+error: null

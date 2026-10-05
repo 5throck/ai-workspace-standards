@@ -46,19 +46,24 @@ numbering schemes are not 1:1 — see the mapping table below.
 ## Phase Numbering Map (Orchestration Steps ↔ Agent Phases)
 
 The orchestration workflow above uses **steps 1-6**; individual agent definitions use **phases
-1-5** (plus occasional phase 6 for late-stage skills). The mapping is:
+1-5** (plus occasional phase 6 for late-stage skills). Governance stages (`process/stages.yaml`)
+host the procedures for each span. The mapping is:
 
-| Orchestration Step | Agent Phase | Scope |
-|--------------------|:-----------:|-------|
-| 1. Triage & Initial Research | 1 | Read-only parallel research (sap-investigator, read-only-analyst, schema-inspector, module analysts) |
-| 2. Business Analysis & AC Definition | 1 | Module analyst PRD/AC drafting (read-only) |
-| 3. Governance & Implementation Approval | 2 | Design & approval gate (PM + user sign-off) |
-| 4. Technical Design & Impact Analysis | 2 | Architect/DBA design, impact analysis |
-| 5. Implementation & Verification Chain | 3-4 | code-writer implementation (3) + test-runner QA chain (4) |
-| 6. Finalization, Sync & Reporting | 5-6 | Memory logging, /sync, reporting (5); late-stage skills (e.g., dump-monitor) run at 6 |
+| Orchestration Step | Agent Phase | Process Stage | Scope |
+|--------------------|:-----------:|:-------------:|-------|
+| 1. Triage & Initial Research | 1 | S1 | Read-only parallel research (sap-investigator, read-only-analyst, schema-inspector, module analysts); security-readiness-baseline establishes controls before access |
+| 2. Business Analysis & AC Definition | 1 | S1 | Module analyst PRD/AC drafting (read-only) — requirements-analysis |
+| 3. Governance & Implementation Approval | 2 | S1 | Design & approval gate (PM + user sign-off) |
+| 4. Technical Design & Impact Analysis | 2 | S1 | Architect/DBA design, impact analysis — solution-blueprint; S1 exit gate |
+| 5. Implementation & Verification Chain | 3-4 | S2 | code-writer implementation (3) + test-runner QA chain (4) — custom-dev-delivery, gates DG-ABAP-01/DG-ABAP-02 |
+| 6. Finalization, Sync & Reporting | 5-6 | S2 | Memory logging, /sync, reporting (5); transport release and security closeout; late-stage skills (e.g., dump-monitor) run at 6 |
 
 > Agent `phases:` fields refer to the **Agent Phase** column above, not the orchestration step
 > number. Skills may declare phase 6 for post-release monitoring.
+>
+> `i18n-specialist` is cross-cutting (locale mirrors, translation-sync) and sits **outside** the
+> SAP delivery pipeline — it has no `phases:` assignment in this mapping and is dispatched by the
+> PM only for documentation-localization work.
 
 ---
 

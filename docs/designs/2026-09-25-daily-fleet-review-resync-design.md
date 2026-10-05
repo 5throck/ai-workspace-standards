@@ -15,6 +15,8 @@ The user approved a daily local ZCode automation on 2026-09-25 (meeting: PM-faci
 - **Phase I — `project-review` skill** over workspace root L0 + `templates/`: machine baseline via `bun scripts/review-baseline.ts --quiet`; orphan agent/skill sweep including `bun scripts/skill-graph-fleet-report.ts`; a 4-slot parallel agent review scoped to a marker-file change window (`.pipeline-state/last-daily-review`); FULL-mode escalation on structural triggers; a **Friday FULL override** (user-approved 2026-09-25 — Fridays run FULL mode regardless of the window). Findings land in `docs/reports/YYYY-MM-DD-project-review-daily.md` with a mandatory Class column (`one-time` / `systemic` / `script-gap`); `script-gap` findings produce validator-hardening tickets capped at 10/day.
 - **Phase II — `project-resync` skill** over ALL `Projects/co-*` (glob-derived; the fleet count is never hardcoded — it was observed as 11, 12, and 13 within one hour during the meeting): Steps 0–6, plus a new read-only **Step 2d "Domain Operating Model"** diff of project vs `templates/co-<x>/` on `process/stages.yaml`, `governance/raci.yaml` (+ `actor_types`), `governance/_human-roles.yaml`, `decisions/gates.yaml`, `evidence-models/`, and `docs/graph-deltas/`. Findings become `domain-model:` human-triage rows and are never auto-promoted.
 
+**Amendment 1 (2026-10-05, user request)**: a **Phase 1b — per-variant `project-review`** was added between Phase I and Phase II. Each `templates/co-<variant>/` directory becomes its own review target: its own machine battery daily, window-scoped agent review when it changed, FULL escalation on its own structural triggers, a Friday full-surface sweep, a 03:45 KST budget with battery-only degradation, and read-only conduct over `templates/` (§4.2b). The 10/day ticket cap is shared across Phase I and Phase 1b, and common-wave defects deduplicate into one systemic finding.
+
 Two governance gaps motivate this registration:
 
 1. **No spec exists.** The automation is substantive standing work (ADR-0078); the Universal Design Gate (ADR-0074) requires a registered design before its landing surfaces are touched.
@@ -60,6 +62,17 @@ Two governance gaps motivate this registration:
 - R16. Give every finding a Class value: `one-time`, `systemic`, or `script-gap`.
 - R17. File one validator-hardening ticket per `script-gap` finding. Cap new tickets at 10 per day. Defer overflow with `--not-before`.
 - R18. Ticket only NEW orphan or skill-graph ids versus the previous snapshot. Use the `skill-graph:` prefix. Deduplicate.
+
+### 4.2b Phase 1b — per-variant project-review (Amendment 1, 2026-10-05)
+
+- R43. Derive the variant set with the glob `templates/co-*`. Never hardcode the count.
+- R44. Run the per-variant machine battery every day: `bun scripts/audit.ts` and `bun scripts/verify-scripts.ts --verify` inside each variant. A battery that crashes in template context is itself a finding.
+- R45. Run a variant's agent review scoped to its window delta. Variants with no window changes and a clean battery run baseline-only.
+- R46. Escalate a single variant to FULL mode when its own structural triggers fire (3+ of its agent files, workspace-schema/common-contract, or a promotion touching it).
+- R47. Extend the Friday FULL override to Phase 1b: every variant gets a scoped review of its full surface, batched.
+- R48. Finish Phase 1b dispatch and collection by 03:45 KST. On breach, degrade the remaining variants to battery-only and note it.
+- R49. Deduplicate common-wave findings: one L1/common defect visible in N variants is one systemic finding listing the affected variants.
+- R50. Keep Phase 1b read-only over `templates/`. Fixes route through tickets or the resync backport paths, never in-runner edits. Share the 10/day ticket cap with Phase I.
 
 ### 4.3 Phase II — project-resync
 
@@ -124,6 +137,7 @@ Two governance gaps motivate this registration:
 - AC-11 (R37, degraded mode). A baseline with ≥3 ERRORs or any Critical produces an audit-only Phase II: zero mutations of any kind.
 - AC-12 (R38–R39, stop conditions). Wall-clock expiry and >2 failing projects each produce exactly one summarizing ticket, not one per item.
 - AC-13 (R40–R42, reporting). The day's memory block passes `scripts/verify-memory.ts` (four headings present); `docs/reports/` holds both reports; the zero-state table closes the run with stated reasons for open PRs.
+- AC-14 (R43–R50, Phase 1b). The variant set is glob-derived; every variant reports a battery result daily; a changed variant gets a window-scoped review; a trigger-hit variant escalates to FULL; a Friday run covers every variant's full surface; a 03:45 breach degrades gracefully with a note; a common-wave defect yields exactly one ticket; no Phase 1b step edits `templates/`; the shared 10/day cap holds.
 
 ## 6. Alternatives considered
 

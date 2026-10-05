@@ -70,6 +70,7 @@ relations:
   - "All automated tests pass before handoff to transport release."
 decision_points:
   - DG-ABAP-01
+  - DG-ABAP-02
 evidence:
   - "docs/handoff-spec.md"
 failure_modes:

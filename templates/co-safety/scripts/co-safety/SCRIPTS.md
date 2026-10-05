@@ -18,7 +18,7 @@
 | `risk-register-rollup.ts` | 1.0.0 | Roll up RA instances into facility risk registers |
 | `safety-audit.ts` | 4.10.1 | co-safety full compliance audit (legal_basis, schemas, evidence) |
 | `scaffold-industry.ts` | 0.1.1 | Scaffold an industry workflow/skill/evidence set |
-| `start-mcp.ts` | 1.0.0 | Start the co-safety MCP servers |
+| `start-mcp.ts` | 1.0.1 | Start the co-safety MCP servers — v1.0.1: servers list emptied to a documented scaffold extension point (the mcp/ dir ships empty; the previously spawned mcp/kr-safety-regs entry point never shipped) |
 | `test-chemical-handling-profile.ts` | 1.0.0 | Chemical handling profile test suite |
 | `test-cross-domain-integration.ts` | 1.0.0 | Cross-domain integration test suite |
 | `test-domain-scenarios.ts` | 1.1.0 | Domain scenario test suite |

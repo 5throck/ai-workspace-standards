@@ -1,6 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 1.15.0 (2026-10-06, T-20261005-022 / D8 of
+ * docs/designs/2026-10-05-consult-abap-develop-review-remediation-design.md):
+ * buildScopeGraph agent discovery now applies the same README- and
+ * underscore-prefix exclusion as the full-graph variant pass (v1.13.0) —
+ * scope-mode regeneration was still emitting README/README_ko as
+ * type:"agent" nodes (co-consult/co-abap/co-develop committed graphs; DH1
+ * of the 2026-10-05 scoped review). verify-skill-graph.ts imports
+ * buildScopeGraph, so the scope derivation and the verifier share this one
+ * rule.
  * @version 1.14.0 (2026-09-23, T-20260923-002 triage): variant citation corpus
  * widened — docs/*.md top-level files, README.md, recursive agents/** and
  * workflows/** added per variant, plus path-fragment and README plain-mention
@@ -1613,7 +1622,9 @@ function applyOverrides(overrides: Overrides, allNodes: Map<string, GraphNode>, 
  * behavior.
  *
  * ADR-0060 Amendment 2 (2026-08-28).
- * @version 1.3.0
+ * @version 1.4.0 — agent discovery shares the full-graph pass's README- and
+ * underscore-prefix exclusion (v1.15.0); previously scope graphs carried
+ * README "agent" nodes.
  */
 export function buildScopeGraph(scope: string): SkillGraph {
   const scopeDir = join(templatesDir, scope);
@@ -1654,7 +1665,11 @@ export function buildScopeGraph(scope: string): SkillGraph {
   const agentsDir = join(scopeDir, 'agents');
   if (existsSync(agentsDir)) {
     for (const f of readdirSync(agentsDir)) {
-      if (!f.endsWith('.md') || f === 'handoff-spec.md') continue;
+      // Same exclusion rule as the full-graph variant pass (v1.13.0): folder
+      // READMEs and _-prefixed files are directory docs, not agents; scope-mode
+      // regeneration previously emitted README/README_ko as type:"agent" nodes
+      // (DH1 of the 2026-10-05 scoped review, T-20261005-022).
+      if (!f.endsWith('.md') || f === 'handoff-spec.md' || /^README/.test(f) || f.startsWith('_')) continue;
       const name = f.replace(/\.md$/, '');
       allNodes.set(name, { id: name, type: 'agent', layer });
       scopeAgents.add(name);

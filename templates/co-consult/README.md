@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: cc09362013b1713a5a450fdaf1b5c98c7df1d4fd1c7e684fae1da860202e1340
+content_hash: 4e790c3f0dc79f712e4df8ca33c442753a83e5c28531770a8c7f0e1f6b0967c0
 ---
 
 # co-consult
@@ -37,11 +37,12 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | medium | inherit |
 | **change-management-partner** | Leads organizational transformation, culture change, and stakeholder alignment | medium | inherit |
 | **communications-lead** | Crafts client-facing communications, presentations, and strategic narratives | medium | inherit |
-| **data-analyst** | Provides data analysis, statistical modeling, and visualization support | low | inherit |
+| **data-analyst** | Provides data analysis, statistical modeling, and visualization support | medium | inherit |
 | **delivery-manager** | Oversees project delivery, operations coordination, and execution quality | low | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 | **industry-expert** | Provides industry-specific insights and competitive dynamics analysis | high | inherit |
 | **sme** | Provides functional expertise across HR, Finance, Operations, and more | medium | inherit |
 | **solutions-architect** | Designs technical solutions, system architectures, and implementation roadmaps | medium | inherit |
@@ -64,7 +65,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **stakeholder-alignment**: Systematic stakeholder mapping, resistance analysis, and influence-interest prioritization.
 - **stakeholder-review-management**: Manages stakeholder review cycles — reviewer selection, feedback, conflict resolution, and change tracking.
 - **technical-feasibility**: Evaluates whether a proposed solution is technically implementable; produces complexity grades and risks.
-- **company-intelligence**: Comprehensive company/corporate-group intelligence; dispatches 5 parallel research agents into one report.
+- **company-intelligence**: Comprehensive company/corporate-group intelligence; dispatches five parallel research agents into one report.
 - **financial-statement-analysis**: Full financial statement analysis pipeline on the active country profile's disclosure system (KR: DART) — collection → validate → normalize → KPI → ROIC tree → report.
 - **mece-logic-auditor**: MECE issue tree auditing and strategic reasoning evaluation for consulting problem-solving frameworks.
 - **hwp-document-processing**: Handles Korean office formats HWP 5.0 (read/validate only) and HWPX (full read/write/generate/validate) — used when a deliverable must be produced in or reference a Korean government/institutional document format.
@@ -93,7 +94,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- Multi-agent discussions: invoke the `meeting-facilitation` skill explicitly (the legacy `/meeting` slash command is retired — 2026-09-26).
 
 ## Variant Type
 
@@ -103,4 +104,4 @@ This variant focuses on strategy consulting for AI-assisted business consulting 
 
 ---
 
-*Last Updated: 2026-08-23*
+*Last Updated: 2026-10-06*

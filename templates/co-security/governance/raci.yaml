@@ -10,7 +10,7 @@ rows:
       - threat-modeler
   - stage: S1
     activity: procedure.co-security.threat-analysis
-    accountable: red-team-lead
+    accountable: threat-modeler
     responsible:
       - red-team-lead
       - threat-modeler
@@ -23,7 +23,7 @@ rows:
       - report-writer
   - stage: S2
     activity: procedure.co-security.remediation-support
-    accountable: report-writer
+    accountable: patch-engineer
     responsible:
       - patch-engineer
   - stage: S2
@@ -33,7 +33,7 @@ rows:
       - report-writer
   - stage: S2
     activity: procedure.co-security.threat-model-and-report
-    accountable: report-writer
+    accountable: threat-modeler
     responsible:
       - pentester
       - red-team-lead

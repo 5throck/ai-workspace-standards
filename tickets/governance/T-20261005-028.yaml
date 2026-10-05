@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261005-028
+kind: manual
+title: >-
+  Curate the co-consult contract: reconcile used_by_agents with agent
+  required_skills frontmatters, populate optional[], add the stages-to-phase
+  mapping table, align the single gate binding, fix README tier errors, bump the
+  stale 1.3.0 skill version, and resolve the skill-lifecycle-record convention
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.216Z'
+history:
+  - at: '2026-10-05T13:23:12.216Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.036Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.051Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.066Z'
+    from: review
+    to: done
+result: >-
+  co-consult contract curated: company-intelligence used_by reconciled with
+  frontmatters, mece Phase-1.5 note, optional[] populated, stage-to-phase
+  mapping in phase-definitions, gates bound, README/context tier and numeric
+  claims fixed, skill version 1.3.1, evidence_models_dir null, context PDF claim
+  updated for v1.1.0
+error: null

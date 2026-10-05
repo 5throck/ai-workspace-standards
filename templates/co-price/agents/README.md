@@ -21,6 +21,7 @@ This directory contains agent definition files for the co-price pricing manageme
 | DevOps & CI/CD Admin | `devops-admin.md` | Bun toolchain, Docker stages, git hooks | High |
 | Global Strategy & L10N Auditor | `l10n-auditor.md` | 16-locale parity, glossary adherence, RTL safety | Medium |
 | Security Monitor | `security-monitor.md` | Vuln/advisory scans, gitleaks, dependency policy | Medium |
+| i18n-specialist | `i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout guidance | Medium |
 
 ## Creating New Agents
 

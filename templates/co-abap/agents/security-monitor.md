@@ -1,6 +1,6 @@
 ---
 name: security-monitor
-phases: [0, 5]
+phases: [5]
 role: Security Monitor
 model: inherit
 color: red

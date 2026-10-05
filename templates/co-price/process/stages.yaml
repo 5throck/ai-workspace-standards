@@ -4,18 +4,33 @@ stages:
   - id: S1
     title: Release Assurance
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Carry the pricing engagement from initial analysis through engine build and
+      assurance: establish the market and pricing baseline, model scenarios and the
+      waterfall, implement the engine, then verify finance, audit, localization, and
+      operations readiness before client release (procedures co-price-pricing-analysis,
+      co-price-scenario-modeling, co-price-engine-implementation, co-price-release-assurance).
     entry_criteria:
-      - PENDING_REVIEW
+      - Engagement objectives, constraints, and trade budget cap confirmed with the user (Commercial Operating Cycle stage 0).
+      - Engine build complete with waterfall checks passing (release-assurance precondition).
     exit_criteria:
-      - PENDING_REVIEW
+      - All release-assurance dimensions signed off — QA harness, CPA double-entry reconciliation, l10n audit, cost-data integrity, and deployment readiness.
+      - DG-PRICE-01 passed — engine outputs reconcile with waterfall checks within tolerance (decisions/gates.yaml).
+      - DG-PRICE-02 passed — price recommendation reconciles with the waterfall model within tolerance (decisions/gates.yaml).
+      - Client-facing release go/no-go decision recorded by the engagement-director.
     owner_agent: lead-architect
   - id: S2
     title: Pricing Security Closeout
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Close the engagement: run the engagement review (scorecard, netROI(8w) gate, review
+      memo feeding the next cycle) and confirm residual security, data-handling, and
+      governance risks before closure (procedures co-price-engagement-review,
+      co-price-pricing-security-closeout).
     entry_criteria:
-      - PENDING_REVIEW
+      - S1 exit criteria met — release decision recorded.
+      - Engagement-review evidence available (release_decision and security_attestation inputs).
     exit_criteria:
-      - PENDING_REVIEW
+      - Engagement review completed — netROI(8-week window) evaluated, outcomes classified, scorecard re-scored, review memo recorded as next-cycle input.
+      - Security attestation complete — residual security risks owned or explicitly accepted; otherwise closure stays blocked.
     owner_agent: engagement-director

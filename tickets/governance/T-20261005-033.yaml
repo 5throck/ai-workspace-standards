@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261005-033
+kind: manual
+title: >-
+  Unify co-develop on the 7-phase model: renumber README, context and user-guide
+  tables, correct procedures/feature-implementation phase, fix code-writer
+  phases and give i18n-specialist a placement, rewrite the sd-analyst phantom
+  handoff chain, fix the 2-vs-3 iteration contradiction, and repair the
+  agents/README literal-newline corruption and handoff-spec link
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T13:23:12.286Z'
+history:
+  - at: '2026-10-05T13:23:12.286Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T17:52:22.248Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T17:52:22.262Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T17:52:22.276Z'
+    from: review
+    to: done
+result: >-
+  co-develop phase model unified on the 7-phase 0-6 scheme:
+  README/context/user-guide (en+ko) renumbered, user-guide self-contradiction
+  resolved, feature-implementation procedure phase 4, code-writer [4],
+  i18n-specialist [5] with rows everywhere and manifest dispatch note,
+  handoff-spec chain rewritten without sd-analyst (en+ko, JSON validated),
+  agents/README literal-newline corruption repaired, test-runner audit.sh x3 and
+  stack-setup setup.sh story fixed, 2-vs-3 iteration contradiction resolved
+error: null

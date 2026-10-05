@@ -262,6 +262,6 @@
     "stages_file": "process/stages.yaml",
     "raci_file": "governance/raci.yaml",
     "gates_file": "decisions/gates.yaml",
-    "evidence_models_dir": "evidence-models/"
+    "evidence_models_dir": null
   }
 }

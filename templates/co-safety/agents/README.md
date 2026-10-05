@@ -14,7 +14,7 @@ agents/
 ├── _shared/                   # Cross-cutting specialists
 └── domains/
     ├── functional/            # psm, msds, training
-    └── industry/              # 21 industry domain agents (ehschem, gasterm, gmp, ...)
+    └── industry/              # 22 industry-domain agent files (ehschem, gasterm, gmp, ...)
 ```
 
 Every specialist agent file follows the mandatory **3-Section structure**:

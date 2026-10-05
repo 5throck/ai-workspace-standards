@@ -1,5 +1,5 @@
 ---
-translated_from_hash: d7c7f22c706d47f0b070f6f2e8203a0cb0e63af53ed2062d32f3ffd7cac46334
+translated_from_hash: dbbfb229e1a54e13761e366ea8af0dab44058929fc11356d99a36f7da807f6dc
 ---
 # Co-Consult — 사용자 가이드
 
@@ -106,17 +106,22 @@ bun scripts/co-consult/financial-report.ts   # financial-pipeline.ts가 프로�
 
 ## 4. 인게이지먼트 단계 구조
 
-`AGENTS.md` §3.5 및 §4.2에 따라 작업은 여러 단계를 거치며, PM은 Phase 0, 2, 5-6에서만 능동적으로 조율합니다 — 전문가들은 배정된 단계 내에서 자율적으로 작업합니다.
+`AGENTS.md` §3.5 및 `docs/phase-definitions.md`(단계 모델 SSOT)에 따라 작업은 여러 단계를 거치며, PM은 Phase 0, 1.5, 2, 5-6에서 능동적으로 조율합니다 — 전문가들은 배정된 단계 내에서 자율적으로 작업합니다.
 
 | Phase | 명칭 | 담당 |
 |---|---|---|
-| 0 | 프로젝트 개시 | PM |
-| 1 | 전략 및 리서치 | strategy-analyst, industry-expert, data-analyst, sme, change-management-partner |
-| 2 | 설계 검증 | industry-expert, sme, change-management-partner — PM이 검증 및 게이트 |
-| 3 | 솔루션 및 내러티브 설계 | communications-lead, solutions-architect, sme |
-| 4 | 실행 및 딜리버리 | delivery-manager, workstream-lead, technology-specialist |
-| 5 | 라이프사이클 마무리 | PM (거버넌스 기록 갱신, memory/에 로그) |
-| 6 | QA 및 마무리 | PM (`bun scripts/audit.ts` 실행 후 `/sync`) |
+| 0 | 개시 (Initiation) | PM |
+| 1 | 리서치 및 분석 (Research & Analysis) | strategy-analyst, industry-expert, data-analyst, sme, change-management-partner |
+| 1.5 | 교차 검증 (Cross-Validation) | `docs/engagement-orchestration.md`의 교차 검증 매트릭스에 따른 피어 검증 에이전트 — 읽기 전용, PM이 디스패치 |
+| 2 | 설계 검토 및 승인 (Design Review & Approval) | industry-expert, sme, change-management-partner — PM이 검증 및 게이트 |
+| 3 | 콘텐츠 제작 (Content Creation) | communications-lead, solutions-architect, sme, data-analyst |
+| 4 | 조율 및 딜리버리 (Coordination & Delivery) | delivery-manager, workstream-lead, technology-specialist |
+| 5 | 라이프사이클 마무리 (Lifecycle Finalization) | PM (거버넌스 기록 갱신, memory/에 로그) |
+| 6 | 품질 보증 및 마무리 (Quality Assurance & Finalization) | PM (`bun scripts/audit.ts` 실행 후 `/sync`) |
+
+Phase 1.5는 모든 Phase 1 산출물이 완료된 후 `insight-synthesis` 이전에 실행됩니다: 검증 에이전트가 피어 산출물을 교차 확인하고 원본을 수정하지 않고 결과를 보고하며, 산출물당 최대 1회의 수정 주기를 갖습니다 (해결되지 않은 지적사항은 수용 리스크로 기록).
+
+거버넌스 단계 모델(`process/stages.yaml`, S1–S4)은 인게이지먼트 추적을 위해 이 단계들을 네 개의 딜리버리 단계로 묶습니다 — `docs/phase-definitions.md § Governance Stage Mapping`을 참조하세요.
 
 **반복 루프**: `financial-modeling` ↔ `technical-feasibility`는 Phase 4로 이동하기 전에 비용/ROI 가정과 기술적 리스크를 조율하기 위해 최대 2회 반복될 수 있습니다.
 

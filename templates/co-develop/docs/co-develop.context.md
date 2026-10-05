@@ -38,6 +38,7 @@
 | Security Monitor | `agents/security-monitor.md` | Security review, hook enforcement | active |
 | Designer | `agents/designer.md` | UI/UX specs and component definitions | active |
 | Stack Setup | `agents/stack-setup.md` | Unknown tech stack identification, risk-assessed setup plan, security-reviewed environment bootstrap | active |
+| I18N Specialist | `agents/i18n-specialist.md` | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output (common extends-stub; engaged on demand) | active |
 
 > Lifecycle management: `bun scripts/agent-lifecycle-audit.ts`
 > After any agent change, update AGENTS.md and this table.
@@ -93,14 +94,17 @@ PM —Architect (design + ADR)
 
 ### Workflow Phases
 
+Canonical 7-phase model (see `docs/phase-definitions.md`):
+
 | Phase | Name | What Happens |
 |-------|------|--------------|
-| 0 | Team Assembly | PM creates specialized agents/skills if required |
-| 1 | Triage | PM classifies request; dispatches read-only agents in parallel |
-| 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
-| 3 | Design | Architect produces implementation plan + ADR |
-| 4 | Implementation | Code Writer —Test Runner —loop up to 3× on failures |
-| 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
+| 0 | Team Assembly & Environment Baseline | PM assembles the team and confirms scope; `stack-setup` (optional) and `security-monitor` establish the environment baseline |
+| 1 | Analysis & Stack Setup | `architect` analyzes requirements and acceptance criteria into an implementation-ready brief |
+| 2 | Design Review & Approval | `architect` produces the implementation plan + ADR; explicit user approval required before execution |
+| 3 | UI/UX Design | `designer` (optional) produces wireframes, component specs, and design tokens when a UI/UX component is in scope |
+| 4 | Implementation & QA Gate | Code Writer → Test Runner — loop up to 3× on failures |
+| 5 | Security Review & Lifecycle Finalization | `security-monitor` runs the pre-PR advisory check; PM logs decisions and updates governance records |
+| 6 | Quality Assurance & Finalization | PM runs the audit and `/sync`; opens PR |
 
 ---
 

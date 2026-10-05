@@ -9,8 +9,9 @@
 
 ## 1. Quick Start
 
-1. Start with `/triage <request>` — the PM classifies the request, creates the task file,
-   and kicks off parallel research. Describe the work in plain language: *"Add a new
+1. Start with a PM triage request — hand your request to the PM in plain language
+   (the `/triage <request>` workflow convention: the PM classifies it, creates the task
+   file, and kicks off parallel research): *"Add a new
    pricing report for sales org 1000"* or *"Fix dump in ZPROG_MM_STOCK_UPLOAD".*
 2. The relevant **module analyst** (SD / MM / FI / CO / PP / LE) translates the business
    request into requirements (`01_srs.md` under `deliverables/REQ-NNN-[slug]/`).
@@ -20,15 +21,16 @@
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
    | Module requirements analysis | sd-analyst | Medium | claude-sonnet-5-5 | Claude Code |
-   | ABAP implementation | code-writer | Medium | claude-sonnet-5-5 | Claude Code |
+   | ABAP implementation | code-writer | Low | claude-haiku-4-5 | Claude Code |
    | QA chain | test-runner | Low | claude-haiku-4-5 | Claude Code |
 
 4. Implementation runs through `code-writer` with the **post-write mandatory chain**
    (`SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck`) after every
    `WriteSource` / `EditSource`.
-5. QA produces `04_qa_report.md`; the transport is created/released with `/transport`.
+5. QA produces `04_qa_report.md`; the PM then dispatches **devops-admin** to create/release
+   the CTS transport (the `/transport` step — a PM-orchestrated convention, not a registered command).
 6. Close with `/sync` — the only supported commit path, and it always runs **after**
-   `/transport` so the CTS transport and the git commit stay in sync.
+   the transport step so the CTS transport and the git commit stay in sync.
 
 > **Rule of thumb**: requests that touch a business module go to the module analyst
 > first; pure technical requests (performance, dumps, interfaces) go straight to the
@@ -52,7 +54,7 @@
 ## 3. The Standard Multi-Stage Workflow
 
 ```
-/triage (PM classifies, creates task file, parallel research)
+PM triage (PM classifies, creates task file, parallel research)
         │
         ▼
 Business Analysis (module analysts → 01_srs.md)
@@ -67,18 +69,21 @@ Implementation (code-writer — post-write chain after EVERY write)
 QA & Verification (test-runner → 04_qa_report.md)
         │
         ▼
-/transport (CTS transport created/released)
+Transport step (PM dispatches devops-admin — CTS transport created/released)
         │
         ▼
 /sync (memlog → changelog → audit → commit → PR)
 ```
 
-Key commands:
+Key conventions — PM-orchestrated workflow shorthand, **not registered commands**:
 
-- `/triage <request>` — start a task; PM classification + task file
-- `/post-write` — manual post-write QA chain (when hooks are unavailable, e.g. Desktop App — see `desktop-app-fallback`)
-- `/transport` — create/release the CTS transport
-- `/sync "feat: ..."` — full pipeline; runs **after** `/transport`, never before
+- **PM triage** (`/triage <request>` shorthand) — start a task; PM classification + task file
+- **Post-write QA chain** (`/post-write` shorthand) — manual chain when hooks are unavailable, e.g. Desktop App — see `desktop-app-fallback`
+- **Transport step** (`/transport` shorthand) — PM dispatches devops-admin to create/release the CTS transport
+
+Registered command:
+
+- `/sync "feat: ..."` — full pipeline; runs **after** the transport step, never before
 
 Never bypass the workflow with direct specialist invocation, and never run raw
 `git commit` / `git push` — the hooks will reject it.
@@ -114,5 +119,5 @@ Domain rules to keep in mind:
 - Always run `SyntaxCheck` **before** `WriteSource`; use `EditSource` for small changes.
 - The post-write chain is mandatory after any logic change — Priority 1 ATC findings
   block deployment, and coverage below 70% on new objects blocks proceeding to ATC.
-- `/transport` before `/sync`, always — the CTS transport and git history must not
+- The transport step before `/sync`, always — the CTS transport and git history must not
   diverge.

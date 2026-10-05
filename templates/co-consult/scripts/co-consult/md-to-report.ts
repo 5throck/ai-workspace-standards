@@ -15,6 +15,8 @@ import {
   convertInchesToTwip, TabStopPosition, TabStopType,
 } from 'docx';
 import { fromMarkdown } from 'mdast-util-from-markdown';
+import { gfm } from 'micromark-extension-gfm';
+import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync } from 'fs';
 import { join, resolve, dirname, basename, extname } from 'path';
@@ -136,25 +138,6 @@ function resolveFont(fontDir: string): { regular: string; bold: string } {
   return { regular: fontR, bold: fontB };
 }
 
-// ─── TOC Heading Collector ───────────────────────────────────────────────────────
-
-interface TocEntry { text: string; depth: number; index: string }
-
-function collectTocEntries(ast: { children: MdastNode[] }): TocEntry[] {
-  const entries: TocEntry[] = [];
-  const counters: number[] = [0, 0, 0];
-  for (const node of ast.children) {
-    if (node.type === 'heading' && node.depth >= 1 && node.depth <= 3) {
-      const d = node.depth - 1;
-      counters[d - 1] = (counters[d - 1] ?? 0) + 1;
-      for (let i = d; i < counters.length; i++) counters[i] = 0;
-      const index = counters.slice(0, d).join('.');
-      entries.push({ text: extractText(node), depth: node.depth, index });
-    }
-  }
-  return entries;
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // DOCX Renderer
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -187,7 +170,7 @@ async function renderDocx(
   // ── Sections ──
   const sections: Array<{
     properties: Record<string, unknown>;
-    children: Paragraph[];
+    children: Array<Paragraph | Table>;
   }> = [];
 
   // ── Cover Page Section ──
@@ -256,7 +239,7 @@ async function renderDocx(
   });
 
   // ── Body Section (with header/footer) ──
-  const bodyChildren: Paragraph[] = [];
+  const bodyChildren: Array<Paragraph | Table> = [];
 
   // TOC
   bodyChildren.push(
@@ -281,9 +264,8 @@ async function renderDocx(
   bodyChildren.push(new Paragraph({ children: [new PageBreak()] }));
 
   // Content — walk AST
-  const skipFirstH1 = true;
   for (const node of ast.children) {
-    const paras = renderDocxNode(node, skipFirstH1, ast.children.indexOf(node) === 0);
+    const paras = renderDocxNode(node, ast.children.indexOf(node) === 0);
     bodyChildren.push(...paras);
   }
 
@@ -346,11 +328,11 @@ async function renderDocx(
   writeFileSync(outPath, buffer);
 }
 
-function renderDocxNode(node: MdastNode, skipFirstH1: boolean, isFirstNode: boolean): Paragraph[] {
-  const paras: Paragraph[] = [];
+function renderDocxNode(node: MdastNode, isFirstNode: boolean): Array<Paragraph | Table> {
+  const paras: Array<Paragraph | Table> = [];
 
   if (node.type === 'heading') {
-    if (node.depth === 1 && (skipFirstH1 || isFirstNode)) return paras; // skip first H1 (used for cover)
+    if (node.depth === 1 && isFirstNode) return paras; // skip first H1 (used for cover)
 
     const headingLevels: Record<number, typeof HeadingLevel.HEADING_1> = {
       1: HeadingLevel.HEADING_1,
@@ -409,39 +391,36 @@ function renderDocxNode(node: MdastNode, skipFirstH1: boolean, isFirstNode: bool
 
   else if (node.type === 'table') {
     const rows = node.children;
-    for (let ri = 0; ri < rows.length; ri++) {
-      const row = rows[ri];
-      const cells: TableCell[] = row.children.map(cell => {
-        const isHeader = ri === 0;
-        const isAlt = ri > 0 && ri % 2 === 0;
-        return new TableCell({
-          shading: isHeader
-            ? { type: ShadingType.SOLID, color: THEME.primary, fill: THEME.primary }
-            : isAlt
-              ? { type: ShadingType.SOLID, color: THEME.light, fill: THEME.light }
-              : undefined,
-          width: { size: Math.floor(9000 / row.children.length), type: WidthType.DXA },
-          children: [
-            new Paragraph({
-              spacing: { before: 40, after: 40 },
-              children: [
-                new TextRun({
-                  text: extractText(cell),
-                  bold: isHeader,
-                  color: isHeader ? THEME.white : THEME.body,
-                  size: isHeader ? 20 : 20,
-                  font: 'Pretendard',
-                }),
-              ],
-            }),
-          ],
-        });
-      });
-      paras.push(new Paragraph({
-        children: [new TextRun({ text: '', break: 1 })], // force paragraph before table
-      })); // Table must be in its own paragraph wrapper
-      paras.push(new Paragraph({ children: [] as unknown as TextRun[], table: new Table({ rows: [new TableRow({ children: cells })] }) as unknown as Paragraph }));
-    }
+    const tableRows: TableRow[] = rows.map((row, ri) => {
+      const isHeader = ri === 0;
+      const isAlt = ri > 0 && ri % 2 === 0;
+      const cells: TableCell[] = row.children.map(cell => new TableCell({
+        shading: isHeader
+          ? { type: ShadingType.SOLID, color: THEME.primary, fill: THEME.primary }
+          : isAlt
+            ? { type: ShadingType.SOLID, color: THEME.light, fill: THEME.light }
+            : undefined,
+        width: { size: Math.floor(9000 / row.children.length), type: WidthType.DXA },
+        children: [
+          new Paragraph({
+            spacing: { before: 40, after: 40 },
+            children: [
+              new TextRun({
+                text: extractText(cell),
+                bold: isHeader,
+                color: isHeader ? THEME.white : THEME.body,
+                size: 20,
+                font: 'Pretendard',
+              }),
+            ],
+          }),
+        ],
+      }));
+      return new TableRow({ children: cells });
+    });
+    // Real docx Table in section children — a Paragraph-wrapped table is
+    // silently dropped by the docx library.
+    paras.push(new Table({ rows: tableRows }));
   }
 
   else if (node.type === 'code') {
@@ -586,22 +565,26 @@ async function main() {
 
   const inputArg = args.find(a => !a.startsWith('--'));
   if (!inputArg) {
-    console.error('Usage: bun scripts/co-consult/md-to-report.ts <file.md|dir> [--format docx|pdf|both] [--out <dir>] [--font-dir <dir>]');
+    console.error('Usage: bun scripts/co-consult/md-to-report.ts <file.md|dir> [--format docx|pdf|both] [--out <dir>]');
     process.exit(1);
   }
 
   const format = (get('--format') as OutputFormat) ?? 'docx';
   const outDirArg = get('--out');
-  const fontDir = resolve(dirname(import.meta.path), '..', '..', '..', '..', 'fonts');
+  // Project root = 2 levels up from scripts/co-consult/ (the directory holding
+  // this script); vendored fonts live in <project-root>/fonts.
+  const workspaceRoot = resolve(dirname(import.meta.path), '..', '..');
+  const fontDir = resolve(workspaceRoot, 'fonts');
   const validFormats: OutputFormat[] = ['docx', 'pdf', 'both'];
   if (!validFormats.includes(format)) {
     console.error(`Invalid format: ${format}. Use docx, pdf, or both.`);
     process.exit(1);
   }
 
-  // Resolve input files
-  const workspaceRoot = resolve(dirname(import.meta.path), '..', '..', '..');
-  const inputPath = resolve(workspaceRoot, inputArg);
+  // Resolve input files — relative paths resolve against the caller's cwd
+  // (documented invocation is from the project root), not against the script
+  // location, so relative args can never land outside the project tree.
+  const inputPath = resolve(process.cwd(), inputArg);
   let inputFiles: string[];
 
   if (existsSync(inputPath) && statSync(inputPath).isDirectory()) {
@@ -617,23 +600,24 @@ async function main() {
   console.log(`   Format: ${format}`);
   console.log(`   Files: ${inputFiles.length}`);
 
+  let failedFiles = 0;
   for (const filePath of inputFiles) {
     console.log(`\n── ${basename(filePath)} ──`);
-    const raw = readFileSync(filePath, 'utf8');
-    const { meta: fmMeta, body } = parseFrontmatter(raw);
-    const ast = fromMarkdown(body);
-    const extracted = extractReportMeta(ast, filePath);
-    const meta = mergeMeta(fmMeta, extracted);
-
-    console.log(`   Title: ${meta.title}`);
-    console.log(`   Date:  ${meta.date}`);
-
-    const baseName = basename(filePath, '.md');
-    const fileDir = outDirArg ? resolve(workspaceRoot, outDirArg) : dirname(filePath);
-
-    if (!existsSync(fileDir)) mkdirSync(fileDir, { recursive: true });
-
     try {
+      const raw = readFileSync(filePath, 'utf8');
+      const { meta: fmMeta, body } = parseFrontmatter(raw);
+      const ast = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmTableFromMarkdown()] });
+      const extracted = extractReportMeta(ast, filePath);
+      const meta = mergeMeta(fmMeta, extracted);
+
+      console.log(`   Title: ${meta.title}`);
+      console.log(`   Date:  ${meta.date}`);
+
+      const baseName = basename(filePath, '.md');
+      const fileDir = outDirArg ? resolve(process.cwd(), outDirArg) : dirname(filePath);
+
+      if (!existsSync(fileDir)) mkdirSync(fileDir, { recursive: true });
+
       // DOCX is always rendered (required as source for PDF conversion)
       const docxPath = join(fileDir, `${baseName}.docx`);
       await renderDocx(ast, meta, docxPath, fontDir);
@@ -651,9 +635,15 @@ async function main() {
         }
       }
     } catch (err: unknown) {
+      failedFiles += 1;
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`   ❌ Error: ${msg}`);
     }
+  }
+
+  if (failedFiles > 0) {
+    console.error(`\n❌ ${failedFiles}/${inputFiles.length} file(s) failed to render.`);
+    process.exitCode = 1;
   }
 }
 

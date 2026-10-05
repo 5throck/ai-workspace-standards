@@ -161,6 +161,7 @@
         "name": "test-driven-development",
         "used_by_agents": [
           "game-developer",
+          "game-debugger",
           "test-runner"
         ],
         "phases": [
@@ -195,7 +196,7 @@
     "stages_file": "process/stages.yaml",
     "raci_file": "governance/raci.yaml",
     "gates_file": "decisions/gates.yaml",
-    "evidence_models_dir": "evidence-models/"
+    "evidence_models_dir": null
   },
   "country_config": {
     "profiles_dir": "docs/countries",

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: e0b5b9ede505da17fdc38000d1630a7476fdcfb25baf549cdbaa991a44eee456
+content_hash: 047afe244ebd81f512e6875592ff0ec5e9401af080ebfa731e3b7cf26c50f50c
 ---
 
 # co-news
@@ -35,12 +35,14 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | medium | inherit |
 | **fact-checker** | Fact-checker - the newsroom's citation gatekeeper | medium | inherit |
 | **financial-analyst** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | medium | inherit |
 | **legal-researcher** | Legal researcher - runs the k-law skill against the National Law Information Cen | medium | inherit |
 | **reporter** | Reporter - drafts the article headline, lead, and body strictly from the fact-ch | medium | inherit |
 | **style-editor** | Style editor - runs the AI-tell reduction pass and house-style conformance pass  | medium | inherit |
 | **visual-editor** | Visual editor - turns the financial-analyst's narrative brief into inline SVG fi | medium | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## Skills
 
@@ -74,7 +76,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `/meeting` — retired 2026-09-26; invoke the `meeting-facilitation` skill explicitly for a structured, inline multi-agent discussion.
 
 ## Variant Type
 
@@ -92,4 +94,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-10-06*

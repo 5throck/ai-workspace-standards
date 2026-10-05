@@ -32,8 +32,9 @@
 ## Environment Setup
 
 ```bash
-# 1. Place the vsp binary in the project root
-#    Download from: https://github.com/5throck/vsp/releases
+# 1. Place the vsp binary in the project root (or let install-vsp.ts fetch it)
+#    Source: https://github.com/oisee/vibing-steampunk/releases (pinned v2.60.0 at remediation time;
+#    SHA256-verified against the release's checksums.txt by scripts/co-abap/install-vsp.ts)
 cp /path/to/vsp ./vsp
 chmod +x ./vsp          # macOS/Linux
 # Windows: copy vsp.exe to project root
@@ -87,6 +88,7 @@ Required env keys (see `.env.sample`):
 | Form Expert | `agents/form-expert.md` | SAP Script, Smart Forms, Adobe Forms design | active |
 | Security Monitor | `agents/security-monitor.md` | Security policies and safe dependencies | active |
 | GUI Scripter | `agents/gui-scripter.md` | BDC / VBS automation (last resort) | active |
+| I18N Specialist | `agents/i18n-specialist.md` | Localization review, locale config, and translation-sync for locale mirrors (cross-cutting; outside the SAP delivery pipeline) | active |
 | Intelligence Investigator | `agents/sap-investigator.md` | Codebase pattern scan, historical design extraction | active |
 | Read-Only Analyst | `agents/read-only-analyst.md` | Business data queries, AS-IS analysis with draft acceptance criteria | active |
 | Schema Inspector | `agents/schema-inspector.md` | Table/CDS structure inspection, dependency maps | active |
@@ -160,12 +162,12 @@ Required env keys (see `.env.sample`):
 > workflow, the orchestration-step ↔ agent-phase numbering map, and the PM facilitation table.
 
 ```bash
-# 1. Start a task
-/triage <request>          # PM classifies — creates task file — parallel research
-
-# 2. After implementation
-/post-write                # SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck
-/transport                 # Create/release CTS transport
+# 1. Start a task — PM triage convention (NOT a registered command):
+#    hand the request to the PM; the PM classifies it, creates the task file,
+#    and dispatches parallel research.
+# 2. After implementation — PM-orchestrated conventions (NOT registered commands):
+#    post-write QA chain  SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck
+#    transport step       the PM dispatches devops-admin to create/release the CTS transport
 ```
 
 > **Requirements-Driven Deliverables Workflow (Stage 1 to 5)**:
@@ -212,6 +214,11 @@ MCP servers are configured in `.mcp.json` (Single Source of Truth).
 > **Duplication Note**: MCP server definitions exist in 3 locations — `.mcp.json` (SSOT), `.claude/settings.json` (Claude Code), and `.gemini/settings.json` (Gemini CLI). The pre-commit hook (Step 5) detects drift between these files. Run `bun scripts/sync-mcp.ts` to propagate `.mcp.json` changes to the other two files automatically (`--check` for drift report only).
 
 See `.mcp.json` for the complete server list.
+
+> **Trust decision (documented)**: `enableAllProjectMcpServers: true` in `.claude/settings.json`
+> and `.gemini/settings.json` auto-enables every MCP server declared in `.mcp.json` — including
+> the third-party `abap-docs` / `sap-docs` HTTP endpoints. This is a deliberate convenience trade-off
+> for this variant; remove the flag or the server entries to restrict to first-party (`abap`) only.
 
 > **Note**: This project uses the standard `SAP_*` prefix format for connection and feature flags (e.g. `SAP_MODE`, `SAP_ALLOWED_PACKAGES`), ensuring 100% compatibility with the upstream `vsp` engine.
 

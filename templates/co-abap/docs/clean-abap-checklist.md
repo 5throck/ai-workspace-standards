@@ -433,7 +433,7 @@ By rule family, this checklist distributes ownership across the co-abap agent ro
 | `schema-inspector` | — | 1 | Table/CDS structure inspection (supports DBA, not direct conformance) |
 | Module analysts (SD/MM/FI/CO/PP/LE) | — | 1 | Business requirement analysis (upstream of implementation) |
 
-**Note**: The table above reflects only the 20 agents actually present in the `templates/co-abap/agents/` directory (verified by Glob). Every agent named in the checklist exists in the variant roster — no invented names.
+**Note**: The table above reflects the 21-agent roster actually present in the `templates/co-abap/agents/` directory (verified by Glob). The `i18n-specialist` (locale mirrors — cross-cutting, outside the ABAP delivery pipeline) has no Clean ABAP conformance role and is therefore not mapped. Every agent named in the checklist exists in the variant roster — no invented names.
 
 ---
 
@@ -445,4 +445,4 @@ See `docs/variant-benchmark-backlog.md` §11 row 9 (this checklist) and row 10 (
 
 ---
 
-*Last Updated: 2026-08-24 — Clean ABAP Conformance Checklist v1.0.0*
+*Last Updated: 2026-10-06 — Clean ABAP Conformance Checklist v1.0.0*

@@ -2,20 +2,33 @@ schema_version: '1.0'
 variant: co-security
 stages:
   - id: S1
-    title: Threat Analysis and Reporting
+    title: Engagement Planning and Threat Analysis
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Plan an authorized offensive engagement — scope, rules of engagement, and
+      threat landscape briefing — then deepen the threat model into attack
+      hypotheses and prioritized test objectives (procedures:
+      engagement-planning, threat-analysis).
     entry_criteria:
-      - PENDING_REVIEW
+      - Client request received and the Phase 0 authorization gate passed (verify-authorization returned PASS; docs/phase-definitions.md).
+      - Engagement scope matches the signed authorization document.
     exit_criteria:
-      - PENDING_REVIEW
+      - Engagement planning complete with verified authorization (threat-analysis precondition).
+      - STRIDE tables, attack trees, and prioritized test objectives documented in docs/threat-models/.
     owner_agent: red-team-lead
   - id: S2
-    title: Remediation Support and Hardening
+    title: Remediation, Reporting and Hardening
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Consolidate validated findings into the authorized engagement report with
+      machine-readable exports, support the client through patching and
+      verification, and convert final outputs into retained lessons and
+      hardening actions (procedures: threat-model-and-report,
+      remediation-support, security-reporting, post-engagement-hardening).
     entry_criteria:
-      - PENDING_REVIEW
+      - Findings validated and remediation status current (security-reporting precondition).
+      - Remediation window agreed with the client (remediation-support precondition).
     exit_criteria:
-      - PENDING_REVIEW
+      - DG-SECURITY-01 passed — report findings match the reconciled finding set exactly (decisions/gates.yaml).
+      - Final report delivered with remediation ownership known and post-engagement follow-ups recorded.
     owner_agent: report-writer

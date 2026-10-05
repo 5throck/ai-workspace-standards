@@ -17,7 +17,7 @@ Autonomous 5-stage issue-to-PR resolution pipeline for software engineering task
 
 ## Dependencies
 - Bun runtime
-- test-runner.ts
+- test-runner.ts — the workspace-root `scripts/test-runner.ts` (L0 dev home). It is a workspace-level tool, not part of the shipped variant, so it is unsatisfiable inside an adopted co-develop project; in adopted projects use the project's own test command (e.g. `bun test`) instead.
 
 ## Phase History
 
@@ -31,7 +31,7 @@ Autonomous 5-stage issue-to-PR resolution pipeline for software engineering task
 
 - [x] Skill SKILL.md exists at `skills/swe-solve/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope, version, owner populated
-- [x] Skill is registered in VERSION_MANIFEST.md
+- [x] Registration scope: variant-scoped — recorded in `docs/workspace-schema.json` → `variant_scoped_skills` (co-develop); the workspace `VERSION_MANIFEST.md` covers workspace-root and common-layer skills only, so no row there is expected for this skill
 - [x] Scope: co-develop (variant-exclusive; registered in `variant_scoped_skills`)
 
 ## Notes

@@ -1,9 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
 // install-vsp.ts - Downloads and installs the vsp binary from GitHub Releases
-// Source: https://github.com/oisee/vibing-steampunk
-// Usage: bun scripts/install-vsp.ts [version]
-//   version: optional tag, e.g. v2.38.1 (default: latest)
+// Canonical source (verified 2026-10-06 via GitHub API): oisee/vibing-steampunk
+// publishes actual vsp release assets (vsp-<os>-<arch>[.exe] + checksums.txt);
+// 5throck/vsp — referenced by older docs — returns 404 for both the repo and
+// its releases. Version is PINNED (no releases/latest lookup); bump
+// PINNED_VERSION deliberately after re-verifying the release assets.
+// Integrity is FAIL-CLOSED: the release's checksums.txt manifest must be
+// fetchable and contain an entry for the asset, or the install aborts.
+// Usage: bun scripts/co-abap/install-vsp.ts [version]
+//   version: optional tag override, e.g. v2.61.0 (default: PINNED_VERSION)
 
 import path from "node:path";
 import * as fs from "node:fs";
@@ -11,12 +17,17 @@ import { $ } from "bun";
 import * as crypto from "node:crypto";
 
 const scriptDir = path.dirname(import.meta.path);
-const projectRoot = path.resolve(scriptDir, "..");
+// scripts/co-abap/ → project root (two levels up): the binary is installed at the project root.
+const projectRoot = path.resolve(scriptDir, "..", "..");
 
 const REPO = "oisee/vibing-steampunk";
+// Pinned 2026-10-06: latest verified release at remediation time (assets
+// confirmed via GitHub API: 6 vsp binaries + checksums.txt + LICENSE + NOTICE).
+const PINNED_VERSION = "v2.60.0";
+const FETCH_TIMEOUT_MS = 30_000;
+
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
-const CYAN = "\x1b[36m";
 const RESET = "\x1b[0m";
 
 function detectPlatform(): { platform: string; arch: string } {
@@ -58,6 +69,34 @@ function detectPlatform(): { platform: string; arch: string } {
   return { platform, arch: archName };
 }
 
+/**
+ * Fail-closed checksum lookup: return the expected SHA256 for `assetName` from
+ * the release's checksums.txt manifest. Throws when the manifest is missing,
+ * unfetchable, or has no entry for the asset — an unverified binary of a
+ * privileged tool is never written to disk.
+ */
+async function expectedChecksum(assetName: string, version: string): Promise<string> {
+  const manifestUrl = `https://github.com/${REPO}/releases/download/${version}/checksums.txt`;
+  let res: Response;
+  try {
+    res = await fetch(manifestUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+  } catch (e) {
+    throw new Error(
+      `checksum manifest unreachable (${manifestUrl}): ${e instanceof Error ? e.message : e}`
+    );
+  }
+  if (!res.ok) {
+    throw new Error(`checksum manifest unavailable (HTTP ${res.status}): ${manifestUrl}`);
+  }
+  const manifest = await res.text();
+  for (const line of manifest.split("\n")) {
+    // sha256sum format: "<64-hex>  <filename>" (binary marker "*" tolerated)
+    const m = /^([0-9a-fA-F]{64})\s+\*?(.+?)\s*$/.exec(line);
+    if (m && m[2] === assetName) return m[1].toLowerCase();
+  }
+  throw new Error(`checksum manifest has no entry for '${assetName}': ${manifestUrl}`);
+}
+
 async function main() {
   const { platform, arch } = detectPlatform();
   const installDir = projectRoot;
@@ -75,23 +114,9 @@ async function main() {
   console.log(`Target  : ${target}`);
   console.log("");
 
-  // Resolve version
-  let version = process.argv.slice(2)[0] || "";
-  if (!version) {
-    console.log("Fetching latest release...");
-    try {
-      const res = await fetch(
-        `https://api.github.com/repos/${REPO}/releases/latest`
-      );
-      const data = (await res.json()) as { tag_name: string };
-      version = data.tag_name;
-    } catch {
-      console.error(`${RED}Error: Failed to fetch latest version from GitHub API.${RESET}`);
-      console.error("       Check your internet connection or visit:");
-      console.error(`       https://github.com/${REPO}/releases`);
-      process.exit(1);
-    }
-  }
+  // Resolve version: explicit CLI argument wins; otherwise the pinned tag.
+  // No releases/latest API call — installs are reproducible and reviewed.
+  const version = process.argv.slice(2)[0] || PINNED_VERSION;
 
   console.log(`Version : ${version}`);
 
@@ -102,7 +127,7 @@ async function main() {
   // Download
   console.log("Downloading...");
   try {
-    const res = await fetch(downloadUrl);
+    const res = await fetch(downloadUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
@@ -111,25 +136,16 @@ async function main() {
       throw new Error("Download failed or file is empty.");
     }
 
-    // Verify SHA256 checksum when the release publishes a <asset>.sha256 file.
+    // Verify SHA256 against the release's checksums.txt manifest (fail-closed:
+    // a missing/unfetchable manifest or entry aborts the install).
     const actual = crypto.createHash("sha256").update(buffer).digest("hex");
-    try {
-      const sumRes = await fetch(`${downloadUrl}.sha256`);
-      if (sumRes.ok) {
-        const expected = (await sumRes.text()).trim().split(/\s+/)[0].toLowerCase();
-        if (expected && expected !== actual) {
-          throw new Error(`Checksum mismatch: expected ${expected}, got ${actual}`);
-        }
-        console.log(`${GREEN}✅ SHA256 verified: ${actual.slice(0, 12)}…${RESET}`);
-      } else {
-        console.warn(`${CYAN}⚠ No checksum asset at ${downloadUrl}.sha256 — skipping integrity check.${RESET}`);
-      }
-    } catch (e) {
-      if (e instanceof Error && e.message.startsWith("Checksum mismatch")) {
-        throw e;
-      }
-      console.warn(`${CYAN}⚠ Could not verify checksum: ${e instanceof Error ? e.message : e}${RESET}`);
+    const expected = await expectedChecksum(assetName, version);
+    if (expected !== actual) {
+      throw new Error(
+        `Checksum mismatch for ${assetName}: expected ${expected}, got ${actual} — refusing to install`
+      );
     }
+    console.log(`${GREEN}✅ SHA256 verified against checksums.txt: ${actual.slice(0, 12)}…${RESET}`);
 
     fs.writeFileSync(target, buffer);
 
@@ -138,8 +154,8 @@ async function main() {
       fs.chmodSync(target, 0o755);
     }
   } catch (e) {
-    console.error(`${RED}Error: Download failed: ${e instanceof Error ? e.message : e}${RESET}`);
-    console.error(`       Check that the release asset exists: ${downloadUrl}`);
+    console.error(`${RED}Error: Download or verification failed: ${e instanceof Error ? e.message : e}${RESET}`);
+    console.error(`       Check that the release asset and checksums.txt exist: ${downloadUrl}`);
     process.exit(1);
   }
 
