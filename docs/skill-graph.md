@@ -376,7 +376,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/agents/research.md` | doc | `research` | — | — |
 | `doc:co-deck/agents/storyline.md` | doc | `storyline` | — | — |
 | `doc:co-deck/agents/version.md` | doc | `version` | — | — |
-| `doc:co-deck/docs/co-deck.context.md` | doc | `agent-lifecycle-manager`, `design`, `graft`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `slide-layout-gate`, `storyline`, `theme-authoring`, `version` | — | — |
+| `doc:co-deck/docs/co-deck.context.md` | doc | `agent-lifecycle-manager`, `design`, `graft`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `skill-lifecycle-manager`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/docs/lecture-profile.md` | doc | `html-build`, `pdf-export`, `research`, `storyline` | — | — |
 | `doc:co-deck/docs/user-guide_ko.md` | doc | `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `storyline`, `theme-authoring`, `version` | — | — |
 | `doc:co-deck/docs/user-guide.md` | doc | `design`, `handbook`, `html-build`, `pdf-export`, `prep-pdf`, `research`, `storyline`, `theme-authoring`, `version` | — | — |

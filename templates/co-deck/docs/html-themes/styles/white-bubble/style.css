@@ -1,0 +1,112 @@
+/**
+ * style.css — co-deck style: white-bubble
+ *
+ * Recreates the "Corporate Culture Revolution" (2008) signature look:
+ * vivid full-bleed photos with ONE sentence per slide inside a white
+ * rounded bubble card, keywords highlighted in warm orange, serif
+ * cover title directly on the photo.
+ *
+ * General surfaces (chrome, cards) are a warm light theme so any theme
+ * can pair with it; the zen-specific bubble behavior is scoped to
+ * [data-theme="zen"].
+ */
+
+:root {
+  /* Page background — warm paper gray framing the slides */
+  --bg-color:            #ece9e3;
+
+  /* Surface */
+  --slide-bg:            #ffffff;
+  --card-bg:             #ffffff;
+  --card-shadow:         0 8px 30px rgba(31, 42, 68, 0.14);
+  --card-padding:        2rem 2.5rem;
+
+  /* Header */
+  --header-bg:           #1f2a44;
+  --header-text:         #ffffff;
+  --header-height:       3.2rem;
+
+  /* Typography */
+  --font-family:         'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-size-title:     2rem;
+  --font-size-body:      1.05rem;
+  --font-weight-title:   700;
+  --line-height-body:    1.7;
+
+  /* Colors */
+  --text-primary:        #1f2a44;
+  --text-secondary:      #2b3650;
+  --accent:              #e8590c;
+  --accent-light:        #fdeee3;
+  --bullet-color:        #e8590c;
+
+  /* Layout */
+  --image-panel-width:   45%;
+  --image-panel-min-width: 280px;
+
+  /* Divider */
+  --divider-bg:          #1f2a44;
+  --divider-accent:      #e8590c;
+
+  /* Cover */
+  --cover-bg:            #1f2a44;
+
+  /* Chrome / UI surfaces */
+  --border-color:         rgba(31, 42, 68, 0.12);
+  --border-subtle:        rgba(31, 42, 68, 0.08);
+  --glass-bg:             rgba(255, 255, 255, 0.92);
+  --toc-drawer-bg:        var(--glass-bg);
+  --toc-drawer-bg-solid:  #ffffff;
+  --footer-bg:            var(--glass-bg);
+  --hover-bg:             rgba(31, 42, 68, 0.04);
+  --text-dim:             rgba(31, 42, 68, 0.4);
+  --scrollbar-thumb:      rgba(31, 42, 68, 0.14);
+  --progress-track:       rgba(31, 42, 68, 0.08);
+  --nav-btn-bg:           rgba(31, 42, 68, 0.04);
+  --nav-btn-hover:        rgba(31, 42, 68, 0.08);
+}
+
+/* ── Zen pairing: "White Bubble" (2008 signature) ────────────────────
+   Photos stay vivid under a faint dark wash; sentence slides carry
+   their text inside a white rounded bubble card; the cover keeps white
+   serif type directly on the photo, like the 2008 original. */
+[data-theme="zen"] {
+  --zen-overlay-color-top:    rgba(20, 20, 20, 0.28);
+  --zen-overlay-color-bottom: rgba(20, 20, 20, 0.18);
+  --cover-text:               #ffffff;
+  --text-on-dark:             #1f2a44;
+  --divider-text:             #1f2a44;
+  --cover-subtitle-text:      rgba(31, 42, 68, 0.68);
+  --accent-color:             #e8590c;
+}
+
+/* White bubble card on every slide except the cover */
+[data-theme="zen"] .slide:not([data-type="cover"]) .slide-content {
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 14px;
+  padding: 2rem 2.75rem;
+  box-shadow: 0 10px 34px rgba(20, 20, 20, 0.22);
+}
+
+[data-theme="zen"] .slide-card .slide-title { color: #1f2a44; text-shadow: none; }
+[data-theme="zen"] .slide-card .slide-subtitle { color: rgba(31, 42, 68, 0.68); }
+[data-theme="zen"] .slide-card .bullet-item { color: rgba(31, 42, 68, 0.82); }
+[data-theme="zen"] .slide-card .cover-meta,
+[data-theme="zen"] .slide-card .contact-item { color: rgba(31, 42, 68, 0.55); }
+
+/* Keyword highlight — **word** in slideData renders <strong> */
+[data-theme="zen"] .slide-card strong { color: #e8590c; }
+
+/* Cover: serif white type directly on the photo, warm highlight */
+[data-theme="zen"] .slide[data-type="cover"] .slide-title {
+  font-family: 'Noto Serif KR', 'Georgia', 'Batang', serif;
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+[data-theme="zen"] .slide[data-type="cover"] .slide-subtitle {
+  color: rgba(255, 255, 255, 0.88);
+}
+[data-theme="zen"] .slide[data-type="cover"] .cover-meta {
+  color: rgba(255, 255, 255, 0.72);
+}
+[data-theme="zen"] .slide[data-type="cover"] .slide-card strong { color: #ffc078; }

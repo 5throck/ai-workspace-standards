@@ -18,7 +18,7 @@ A **theme** is a rendering paradigm package of **4 files**: HTML skeleton (`temp
 | `pitch` | 1.0.0 | active | ppt-engine | bottom footer bar — prev/next buttons + TOC drawer + Fade/Push/Zoom transitions + TTS | Optional | classic, minimal, premium-dark | `themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | active | ppt-presenter | PPT footer bar — prev/next + transition mode selector (fade/push/zoom) + TOC drawer + script toggle + timer | Optional | classic, minimal, premium-dark, academic, visual-heavy (⚠ partial) | `themes/pitch-enhanced/` |
 | `vertical` | 3.0.0 | active | vertical-scroll | sticky top bar — TOC drawer + prev/next arrows + TTS controls + auto-advance + timer + progress bar | Required | classic, minimal, premium-dark, academic, visual-heavy | `themes/vertical/` |
-| `zen` | 3.0.0 | active | zen | TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls | Optional | classic, minimal, premium-dark, academic | `themes/zen/` |
+| `zen` | 3.0.0 | active | zen | TOC drawer + footer bar — prev/next, transition mode selector, script toggle, timer, TTS controls | Optional | classic, minimal, premium-dark, academic, white-bubble | `themes/zen/` |
 <!-- AUTO-GENERATED-THEME-TABLE:END -->
 
 ### Theme Package Files
@@ -161,9 +161,12 @@ PDF export and print specifications. `bleed_mm`: bleed area for professional pri
 | `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `visual-heavy` | ✅ | ✅ | ❌ incompatible | ⚠️ partial | ✅ | ❌ incompatible |
+| `white-bubble` | ❓ | ❓ | ❓ | ❓ | ❓ | ✅ |
 <!-- AUTO-GENERATED-COMPAT-MATRIX:END -->
 
 **Legend**: ✅ Fully compatible · ⚠️ Partial (see theme.json `partial_styles`) · ❌ Incompatible (see theme.json `incompatible_styles`)
+
+> **`white-bubble` is zen-only by design**: its signature (white bubble card, vivid-photo overlay, keyword-highlight styling) is expressed through zen-specific selectors and variables, and it is declared compatible only with `zen`. Pairing it with other themes is not registered — not silently broken; add it to a theme's `compatible_styles` only after verifying the render.
 
 > **`visual-heavy`** is `⚠️ partial` for all PPT-transformed themes (outline, pitch-enhanced, zen, vertical): full-bleed `background-image` on `.slide` works but the floating-card clipping in pitch-enhanced or the card-boundary in base.css themes means some image area may be cropped. The text-shadow overlay works fully.
 >
@@ -201,6 +204,7 @@ A **style** controls color, font, and spacing via `styles/base.css` (shared foun
 | `minimal` | 1.0.0 | active | `docs/html-themes/styles/minimal/style.css` | `styles/minimal/pdf_color_spec.json` | Text-heavy lectures | None |
 | `visual-heavy` | 1.0.0 | active | `docs/html-themes/styles/visual-heavy/style.css` | `styles/visual-heavy/pdf_color_spec.json` | Visual storytelling | Full-bleed background |
 | `academic` | 1.0.0 | active | `docs/html-themes/styles/academic/style.css` | `styles/academic/pdf_color_spec.json` | Research / thesis | 30% illustration panel |
+| `white-bubble` | 1.0.0 | active | `docs/html-themes/styles/white-bubble/style.css` | `styles/white-bubble/pdf_color_spec.json` | Zen storytelling — vivid photos + white bubble cards + orange keyword highlights (zen-only; derived from the 2008 "Corporate Culture Revolution" deck) | Full-bleed background + white bubble |
 
 > **`premium-dark` is the default style** as of 2026-06-22. Projects whose `lecture-profile.md` does not set `style` now render `premium-dark` (dark navy surfaces `#111827`/`#0B0F19` + gold accent `#D97706` + MaruBuri/Noto Serif KR typography + soft gold title glow via `--title-text-shadow`). Derived from the `kyobo_ax_2026` executive lecture deck; compatible with all themes.
 >
@@ -376,4 +380,4 @@ Layer 3 (project): presentations/<project>/lecture-profile.md            → lay
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.
 
-*Last updated: 2026-07-22 — `outlook` (v1.0.0, horizontal-scroll paradigm) added; 6 themes total: outline (v3.0.0), outlook (v1.0.0), pitch (v1.0.0), pitch-enhanced (v3.0.0), vertical (v3.0.0), zen (v3.0.0). Previous (2026-06-25): notebook, scroll, slideshow themes removed; remaining 5 themes: outline (v3.0.0), pitch (v1.0.0), pitch-enhanced (v3.0.0), vertical (v3.0.0), zen (v3.0.0); default theme changed to pitch-enhanced. Previous (2026-06-24): 3 new themes added (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); compatibility matrix expanded to 8 themes.*
+*Last updated: 2026-10-05 — `white-bubble` (v1.0.0, zen-only) style added — vivid photos + white bubble cards + orange keyword highlights, derived from the 2008 "Corporate Culture Revolution" reference deck. Previous (2026-07-22): `outlook` (v1.0.0, horizontal-scroll paradigm) added; 6 themes total: outline (v3.0.0), outlook (v1.0.0), pitch (v1.0.0), pitch-enhanced (v3.0.0), vertical (v3.0.0), zen (v3.0.0). Previous (2026-06-25): notebook, scroll, slideshow themes removed; remaining 5 themes: outline (v3.0.0), pitch (v1.0.0), pitch-enhanced (v3.0.0), vertical (v3.0.0), zen (v3.0.0); default theme changed to pitch-enhanced. Previous (2026-06-24): 3 new themes added (zen, vertical, outline); all PPT themes upgraded to v3.0.0 (TOC drawer replaces thumbnail panel); compatibility matrix expanded to 8 themes.*

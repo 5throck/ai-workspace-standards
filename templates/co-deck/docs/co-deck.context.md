@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-10-04
+# Last Updated: 2026-10-05
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -149,7 +149,7 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 | `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
 | `vertical` | 3.0.0 | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | max 5 bullets, 28 char title, 30-60 slides | `docs/html-themes/themes/vertical/` |
-| `zen` | 3.0.0 | Presentation Zen — full-bleed backgrounds, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 3 bullets, 28 char title, 10-30 slides | `docs/html-themes/themes/zen/` |
+| `zen` | 3.0.0 | Presentation Zen — full-bleed backgrounds, semi-transparent overlay, centered message | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 5 bullets, 50 char title, 10-30 slides | `docs/html-themes/themes/zen/` |
 
 `theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_styles` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
 
@@ -210,6 +210,7 @@ A **style** is a CSS variable override file that controls color, font, and spaci
 | `minimal` | `docs/html-themes/styles/minimal/style.css` | Text-heavy lectures | None |
 | `visual-heavy` | `docs/html-themes/styles/visual-heavy/style.css` | Visual storytelling (partial for all PPT themes) | Full-bleed background |
 | `academic` | `docs/html-themes/styles/academic/style.css` | Research / thesis | 30% illustration panel |
+| `white-bubble` | `docs/html-themes/styles/white-bubble/style.css` | Zen storytelling — one sentence per slide in a white bubble card, orange keyword highlights (zen-only) | Full-bleed background + white bubble |
 
 > **`premium-dark` is the default style** as of 2026-06-22 (replaces `classic`). Projects whose `lecture-profile.md` does not set `style` now render `premium-dark`. Derived from the `kyobo_ax_2026` executive lecture deck; compatible with all themes.
 >
@@ -432,23 +433,6 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 | 11 | Export | **Gate 5 (required)** | sample_5slides.pdf → full .pdf |
 <!-- END VARIANT-INJECT -->
 
-### PPTX Export Boundary
-
-HTML theme decks terminate at PDF by design (pdf-export skill + render-pdf-deck.ts pipeline). Fidelity loss in an HTML→OOXML conversion is the accepted trade-off for the layout-first theme system.
-
-For PowerPoint handoff of markdown-sourced material, use the workspace-root compiler: `bun scripts/md-to-ooxml.ts --input <deck-outline.md> --type pptx` (v1.2.0, Flat OPC single-file OOXML package; H1-per-slide mapping). This is the supported pptx path, kept at the workspace layer rather than forked into co-deck.
-
-This boundary is deliberate; revisit only if a theme-deck pptx fidelity requirement lands (see `docs/variant-benchmark-backlog.md` §5 row 5 for the tracking entry).
-
----
-
-## Git / PR Workflow
-
-See `docs/context.md` § Git / PR Workflow for the full `/sync` pipeline (memlog → MEMORY.md
-index update → CHANGELOG.md → audit → branch → commit/push → PR). No content override — none
-of `co-deck`'s 4 production workflows (Presentation, Handbook, Theme, Style) alter git/PR
-mechanics; each production run still ends the same way once its gates pass.
-
 ---
 
 <!-- VARIANT-INJECT: guidelines [REQUIRED] -->
@@ -528,12 +512,6 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 ---
 
-## Computational Integrity
-
-All numeric outputs in deliverables (aggregations, statistics, percentages, metrics) must be computed by executed code (bun/TypeScript scripts) — never by the AI performing arithmetic directly. High-precision or safety-critical domains (Class A: aerospace, precision control, regulated finance) require validated external tools. See `docs/context.md` § Computational Integrity Standards for the full policy; label AI estimates **approximate**.
-
----
-
 ## File Organization Policy
 
 <!-- VARIANT-INJECT: file-organization -->
@@ -574,7 +552,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
 5. **PDF requires layout preparation** — run Prep PDF (estimate-layout.ts) before Export Agent; optional auto-calibrate loop for iterative refinement
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
-7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline **[DECK-R1]**
+7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
@@ -584,8 +562,7 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.7.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**. **Background images** (v1.7.0): when `background_image.enabled: true` in lecture-profile.md, the renderer applies full-bleed background images via `placeImageCover()` + semi-transparent overlay via `fillRectOverlay()` per scope (`all`/`divider-cover`/`individual`). Image paths resolved from `image-manifest.json` first, then `slideData.backgroundImage`, then `fallback_color`.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
 16. **UTF-8 without BOM (LF)**: All co-deck files — source templates, generated HTML, scripts, markdown, JSON — MUST use UTF-8 encoding without BOM and LF line endings. html-build agent must verify `<meta charset="UTF-8">` in generated HTML. On Windows (Korean locale), ensure `chcp 65001` is set before any file write to prevent CP949 corruption. See `docs/html-themes/THEMES.md → File Encoding Standard` for enforcement details.
-17. **Background image system (v1.7.0)**: `lecture-profile.md` has an independent `background_image` section (not inside pdf_color_spec.json) with fields: `enabled`, `scope` (all/divider-cover/individual), `source` (download/svg), `overlay` (color + opacity), `keywords`, `fallback_color`. Stage 0 prompts the user for background image preference. Image-curator downloads `bg-deck.<ext>` (atmospheric landscape, ~1920×1080) and adds a global entry (`slide_index: -1`, `scope: "global"`) to `image-manifest.json`. Html-build binds `backgroundImage` into slideData. Template.html sets `--slide-bg-image` CSS variable for HTML rendering. Pdf-export reads config and renders full-bleed + overlay.
-18. **Layout gate before PDF export** **[DECK-R2]**: after html-build and before `gen-slides-pdf.ts`, run `bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --lint` — every slide in slidedata.json is checked against the merged spec's `content_constraints` (title/subtitle/desc chars, bullet count, body chars per slide type). Exit 1 (any FAIL: over-bound content, or a slide type missing from `slide_types`) blocks PDF export; remediate via the ladder in `skills/slide-layout-gate/SKILL.md` (cut → split → reclassify → justified `layout_overrides`). Slide types with no declared constraints pass with WARN. This is the render-time bound; `theme.json content_rules` (Rule 11) remains the stricter creation-time discipline. <!-- END VARIANT-INJECT -->
+17. **Background image system (v1.7.0)**: `lecture-profile.md` has an independent `background_image` section (not inside pdf_color_spec.json) with fields: `enabled`, `scope` (all/divider-cover/individual), `source` (download/svg), `overlay` (color + opacity), `keywords`, `fallback_color`. Stage 0 prompts the user for background image preference. Image-curator downloads `bg-deck.<ext>` (atmospheric landscape, ~1920×1080) and adds a global entry (`slide_index: -1`, `scope: "global"`) to `image-manifest.json`. Html-build binds `backgroundImage` into slideData. Template.html sets `--slide-bg-image` CSS variable for HTML rendering. Pdf-export reads config and renders full-bleed + overlay. <!-- END VARIANT-INJECT -->
 
 ### H-Stage Pipeline (Handbook — Document Production)
 
@@ -676,6 +653,15 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 
 ---
 
+*co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
+*co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
+
+## Template Provenance
+
+- **Template-Version**: 0.5.4
+- **Template-Variant**: co-deck
+
+
 <!-- COMMON-CONTEXT:START -->
 ### Instruction Standard (LLM Interaction Standard, ADR-0098)
 
@@ -694,14 +680,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 - **Enforcement**: governance, not code — decision records capture the judgment trail, and the change audits catch structural drift. Full decision: ADR-0080 in the workspace root `docs/adr/`.
 <!-- COMMON-CONTEXT:END -->
 
----
 
-*co-deck.context.md version: 4.5 — layout gate (Domain Rule 18, [DECK-R2]) — estimate-layout.ts v1.2.0 `--lint` checks slidedata.json against the merged content_constraints; FAIL blocks PDF export; `slide-layout-gate` skill owns the gate procedure (2026-08-26); previous: 4.4 handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`), validation layered and aggregated via `validate-handbook.ts` (8 check groups); 4.3 merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md*
-
-## Template Provenance
-
-- **Template-Version**: 0.5.4
-- **Template-Variant**: co-deck
 <!-- COMMON-CONTEXT:START -->
 This project follows the coding standards in the key-rules list below.
 

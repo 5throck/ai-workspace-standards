@@ -63,3 +63,22 @@
   --nav-btn-bg:           rgba(0, 0, 0, 0.04);
   --nav-btn-hover:        rgba(0, 0, 0, 0.08);
 }
+
+/* ── Zen pairing: "Ink & Paper" ──────────────────────────────────────
+   Scoped to [data-theme="zen"] — other themes are unaffected.
+   Replaces zen's dark overlay with a warm paper wash so background
+   photos read as faint watermarks and text stays ink-dark. */
+[data-theme="zen"] {
+  --zen-overlay-color-top:    rgba(248, 246, 241, 0.90);
+  --zen-overlay-color-bottom: rgba(248, 246, 241, 0.84);
+  --cover-text:               #1a1a2e;
+  --text-on-dark:             #1a1a2e;
+  --divider-text:             #1a1a2e;
+  --cover-subtitle-text:      rgba(26, 26, 46, 0.68);
+  --accent-color:             #B03A2E;
+}
+[data-theme="zen"] .slide-card .slide-title { color: #1a1a2e; text-shadow: none; }
+[data-theme="zen"] .slide-card .slide-subtitle { color: rgba(26, 26, 46, 0.68); }
+[data-theme="zen"] .slide-card .bullet-item { color: rgba(26, 26, 46, 0.80); }
+[data-theme="zen"] .slide-card .cover-meta,
+[data-theme="zen"] .slide-card .contact-item { color: rgba(26, 26, 46, 0.5); }
