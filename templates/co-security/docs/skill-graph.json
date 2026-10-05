@@ -299,6 +299,12 @@
       "source": "decision_model"
     },
     {
+      "type": "accountable_for",
+      "from": "patch-engineer",
+      "to": "procedure.co-security.remediation-support",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "patch-engineer",
       "to": "verify-authorization",
@@ -626,12 +632,6 @@
       "source": "raci_matrix"
     },
     {
-      "type": "accountable_for",
-      "from": "red-team-lead",
-      "to": "procedure.co-security.threat-analysis",
-      "source": "raci_matrix"
-    },
-    {
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
@@ -646,19 +646,7 @@
     {
       "type": "accountable_for",
       "from": "report-writer",
-      "to": "procedure.co-security.remediation-support",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "report-writer",
       "to": "procedure.co-security.security-reporting",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "report-writer",
-      "to": "procedure.co-security.threat-model-and-report",
       "source": "raci_matrix"
     },
     {
@@ -898,6 +886,18 @@
       "from": "stride-threat-matrix",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "threat-modeler",
+      "to": "procedure.co-security.threat-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "threat-modeler",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "raci_matrix"
     },
     {
       "type": "references",

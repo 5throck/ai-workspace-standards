@@ -9,9 +9,9 @@
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
-| 1 | **Phase A complete** | Pending | `phaseAComplete` in variant.json; agent manifest (40), skill manifest (4), documentation present. |
-| 2 | **Agent roster completeness** | Pending | All 40 agents defined; verify each agent file has substantive content. |
-| 3 | **Skills coverage** | Pending | 4 variant-specific skills; verify each SKILL.md is complete and operational. |
+| 1 | **Phase A complete** | Pending | `phaseAComplete` in variant.json; agent manifest registers 4 top-level roster entries (40 agent definition files ship in total, incl. the nested `_shared/` and `domains/` trees per `agents/README.md` manifest-scope note); skill manifest (60), documentation present. |
+| 2 | **Agent roster completeness** | Pending | All 40 agent definition files present (3 top-level + 12 `_shared/` + 3 functional + 22 industry, per `agents/README.md`); verify each agent file has substantive content. |
+| 3 | **Skills coverage** | Pending | 60 skills registered in `skills[]`; `skill_manifest.variant_specific` designates 4 (compliance-gap, permit-to-work, risk-assessment, emergency-response) as the variant-specific core workflow set; verify each SKILL.md is complete and operational. |
 | 4 | **Documentation completeness** | Pending | README.md present and accurate; AGENTS.md reflects the actual roster; variant.json fields accurate. |
 | 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` passes with 0 errors. |
 | 6 | **Real engagements** | Pending | Minimum 1 successful end-to-end engagement. |

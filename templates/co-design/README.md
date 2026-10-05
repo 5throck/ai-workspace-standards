@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 9a4a25829fe39c45c4a87b70c7a842322d70aba1747b3daa33cec7b5b6b5eef2
+content_hash: 1e8cebc1a35879a4615474af2ee563023f54ecbf847c319dda44cf47eeb4cead
 ---
 
 # co-design
@@ -39,6 +39,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 |-------|------|------|-------|
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
 | **design-lead** | Design system architect — visual language, tokens, and component architecture | high | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 | **prototype-engineer** | Interactive prototyping specialist — builds functional prototypes for testing | medium | inherit |
 | **service-designer** | Service designer — end-to-end service experiences, journeys, and blueprints | medium | inherit |
 | **storyteller** | Brand narrative lead — design principles, brand voice, and pattern consistency audits | medium | inherit |
@@ -50,6 +51,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 - **accessibility-audit**: Defines automated WCAG 2.1 Level AA accessibility evaluation rules, DOM audit patterns, and remediation guidance using axe-core for UI components, templates, and web applications.
 - **service-design**: Designs end-to-end service experiences including customer journeys, service blueprints, and operational processes. Use when: mapping customer experiences, optimizing touchpoints, aligning frontstage and backstage operations, or improving service delivery.
+- **token-usage-lint**: Lint procedure that scans co-design UI code for hardcoded design values (raw hex colors, rgb()/hsl() literals, raw px spacing) that bypass the tokens.json SSOT. Use when: reviewing generated UI code, auditing for hardcoded design values, or checking design token compliance in playground demos and handoff artifacts.
 - **ui-ux-design-intelligence**: Provides comprehensive UI/UX design capabilities including design system creation, component design, visual hierarchy, and user-centered design principles. Use when: building design systems, creating visual designs, designing UI components, or establishing design specifications.
 
 See [docs/user-guide.md](docs/user-guide.md) for a practical, task-oriented walkthrough of when to use each agent and skill, the workflow phases, and where deliverables are saved.
@@ -82,7 +84,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `/meeting-facilitation` — Run a structured, inline multi-agent discussion (skill; the legacy `/meeting` slash command is retired).
 
 ## Variant Type
 
@@ -92,4 +94,4 @@ This variant focuses on UI/UX design, design systems, prototyping, and design ha
 
 ---
 
-*Last Updated: 2026-08-25*
+*Last Updated: 2026-10-06*

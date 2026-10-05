@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: b4544c21a73694d38bf8db048d2ace3e1acf314cfef6b174864f7e2d0030ccce
+translated_from_hash: ef6fb8bdda12ab229a52f0a1bd51bf74690bc6b98744e0fc67cb7161e1002d86
 lang: ko
 lang_reason: source-material
 ---
@@ -42,6 +42,7 @@ lang_reason: source-material
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
 | **analyst** | Research analyst — investigation, data synthesis, and evidence gathering | medium | inherit |
 | **content-writer** | Content writer — research-to-documentation transformation and communications | medium | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 | **ms365-expert** | Microsoft 365 expert — guidance on Outlook, Word, Excel, PowerPoint, Teams | low | inherit |
 | **project-coordinator** | Project coordinator — schedules, stakeholder communication, delivery logistics | low | inherit |
 | **storyteller** | Organizational storyteller — culture, change narratives, institutional knowledge | medium | inherit |
@@ -76,7 +77,7 @@ lang_reason: source-material
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `/meeting-facilitation` — 구조화된 인라인 다중 에이전트 토론을 실행합니다 (스킬; 레거시 `/meeting` 슬래시 명령어는 폐기되었습니다).
 
 ## 변형 유형
 
@@ -86,4 +87,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-08-09*
+*최근 갱신: 2026-10-06*

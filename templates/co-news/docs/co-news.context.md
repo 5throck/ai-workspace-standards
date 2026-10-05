@@ -19,7 +19,7 @@ No runtime application stack — co-news produces article deliverables, not soft
 
 ## Agents
 
-See [AGENTS.md](../AGENTS.md) for the full 7-agent roster.
+See [AGENTS.md](../AGENTS.md) for the full 8-agent roster.
 
 ## Skills
 
@@ -27,6 +27,7 @@ See [AGENTS.md](../AGENTS.md) for the full 7-agent roster.
 - `financial-narrative-brief` — turns k-dart financial data into an article-ready narrative brief
 - `financial-journalism-style` — financial-journalism house style in the variant's source register (KR: Sedaily / TheBell conventions)
 - `ai-tell-reduction` — rewrites AI-sounding prose into naturally human-written prose in the target language (KR profile default: Korean)
+- `style-lint-checklist` — pre-publication lint pass encoding the financial-journalism style guide's top rules as pass/fail checklist items; run by style-editor before publication, meaning-distortion findings block
 - `financial-infographic-svg` — generates inline SVG financial infographics from the narrative brief
 
 Also uses the L1 common skills k-dart (DART financial disclosures, KR) and k-law (KR statutes/precedents) — see templates/common/skills/.
@@ -194,7 +195,7 @@ items.
 <!-- VARIANT-SECTION: agent-roster -->
 ## Agent Roster
 
-Co-News uses a 7-agent newsroom roster (1 orchestrator + 6 specialists):
+Co-News uses an 8-agent newsroom roster (1 orchestrator + 6 newsroom specialists + i18n-specialist):
 
 | Agent | File | Role | Phase(s) |
 |-------|------|------|----------|
@@ -205,6 +206,7 @@ Co-News uses a 7-agent newsroom roster (1 orchestrator + 6 specialists):
 | **reporter** | `agents/reporter.md` | Drafts the article from verified briefs; follows financial-journalism-style house conventions | 3 |
 | **style-editor** | `agents/style-editor.md` | Runs AI-tell reduction pass and house-style conformance pass; re-verifies figures against the citation ledger | 4 |
 | **visual-editor** | `agents/visual-editor.md` | Generates financial-infographic-svg visualizations from the narrative brief data | 5 |
+| **i18n-specialist** | `agents/i18n-specialist.md` | Owns locale configuration, locale-specific formatting, and text layout guidance | cross-cutting |
 <!-- END VARIANT-SECTION -->
 
 

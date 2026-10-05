@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20261005-035
+kind: manual
+title: >-
+  Fleet remediation: clear the 334 validate-variant-claims findings across
+  co-design, co-export, co-game, co-hr, co-news, co-price, co-safety,
+  co-security, co-work (i18n/pm roster rows, evidence_models_dir and missing
+  raci/gates paths, PENDING_REVIEW stages, ADR-0099 checklist reconciliations
+  for same-day stable migrations, count claims, gate title truncations, used_by
+  gaps) - the same classes remediated for co-deck/co-consult/co-abap/co-develop
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T22:17:38.496Z'
+history:
+  - at: '2026-10-05T22:17:38.496Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T22:59:11.774Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T22:59:11.788Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T22:59:11.803Z'
+    from: review
+    to: done
+result: >-
+  Fleet remediation complete: all 13 templates PASS 0 findings on
+  validate-variant-claims v1.4.0 (was 9 FAIL ~334 findings) - co-export 21,
+  co-hr 24, co-news 18, co-game 24, co-security 32, co-work 31, co-design 28,
+  co-price 54, co-safety 102 all cleared (co-safety's 77 residual were validator
+  calibration items, fixed by recursive roster walk + header detection + [p]
+  prose calibration); batch 3 landed (checks s: SCRIPTS.md flag validation, t:
+  settings hook lint, docs-links --all scope to templates/*/docs, [p]
+  path-literal calibration); new docs-links findings fixed (co-game/co-export
+  anchors, 43 Windows absolute links in co-safety ko docs); T-019 scope folded
+  in
+error: null

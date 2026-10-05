@@ -6251,19 +6251,13 @@
     {
       "type": "accountable_for",
       "from": "architect",
-      "to": "procedure.co-abap.requirements-analysis",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "architect",
-      "to": "procedure.co-abap.security-readiness-baseline",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "architect",
       "to": "procedure.co-abap.solution-blueprint",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-game.game-architecture-design",
       "source": "raci_matrix"
     },
     {
@@ -6502,6 +6496,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "co-analyst",
+      "to": "procedure.co-abap.requirements-analysis",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "code-review",
       "to": "code-writer",
@@ -6577,12 +6577,6 @@
       "type": "accountable_for",
       "from": "code-writer",
       "to": "procedure.co-abap.custom-dev-delivery",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "code-writer",
-      "to": "procedure.co-abap.security-closeout-review",
       "source": "raci_matrix"
     },
     {
@@ -7808,6 +7802,12 @@
       "source": "raci_matrix"
     },
     {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "design",
       "to": "design",
@@ -7980,6 +7980,12 @@
       "from": "designer",
       "to": "code-review",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "designer",
+      "to": "procedure.co-game.game-content-production",
+      "source": "raci_matrix"
     },
     {
       "type": "references",
@@ -9772,13 +9778,97 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-design/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -9832,7 +9922,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/README.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
       "to": "service-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "token-usage-lint",
       "source": "workflow-doc"
     },
     {
@@ -10090,6 +10192,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/AGENTS.md",
       "to": "project-review",
       "source": "workflow-doc"
     },
@@ -10103,12 +10217,6 @@
       "type": "cites_skill",
       "from": "doc:co-export/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-export/AGENTS.md",
-      "to": "source-command-commit-push-pr",
       "source": "workflow-doc"
     },
     {
@@ -10162,6 +10270,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-export/docs/co-export.context.md",
+      "to": "landed-cost-calculation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
       "to": "logistics-coordination",
       "source": "workflow-doc"
     },
@@ -10169,6 +10283,12 @@
       "type": "cites_skill",
       "from": "doc:co-export/docs/co-export.context.md",
       "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/co-export.context.md",
+      "to": "roo-qualification-worksheet",
       "source": "workflow-doc"
     },
     {
@@ -10354,6 +10474,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-export/README.md",
+      "to": "landed-cost-calculation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
       "to": "logistics-coordination",
       "source": "workflow-doc"
     },
@@ -10361,6 +10487,18 @@
       "type": "cites_skill",
       "from": "doc:co-export/README.md",
       "to": "market-entry-strategy",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/README.md",
+      "to": "roo-qualification-worksheet",
       "source": "workflow-doc"
     },
     {
@@ -10493,6 +10631,12 @@
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
       "to": "test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "arcade-physics",
       "source": "workflow-doc"
     },
     {
@@ -10528,6 +10672,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/AGENTS.md",
       "to": "project-review",
       "source": "workflow-doc"
     },
@@ -10541,12 +10697,6 @@
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-hr/AGENTS.md",
-      "to": "source-command-commit-push-pr",
       "source": "workflow-doc"
     },
     {
@@ -10840,6 +10990,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-hr/README.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/README.md",
       "to": "org-design-framework",
       "source": "workflow-doc"
     },
@@ -10882,6 +11038,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/AGENTS.md",
       "to": "project-review",
       "source": "workflow-doc"
     },
@@ -10895,12 +11063,6 @@
       "type": "cites_skill",
       "from": "doc:co-news/AGENTS.md",
       "to": "skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-news/AGENTS.md",
-      "to": "source-command-commit-push-pr",
       "source": "workflow-doc"
     },
     {
@@ -10997,6 +11159,12 @@
       "type": "cites_skill",
       "from": "doc:co-news/docs/co-news.context.md",
       "to": "source-verification-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/co-news.context.md",
+      "to": "style-lint-checklist",
       "source": "workflow-doc"
     },
     {
@@ -11135,6 +11303,12 @@
       "type": "cites_skill",
       "from": "doc:co-news/README.md",
       "to": "financial-narrative-brief",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/README.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -12004,6 +12178,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/README.md",
+      "to": "meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
       "to": "permit-to-work",
       "source": "workflow-doc"
     },
@@ -12298,7 +12478,25 @@
     {
       "type": "cites_skill",
       "from": "doc:co-security/README.md",
+      "to": "finding-reconciliation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "samm-maturity",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
       "to": "sarif-exporter",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "spdx-sbom",
       "source": "workflow-doc"
     },
     {
@@ -12322,13 +12520,97 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
+      "to": "create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
       "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
+      "to": "platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
       "to": "skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
+      "to": "sync",
       "source": "workflow-doc"
     },
     {
@@ -12365,6 +12647,12 @@
       "type": "cites_skill",
       "from": "doc:co-work/README.md",
       "to": "documentation-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -12637,12 +12925,6 @@
       "type": "accountable_for",
       "from": "engagement-director",
       "to": "procedure.co-price.engagement-review",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "engagement-director",
-      "to": "procedure.co-price.pricing-security-closeout",
       "source": "raci_matrix"
     },
     {
@@ -13764,6 +14046,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "accountable_for",
+      "from": "game-debugger",
+      "to": "procedure.co-game.game-release-verification",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "game-designer",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "raci_matrix"
     },
     {
       "type": "accountable_for",
@@ -16876,24 +17170,6 @@
     {
       "type": "accountable_for",
       "from": "lead-architect",
-      "to": "procedure.co-price.pricing-analysis",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
-      "to": "procedure.co-price.pricing-security-bootstrap",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
-      "to": "procedure.co-price.release-assurance",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "lead-architect",
       "to": "procedure.co-price.scenario-modeling",
       "source": "raci_matrix"
     },
@@ -17627,6 +17903,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "patch-engineer",
+      "to": "procedure.co-security.remediation-support",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "patch-engineer",
       "to": "verify-authorization",
@@ -18105,6 +18387,12 @@
       "from": "pricing-strategist",
       "to": "pricing-governance",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "pricing-strategist",
+      "to": "procedure.co-price.pricing-analysis",
+      "source": "raci_matrix"
     },
     {
       "type": "produces",
@@ -22242,6 +22530,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "qa-tester",
+      "to": "procedure.co-price.release-assurance",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "rack-fall-protection-planner",
       "to": "fall-hazard-assessor",
@@ -22263,12 +22557,6 @@
       "type": "accountable_for",
       "from": "red-team-lead",
       "to": "procedure.co-security.engagement-planning",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "red-team-lead",
-      "to": "procedure.co-security.threat-analysis",
       "source": "raci_matrix"
     },
     {
@@ -22347,19 +22635,7 @@
     {
       "type": "accountable_for",
       "from": "report-writer",
-      "to": "procedure.co-security.remediation-support",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "report-writer",
       "to": "procedure.co-security.security-reporting",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "report-writer",
-      "to": "procedure.co-security.threat-model-and-report",
       "source": "raci_matrix"
     },
     {
@@ -23424,6 +23700,36 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-abap.security-closeout-review",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-abap.security-readiness-baseline",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-game.game-security-retrospective",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-price.pricing-security-bootstrap",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-price.pricing-security-closeout",
+      "source": "raci_matrix"
+    },
+    {
       "type": "references",
       "from": "security-scan",
       "to": "update-bun-packages",
@@ -23885,37 +24191,7 @@
     {
       "type": "accountable_for",
       "from": "stack-setup",
-      "to": "procedure.co-game.game-architecture-design",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-concept-design",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-content-production",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-release-verification",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
       "to": "procedure.co-game.game-security-bootstrap",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-security-retrospective",
       "source": "raci_matrix"
     },
     {
@@ -24509,12 +24785,6 @@
     {
       "type": "accountable_for",
       "from": "strategy-analyst",
-      "to": "procedure.co-consult.solution-delivery",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "strategy-analyst",
       "to": "procedure.co-consult.solution-design",
       "source": "raci_matrix"
     },
@@ -24874,6 +25144,12 @@
     {
       "type": "used_by",
       "from": "test-driven-development",
+      "to": "game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
       "to": "game-developer",
       "source": "skill_manifest"
     },
@@ -24966,6 +25242,18 @@
       "from": "thermal-burn-prevention-planner",
       "to": "tool-box-meeting",
       "source": "prose"
+    },
+    {
+      "type": "accountable_for",
+      "from": "threat-modeler",
+      "to": "procedure.co-security.threat-analysis",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "threat-modeler",
+      "to": "procedure.co-security.threat-model-and-report",
+      "source": "raci_matrix"
     },
     {
       "type": "references",

@@ -1,6 +1,6 @@
 # co-hr Context
 
-co-hr is a 12-agent Multi-AI-Team for labor-law compliance of the target jurisdiction (country profiles under `docs/countries/`), HR management/development, and organizational design consulting. It routes incoming engagements to one of 11 domain-lead archetypes (labor compliance, labor relations, safety & health, org design, compensation & benefits, performance management, talent acquisition, learning & development, career & succession, change management, or cross-functional transformation), each drawing on a shared bench of specialist agents and skills. PM performs intake classification, dispatches the archetype lead and supporting agents, and enforces compliance sign-off and approval gates before any deliverable reaches the client.
+co-hr is a 13-agent Multi-AI-Team for labor-law compliance of the target jurisdiction (country profiles under `docs/countries/`), HR management/development, and organizational design consulting. It routes incoming engagements to one of 11 domain-lead archetypes (labor compliance, labor relations, safety & health, org design, compensation & benefits, performance management, talent acquisition, learning & development, career & succession, change management, or cross-functional transformation), each drawing on a shared bench of specialist agents and skills. PM performs intake classification, dispatches the archetype lead and supporting agents, and enforces compliance sign-off and approval gates before any deliverable reaches the client.
 
 ## Tech Stack
 
@@ -183,9 +183,9 @@ This section replaces the workspace PM's governance workflow with variant-specif
 <!-- VARIANT-SECTION: agent-roster -->
 ## Agent Roster
 
-See [AGENTS.md](../AGENTS.md) for the full 12-agent roster (this pm agent plus 11
-specialists spanning labor compliance/relations/safety, HRM, HRD, org design, change
-management, and HR data analytics).
+See [AGENTS.md](../AGENTS.md) for the full 13-agent roster (this pm agent, the
+i18n-specialist, and 11 HR-domain specialists spanning labor compliance/relations/safety,
+HRM, HRD, org design, change management, and HR data analytics).
 This section replaces the workspace PM's agent roster with variant-specific agents.
 <!-- END VARIANT-SECTION -->
 
@@ -195,7 +195,7 @@ This section replaces the workspace PM's agent roster with variant-specific agen
 <!-- VARIANT-SECTION: dispatch-protocol -->
 ## Dispatch Protocol
 
-**Tier**: claude=high (PM orchestrates a 12-agent roster spanning legal-compliance,
+**Tier**: claude=high (PM orchestrates a 13-agent roster spanning legal-compliance,
 HRM, HRD, org design, and change management domains — high-tier reasoning is
 required to correctly sequence handoffs and catch compliance-review gaps).
 

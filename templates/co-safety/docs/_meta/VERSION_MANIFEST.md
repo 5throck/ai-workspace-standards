@@ -46,14 +46,13 @@
 | api-documentation | 1.0.0 | .claude/skills/api-documentation/SKILL.md | claude | N/A | N/A |
 | asset-integrity-check | N/A | skills/daily/asset-integrity-check/SKILL.md | workspace | N/A | asset-integrity-agent |
 | audit-preparation | N/A | skills/daily/audit-preparation/SKILL.md | workspace | N/A | audit-agent |
-| audit-workspace | 1.0.0 | skills/audit-workspace/SKILL.md | workspace | N/A | auditor |
 | compliance-gap | 1.0.0 | skills/daily/compliance-gap/SKILL.md | workspace | N/A | compliance-agent |
 | contractor-onboarding | N/A | skills/daily/contractor-onboarding/SKILL.md | workspace | N/A | contractor-safety-agent |
 | documentation-writing | 1.0.0 | .claude/skills/documentation-writing/SKILL.md | claude | N/A | N/A |
 | emergency-response | 1.0.0 | skills/emergency/emergency-response/SKILL.md | workspace | N/A | emergency-agent |
 | finishing-a-development-branch | 1.0.0 | .claude/skills/finishing-a-development-branch/SKILL.md | both | N/A | N/A |
 | hazop-analysis | N/A | skills/investigation/hazop-analysis/SKILL.md | workspace | N/A | psm-agent |
-| legalize-kr-sync | N/A | skills/legalize-kr-sync/SKILL.md | workspace | N/A | safety-workflow-manager |
+| k-law | 1.0.2 | skills/k-law/SKILL.md | workspace | N/A | strategy-analyst |
 | meeting-facilitation | 1.4.0 | skills/meeting-facilitation/SKILL.md | workspace | N/A | pm |
 | permit-to-work | 1.0.0 | skills/daily/permit-to-work/SKILL.md | workspace | N/A | safety-workflow-manager |
 | platform-command-lifecycle-manager | 1.0.0 | .claude/skills/platform-command-lifecycle-manager/SKILL.md | both | N/A | pm |
@@ -65,12 +64,10 @@
 | root-cause-analysis | N/A | skills/investigation/root-cause-analysis/SKILL.md | workspace | N/A | incident-investigation-agent |
 | script-lifecycle-manager | 1.2.0 | skills/script-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | security-scan | 1.0.0 | skills/security-scan/SKILL.md | workspace | N/A | security-expert |
-| simulate-project-creation | 1.0.0 | .claude/skills/simulate-project-creation/SKILL.md | both | N/A | scaffolding-expert |
 | skill-lifecycle-manager | 1.2.0 | skills/skill-lifecycle-manager/SKILL.md | workspace | N/A | pm |
 | team-builder | 1.1.0 | skills/team-builder/SKILL.md | workspace | N/A | pm |
 | translate | 1.0.0 | skills/translate/SKILL.md | workspace | N/A | pm |
-| ui-ux-pro-max | 1.0.0 | skills/ui-ux-pro-max/SKILL.md | workspace | N/A | architect |
-| validate-docs-links | 1.0.0 | skills/validate-docs-links/SKILL.md | workspace | N/A | docs-writer |
+| ui-ux-design-intelligence | 1.0.1 | skills/ui-ux-design-intelligence/SKILL.md | workspace | N/A | pm |
 
 ---
 
@@ -209,7 +206,6 @@
 - Skill asset-integrity-check has no triggers defined
 - Skill audit-preparation missing version
 - Skill audit-preparation has no triggers defined
-- Skill audit-workspace has no triggers defined
 - Skill compliance-gap has no triggers defined
 - Skill contractor-onboarding missing version
 - Skill contractor-onboarding has no triggers defined
@@ -218,8 +214,7 @@
 - Skill finishing-a-development-branch has no triggers defined
 - Skill hazop-analysis missing version
 - Skill hazop-analysis has no triggers defined
-- Skill legalize-kr-sync missing version
-- Skill legalize-kr-sync has no triggers defined
+- Skill k-law has no triggers defined
 - Skill meeting-facilitation has no triggers defined
 - Skill permit-to-work has no triggers defined
 - Skill platform-command-lifecycle-manager has no triggers defined
@@ -233,12 +228,10 @@
 - Skill root-cause-analysis has no triggers defined
 - Skill script-lifecycle-manager has no triggers defined
 - Skill security-scan has no triggers defined
-- Skill simulate-project-creation has no triggers defined
 - Skill skill-lifecycle-manager has no triggers defined
 - Skill team-builder has no triggers defined
 - Skill translate has no triggers defined
-- Skill ui-ux-pro-max has no triggers defined
-- Skill validate-docs-links has no triggers defined
+- Skill ui-ux-design-intelligence has no triggers defined
 - Command changelog not integrated as a skill
 - Command commit-push-pr not integrated as a skill
 - Command meeting not integrated as a skill

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 2a95ee51b09b91282df91397484af982536b06f6cff92255bddb1ca66f6d0857
+content_hash: 65235b597d46a6d70f27697bd5a427bbbd9a37a68e0d657538d276957907673f
 ---
 
 # co-hr
@@ -35,6 +35,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | medium | inherit |
 | **career-succession-consultant** | Career and succession consultant - designs career pathing, leadership pipelines, | medium | inherit |
 | **change-management-partner** | Change management partner - manages change for org restructuring or new HR syste | medium | inherit |
 | **compensation-benefits-analyst** | Compensation and benefits analyst - designs wage structures, incentive schemes,  | medium | inherit |
@@ -46,6 +47,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **performance-management-consultant** | Performance management consultant - designs performance evaluation systems, KPI/ | medium | inherit |
 | **safety-health-officer** | Safety and health officer - reviews compliance with the jurisdiction’s occupatio | medium | inherit |
 | **talent-acquisition-specialist** | Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | medium | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## Skills
 
@@ -84,7 +86,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `/meeting` — retired 2026-09-26; invoke the `meeting-facilitation` skill explicitly for a structured, inline multi-agent discussion.
 
 ## Variant Type
 
@@ -102,4 +104,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-10-06*

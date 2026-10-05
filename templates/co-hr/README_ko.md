@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 2a95ee51b09b91282df91397484af982536b06f6cff92255bddb1ca66f6d0857
+translated_from_hash: 65235b597d46a6d70f27697bd5a427bbbd9a37a68e0d657538d276957907673f
 lang: ko
 lang_reason: source-material
 ---
@@ -37,6 +37,7 @@ HR/노무 Multi AI Team - 대상 관할권의 노동법령 컴플라이언스(do
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
+| **PM** | Project Manager — workflow orchestration, dispatch, quality gates | medium | inherit |
 | **career-succession-consultant** | Career and succession consultant - designs career pathing, leadership pipelines, | medium | inherit |
 | **change-management-partner** | Change management partner - manages change for org restructuring or new HR syste | medium | inherit |
 | **compensation-benefits-analyst** | Compensation and benefits analyst - designs wage structures, incentive schemes,  | medium | inherit |
@@ -48,6 +49,7 @@ HR/노무 Multi AI Team - 대상 관할권의 노동법령 컴플라이언스(do
 | **performance-management-consultant** | Performance management consultant - designs performance evaluation systems, KPI/ | medium | inherit |
 | **safety-health-officer** | Safety and health officer - reviews compliance with the jurisdiction’s occupatio | medium | inherit |
 | **talent-acquisition-specialist** | Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | medium | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 
 ## 스킬
 
@@ -86,7 +88,7 @@ HR/노무 Multi AI Team - 대상 관할권의 노동법령 컴플라이언스(do
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `/meeting` — 2026-09-26부로 폐지되었습니다; 구조화된 인라인 다중 에이전트 토론은 `meeting-facilitation` 스킬을 명시적으로 호출하세요.
 
 ## 변형 유형
 
@@ -104,4 +106,4 @@ HR/노무 Multi AI Team - 대상 관할권의 노동법령 컴플라이언스(do
 
 ---
 
-*최근 갱신: 2026-08-22*
+*최근 갱신: 2026-10-06*

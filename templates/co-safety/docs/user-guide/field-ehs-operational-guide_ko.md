@@ -1,7 +1,7 @@
 # 현장 EHS 실무 운영 가이드 (Field EHS Operational Guide)
 
 > **문서 유형**: Layer C — 한국어 실무 가이드  
-> **관련 에이전트**: [safety-workflow-manager](file:///c:/git/ai_workspace/Projects/safety_os/agents/_core/safety-workflow-manager.md), [risk-assessment-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/_shared/risk-assessment-agent.md), [psm-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/functional/psm/psm-agent.md)  
+> **관련 에이전트**: [safety-workflow-manager](../../agents/safety-workflow-manager.md), [risk-assessment-agent](../../agents/_shared/risk-assessment-agent.md), [psm-agent](../../agents/domains/functional/psm/psm-agent.md)  
 > **법적 근거**: 산업안전보건법 제15조, 제29조, 제36조, 제38조, 제92조, 중대재해처벌법 시행령 제4조
 
 ---
@@ -75,18 +75,18 @@
 
 | 산업군 | 핵심 관리 공정 | 현장 필수 준수 수칙 (Operational Rules) | 담당 에이전트 |
 |-------|--------------|--------------------------------------|--------------|
-| **반도체/디스플레이** | 특수가스 캐비닛 & 클린룸 화학물질 | • SiH4/NF3 가스 누출 감지기 및 연동 인터록 매일 점검<br>• 불산(HF) 취급 시 전용 내화학 보호구 및 세안/세척설비 비치 | [semicon-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/semicon/semicon-agent.md) |
-| **이차전지/배터리** | 배터리 셀 제조 & 폐배터리 리사이클링 | • Formation/충방전 공정 열화상 모니터링 및 열폭주 인터록<br>• NMP 유기용제 회수 설비 배기 점검 및 폐배터리 침전조 무산소 점검 | [battery-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/battery/battery-agent.md) |
-| **조선/해양플랜트** | 선박 탱크 밀폐공간 & 골리앗 크레인 | • 선박 보이드 탱크 작업 전 산소/가스 농도 3위치 측정 및 감시자 배치<br>• 대형 크레인 인양 작업 신호수 지정 및 신호체계 모니터링 | [shipbuilding-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/shipbuilding/shipbuilding-agent.md) |
-| **철강/금속제련** | 용광로/전기로 & 부생가스 배관 | • 전기로/가열로 정비 시 Zero Energy LOTO 및 습기 투입 방지<br>• 부생가스(CO/N2) 배관 가스검지기 및 차단 밸브 주간 정밀 점검 | [steelmaking-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/steelmaking/steelmaking-agent.md) |
-| **데이터센터** | 리튬이온 UPS & 고전압 수전 설비 | • UPS 배터리 룸 온습도 모니터링 및 가스계 소화설비 수동 차단기 점검<br>• 고전압 변전실 작업 시 Arc Flash PPE 등급 준수 및 LOTO 부착 | [datacenter-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/datacenter/datacenter-agent.md) |
-| **식품 (HACCP)** | CCP 공정 & 교반기/혼합기 정비 | • HACCP CCP 한계기준(온도/시간) 이탈 시 자동 CAPA 및 가열 처리<br>• 식품 교반기/혼합기 세척 및 정비 시 전원 2중 차단 LOTO 적용 | [food-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/food/food-agent.md) |
-| **화장품 (CGMP)** | 배치 출하 & 유기용제/원료 혼합 | • CGMP 배치 출하 전 미생물/중금속 시험 적합 검수 기록 보관<br>• 향료/알코올 혼합 정조 작업 시 국소배기장치 및 방폭 설비 가동 | [cosmetics-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/cosmetics/cosmetics-agent.md) |
-| **항만 물류** | 항만 크레인 인양 & 냉동창고 | • 항만 갠트리 크레인 작업 전 와이어로프/신호수 점검 및 AGV 센서 연동<br>• 냉동창고 암모니아 냉매가스 누출 감지기 및 비상 탈출 장치 매일 점검 | [logistics-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/logistics/logistics-agent.md) |
-| **철도/교통** | 25kV 전차선 & 야간 선로 정비 | • 전차선 정비 전 전원 단전 확인 및 이동식 단축 접지봉 즉시 부착<br>• 야간 선로 정비 작업 전 감시인 배치 및 열차 통과 지연 인터록 확인 | [railway-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/railway/railway-agent.md) |
-| **폐기물/수자원** | 하수조 밀폐공간 & 소각 파쇄기 | • 하수조/맨홀 진입 전 O2(>=18%) 및 H2S(<=10ppm) 측정 및 강제 환기<br>• 폐기물 소각 호퍼 및 파쇄기 정비 전 전원 완전 차단 LOTO 적용 | [waste-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/waste/waste-agent.md) |
-| **방위산업** | 화약 추진제 & 극저온 가스 | • 화약 추진제 혼합실 정전기 방지 접지 resistance 및 제습 점검<br>• 유도무기 극저온 액체연료(LN2/LOX) 충전 잔여 압력 확인 | [defense-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/defense/defense-agent.md) |
-| **바이오 CDMO** | Bioreactor SIP & LMO 생물안전 | • Bioreactor SIP 멸균 작업 전 패킹 누출 및 안전 릴리프 밸브 점검<br>• LMO 2~3등급 시설 HEPA 필터 차압 유지 및 H2O2 훈증 소독 점검 | [biotech-agent](file:///c:/git/ai_workspace/Projects/safety_os/agents/domains/industry/biotech/biotech-agent.md) |
+| **반도체/디스플레이** | 특수가스 캐비닛 & 클린룸 화학물질 | • SiH4/NF3 가스 누출 감지기 및 연동 인터록 매일 점검<br>• 불산(HF) 취급 시 전용 내화학 보호구 및 세안/세척설비 비치 | [semicon-agent](../../agents/domains/industry/semicon/semicon-agent.md) |
+| **이차전지/배터리** | 배터리 셀 제조 & 폐배터리 리사이클링 | • Formation/충방전 공정 열화상 모니터링 및 열폭주 인터록<br>• NMP 유기용제 회수 설비 배기 점검 및 폐배터리 침전조 무산소 점검 | [battery-agent](../../agents/domains/industry/battery/battery-agent.md) |
+| **조선/해양플랜트** | 선박 탱크 밀폐공간 & 골리앗 크레인 | • 선박 보이드 탱크 작업 전 산소/가스 농도 3위치 측정 및 감시자 배치<br>• 대형 크레인 인양 작업 신호수 지정 및 신호체계 모니터링 | [shipbuilding-agent](../../agents/domains/industry/shipbuilding/shipbuilding-agent.md) |
+| **철강/금속제련** | 용광로/전기로 & 부생가스 배관 | • 전기로/가열로 정비 시 Zero Energy LOTO 및 습기 투입 방지<br>• 부생가스(CO/N2) 배관 가스검지기 및 차단 밸브 주간 정밀 점검 | [steelmaking-agent](../../agents/domains/industry/steelmaking/steelmaking-agent.md) |
+| **데이터센터** | 리튬이온 UPS & 고전압 수전 설비 | • UPS 배터리 룸 온습도 모니터링 및 가스계 소화설비 수동 차단기 점검<br>• 고전압 변전실 작업 시 Arc Flash PPE 등급 준수 및 LOTO 부착 | [datacenter-agent](../../agents/domains/industry/datacenter/datacenter-agent.md) |
+| **식품 (HACCP)** | CCP 공정 & 교반기/혼합기 정비 | • HACCP CCP 한계기준(온도/시간) 이탈 시 자동 CAPA 및 가열 처리<br>• 식품 교반기/혼합기 세척 및 정비 시 전원 2중 차단 LOTO 적용 | [food-agent](../../agents/domains/industry/food/food-agent.md) |
+| **화장품 (CGMP)** | 배치 출하 & 유기용제/원료 혼합 | • CGMP 배치 출하 전 미생물/중금속 시험 적합 검수 기록 보관<br>• 향료/알코올 혼합 정조 작업 시 국소배기장치 및 방폭 설비 가동 | [cosmetics-agent](../../agents/domains/industry/cosmetics/cosmetics-agent.md) |
+| **항만 물류** | 항만 크레인 인양 & 냉동창고 | • 항만 갠트리 크레인 작업 전 와이어로프/신호수 점검 및 AGV 센서 연동<br>• 냉동창고 암모니아 냉매가스 누출 감지기 및 비상 탈출 장치 매일 점검 | [logistics-agent](../../agents/domains/industry/logistics/logistics-agent.md) |
+| **철도/교통** | 25kV 전차선 & 야간 선로 정비 | • 전차선 정비 전 전원 단전 확인 및 이동식 단축 접지봉 즉시 부착<br>• 야간 선로 정비 작업 전 감시인 배치 및 열차 통과 지연 인터록 확인 | [railway-agent](../../agents/domains/industry/railway/railway-agent.md) |
+| **폐기물/수자원** | 하수조 밀폐공간 & 소각 파쇄기 | • 하수조/맨홀 진입 전 O2(>=18%) 및 H2S(<=10ppm) 측정 및 강제 환기<br>• 폐기물 소각 호퍼 및 파쇄기 정비 전 전원 완전 차단 LOTO 적용 | [waste-agent](../../agents/domains/industry/waste/waste-agent.md) |
+| **방위산업** | 화약 추진제 & 극저온 가스 | • 화약 추진제 혼합실 정전기 방지 접지 resistance 및 제습 점검<br>• 유도무기 극저온 액체연료(LN2/LOX) 충전 잔여 압력 확인 | [defense-agent](../../agents/domains/industry/defense/defense-agent.md) |
+| **바이오 CDMO** | Bioreactor SIP & LMO 생물안전 | • Bioreactor SIP 멸균 작업 전 패킹 누출 및 안전 릴리프 밸브 점검<br>• LMO 2~3등급 시설 HEPA 필터 차압 유지 및 H2O2 훈증 소독 점검 | [biotech-agent](../../agents/domains/industry/biotech/biotech-agent.md) |
 
 ---
 
@@ -101,4 +101,4 @@
   - LOTO 이행 기록: 1년 보관
   - HACCP / CGMP / GxP 제조기록서: 3~5년 보관
 - **시스템 동기화**:
-  - 모든 증적 데이터는 [`evidence-models/`](file:///c:/git/ai_workspace/Projects/safety_os/evidence-models/) 표준 JSON 스키마 구조와 부합하게 기록되어야 합니다.
+  - 모든 증적 데이터는 [`evidence-models/`](../../evidence-models/) 표준 JSON 스키마 구조와 부합하게 기록되어야 합니다.

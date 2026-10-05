@@ -9,10 +9,10 @@
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
-| A1 | **Agent manifest complete** | ✅ Verified | 11 agents defined in variant.json; all 11 agent `.md` files contain substantive domain-specific content (1,308 total lines). Zero TODO stubs or placeholders. |
-| A2 | **Skill manifest complete** | ✅ Verified | 10 variant-specific skills defined; all 10 SKILL.md files have complete frontmatter (name, version, scope, status, owner, prerequisites, last_reviewed) and substantive body content. variant.json and disk directories match exactly. |
-| A3 | **Agent files substantive** | ✅ Verified | pm.md carries variant_overrides for governance-workflow, agent-roster, and dispatch-protocol. All 11 specialist agents have full sections: Role, Responsibilities, Protocols (Dispatch Protocol, PM-ONLY INVOCATION), Output Format, Output Destination, Meeting Participation, Constraints. |
-| A4 | **Documentation complete** | ✅ Verified | README.md present with accurate 11-agent/10-skill roster; context.md complete with domain-specific guidelines; AGENTS.md reflects actual roster; variant.json fields accurate; bilingual user guide (docs/user-guide.md + docs/user-guide_ko.md) present. |
+| A1 | **Agent manifest complete** | ✅ Verified | 13 agents defined in variant.json; all 13 agent `.md` files contain substantive content — eleven HR-domain specialists with full domain-specific sections, plus PM and i18n-specialist overrides extending the common agents (1,218 total lines). Zero TODO stubs or placeholders. |
+| A2 | **Skill manifest complete** | ✅ Verified | 12 variant-specific skills defined; all 12 SKILL.md files have complete frontmatter (name, version, scope, status, owner, prerequisites, last_reviewed) and substantive body content. variant.json and disk directories match exactly. |
+| A3 | **Agent files substantive** | ✅ Verified | pm.md carries variant_overrides for governance-workflow, agent-roster, and dispatch-protocol. Every HR-domain specialist agent (all agents other than PM and i18n-specialist) has full sections: Role, Responsibilities, Protocols (Dispatch Protocol, PM-ONLY INVOCATION), Output Format, Output Destination, Meeting Participation, Constraints. |
+| A4 | **Documentation complete** | ✅ Verified | README.md present with accurate 13-agent/12-skill roster; context.md complete with domain-specific guidelines; AGENTS.md reflects actual roster; variant.json fields accurate; bilingual user guide (docs/user-guide.md + docs/user-guide_ko.md) present. |
 | A5 | **Engagement methodology documented** | ✅ Verified | 4-phase engagement lifecycle documented in variant.json engagement_methodology and pm.md dispatch-protocol: Phase 0 (intake) -> Phase 1 (research & diagnosis) -> Phase 2 (design) -> Phase 3 (validation & delivery). |
 | A6 | **Deliverable templates defined** | ✅ Verified | Output Format and Output Destination sections present in all specialist agent files, keyed to the 4-phase lifecycle (diagnosis reports, design deliverables, validation packages per domain). |
 | A7 | **Audit passes** | ✅ Verified | `bun scripts/audit.ts` passes with 0 errors at beta entry; re-run required at promotion time (Criterion 5). |
@@ -30,12 +30,12 @@
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
 | 1 | **Phase A complete** | ✅ Met | `phaseAComplete: true` in variant.json; Phase A checklist above verified. |
-| 2 | **Agent roster completeness** | ✅ Met | 11 specialist agents with substantive files; roster documented in AGENTS.md and README.md. |
-| 3 | **Skills coverage** | ✅ Met | 10 variant-specific skills with complete frontmatter and `used_by_agents`/`phases` mappings in variant.json. |
+| 2 | **Agent roster completeness** | ✅ Met | 13 agents with substantive files — eleven HR-domain specialists plus PM and i18n-specialist; roster documented in AGENTS.md and README.md. |
+| 3 | **Skills coverage** | ✅ Met | 12 variant-specific skills with complete frontmatter and `used_by_agents`/`phases` mappings in variant.json. |
 | 4 | **Documentation completeness** | ✅ Met | README.md, context.md, AGENTS.md, bilingual user guide, and variant.json all accurate. |
 | 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` must pass with 0 errors at promotion time. |
 | 6 | **Real engagements** | Pending | Minimum 1 successful HR/labor-relations engagement (Phase 0 intake -> research/diagnosis -> design -> validation/delivery end-to-end). |
-| 7 | **README accuracy** | Pending | README reflects the current 11-agent roster, 10 skills, and 4-phase engagement lifecycle at promotion time. |
+| 7 | **README accuracy** | Pending | README reflects the current 13-agent roster, 12 skills, and 4-phase engagement lifecycle at promotion time. |
 | 8 | **Minimum beta duration** | Pending | 3 months in beta status (earliest promotion: 2026-11-22). |
 | 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
 | 10 | **User feedback** | Pending | Positive feedback from beta users; no critical UX/functional complaints. |

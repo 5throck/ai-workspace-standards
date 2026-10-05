@@ -6,7 +6,7 @@
 
 ## 개요
 
-**Co-Price** 워크스페이스에 오신 것을 환영합니다. Claude 및 Gemini AI 어시스트와의 협업에 최적화된 이 템플릿은 재무 전략, 비용 경인, 상장 조사, 계산 관리, 에이전트 오터, 및 서비스 디라이버리를 교보하는 15개의 전문 AI 에이전트 팀을 제공합니다.
+**Co-Price** 워크스페이스에 오신 것을 환영합니다. Claude 및 Gemini AI 어시스트와의 협업에 최적화된 이 템플릿은 재무 전략, 비용 엔지니어링, P&L 감사, 가격 진단, 시장 조사 분석, 및 engagement 딜리버리를 아우르는 16개의 전문 AI 에이전트 팀을 제공합니다.
 
 ## 빠른 시작
 
@@ -28,25 +28,26 @@
 
 ## AI 팀 소개
 
-여러분의 파트너는 5개 그룹의 15개 전문 에이전트로 구성됩니다. **Project Manager (PM)**만 모든 요청의 단일 진입점입니다.
+여러분의 파트너는 5개 그룹의 16개 전문 에이전트로 구성됩니다. **Project Manager (PM)**만 모든 요청의 단일 진입점입니다.
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
-| **PM** | 가격 커설팅 오캐스트레이터 — 이중 라이프사이클 조율, 유일 디스패치 | high | inherit |
-| **Finance Strategy & Channel Lead** | 다중 산업 가격/P&L LaTeX 사포 작성, 수익 엔진, 워터폴 | high | inherit |
-| **Cost & Asset Management** | OPEX/CAPEX, 각각상각, BOM 비용 롤업, 노동력 스케일링, 축격 밴드 | high | inherit |
-| **P&L Engine Auditor (CPA)** | 부격 항목 정무성, `[Ref:]` 태그 Vitest 하넨스, 하넨스 통과 증명서 | high | inherit |
-| **Pricing Strategist** | 진단/탈성성을 F/T/S 권고사항으로 변환, 할인 사다리, 가격 코리도 | high | inherit |
-| **Market Intelligence Analyst** | 벤칸마크, VW/GG 조사 분석, 경쟁사 가격, 출처 관리 | high | inherit |
-| **Engagement Director** | 진단 → 설계 → 검증 → 디라이버리 오캐스트레이션, 사면 통과 게이트 | high | inherit |
-| **Lead Architect & Data Guard** | Prisma 모델링, v10.1 배치 스키마 설계, AI 인프라 계약 | high | inherit |
-| **Core Engine Developer** | 드리프프리 TypeScript 엔진 모듈, 오널레일 AI 트랜스포트 | high | inherit |
-| **Security Auditor** | Zod 가드레일, API 경계 감사, PRICE_* env 스키마 | high | inherit |
-| **UX & Visual Specialist** | Onyx 2.0 컴포넌트, 코파일트 패널, 이중언어 사용자 가이드 | high | inherit |
-| **End-to-End QA Engineer** | 컴포넌트 마운티벅, 브라우저 검증, 스트리밍 상태 체크 | high | inherit |
-| **DevOps & CI/CD Admin** | Bun 툼체인, Docker 스테이지, git 훁, 배포 표준 | high | inherit |
-| **Global Strategy & L10N Auditor** | 16로케일 페리티, 용어 준수, RTL 안전 | medium | inherit |
-| **Security Monitor** | 취약점/권고 사칸, gitleaks, 취약점 듀시, 의존성 폄릴 | medium | inherit |
+| **pm** | 가격 컨설팅 오케스트레이터 — 이중 라이프사이클 조율, 유일 디스패처 | medium | inherit |
+| **finance-strategy-lead** | 다중 산업 가격/P&L LaTeX 스펙 작성, 수익 엔진, 워터폴 | high | inherit |
+| **cost-asset-mgmt** | OPEX/CAPEX, 감가상각, BOM 비용 롤업, 노동력 스케일링, 충격 밴드 | high | inherit |
+| **cpa-auditor** | 복식 부기 정합성, `[Ref:]` 태그 Vitest 하네스, 하네스 통과 증명서 | high | inherit |
+| **pricing-strategist** | 진단/탄력성을 F/T/S 권고사항으로 변환, 할인 사다리, 가격 코리도 | high | inherit |
+| **market-intelligence-analyst** | 벤치마크, VW/GG 조사 분석, 경쟁사 가격, 출처 관리 | high | inherit |
+| **engagement-director** | 진단 → 설계 → 검증 → 딜리버리 오케스트레이션, 산출물 게이트 | high | inherit |
+| **lead-architect** | Prisma 모델링, v10.1 배치 스키마 설계, AI 인프라 계약 | high | inherit |
+| **core-engine-dev** | 드리프트 프리 TypeScript 엔진 모듈, 온레일즈 AI 트랜스포트 | high | inherit |
+| **security-auditor** | Zod 가드레일, API 경계 감사, PRICE_* env 스키마 | high | inherit |
+| **ux-specialist** | Onyx 2.0 컴포넌트, 코파일럿 패널, 이중언어 사용자 가이드 | high | inherit |
+| **qa-tester** | 컴포넌트 마운팅, 브라우저 검증, 스트리밍 상태 체크 | high | inherit |
+| **devops-admin** | Bun 툴체인, Docker 스테이지, git 훅, 배포 표준 | high | inherit |
+| **l10n-auditor** | 16로케일 패리티, 용어 준수, RTL 안전 | medium | inherit |
+| **security-monitor** | 취약점/권고 사항, gitleaks, 발견 항목 레지스터, 의존성 정책 | medium | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포맷팅, 텍스트 레이아웃 가이던스 | medium | inherit |
 
 ## 스킬
 

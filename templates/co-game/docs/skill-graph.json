@@ -392,6 +392,12 @@
       "source": "prose"
     },
     {
+      "type": "accountable_for",
+      "from": "architect",
+      "to": "procedure.co-game.game-architecture-design",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "code-review",
       "to": "arcade-physics",
@@ -450,10 +456,28 @@
       }
     },
     {
+      "type": "accountable_for",
+      "from": "designer",
+      "to": "procedure.co-game.game-content-production",
+      "source": "raci_matrix"
+    },
+    {
       "type": "produces",
       "from": "documentation-writing",
       "to": "output_type.content_integration_notes",
       "source": "procedure_schema"
+    },
+    {
+      "type": "accountable_for",
+      "from": "game-debugger",
+      "to": "procedure.co-game.game-release-verification",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
+      "from": "game-designer",
+      "to": "procedure.co-game.game-concept-design",
+      "source": "raci_matrix"
     },
     {
       "type": "accountable_for",
@@ -909,6 +933,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "accountable_for",
+      "from": "security-monitor",
+      "to": "procedure.co-game.game-security-retrospective",
+      "source": "raci_matrix"
+    },
+    {
       "type": "follows",
       "from": "sound-synth",
       "to": "documentation-writing",
@@ -946,37 +976,7 @@
     {
       "type": "accountable_for",
       "from": "stack-setup",
-      "to": "procedure.co-game.game-architecture-design",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-concept-design",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-content-production",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-release-verification",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
       "to": "procedure.co-game.game-security-bootstrap",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "stack-setup",
-      "to": "procedure.co-game.game-security-retrospective",
       "source": "raci_matrix"
     },
     {
@@ -1013,6 +1013,12 @@
       "from": "test-driven-development",
       "to": "game-debugger",
       "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "game-debugger",
+      "source": "skill_manifest"
     },
     {
       "type": "used_by",

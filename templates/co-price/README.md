@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: b508b04091bbdd20f1147de073c5c8538bdbf2ec6c4a9a612d5a738f7b0ab387
+content_hash: 5295220d95c6241077c89938b1bec14d7c5d9fdefe7261a7e8c7a6728d9a30dd
 ---
 
 # co-price
@@ -11,7 +11,7 @@ content_hash: b508b04091bbdd20f1147de073c5c8538bdbf2ec6c4a9a612d5a738f7b0ab387
 
 ## Overview
 
-Welcome to the **Co-Price** workspace — your dedicated AI pricing management and consulting simulator. Optimized for collaborative work with Claude and Gemini AI assistants, this template provides a full team of 15 specialized agents covering financial strategy, cost engineering, P&L audit, pricing diagnostics, market intelligence, and engagement delivery.
+Welcome to the **Co-Price** workspace — your dedicated AI pricing management and consulting simulator. Optimized for collaborative work with Claude and Gemini AI assistants, this template provides a full team of 16 specialized agents covering financial strategy, cost engineering, P&L audit, pricing diagnostics, market intelligence, and engagement delivery.
 
 ## Quick Start
 
@@ -33,25 +33,26 @@ We are designed to reduce context overload by delegating specific phases of work
 
 ## Meet the AI Team
 
-Your partners consist of 15 specialized agents across five groups. The **Project Manager (PM)** is your single point of entry — they orchestrate the rest of the team.
+Your partners consist of 16 specialized agents across five groups. The **Project Manager (PM)** is your single point of entry — they orchestrate the rest of the team.
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| **PM** | Pricing Consulting Orchestrator — dual-lifecycle orchestration, sole dispatcher | high | inherit |
-| **Finance Strategy & Channel Lead** | Multi-industry pricing/P&L LaTeX spec authorship, revenue engine, waterfall | high | inherit |
-| **Cost & Asset Management** | OPEX/CAPEX, depreciation, BOM cost roll-ups, labor scaling, shock bands | high | inherit |
-| **P&L Engine Auditor (CPA)** | Double-entry integrity, `[Ref:]`-tagged Vitest harness, Harness Pass Certificates | high | inherit |
-| **Pricing Strategist** | Diagnostics/elasticity to F/T/S recommendations, discount ladders, corridors | high | inherit |
-| **Market Intelligence Analyst** | Benchmarks, VW/GG survey analytics, competitor prices, provenance | high | inherit |
-| **Engagement Director** | Diagnose → Design → Validate → Deliver orchestration, deliverable gates | high | inherit |
-| **Lead Architect & Data Guard** | Prisma modeling, v10.1 batch schema design, AI-infrastructure contracts | high | inherit |
-| **Core Engine Developer** | Drift-free TypeScript engine modules, on-rails AI transport | high | inherit |
-| **Security Auditor** | Zod guardrails, API boundary audits, PRICE_* env schema | high | inherit |
-| **UX & Visual Specialist** | Onyx 2.0 components, copilot panel, bilingual user guides | high | inherit |
-| **End-to-End QA Engineer** | Component mounting, browser assertions, streaming-state checks | high | inherit |
-| **DevOps & CI/CD Admin** | Bun toolchain, Docker stages, git hooks, deploy standards | high | inherit |
-| **Global Strategy & L10N Auditor** | 16-locale parity, glossary adherence, RTL safety | medium | inherit |
-| **Security Monitor** | Vuln/advisory scans, gitleaks, findings register, dependency policy | medium | inherit |
+| **pm** | Pricing Consulting Orchestrator — dual-lifecycle orchestration, sole dispatcher | medium | inherit |
+| **finance-strategy-lead** | Multi-industry pricing/P&L LaTeX spec authorship, revenue engine, waterfall | high | inherit |
+| **cost-asset-mgmt** | OPEX/CAPEX, depreciation, BOM cost roll-ups, labor scaling, shock bands | high | inherit |
+| **cpa-auditor** | Double-entry integrity, `[Ref:]`-tagged Vitest harness, Harness Pass Certificates | high | inherit |
+| **pricing-strategist** | Diagnostics/elasticity to F/T/S recommendations, discount ladders, corridors | high | inherit |
+| **market-intelligence-analyst** | Benchmarks, VW/GG survey analytics, competitor prices, provenance | high | inherit |
+| **engagement-director** | Diagnose → Design → Validate → Deliver orchestration, deliverable gates | high | inherit |
+| **lead-architect** | Prisma modeling, v10.1 batch schema design, AI-infrastructure contracts | high | inherit |
+| **core-engine-dev** | Drift-free TypeScript engine modules, on-rails AI transport | high | inherit |
+| **security-auditor** | Zod guardrails, API boundary audits, PRICE_* env schema | high | inherit |
+| **ux-specialist** | Onyx 2.0 components, copilot panel, bilingual user guides | high | inherit |
+| **qa-tester** | Component mounting, browser assertions, streaming-state checks | high | inherit |
+| **devops-admin** | Bun toolchain, Docker stages, git hooks, deploy standards | high | inherit |
+| **l10n-auditor** | 16-locale parity, glossary adherence, RTL safety | medium | inherit |
+| **security-monitor** | Vuln/advisory scans, gitleaks, findings register, dependency policy | medium | inherit |
+| **i18n-specialist** | Locale configuration, locale-specific formatting, text layout guidance | medium | inherit |
 
 ## Skills
 

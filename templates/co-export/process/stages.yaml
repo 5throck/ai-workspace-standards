@@ -1,48 +1,55 @@
 schema_version: '1.0'
 variant: co-export
+# Stage <-> procedure mapping (SSOT: procedures/*/schema.yaml `stage` field):
+#   S1 ≈ Phase 1 (Research / Analysis)      — procedure: market-entry-assessment
+#   S2 ≈ Phase 2 (Compliance Determination) — procedure: compliance-determination
+#   S3 ≈ Phase 3 (Export Shipment Compliance) — procedure: export-shipment-compliance
+#   S4 ≈ Phase 3 (Shipment Execution)       — procedure: shipment-execution
+#   S5 ≈ Phase 4 (Post-Delivery Optimization) — procedure: post-delivery-optimization
 stages:
   - id: S1
     title: Market Entry Assessment
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: "Assess a destination market end to end: regulatory posture, certification needs, and classification groundwork before any shipment is planned."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Engagement kickoff completed (Phase 0) and target market and product category proposed by the client."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Assessment covers regulatory, certification, and classification dimensions before go-ahead."
     owner_agent: market-entry-strategist
   - id: S2
     title: Compliance Determination
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: "Produce the binding compliance determinations for a shipment: origin, certification, and control screening."
     entry_criteria:
-      - PENDING_REVIEW
+      - "S1 exit criteria met — market entry assessment accepted and shipment specifics received."
     exit_criteria:
-      - PENDING_REVIEW
+      - "All determinations (HS classification, origin, certification, export control) documented with rationale before shipment planning."
     owner_agent: fta-origin-analyst
   - id: S3
     title: Export Shipment Compliance
     order: 3
-    purpose: PENDING_REVIEW
+    purpose: "Take an export shipment from HS classification through origin determination and documentation to logistics coordination."
     entry_criteria:
-      - PENDING_REVIEW
+      - "S2 exit criteria met — shipment commercial data received and destination confirmed."
     exit_criteria:
-      - PENDING_REVIEW
+      - "DG-EXPORT-01 passed — document set passes checklist with zero missing mandatory fields (decisions/gates.yaml)."
+      - "Export control screening cleared — any screening hit halts shipment planning and escalates to export-control-compliance-specialist."
     owner_agent: pm
   - id: S4
     title: Shipment Execution
     order: 4
-    purpose: PENDING_REVIEW
+    purpose: "Execute shipment operations once compliance determinations are complete: drawback positioning and coordinated logistics."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Compliance determinations complete and document set in progress."
     exit_criteria:
-      - PENDING_REVIEW
+      - "DG-EXPORT-02 passed — landed cost model reconciles with the commercial quote (decisions/gates.yaml)."
     owner_agent: logistics-coordinator
   - id: S5
     title: Post-Delivery Optimization
     order: 5
-    purpose: PENDING_REVIEW
+    purpose: "Optimize the ongoing trade lane after first delivery: logistics tuning and market entry follow-through."
     entry_criteria:
-      - PENDING_REVIEW
+      - "First deliveries completed and actuals available."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Optimization plan backed by delivery actuals, not estimates."
     owner_agent: logistics-coordinator

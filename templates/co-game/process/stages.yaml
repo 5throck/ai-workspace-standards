@@ -2,20 +2,31 @@ schema_version: '1.0'
 variant: co-game
 stages:
   - id: S1
-    title: Game Security Retrospective
+    title: Game Build Lifecycle
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Carry a game build from environment/security bootstrap through concept
+      design, architecture, content production, and release verification to the
+      post-release security retrospective (procedures: game-security-bootstrap,
+      game-concept-design, game-architecture-design,
+      game-content-production, game-release-verification,
+      game-security-retrospective).
     entry_criteria:
-      - PENDING_REVIEW
+      - Game target platform and repository are known (game-security-bootstrap precondition).
+      - Genre and scope confirmed by PM at Phase 0 team assembly (docs/phase-definitions.md).
     exit_criteria:
-      - PENDING_REVIEW
+      - Release verification produced a go/no-go record with no open P0/P1 defects.
+      - Post-release security follow-ups are recorded or explicitly waived (game-security-retrospective).
     owner_agent: stack-setup
   - id: S2
     title: Gameplay Feature Loop
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: >-
+      Implement one gameplay feature through design, test-first development,
+      debugging, and physics verification (procedure: gameplay-feature-loop).
     entry_criteria:
-      - PENDING_REVIEW
+      - Feature spec approved by game-designer and scoped in the milestone.
     exit_criteria:
-      - PENDING_REVIEW
+      - Feature implementation committed with the reproduction and regression suites passing.
+      - Playtest confirms the core loop feel is preserved; a broken core loop halts and returns tuning to game-designer.
     owner_agent: game-developer

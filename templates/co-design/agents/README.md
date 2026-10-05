@@ -8,6 +8,7 @@ This directory contains agent definition files for the co-design workflow.
 |-------|------|------|
 | Design PM | `pm.md` | Owns design workflow; dispatches design specialist agents |
 | Design Lead | `design-lead.md` | Design system authority, visual consistency, component standards |
+| I18N Specialist | `i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout guidance |
 | Prototype Engineer | `prototype-engineer.md` | Interactive prototypes, component implementation |
 | Service Designer | `service-designer.md` | End-to-end service blueprints, journey maps |
 | Storyteller | `storyteller.md` | Design narrative, presentation strategy, stakeholder alignment |

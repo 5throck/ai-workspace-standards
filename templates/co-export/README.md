@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 640b8a19681fdba7a7ce939040c9ef5d34cff2c8a6f9d56b7156b8c2583dbbae
+content_hash: 3ac43055fb94f5a1c927cb56389020d5dfc22db01a8250c9aa2dfc2cd32a2f3d
 ---
 
 # co-export
@@ -45,6 +45,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **logistics-coordinator** | Incoterms selection, freight/forwarding, and bonded warehouse logistics | low | inherit |
 | **market-entry-strategist** | Overseas market entry strategy, buyer discovery, and market research | medium | inherit |
 | **trade-documentation-specialist** | Trade documentation and customs clearance paperwork specialist | medium | inherit |
+| **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## Skills
 
@@ -54,8 +55,10 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **fta-origin-determination**: Guides the FTA/Origin Analyst through determining whether goods qualify for preferential tariff treatment under a specific Free Trade Agreement — origin criterion selection, non-originating material assessment, and origin certification method identification.
 - **halal-certification-workflow**: Guides the Halal Certification Specialist through determining whether halal certification is required for a destination market and product category, identifying the recognized certifying body (JAKIM, BPJPH/MUI, ESMA, GSO), and mapping the certification/audit process and renewal cycle.
 - **hs-classification-workflow**: Guides the HS Classification Specialist through GRI-ordered Harmonized System classification, customs valuation basis determination, and tariff rate lookup. Ensures classification reasoning is reproducible and defensible under a customs post-clearance audit.
+- **landed-cost-calculation**: Defines the landed-cost computation convention for export engagements: a formula ledger decomposing customs value, duty, freight, insurance, and ancillary charges, plus an assumption ledger tracking every input's source and sensitivity. All arithmetic is executed by a bun/TypeScript script in the scaffolded project — never performed by the agent.
 - **logistics-coordination**: Guides the Logistics Coordinator through Incoterms term selection (2020 default, with 2000/2010 version recognition for legacy contracts), freight mode/forwarder comparison, and bonded-warehouse/customs clearance logistics planning, ending in final engagement delivery handoff.
 - **market-entry-strategy**: Guides the Market Entry Strategist through destination-market demand assessment, competitive landscape analysis, entry channel comparison, and buyer/distributor discovery — synthesized with compliance findings into a single go-to-market recommendation.
+- **roo-qualification-worksheet**: Produces a per-shipment Rules of Origin qualification worksheet from the FTA skill's determination — converts origin analysis into an auditable artifact for customs post-clearance audits and FTA retention requirements.
 - **trade-documentation-checklist**: Guides the Trade Documentation Specialist through assembling a complete, internally consistent trade document package (invoice, packing list, B/L, certificate of origin) and reviewing letter-of-credit terms against UCP 600 for discrepancy risk.
 
 ## How to Collaborate
@@ -82,7 +85,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `/meeting` — retired 2026-09-26; invoke the `meeting-facilitation` skill explicitly for a structured, inline multi-agent discussion.
 
 ## Variant Type
 
@@ -100,4 +103,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-15*
+*Last Updated: 2026-10-06*

@@ -13,18 +13,18 @@ rows:
       - ux-specialist
   - stage: S1
     activity: procedure.co-price.pricing-analysis
-    accountable: lead-architect
+    accountable: pricing-strategist
     responsible:
       - market-intelligence-analyst
       - pricing-strategist
   - stage: S1
     activity: procedure.co-price.pricing-security-bootstrap
-    accountable: lead-architect
+    accountable: security-monitor
     responsible:
       - security-monitor
   - stage: S1
     activity: procedure.co-price.release-assurance
-    accountable: lead-architect
+    accountable: qa-tester
     responsible:
       - cost-asset-mgmt
       - cpa-auditor
@@ -50,6 +50,6 @@ rows:
       - security-auditor
   - stage: S2
     activity: procedure.co-price.pricing-security-closeout
-    accountable: engagement-director
+    accountable: security-monitor
     responsible:
       - security-monitor

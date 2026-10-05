@@ -666,6 +666,12 @@
       "source": "raci_matrix"
     },
     {
+      "type": "accountable_for",
+      "from": "delivery-manager",
+      "to": "procedure.co-consult.solution-delivery",
+      "source": "raci_matrix"
+    },
+    {
       "type": "used_by",
       "from": "executive-presentation",
       "to": "communications-lead",
@@ -1988,12 +1994,6 @@
       "type": "accountable_for",
       "from": "strategy-analyst",
       "to": "procedure.co-consult.diagnosis-to-recommendation",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "strategy-analyst",
-      "to": "procedure.co-consult.solution-delivery",
       "source": "raci_matrix"
     },
     {

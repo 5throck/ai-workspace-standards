@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.4.0
 /**
  * validate-variant-claims.ts — variant contract-truth validator (D6 of
  * docs/designs/2026-10-05-co-deck-review-remediation-design.md; T-20261005-011..014;
  * batch 2 per D9 of docs/designs/2026-10-05-consult-abap-develop-review-remediation-design.md,
- * T-20261005-022).
+ * T-20261005-022; batch 3 + F4 calibration per T-20261005-019).
  *
  * Closes the ratchet loop for the 24 `script-gap` finding classes in
  * docs/reports/2026-10-05-project-review-scoped-co-deck.md and the 16 batch-2
@@ -80,6 +80,30 @@
  *                               only when the common target is missing. (D9 item 8)
  *   r. Checklist cited keys   — variant.json keys cited in PROMOTION_CHECKLIST
  *                               (e.g. `phaseAComplete: true`) must exist. (D9 item 9)
+ *   s. SCRIPTS.md flags       — bracketed `[--flag <arg>]`/`[--flag]` tokens in the
+ *                               variant SCRIPTS.md usage column must appear in the
+ *                               manifest script's source (argv-parsing string match).
+ *                               Batch 3 (T-20261005-019).
+ *   t. Settings hook lint     — .claude/settings.json hook entries must use the
+ *                               hooks:[{type:"command",...}] wrapper (a bare
+ *                               `command` is the co-abap malformed class);
+ *                               duplicate (event, matcher, command) triples are
+ *                               warnings. Batch 3 (T-20261005-019).
+ *
+ * Check p is calibrated (v1.3.0): spawn-target literals must look like paths —
+ * no whitespace, plus a `/`/`\` separator or a plausible bare script basename —
+ * and comments are stripped before scanning, so quoted prose sentences
+ * ("enforced the same way by safety-audit.ts") and whole command strings
+ * ("bun scripts/x/safety-audit.ts") no longer flag.
+ *
+ * Roster/claim calibration (v1.4.0, F4 triage of co-safety): the agent-file
+ * roster walk is RECURSIVE (nested `_shared/**` and `domains/**` trees are
+ * roster members; their top-level-only manifest scope is documented per
+ * T-20260912-014), and numeric "N agents" claims are truthful when they match
+ * the manifest length OR the on-disk agent-definition-file count (extends
+ * stubs excluded — delivery pointers are not definitions). Check n recognizes
+ * table headers only at a table start, so a tool-mapping data row
+ * (`| Agent | agent_manager / … |`) no longer poisons the rows after it.
  *
  * Each check is independent: one failure never aborts the rest, and a missing
  * input (no html-themes tree, no process_manifest, …) skips that check cleanly.
@@ -92,11 +116,11 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as yamlLoad } from 'js-yaml';
 
-const VERSION = '1.2.0';
+const VERSION = '1.4.0';
 const WORKSPACE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
@@ -107,8 +131,9 @@ if (args.includes('--help') || args.includes('-h')) {
 validate-variant-claims v${VERSION}
 
 Validates a template variant's descriptive claims against its manifests
-(contract-truth checks a-r; design D6 of 2026-10-05-co-deck-review-remediation
-+ batch-2 D9 of 2026-10-05-consult-abap-develop-review-remediation).
+(contract-truth checks a-t; design D6 of 2026-10-05-co-deck-review-remediation
++ batch-2 D9 of 2026-10-05-consult-abap-develop-review-remediation
++ batch-3 T-20261005-019).
 
 Usage:
   bun scripts/validate-variant-claims.ts [--template <name>]   # default: co-deck
@@ -239,15 +264,41 @@ const skills = Array.isArray(variant.skills)
 const lifecycle = (variant.lifecycle ?? {}) as Record<string, unknown>;
 const status = typeof lifecycle.status === 'string' ? lifecycle.status : typeof variant.status === 'string' ? variant.status : null;
 
-// Roster = declared agents[] ∪ agent files on disk (top level, README excluded).
+// Roster = declared agents[] ∪ agent files on disk. The disk walk is RECURSIVE
+// (v1.4.0 calibration, F4 triage of co-safety): variants like co-safety ship
+// nested agent trees (agents/_shared/**, agents/domains/{functional,industry}/**)
+// whose manifest scope is documented in their agents/README.md (T-20260912-014)
+// — nested files are roster members for owner-validity, phantom-row and
+// completeness checks. README* files are not agents.
 const roster = new Set<string>(agents);
+// Numeric-claim truth count (v1.4.0): agent DEFINITION files on disk. An
+// extends file (ADR-0033 `extends:` frontmatter) is a delivery pointer, not a
+// definition — UNLESS it declares `variant_overrides:` (substantive variant
+// deltas resolved at scaffold/adopt time; the co-safety pm.md CSO-override
+// form). So co-safety counts 40 (39 flat/self-contained + pm.md override),
+// excluding the pure common-delivered i18n-specialist pointer.
+let agentDefFileCount = 0;
 try {
-  for (const f of readdirSync(join(tpl, 'agents'))) {
-    if (f.endsWith('.md') && !/^README/i.test(f)) roster.add(f.replace(/\.md$/, ''));
-  }
+  const walkAgents = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) {
+        walkAgents(full);
+      } else if (e.isFile() && e.name.endsWith('.md') && !/^README/i.test(e.name)) {
+        roster.add(e.name.replace(/\.md$/, ''));
+        const text = readFileSync(full, 'utf-8');
+        const fm = text.split('---')[1] ?? '';
+        const isExtendsStub = /^extends:\s*\S+/m.test(fm);
+        if (!isExtendsStub || /variant_overrides:/.test(fm)) agentDefFileCount++;
+      }
+    }
+  };
+  walkAgents(join(tpl, 'agents'));
 } catch {
   /* agents/ dir absent — manifest roster only */
 }
+// Every count a numeric agents-claim may truthfully match (v1.4.0).
+const AGENT_COUNT_TRUTHS = new Set<number>([agents.length, agentDefFileCount].filter((n) => n > 0));
 
 // ── Check a — roster-count claims vs manifests ───────────────────────────────
 
@@ -273,13 +324,20 @@ function scanClaims(
     for (const { re, kind } of CLAIM_PATTERNS) {
       for (const m of line.matchAll(re)) {
         const claimed = parseInt(m[1], 10);
-        const actual = kind === 'agents' ? agents.length : skills.length;
-        if (Number.isNaN(claimed) || claimed === actual) continue;
+        // v1.4.0: an agents claim is truthful when it matches the manifest
+        // length OR the on-disk agent-definition-file count (nested rosters;
+        // T-20260912-014 manifest scope). Skills stay manifest-scoped.
+        const truthful = kind === 'agents'
+          ? AGENT_COUNT_TRUTHS.has(claimed)
+          : claimed === skills.length;
+        if (Number.isNaN(claimed) || truthful) continue;
         if (/common/i.test(m[0])) continue; // subset claim about common-inherited skills
         add(
           check,
           file,
-          `claims "${m[0].trim()}" but ${kind}[] has ${actual}`,
+          `claims "${m[0].trim()}" but ${kind === 'agents'
+            ? `agents[] has ${agents.length} and ${agentDefFileCount} agent definition files ship on disk`
+            : `skills[] has ${skills.length}`}`,
           lineNo,
         );
       }
@@ -1095,9 +1153,15 @@ function checkM(): { skipped?: string } {
     for (const { re, kind } of CLAIM_PATTERNS) {
       for (const m of line.matchAll(re)) {
         const claimed = parseInt(m[1], 10);
-        const actual = kind === 'agents' ? agents.length : skills.length;
-        if (!Number.isNaN(claimed) && claimed !== actual && !/common/i.test(m[0])) {
-          add(CHECK, rel(recordPath), `claims "${m[0].trim()}" but ${kind}[] has ${actual}`, i + 1);
+        // v1.4.0: same dual truth as check a — manifest length or the on-disk
+        // agent-definition-file count.
+        const truthful = kind === 'agents'
+          ? AGENT_COUNT_TRUTHS.has(claimed)
+          : claimed === skills.length;
+        if (!Number.isNaN(claimed) && !truthful && !/common/i.test(m[0])) {
+          add(CHECK, rel(recordPath), `claims "${m[0].trim()}" but ${kind === 'agents'
+            ? `agents[] has ${agents.length} and ${agentDefFileCount} agent definition files ship on disk`
+            : `skills[] has ${skills.length}`}`, i + 1);
         }
         if (!claim) claim = { kind, claimed, text: m[0] };
       }
@@ -1162,25 +1226,39 @@ function checkN(): void {
     const skillIds = new Set<string>();
     let tableKind: 'agents' | 'skills' | null = null;
     let fileCol = -1;
+    let prevWasTableRow = false;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim().startsWith('|')) {
         tableKind = null;
+        prevWasTableRow = false;
         continue;
       }
       const cells = splitMdRow(line);
-      if (isTableSeparator(cells)) continue;
+      if (isTableSeparator(cells)) {
+        prevWasTableRow = true;
+        continue;
+      }
       const first = cells[0].replace(/[`*]/g, '').trim().toLowerCase();
-      if (first === 'agent' || first === '에이전트') {
+      // v1.4.0 calibration (F4 triage of co-safety): a header row is only
+      // recognized at a table START (the previous line is not a table row).
+      // A data row like `| Agent | agent_manager / invoke_subagent |` inside a
+      // tool-mapping table must not flip tableKind to "agents" and poison the
+      // rows that follow it.
+      const atTableStart = !prevWasTableRow;
+      if (atTableStart && (first === 'agent' || first === '에이전트')) {
         tableKind = 'agents';
         fileCol = cells.findIndex((c) => /^file$/i.test(c.replace(/[`*]/g, '').trim()));
+        prevWasTableRow = true;
         continue;
       }
-      if (first === 'skill' || first === '스킬') {
+      if (atTableStart && (first === 'skill' || first === '스킬')) {
         tableKind = 'skills';
         fileCol = cells.findIndex((c) => /^file$|^directory$/i.test(c.replace(/[`*]/g, '').trim()));
+        prevWasTableRow = true;
         continue;
       }
+      prevWasTableRow = true;
       if (!tableKind) continue;
 
       // Positively-identified rows only: a File/Directory-column entry
@@ -1320,6 +1398,69 @@ const IMPORT_STATEMENT_RE = /\bfrom\s*['"]|^\s*import\s|\brequire\(\s*['"]|\bimp
 // A join()/resolve() call anchored at the script's own directory: walking its
 // string-literal arguments statically resolves the spawn target.
 const ANCHORED_JOIN_RE = /\b(?:join|resolve)\s*\(\s*(?:scriptDir|dirname\(\s*(?:import\.meta\.\w+|__filename)\s*\)|__dirname|import\.meta\.(?:dir|url|path))/i;
+// v1.3.0 calibration (template-quality batch 3): a spawn-target literal must
+// LOOK like a path. A quoted prose sentence ("enforced the same way by
+// safety-audit.ts" — co-safety safety-audit.ts:567) carries whitespace; a
+// whole command string ("bun scripts/co-safety/safety-audit.ts") does too.
+// A path must be whitespace-free and carry a separator; a bare token is only
+// accepted as a plausible script basename (extension enforced by
+// SPAWN_TARGET_EXT_RE, charset below).
+const WHITESPACE_RE = /\s/;
+const BARE_BASENAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function looksLikePathLiteral(lit: string): boolean {
+  if (WHITESPACE_RE.test(lit)) return false;
+  if (lit.includes('/') || lit.includes('\\')) return true;
+  return BARE_BASENAME_RE.test(lit);
+}
+
+/**
+ * v1.3.0 calibration: strip comments before literal scanning so quoted prose
+ * inside comments never becomes a spawn-target candidate ("where cheap" — a
+ * line-based pass, line count preserved so reported line numbers stay exact).
+ * Handles `//` line comments (URL-safe: a `//` preceded by something other
+ * than line start/whitespace, like `https://`, is kept), block comments
+ * (state across lines), and full-line `#` comments for py/sh. Inline
+ * `#` in py/sh is deliberately left alone — a `#` can sit inside a string
+ * literal, and the observed prose class lives in full-line comments.
+ */
+function stripCommentLines(text: string, ext: string): string[] {
+  const hashLang = ext === '.py' || ext === '.sh';
+  const out: string[] = [];
+  let inBlock = false;
+  for (const line of text.split('\n')) {
+    let s = line;
+    if (inBlock) {
+      const end = s.indexOf('*/');
+      if (end < 0) {
+        out.push('');
+        continue;
+      }
+      s = ' '.repeat(end + 2) + s.slice(end + 2);
+      inBlock = false;
+    }
+    if (hashLang) {
+      if (/^\s*#/.test(s)) s = '';
+    } else {
+      const open = s.indexOf('/*');
+      if (open >= 0) {
+        const close = s.indexOf('*/', open + 2);
+        if (close >= 0) {
+          s = s.slice(0, open) + ' '.repeat(close + 2 - open) + s.slice(close + 2);
+        } else {
+          s = s.slice(0, open);
+          inBlock = true;
+        }
+      }
+      if (!inBlock) {
+        const m = s.match(/(?:^|\s)\/\/.*$/);
+        if (m && m.index !== undefined) s = s.slice(0, m.index);
+      }
+    }
+    out.push(s);
+  }
+  return out;
+}
 
 function checkP(): { skipped?: string } {
   const CHECK = 'p';
@@ -1342,11 +1483,12 @@ function checkP(): { skipped?: string } {
     if (text === null) continue;
     const scriptDir = dirname(abs);
 
-    text.split('\n').forEach((line, i) => {
+    stripCommentLines(text, extname(abs)).forEach((line, i) => {
       if (IMPORT_STATEMENT_RE.test(line)) return;
       for (const m of line.matchAll(/['"]([^'"\n]+)['"]/g)) {
         const lit = m[1];
         if (!SPAWN_TARGET_EXT_RE.test(lit)) continue;
+        if (!looksLikePathLiteral(lit)) continue;
         if (lit.startsWith('/') || lit.includes('://') || lit.includes('${')) continue;
 
         if (/\b(?:join|resolve)\s*\(/.test(line)) {
@@ -1480,6 +1622,163 @@ function checkR(): { skipped?: string } {
   return {};
 }
 
+// ── Check s — SCRIPTS.md documented flags exist in the script source ─────────
+
+function checkS(): { skipped?: string } {
+  const CHECK = 's';
+  const sm = variant.script_manifest;
+  if (!sm || typeof sm !== 'object' || Array.isArray(sm)) {
+    return { skipped: 'no script_manifest' };
+  }
+  const local = (sm as Record<string, unknown>).local;
+  if (!Array.isArray(local) || local.length === 0) return { skipped: 'script_manifest.local is empty' };
+
+  // Variant SCRIPTS.md location: scripts/<variant>/SCRIPTS.md (co-deck layout)
+  // or scripts/SCRIPTS.md.
+  let scriptsMdPath: string | null = null;
+  for (const cand of [join(tpl, 'scripts', templateName, 'SCRIPTS.md'), join(tpl, 'scripts', 'SCRIPTS.md')]) {
+    if (existsSync(cand)) {
+      scriptsMdPath = cand;
+      break;
+    }
+  }
+  if (!scriptsMdPath) return { skipped: 'no variant SCRIPTS.md' };
+  const scriptsMd = readText(scriptsMdPath);
+  if (scriptsMd === null) return { skipped: 'SCRIPTS.md unreadable' };
+
+  // Usage table: the header row carrying a (cli-)usage column defines it; rows
+  // are keyed by the script filename in the first column. Table shapes vary
+  // across variants (cli-usage / Usage; some variants document no usage column
+  // at all — those skip cleanly, undocumented rows are a registry-sync gap for
+  // validate-templates, not this check).
+  let usageCol = -1;
+  const usageRows = new Map<string, string>();
+  for (const line of scriptsMd.split('\n')) {
+    if (!line.trim().startsWith('|')) continue;
+    const cells = splitMdRow(line);
+    const ui = cells.findIndex((c) => /^(?:cli-)?usage$/i.test(c.replace(/[`*]/g, '').trim()));
+    if (ui >= 0) {
+      usageCol = ui;
+      continue;
+    }
+    if (usageCol < 0) continue;
+    if (isTableSeparator(cells)) continue;
+    const name = (cells[0] ?? '').replace(/[`*]/g, '').trim();
+    if (/\.(?:ts|mjs|py|sh)$/i.test(name)) usageRows.set(basename(name), cells[usageCol] ?? '');
+  }
+  if (usageCol < 0) return { skipped: 'SCRIPTS.md documents no usage column' };
+
+  let checkedFlags = 0;
+  for (const entry of local) {
+    if (!entry || typeof entry !== 'object') continue;
+    const e = entry as Record<string, unknown>;
+    if (e.status === 'deprecated') continue; // deprecated docs may lag intentionally (check h's lane)
+    const relPath = typeof e.path === 'string' ? e.path : null;
+    if (!relPath) continue;
+    const abs = join(tpl, relPath);
+    if (!existsSync(abs)) continue;
+    const usage = usageRows.get(basename(relPath));
+    if (usage === undefined) continue; // not documented in the usage table — nothing to verify
+    // Bracketed usage tokens only: `[--flag <arg>]` / `[--flag]`; the first
+    // token of a bracket is the flag, `<args>` and bare `[output_dir]` are
+    // positional placeholders.
+    const flags = new Set<string>();
+    for (const m of usage.matchAll(/\[([^\]]+)\]/g)) {
+      const tok = m[1].trim().split(/\s+/)[0];
+      if (tok.startsWith('--')) flags.add(tok);
+    }
+    if (flags.size === 0) continue;
+    const src = readText(abs);
+    if (src === null) continue;
+    checkedFlags += flags.size;
+    for (const flag of flags) {
+      // String match over the source is the accepted argv-parsing proxy
+      // (batch-3 scope, T-20261005-019 — the co-consult hwpx-generate --output
+      // bug class: the doc promised a flag the script never parsed).
+      if (!src.includes(flag)) {
+        add(
+          CHECK,
+          rel(abs),
+          `SCRIPTS.md usage documents flag ${flag} but the script never references it (documented-flag drift)`,
+          lineOf(scriptsMd, basename(relPath)),
+        );
+      }
+    }
+  }
+  if (checkedFlags === 0) return { skipped: 'no bracketed flags documented in the usage column' };
+  return {};
+}
+
+// ── Check t — .claude/settings.json hook lint ────────────────────────────────
+
+function checkT(): { skipped?: string } {
+  const CHECK = 't';
+  const settingsPath = join(tpl, '.claude', 'settings.json');
+  if (!existsSync(settingsPath)) return { skipped: 'no .claude/settings.json' };
+  const raw = readText(settingsPath);
+  if (raw === null) return { skipped: 'settings.json unreadable' };
+  let settings: unknown;
+  try {
+    settings = JSON.parse(raw);
+  } catch (e) {
+    add(CHECK, rel(settingsPath), `settings.json is not valid JSON: ${e instanceof Error ? e.message : String(e)}`);
+    return {};
+  }
+  const hooks = (settings as Record<string, unknown>).hooks;
+  if (!hooks || typeof hooks !== 'object' || Array.isArray(hooks)) {
+    return { skipped: 'settings.json declares no hooks object' };
+  }
+
+  const triples = new Map<string, number>();
+  for (const [event, entries] of Object.entries(hooks as Record<string, unknown>)) {
+    if (!Array.isArray(entries)) {
+      add(CHECK, rel(settingsPath), `hooks.${event} must be an array of matcher entries (got ${typeof entries})`);
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+      const e = entry as Record<string, unknown>;
+      // Wrapper contract: { matcher, hooks: [{ type: "command", command }] }.
+      // A `command` directly on the entry (no hooks wrapper) is the malformed
+      // co-abap PostToolUse class — the hook runner silently drops it.
+      if (typeof e.command === 'string' && !Array.isArray(e.hooks)) {
+        add(
+          CHECK,
+          rel(settingsPath),
+          `hooks.${event} entry carries a bare "command" without the hooks:[{type:"command",...}] wrapper (co-abap class — the hook never runs; wrap it, design D11)`,
+        );
+        continue;
+      }
+      if (!Array.isArray(e.hooks)) continue;
+      for (const hook of e.hooks) {
+        if (!hook || typeof hook !== 'object' || Array.isArray(hook)) continue;
+        const h = hook as Record<string, unknown>;
+        if (h.type !== 'command' || typeof h.command !== 'string') {
+          add(
+            CHECK,
+            rel(settingsPath),
+            `hooks.${event} hook entry must be { type: "command", command: <string> } (got type=${JSON.stringify(h.type ?? null)}, command=${typeof h.command})`,
+          );
+          continue;
+        }
+        const key = `${event}|${typeof e.matcher === 'string' ? e.matcher : ''}|${h.command}`;
+        triples.set(key, (triples.get(key) ?? 0) + 1);
+      }
+    }
+  }
+  // Duplicates are hygiene, not breakage — warning only (design D11 dedupe).
+  for (const [key, count] of triples) {
+    if (count <= 1) continue;
+    const [event, matcher, command] = key.split('|');
+    warn(
+      CHECK,
+      rel(settingsPath),
+      `duplicate hook: ${event}${matcher ? ` (matcher ${matcher})` : ''} → ${command} appears ${count} times (dedupe to one per (event, matcher, command), design D11)`,
+    );
+  }
+  return {};
+}
+
 // ── Dispatch ─────────────────────────────────────────────────────────────────
 
 interface CheckDef {
@@ -1507,6 +1806,8 @@ const CHECKS: CheckDef[] = [
   { id: 'p', label: 'Spawn-target existence (script literals)', run: checkP },
   { id: 'q', label: 'Cross-layer relative imports resolve in common', run: checkQ },
   { id: 'r', label: 'PROMOTION_CHECKLIST cited variant.json keys exist', run: checkR },
+  { id: 's', label: 'SCRIPTS.md documented flags exist in script source', run: checkS },
+  { id: 't', label: '.claude/settings.json hook lint (wrapper contract, duplicates)', run: checkT },
 ];
 
 console.log(`validate-variant-claims v${VERSION} — templates/${templateName}\n`);

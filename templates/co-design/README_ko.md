@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 9a4a25829fe39c45c4a87b70c7a842322d70aba1747b3daa33cec7b5b6b5eef2
+translated_from_hash: 1e8cebc1a35879a4615474af2ee563023f54ecbf847c319dda44cf47eeb4cead
 lang: ko
 lang_reason: source-material
 ---
@@ -41,6 +41,7 @@ lang_reason: source-material
 |---------|------|------|------|
 | **PM** | 프로젝트 매니저 — 워크플로 조율, 디스패치, 품질 게이트 | high | inherit |
 | **design-lead** | 디자인 시스템 아키텍트 — 시각 언어, 토큰, 컴포넌트 아키텍처 | high | inherit |
+| **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 | **prototype-engineer** | 인터랙티브 프로토타이핑 전문가 — 테스트용 기능적 프로토타입 구축 | medium | inherit |
 | **service-designer** | 서비스 디자이너 — 엔드투엔드 서비스 경험, 여정, 블루프린트 | medium | inherit |
 | **storyteller** | 브랜드 내러티브 리드 — 디자인 원칙, 브랜드 보이스, 패턴 일관성 감사 | medium | inherit |
@@ -52,6 +53,7 @@ lang_reason: source-material
 
 - **accessibility-audit**: UI 컴포넌트, 템플릿, 웹 애플리케이션을 위한 자동화된 WCAG 2.1 Level AA 접근성 평가 규칙, DOM 감사 패턴, axe-core 기반 수정 가이드를 정의합니다.
 - **service-design**: 고객 여정, 서비스 블루프린트, 운영 프로세스를 포함한 엔드투엔드 서비스 경험을 디자인합니다. 사용 시점: 고객 경험 매핑, 터치포인트 최적화, 프론트스테이지/백스테이지 운영 정렬, 서비스 전달 개선.
+- **token-usage-lint**: tokens.json SSOT을 우회하는 하드코딩된 디자인 값(원시 hex 색상, rgb()/hsl() 리터럴, 원시 px 간격)을 co-design UI 코드에서 검사하는 린트 절차입니다. 사용 시점: 생성된 UI 코드 검토, 하드코딩된 디자인 값 감사, 플레이그라운드 데모 및 핸드오프 아티팩트의 디자인 토큰 컴플라이언스 확인.
 - **ui-ux-design-intelligence**: 디자인 시스템 생성, 컴포넌트 디자인, 시각적 계층 구조, 사용자 중심 디자인 원칙을 포함한 종합적인 UI/UX 디자인 역량을 제공합니다. 사용 시점: 디자인 시스템 구축, 시각 디자인 생성, UI 컴포넌트 디자인, 디자인 명세 수립.
 
 각 에이전트와 스킬을 언제 사용해야 하는지, 워크플로 단계, 산출물 저장 위치에 대한 실용적인 작업 중심 안내는 [docs/user-guide_ko.md](docs/user-guide_ko.md)를 참고하세요.
@@ -84,7 +86,7 @@ lang_reason: source-material
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목을 추가합니다.
 - `/memlog "summary"` — 오늘 세션 로그에 요약을 추가합니다.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론을 실행합니다.
+- `/meeting-facilitation` — 구조화된 인라인 다중 에이전트 토론을 실행합니다 (스킬; 레거시 `/meeting` 슬래시 명령어는 폐기되었습니다).
 
 ## 변형 유형
 
@@ -94,4 +96,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-08-09*
+*최근 갱신: 2026-10-06*

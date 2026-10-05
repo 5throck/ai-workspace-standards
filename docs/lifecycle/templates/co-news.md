@@ -20,7 +20,7 @@ Business/finance journalism variant for economics reporters covering listed comp
 ### Review Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 6 newsroom agents present (fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor)
+- [x] All 8 newsroom agents present (fact-checker, financial-analyst, i18n-specialist, legal-researcher, pm, reporter, style-editor, visual-editor)
 - [x] All 6 journalism skills present (ai-tell-reduction, financial-infographic-svg, financial-journalism-style, financial-narrative-brief, source-verification-ledger, style-lint-checklist)
 - [x] inherits_common correctly points to templates/common
 - [ ] Stable promotion pending — currently beta
@@ -42,5 +42,5 @@ Business/finance journalism variant for economics reporters covering listed comp
 - **Current Phase**: review
 - **Version**: 0.1.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-10
+- **Last Updated**: 2026-10-06
 - **Last Reviewer**: lifecycle-manager

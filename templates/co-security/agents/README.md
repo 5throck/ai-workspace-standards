@@ -12,6 +12,7 @@ This directory contains agent definition files for co-security engagement workfl
 | Threat Modeler | `threat-modeler.md` | STRIDE analysis, ATT&CK mapping, risk scoring |
 | Patch Engineer | `patch-engineer.md` | Ansible-based cross-platform patch deployment |
 | Report Writer | `report-writer.md` | Pentest reports, executive summaries |
+| I18N Specialist | `i18n-specialist.md` | Locale mirrors: locale config, locale-specific formatting, text layout (cross-cutting) |
 
 ## ⚠️ Authorization Required
 

@@ -565,7 +565,7 @@ async function main() {
 
   const inputArg = args.find(a => !a.startsWith('--'));
   if (!inputArg) {
-    console.error('Usage: bun scripts/co-consult/md-to-report.ts <file.md|dir> [--format docx|pdf|both] [--out <dir>] [--font-dir <dir>]');
+    console.error('Usage: bun scripts/co-consult/md-to-report.ts <file.md|dir> [--format docx|pdf|both] [--out <dir>]');
     process.exit(1);
   }
 

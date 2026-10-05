@@ -58,9 +58,9 @@ This variant follows the standard 7-phase workflow defined in [`phase-definition
 
 ## Skills
 
-Nine domain skills, one per specialist, defined in `skills/<name>/SKILL.md` and mirrored to
-`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`. See [AGENTS.md § Domain Skills](../AGENTS.md#domain-skills)
-for the full table. Common skills inherited from `templates/common/skills/` cover research,
+Eleven domain skills defined in `skills/<name>/SKILL.md` and mirrored to
+`.claude/skills/`, `.gemini/skills/`, `.agents/skills/`. See [SKILLS.md](../skills/SKILLS.md)
+for the full registry. Common skills inherited from `templates/common/skills/` cover research,
 documentation, and lifecycle management.
 
 | Skill | Owner |
@@ -68,10 +68,12 @@ documentation, and lifecycle management.
 | `hs-classification-workflow` | hs-classification-specialist |
 | `customs-duty-drawback-workflow` | customs-duty-drawback-specialist |
 | `fta-origin-determination` | fta-origin-analyst |
+| `roo-qualification-worksheet` | fta-origin-analyst |
 | `halal-certification-workflow` | halal-certification-specialist |
 | `export-control-screening` | export-control-compliance-specialist |
 | `foreign-regulation-monitoring` | foreign-regulatory-intelligence-analyst |
 | `market-entry-strategy` | market-entry-strategist |
+| `landed-cost-calculation` | logistics-coordinator |
 | `trade-documentation-checklist` | trade-documentation-specialist |
 | `logistics-coordination` | logistics-coordinator |
 

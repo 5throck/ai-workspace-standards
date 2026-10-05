@@ -28,7 +28,7 @@
 
 ## Agents
 
-15 agents across five groups. Full roster/dispatch: [`AGENTS.md`](../AGENTS.md);
+16 agents across five groups. Full roster/dispatch: [`AGENTS.md`](../AGENTS.md);
 authoritative definitions in `agents/*.md`.
 
 | Agent | File | Role | Status |
@@ -48,6 +48,7 @@ authoritative definitions in `agents/*.md`.
 | security-monitor | `agents/security-monitor.md` | Vuln scans, gitleaks, dependency policy | active |
 | qa-tester | `agents/qa-tester.md` | E2E, component mounting, streaming states | active |
 | devops-admin | `agents/devops-admin.md` | bun toolchain, Docker, hooks, deploys | active |
+| i18n-specialist | `agents/i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout | active |
 
 ---
 

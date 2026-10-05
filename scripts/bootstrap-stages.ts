@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Bootstrap Domain Execution Graph stages using the normative algorithm from
  * docs/designs/2026-09-19-template-domain-operating-system-design.md §5.3.
@@ -14,8 +14,17 @@
  * - Name-prefix tiebreak
  * - DEG-P-01 distinctness check (FATAL)
  *
+ * Safety guards (v1.1.0, T-20261005-019):
+ * - A committed process/stages.yaml is a curated artifact. A re-run REFUSES
+ *   (exit 1) when any target variant already has one — a re-run must never
+ *   overwrite curated stages, rewrite procedure `stage:` fields, or flip
+ *   deg_conformance. Pass --force for a genuine re-bootstrap, or --report-only
+ *   to preview the derivation without writing anything.
+ * - --report-only and --variants are now implemented (previously documented
+ *   but inert).
+ *
  * Usage:
- *   bun scripts/bootstrap-stages.ts [--variants co-consult,co-deck,...] [--report-only]
+ *   bun scripts/bootstrap-stages.ts [--variants co-consult,co-deck,...] [--report-only] [--force]
  */
 
 import * as fs from "fs";
@@ -627,15 +636,74 @@ function runDistinctnessCheck(
 // ============================================================================
 
 async function main() {
+  // ── CLI (v1.1.0: --variants / --report-only / --force are now implemented) ──
+  const argv = process.argv;
+  const FORCE = argv.includes("--force");
+  const REPORT_ONLY = argv.includes("--report-only");
+  const variantsIdx = argv.indexOf("--variants");
+  const variantsArg =
+    variantsIdx >= 0 && argv[variantsIdx + 1] && !argv[variantsIdx + 1].startsWith("--")
+      ? argv[variantsIdx + 1]
+      : argv.find((a) => a.startsWith("--variants="))?.split("=")[1];
+  if (variantsIdx >= 0 && (!argv[variantsIdx + 1] || argv[variantsIdx + 1].startsWith("--")) && !argv.some((a) => a.startsWith("--variants="))) {
+    console.error("❌ --variants requires a comma-separated list, e.g. --variants co-consult,co-deck");
+    process.exit(1);
+  }
+
+  if (REPORT_ONLY) {
+    console.log("🔍 Report-only mode: the derivation runs but NO files are written.\n");
+  }
+
   const reports: DistinctnessReport[] = [];
   const filesCreated: string[] = [];
   const filesModified: string[] = [];
 
   // Get list of variants to process
-  const allVariants = fs.readdirSync(TEMPLATES_DIR).filter((f) => {
+  let allVariants = fs.readdirSync(TEMPLATES_DIR).filter((f) => {
     const stat = fs.statSync(path.join(TEMPLATES_DIR, f));
     return stat.isDirectory() && f.startsWith("co-");
   });
+
+  if (variantsArg) {
+    const wanted = new Set(variantsArg.split(",").map((s) => s.trim()).filter(Boolean));
+    allVariants = allVariants.filter((v) => wanted.has(v));
+    if (allVariants.length === 0) {
+      console.error(`❌ No matching co-* variants for --variants ${variantsArg}`);
+      process.exit(1);
+    }
+  }
+
+  // ── Curated-stage protection (v1.1.0, T-20261005-019) ─────────────────────
+  // A committed process/stages.yaml is a curated artifact. Refuse before any
+  // processing so a re-run can never overwrite curated stages, rewrite
+  // procedure `stage:` fields, or flip deg_conformance. --force is the
+  // documented escape for a genuine re-bootstrap; --report-only writes
+  // nothing and so needs no override.
+  if (!REPORT_ONLY && !FORCE) {
+    const curated = allVariants.filter(
+      (v) => fs.existsSync(path.join(TEMPLATES_DIR, v, "process", "stages.yaml"))
+    );
+    if (curated.length > 0) {
+      console.error(
+        [
+          "",
+          "❌ REFUSED: curated process/stages.yaml found for: " + curated.join(", "),
+          "",
+          "   A committed stages.yaml is a curated artifact. Re-running this generator",
+          "   would overwrite the curated stages, rewrite the procedure `stage:` fields,",
+          "   and flip variant.json deg_conformance. This script will not do that",
+          "   implicitly.",
+          "",
+          "   - Genuine re-bootstrap (procedure graph changed, stages re-derived):",
+          "       bun scripts/bootstrap-stages.ts --force",
+          "   - Preview the derivation without writing anything:",
+          "       bun scripts/bootstrap-stages.ts --report-only",
+          "",
+        ].join("\n")
+      );
+      process.exit(1);
+    }
+  }
 
   allVariants.push("common"); // Add templates/common
 
@@ -670,17 +738,21 @@ async function main() {
       // Set deg_conformance: "core" with stages_file: null
       const variantJsonPath = path.join(variantPath, "variant.json");
       if (fs.existsSync(variantJsonPath)) {
-        const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
-        variantJson.deg_conformance = "core";
-        variantJson.process_manifest = {
-          stages_file: null,
-          raci_file: "governance/raci.yaml",
-          gates_file: "decisions/gates.yaml",
-          evidence_models_dir: "evidence-models/",
-        };
-        fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
-        filesModified.push(variantJsonPath);
-        console.log(`  ✅ Updated variant.json with deg_conformance: "core" (stage-pending)`);
+        if (REPORT_ONLY) {
+          console.log(`  🔍 Would update variant.json with deg_conformance: "core" (stage-pending)`);
+        } else {
+          const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
+          variantJson.deg_conformance = "core";
+          variantJson.process_manifest = {
+            stages_file: null,
+            raci_file: "governance/raci.yaml",
+            gates_file: "decisions/gates.yaml",
+            evidence_models_dir: "evidence-models/",
+          };
+          fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
+          filesModified.push(variantJsonPath);
+          console.log(`  ✅ Updated variant.json with deg_conformance: "core" (stage-pending)`);
+        }
       }
       continue;
     }
@@ -725,17 +797,21 @@ async function main() {
       // Set deg_conformance: "core" with stages_file: null for unexpectedly failing governed variant
       const variantJsonPath = path.join(variantPath, "variant.json");
       if (fs.existsSync(variantJsonPath)) {
-        const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
-        variantJson.deg_conformance = "core";
-        variantJson.process_manifest = {
-          stages_file: null,
-          raci_file: "governance/raci.yaml",
-          gates_file: "decisions/gates.yaml",
-          evidence_models_dir: "evidence-models/",
-        };
-        fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
-        filesModified.push(variantJsonPath);
-        console.log(`  ✅ Set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        if (REPORT_ONLY) {
+          console.log(`  🔍 Would set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        } else {
+          const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
+          variantJson.deg_conformance = "core";
+          variantJson.process_manifest = {
+            stages_file: null,
+            raci_file: "governance/raci.yaml",
+            gates_file: "decisions/gates.yaml",
+            evidence_models_dir: "evidence-models/",
+          };
+          fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
+          filesModified.push(variantJsonPath);
+          console.log(`  ✅ Set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        }
       }
       continue;
     }
@@ -751,17 +827,21 @@ async function main() {
       // Set deg_conformance: "core" with stages_file: null, no stages.yaml
       const variantJsonPath = path.join(variantPath, "variant.json");
       if (fs.existsSync(variantJsonPath)) {
-        const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
-        variantJson.deg_conformance = "core";
-        variantJson.process_manifest = {
-          stages_file: null,
-          raci_file: "governance/raci.yaml",
-          gates_file: "decisions/gates.yaml",
-          evidence_models_dir: "evidence-models/",
-        };
-        fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
-        filesModified.push(variantJsonPath);
-        console.log(`  ✅ Set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        if (REPORT_ONLY) {
+          console.log(`  🔍 Would set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        } else {
+          const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
+          variantJson.deg_conformance = "core";
+          variantJson.process_manifest = {
+            stages_file: null,
+            raci_file: "governance/raci.yaml",
+            gates_file: "decisions/gates.yaml",
+            evidence_models_dir: "evidence-models/",
+          };
+          fs.writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n");
+          filesModified.push(variantJsonPath);
+          console.log(`  ✅ Set deg_conformance: "core" (stage-pending) with no stages.yaml`);
+        }
       }
       continue;
     }
@@ -771,6 +851,15 @@ async function main() {
       console.log(
         `  ✅ DISTINCTNESS CHECK PASSED (${distinctnessReport.distinctStageCount} distinct stages, ${distinctnessReport.distinctPhaseCount} distinct phases)`
       );
+
+      const variantJsonPath = path.join(variantPath, "variant.json");
+
+      if (REPORT_ONLY) {
+        console.log(
+          `  🔍 Would emit ${path.join("process", "stages.yaml")} (${stages.length} stages), add stage: fields to procedure schemas, and set deg_conformance: "governed" in variant.json`
+        );
+        continue;
+      }
 
       // Emit stages.yaml
       const processDir = path.join(variantPath, "process");
@@ -843,7 +932,6 @@ async function main() {
       console.log(`  ✅ Added stage: field to ${proceduresUpdated} procedure schemas`);
 
       // Update variant.json
-      const variantJsonPath = path.join(variantPath, "variant.json");
       if (fs.existsSync(variantJsonPath)) {
         const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
         variantJson.deg_conformance = "governed";

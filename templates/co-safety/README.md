@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 52f913038b6f8d5897dd3bbca578f65efc0357c7f0566dbd8370223a0fc6b5b0
+content_hash: 898e419b138c407bf87e9572aecdc9eb0d2f7d0d815136c6fabe96e28dcd7426
 ---
 
 # co-safety
@@ -60,6 +60,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **shipbuilding-agent** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | medium | sonnet |
 | **steelmaking-agent** | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace expl | medium | sonnet |
 | **waste-agent** | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asp | medium | sonnet |
+| **pm** | Chief Safety Officer (CSO) — governance routing, legal_basis gates, emergency override | medium | inherit |
 | **safety-governance-manager** | Strategic safety governance —selects industry profiles, defines KPIs, approves p | high | opus |
 | **safety-workflow-manager** | Harness Prompt agent —operational safety workflow execution, dynamic agent team  | high | opus |
 | **asset-integrity-agent** | Asset integrity specialist; preventative maintenance and aging equipment managem | medium | sonnet |
@@ -74,6 +75,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **occupational-health-agent** | Occupational health specialist; worker health examinations and environment monit | medium | sonnet |
 | **reporting-agent** | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses | medium | sonnet |
 | **risk-assessment-agent** | Workplace risk assessment specialist —hazard identification, risk scoring, contr | medium | sonnet |
+| **i18n-specialist** | Locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## Skills
 
@@ -106,7 +108,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `meeting-facilitation` skill — Run a structured, inline multi-agent discussion (the legacy `/meeting` slash command is retired).
 
 ## Variant Type
 
@@ -124,4 +126,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-08-27*
+*Last Updated: 2026-10-06*

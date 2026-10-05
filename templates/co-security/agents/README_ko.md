@@ -12,6 +12,7 @@
 | 위협 모델러 | `threat-modeler.md` | STRIDE 분석, ATT&CK 매핑, 위험 점수 산정 |
 | 패치 엔지니어 | `patch-engineer.md` | Ansible 기반 크로스플랫폼 패치 배포 |
 | 리포트 라이터 | `report-writer.md` | 펜테스트 보고서, 경영진 요약본 작성 |
+| I18N 전문가 | `i18n-specialist.md` | 로캘 미러: 로캘 구성, 로캘별 포맷팅, 텍스트 레이아웃 (횡단 관심사) |
 
 ## ⚠️ 인가 문서 필수
 

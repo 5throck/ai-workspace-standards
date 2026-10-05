@@ -20,6 +20,7 @@ Agent definition files for the **co-export** trade consulting team. Each agent f
 | Trade Documentation Specialist | `trade-documentation-specialist.md` | Medium | L/C, invoice, packing list, B/L, customs clearance docs |
 | Customs Duty Drawback Specialist | `customs-duty-drawback-specialist.md` | High | Duty drawback eligibility, refund-method selection, usage-rate calculation |
 | Logistics Coordinator | `logistics-coordinator.md` | Low | Incoterms, freight/forwarding, bonded warehouse logistics |
+| I18N Specialist | `i18n-specialist.md` | Medium | Locale configuration, locale-specific formatting, text layout guidance |
 
 See [`AGENTS.md`](../AGENTS.md) for the canonical roster, dispatch triggers, and
 [`docs/co-export.context.md`](../docs/co-export.context.md) for phase mapping and the output

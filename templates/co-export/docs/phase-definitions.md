@@ -98,7 +98,7 @@ workflow: [`customs-duty-drawback-workflow`](../skills/customs-duty-drawback-wor
 runs once per export shipment as a Phase 3 sub-process, reusing the HS code and tariff rate
 already confirmed under the parent engagement's Phase 1-2 classification. It does not require a
 fresh Phase 2 approval gate per shipment — only if the underlying HS classification or refund
-method changes. See [`docs/co-export.context.md` § Dispatch / Handoff Chain](co-export.context.md#dispatch--handoff-chain)
+method changes. See [`docs/co-export.context.md` § Dispatch / Handoff Chain](co-export.context.md#agent-dispatch-order-dispatch--handoff-chain)
 for the full trigger condition.
 
 ---

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
 // @description Scans workspace Markdown files for broken relative file links.
 //              Invoked by dev-sync.ts as a pre-flight link validation gate and
 //              spawned by audit.ts as the docs relative-link gate.
@@ -8,6 +8,19 @@
 //              The docs/ subdirectories have many historical cross-references that
 //              are managed by the validate-doc-folder.ts validator separately.
 //              Use --dir to scan a specific directory, --all to scan all of docs/.
+//
+//              v1.5.0 (template-quality batch 3, T-20261005-019): --all now also
+//              walks templates/<variant>/docs/** (default scope unchanged).
+//              Variant-doc links get the same per-link post-scaffold resolution
+//              allowance as common (rules (i)-(iv), generalized from the
+//              templates/common/docs tree to any templates/<name>/docs tree),
+//              plus a common-delivered allowlist — links that only resolve once
+//              the scaffold delivers their target (docs/context.md,
+//              docs/governance/**, docs/VERSION_MANIFEST.md, CLAUDE.md,
+//              GEMINI.md, .env.sample at the template root) are skipped. Links
+//              still unresolved are WARNINGS, never errors: variant content is
+//              remediated by fleet agents and scaffold delivery differs per
+//              variant — flag-then-report, don't gate.
 //
 //              v1.3.0 (T-20260927-018): fenced code blocks are dropped before
 //              link matching. Code samples legitimately contain non-links —
@@ -41,7 +54,7 @@
 // @usage bun scripts/validate-docs-links.ts [--dir <path>] [--all] [--verbose]
 
 import { existsSync, readdirSync, statSync, readFileSync } from "fs";
-import { join, resolve, dirname, extname, relative, sep } from "path";
+import { join, resolve, dirname, extname, relative, sep, basename } from "path";
 
 const WORKSPACE_ROOT = resolve(import.meta.dir, "..");
 const args = process.argv.slice(2);
@@ -81,6 +94,39 @@ const TEMPLATE_STAGING_SKIP = new Set(["_examples"]);
 // get the post-scaffold resolution allowance (see header, rules (i)-(iv)).
 const TEMPLATE_DOCS_ROOT = join(WORKSPACE_ROOT, "templates", "common", "docs");
 
+// v1.5.0: common-delivered links — targets the scaffold delivers post-scaffold
+// (l0-ref/scaffold delivery rules), so a template doc referencing them is not
+// broken even though the file is absent from the template tree. Matched on the
+// link's resolved location relative to its template root. Anything outside this
+// list that still fails resolution is a warning, never an error ("when unsure,
+// warn not error").
+function isCommonDeliveredPath(templateRoot: string, mdDir: string, hrefClean: string): boolean {
+  const relToTpl = relative(templateRoot, resolve(mdDir, hrefClean)).split(sep).join("/");
+  if (relToTpl.startsWith("..")) return false;
+  return (
+    relToTpl === "docs/context.md" ||
+    relToTpl === "docs/VERSION_MANIFEST.md" ||
+    relToTpl.startsWith("docs/governance/") ||
+    relToTpl === "CLAUDE.md" ||
+    relToTpl === "GEMINI.md" ||
+    relToTpl === ".env.sample"
+  );
+}
+
+/**
+ * v1.5.0: the templates/<name> root when `mdPath` lives under
+ * templates/<name>/docs/, else null. Generalizes the v1.2.0 common-only
+ * allowance to every template's docs tree (the templates/common behavior —
+ * bases and error semantics — is unchanged by the generalization).
+ */
+function templateDocsOwner(mdPath: string): string | null {
+  const rel = relative(join(WORKSPACE_ROOT, "templates"), mdPath);
+  if (rel.startsWith("..") || rel === "") return null;
+  const parts = rel.split(sep);
+  if (parts.length < 3 || parts[1] !== "docs") return null; // <name>/docs/<file...>
+  return join(WORKSPACE_ROOT, "templates", parts[0]);
+}
+
 // Link pattern: [text](path#fragment) — captures relative paths plus their
 // optional anchor fragment (v1.1.0 verifies fragments; not http/https/mailto/#-only anchors)
 const RELATIVE_LINK_RE = /\[([^\]]*)\]\(([^)#\s]+)(#[^)\s]+)?\)/g;
@@ -89,6 +135,8 @@ let totalFiles = 0;
 let totalLinks = 0;
 let brokenLinks = 0;
 const errors: string[] = [];
+// v1.5.0: variant template-docs findings under --all are informational.
+const templateDocWarnings: string[] = [];
 
 /**
  * GitHub-style heading slug: lowercase, strip combining marks, drop characters
@@ -223,14 +271,21 @@ function checkFile(mdPath: string): void {
   const mdDir = dirname(mdPath);
   // v1.2.0: post-scaffold resolution allowance for template docs, applied per
   // link (whole files are never skipped). Candidate bases in resolution order;
-  // see the header for rules (i)-(iv). Files outside the template docs keep
-  // the plain relative-path behavior.
+  // see the header for rules (i)-(iv). v1.5.0 generalizes the allowance from
+  // the templates/common/docs tree to every templates/<name>/docs tree — the
+  // common behavior (same bases, error semantics) is unchanged. Files outside
+  // any template docs keep the plain relative-path behavior.
+  const templateRoot = templateDocsOwner(mdPath);
+  // Variant template docs (all but common): under --all their unresolved links
+  // are warnings, and common-delivered links are skipped (delivery allowance).
+  const isVariantDocs = templateRoot !== null && basename(templateRoot) !== "common";
   const candidateBases: string[] = [mdDir];
-  if (!relative(TEMPLATE_DOCS_ROOT, mdPath).startsWith("..")) {
+  if (templateRoot !== null) {
+    const docsRel = relative(join(templateRoot, "docs"), mdDir);
     candidateBases.push(
       WORKSPACE_ROOT, // (ii) repo-root-relative authoring
-      join(WORKSPACE_ROOT, "templates", "common"), // (iii) template delivery tree
-      join(WORKSPACE_ROOT, "docs", relative(TEMPLATE_DOCS_ROOT, mdDir)), // (iv) delivered docs/ root
+      templateRoot, // (iii) template delivery tree
+      join(WORKSPACE_ROOT, "docs", docsRel), // (iv) delivered docs/ root
     );
   }
   RELATIVE_LINK_RE.lastIndex = 0;
@@ -257,8 +312,17 @@ function checkFile(mdPath: string): void {
     }
 
     if (target === null) {
-      brokenLinks++;
       const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
+      // v1.5.0: variant template docs — allowance-listed deliveries are skipped,
+      // anything else is a warning (never an error).
+      if (isVariantDocs && templateRoot !== null) {
+        if (isCommonDeliveredPath(templateRoot, mdDir, hrefClean)) continue;
+        const msg = `  WARN ${rel}: template-doc link does not resolve pre-scaffold → ${href} (post-scaffold delivery or stale — verify manually)`;
+        templateDocWarnings.push(msg);
+        if (verbose) console.error(msg);
+        continue;
+      }
+      brokenLinks++;
       const msg = `  ${rel}: broken link → ${href}`;
       errors.push(msg);
       if (verbose) console.error(msg);
@@ -269,21 +333,31 @@ function checkFile(mdPath: string): void {
     if (fragment && extname(target) === ".md") {
       // D4: Check for § character in the fragment — GitHub strips it from headings
       if (fragment.includes("§")) {
-        brokenLinks++;
         const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
         const correctedFragment = fragment.replace(/§/g, "");
         const msg = `  ${rel}: anchor contains '§', which GitHub strips from slugs; use #${correctedFragment} instead → ${hrefClean}#${correctedFragment}`;
-        errors.push(msg);
-        if (verbose) console.error(msg);
+        if (isVariantDocs) {
+          templateDocWarnings.push(`  WARN${msg.replace(/^  /, " ")}`);
+          if (verbose) console.error(`  WARN${msg.replace(/^  /, " ")}`);
+        } else {
+          brokenLinks++;
+          errors.push(msg);
+          if (verbose) console.error(msg);
+        }
         continue;
       }
       const fragments = collectAnchorFragments(target);
       if (fragments.size > 0 && !fragments.has(fragment.toLowerCase())) {
-        brokenLinks++;
         const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
         const msg = `  ${rel}: broken anchor → ${hrefClean}#${fragment} (no matching heading in target)`;
-        errors.push(msg);
-        if (verbose) console.error(msg);
+        if (isVariantDocs) {
+          templateDocWarnings.push(`  WARN${msg.replace(/^  /, " ")}`);
+          if (verbose) console.error(`  WARN${msg.replace(/^  /, " ")}`);
+        } else {
+          brokenLinks++;
+          errors.push(msg);
+          if (verbose) console.error(msg);
+        }
       }
     }
   }
@@ -299,6 +373,25 @@ if (dirArg) {
 } else if (scanAll) {
   // Full docs/ recursive scan (for CI deep validation)
   mdFiles = collectMdFiles(join(WORKSPACE_ROOT, "docs"), true);
+  // v1.5.0 (template-quality batch 3, T-20261005-019): --all also walks
+  // templates/<variant>/docs/** — with the post-scaffold allowance, the
+  // common-delivered allowlist, and warning-only semantics (see header).
+  // Default scope is unchanged; templates/common/docs stays in the default
+  // (error-semantics) scope via the branch below.
+  const templatesDir = join(WORKSPACE_ROOT, "templates");
+  let templateEntries: string[] = [];
+  try {
+    templateEntries = readdirSync(templatesDir);
+  } catch {
+    /* no templates dir */
+  }
+  for (const entry of templateEntries) {
+    if (entry === "common") continue; // already gated with error semantics in the default scope
+    const docsDir = join(templatesDir, entry, "docs");
+    if (existsSync(docsDir)) {
+      mdFiles.push(...collectMdFiles(docsDir, true, TEMPLATE_STAGING_SKIP));
+    }
+  }
 } else {
   // Default: docs/ root level files only (no subdirectories)
   // Subdirectories like adr/, designs/, architecture/ have many historical
@@ -322,6 +415,15 @@ for (const f of mdFiles) {
   checkFile(f);
 }
 
+// v1.5.0: variant template-docs findings are informational — printed, never
+// gated on (the exit code below depends only on brokenLinks).
+if (templateDocWarnings.length > 0) {
+  console.error(
+    `\n⚠️  ${templateDocWarnings.length} template-docs link warning(s) in --all scope (informational, not gated):\n`
+  );
+  for (const w of templateDocWarnings) console.error(w);
+}
+
 if (brokenLinks > 0) {
   console.error(`\n❌ Found ${brokenLinks} broken link(s) in ${totalFiles} markdown file(s):\n`);
   for (const e of errors) console.error(e);
@@ -330,6 +432,9 @@ if (brokenLinks > 0) {
 } else {
   if (verbose) {
     console.log(`\n✅ All ${totalLinks} relative links in ${totalFiles} markdown files resolve correctly.`);
+  }
+  if (!verbose && templateDocWarnings.length > 0) {
+    console.error(`\n✅ 0 broken links in ${totalFiles} markdown file(s) (${templateDocWarnings.length} template-docs warning(s) above; informational).`);
   }
   process.exit(0);
 }

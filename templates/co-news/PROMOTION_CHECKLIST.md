@@ -10,8 +10,8 @@
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
 | 1 | **Phase A complete** | Done | `phaseAComplete: true` in variant.json; agent manifest, skill manifest, and documentation present |
-| 2 | **Agent roster completeness** | Pending | All 7 agents defined (pm, fact-checker, financial-analyst, legal-researcher, reporter, style-editor, visual-editor). Verify each agent file has substantive content (no TODO stubs). |
-| 3 | **Skills coverage** | Pending | 5 variant-specific skills (source-verification-ledger, financial-narrative-brief, financial-journalism-style, ai-tell-reduction, financial-infographic-svg) plus L1 common skills (k-dart, k-law). Verify each SKILL.md is complete and operational. |
+| 2 | **Agent roster completeness** | Pending | All 8 agents defined (pm, fact-checker, financial-analyst, i18n-specialist, legal-researcher, reporter, style-editor, visual-editor). Verify each agent file has substantive content (no TODO stubs). |
+| 3 | **Skills coverage** | Pending | 6 variant-specific skills (source-verification-ledger, financial-narrative-brief, financial-journalism-style, ai-tell-reduction, financial-infographic-svg, style-lint-checklist) plus L1 common skills (k-dart, k-law). Verify each SKILL.md is complete and operational. |
 | 4 | **Documentation completeness** | Pending | README.md present and accurate; co-news.context.md complete with substantive governance/roster/dispatch sections; AGENTS.md reflects actual roster; variant.json fields accurate. |
 | 5 | **Audit pass rate** | Pending | `bun scripts/audit.ts` passes with 0 errors. No deprecated scripts in SCRIPTS.md. |
 | 6 | **Real engagements** | Pending | Minimum 1 successful article production engagement (tip -> research -> draft -> fact-check -> editorial -> publish pipeline end-to-end). |

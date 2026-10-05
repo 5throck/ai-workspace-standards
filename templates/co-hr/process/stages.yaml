@@ -1,30 +1,38 @@
 schema_version: '1.0'
 variant: co-hr
+# Stage <-> procedure mapping (SSOT: procedures/*/schema.yaml `stage` field):
+#   S1 ≈ Phase 1 (Compensation Benchmarking) — procedure: compensation-benchmarking
+#   S2 ≈ Phases 1-2 (HR Diagnosis -> HR Solution Design) — procedures: hr-diagnosis, hr-solution-design
+#   S3 ≈ Phase 3 (Organization Implementation) — procedure: org-implementation
 stages:
   - id: S1
     title: Compensation Benchmarking
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: "Produce a defensible compensation benchmark comparing client pay positions against market data."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Engagement kickoff completed (Phase 0) and job architecture and benchmark roles agreed with the client."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Benchmark report complete with methodology, findings, and pay-range recommendations."
+      - "Roles with thin market-data coverage are marked no-benchmark rather than interpolated silently."
     owner_agent: compensation-benefits-analyst
   - id: S2
     title: HR Solution Design
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: "Diagnose the client organization across labor relations, compliance, and workforce risk, then design the integrated HR solution across organization, talent, compensation, learning, and performance."
     entry_criteria:
-      - PENDING_REVIEW
+      - "Engagement scope agreed and data access granted."
+      - "HR diagnosis accepted by the client sponsor before solution design begins."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Solution components reconciled before client presentation — no unresolved conflicts (e.g. compensation vs structure)."
+      - "Client approves the HR solution at the phase 2 gate."
     owner_agent: org-design-consultant
   - id: S3
     title: Organization Implementation
     order: 3
-    purpose: PENDING_REVIEW
+    purpose: "Implement the approved HR solution and quantify its effects with data."
     entry_criteria:
-      - PENDING_REVIEW
+      - "S2 exit criteria met — client approved the HR solution at the phase 2 gate."
     exit_criteria:
-      - PENDING_REVIEW
+      - "Implementation sequenced into milestones with owners, and implementation metrics stood up to verify effects."
+      - "Adoption stalling triggers the change roadmap instead of pushing the schedule."
     owner_agent: org-design-consultant

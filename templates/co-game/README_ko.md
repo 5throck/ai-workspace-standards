@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: a8f2cf58a3d98c95d87d24d074eed39ef8adab2182c324e60ae2c814448a1d13
+translated_from_hash: 91bbf3f6c043c33f9446d18a5bd43e968e0c4848f5cbbcabdd31f13a0b359505
 lang: ko
 lang_reason: source-material
 ---
@@ -50,6 +50,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 | **test-runner** | QA 및 검증 — 테스트 실행, 수용 기준 검증 | medium | inherit |
 | **security-monitor** | 보안 모니터 — 취약점, 권고, 시크릿 유출 스캔 | medium | inherit |
 | **stack-setup** | 스택 설정 — 환경 구성, 빌드 설정, 스택 복구 | low | inherit |
+| **i18n-specialist** | 로캘 미러의 로캘 구성, 로캘별 포맷팅, 텍스트 레이아웃 가이던스 (common extends-stub; 게임 파이프라인 외부) | medium | inherit |
 
 ## 스킬
 
@@ -57,6 +58,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 - **refactoring**: 동작을 보존하면서 체계적인 리팩토링 기법으로 코드 구조와 설계를 개선합니다.
 - **test-driven-development**: red-green-refactor 주기를 통한 TDD 방법론으로 소프트웨어를 구현합니다.
 - **sound-synth**: Web Audio API 및 jsfxr 파라미터 명세를 사용한 절차적 8비트 레트로 사운드 이펙트 및 오디오 합성 규칙.
+- **arcade-physics**: 아케이드 물리 규칙 — 결정론적 고정 타임스텝 적분, 충돌 응답, 장르별 튜닝 이동 상수.
 
 ## 협업 방법
 

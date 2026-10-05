@@ -61,6 +61,7 @@ EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory
 | **shipbuilding-agent** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | medium | sonnet |
 | **steelmaking-agent** | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace expl | medium | sonnet |
 | **waste-agent** | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asp | medium | sonnet |
+| **pm** | 최고안전책임자 (CSO) — 거버넌스 라우팅, legal_basis 게이트, 비상 대응 오버라이드 | medium | inherit |
 | **safety-governance-manager** | Strategic safety governance —selects industry profiles, defines KPIs, approves p | high | opus |
 | **safety-workflow-manager** | Harness Prompt agent —operational safety workflow execution, dynamic agent team  | high | opus |
 | **asset-integrity-agent** | Asset integrity specialist; preventative maintenance and aging equipment managem | medium | sonnet |
@@ -75,6 +76,7 @@ EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory
 | **occupational-health-agent** | Occupational health specialist; worker health examinations and environment monit | medium | sonnet |
 | **reporting-agent** | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses | medium | sonnet |
 | **risk-assessment-agent** | Workplace risk assessment specialist —hazard identification, risk scoring, contr | medium | sonnet |
+| **i18n-specialist** | 로케일 구성, 로케일별 포맷팅, 텍스트 레이아웃 가이던스 | medium | inherit |
 
 ## 스킬
 
@@ -107,7 +109,7 @@ EHS (Environmental Health & Safety) AI Agent platform for South Korea regulatory
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `/meeting` 명령어는 폐기되었습니다 — 구조화된 인라인 다중 에이전트 토론은 `meeting-facilitation` 스킬로 진행합니다.
 
 ## 변형 유형
 
