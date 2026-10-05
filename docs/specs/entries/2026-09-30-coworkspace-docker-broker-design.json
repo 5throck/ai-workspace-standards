@@ -1,0 +1,10 @@
+{
+  "id": "2026-09-30-coworkspace-docker-broker-design",
+  "title": "coworkspace docker broker design",
+  "file": "docs/designs/2026-09-30-coworkspace-docker-broker-design.md",
+  "status": "superseded",
+  "source": "manual",
+  "created": "2026-09-30",
+  "last_updated": "2026-09-30",
+  "superseded_by": "2026-09-30-coworkspace-docker-broker-raw-proxy-design"
+}

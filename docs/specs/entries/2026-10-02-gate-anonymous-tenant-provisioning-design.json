@@ -1,0 +1,9 @@
+{
+  "id": "2026-10-02-gate-anonymous-tenant-provisioning-design",
+  "title": "gate anonymous tenant provisioning design",
+  "file": "docs/designs/2026-10-02-gate-anonymous-tenant-provisioning-design.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-10-01",
+  "last_updated": "2026-10-01"
+}

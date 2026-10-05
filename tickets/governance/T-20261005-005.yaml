@@ -1,0 +1,51 @@
+schemaVersion: 1
+id: T-20261005-005
+kind: manual
+title: >-
+  governance-hygiene: one-file-per-spec storage — make
+  docs/specs/entries/<id>.json the SSOT and docs/specs/registry.json a committed
+  generated projection. Follow-up to T-20261005-002 (canonical order, merged as
+  PR #1425): sorted insertion removed the deterministic tail conflict, but two
+  registrations whose ids fall into the same alphabetical gap (typically
+  same-day neighbors) still collide at line level on a simultaneous push. With
+  per-entry files the judgment content never conflicts (disjoint files), the
+  only residual conflict surface is the projection, and its resolution is one
+  mechanical command (spec-register --regenerate) instead of a hand-splice.
+  Readers of registry.json keep working unchanged (path + shape preserved);
+  audit Check 5 gains a projection-drift arm. Acceptance: same-gap two-branch
+  registration demo resolves via --regenerate with zero manual JSON editing;
+  projection matches entries (drift gate); all existing readers green.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-05T04:30:00.000Z'
+history:
+  - at: '2026-10-05T04:30:00.000Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T02:52:28.085Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T02:52:28.102Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T02:52:28.120Z'
+    from: review
+    to: done
+result: >-
+  Fixed in this change set: spec-register.ts v1.5.0 -> v1.6.0 —
+  docs/specs/entries/<id>.json is the SSOT (one file per spec) and registry.json
+  is a committed generated projection (same path+shape, all readers unchanged);
+  union migration auto-splits legacy projections on every rebuild; --regenerate
+  rebuilds mechanically and tolerates a conflicted projection; audit.ts v2.50.0
+  Check 5b fails stale projections. Live registry migrated to 236 entry files
+  (projection diff: the new entry only). Same-gap acceptance demonstrated
+  end-to-end: two-branch registration -> projection conflict -> one --regenerate
+  command -> sorted projection with both entries, zero manual JSON editing.
+  Tests 8/8 (upsert/regenerate round-trip, idempotent migration, determinism,
+  union recovery pin, conflicted-projection rebuild, same-gap file pin,
+  canonical-order predicate). Design:
+  docs/designs/2026-10-05-spec-registry-entries-projection-design.md. Residual:
+  none for entry content; projection conflicts resolve mechanically (custom git
+  merge driver deferred — per-clone config fragility).
+error: null

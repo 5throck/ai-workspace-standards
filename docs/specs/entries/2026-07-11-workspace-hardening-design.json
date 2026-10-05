@@ -1,0 +1,9 @@
+{
+  "id": "2026-07-11-workspace-hardening-design",
+  "title": "workspace hardening design",
+  "file": "docs/designs/workspace-hardening-design.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-08-16",
+  "last_updated": "2026-08-16"
+}

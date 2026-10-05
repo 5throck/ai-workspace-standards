@@ -1,0 +1,9 @@
+{
+  "id": "2026-06-19-l1-agent-format-spec",
+  "title": "l1 agent format spec",
+  "file": "docs/designs/l1-agent-format-spec.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-08-16",
+  "last_updated": "2026-08-16"
+}

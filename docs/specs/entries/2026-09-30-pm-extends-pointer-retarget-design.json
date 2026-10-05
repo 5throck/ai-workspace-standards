@@ -1,0 +1,10 @@
+{
+  "id": "2026-09-30-pm-extends-pointer-retarget-design",
+  "title": "pm extends pointer retarget design",
+  "file": "docs/designs/2026-09-30-pm-extends-pointer-retarget-design.md",
+  "status": "superseded",
+  "source": "manual",
+  "created": "2026-09-30",
+  "last_updated": "2026-09-30",
+  "superseded_by": "ADR-0095"
+}

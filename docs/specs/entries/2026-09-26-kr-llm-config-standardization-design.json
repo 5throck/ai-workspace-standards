@@ -1,0 +1,10 @@
+{
+  "id": "2026-09-26-kr-llm-config-standardization-design",
+  "title": "kr llm config standardization design",
+  "file": "docs/designs/2026-09-26-kr-llm-config-standardization-design.md",
+  "status": "approved",
+  "source": "architect",
+  "created": "2026-09-26",
+  "last_updated": "2026-09-26",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+}

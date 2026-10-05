@@ -1,0 +1,9 @@
+{
+  "id": "2026-06-07-adr-0033-implementation-summary",
+  "title": "adr 0033 implementation summary",
+  "file": "docs/designs/adr-0033-implementation-summary.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-08-16",
+  "last_updated": "2026-08-16"
+}
