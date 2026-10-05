@@ -1,5 +1,5 @@
 // @version 2.48.1
-// v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (CONSTITUTION.md guard) —
+// v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (workspace-root marker guard) —
 //           the E2E caught scaffold-context leakage (project docs/ are project-scoped).
 // v2.48.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): docs/ folder
 //           manifest gate — spawns validate-doc-folder.ts --workspace (existsSync-guarded,

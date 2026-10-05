@@ -2395,7 +2395,7 @@ function checkStyleNeutrality() {
 
   // 2. Normative L0 governance text + L1 normative docs.
   const normativeFiles: string[] = [
-    'context.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md',
+    'CONSTITUTION.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md',
   ];
   for (const dir of [join(ROOT, 'docs', 'constitution'), join(ROOT, 'docs', 'governance')]) {
     if (existsSync(dir)) {
