@@ -1,14 +1,21 @@
-// @version 2.0.0 — OS-aware font directory defaults + system font detection.
+// @version 2.1.0 — supply-chain hardening: Pretendard pinned to a concrete release
+//   tag (no releases/latest), optional per-font expected_sha256 verification of the
+//   downloaded archive, hard failure when extraction does not cover spec.files
+//   (partial font sets previously exited 0 and surfaced later as PDF font fallback),
+//   project-local default font dir (OS font dir writes are opt-in via --os-font-dir),
+//   English console output.
 // Download Korean TTF fonts for PDF generation — saves to presentations/assets/fonts/ directory.
-// Auto-detects OS to set default font directory; skips download if fonts are already
-// installed system-wide.
-// Usage: bun scripts/download-font.ts <font_name> [output_dir]
+// Detects fonts already installed system-wide and skips the download.
+// Usage: bun scripts/co-deck/download-font.ts <font_name> [output_dir] [--os-font-dir]
+//   output_dir defaults to the project-local presentations/assets/fonts/; pass
+//   --os-font-dir (without output_dir) to write to the OS user font directory instead.
 // Fonts: maruburi | notosanskr | nanumsquareneo | pretendard
 // Requires: fflate (bun install fflate)
 
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { platform, homedir } from 'os';
+import { createHash } from 'crypto';
 import { unzipSync } from 'fflate';
 
 interface FontSpec {
@@ -18,11 +25,13 @@ interface FontSpec {
   extract: string;
   nestedZip?: string | null;
   files: Record<string, string>;
+  /** SHA-256 of the downloaded archive (hex). Verification runs only when declared. */
+  expected_sha256?: string;
 }
 
 const FONT_CATALOG: Record<string, FontSpec> = {
   maruburi: {
-    name: '마루부리 (MaruBuri)',
+    name: 'MaruBuri',
     url: 'https://hangeul.pstatic.net/hangeul_static/webfont/zips/maruburi.zip',
     headers: {
       Referer: 'https://hangeul.naver.com/',
@@ -48,7 +57,7 @@ const FONT_CATALOG: Record<string, FontSpec> = {
     },
   },
   nanumsquareneo: {
-    name: '나눔스퀘어 네오 (NanumSquareNeo)',
+    name: 'NanumSquareNeo',
     url: 'https://hangeul.pstatic.net/hangeul_static/webfont/NanumSquareNeo/NanumFontSetup_TTF_SQUARENEO.zip',
     headers: {
       Referer: 'https://hangeul.naver.com/',
@@ -65,7 +74,9 @@ const FONT_CATALOG: Record<string, FontSpec> = {
   },
   pretendard: {
     name: 'Pretendard',
-    url: 'https://github.com/orioncactus/pretendard/releases/latest/download/Pretendard.zip',
+    // Pinned to a concrete release tag (v1.3.9) — never fetch releases/latest,
+    // so a rogue or breaking upstream release cannot silently change the bytes.
+    url: 'https://github.com/orioncactus/pretendard/releases/download/v1.3.9/Pretendard-1.3.9.zip',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
     },
@@ -77,22 +88,22 @@ const FONT_CATALOG: Record<string, FontSpec> = {
   },
 };
 
-// ── OS-aware default font directory ─────────────────────────────────────────────
+// ── Font directory defaults ─────────────────────────────────────────────────────
 
-function getDefaultFontDir(): string {
+// Project-local default: font downloads stay inside the project so scaffolds are
+// self-contained. Writing to OS font directories is opt-in via --os-font-dir.
+const PROJECT_FONT_DIR = 'presentations/assets/fonts';
+
+function getOsFontDir(): string | null {
   const p = platform();
-  const home = homedir();
-
   if (p === 'win32') {
-    // Windows: use project-relative presentations/assets/fonts/ (system font install requires admin)
-    return 'presentations/assets/fonts';
-  } else if (p === 'darwin') {
-    // macOS: user font directory (no admin needed)
-    return join(home, 'Library/Fonts');
-  } else {
-    // Linux: XDG user font directory
-    return join(home, '.local/share/fonts');
+    // Windows: system font install requires admin — no OS user-font dir offered.
+    return null;
   }
+  const home = homedir();
+  if (p === 'darwin') return join(home, 'Library/Fonts');
+  // Linux: XDG user font directory
+  return join(home, '.local/share/fonts');
 }
 
 // ── System font detection ───────────────────────────────────────────────────────
@@ -135,11 +146,24 @@ async function downloadBytes(url: string, headers: Record<string, string>): Prom
   const bytes = new Uint8Array(await resp.arrayBuffer());
 
   if (contentLength > 0) {
-    console.log(`  다운로드 완료 ${Math.round(bytes.length / 1024)}KB / ${Math.round(contentLength / 1024)}KB`);
+    console.log(`  Downloaded ${Math.round(bytes.length / 1024)}KB / ${Math.round(contentLength / 1024)}KB`);
   } else {
-    console.log(`  다운로드 완료 ${Math.round(bytes.length / 1024)}KB`);
+    console.log(`  Downloaded ${Math.round(bytes.length / 1024)}KB`);
   }
   return bytes;
+}
+
+/** Verify the archive's SHA-256 against the declared checksum. Errors only when a checksum IS declared. */
+function verifySha256(bytes: Uint8Array, spec: FontSpec): void {
+  if (!spec.expected_sha256) return;
+  const actual = createHash('sha256').update(bytes).digest('hex');
+  if (actual !== spec.expected_sha256.toLowerCase()) {
+    throw new Error(
+      `SHA-256 mismatch for ${spec.name} archive: expected ${spec.expected_sha256}, got ${actual}. ` +
+      `The upstream file changed — do NOT proceed; update expected_sha256 only after verifying the new source.`,
+    );
+  }
+  console.log(`  SHA-256 verified: ${actual}`);
 }
 
 function extractFonts(zipBytes: Uint8Array, spec: FontSpec, outputDir: string): [string, number][] {
@@ -168,30 +192,59 @@ function extractFonts(zipBytes: Uint8Array, spec: FontSpec, outputDir: string): 
     const outPath = join(outputDir, outName);
     writeFileSync(outPath, data);
     saved.push([outName, data.length]);
-    console.log(`  ✓ ${outName} (${Math.round(data.length / 1024)}KB)`);
+    console.log(`  OK ${outName} (${Math.round(data.length / 1024)}KB)`);
   }
 
   return saved;
 }
 
+/** Fail when the saved files do not cover every entry of spec.files. */
+function verifyCoverage(saved: [string, number][], spec: FontSpec): void {
+  const savedNames = new Set(saved.map(([n]) => n));
+  const missing = Object.values(spec.files).filter(n => !savedNames.has(n));
+  if (missing.length === 0) return;
+
+  console.error(`  ERROR: extraction incomplete — ${missing.length} of ${Object.keys(spec.files).length} expected file(s) missing:`);
+  for (const m of missing) console.error(`     ${m}`);
+  console.error('  A partial font set would surface later as PDF font fallback. Aborting.');
+  throw new Error('extracted files do not cover the font spec');
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  const osFontDirFlag = args.includes('--os-font-dir');
+  const positional = args.filter(a => !a.startsWith('--'));
 
-  if (args.length < 1) {
-    console.log(`사용법: bun scripts/download-font.ts <font_name> [output_dir]`);
-    console.log(`\n지원 폰트: ${Object.keys(FONT_CATALOG).join(', ')}`);
-    console.log(`\nOS 감지: ${platform()} — 기본 폰트 디렉토리: ${getDefaultFontDir()}`);
+  if (positional.length < 1) {
+    console.log(`Usage: bun scripts/co-deck/download-font.ts <font_name> [output_dir] [--os-font-dir]`);
+    console.log(`\nSupported fonts: ${Object.keys(FONT_CATALOG).join(', ')}`);
+    console.log(`\nDefault output directory (project-local): ${PROJECT_FONT_DIR}`);
+    console.log(`Pass --os-font-dir (without output_dir) to write to the OS user font directory instead.`);
     process.exit(1);
   }
 
-  const fontKey = args[0].toLowerCase().trim();
+  const fontKey = positional[0].toLowerCase().trim();
   if (!(fontKey in FONT_CATALOG)) {
-    console.error(`❌ 알 수 없는 폰트: ${fontKey}`);
-    console.error(`지원 폰트: ${Object.keys(FONT_CATALOG).join(', ')}`);
+    console.error(`Unknown font: ${fontKey}`);
+    console.error(`Supported fonts: ${Object.keys(FONT_CATALOG).join(', ')}`);
     process.exit(1);
   }
 
-  const outputDir = resolve(args[1] ?? getDefaultFontDir());
+  // Output dir resolution: explicit arg > --os-font-dir opt-in > project-local default.
+  let outputDir: string;
+  if (positional.length >= 2) {
+    outputDir = resolve(positional[1]);
+  } else if (osFontDirFlag) {
+    const osDir = getOsFontDir();
+    if (!osDir) {
+      console.error('--os-font-dir is not supported on this platform (system font install requires admin). Using the project-local directory.');
+      outputDir = resolve(PROJECT_FONT_DIR);
+    } else {
+      outputDir = resolve(osDir);
+    }
+  } else {
+    outputDir = resolve(PROJECT_FONT_DIR);
+  }
   mkdirSync(outputDir, { recursive: true });
 
   const spec = FONT_CATALOG[fontKey];
@@ -201,8 +254,8 @@ async function main() {
     existsSync(join(outputDir, filename))
   );
   if (allExistInOutput) {
-    console.log(`✅ ${spec.name} 폰트가 이미 존재합니다: ${outputDir}`);
-    console.log(`   파일: ${Object.values(spec.files).join(', ')}`);
+    console.log(`OK: ${spec.name} fonts already exist in ${outputDir}`);
+    console.log(`   Files: ${Object.values(spec.files).join(', ')}`);
     process.exit(0);
   }
 
@@ -211,41 +264,43 @@ async function main() {
     findSystemFont(filename) !== null
   );
   if (allExistInSystem) {
-    console.log(`✅ ${spec.name} 폰트가 시스템에 이미 설치되어 있습니다:`);
+    console.log(`OK: ${spec.name} fonts are already installed system-wide:`);
     for (const filename of Object.keys(spec.files)) {
       const sysPath = findSystemFont(filename);
-      console.log(`   ${filename} → ${sysPath}`);
+      console.log(`   ${filename} -> ${sysPath}`);
     }
-    console.log(`\n   💡 프로젝트 폰트 디렉토리에도 복사하려면:`);
-    console.log(`   bun scripts/download-font.ts ${fontKey} ${outputDir}`);
+    console.log(`\n   To copy them into the project font directory as well:`);
+    console.log(`   bun scripts/co-deck/download-font.ts ${fontKey} ${outputDir}`);
     process.exit(0);
   }
 
-  console.log(`\n📦 ${spec.name} 다운로드 시작`);
+  console.log(`\nDownloading ${spec.name}`);
   console.log(`   URL: ${spec.url}`);
   console.log(`   OS: ${platform()}`);
-  console.log(`   저장 위치: ${outputDir}/\n`);
+  console.log(`   Output: ${outputDir}/\n`);
 
   try {
     const zipBytes = await downloadBytes(spec.url, spec.headers);
-    console.log(`  추출 중...`);
+    verifySha256(zipBytes, spec);
+    console.log(`  Extracting...`);
     const saved = extractFonts(zipBytes, spec, outputDir);
 
     if (saved.length === 0) {
-      console.warn(`⚠️  추출된 파일이 없습니다. zip 구조를 확인하세요.`);
+      console.error(`  ERROR: no files extracted. Check the zip structure against the font catalog.`);
       process.exit(1);
     }
+    verifyCoverage(saved, spec);
 
-    console.log(`\n✅ 완료 — ${saved.length}개 파일 저장됨`);
-    console.log(`   위치: ${outputDir}/`);
-    console.log(`\nPDF 스크립트에서 사용:`);
+    console.log(`\nDone — ${saved.length} file(s) saved`);
+    console.log(`   Location: ${outputDir}/`);
+    console.log(`\nUsed by the PDF scripts as:`);
     for (const [outName] of saved) {
       const varName = outName.replace(/-/g, '_').replace(/\.ttf$/i, '').toUpperCase();
       console.log(`   ${varName} = "${join(outputDir, outName)}"`);
     }
   } catch (err: any) {
-    console.error(`\n❌ 오류: ${err.message}`);
-    console.error('   URL을 확인하거나 브라우저에서 직접 다운로드하세요.');
+    console.error(`\nError: ${err.message}`);
+    console.error('   Check the URL, or download the font manually from the vendor site.');
     process.exit(1);
   }
 }

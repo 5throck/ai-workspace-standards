@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-05T11:17:32.105Z
+**Generated**: 2026-10-05T11:21:47.384Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 56
-- **Scripts**: 119 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 120 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -207,6 +207,7 @@
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
 | validate-templates.ts | 1.51.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
+| validate-variant-claims.ts | 1.0.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |

@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261005-015
+kind: manual
+title: >-
+  Repair co-deck stale doc paths and registry rows: skills/handbook references
+  x5, AGENTS.md VERSION_MANIFEST link and agent-lifecycle-manager pointer,
+  context.md graft row plus missing slide-layout-gate and presenter-mode rows,
+  the measure skill row, gate-model unification across agents/README, user-guide
+  and context.md, and the theme-authoring SKILL deprecated measure-layout
+  pointer in 6 mirrors
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.400Z'
+history:
+  - at: '2026-10-05T10:13:00.400Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.102Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.117Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.132Z'
+    from: review
+    to: done
+result: >-
+  handbook x5 repointed to common; VERSION_MANIFEST links to plain text;
+  lifecycle-manager pointers real; skills table rows fixed; measure mapping
+  prep-pdf; gate model unified on user-guide; theme-authoring mirrors x6;
+  user-guide+ko fixed (hash PASS)
+error: null

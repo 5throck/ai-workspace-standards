@@ -24,7 +24,7 @@
 | **HTML Renderer** | Playwright — **deprecated** (optional, for legacy `measure-layout.ts` only; use `estimate-layout.ts` instead) |
 | **Image Sources** | Pixabay API (keyless) · Unsplash URL method · Pexels/Unsplash API (optional keys) |
 | **Package Manager** | Bun (`bun install`) |
-| **Testing** | Manual gate-based workflow (approval gates at stages 2, 3, 5) |
+| **Testing** | Manual gate-based workflow (approval gates: 2 and 5 mandatory; 1.5, 3, 4 optional) |
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -79,16 +79,19 @@ Three flags control agent execution in the co-deck pipeline:
 | research | `skills/research/SKILL.md` | research | active |
 | storyline | `skills/storyline/SKILL.md` | storyline | active |
 | design | `skills/design/SKILL.md` | design | active |
-| graft | `skills/graft/SKILL.md` | graft | active |
 | html-build | `skills/html-build/SKILL.md` | html-build | active |
 | prep-pdf | `skills/prep-pdf/SKILL.md` | measure | active |
 | pdf-export | `skills/pdf-export/SKILL.md` | pdf-export | active |
+| slide-layout-gate | `skills/slide-layout-gate/SKILL.md` | pdf-export (layout conformance gate before export) | active |
+| presenter-mode | `skills/presenter-mode/SKILL.md` | html-build | active |
 | theme-authoring | `skills/theme-authoring/SKILL.md` | PM (T-Stage + Style Workflow entry point) | active |
-| handbook | `skills/handbook/SKILL.md` | handbook-writer, handbook-reviewer | active |
-| agent-lifecycle-manager | `.claude/skills/agent-lifecycle-manager/SKILL.md` | PM | active |
+| platform-command-lifecycle-manager | `.claude/skills/platform-command-lifecycle-manager/SKILL.md` | PM (platform command lifecycle — `.claude/commands/`, `.gemini/commands/`) | active |
+| platform-skill-lifecycle-manager | `.claude/skills/platform-skill-lifecycle-manager/SKILL.md` | PM (platform skill lifecycle — `.claude/skills/`, `.gemini/skills/`) | active |
 <!-- END VARIANT-INJECT -->
 
 > `source-verifier` and `image-curator` agents have no skill trigger files (PM-dispatched only; no user-facing trigger phrases).
+
+> Common-provided skills (via `inherits_common`, not in the table above): `handbook` + `handbook-sync-audit` — the H-Stage handbook skills were promoted from this variant to `templates/common/skills/` on 2026-08-30. `handbook-writer`/`handbook-reviewer` dispatch through the common `handbook` skill.
 
 > Skill layer: A (engine-agnostic) — platform parity copies in `.claude/skills/` and `.gemini/skills/`
 
@@ -146,6 +149,7 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 | Name | Version | Paradigm | Navigation | TOC | Content Rules | Folder |
 |------|---------|----------|-----------|-----|---------------|--------|
 | `outline` | 3.0.0 | Research Notebook — text-only, no image panel, headline+bullet focused | PPT footer bar (TOC drawer + transitions + script + timer + prev/next) | Drawer | max 6 bullets, 35 char title, 30-60 slides | `docs/html-themes/themes/outline/` |
+| `outlook` | 1.0.0 | Horizontal Scroll — slides arranged horizontally, mouse wheel converted to horizontal scroll | TOC overlay panel + footer bar (prev/next, transition mode selector, script, timer, TTS, auto-play) | Overlay | max 8 bullets, 40 char title, 20-60 slides | `docs/html-themes/themes/outlook/` |
 | `pitch` | 1.0.0 | Floating card (92vw×82vh), scale+translate transition | Bottom footer bar (TOC drawer + script panel + prev/next) | Optional | max 4 bullets, 28 char title, 20-50 slides | `docs/html-themes/themes/pitch/` |
 | `pitch-enhanced` | 3.0.0 | PPT Presenter View — pitch floating-card + TOC drawer, transitions, timer | PPT footer bar (TOC drawer + transitions fade/push/zoom + script + timer + prev/next) | Drawer | max 4 bullets, 28 char title | `docs/html-themes/themes/pitch-enhanced/` |
 | `vertical` | 3.0.0 | True Vertical Scroll — all slides stacked, sticky top bar, IntersectionObserver | Sticky top bar (TOC drawer + TTS + auto-advance + timer + progress + arrows) | Drawer | max 5 bullets, 28 char title, 30-60 slides | `docs/html-themes/themes/vertical/` |
@@ -153,7 +157,7 @@ A **theme** defines the HTML structure, navigation, and rendering paradigm. Each
 
 `theme.json` fields: `content_rules` (read by Storyline at Stage 2), `compatible_styles`, `partial_styles` (visual-heavy is partial for all PPT themes), `incompatible_styles` (pitch only: visual-heavy, academic), `recommended_structure`, `slide_types` (declares which slide types the theme supports), `css_base` (→ `styles/base.css`), `css_ppt_engine` (PPT themes only → `themes/_shared/ppt-engine.css`), `css_theme` (→ `themes/<name>/theme.css`).
 
-Each theme folder also includes **`theme.css`** (per-theme CSS extension — card geometry, slide type layouts) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.7.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
+Each theme folder also includes **`theme.css`** (per-theme CSS extension — card geometry, slide type layouts) and **`pdf_layout_spec.json`** — the **region-based** layout spec: `page` geometry, `calibration.viewport_px`, `regions.*` (named layout rectangles), `slide_types[type].regions` (which regions each slide type uses), `slide_type_overrides`, `fonts`, `line_heights`, `content_constraints`, `toc`, `print`. Read by `gen-slides-pdf.ts` (v1.9.0) as Layer 1 of the 4-layer PDF merge. The renderer is **theme-agnostic**: `buildCoords()` resolves `regions.*` uniformly and dispatches render functions by declared `slide_types`, not by theme name.
 
 > **Layer 0 — shared defaults**: `docs/html-themes/themes/_shared/layout_base.json` holds the region skeleton (all regions `null`) + the 16:9 `page` baseline + `print` defaults. It is the merge base, never filled by the renderer. `_shared/` is excluded from the theme scan (it is not itself a theme).
 
@@ -169,7 +173,7 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | Presenter timer | `setInterval`-based clock with start/pause/reset |
 | Speaker notes panel | Glass-morphism overlay with per-slide script content |
 | **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing, per-engine UI hiding** |
-| **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 5 themes supported (PPT themes via ppt-engine.js, pitch via inline code); Escape exits fullscreen first before closing overlays** |
+| **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 6 themes supported (PPT themes via ppt-engine.js, pitch and outlook via their own footer button); Escape exits fullscreen first before closing overlays** |
 | **@media print** | **Ctrl+P renders one slide per page in landscape orientation; all UI chrome (footer, TOC, script panel, timer, etc.) hidden; slide cards flow as block with page-break-after** |
 | Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + **fullscreen button** + nav buttons |
@@ -182,9 +186,9 @@ The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, sca
 
 > **Vertical topbar auto-theming**: The vertical topbar uses `var(--glass-bg)` for its background (same as TOC drawer and footer), so it automatically adapts to dark/light styles. Buttons use `var(--nav-btn-bg)`, `var(--nav-btn-hover)`, and `var(--border-subtle)`.
 
-### Theme Architecture — Two Families
+### Theme Architecture — Two Families Plus Outlook
 
-The five themes split into **two architectural families** with intentional design differences:
+The six themes split into **two architectural families** plus one standalone paradigm:
 
 | Aspect | **Pitch Family** (pitch — native DOM) | **PPT-Engine Family** (outline, pitch-enhanced, zen, vertical) |
 |--------|--------------------------------------|---------------------------------------------------------------|
@@ -196,6 +200,8 @@ The five themes split into **two architectural families** with intentional desig
 | **Transitions** | scale+translateY | ppt-engine fade/push/zoom |
 | **Navigation** | TOC drawer (`T` key) | TOC drawer + ppt-footer |
 | **PDF calibration** | 750px (matches 750px max-height card) | 720px (matches 1280×720 reference) |
+
+> **`outlook` (v1.0.0)** is a standalone horizontal-scroll paradigm outside this two-family table: slides are laid out horizontally (mouse wheel converted to horizontal scroll) with a TOC overlay panel + footer bar, its own fullscreen button, and its own theme CSS.
 
 > **pitch-enhanced** is a **hybrid**: it uses the ppt-engine runtime (TOC drawer, transitions, NarrationEngine, timer) but preserves the pitch-native DOM vocabulary and floating-card geometry. Its `theme.css` (393 lines) is the most complex override layer, neutralizing base.css defaults that conflict with the pitch aesthetic.
 
@@ -233,15 +239,16 @@ Each style folder also includes **`pdf_color_spec.json`** — 12 role-based RGB 
 
 Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md` compatibility matrix.
 
-| Style ↓ / Theme → | `outline` | `pitch` | `pitch-enhanced` | `vertical` | `zen` |
-|-------------------|-----------|---------|------------------|------------|-------|
-| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `visual-heavy` | ⚠️ partial | ❌ incompatible | ⚠️ partial | ✅ | ❌ incompatible |
-| `academic` | ✅ | ❌ incompatible | ✅ | ✅ | ❌ incompatible |
+| Style ↓ / Theme → | `outline` | `outlook` | `pitch` | `pitch-enhanced` | `vertical` | `zen` |
+|-------------------|-----------|-----------|---------|------------------|-----------|-------|
+| `premium-dark` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classic` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `minimal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `visual-heavy` | ✅ | ✅ | ❌ incompatible | ⚠️ partial | ✅ | ❌ incompatible |
+| `academic` | ✅ | ✅ | ❌ incompatible | ✅ | ✅ | ✅ |
+| `white-bubble` | ❓ | ❓ | ❓ | ❓ | ❓ | ✅ |
 
-> **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible
+> **Legend**: ✅ Fully compatible · ⚠️ Partial (background-image on `.slide` may be clipped by card boundary) · ❌ Incompatible · ❓ Not registered (pairing is not declared in any `theme.json` — e.g. `white-bubble` is zen-only by design)
 >
 > **`pitch` (v1.0.0)** preserves its original incompatibilities. Use `pitch-enhanced` for full style compatibility with pitch aesthetics.
 
@@ -249,11 +256,11 @@ Not all theme × style combinations are valid. Check `docs/html-themes/THEMES.md
 
 To create a new theme or style, use the **T-Stage** or **Style Workflow** via the PM agent. See `skills/theme-authoring/SKILL.md`. The `scaffold-theme-style.ts` script stubs the correct file layout (region skeleton for themes, adapted copy for styles) and auto-regenerates the preview manifest.
 
-**`visual-heavy` special behavior** (`⚠️ partial` for outline, pitch-enhanced, zen, vertical): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well for short/visual slides (cover, divider, image-driven content); avoid for text-dense slides. Background image may be partially clipped by card boundary in pitch-enhanced or base.css card layouts. Incompatible with original `pitch` (full-bleed conflicts with floating-card layout).
+**`visual-heavy` special behavior** (`⚠️ partial` for pitch-enhanced; incompatible with pitch and zen): `renderSlide()` must inject `--slide-bg-image` as a CSS custom property on the `.slide` element. Works well for short/visual slides (cover, divider, image-driven content); avoid for text-dense slides. Background image may be partially clipped by card boundary in pitch-enhanced or base.css card layouts. Incompatible with original `pitch` (full-bleed conflicts with floating-card layout) and with `zen` (full-bleed conflicts with zen's own background system).
 
 ### 4-Layer PDF Merge
 
-`gen-slides-pdf.ts` (v1.7.0) merges four layers at runtime via `deepMerge` (later layers win):
+`gen-slides-pdf.ts` (v1.9.0) merges four layers at runtime via `deepMerge` (later layers win):
 
 ```
 Layer 0 — shared : docs/html-themes/themes/_shared/layout_base.json       → region skeleton (all null) + 16:9 page + print defaults
@@ -299,8 +306,8 @@ title: "Lecture Title"
 audience: graduate | undergraduate | practitioner | general
 level: intro | intermediate | advanced
 presentation:
-  theme: pitch-enhanced  # HTML structure: outline | pitch | pitch-enhanced | vertical | zen
-  style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic
+  theme: pitch-enhanced  # HTML structure: outline | outlook | pitch | pitch-enhanced | vertical | zen
+  style: premium-dark # CSS variables: premium-dark | classic | minimal | visual-heavy | academic | white-bubble
 script_language: ko      # Language of TTS narration script (defaults to `language` if not set)
 keywords: [Keyword 1, Keyword 2]
 instructor:
@@ -527,10 +534,9 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 | `presentations/assets/icons/` | **Shared icon pool** |
 | `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
 | `presentations/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
-| `agents/` | Agent role definitions (13 agents) |
-| `skills/` | Skill trigger descriptors |
+| `agents/` | Agent role definitions (14 agents: 1 PM + 10 slide-pipeline + 2 handbook + 1 i18n-specialist) |
+| `skills/` | Skill trigger descriptors (10 variant-specific; `handbook`/`handbook-sync-audit` provided by common via `inherits_common`) |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
-| `skills/handbook/` | Handbook skill — H-Stage pipeline, templates, assets, examples |
 | `docs/html-themes/styles/base.css` | Shared CSS structural foundation + default variables (Layer 1 of CSS Load Order) |
 | `docs/html-themes/styles/<name>/style.css` | Per-style CSS variable overrides (shared style/color pool — `style.css` + `pdf_color_spec.json` per folder; NOT nested under themes) |
 | `docs/html-themes/themes/_shared/layout_base.json` | Layer 0 — region skeleton (all null) + 16:9 page + print defaults |
@@ -557,12 +563,12 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
 10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
-12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is partial for outline, pitch-enhanced, zen, vertical; incompatible with pitch.
+12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is partial for pitch-enhanced; incompatible with pitch and zen; `white-bubble` is zen-only.
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
-14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.7.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**. **Background images** (v1.7.0): when `background_image.enabled: true` in lecture-profile.md, the renderer applies full-bleed background images via `placeImageCover()` + semi-transparent overlay via `fillRectOverlay()` per scope (`all`/`divider-cover`/`individual`). Image paths resolved from `image-manifest.json` first, then `slideData.backgroundImage`, then `fallback_color`.
+14. **4-layer PDF merge + region model**: `gen-slides-pdf.ts` (v1.9.0) always `deepMerge`-loads `_shared/layout_base.json` (Layer 0, region skeleton) → `pdf_layout_spec.json` (theme, `regions.*` + `slide_types[type].regions`) → `pdf_color_spec.json` (style) → `layout_overrides` (project) in order. The renderer is theme-agnostic — dispatch is by declared `slide_types`, not by theme name. Required regions that resolve to `null` throw (no silent fallback). Never hardcode geometry or color values in the script. Typography is tuned via `layout_overrides.fonts`/`line_heights` (calibrated pitch reference in `docs/lecture-profile.md`); divider images render **cover-crop** (`placeImageCover`, object-fit:cover); font selection prefers **Pretendard** then falls back to **MaruBuri**. **Background images** (feature introduced in gen-slides-pdf v1.7.0): when `background_image.enabled: true` in lecture-profile.md, the renderer applies full-bleed background images via `placeImageCover()` + semi-transparent overlay via `fillRectOverlay()` per scope (`all`/`divider-cover`/`individual`). Image paths resolved from `image-manifest.json` first, then `slideData.backgroundImage`, then `fallback_color`.
 15. **Validate after every theme/style edit**: run `bun scripts/co-deck/validate-theme-styles.ts` (region schema + shared pool + slide_type↔region cross-check). Regenerate `bun scripts/co-deck/generate-themes-manifest.ts` after adding/removing any theme or style. Use `scaffold-theme-style.ts` to stub new entries (auto-regenerates the manifest).
 16. **UTF-8 without BOM (LF)**: All co-deck files — source templates, generated HTML, scripts, markdown, JSON — MUST use UTF-8 encoding without BOM and LF line endings. html-build agent must verify `<meta charset="UTF-8">` in generated HTML. On Windows (Korean locale), ensure `chcp 65001` is set before any file write to prevent CP949 corruption. See `docs/html-themes/THEMES.md → File Encoding Standard` for enforcement details.
-17. **Background image system (v1.7.0)**: `lecture-profile.md` has an independent `background_image` section (not inside pdf_color_spec.json) with fields: `enabled`, `scope` (all/divider-cover/individual), `source` (download/svg), `overlay` (color + opacity), `keywords`, `fallback_color`. Stage 0 prompts the user for background image preference. Image-curator downloads `bg-deck.<ext>` (atmospheric landscape, ~1920×1080) and adds a global entry (`slide_index: -1`, `scope: "global"`) to `image-manifest.json`. Html-build binds `backgroundImage` into slideData. Template.html sets `--slide-bg-image` CSS variable for HTML rendering. Pdf-export reads config and renders full-bleed + overlay. <!-- END VARIANT-INJECT -->
+17. **Background image system** (feature introduced in gen-slides-pdf v1.7.0): `lecture-profile.md` has an independent `background_image` section (not inside pdf_color_spec.json) with fields: `enabled`, `scope` (all/divider-cover/individual), `source` (download/svg), `overlay` (color + opacity), `keywords`, `fallback_color`. Stage 0 prompts the user for background image preference. Image-curator downloads `bg-deck.<ext>` (atmospheric landscape, ~1920×1080) and adds a global entry (`slide_index: -1`, `scope: "global"`) to `image-manifest.json`. Html-build binds `backgroundImage` into slideData. Template.html sets `--slide-bg-image` CSS variable for HTML rendering. Pdf-export reads config and renders full-bleed + overlay. <!-- END VARIANT-INJECT -->
 
 ### H-Stage Pipeline (Handbook — Document Production)
 
@@ -655,6 +661,7 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 
 *co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
 *co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
+*co-deck.context.md version: 4.5 — updated 2026-10-05: theme/style registry sync (outlook + white-bubble rows, 6×6 compatibility matrix, gen-slides-pdf v1.9.0); skills table synced to variant.json (added slide-layout-gate/presenter-mode; removed dead handbook/graft/agent-lifecycle-manager paths); gate model aligned to user-guide §4 (Gates 2 and 5 mandatory; 1.5, 3, 4 optional).*
 
 ## Template Provenance
 

@@ -1,8 +1,8 @@
 // @version 1.0.0
 // File version snapshot manager — saves copies to _versions/<id>/ and tracks history in VERSIONS.md.
-// Usage: bun scripts/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "..." --agent "..."
-//        bun scripts/snapshot.ts --workspace presentations/<project> --list
-//        bun scripts/snapshot.ts --workspace presentations/<project> --restore <versionId>
+// Usage: bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "..." --agent "..."
+//        bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
+//        bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --restore <versionId>
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, statSync,
@@ -58,7 +58,7 @@ function updateVersionsMd(
     ...skipped.map(s  => `  - ~~\`${s}\`~~ (없음, 건너뜀)`),
   ].join('\n');
 
-  const restoreCmd = `bun scripts/snapshot.ts --restore ${versionId}`;
+  const restoreCmd = `bun scripts/co-deck/snapshot.ts --restore ${versionId}`;
   const newEntry = `
 ## ${versionId}
 
@@ -89,7 +89,7 @@ ${restoreCmd}
   } else {
     content = `# 버전 이력
 
-이 파일은 \`scripts/snapshot.ts\`가 자동으로 관리합니다.
+이 파일은 \`scripts/co-deck/snapshot.ts\`가 자동으로 관리합니다.
 각 스냅샷은 \`_versions/<버전ID>/\` 폴더에 저장됩니다.
 
 ---
@@ -129,11 +129,18 @@ function snapshot(files: string[], desc: string, agent: string, workspace: strin
     }
   }
 
-  for (const s of skipped) console.log(`  ⚠️  건너뜀 (없음): ${s}`);
+  if (skipped.length > 0) {
+    console.error(`  ❌ Input file(s) not found (${skipped.length}):`);
+    for (const s of skipped) console.error(`     ${s}`);
+    // Snapshot still completes for the files that exist, but the run fails so
+    // callers (and the agent) notice the missing input instead of silently
+    // proceeding with a partial snapshot.
+    process.exitCode = 1;
+  }
 
   updateVersionsMd(workspace, versionId, desc, agent, saved, skipped);
   console.log(`\n✅ 스냅샷 완료: ${versionId}`);
-  console.log(`   복원 명령어: bun scripts/snapshot.ts --restore ${versionId}`);
+  console.log(`   복원 명령어: bun scripts/co-deck/snapshot.ts --restore ${versionId}`);
   return versionId;
 }
 
@@ -164,8 +171,8 @@ function listVersions(workspace: string) {
 
   if (entries.length > MAX_DISPLAY) console.log(`  ... 외 ${entries.length - MAX_DISPLAY}개 더`);
   console.log(line);
-  console.log(`\n  복원: bun scripts/snapshot.ts --restore <버전ID>`);
-  if (entries[0]) console.log(`  예시: bun scripts/snapshot.ts --restore ${entries[0]}`);
+  console.log(`\n  복원: bun scripts/co-deck/snapshot.ts --restore <버전ID>`);
+  if (entries[0]) console.log(`  예시: bun scripts/co-deck/snapshot.ts --restore ${entries[0]}`);
 }
 
 function restore(versionId: string, workspace: string) {
@@ -174,7 +181,8 @@ function restore(versionId: string, workspace: string) {
 
   if (!existsSync(versionDir)) {
     if (!existsSync(versionsDir)) {
-      console.log(`❌ 버전을 찾을 수 없습니다: ${versionId}`); return;
+      console.log(`❌ 버전을 찾을 수 없습니다: ${versionId}`);
+      process.exitCode = 1; return;
     }
     const matches = readdirSync(versionsDir, { withFileTypes: true })
       .filter(e => e.isDirectory() && e.name.includes(versionId))
@@ -186,10 +194,11 @@ function restore(versionId: string, workspace: string) {
     } else if (matches.length > 1) {
       console.log(`❌ 여러 버전이 매칭됩니다. 더 구체적인 ID를 사용하세요:`);
       matches.forEach(m => console.log(`   ${m}`));
-      return;
+      process.exitCode = 1; return;
     } else {
       console.log(`❌ 버전을 찾을 수 없습니다: ${versionId}`);
-      console.log(`   bun scripts/snapshot.ts --list 로 목록을 확인하세요.`); return;
+      console.log(`   bun scripts/co-deck/snapshot.ts --list 로 목록을 확인하세요.`);
+      process.exitCode = 1; return;
     }
   }
 
@@ -262,13 +271,13 @@ if (isList) {
 } else {
   console.log(`
 사용법:
-  bun scripts/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "설명" --agent "에이전트명"
-  bun scripts/snapshot.ts --workspace presentations/<project> --list
-  bun scripts/snapshot.ts --workspace presentations/<project> --restore <버전ID>
+  bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "설명" --agent "에이전트명"
+  bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
+  bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --restore <버전ID>
 
 예시:
-  bun scripts/snapshot.ts slide_deck.md --desc '챕터 수 조정' --agent content
-  bun scripts/snapshot.ts --list
-  bun scripts/snapshot.ts --restore 2026-06-17_14-30_content_챕터수조정
+  bun scripts/co-deck/snapshot.ts slide_deck.md --desc '챕터 수 조정' --agent content
+  bun scripts/co-deck/snapshot.ts --list
+  bun scripts/co-deck/snapshot.ts --restore 2026-06-17_14-30_content_챕터수조정
 `);
 }

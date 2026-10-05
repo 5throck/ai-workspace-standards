@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261005-008
+kind: manual
+title: >-
+  Null co-deck betaLifecycleSummary per the stable-variant convention (co-design
+  precedent) and rewrite PROMOTION_CHECKLIST.md as a post-promotion record - it
+  still claims beta v0.2.1, 5 themes, 13 agents, and an empty review history
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T10:12:42.534Z'
+history:
+  - at: '2026-10-05T10:12:42.534Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.792Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.807Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.821Z'
+    from: review
+    to: done
+result: >-
+  betaLifecycleSummary=null (consumer-grepped safe); PROMOTION_CHECKLIST.md
+  rewritten as post-promotion record with honest evidence
+error: null

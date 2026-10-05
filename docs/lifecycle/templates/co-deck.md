@@ -18,10 +18,10 @@
 ### Review Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 11 deck agents present (pm, version, research, source-verifier, storyline, design, image-curator, diagram-specialist, html-build, measure, pdf-export)
-- [x] All 8 skills present
+- [x] All 14 deck agents present (1 PM + 10 slide-pipeline + 2 handbook + 1 i18n-specialist: pm, version, research, source-verifier, storyline, design, image-curator, diagram-specialist, html-build, measure, pdf-export, handbook-writer, handbook-reviewer, i18n-specialist)
+- [x] All 10 variant skills present (version, research, storyline, design, html-build, prep-pdf, pdf-export, slide-layout-gate, theme-authoring, presenter-mode; common provides handbook + handbook-sync-audit)
 - [x] Pipeline order and optional/skippable agents documented
-- [x] Theme manifest with 5 themes + PPT-transformed themes documented
+- [x] Theme manifest with 6 themes + 6 styles documented (incl. outlook, white-bubble)
 - [x] Script manifest with local scripts documented
 - [x] Trust score thresholds configured
 - [x] Stable promotion completed

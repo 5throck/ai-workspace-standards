@@ -35,7 +35,7 @@ Use this lookup table to see which agent + skill PM will route your request to. 
 | Find and download slide images (Pixabay/Unsplash/Pexels) | `image-curator` | (no dedicated SKILL.md; agent-only) | Outputs `assets/images/` + `image-manifest.json`; Stage 3.5, optional, runs parallel with diagram-specialist |
 | Generate SVG concept diagrams or data charts | `diagram-specialist` | (no dedicated SKILL.md; agent-only) | 6 diagram types (cycle/flow/matrix/pyramid/timeline/comparison) + 3 chart types (bar/line/pie); Stage 3.5, optional |
 | Build/generate the actual HTML slide deck | `html-build` | `html-build` | Applies `data-theme`, supports 6 themes (`outline`, `outlook`, `pitch`, `pitch-enhanced`, `vertical`, `zen`) and 2 TOC drawer styles (`glass-drawer`, `solid-drawer`), injects images, speaker intro, contact slide; Stages 5-8 |
-| Measure rendered layout for PDF export (legacy, Playwright) | `measure` | `measure` | **Deprecated** — superseded by `prep-pdf` |
+| Measure rendered layout for PDF export (legacy, Playwright) | `measure` | `prep-pdf` | **Deprecated** — superseded by `prep-pdf`; the `measure` agent runs Playwright-free (its required skill is `prep-pdf`) |
 | Prepare for PDF export without Playwright | `pdf-export` | `prep-pdf` | Resolves the 4-layer spec merge (base → theme → style → overrides); Stages 9-10 |
 | Generate the sample or final print-ready PDF | `pdf-export` | `pdf-export` | Sample (5 slides) then full PDF via `pdf-lib`; Stage 11 |
 | Handbook / documentation site / course site build | `handbook-writer`, `handbook-reviewer` | `handbook` | Independent H-Stage pipeline (H-0~H-7); see §3 below |
@@ -64,7 +64,7 @@ H-7: PM             — Secret scan, deploy, verify
 - References from `source-verification.md` (Reference cache)
 - `_versions/` snapshots (Version cache)
 
-Full pipeline spec: `skills/handbook/SKILL.md`.
+Full pipeline spec: the common `handbook` skill (`templates/common/skills/handbook` — resolves via `inherits_common`).
 
 ## 4. Engagement / Production Phase Structure
 
@@ -138,6 +138,6 @@ When adding or modifying themes or styles, update the preview assets via CLI:
 # Regenerate the manifest (themes-manifest.js)
 bun scripts/co-deck/generate-themes-manifest.ts
 
-# Regenerate all 27 preview HTML decks in docs/html-themes/preview/decks/
+# Regenerate preview decks for all registered theme×style combinations in docs/html-themes/preview/decks/
 bun scripts/co-deck/build-theme-preview.ts
 ```

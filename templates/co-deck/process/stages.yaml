@@ -2,38 +2,128 @@ schema_version: '1.0'
 variant: co-deck
 stages:
   - id: S1
-    title: Deck Source Research
+    title: Research
     order: 1
-    purpose: PENDING_REVIEW
+    purpose: Gather and organize web sources for the lecture topic into research_notes.md - the primary input for storyline work.
     entry_criteria:
-      - PENDING_REVIEW
+      - lecture-profile.md loaded (title, audience, level confirmed)
+      - Topic and audience confirmed by PM at Stage 0 intake
     exit_criteria:
-      - PENDING_REVIEW
-    owner_agent: version
+      - research_notes.md written with cited sources
+    owner_agent: research
+  - id: S1.5
+    title: Source Verification
+    order: 1.5
+    purpose: Verify cited URLs and cross-check key sources; produce source-verification.md with a Trust Score. Optional - skipped with --skip-verify for draft iterations.
+    entry_criteria:
+      - research_notes.md exists
+    exit_criteria:
+      - source-verification.md produced with a Trust Score
+      - Trust Score below the pass threshold (0.9) returns to research (max 2 retries per agent_manifest.retry_policy)
+    owner_agent: source-verifier
   - id: S2
-    title: Version Export Control
+    title: Storyline
     order: 2
-    purpose: PENDING_REVIEW
+    purpose: Shape verified research into the narrative flow and chapter structure (storyline.md) before any slide-level work.
     entry_criteria:
-      - PENDING_REVIEW
+      - research_notes.md available (verified when Stage 1.5 ran)
     exit_criteria:
-      - PENDING_REVIEW
-    owner_agent: version
+      - storyline.md written (narrative flow and chapter structure)
+    owner_agent: storyline
   - id: S3
-    title: Deck Publish and Versioning
+    title: Slide Deck
     order: 3
-    purpose: PENDING_REVIEW
+    purpose: Convert the storyline into per-slide content (slide_deck.md) with image_role, image_query, and visual_spec fields.
     entry_criteria:
-      - PENDING_REVIEW
+      - storyline.md available
     exit_criteria:
-      - PENDING_REVIEW
-    owner_agent: pdf-export
+      - slide_deck.md written (direct input for html-build and Stage 3.5)
+    owner_agent: storyline
+  - id: S3.5
+    title: Image Curation and Diagram Generation
+    order: 3.5
+    purpose: Download license-clear slide images (image-curator) and generate SVG diagrams/charts (diagram-specialist) in parallel from slide_deck.md. Both optional and parallel.
+    entry_criteria:
+      - slide_deck.md available with image_role / visual_spec fields
+    exit_criteria:
+      - assets/images/ + image-manifest.json validated (0 duplicate content_hash)
+      - assets/diagrams/*.svg + diagram-manifest.json generated for visual_spec slides
+    owner_agent: image-curator
   - id: S4
-    title: Version Retrospective Control
+    title: Design
     order: 4
-    purpose: PENDING_REVIEW
+    purpose: Lock layout proportions, color palette, and typography into design_spec.md after Gate 2 content approval.
     entry_criteria:
-      - PENDING_REVIEW
+      - Gate 2 passed (storyline approved)
+      - slide_deck.md chapter structure understood
     exit_criteria:
-      - PENDING_REVIEW
-    owner_agent: version
+      - design_spec.md written (immutable until a Gate 3 revision is approved)
+    owner_agent: design
+  - id: S5
+    title: HTML Slide Generation
+    order: 5
+    purpose: Generate HTML slides from slide_deck.md and design_spec.md, applying the design spec CSS variables.
+    entry_criteria:
+      - slide_deck.md and design_spec.md available
+      - Assets staged when the deck uses images or diagrams
+    exit_criteria:
+      - HTML slides generated for every slide
+    owner_agent: html-build
+  - id: S6
+    title: Image Binding
+    order: 6
+    purpose: Bind matched images into the slides per the image manifest.
+    entry_criteria:
+      - Stage 5 HTML slides generated
+      - image-manifest.json available (when the deck uses images)
+    exit_criteria:
+      - Images embedded on every slide that declares an image_role
+    owner_agent: html-build
+  - id: S7
+    title: Balance Check
+    order: 7
+    purpose: Self-review slide balance (density and overflow) across the whole deck.
+    entry_criteria:
+      - Assembled deck from Stages 5-6
+    exit_criteria:
+      - Balance check passed with no unresolved overflow
+    owner_agent: html-build
+  - id: S8
+    title: Special Pages
+    order: 8
+    purpose: Add speaker intro and contact special pages, then extract slidedata.json for the PDF engine.
+    entry_criteria:
+      - Balanced deck from Stage 7
+    exit_criteria:
+      - lecture_<name>_vN.html complete with special pages
+      - slidedata.json extracted (Stage 8 output)
+    owner_agent: html-build
+  - id: S9
+    title: Layout Measure
+    order: 9
+    purpose: Measure or estimate rendered layout and check readability before export (estimate-layout; the legacy Playwright measure is superseded by the Playwright-free prep-pdf flow).
+    entry_criteria:
+      - Built deck available (lecture HTML + slidedata.json)
+    exit_criteria:
+      - layout_summary.md written with the layout gate verdict
+    owner_agent: measure
+  - id: S10
+    title: PDF Prep
+    order: 10
+    purpose: Validate the 4-layer spec merge (base -> theme -> style -> overrides) and font availability via the prep-pdf skill.
+    entry_criteria:
+      - Layout gate passed (Stage 9 verdict)
+    exit_criteria:
+      - pdf_layout_spec.json merged and validated
+      - Fonts verified (Pretendard or MaruBuri present)
+    owner_agent: measure
+  - id: S11
+    title: PDF Export
+    order: 11
+    purpose: Generate the 5-slide sample PDF for Gate 5 approval, then the full print-ready PDF; version control binds artifacts to the source revision.
+    entry_criteria:
+      - slidedata.json and merged layout spec available
+    exit_criteria:
+      - Sample PDF approved at Gate 5
+      - lecture_<name>_vN.pdf generated (final print-ready output)
+    owner_agent: pdf-export

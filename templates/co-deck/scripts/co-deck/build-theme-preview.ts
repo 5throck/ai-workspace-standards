@@ -125,3 +125,7 @@ for (const theme of themeDirs) {
 
 console.log(`\nDone: ${built} deck(s) built, ${errors} error(s).`);
 console.log(`Output: ${decksDir}`);
+// CI/audit callers must see failures: exit non-zero when any deck errored.
+if (errors > 0) {
+  process.exit(1);
+}

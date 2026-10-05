@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261005-013
+kind: manual
+title: >-
+  validator-hardening: add a co-deck script lint for undeclared imports
+  resolvable from a scaffold, SCRIPTS.md claims (vendored files, documented
+  flags, deps table), deprecated-script references inside active skills, and
+  exit-code-on-error patterns
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.370Z'
+history:
+  - at: '2026-10-05T10:13:00.370Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.014Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.029Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.044Z'
+    from: review
+    to: done
+result: >-
+  validator checks h/i landed; discovered 7th undeclared dep
+  pdf-to-png-converter (now declared)
+error: null

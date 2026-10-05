@@ -103,6 +103,22 @@ if (themesMdMode) {
 
   const content = readFileSync(themesMdPath, 'utf-8');
 
+  // Guard: the AUTO-GENERATED markers must exist, otherwise the replacements
+  // below would silently no-op while we still reported "THEMES.md tables
+  // updated." Fail loudly instead.
+  const missingMarkers: string[] = [];
+  if (!content.includes('AUTO-GENERATED-THEME-TABLE:START') || !content.includes('AUTO-GENERATED-THEME-TABLE:END')) {
+    missingMarkers.push('AUTO-GENERATED-THEME-TABLE (START/END)');
+  }
+  if (!content.includes('AUTO-GENERATED-COMPAT-MATRIX:START') || !content.includes('AUTO-GENERATED-COMPAT-MATRIX:END')) {
+    missingMarkers.push('AUTO-GENERATED-COMPAT-MATRIX (START/END)');
+  }
+  if (missingMarkers.length > 0) {
+    console.error(`ERROR: THEMES.md is missing AUTO-GENERATED marker(s): ${missingMarkers.join(', ')}`);
+    console.error('   Restore the marker pairs (with nothing between them) and re-run, or update the tables by hand.');
+    process.exit(1);
+  }
+
   // Helper: resolve version from theme.json (prefer version_num, fallback to version)
   function themeVersion(name: string): string {
     const p = join(themesRoot, name, 'theme.json');

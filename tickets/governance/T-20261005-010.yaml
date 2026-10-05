@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261005-010
+kind: manual
+title: >-
+  Unify the co-deck process model: regenerate stages.yaml S1-S11 from
+  agent_manifest.pipeline_order, re-bind gates.yaml DG-DECK-01..05 to real
+  stages and deciders and untruncate titles, fix RACI owners, rewrite
+  docs/phase-definitions.md with real agent names, and add a phase-to-stage
+  mapping table
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-05T10:12:42.562Z'
+history:
+  - at: '2026-10-05T10:12:42.562Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:13.881Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:13.895Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:13.910Z'
+    from: review
+    to: done
+result: >-
+  stages.yaml S1-S11(+1.5/3.5) with real owners; gates re-bound with full titles
+  (user-guide sect4 authority); RACI owners; phase-definitions rewrite +
+  phase-to-stage table; design.md aligned; procedures re-staged; co-deck
+  skill-graph regenerated (verify PASS)
+error: null

@@ -91,7 +91,9 @@ function runBuild(options: WatchOptions): { exitCode: number; stdout: string; st
 
   const stdout = proc.stdout.toString();
   const stderr = proc.stderr.toString();
-  const exitCode = proc.exitCode || 0;
+  // exitCode is null when the process was killed by a signal — that is a
+  // failure, not a success (0).
+  const exitCode = proc.exitCode ?? (proc.signalCode ? 1 : 0);
 
   return { exitCode, stdout, stderr };
 }
@@ -183,8 +185,14 @@ async function watchMode(options: WatchOptions): Promise<void> {
 
   try {
     // Try recursive watch first
-    fs.watch(watchedPath, { recursive: true }, (_event, filename) => {
+    const watcher = fs.watch(watchedPath, { recursive: true }, (_event, filename) => {
       onWatchEvent(watchedPath, filename);
+    });
+    // fs.watch throws asynchronously after establishment — handle the 'error'
+    // event or an uncaught exception kills the watch loop.
+    watcher.on('error', (err) => {
+      console.error(`[watch] watcher error (recursive): ${err}`);
+      console.error('[watch] file watching may be degraded — rebuilds still work manually.');
     });
 
     console.log('[watch] mode: recursive');
@@ -215,8 +223,12 @@ async function watchMode(options: WatchOptions): Promise<void> {
 
       for (const dir of watchedDirs) {
         try {
-          fs.watch(dir, (_event, filename) => {
+          const w = fs.watch(dir, (_event, filename) => {
             onWatchEvent(dir, filename);
+          });
+          // Same as above: async watcher errors must not crash the process.
+          w.on('error', (err) => {
+            console.error(`[watch] watcher error (${dir}): ${err}`);
           });
         } catch {
           // Skip directories that can't be watched

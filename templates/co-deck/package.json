@@ -1,0 +1,27 @@
+{
+  "type": "module",
+  "name": "co-deck",
+  "version": "0.2.3",
+  "description": "co-deck variant — presentation deck pipeline scripts (PDF/HTML build, theme tooling, tests)",
+  "private": true,
+  "scripts": {
+    "test": "bun test scripts/co-deck/tests/",
+    "test:visual": "bun test scripts/co-deck/tests/theme-visual-regression.test.ts",
+    "test:visual:update": "UPDATE_BASELINES=1 bun test scripts/co-deck/tests/theme-visual-regression.test.ts",
+    "test:smoke": "bun test scripts/co-deck/tests/theme-browser-smoke.test.ts && node scripts/co-deck/tests/theme-browser-smoke.browser.mjs"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "pdf-to-png-converter": "^4.2.1",
+    "puppeteer-core": "^25.12.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

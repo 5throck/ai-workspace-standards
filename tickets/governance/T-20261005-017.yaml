@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261005-017
+kind: manual
+title: >-
+  Harden co-deck scripts: CRLF-tolerant frontmatter parsing in gen-slides-pdf
+  and estimate-layout, snapshot.ts exit codes plus correct restore path in
+  generated VERSIONS.md, html-to-pdf Chrome orphan on failure, watch-deck
+  signal-exit coercion, download-font release pinning with checksums and
+  extract-completion check plus opt-in out-of-project writes and English console
+  messages
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-05T10:13:00.428Z'
+history:
+  - at: '2026-10-05T10:13:00.428Z'
+    from: null
+    to: backlog
+  - at: '2026-10-05T11:04:14.192Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T11:04:14.207Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T11:04:14.222Z'
+    from: review
+    to: done
+result: >-
+  CRLF-tolerant frontmatter + loud fallback warns; snapshot exit codes + correct
+  restore paths; html-to-pdf cleanup ordering + traversal guard; watch-deck
+  signal handling; download-font v2.1.0 (pinned v1.3.9, optional sha256,
+  coverage check, opt-in OS dir, English)
+error: null
