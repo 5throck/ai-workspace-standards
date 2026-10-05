@@ -1,0 +1,9 @@
+{
+  "id": "2026-10-01-ci-template-unit-test-job-design",
+  "title": "ci template unit test job design",
+  "file": "docs/designs/2026-10-01-ci-template-unit-test-job-design.md",
+  "status": "implemented",
+  "source": "architect",
+  "created": "2026-09-30",
+  "last_updated": "2026-10-01"
+}

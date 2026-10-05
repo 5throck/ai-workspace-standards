@@ -1,0 +1,9 @@
+{
+  "id": "2026-07-02-retry-handler-fail-fast-design",
+  "title": "retry handler fail fast design",
+  "file": "docs/designs/retry-handler-fail-fast-design.md",
+  "status": "proposed",
+  "source": "manual",
+  "created": "2026-08-16",
+  "last_updated": "2026-08-16"
+}

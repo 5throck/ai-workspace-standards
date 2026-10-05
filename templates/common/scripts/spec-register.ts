@@ -1,4 +1,16 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-10-05, T-20261005-005, spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md):
+//           one-file-per-spec SSOT — docs/specs/entries/<id>.json holds one
+//           pretty-printed SpecEntry per file and docs/specs/registry.json
+//           becomes a committed generated projection (same path and shape, so
+//           every reader is unchanged). registerSpec/--update upsert the entry
+//           FILE then regenerateProjection(); the first CRUD in a legacy tree
+//           auto-migrates by splitting the projection into entry files; new
+//           --regenerate flag rebuilds the projection mechanically (the
+//           supported resolution after a same-gap merge, replacing
+//           hand-splicing). insertSpecSorted removed — superseded by
+//           regeneration; loadRegistry/saveRegistry gained optional path
+//           overrides for the regression tests.
 // v1.5.0 (2026-10-05, T-20261005-002, spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md):
 //           content-derived insertion — registerSpec() places new entries by id
 //           (insertSpecSorted) instead of appending at the shared array tail,
@@ -44,6 +56,11 @@ import * as path from 'node:path';
 // Resolved from the script's own location (scripts/spec-register.ts → workspace
 // root), not cwd — spawned callers may run from a different working directory.
 export const REGISTRY_PATH = path.resolve(import.meta.dir, '..', 'docs', 'specs', 'registry.json');
+
+/** T-20261005-005: one-file-per-spec SSOT — one pretty-printed SpecEntry object
+ * per file; registry.json becomes a committed generated projection (same path
+ * and shape, so every reader works unchanged). */
+export const ENTRIES_DIR = path.resolve(import.meta.dir, '..', 'docs', 'specs', 'entries');
 
 // ANSI colors — explicit \x1b escapes produce the exact same output bytes as the
 // previous raw-escape-character literals.
@@ -96,31 +113,72 @@ interface Registry {
   specs: SpecEntry[];
 }
 
-export function loadRegistry(): Registry {
-  if (!fs.existsSync(REGISTRY_PATH)) {
-    fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
-    return { version: '1.0.0', specs: [] };
-  }
-  return JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'));
+/** Read every entry file (sorted by id); empty when the directory is absent. */
+export function readEntryFiles(entriesDir = ENTRIES_DIR): SpecEntry[] {
+  if (!fs.existsSync(entriesDir)) return [];
+  return fs.readdirSync(entriesDir)
+    .filter(f => f.endsWith('.json'))
+    .map(f => JSON.parse(fs.readFileSync(path.join(entriesDir, f), 'utf-8')) as SpecEntry)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
-export function saveRegistry(registry: Registry): void {
+export function entryPath(id: string, entriesDir = ENTRIES_DIR): string {
+  return path.join(entriesDir, `${id}.json`);
+}
+
+export function writeEntryFile(entry: SpecEntry, entriesDir = ENTRIES_DIR): void {
+  fs.mkdirSync(entriesDir, { recursive: true });
+  fs.writeFileSync(entryPath(entry.id, entriesDir), JSON.stringify(entry, null, 2) + '\n', 'utf-8');
+}
+
+export function loadRegistry(opts: { entriesDir?: string; registryPath?: string } = {}): Registry {
+  // T-20261005-005: the entries directory is the SSOT when it has files; the
+  // projection fallback keeps legacy trees and not-yet-migrated projects working.
+  const entries = readEntryFiles(opts.entriesDir);
+  if (entries.length > 0) {
+    return { version: '1.0.0', specs: entries };
+  }
+  const registryPath = opts.registryPath ?? REGISTRY_PATH;
+  if (!fs.existsSync(registryPath)) {
+    fs.mkdirSync(path.dirname(registryPath), { recursive: true });
+    return { version: '1.0.0', specs: [] };
+  }
+  return JSON.parse(fs.readFileSync(registryPath, 'utf-8'));
+}
+
+export function saveRegistry(registry: Registry, registryPath = REGISTRY_PATH): void {
   // T-20261005-002: canonicalize on every write — the array is kept sorted by
   // id so concurrent registrations land in content-derived positions and the
   // file self-heals from historical arrival-order on the next save.
   registry.specs.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
-  fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+  fs.mkdirSync(path.dirname(registryPath), { recursive: true });
+  fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
 }
 
-/** T-20261005-002: place a new entry at its content-derived position (id
- * ascending) instead of the shared array tail — the tail append made every
- * concurrent registration conflict deterministically. */
-export function insertSpecSorted(specs: SpecEntry[], entry: SpecEntry): SpecEntry[] {
-  const idx = specs.findIndex(s => s.id > entry.id);
-  if (idx === -1) specs.push(entry);
-  else specs.splice(idx, 0, entry);
-  return specs;
+/** T-20261005-005: rebuild the projection from the entries directory. Legacy
+ * migration is a UNION, not a fallback: projection entries that have no entry
+ * file yet are split into files on every regeneration — so the first CRUD in a
+ * legacy tree migrates automatically even though registerSpec has already
+ * written its own entry file, and a partial state self-heals. */
+export function regenerateProjection(opts: { entriesDir?: string; registryPath?: string } = {}): Registry {
+  const entriesDir = opts.entriesDir ?? ENTRIES_DIR;
+  const registryPath = opts.registryPath ?? REGISTRY_PATH;
+  if (fs.existsSync(registryPath)) {
+    try {
+      const legacy = JSON.parse(fs.readFileSync(registryPath, 'utf-8')) as Registry;
+      const have = new Set(readEntryFiles(entriesDir).map(e => e.id));
+      for (const spec of legacy.specs) {
+        if (!have.has(spec.id)) writeEntryFile(spec, entriesDir);
+      }
+    } catch {
+      // T-20261005-005: a conflicted projection (git merge markers) is not parseable
+      // — the entries directory is the SSOT, so discard it and rebuild from files.
+      console.log(`${YELLOW}Projection is conflicted or unparseable — rebuilding from ${entriesDir}${RESET}`);
+    }
+  }
+  const registry: Registry = { version: '1.0.0', specs: readEntryFiles(entriesDir) };
+  saveRegistry(registry, registryPath);
+  return registry;
 }
 
 /** T-20261005-002: the registry array is canonical when ids ascend. Returns a
@@ -181,7 +239,8 @@ export function registerSpec(options: {
   if (existing) {
     existing.last_updated = today();
     if (options.meetingRef) existing.meeting_ref = options.meetingRef;
-    saveRegistry(registry);
+    writeEntryFile(existing);
+    regenerateProjection();
     console.log(`${GREEN}Updated: ${id}${RESET}`);
     return { id, updated: true };
   }
@@ -196,8 +255,8 @@ export function registerSpec(options: {
     last_updated: today(),
   };
   if (options.meetingRef) entry.meeting_ref = options.meetingRef.split('\\').join('/');
-  insertSpecSorted(registry.specs, entry);
-  saveRegistry(registry);
+  writeEntryFile(entry);
+  regenerateProjection();
   console.log(`${GREEN}Registered spec: ${id}${RESET}`);
   return { id, updated: false };
 }
@@ -259,8 +318,15 @@ function dispatch(): void {
     entry.status = newStatus;
     if (supersededBy) entry.superseded_by = supersededBy;
     entry.last_updated = today();
-    saveRegistry(registry);
+    writeEntryFile(entry);
+    regenerateProjection();
     console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
+    process.exit(0);
+  }
+
+  if (hasFlag('--regenerate')) {
+    const registry = regenerateProjection();
+    console.log(`${GREEN}Regenerated projection: ${registry.specs.length} spec(s)${RESET}`);
     process.exit(0);
   }
 
@@ -282,7 +348,7 @@ function dispatch(): void {
     process.exit(0);
   }
 
-  console.error('Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --list');
+  console.error('Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --regenerate | --list');
   process.exit(1);
 }
 

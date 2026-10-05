@@ -1,0 +1,9 @@
+{
+  "id": "2026-06-09-deploy-to-l1-script-design",
+  "title": "deploy to l1 script design",
+  "file": "docs/designs/deploy-to-l1-script-design.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-08-16",
+  "last_updated": "2026-08-16"
+}

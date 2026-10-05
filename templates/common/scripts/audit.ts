@@ -1,4 +1,10 @@
-// @version 2.49.0
+// @version 2.50.0
+// v2.50.0 (2026-10-05, T-20261005-005, spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md):
+//           spec-check Check 5b — docs/specs/registry.json is a generated
+//           projection of docs/specs/entries/*.json; when the entries directory
+//           exists the projection must match its id set exactly (a stale
+//           projection after a same-gap merge FAILs with the --regenerate fix).
+//           Skipped for legacy trees without an entries directory.
 // v2.49.0 (2026-10-05, T-20261005-002, spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md):
 //           spec-check Check 5 — docs/specs/registry.json must be in canonical
 //           id order (canonicalOrderViolation from spec-register.ts). The
@@ -3284,6 +3290,23 @@ if (SPEC_CHECK) {
             Fail(`Spec check: docs/specs/registry.json is not in canonical id order (${orderViolation}) — the next spec-register.ts write re-sorts it`);
         } else if (registry.specs.length > 0) {
             Pass(`Spec check: all ${registry.specs.length} registry entries in canonical id order`);
+        }
+
+        // Check 5b (T-20261005-005): projection drift — docs/specs/registry.json is a
+        // generated projection of docs/specs/entries/*.json; a stale projection means
+        // an entry file landed without regeneration (e.g. after a same-gap merge).
+        const ENTRIES_DIR = path.join('docs', 'specs', 'entries');
+        if (fs.existsSync(ENTRIES_DIR)) {
+            const entryIds = fs.readdirSync(ENTRIES_DIR).filter(f => f.endsWith('.json'))
+                .map(f => f.replace(/\.json$/, '')).sort();
+            const projectionIds = registry.specs.map(s => s.id).sort();
+            const drift = entryIds.length !== projectionIds.length
+                || entryIds.some((id, i) => id !== projectionIds[i]);
+            if (drift) {
+                Fail(`Spec check: docs/specs/registry.json is stale vs docs/specs/entries/ (${entryIds.length} entry file(s) vs ${projectionIds.length} projected) — run: bun scripts/spec-register.ts --regenerate`);
+            } else {
+                Pass(`Spec check: registry projection matches ${entryIds.length} entry file(s)`);
+            }
         }
         }
     }

@@ -1,25 +1,34 @@
 /**
- * Tests for the spec-registry canonical-order mechanism (T-20261005-002,
- * spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md).
+ * Tests for the spec-registry entries-as-SSOT mechanism (T-20261005-005,
+ * spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md)
+ * and the canonical-order predicate it retained from T-20261005-002.
  *
- * Every concurrent registration used to append at the shared array tail, so
- * simultaneous PRs registering different design docs conflicted
- * deterministically (5 hand-splices on 2026-10-05 alone). The fix: insert at
- * the content-derived position (id ascending), canonicalize the array on every
- * save, and fail out-of-band non-canonical files at the audit gate.
+ * docs/specs/entries/<id>.json is the SSOT (one file per spec) and
+ * docs/specs/registry.json is a committed generated projection. Concurrent
+ * registrations now write disjoint entry files — the judgment content can
+ * never conflict; the only residual conflict surface is the projection, whose
+ * resolution is one mechanical command (--regenerate).
  *
  * Pins:
- * 1. insertSpecSorted places entries mid-array, at the head, and at the tail.
- * 2. canonicalOrderViolation returns null for sorted input and names the first
- *    offending pair otherwise.
- * 3. THE CONCURRENT-WRITER PIN: two writers inserting different ids from the
- *    same base land in DIFFERENT gaps — the git line-merge stays clean.
- * 4. Same-gap residual: two adjacent ids land in one gap (the loser rebases;
- *    the replay is stable — documented in the design, not silently ignored).
+ * 1. Upsert + regenerate round-trip keeps the projection sorted.
+ * 2. Migration splits a legacy projection into entry files, idempotently.
+ * 3. Regeneration is deterministic (byte-identical output).
+ * 4. THE CONCURRENT-WRITER PIN: same-gap writers produce disjoint entry files
+ *    and the union regenerates deterministically.
+ * 5. canonicalOrderViolation still names the first offending pair.
  */
 
 import { describe, test, expect } from 'bun:test';
-import { insertSpecSorted, canonicalOrderViolation } from '../../scripts/spec-register.ts';
+import { mkdtempSync, readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  canonicalOrderViolation,
+  entryPath,
+  readEntryFiles,
+  regenerateProjection,
+  writeEntryFile,
+} from '../../scripts/spec-register.ts';
 
 const entry = (id: string) => ({
   id,
@@ -31,69 +40,105 @@ const entry = (id: string) => ({
   last_updated: '2026-10-05',
 });
 
-describe('insertSpecSorted', () => {
-  test('inserts mid-array at the id boundary', () => {
-    const specs = [entry('a'), entry('c'), entry('e')];
-    insertSpecSorted(specs, entry('b'));
-    expect(specs.map(s => s.id)).toEqual(['a', 'b', 'c', 'e']);
+function scratch(): { entriesDir: string; registryPath: string } {
+  const dir = mkdtempSync(join(tmpdir(), 'spec-registry-entries-'));
+  return { entriesDir: join(dir, 'entries'), registryPath: join(dir, 'registry.json') };
+}
+
+describe('entries model', () => {
+  test('upsert + regenerate round-trip keeps the projection sorted', () => {
+    const s = scratch();
+    writeEntryFile(entry('2026-10-02-b'), s.entriesDir);
+    writeEntryFile(entry('2026-10-01-a'), s.entriesDir);
+    const registry = regenerateProjection(s);
+    expect(registry.specs.map(e => e.id)).toEqual(['2026-10-01-a', '2026-10-02-b']);
+    const onDisk = JSON.parse(readFileSync(s.registryPath, 'utf-8'));
+    expect(onDisk.specs.map((e: { id: string }) => e.id)).toEqual(['2026-10-01-a', '2026-10-02-b']);
   });
 
-  test('appends at the tail when the id is the largest', () => {
-    const specs = [entry('a'), entry('c')];
-    insertSpecSorted(specs, entry('z'));
-    expect(specs.map(s => s.id)).toEqual(['a', 'c', 'z']);
+  test('migration splits a legacy projection into entry files, idempotently', () => {
+    const s = scratch();
+    const legacy = { version: '1.0.0', specs: [entry('2026-10-01-a'), entry('2026-10-02-b')] };
+    writeFileSync(s.registryPath, JSON.stringify(legacy, null, 2) + '\n', 'utf-8');
+    regenerateProjection(s); // no entries yet → migrates the legacy projection
+    expect(readdirSync(s.entriesDir).filter(f => f.endsWith('.json')).length).toBe(2);
+    const first = readFileSync(s.registryPath, 'utf-8');
+    const second = regenerateProjection(s);
+    expect(second.specs.length).toBe(2);
+    expect(readFileSync(s.registryPath, 'utf-8')).toBe(first);
   });
 
-  test('prepends at the head when the id is the smallest', () => {
-    const specs = [entry('c'), entry('e')];
-    insertSpecSorted(specs, entry('a'));
-    expect(specs.map(s => s.id)).toEqual(['a', 'c', 'e']);
+  test('union regeneration never drops file-only entries (2026-10-05 recovery pin)', () => {
+    const s = scratch();
+    writeEntryFile(entry('2026-10-01-a'), s.entriesDir);
+    // A projection that only knows one entry while two entry files exist — the
+    // incident shape caught live during this design's first registration (a
+    // fallback-ordered migration erased the pre-existing entries pre-commit).
+    writeFileSync(s.registryPath, JSON.stringify({ version: '1.0.0', specs: [entry('2026-10-01-a')] }, null, 2) + '\n', 'utf-8');
+    writeEntryFile(entry('2026-10-02-b'), s.entriesDir);
+    const registry = regenerateProjection(s);
+    expect(registry.specs.map(e => e.id)).toEqual(['2026-10-01-a', '2026-10-02-b']);
+  });
+
+  test('a conflicted projection (merge markers) is discarded and rebuilt from files', () => {
+    const s = scratch();
+    writeEntryFile(entry('2026-10-05-aaa'), s.entriesDir);
+    writeEntryFile(entry('2026-10-05-bbb'), s.entriesDir);
+    writeFileSync(s.registryPath, [
+      '<<<<<<< HEAD',
+      JSON.stringify({ version: '1.0.0', specs: [entry('2026-10-05-aaa')] }, null, 2),
+      '=======',
+      JSON.stringify({ version: '1.0.0', specs: [entry('2026-10-05-bbb')] }, null, 2),
+      '>>>>>>> pr-b',
+      '',
+    ].join('\n'), 'utf-8');
+    const registry = regenerateProjection(s);
+    expect(registry.specs.map(e => e.id)).toEqual(['2026-10-05-aaa', '2026-10-05-bbb']);
+    expect(() => JSON.parse(readFileSync(s.registryPath, 'utf-8'))).not.toThrow();
+  });
+
+  test('regeneration is deterministic (byte-identical output)', () => {
+    const s = scratch();
+    writeEntryFile(entry('2026-10-02-b'), s.entriesDir);
+    writeEntryFile(entry('2026-10-01-a'), s.entriesDir);
+    regenerateProjection(s);
+    const first = readFileSync(s.registryPath, 'utf-8');
+    regenerateProjection(s);
+    expect(readFileSync(s.registryPath, 'utf-8')).toBe(first);
+  });
+
+  test('upserting an existing id refreshes the same file (no duplicates)', () => {
+    const s = scratch();
+    writeEntryFile(entry('2026-10-01-a'), s.entriesDir);
+    writeEntryFile({ ...entry('2026-10-01-a'), status: 'approved' }, s.entriesDir);
+    const registry = regenerateProjection(s);
+    expect(registry.specs.length).toBe(1);
+    expect(registry.specs[0].status).toBe('approved');
+    expect(existsSync(entryPath('2026-10-01-a', s.entriesDir))).toBe(true);
   });
 });
 
-describe('canonicalOrderViolation', () => {
-  test('returns null for sorted input', () => {
-    expect(canonicalOrderViolation([entry('a'), entry('b'), entry('c')])).toBeNull();
+describe('concurrent-writer merge model (file level)', () => {
+  test('THE PIN: same-gap writers produce disjoint files; the union regenerates', () => {
+    const s = scratch();
+    // Writer A and B each touch exactly one entry file — never the same file,
+    // even for same-gap alphabetical neighbors (the #1425 residual case).
+    const fileA = entryPath('2026-10-05-aaa', s.entriesDir);
+    const fileB = entryPath('2026-10-05-bbb', s.entriesDir);
+    expect(fileA).not.toBe(fileB);
+    writeEntryFile(entry('2026-10-05-aaa'), s.entriesDir); // branch A's change
+    writeEntryFile(entry('2026-10-05-bbb'), s.entriesDir); // branch B's change
+    const registry = regenerateProjection(s);
+    expect(registry.specs.map(e => e.id)).toEqual(['2026-10-05-aaa', '2026-10-05-bbb']);
+    expect(readEntryFiles(s.entriesDir).length).toBe(2);
   });
+});
 
-  test('names the first offending pair for unsorted input', () => {
+describe('canonicalOrderViolation (retained from T-20261005-002)', () => {
+  test('returns null for sorted input and names the first offending pair otherwise', () => {
+    expect(canonicalOrderViolation([entry('a'), entry('b')])).toBeNull();
     const msg = canonicalOrderViolation([entry('a'), entry('z'), entry('m')]);
     expect(msg).toContain('"m"');
     expect(msg).toContain('"z"');
-  });
-});
-
-describe('concurrent-writer merge model', () => {
-  test('THE PIN: two writers land in different gaps of the same base', () => {
-    const baseIds = ['2026-10-01-base-a', '2026-10-05-base-e'];
-    const base = baseIds.map(entry);
-
-    // Each writer starts from fresh copies of the same committed base.
-    const writerA = base.map(s => ({ ...s }));
-    insertSpecSorted(writerA, entry('2026-10-02-alpha'));
-
-    const writerB = base.map(s => ({ ...s }));
-    insertSpecSorted(writerB, entry('2026-10-08-beta'));
-
-    const aIds = writerA.map(s => s.id);
-    const bIds = writerB.map(s => s.id);
-
-    // Different insertion gaps, separated by unchanged base entries → git
-    // merges the two JSON edits cleanly (the tail append collided on BOTH).
-    expect(aIds.indexOf('2026-10-02-alpha')).not.toBe(bIds.indexOf('2026-10-08-beta'));
-    expect(aIds).toEqual(['2026-10-01-base-a', '2026-10-02-alpha', '2026-10-05-base-e']);
-    expect(bIds).toEqual(['2026-10-01-base-a', '2026-10-05-base-e', '2026-10-08-beta']);
-  });
-
-  test('same-gap residual: adjacent ids share a gap but sort deterministically', () => {
-    const a = [entry('a'), entry('c')];
-    const b = [entry('a'), entry('c')];
-    insertSpecSorted(a, entry('b'));
-    insertSpecSorted(b, entry('b2'));
-    // Both writers insert between a and c (same gap) — a simultaneous push
-    // conflicts at line level and the loser rebases; the replay is stable.
-    insertSpecSorted(a, entry('b2'));
-    expect(a.map(s => s.id)).toEqual(['a', 'b', 'b2', 'c']);
-    expect(b.map(s => s.id)).toEqual(['a', 'b2', 'c']);
   });
 });
