@@ -12,12 +12,33 @@ title: >-
   timing (deadline-aware waits instead of fixed-count races, or a stubbed
   scheduler) so the suite stops blocking merges in the windows leg.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-04T16:12:00.000Z'
 history:
   - at: '2026-10-04T16:12:00.000Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-05T03:23:47.949Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-05T03:23:47.974Z'
+    from: waiting
+    to: review
+  - at: '2026-10-05T03:23:47.989Z'
+    from: review
+    to: done
+result: >-
+  Fixed in this change set: root cause was NOT spawn timing (supersedes the
+  ticket's hypothesis) — CI run 37248182817 shows
+  accepted=2/rate-limited=3/uncounted=1, i.e. one intake threw a non-retryable
+  -32603 mid-accept. The Windows-fragile site was ticket-id publication via
+  linkSync (hard links fail EPERM on Windows under filter/AV pressure).
+  mcp-upstream-server.ts v1.9.1 -> v1.9.2: EPERM falls back to the O_EXCL
+  exclusive create ('wx') — the cross-platform atomic-take primitive; EEXIST
+  still means id-taken; -32603 responses now carry the underlying message for
+  diagnosability. POSIX path byte-identical. Verification: M5 x5 + full 90-test
+  file suite green locally; authoritative proof is this PR's windows-latest leg.
+  Design:
+  docs/designs/2026-10-05-upstream-intake-windows-id-allocation-design.md
 error: null
