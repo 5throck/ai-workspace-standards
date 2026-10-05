@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261005-001
+kind: manual
+title: >-
+  fix the windows-only M5 parallel-intake timing flake in
+  tests/unit/mcp-upstream-server.test.ts — "N parallel creates against hard cap
+  3 accept exactly 3; the rest get retryable -32000" failed on windows-latest
+  (~454ms) during PR #1419's merge run 37248182817 (2026-10-05) while ubuntu and
+  macos were green; the PR was admin-merged under the documented flake
+  workaround. Sibling of T-20261004-002 (windows loginRequired wave-B flake):
+  make the M5 concurrency assertions deterministic under slow windows spawn
+  timing (deadline-aware waits instead of fixed-count races, or a stubbed
+  scheduler) so the suite stops blocking merges in the windows leg.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:12:00.000Z'
+history:
+  - at: '2026-10-04T16:12:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null

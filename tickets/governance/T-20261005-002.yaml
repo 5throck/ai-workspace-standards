@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261005-002
+kind: manual
+title: >-
+  governance-hygiene: eliminate the recurring docs/specs/registry.json
+  concurrent-merge conflict — every PR that registers a design doc appends at
+  the same array tail, so concurrent syncs conflict deterministically (observed
+  and hand-spliced 5x on 2026-10-05 across #1416/#1417/#1418/#1419/#1420).
+  Direction: make spec-register.ts insert entries at a position derived from
+  content (sorted by id, not by arrival) so independent registrations land in
+  different array regions, and add a validator asserting the canonical ordering
+  (audit gate re-sorts and fails on non-canonical files). Optionally consider
+  one-file-per-spec storage with the registry becoming a generated projection.
+  Acceptance: two branches each registering a different spec merge cleanly
+  without manual splicing.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-04T16:12:00.000Z'
+history:
+  - at: '2026-10-04T16:12:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
