@@ -1,4 +1,11 @@
-// @version 2.48.1
+// @version 2.48.2
+// v2.48.2 (2026-10-05, T-20261004-024): the docs relative-link gate now also
+//           enforces `validate-docs-links.ts --all` (every docs/ subdirectory —
+//           adr/, designs/, architecture/, governance/). The historical-rot
+//           carve-out is retired: all 59 then-broken deep links were repaired to
+//           real targets (or dead targets demoted to inline-code text), so the
+//           deep scan exits 0 and any regrowth fails the audit. Same spawn
+//           contract as before (workspace-root only, existsSync-guarded).
 // v2.48.1 (2026-10-04): the manifest-gate spawn is L0-only (context.md guard) —
 //           the E2E caught scaffold-context leakage (project docs/ are project-scoped).
 // v2.48.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): docs/ folder
@@ -2229,23 +2236,33 @@ checkTemplateDependencyMirror();
 // distinguishes the governance root from generated project copies.
 const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('variant.json');
 
-// ── Docs relative-link gate (design-foundation v1.2 PR-2) ────────────────────
+// ── Docs relative-link gate (design-foundation v1.2 PR-2; T-20261004-024) ─────
 // design-foundation.md §8 previously shipped a stale project path and rotted
 // under review-only checking (stale path fixed in PR #1102). Spawn the existing
-// validator — the same gate dev-sync runs as pre-flight — which checks docs/
-// root-level files plus templates/common/docs/** (recursive) with a documented
-// post-scaffold resolution allowance. Workspace-root only: the validator is
-// hard-scoped to the L0 docs layout, so project (L2) contexts self-skip.
+// validator — the same gate dev-sync runs as pre-flight — in BOTH scopes:
+// default (docs/ root-level files plus templates/common/docs/** recursive, with
+// the documented post-scaffold resolution allowance) and --all (every docs/
+// subdirectory: adr/, designs/, architecture/, governance/ — T-20261004-024
+// retired the historical-rot carve-out by repairing all of it; the deep scan
+// exits 0 and is enforced here so the count cannot regrow). Workspace-root
+// only: the validator is hard-scoped to the L0 docs layout, so project (L2)
+// contexts self-skip.
 if (IS_WORKSPACE_ROOT && fs.existsSync(path.join('scripts', 'validate-docs-links.ts'))) {
-    const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-docs-links.ts'], {
-        encoding: 'utf-8',
-    });
-    if (status !== 0) {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-        Fail('docs link validation failed — run scripts/validate-docs-links.ts for details');
-    } else {
-        Pass('Docs link gate: relative links in docs/ root and templates/common/docs resolve');
+    const linkScopes: Array<{ args: string[]; label: string }> = [
+        { args: [], label: 'relative links in docs/ root and templates/common/docs resolve' },
+        { args: ['--all'], label: 'deep scan (--all): all docs/ relative links resolve' },
+    ];
+    for (const scope of linkScopes) {
+        const { status, stdout, stderr } = spawnSync('bun', ['scripts/validate-docs-links.ts', ...scope.args], {
+            encoding: 'utf-8',
+        });
+        if (status !== 0) {
+            if (stdout) console.log(stdout);
+            if (stderr) console.error(stderr);
+            Fail(`docs link validation failed (scope: ${scope.args.join(' ') || 'default'}) — run scripts/validate-docs-links.ts ${scope.args.join(' ')} for details`);
+        } else {
+            Pass(`Docs link gate: ${scope.label}`);
+        }
     }
 }
 

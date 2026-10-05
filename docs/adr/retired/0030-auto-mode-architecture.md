@@ -217,9 +217,9 @@ interface CheckpointState {
 ## References
 
 **Related Documentation**:
-- [CONSTITUTION.md §5 - Multi-Agent Architecture](../../CONSTITUTION.md#5-multi-agent-architecture)
-- [agents/pm.md - PM Gateway Workflow](../../agents/pm.md)
-- [CLAUDE.md §5 - Agent Dispatch Rules](../../CLAUDE.md#5-agent-dispatch-rules)
+- [CONSTITUTION.md §5 - Multi-Agent Architecture](../../../CONSTITUTION.md#5-multi-agent-architecture)
+- [agents/pm.md - PM Gateway Workflow](../../../agents/pm.md)
+- [CLAUDE.md §5 - Agent Dispatch Rules](../../../CLAUDE.md#5-agent-dispatch-rules)
 
 **Implementation Files**:
 - `scripts/lib/platform-dispatcher.ts` (to be created)

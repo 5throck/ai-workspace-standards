@@ -342,6 +342,6 @@ When a variant's agent_roster lacks a specific agent type, use this fallback hie
 
 ## References
 
-- [Meeting Notes: PM.md Variant-Specific Content Injection](/memory/meeting-2026-06-08-pm-md-variant-specific-content-injection.md)
-- [CONSTITUTION.md §5 - Multi-Agent Architecture](/CONSTITUTION.md#5-multi-agent-architecture)
-- [merge-frontmatter.ts](/scripts/merge-frontmatter.ts) - Implementation target
+- [Meeting Notes: PM.md Variant-Specific Content Injection](../../memory/archive/meeting-2026-06-08-pm-md-variant-specific-content-injection.md)
+- [CONSTITUTION.md §5 - Multi-Agent Architecture](../../CONSTITUTION.md#5-multi-agent-architecture)
+- [merge-frontmatter.ts](../../scripts/helpers/merge-frontmatter.ts) - Implementation target

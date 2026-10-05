@@ -4,7 +4,7 @@
 **Status**: Draft (Row 0 Design Gate document per ADR-0074; evidence verified 2026-09-12 by direct code reading, live validator runs, and a whole-fleet classification simulation)
 **Source**: PM-dispatched architect task covering governance tickets T-20260912-028 and T-20260912-029
 **Spec ID**: 2026-09-12-validator-hardening-drift-marker-design
-**Related**: [T-20260912-028](../../tickets/governance/T-20260912-028.yaml), [T-20260912-029](../../tickets/governance/T-20260912-029.yaml), T-20260912-016 (introduced `--check-drift --json`), [ADR-0074](../adr/0074-universal-design-gate.md) (Design Gate), [ADR-0059](../adr/0059-governance-reflection-validators.md) (intentional-duplicate markers), [ADR-0062](../adr/0062-marker-based-doc-propagation-domains.md) (shared parser requirement), [ADR-0031](../adr/0031-l1-l2-fork-model.md) (Fork Model), `docs/templates/common-contract.json` v1.6.0 (`platform_settings`), `scripts/propagate-to-templates.ts`, `scripts/lifecycle-sync-audit.ts`, `scripts/helpers/markers.ts`, `scripts/validate-templates.ts`
+**Related**: `T-20260912-028` (archived), `T-20260912-029` (archived), T-20260912-016 (introduced `--check-drift --json`), [ADR-0074](../adr/0074-universal-design-gate.md) (Design Gate), [ADR-0059](../adr/0059-governance-reflection-validators.md) (intentional-duplicate markers), [ADR-0062](../adr/0062-marker-based-doc-propagation-domains.md) (shared parser requirement), [ADR-0031](../adr/0031-l1-l2-fork-model.md) (Fork Model), `docs/templates/common-contract.json` v1.6.0 (`platform_settings`), `scripts/propagate-to-templates.ts`, `scripts/lifecycle-sync-audit.ts`, `scripts/helpers/markers.ts`, `scripts/validate-templates.ts`
 
 ---
 

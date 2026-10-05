@@ -4,7 +4,7 @@
 **Status**: Draft (Row 0 Design Gate document; evidence verified 2026-09-09 by direct code reading and a 3-agent survey, spot-reconfirmed 2026-09-10)
 **Source**: PM-dispatched architect task, following the 2026-09-09 destructive `--marker-rewrite` incident
 **Spec ID**: 2026-09-10-marker-engine-remediation-design
-**Related**: [ADR-0062](../adr/0062-marker-based-doc-propagation-domains.md), [2026-08-24-marker-propagation-engine-design.md](2026-08-24-marker-propagation-engine-design.md), [ADR-0065](../adr/0065-accessibility-standard.md), [memory/2026-09-09.md](../../memory/2026-09-09.md), `scripts/propagate-to-templates.ts`, `scripts/helpers/markers.ts`, `scripts/verify-adr-governance.ts`
+**Related**: [ADR-0062](../adr/0062-marker-based-doc-propagation-domains.md), [2026-08-24-marker-propagation-engine-design.md](2026-08-24-marker-propagation-engine-design.md), [ADR-0065](../adr/0065-accessibility-standard.md), `memory/2026-09-09.md` (since purged from memory/), `scripts/propagate-to-templates.ts`, `scripts/helpers/markers.ts`, `scripts/verify-adr-governance.ts`
 
 ---
 

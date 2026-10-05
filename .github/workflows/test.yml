@@ -100,8 +100,14 @@ jobs:
         # dev-sync uses (docs/ root-level scan; no network — http(s) links are
         # skipped, only relative file links + anchors are verified). Ubuntu-only:
         # a pure markdown scan gains nothing from 3 OSes.
+        #
+        # T-20261004-024: the deep scan (--all, every docs/ subdirectory) is
+        # enforced too — the historical rot in adr/, designs/, architecture/ was
+        # repaired to zero, so the deep scan exits 0 and cannot regrow past CI.
         if: matrix.os == 'ubuntu-latest'
-        run: bun scripts/validate-docs-links.ts
+        run: |
+          bun scripts/validate-docs-links.ts
+          bun scripts/validate-docs-links.ts --all
 
       - name: Workspace audit
         if: matrix.os == 'ubuntu-latest'

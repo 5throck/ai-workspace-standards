@@ -89,7 +89,7 @@ This document specifies the detailed structural design for AGENTS.md reorganizat
 **Role**: Orchestrates multi-agent workflows; creates execution plans; dispatches specialists; enforces quality gates  
 **Tier**: High  
 **Status**: active  
-**Definition**: [`agents/pm.md`](agents/pm.md)  
+**Definition**: [`agents/pm.md`](../../agents/pm.md)  
 **Triggers**: User requests; "Managing workflow"; "Multi-step task coordination"  
 **Platform**: workspace-root-only (L0)
 
@@ -123,19 +123,19 @@ This document specifies the detailed structural design for AGENTS.md reorganizat
 #### Content Specifications
 
 **§3.1: Phase Determination**
-All multi-step tasks (2+ files or 2+ sequential steps) must follow PM Gateway workflow. PM determines execution phase and required specialist involvement based on deliverable type classification. **Full workflow**: See [`agents/pm.md`](agents/pm.md) §3.
+All multi-step tasks (2+ files or 2+ sequential steps) must follow PM Gateway workflow. PM determines execution phase and required specialist involvement based on deliverable type classification. **Full workflow**: See [`agents/pm.md`](../../agents/pm.md) §3.
 
 **§3.2: Permission Denial Protocol**
-Direct specialist agent invocation bypasses PM Gateway governance. PM denies such requests and redirects through proper workflow, maintaining quality gate enforcement. **Full protocol**: See [`agents/pm.md`](agents/pm.md) §3.2.
+Direct specialist agent invocation bypasses PM Gateway governance. PM denies such requests and redirects through proper workflow, maintaining quality gate enforcement. **Full protocol**: See [`agents/pm.md`](../../agents/pm.md) §3.2.
 
 **§3.3: Meeting Facilitation**
-Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](skills/meeting-facilitation/SKILL.md).
+Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](../../agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](../../skills/meeting-facilitation/SKILL.md).
 
 **§3.4: Execution Plan Display**
-Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
+Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](../../agents/pm.md) §5.
 
 **§3.5: Role Boundaries**
-PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](agents/pm.md) ⚠️ CRITICAL section.
+PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](../../agents/pm.md) ⚠️ CRITICAL section.
 
 #### Content Removal (from current AGENTS.md)
 
@@ -170,7 +170,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 **Agent Lifecycle**
 - Agent creation, modification, deprecation: **[`CONSTITUTION.md`](CONSTITUTION.md) §5.6**
 - Template variant lifecycle: **[`CONSTITUTION.md`](CONSTITUTION.md) §10**
-- Lifecycle manager operations: **[`agents/lifecycle-manager.md`](agents/lifecycle-manager.md)**
+- Lifecycle manager operations: **[`agents/lifecycle-manager.md`](../../agents/lifecycle-manager.md)**
 
 **Platform Differences**
 - Claude Code vs Antigravity: **[`CONSTITUTION.md`](CONSTITUTION.md) §5**
@@ -180,7 +180,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 **Execution Plans**
 - Templates and boilerplate: **[`CLAUDE.md`](CLAUDE.md)** §5, **[`GEMINI.md`](GEMINI.md)** §5
 - 3-Tier Strategy: **[`CONSTITUTION.md`](CONSTITUTION.md)** §5
-- Model assignments: **[`docs/workspace-schema.json`](docs/workspace-schema.json)**
+- Model assignments: **[`docs/workspace-schema.json`](../workspace-schema.json)**
 
 **Language Policy**
 - English-only documentation: **[`CLAUDE.md`](CLAUDE.md)** §4, **[`GEMINI.md`](GEMINI.md)** §4
@@ -191,18 +191,18 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 - Local skills: `skills/<name>/SKILL.md`
 - Platform skills: `.claude/skills/`, `.gemini/skills/`
 - Priority resolution: **[`CLAUDE.md`](CLAUDE.md)** §5, **[`GEMINI.md`](GEMINI.md)** §5
-- Skill lifecycle: **[`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md)**
+- Skill lifecycle: **[`docs/VERSION_MANIFEST.md`](../VERSION_MANIFEST.md)**
 
 **PM Gateway Details**
-- Full workflow: **[`agents/pm.md`](agents/pm.md)** §3-5
-- Permission denial: **[`agents/pm.md`](agents/pm.md)** §3.2
-- Meeting facilitation: **[`agents/pm.md`](agents/pm.md)** §5
-- Execution plan templates: **[`agents/pm.md`](agents/pm.md)** §5
+- Full workflow: **[`agents/pm.md`](../../agents/pm.md)** §3-5
+- Permission denial: **[`agents/pm.md`](../../agents/pm.md)** §3.2
+- Meeting facilitation: **[`agents/pm.md`](../../agents/pm.md)** §5
+- Execution plan templates: **[`agents/pm.md`](../../agents/pm.md)** §5
 
 **Variant Management**
-- L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](docs/adr/0031-l1-l2-fork-model.md)**
-- YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)**
-- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)**
+- L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](../adr/0031-l1-l2-fork-model.md)**
+- YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](../adr/0033-variant-specific-skills-scripts-blueprint.md)**
+- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](../../templates/common/docs/variants/pm-yaml-schema.md)**
 
 #### Content Removal (from current AGENTS.md)
 
@@ -362,22 +362,22 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 #### pm.md Specific Sections
 
 **PM Gateway Workflow**:
-- Link target: [`agents/pm.md`](agents/pm.md) §3
+- Link target: [`agents/pm.md`](../../agents/pm.md) §3
 - Content: Phase determination, enforcement layers, specialist dispatch
 - Validation: Section must exist in pm.md and contain complete workflow
 
 **Permission Denial Protocol**:
-- Link target: [`agents/pm.md`](agents/pm.md) §3.2
+- Link target: [`agents/pm.md`](../../agents/pm.md) §3.2
 - Content: Denial classification, escalation template, logging requirements
 - Validation: Section must exist with detailed protocol steps
 
 **Meeting Facilitation**:
-- Link target: [`agents/pm.md`](agents/pm.md) §5
+- Link target: [`agents/pm.md`](../../agents/pm.md) §5
 - Content: Meeting process, dialogue facilitation, transcript documentation
 - Validation: Section must describe `/meeting` usage
 
 **Execution Plan Templates**:
-- Link target: [`agents/pm.md`](agents/pm.md) §5
+- Link target: [`agents/pm.md`](../../agents/pm.md) §5
 - Content: Standard templates, boilerplate policy, platform considerations
 - Validation: Must include table format and mandatory criteria
 
@@ -389,19 +389,19 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 
 **§5: Multi-Agent Architecture**:
 - L0 link target: [`CONSTITUTION.md`](CONSTITUTION.md) §5
-- L1 link target: [`docs/context.md`](docs/context.md)
+- L1 link target: [`docs/context.md`](../../templates/common/docs/context.md)
 - Content: Agent ecosystem, PM Gateway, enforcement model
 - Validation: Section must exist with governance architecture
 
 **§5.6: Agent Lifecycle**:
 - L0 link target: [`CONSTITUTION.md`](CONSTITUTION.md) §5.6
-- L1 link target: [`docs/context.md — Lifecycle Management`](docs/context.md#lifecycle-management)
+- L1 link target: [`docs/context.md — Lifecycle Management`](../../templates/common/docs/context.md#lifecycle-management)
 - Content: Agent creation, modification, deprecation processes
 - Validation: Section must detail lifecycle management
 
 **§10: L1-L2 Fork Model**:
 - L0 link target: [`CONSTITUTION.md`](CONSTITUTION.md) §10
-- L1 link target: [`docs/context.md`](docs/context.md)
+- L1 link target: [`docs/context.md`](../../templates/common/docs/context.md)
 - Content: Template lifecycle, distribution rules, independence principles
 - Validation: Section must explain fork model
 
@@ -432,27 +432,27 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 #### Additional Reference Targets
 
 **VERSION_MANIFEST.md**:
-- Link target: [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md)
+- Link target: [`docs/VERSION_MANIFEST.md`](../VERSION_MANIFEST.md)
 - Content: Skill versions, status, lifecycle metadata
 - Validation: Must be authoritative source for skill information
 
 **workspace-schema.json**:
-- Link target: [`docs/workspace-schema.json`](docs/workspace-schema.json)
+- Link target: [`docs/workspace-schema.json`](../workspace-schema.json)
 - Content: Workflow phases, agent tiers, model assignments
 - Validation: Must contain complete schema definitions
 
 **ADR-0031**:
-- Link target: [`docs/adr/0031-l1-l2-fork-model.md`](docs/adr/0031-l1-l2-fork-model.md)
+- Link target: [`docs/adr/0031-l1-l2-fork-model.md`](../adr/0031-l1-l2-fork-model.md)
 - Content: L1-L2 fork model, distribution rules
 - Validation: Must explain fork model principles
 
 **ADR-0033**:
-- Link target: [`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)
+- Link target: [`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](../adr/0033-variant-specific-skills-scripts-blueprint.md)
 - Content: Variant directory structure, YAML extends pattern
 - Validation: Must include blueprint details
 
 **pm-yaml-schema.md**:
-- Link target: [`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)
+- Link target: [`templates/common/docs/variants/pm-yaml-schema.md`](../../templates/common/docs/variants/pm-yaml-schema.md)
 - Content: YAML frontmatter schema for variant PM agents
 - Validation: Must include complete schema specification
 
@@ -633,7 +633,7 @@ changelog:
 **Role**: Orchestrates multi-agent workflows; creates execution plans; dispatches specialists; enforces quality gates  
 **Tier**: High  
 **Status**: active  
-**Definition**: [`agents/pm.md`](agents/pm.md)  
+**Definition**: [`agents/pm.md`](../../agents/pm.md)  
 **Triggers**: User requests; "Managing workflow"; "Multi-step task coordination"  
 **Platform**: workspace-root-only (L0)
 
@@ -657,19 +657,19 @@ changelog:
 ## §3: PM Gateway Workflow
 
 ### §3.1: Phase Determination
-All multi-step tasks (2+ files or 2+ sequential steps) must follow PM Gateway workflow. PM determines execution phase and required specialist involvement based on deliverable type classification. **Full workflow**: See [`agents/pm.md`](agents/pm.md) §3.
+All multi-step tasks (2+ files or 2+ sequential steps) must follow PM Gateway workflow. PM determines execution phase and required specialist involvement based on deliverable type classification. **Full workflow**: See [`agents/pm.md`](../../agents/pm.md) §3.
 
 ### §3.2: Permission Denial Protocol
-Direct specialist agent invocation bypasses PM Gateway governance. PM denies such requests and redirects through proper workflow, maintaining quality gate enforcement. **Full protocol**: See [`agents/pm.md`](agents/pm.md) §3.2.
+Direct specialist agent invocation bypasses PM Gateway governance. PM denies such requests and redirects through proper workflow, maintaining quality gate enforcement. **Full protocol**: See [`agents/pm.md`](../../agents/pm.md) §3.2.
 
 ### §3.3: Meeting Facilitation
-Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](skills/meeting-facilitation/SKILL.md).
+Multi-agent coordination uses structured meeting format for collaborative decision-making. PM facilitates discussions using `/meeting` command or equivalent skill to enable real-time agent dialogue. **Full details**: See [`agents/pm.md`](../../agents/pm.md) §5 and [`skills/meeting-facilitation/SKILL.md`](../../skills/meeting-facilitation/SKILL.md).
 
 ### §3.4: Execution Plan Display
-Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](agents/pm.md) §5.
+Before dispatching 2+ agents, PM displays mandatory execution plan table. Required columns: #, Task, Agent, Tier, Model. End every plan with a single `/sync` row — it covers lifecycle update, audit, commit, push, and PR in one pipeline. **Full templates**: See [`agents/pm.md`](../../agents/pm.md) §5.
 
 ### §3.5: Role Boundaries
-PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](agents/pm.md) ⚠️ CRITICAL section.
+PM orchestrates multi-agent workflows but never implements code directly. All file modifications (except `memory/*.md` and `CHANGELOG.md`) must be dispatched to specialists (docs-writer, architect, automation-engineer). **Full constraints**: See [`agents/pm.md`](../../agents/pm.md) ⚠️ CRITICAL section.
 ```
 
 ### §4: Sample Reference Format
@@ -680,7 +680,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 ### Agent Lifecycle
 - Agent creation, modification, deprecation: **[`CONSTITUTION.md`](CONSTITUTION.md) §5.6**
 - Template variant lifecycle: **[`CONSTITUTION.md`](CONSTITUTION.md) §10**
-- Lifecycle manager operations: **[`agents/lifecycle-manager.md`](agents/lifecycle-manager.md)**
+- Lifecycle manager operations: **[`agents/lifecycle-manager.md`](../../agents/lifecycle-manager.md)**
 
 ### Platform Differences
 - Claude Code vs Antigravity: **[`CONSTITUTION.md`](CONSTITUTION.md) §5**
@@ -690,7 +690,7 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 ### Execution Plans
 - Templates and boilerplate: **[`CLAUDE.md`](CLAUDE.md)** §5, **[`GEMINI.md`](GEMINI.md)** §5
 - 3-Tier Strategy: **[`CONSTITUTION.md`](CONSTITUTION.md)** §5
-- Model assignments: **[`docs/workspace-schema.json`](docs/workspace-schema.json)**
+- Model assignments: **[`docs/workspace-schema.json`](../workspace-schema.json)**
 
 ### Language Policy
 - English-only documentation: **[`CLAUDE.md`](CLAUDE.md)** §4, **[`GEMINI.md`](GEMINI.md)** §4
@@ -701,18 +701,18 @@ PM orchestrates multi-agent workflows but never implements code directly. All fi
 - Local skills: `skills/<name>/SKILL.md`
 - Platform skills: `.claude/skills/`, `.gemini/skills/`
 - Priority resolution: **[`CLAUDE.md`](CLAUDE.md)** §5, **[`GEMINI.md`](GEMINI.md)** §5
-- Skill lifecycle: **[`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md)**
+- Skill lifecycle: **[`docs/VERSION_MANIFEST.md`](../VERSION_MANIFEST.md)**
 
 ### PM Gateway Details
-- Full workflow: **[`agents/pm.md`](agents/pm.md)** §3-5
-- Permission denial: **[`agents/pm.md`](agents/pm.md)** §3.2
-- Meeting facilitation: **[`agents/pm.md`](agents/pm.md)** §5
-- Execution plan templates: **[`agents/pm.md`](agents/pm.md)** §5
+- Full workflow: **[`agents/pm.md`](../../agents/pm.md)** §3-5
+- Permission denial: **[`agents/pm.md`](../../agents/pm.md)** §3.2
+- Meeting facilitation: **[`agents/pm.md`](../../agents/pm.md)** §5
+- Execution plan templates: **[`agents/pm.md`](../../agents/pm.md)** §5
 
 ### Variant Management
-- L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](docs/adr/0031-l1-l2-fork-model.md)**
-- YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](docs/adr/0033-variant-specific-skills-scripts-blueprint.md)**
-- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](templates/common/docs/variants/pm-yaml-schema.md)**
+- L1-L2 fork model: **[`docs/adr/0031-l1-l2-fork-model.md`](../adr/0031-l1-l2-fork-model.md)**
+- YAML extends pattern: **[`docs/adr/0033-variant-specific-skills-scripts-blueprint.md`](../adr/0033-variant-specific-skills-scripts-blueprint.md)**
+- PM variant overrides: **[`templates/common/docs/variants/pm-yaml-schema.md`](../../templates/common/docs/variants/pm-yaml-schema.md)**
 ```
 
 ---

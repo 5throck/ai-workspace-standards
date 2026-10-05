@@ -894,7 +894,7 @@ interface ConflictResolution {
 - Newly converted L3 projects lack real-world testing
 - Beta status allows controlled validation before stable promotion
 - Prevents premature production commitment to unproven variants
-- Aligns with [`docs/governance/variant-lifecycle.md`](../../governance/variant-lifecycle.md) governance framework
+- Aligns with [`docs/governance/variant-lifecycle.md`](../governance/variant-lifecycle.md) governance framework
 
 ```typescript
 function generateVariantJson(
@@ -1066,7 +1066,7 @@ function validatePlatformParity(variantPath: string): ValidationResult {
 
 **Objective**: Define comprehensive governance for new variants from beta creation through stable promotion.
 
-**Governance Reference**: All lifecycle rules follow [`docs/governance/variant-lifecycle.md`](../../governance/variant-lifecycle.md).
+**Governance Reference**: All lifecycle rules follow [`docs/governance/variant-lifecycle.md`](../governance/variant-lifecycle.md).
 
 ---
 
@@ -3538,9 +3538,9 @@ The pipeline implementation is complete when:
 ### 5. Governance Compliance
 
 All changes comply with:
-- [`docs/governance/variant-lifecycle.md`](../../governance/variant-lifecycle.md) - Official lifecycle framework
+- [`docs/governance/variant-lifecycle.md`](../governance/variant-lifecycle.md) - Official lifecycle framework
 - [`agents/lifecycle-manager.md`](../../agents/lifecycle-manager.md) - Lifecycle governance ownership
-- [`docs/templates/VERSION_REGISTRY.json`](../../templates/VERSION_REGISTRY.json) - Schema compliance
+- [`docs/templates/VERSION_REGISTRY.json`](../templates/VERSION_REGISTRY.json) - Schema compliance
 
 ### 6. Key Design Decisions
 
