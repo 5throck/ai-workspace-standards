@@ -100,7 +100,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `helpers/registries/variant-type-registry.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/registries/validation-policy.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/template-utils.ts` | L0 | 1.3.0 | active | v1.3.0 (2026-10-06): DEFAULT_PM_ROLE_DESCRIPTIONS gains the co-learning entry — M13 pin (registry keys ≡ deriveCoVariantDirs) requires one role description per registered variant; propagated to the L1 mirror | —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/mirror-hygiene.ts` | L0 | 1.0.0 | active | v1.0.0 mirror-hygiene scanner (R6, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md): a platform skill mirror contains only skill directories; stray files (SKILLS.md/README*.md) and non-skill dirs are findings; wired into validate-templates checkMirrorHygiene (WARN soak) | —| L0+L1 | —|
 | `hooks/gateguard-fact-force.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|

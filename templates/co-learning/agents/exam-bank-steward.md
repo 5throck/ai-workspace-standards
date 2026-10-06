@@ -26,6 +26,7 @@ examples:
   - user: "Prepare the exam window for the next cohort"
     assistant: "Prepares cohort scoping, open/close windows and activation checklist for the exam."
 phases: [4, 5]
+required_skills: [exam-bank-operations]
 ---
 
 # Exam Bank Steward (exam-bank-steward)

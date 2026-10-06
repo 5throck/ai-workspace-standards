@@ -13121,6 +13121,17 @@
       "type": "used_by",
       "from": "exam-bank-operations",
       "to": "exam-bank-steward",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-learning/agents/exam-bank-steward.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "exam-bank-operations",
+      "to": "exam-bank-steward",
       "source": "skill_manifest"
     },
     {

@@ -60,7 +60,7 @@ describe('data invariants behind the contract', () => {
     const variants = readdirSync(templatesDir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
       .map((e) => e.name);
-    expect(variants.length).toBe(13);
+    expect(variants.length).toBe(14);
     for (const variant of variants) {
       expect(existsSync(join(templatesDir, variant, VERSION_MANIFEST_RELPATH))).toBe(false);
     }

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 0395ad739b73ba55cb839d9e428f27c0f9c3932c7ee10f10ad4300b5a170557c
+content_hash: c9ceacc812479138cd042d9396cbe578d13797b8da1f6d60595683a8c658e8ad
 ---
 
 # co-learning
@@ -15,7 +15,7 @@ Learning and assessment workflow — question-bank authoring with answer-length 
 
 ## Quick Start
 
-This is a stable variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
+This is a beta variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
 
 ### Shipped instruction files:
 
@@ -55,14 +55,14 @@ Always start your requests by talking to the **PM**. Do not invoke specialist ag
 
 ### B. Standard Workflow Phases
 
-The canonical 7-phase model (see `docs/phase-definitions.md`):
+The canonical 7-phase model (see `docs/phase-definitions.md`); co-learning's specialist work concentrates in Phases 4-5:
 
-0. **Team Assembly & Environment Baseline:** The PM assembles the team and confirms scope; `stack-setup` (optional) and `security-monitor` establish the environment baseline.
-1. **Analysis & Stack Setup:** `architect` analyzes requirements and acceptance criteria into an implementation-ready brief.
-2. **Design Review & Approval:** The architect's implementation plan + ADR are presented for explicit user approval.
-3. **UI/UX Design:** `designer` (optional) produces wireframes, component specs, and design tokens when a UI/UX component is in scope.
-4. **Implementation & QA Gate:** `code-writer` implements; `test-runner` verifies; the PM loops up to 3× on failures.
-5. **Security Review & Lifecycle Finalization:** `security-monitor` runs the pre-PR advisory check; the PM logs decisions and updates governance records.
+0. **Team Assembly & Environment Baseline:** The PM assembles the team and confirms scope; the PM handles project setup directly (Phase Determination, `AGENTS.md §3.5`).
+1. **Analysis & Planning:** The PM classifies each deliverable; question-bank and exam deliverables route to `exam-bank-steward`.
+2. **Design Review & Approval:** The plan is presented for explicit user approval before specialist dispatch.
+3. **Pre-Production Preparation:** Phases without an assigned specialist pass through; locale deliverable needs are noted for `i18n-specialist` (engaged on demand, Phase 5).
+4. **Authoring & QA Gate:** `exam-bank-steward` authors and reviews question-bank items with answer-length bias checks; every rewrite is human-reviewed via the remediation ledger.
+5. **Exam Operations & Lifecycle Finalization:** `exam-bank-steward` prepares cohorts, exam windows, and activation and monitors statistics; the PM runs the pre-PR advisory check, logs decisions, and updates governance records.
 6. **Quality Assurance & Finalization:** The PM runs the audit, `/sync`, and opens a PR.
 
 ### C. Available Commands
@@ -79,6 +79,8 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 **Type**: learning
 
 This variant focuses on learning and assessment workflows: question-bank quality, exam operations, and statistics monitoring.
+
+> **⚠️ Beta variant** — not for production use.
 
 ---
 

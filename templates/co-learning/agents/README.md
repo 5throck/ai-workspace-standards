@@ -17,12 +17,7 @@ Each agent is defined as a markdown file (`<name>.md`) with:
 | Agent | File | Role |
 |-------|------|------|
 | PM Orchestrator | `pm.md` | Owns the workflow; dispatches parallel tasks |
-| Architect | `architect.md` | Produces implementation plans and ADRs |
-| Designer | `designer.md` | Produces UI/UX specs and wireframes |
-| Code Writer | `code-writer.md` | Implements approved plans |
-| Test Runner | `test-runner.md` | Verifies acceptance criteria |
-| Security Monitor | `security-monitor.md` | Enforces security policies |
-| Stack Setup | `stack-setup.md` | Identifies and sets up unknown stacks |
+| Exam Bank Steward | `exam-bank-steward.md` | Curates the question bank (authoring quality, answer-length bias review, remediation workflow) and operates exams (cohorts, windows, activation, statistics monitoring) |
 | I18N Specialist | `i18n-specialist.md` | Locale documentation and translation-sync for locale mirrors (common extends-stub; engaged on demand) |
 
 ## Creating New Agents
@@ -67,10 +62,8 @@ Update `AGENTS.md` to:
 
 ## Agent Groups
 
-- **Orchestration/Audit** - PM, Security Monitor
-- **Design** - Architect, Designer
-- **Execution** - Code Writer, Test Runner
-- **Security/Setup** - Stack Setup
+- **Orchestration** - PM
+- **Learning/Delivery** - Exam Bank Steward
 - **Localization** - I18N Specialist
 
 See `AGENTS.md` for the full workflow and dispatch protocol.

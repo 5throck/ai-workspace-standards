@@ -56,7 +56,7 @@
 | `environmental-compliance-checker` | variant:co-safety | — | — | — | — | — |
 | `ess-fire-risk-assessor` | variant:co-safety | — | — | — | — | — |
 | `evidence-ledger` | common | — | — | — | — | — |
-| `exam-bank-operations` | variant:co-learning | exam-bank-steward | phase4, phase5 | documentation-writing (composes_with) | — | — |
+| `exam-bank-operations` | variant:co-learning | exam-bank-steward, exam-bank-steward | phase4, phase5 | documentation-writing (composes_with) | — | — |
 | `excel-export` | variant:co-price | — | — | — | — | — |
 | `executive-presentation` | variant:co-consult | communications-lead, communications-lead | phase3 | consulting-report-writing (composes_with), financial-modeling (composes_with), narrative-framework (composes_with), org-readiness-assessment (composes_with), technical-feasibility (composes_with) | complexity-grades, business-case, readiness-scores | executive-deck |
 | `explain-me` | L0 | — | — | — | — | — |

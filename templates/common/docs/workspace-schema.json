@@ -156,6 +156,9 @@
     ],
     "co-develop": [
       "swe-solve"
+    ],
+    "co-learning": [
+      "exam-bank-operations"
     ]
   },
   "rootAllowlist": {
