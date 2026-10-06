@@ -1,4 +1,13 @@
-// @version 2.50.0
+// @version 2.51.0
+// v2.51.0 (2026-10-07, U-20261006-004 upstream request from co-develop, spec
+//           docs/designs/2026-10-07-upstream-codevelop-batch-design.md):
+//           verify-memory gate conditions on memory/MEMORY.md (the old
+//           CONSTITUTION.md root-marker guard scrubbed to context.md in L1/L2
+//           copies, where no root context.md exists — the gate silently skipped
+//           in every scaffolded project while standalone verify-memory reported
+//           real errors); new [SKIP] label distinct from [PASS] for
+//           non-applicable gates (memory --skip-memory branch, design-lint
+//           skip branches — a skipped gate is not a pass).
 // v2.50.0 (2026-10-05, T-20261005-005, spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md):
 //           spec-check Check 5b — docs/specs/registry.json is a generated
 //           projection of docs/specs/entries/*.json; when the entries directory
@@ -260,6 +269,12 @@ function Fail(msg: string) {
 }
 function Warn(msg: string) {
     console.log(`${YELLOW}[WARN] ${msg}${RESET}`);
+}
+// U-20261006-004: skipped gates are not passes — a battery summary where
+// "All checks passed" coexists with self-skipped members must label the
+// distinction (a [SKIP] line counts neither pass nor failure).
+function Skip(msg: string) {
+    console.log(`${YELLOW}[SKIP] ${msg}${RESET}`);
 }
 
 console.log(`${CYAN}=== audit.ts - workspace standards check ===${RESET}`);
@@ -942,7 +957,11 @@ if (hasBun) {
         else
             Pass("README lifecycle audit: all READMEs healthy");
     }
-    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync('CONSTITUTION.md') && !SKIP_MEMORY) {
+    // U-20261006-004: gate on the memory log itself, not a root-marker file.
+    // The old CONSTITUTION.md guard (scrubbed to context.md in L1/L2 copies,
+    // where no root context.md exists) silently skipped this check in every
+    // scaffolded project while standalone verify-memory reported real errors.
+    if (fs.existsSync(path.join('scripts', 'verify-memory.ts')) && fs.existsSync(path.join('memory', 'MEMORY.md')) && !SKIP_MEMORY) {
         // explicitly skip any files located in memory/archive/
         const memoryFiles = fs.readdirSync('memory')
             .filter(f => f.endsWith('.md') && fs.statSync(path.join('memory', f)).isFile())
@@ -957,7 +976,9 @@ if (hasBun) {
             Pass("Memory logs: format valid");
     } else if (SKIP_MEMORY) {
         // Skip memory check when --skip-memory flag is provided
-        Pass("Memory logs: check skipped (--skip-memory flag)");
+        Skip("Memory logs: check skipped (--skip-memory flag)");
+    } else {
+        Skip("Memory logs: no scripts/verify-memory.ts or memory/MEMORY.md in this context — check not applicable");
     }
     if (fs.existsSync(path.join('scripts', 'lifecycle-sync-audit.ts'))) {
         const out = await $`bun ${path.join('scripts', 'lifecycle-sync-audit.ts')} --json`.quiet().nothrow();
@@ -1676,7 +1697,7 @@ checkShellInjectionPatterns();
 function checkDesignLint() {
     const lintScript = path.join('scripts', 'design-lint.ts');
     if (!fs.existsSync(lintScript)) {
-        Pass('Design-lint gate: scripts/design-lint.ts not present — skipped');
+        Skip('Design-lint gate: scripts/design-lint.ts not present — check not applicable');
         return;
     }
     const schemaPath = path.join('docs', 'workspace-schema.json');
@@ -1694,12 +1715,12 @@ function checkDesignLint() {
     }
 
     if (config.enabled !== true) {
-        Pass('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
+        Skip('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — check not applicable');
         return;
     }
     const roots = (config.scanRoots ?? []).filter((r) => fs.existsSync(r));
     if (roots.length === 0) {
-        Pass('Design-lint gate: no configured scan roots present — skipped');
+        Skip('Design-lint gate: no configured scan roots present — check not applicable');
         return;
     }
     const result = spawnSync('bun', [lintScript, '--dir', ...roots], { encoding: 'utf-8' });

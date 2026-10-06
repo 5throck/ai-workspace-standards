@@ -139,4 +139,37 @@ describe("design-lint fonts sub-check (T-20260926-031)", () => {
     const { stdout } = await runFonts(proj);
     expect(stdout).toContain("tokens.css:2");
   });
+
+  test("template token files and <value> placeholders are not evaluated (U-20261006-003)", async () => {
+    // A fresh scaffold's docs/design-tokens.template.css carries literal
+    // `<value>` placeholders — not real stacks — so the fallback contract is
+    // not evaluable there; the standalone run must exit 0 (the
+    // co-develop/co-security LOCAL-PATCH behavior, ported at root).
+    const proj = makeProject({
+      "docs/design-tokens.template.css": [
+        ":root {",
+        "  --font-sans: <value>;",
+        "  --font-serif: <value>;",
+        "  --font-mono: <value>;",
+        "}",
+      ].join("\n") + "\n",
+    });
+    const { exitCode, stdout } = await runFonts(proj);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("PASS fonts");
+    expect(stdout).not.toContain("design-tokens.template.css");
+  });
+
+  test("placeholders are skipped while real stacks in the same scan stay checked", async () => {
+    const proj = makeProject({
+      "tokens.css": [
+        "--font-sans: <value>;",
+        "--font-display: Canela;", // real value, still fails the contract
+      ].join("\n") + "\n",
+    });
+    const { exitCode, stdout } = await runFonts(proj);
+    expect(exitCode).toBe(1);
+    expect(stdout).toContain("--font-display");
+    expect(stdout).not.toContain("--font-sans");
+  });
 });

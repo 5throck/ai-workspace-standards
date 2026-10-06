@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.64.0
+// @version 1.65.0
+// v1.65.0 (2026-10-07, U-20261006-001 upstream request from co-develop):
+//          post-upgrade scripts-snapshot.json regeneration — the snapshot is
+//          the baseline for the "Script version comparison (L2 snapshot vs L1
+//          current)" report, but it was written once at scaffold/adopt and
+//          survived every upgrade frozen at its creation date (co-develop:
+//          2026-08-30 snapshot survived 0.6.0→0.12.0; 76 listed scripts absent
+//          from the project, 58 shipped scripts unlisted). upgrade-project now
+//          regenerates it post-delivery via the same L0 helper new-project
+//          §5.5c / adopt-project §15 use; the file joins REGENERATED_FILES in
+//          lib/upgrade-policy.ts 1.22.0. Non-fatal on helper/registry absence.
 // v1.64.0 (2026-10-06, U-20261006-005 upstream request from co-develop):
 //          PRUNE REMOVED goes preserve-by-default for project-owned (L3)
 //          agents/ and skills/ roster entries. The 2026-09-12 fleet-sync
@@ -564,6 +574,7 @@ import {
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
+import { parseScriptRegistry } from './helpers/write-scripts-snapshot.ts';
 import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 import {
   buildMergedTemplateBlocks,
@@ -831,17 +842,10 @@ if (existsSync(scriptsSnapshot) && existsSync(scriptsMd)) {
     const l2Scripts: Record<string, { version: string }> = snapshot.scripts || {};
     console.log(`  Snapshot created: ${snapshot.created ?? 'unknown'}  (${Object.keys(l2Scripts).length} scripts)`);
 
-    const mdContent = readFileSync(scriptsMd, 'utf8');
-    const registryMatch = mdContent.match(/## Registry\n.*?\n\|[-| ]+\|\n([\s\S]*?)(?=\n##|\Z)/);
-    const l1Scripts: Record<string, { version: string; status: string }> = {};
-    if (registryMatch) {
-      for (const line of registryMatch[1].trim().split('\n')) {
-        const parts = line.split('|').map(p => p.trim()).filter(Boolean);
-        if (parts.length >= 4 && /^\d+\.\d+\.\d+$/.test(parts[2])) {
-          l1Scripts[parts[0].replace(/`/g, '')] = { version: parts[2], status: parts[3] };
-        }
-      }
-    }
+    // U-20261006-001: line-shape registry scan (shared parseScriptRegistry) —
+    // the old `## Registry` lazy-lookahead capture stopped at the first `###`
+    // subsection and compared against a slice of the table.
+    const l1Scripts = parseScriptRegistry(readFileSync(scriptsMd, 'utf8'));
 
     const outdated: [string, string, string][] = [];
     const deprecated: [string, string][] = [];
@@ -3562,6 +3566,33 @@ if (existsSync(manifestGenScript)) {
     }
   } else {
     console.log('  [DRY RUN] Would run: bun scripts/generate-version-manifest.ts');
+  }
+  console.log('');
+}
+
+// ── Post-upgrade: regenerate scripts-snapshot.json (U-20261006-001) ──────────
+// The upgrade just delivered newer scripts; the snapshot is the baseline for
+// the "Script version comparison (L2 snapshot vs L1 current)" report, so a
+// snapshot frozen at its scaffold/adopt date misreports outdated/deprecated
+// findings against stale versions and lists scripts the project never received
+// (co-develop: snapshot dated 2026-08-30 survived 0.6.0 → 0.10.0 → 0.12.0).
+// Regenerate from the L0 registry exactly like new-project §5.5c /
+// adopt-project §15. The file is never template-delivered (REGENERATED_FILES
+// in lib/upgrade-policy.ts) — this is an in-place rewrite of generated state.
+// Non-fatal: a missing helper or registry warns and continues.
+const snapshotHelper = join(workspaceRoot, 'scripts', 'helpers', 'write-scripts-snapshot.ts');
+const snapshotRegistry = join(workspaceRoot, 'scripts', 'SCRIPTS.md');
+if (existsSync(snapshotHelper) && existsSync(snapshotRegistry)) {
+  console.log('--- Post-upgrade: Regenerating scripts-snapshot.json ---');
+  if (!dryRun) {
+    const snapGen = spawnSync(process.execPath, [snapshotHelper, projectDir, new Date().toISOString().slice(0, 10), variant, 'templates/common/scripts'], { stdio: 'inherit', timeout: 60000 });
+    if (snapGen.status === 0) {
+      console.log('  ✅ scripts-snapshot.json regenerated from the L0 registry (script version comparison baseline refreshed)');
+    } else {
+      console.log(`  ⚠️  write-scripts-snapshot.ts exited with status ${snapGen.status} — the stale snapshot is preserved (regenerate manually or at the next upgrade)`);
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: scripts/helpers/write-scripts-snapshot.ts <project-dir> <today> <variant> templates/common/scripts');
   }
   console.log('');
 }

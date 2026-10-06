@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.10.1
+// @version 1.11.0
+// v1.11.0 (2026-10-07, U-20261006 runner batch): moveTicketUnlocked validates
+//          the mutated ticket before the atomic write — the schema invariants
+//          were read-path-only, so a move could write a state (upstream
+//          inbox+waiting) that no ticket.ts command could then read or
+//          transition (the file wedged until a hand repair).
 // v1.10.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.10.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): archive — a done
 //           ticket dwells >= DEFAULT_ARCHIVE_DAYS (7) days, then archiveTickets renames it into
@@ -397,6 +402,11 @@ function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptio
   if (isRetry) ticket.attempts = nextAttempts;
   if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
   if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
+  // v1.11.0 (U-20261006 runner batch): validate the mutated ticket BEFORE the
+  // write. The schema invariants are read-path-only otherwise, so a move could
+  // write a state (e.g. upstream inbox+waiting) that NO ticket.ts command could
+  // then read or transition — the file wedged until a hand repair.
+  validateTicket(ticket);
   writeTicketAtomic(dir, ticket);
   return ticket;
 }

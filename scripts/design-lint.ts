@@ -2,7 +2,12 @@
 /**
  * design-lint.ts — deterministic design-compliance lint (sub-check runner).
  * Runnable companion to the token-usage-lint and design-foundation specs.
- * @version 2.0.0
+ * @version 2.1.1
+ *
+ * v2.1.1 (2026-10-05, U-20261006-003): the fonts sub-check skips `*.template.*`
+ * token files and `<...>` placeholder values — a fresh scaffold's
+ * docs/design-tokens.template.css placeholders are not evaluable font stacks
+ * and must not fail the check (ports the co-develop/co-security LOCAL-PATCH).
  *
  * v2.0.0 (2026-09-26, spec docs/designs/2026-09-26-design-lint-registries-design.md):
  * restructured as a sub-check runner over five checks; the v1.0.0 raw-value scan
@@ -79,7 +84,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { load as loadYaml } from "js-yaml";
 
-const VERSION = "2.0.0";
+const VERSION = "2.1.1";
 
 /** Sub-check execution order (canonical; --check selections are re-sorted to this). */
 const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts"] as const;
@@ -1029,6 +1034,10 @@ function runFonts(opts: CliOptions): CheckResult {
   }
   const findings: Finding[] = [];
   for (const decl of declarations) {
+    // U-20261006-003: `*.template.*` token files carry `<value>` placeholders,
+    // not real font stacks — the fallback contract is not evaluable there
+    // (ported from the co-develop/co-security LOCAL-PATCH, 2026-10-06).
+    if (/\.template\./.test(decl.file) || /[<>]/.test(decl.value)) continue;
     const families = splitFamilies(decl.value);
     if (families.length >= 2 && GENERIC_FONT_FAMILIES.has(families[families.length - 1].toLowerCase())) continue;
     const reasons: string[] = [];

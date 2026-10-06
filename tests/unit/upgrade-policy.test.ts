@@ -130,7 +130,9 @@ describe('upgrade-policy resolveClaim — dedicated passes keep their paths', ()
   });
 
   test('REGENERATED files are generated in-project', () => {
-    for (const rel of ['docs/skill-graph.json', '.claude/template-version.txt', 'docs/VERSION_MANIFEST.md']) {
+    // U-20261006-001: scripts-snapshot.json joins — scaffold-written once, it
+    // must be regenerated post-upgrade, not preserved frozen.
+    for (const rel of ['docs/skill-graph.json', '.claude/template-version.txt', 'docs/VERSION_MANIFEST.md', 'scripts-snapshot.json']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('REGENERATED');
     }
   });
@@ -193,7 +195,7 @@ describe('upgrade-policy resolveClaim — PRESERVE / PROJECT_STATE / TEMPLATE_ON
   });
 
   test('runtime / generated state never delivered', () => {
-    for (const rel of ['package.json', 'bun.lock', 'variant.json', 'scripts-snapshot.json', 'memory/2026-01-01.md', 'docs/countries/ACTIVE.md']) {
+    for (const rel of ['package.json', 'bun.lock', 'variant.json', 'memory/2026-01-01.md', 'docs/countries/ACTIVE.md']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('PROJECT_STATE');
     }
   });
