@@ -26,46 +26,30 @@ fi
 
 echo "🔍 Scanning for secrets in commits being rebased..."
 
-# Get the range of commits being rebased
-# $1 = upstream branch, $2 = branch being rebased
+# Compute the rebase range. git passes $1 = upstream always (when given) and
+# $2 = the branch only for some invocation forms — plain `git rebase <upstream>`
+# passes ONE argument, so the branch defaults to HEAD. With no arguments at all
+# (pull.rebase implicit upstream), fall back to the last 10 commits.
 if [ $# -ge 2 ]; then
-    UPSTREAM="$1"
-    REBASE_BRANCH="$2"
-
-    # Scan each commit in the rebase range
-    SECRETS_FOUND=0
-    while IFS= read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
-            echo "✅ Commit $commit: clean"
-        else
-            echo "❌ SECRET DETECTED in commit $commit"
-            echo "   Rebase blocked to prevent secret exposure"
-            SECRETS_FOUND=1
-        fi
-    done < <(git rev-list --no-merges "$UPSTREAM..$REBASE_BRANCH")
-
-    if [ "$SECRETS_FOUND" -eq 1 ]; then
-        echo "❌ Rebase blocked: secrets detected in history."
-        exit 1
-    fi
+    RANGE="$1..$2"
+elif [ $# -eq 1 ]; then
+    RANGE="$1..HEAD"
 else
-    # Fallback: scan recent commits if no parameters provided
-    echo "⚠️  No rebase parameters - scanning last 10 commits"
-    SECRETS_FOUND=0
-    while IFS= read -r commit; do
-        if git show "$commit" 2>/dev/null | gitleaks detect --no-git --verbose --no-banner 2>/dev/null; then
-            echo "✅ Commit $commit: clean"
-        else
-            echo "❌ SECRET DETECTED in commit $commit"
-            SECRETS_FOUND=1
-        fi
-    done < <(git log -n 10 --format="%H")
-
-    if [ "$SECRETS_FOUND" -eq 1 ]; then
-        echo "❌ Rebase blocked: secrets detected in history."
-        exit 1
-    fi
+    RANGE="HEAD~10..HEAD"
 fi
 
-echo "✅ No secrets found - rebase can proceed"
-exit 0
+# Single repo-mode scan of exactly the commits being replayed.
+# Fixed 2026-10-06: the previous `git show <commit> | gitleaks detect --no-git`
+# pipe never scanned the commit — since gitleaks 8.x, `detect --no-git` ignores
+# stdin and scans the current directory instead, so the verdict came from the
+# working tree (blocking every rebase) rather than from the commits. Repo mode
+# with --log-opts scans the real commit diffs and honors the repo's
+# .gitleaks.toml allowlist.
+if gitleaks detect --no-banner --log-opts="--no-merges $RANGE"; then
+    echo "✅ No secrets found in $RANGE - rebase can proceed"
+    exit 0
+else
+    echo "❌ SECRET DETECTED in $RANGE"
+    echo "   Rebase blocked to prevent secret exposure"
+    exit 1
+fi
