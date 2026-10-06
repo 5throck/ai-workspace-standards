@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261006-003
+kind: manual
+title: >-
+  co-learning _ko docs skip the lang: ko declaration convention —
+  templates/co-learning/docs/{user-guide_ko.md (missing lang/lang_reason),
+  handoff-spec_ko.md and privacy-design-checklist_ko.md (no frontmatter at all)}
+  carry full Korean content while README_ko.md follows the sanctioned pattern;
+  found 2026-10-07 Slot D — land the declarations mirroring README_ko.md
+  (sync_version/translated_from_hash/lang/lang_reason)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-06T22:11:40.074Z'
+history:
+  - at: '2026-10-06T22:11:40.074Z'
+    from: null
+    to: backlog
+result: null
+error: null

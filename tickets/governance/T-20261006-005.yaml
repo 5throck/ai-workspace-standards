@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261006-005
+kind: manual
+title: >-
+  ADR-0099 checklist-coherence follow-up wave 2: co-deck PROMOTION_CHECKLIST
+  marks criteria 6/8/10 Done while its own evidence says unmet (criterion 8:
+  promotion 2026-08-30 after Beta-Since 2026-06-17 = 74 days, not 3 months) —
+  extend the ADR-0099 ratification follow-up (which names co-work/co-design) to
+  co-deck and re-mark as waived-with-basis + ratification row; also update its
+  line-26 baseline count 6/6→7/7; and add the co-abap-style migrated-same-day
+  parenthetical to the Beta Since lines in co-consult and co-develop checklists
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-06T22:16:24.439Z'
+history:
+  - at: '2026-10-06T22:16:24.439Z'
+    from: null
+    to: backlog
+result: null
+error: null

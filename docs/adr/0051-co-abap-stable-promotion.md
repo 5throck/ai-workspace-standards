@@ -1,6 +1,6 @@
 # ADR-0051: co-abap Stable Promotion
 
-**Status**: Accepted
+**Status**: Accepted — amended by ADR-0099 (2026-10-05): admission basis corrected to migration fast-track; the promotion-checklist and lifecycle claims below that contradict ADR-0099 §3 are superseded (see that ADR's correction).
 **Date**: 2026-08-15
 **Deciders**: pm, architect
 **Supersedes**: ADR-0020 (abap_vibe_coding variant conversion)

@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261006-004
+kind: manual
+title: >-
+  validator-hardening: validate-md-language.ts silently excludes _ko-suffixed
+  files as i18n locale files, so Korean content there needs no lang declaration
+  and declaration drift is undetectable — require a lang declaration (any legal
+  value) in _ko-suffixed files instead of excluding them, so missing
+  declarations fail
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-06T22:11:40.088Z'
+history:
+  - at: '2026-10-06T22:11:40.088Z'
+    from: null
+    to: backlog
+result: null
+error: null

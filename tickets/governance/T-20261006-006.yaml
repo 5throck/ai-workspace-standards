@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261006-006
+kind: manual
+title: >-
+  validator-hardening: validate-variant-claims.ts (1880 lines, v1.0.0→1.4.0 in
+  two days) has zero unit tests and no CI wiring — add
+  tests/unit/validate-variant-claims.test.ts pinning the calibration-sensitive
+  parsers (table-kind flip, comment stripping, roster counting with extends-stub
+  exclusion, theme_manifest truth) and wire the battery entry into test.yml next
+  to the docs-links --all step (sub-second, verified cheap)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-06T22:16:24.455Z'
+history:
+  - at: '2026-10-06T22:16:24.455Z'
+    from: null
+    to: backlog
+result: null
+error: null
