@@ -3,7 +3,7 @@ id: U-20261006-005
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-06T09:55:00.000Z'
 history:
@@ -13,7 +13,21 @@ history:
   - at: '2026-10-06T07:01:51.090Z'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-06T07:04:12.972Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-06T07:04:12.990Z'
+    from: waiting
+    to: review
+  - at: '2026-10-06T07:04:13.033Z'
+    from: review
+    to: done
+result: >-
+  upgrade-project 1.64.0: --prune-removed now treats agents/skills files absent
+  from every template tree as project-owned (L3) and KEEP-verifies them with an
+  ADR-0080 deprecation pointer instead of deleting; skills SSOT prune fires only
+  through explicit retirement records (isRetiredSkill); regression tests pin
+  project-owned survival byte-for-byte plus a legitimate retirement case
 error: null
 upstream:
   project: co-develop
@@ -52,7 +66,7 @@ upstream:
     docs/lifecycle/agents/exam-bank-steward.md at 43dc0c4 still claims '[x]
     Defined in agents/exam-bank-steward.md' after the file was deleted in the
     same commit.
-  triage: inbox
+  triage: ready
   flagged: false
   triage_reasons:
     - manual_filing
