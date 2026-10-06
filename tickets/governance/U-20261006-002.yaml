@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261006-002
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-06T00:20:20.491Z
+history:
+  - at: 2026-10-06T00:20:20.491Z
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.12.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/verify-skills.ts (delivered to every variant) writes skills/SKILLS.md in place on every run and exits 0 regardless of drift: its legacy-index test treats any file whose first line starts with ''# Skills Index'' as regenerable, so (1) in co-security the curated variant index titled ''# Skills Index - co-security'' (6-skill security index) is silently overwritten by the generated 41-skill flat index, and (2) in co-develop a corrupted committed index (stale 5-skill legacy header with a dead exam-bank-operations row ahead of the generated 39-skill table) was silently regenerated instead of flagged - the corruption survived upgrades because the gate that should catch it rewrites instead of verifying. Expected: a check mode that compares the generated index against the file on disk and exits 1 on drift, with regeneration only on an explicit flag. Observed harm: the standard battery command mutates the registry it claims to verify and masks corruption with a green exit.'
+  affected_paths:
+    - scripts/verify-skills.ts
+    - skills/SKILLS.md
+  identity_source: cwd
+  repro: 'Projects/co-security: run ''bun run verify-skills'' on a clean tree, then git diff -- skills/SKILLS.md shows the curated 6-skill index replaced by the generated 41-skill index (exit 0); git restore recovers. Projects/co-develop at main (pre-remediation commit 6a84e48): committed skills/SKILLS.md carried a stale ''# Skills Index'' header block (row ''exam-bank-operations'' pointing at a deleted skill, ''4-stage'' wording) ahead of the generated table; running the script regenerated the file, exit 0, no drift report.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/verify-skills.ts=false
+    - info:in_last_delivery skills/SKILLS.md=true
+  dedupe_key: c8d0772e21d0fd43fe172f6b12aded105ba74e57ed861ca36be656bb88812af3
+  duplicates:
+    - project: co-develop
+      at: 2026-10-06T00:20:20.491Z
