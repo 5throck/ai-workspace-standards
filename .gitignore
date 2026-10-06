@@ -123,6 +123,7 @@ __pycache__/
 !templates/co-price/
 !templates/co-design/
 !templates/co-develop/
+!templates/co-learning/
 !templates/co-game/
 !templates/co-security/
 !templates/co-work/
