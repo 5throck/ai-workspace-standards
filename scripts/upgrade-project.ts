@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.63.0
+// @version 1.64.0
+// v1.64.0 (2026-10-06, U-20261006-005 upstream request from co-develop):
+//          PRUNE REMOVED goes preserve-by-default for project-owned (L3)
+//          agents/ and skills/ roster entries. The 2026-09-12 fleet-sync
+//          hard-deleted Projects/co-develop agents/exam-bank-steward.md +
+//          skills/exam-bank-operations/ (commit 43dc0c4) with no ADR-0080
+//          decision record. Ownership test (no agents/skills delivery
+//          registry exists — skills/SKILLS.md dropped its layer column):
+//          a project file absent from EVERY template tree (variant + common
+//          + root SSOT) and not manifest-blessed is project-owned → KEEP
+//          ("project-owned, kept") + a pointer at the ADR-0080 deprecation
+//          procedure; deletion fires only for skills with an explicit
+//          retirement record (the isRetiredSkill discriminator the
+//          retired-mirror sweep already uses — hoisted and shared). The
+//          scripts/ registry-aware retirement path (scriptIsRetiredDelivery)
+//          is unchanged.
 // v1.63.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
 //          the COUNTRY-SCOPED SKILL PRUNE context-doc scrub filter now matches
 //          bold table rows (**k-dart**) and skill-path mentions
@@ -3118,6 +3133,27 @@ if (pruneRemoved) {
     // must never count as prunable; upstream = any source that delivers.
     { projDir: join(projectDir, 'skills'), tplDirs: [join(templatesDir, 'skills'), join(commonDir, 'skills'), join(workspaceRoot, 'skills')].filter(existsSync), ext: '/SKILL.md', label: 'skills/', isSkill: true },
   ];
+  // v1.64.0 (U-20261006-005): retirement discriminator hoisted from the
+  // retired-mirror sweep below so the skills/ SSOT prune shares it — a skill
+  // absent from every upstream source is deleted ONLY when an explicit
+  // retirement record marks it retired/deprecated; anything else is
+  // project-owned content that must never be silently deleted (ADR-0080:
+  // deprecation is the default exit, hard delete needs a recorded decision).
+  const isRetiredSkill = (name: string): boolean => {
+    const record = join(workspaceRoot, 'docs', 'lifecycle', 'skills', `${name}.md`);
+    if (existsSync(record) && / retired | deprecated /i.test(readFileSync(record, 'utf8').slice(0, 4000))) return true;
+    const mirrorSkill = join(projectDir, 'skills', name, 'SKILL.md');
+    if (existsSync(mirrorSkill)) return false;
+    let status = '';
+    for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex', '.hermes']) {
+      const mf = join(projectDir, mirrorRoot, 'skills', name, 'SKILL.md');
+      if (existsSync(mf)) {
+        const m = readFileSync(mf, 'utf8').match(/^status:\s*(\S+)/m);
+        if (m) { status = m[1].toLowerCase(); break; }
+      }
+    }
+    return status === 'retired' || status === 'deprecated';
+  };
   for (const cat of pruneCategories) {
     if (!existsSync(cat.projDir)) continue;
     // Collect all template file basenames. For identity-separated/common-only
@@ -3150,7 +3186,18 @@ if (pruneRemoved) {
     if (cat.isSkill) {
       for (const d of readdirSync(cat.projDir)) {
         if (!tplBasenames.has(d) && existsSync(join(cat.projDir, d, 'SKILL.md'))) {
-          console.log(`  PRUNE  ${cat.label}${d}/`);
+          // v1.64.0 (U-20261006-005): absence from every upstream source no
+          // longer means "prunable". Without an explicit retirement record the
+          // skill is project-owned (L3) — the 2026-09-12 fleet-sync run here
+          // hard-deleted co-develop's exam-bank-operations with no ADR-0080
+          // decision. Prune only retired upstream deliveries (the shared
+          // isRetiredSkill discriminator below); everything else is kept with
+          // a pointer at the deprecation procedure.
+          if (!isRetiredSkill(d)) {
+            console.log(`  KEEP   ${cat.label}${d}/  (project-owned, kept: not template-delivered — if stale, retire via the ADR-0080 deprecation procedure, never auto-delete)`);
+            continue;
+          }
+          console.log(`  PRUNE  ${cat.label}${d}/  (retired upstream skill — explicit retirement record)`);
           if (!dryRun) {
             const rm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', `${cat.label}${d}`], { encoding: 'utf8' });
             if (rm.status !== 0) {
@@ -3209,6 +3256,17 @@ if (pruneRemoved) {
           // files at audit time.
           if (cat.label === 'scripts/' && !scriptIsRetiredDelivery(f)) {
             console.log(`  KEEP   ${cat.label}${f}  (project-owned: no upstream delivery row)`);
+            continue;
+          }
+          // v1.64.0 (U-20261006-005): agents/ has no upstream delivery registry
+          // to consult, so a persona file absent from the template trees is
+          // project-owned (L3) by construction — never pruned here. The
+          // 2026-09-12 fleet-sync run deleted co-develop's exam-bank-steward.md
+          // at this exact branch with no ADR-0080 decision record. A suspected-
+          // stale agent is retired through the ADR-0080 deprecation procedure
+          // (recorded decision), never by an upgrade pass.
+          if (cat.label === 'agents/') {
+            console.log(`  KEEP   ${cat.label}${f}  (project-owned, kept: not template-delivered — if stale, retire via the ADR-0080 deprecation procedure, never auto-delete)`);
             continue;
           }
           console.log(`  PRUNE  ${cat.label}${f}`);
@@ -3288,21 +3346,8 @@ if (pruneRemoved) {
     // the mirror; KEEP-uncertain, needs human review). Prune only the former:
     // a root lifecycle record marked retired/deprecated, or a mirror SKILL.md
     // that self-declares retired/deprecated.
-    const isRetiredSkill = (name: string): boolean => {
-      const record = join(workspaceRoot, 'docs', 'lifecycle', 'skills', `${name}.md`);
-      if (existsSync(record) && / retired | deprecated /i.test(readFileSync(record, 'utf8').slice(0, 4000))) return true;
-      const mirrorSkill = join(projectDir, 'skills', name, 'SKILL.md');
-      if (existsSync(mirrorSkill)) return false;
-      let status = '';
-      for (const mirrorRoot of ['.claude', '.gemini', '.agents', '.codex', '.hermes']) {
-        const mf = join(projectDir, mirrorRoot, 'skills', name, 'SKILL.md');
-        if (existsSync(mf)) {
-          const m = readFileSync(mf, 'utf8').match(/^status:\s*(\S+)/m);
-          if (m) { status = m[1].toLowerCase(); break; }
-        }
-      }
-      return status === 'retired' || status === 'deprecated';
-    };
+    // v1.64.0 (U-20261006-005): the discriminator is hoisted above the prune
+    // categories loop (shared with the skills/ SSOT prune) — same logic.
     for (const d of readdirSync(projMirror)) {
       if (!existsSync(join(projMirror, d, 'SKILL.md'))) continue;
       if (upstreamSkillNames.has(d) || projSsotNames.has(d)) continue;

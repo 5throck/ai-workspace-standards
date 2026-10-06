@@ -3,13 +3,16 @@ id: U-20261006-007
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-06T09:55:00.000Z'
 history:
   - at: '2026-10-06T09:55:00.000Z'
     from: null
     to: backlog
+  - at: '2026-10-06T07:01:51.149Z'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,12 +22,29 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/readme-lifecycle-audit.ts (delivered to every scaffolded project) validates the README footer against only the English literal ''*Last Updated: YYYY-MM-DD*'' and warns ''Missing "Last Updated" date'' on localized footers: Projects/co-develop and Projects/co-security README_ko.md both ended with the Korean equivalent ''*최근 업데이트: 2026-08-09*'' and the audit flagged them even though the language-twin rules expect the Korean footer in the Korean README. Expected: the audit accepts the localized footer literals (at minimum the Korean ''최근 업데이트'' twin the workspace''s own README_ko convention produces), or the convention standardizes on appending the English literal to every localized README. Observed: both projects appended the English literal below the Korean one as a local workaround to silence the warning - a duplication the audit''s own twin rules do not require.'
+  symptom: >-
+    scripts/readme-lifecycle-audit.ts (delivered to every scaffolded project)
+    validates the README footer against only the English literal '*Last Updated:
+    YYYY-MM-DD*' and warns 'Missing "Last Updated" date' on localized footers:
+    Projects/co-develop and Projects/co-security README_ko.md both ended with
+    the Korean equivalent '*최근 업데이트: 2026-08-09*' and the audit flagged them
+    even though the language-twin rules expect the Korean footer in the Korean
+    README. Expected: the audit accepts the localized footer literals (at
+    minimum the Korean '최근 업데이트' twin the workspace's own README_ko convention
+    produces), or the convention standardizes on appending the English literal
+    to every localized README. Observed: both projects appended the English
+    literal below the Korean one as a local workaround to silence the warning -
+    a duplication the audit's own twin rules do not require.
   affected_paths:
     - scripts/readme-lifecycle-audit.ts
     - README_ko.md
   identity_source: cwd
-  repro: '1. cd Projects/co-develop. 2. tail -1 README_ko.md - shows the Korean footer literal. 3. bun run readme-lifecycle-audit - warns ''Missing "Last Updated" date - File: README_ko.md''. 4. Append ''*Last Updated: YYYY-MM-DD*'' below the Korean line and re-run - warning clears, proving the audit matches only the English literal.'
+  repro: >-
+    1. cd Projects/co-develop. 2. tail -1 README_ko.md - shows the Korean footer
+    literal. 3. bun run readme-lifecycle-audit - warns 'Missing "Last Updated"
+    date - File: README_ko.md'. 4. Append '*Last Updated: YYYY-MM-DD*' below the
+    Korean line and re-run - warning clears, proving the audit matches only the
+    English literal.
   triage: inbox
   flagged: false
   triage_reasons:

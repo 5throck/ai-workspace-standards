@@ -142,6 +142,8 @@ Agent Teams allow multiple Claude Code instances to work in parallel with a shar
 Spawn a teammate using the automation-engineer agent type to implement the script per the approved plan.
 ```
 
+> The example names `automation-engineer`, a **workspace-root (L0) agent** — in a scaffolded project, substitute your project's equivalent implementer agent from its own `agents/` roster.
+
 > ⚠️ **Platform support summary**:
 > - **Claude Code CLI** ✅ Full support
 > - **Claude Code Desktop App** ⚠️ Partial — in-process only, no hooks, no tmux
@@ -263,7 +265,7 @@ Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. 
 
 > **Agent Architecture**: See [CONSTITUTION.md §5 - Multi-Agent Architecture](CONSTITUTION.md#5-multi-agent-architecture) for governance rules.
 > **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
-> **docs-writer tier**: Medium (claude-sonnet-5-5) — upgraded from Low per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium (claude-sonnet-5-5) — upgraded from Low per 2026-05-28 team restructuring. (`docs-writer` is a **workspace-root (L0) agent**; in a scaffolded project, substitute your project's equivalent writer agent.)
 
 **Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
 ```
@@ -275,12 +277,14 @@ Agent(
 )
 ```
 
+> The example dispatches `automation-engineer`, a **workspace-root (L0) agent** — in a scaffolded project, substitute your project's equivalent implementer agent's role definition in the prompt.
+
 > **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-5-5`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. <!-- Note: `fable` is a forward-looking alias not yet registered in workspace-schema.json --> When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-5-5` → `model = "opus"`; Medium → `claude-sonnet-5-5` → `model = "sonnet"`; Low → `claude-haiku-4-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
 >
 > **Automated enforcement (Claude Code CLI only)**: `scripts/hooks/agent-model-gate.ts` runs as a `PreToolUse` hook (matcher: `Agent`) and asks for confirmation whenever an `Agent()` call dispatches one of the 8 workspace-root agents (`pm`, `architect`, `auditor`, `lifecycle-manager`, `automation-engineer`, `docs-writer`, `scaffolding-expert`, `security-expert`) without a valid `model` alias — this is the check that catches the High/Low-tier (`opus`/`haiku`) silent-fallback bug described above before it happens. L0-only; not propagated to `templates/common/` since variant projects have their own agent rosters without a workspace-wide tier registry.
 
 Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Agent Roster](AGENTS.md#1-agent-ecosystem-overview)):
-1. **automation-engineer** implements the changes (or code-writer for project-specific agents).
+1. **automation-engineer** implements the changes — a **workspace-root (L0) agent**; in a scaffolded project, substitute your project's equivalent implementer agent (or code-writer for project-specific agents).
 2. **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
 3. **Quality gate (audit script)** validates compliance.
 
@@ -357,7 +361,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-02 — removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR; previous: 2026-06-21 inlined N-1/N rows*
+*Last Updated: 2026-10-06 — annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
 
 

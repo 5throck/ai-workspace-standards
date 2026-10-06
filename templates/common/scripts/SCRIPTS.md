@@ -134,7 +134,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `migrate-quality-gates.ts` | L0 | 1.1.0 | active | Convert quality_gates prose entries to decision gates; automate classification (GATE vs INVARIANT vs MANUAL), YAML output, procedure schema updates, and _output-types.yaml enrichment (ADR-0083 P5); decider_agent derived from stage owner_agent, not procedure owner_agent | —| L0+L1 | —|
 | `resolve-variants.ts` | L0 | 1.0.3 | active | —| —| L0+L1 | —|
 | `qa-gate.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
-| `readme-lifecycle-audit.ts` | L0 | 1.0.4 | active | —| —| L0+L1 | —|
+| `readme-lifecycle-audit.ts` | L0 | 1.1.0 | active | v1.1.0 (2026-10-06, U-20261006-007 upstream request from co-develop): the footer detection/extraction accepts the workspace's localized footer literals — the English 'Last Updated' plus its two Korean-language twins (the templates README_ko convention literal and the project README_ko.md variant; the literals themselves live in the script source); the missing-footer warning lists the accepted literals. Prior: v1.0.4 | —| L0+L1 | —|
 | `render-pdf-deck.ts` | L0 | 1.0.1 | active | —| —| L0+L1 | —|
 | `retry-handler.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `setup-github-branch-protection.ts` | L0 | 1.0.1 | active | `--repo`, `--branch`, `--check` (repeatable), `--dry-run` | —| L0+L1 | —|

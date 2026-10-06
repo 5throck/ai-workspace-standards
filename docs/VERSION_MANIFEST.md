@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-06T06:18:44.848Z
+**Generated**: 2026-10-06T07:01:59.816Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -155,7 +155,7 @@
 | promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
 | propagate-to-templates.ts | 2.19.1 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
-| readme-lifecycle-audit.ts | 1.0.4 | scripts/readme-lifecycle-audit.ts | N/A |
+| readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.3.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
@@ -192,7 +192,7 @@
 | ticket.ts | 1.9.1 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.63.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.64.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
