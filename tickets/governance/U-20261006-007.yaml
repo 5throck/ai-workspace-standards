@@ -31,7 +31,7 @@ error: null
 upstream:
   project: co-develop
   variant: co-develop
-  template_version: 0.12.0
+  template_version: "0.12.0"
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
@@ -67,3 +67,7 @@ upstream:
   duplicates:
     - project: co-develop
       at: '2026-10-06T09:55:00.000Z'
+  resolution:
+    outcome: fixed
+    summary: "readme-lifecycle-audit 1.1.0: accepts Last Updated + Korean twins in detection, date extraction, and the warn/fix message; subprocess-based regression tests pin Korean-footer pass without any English literal; stale L1 mirror body resynced which also fixes fresh-scaffold pre-commit audits"
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1439

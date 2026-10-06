@@ -31,7 +31,7 @@ error: null
 upstream:
   project: co-security
   variant: co-security
-  template_version: 0.12.0
+  template_version: "0.12.0"
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
@@ -74,3 +74,7 @@ upstream:
   duplicates:
     - project: co-security
       at: '2026-10-06T09:55:00.000Z'
+  resolution:
+    outcome: fixed
+    summary: "COMMON-CLAUDE block examples annotated as workspace-root agents at all 4 sites (root CLAUDE.md source + templates/common mirror byte-synced, managed-block-parity 60/60): automation-engineer/docs-writer examples kept with an explicit substitute-in-scaffold note"
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1439
