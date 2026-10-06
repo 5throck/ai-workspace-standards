@@ -3,13 +3,19 @@ id: U-20261006-004
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: review
 attempts: 0
-created_at: 2026-10-06T00:20:20.779Z
+created_at: '2026-10-06T00:20:20.779Z'
 history:
-  - at: 2026-10-06T00:20:20.779Z
+  - at: '2026-10-06T00:20:20.779Z'
     from: null
     to: waiting
+  - at: '2026-10-06T18:02:58.482Z'
+    from: waiting
+    to: running
+  - at: '2026-10-06T18:39:28.878Z'
+    from: running
+    to: review
 result: null
 error: null
 upstream:
@@ -19,12 +25,32 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/audit.ts conditions three battery members so they self-skip in scaffolded projects while the same standalone scripts FAIL, so ''All checks passed'' coexists with red validators at L3: (1) the verify-memory gate runs only when a root context.md exists (audit.ts ~line 925); projects have docs/context.md, so the memory check is skipped while ''bun scripts/verify-memory.ts'' exits 1 on dead MEMORY.md archive rows (co-develop: 9 dead rows; co-security: 3 errors, observed 2026-10-06); (2) the design-lint gate reports ''no configured scan roots present - skipped'' and passes, while standalone design-lint exits 1 (template placeholder false positives, filed separately); (3) typecheck self-skips (''no baseline file in this context - skipping (root-context gate)'') with exit 0, so green says nothing about types at L3. Expected: gate conditions aligned with standalone verdicts (e.g. run verify-memory whenever memory/MEMORY.md exists) and skipped-vs-passed labeled distinctly in the audit summary.'
+  symptom: >-
+    scripts/audit.ts conditions three battery members so they self-skip in
+    scaffolded projects while the same standalone scripts FAIL, so 'All checks
+    passed' coexists with red validators at L3: (1) the verify-memory gate runs
+    only when a root context.md exists (audit.ts ~line 925); projects have
+    docs/context.md, so the memory check is skipped while 'bun
+    scripts/verify-memory.ts' exits 1 on dead MEMORY.md archive rows
+    (co-develop: 9 dead rows; co-security: 3 errors, observed 2026-10-06); (2)
+    the design-lint gate reports 'no configured scan roots present - skipped'
+    and passes, while standalone design-lint exits 1 (template placeholder false
+    positives, filed separately); (3) typecheck self-skips ('no baseline file in
+    this context - skipping (root-context gate)') with exit 0, so green says
+    nothing about types at L3. Expected: gate conditions aligned with standalone
+    verdicts (e.g. run verify-memory whenever memory/MEMORY.md exists) and
+    skipped-vs-passed labeled distinctly in the audit summary.
   affected_paths:
     - scripts/audit.ts
     - scripts/typecheck.ts
   identity_source: cwd
-  repro: 'cd Projects/co-develop at main (pre-remediation): ''bun run audit'' prints All checks passed (exit 0); ''bun scripts/verify-memory.ts'' exits 1 listing dead session rows; ''bun scripts/design-lint.ts'' exits 1; ''bun scripts/typecheck.ts'' prints the skip note and exits 0. Same divergence in Projects/co-security (verify-memory reports 3 errors against an audit-green run).'
+  repro: >-
+    cd Projects/co-develop at main (pre-remediation): 'bun run audit' prints All
+    checks passed (exit 0); 'bun scripts/verify-memory.ts' exits 1 listing dead
+    session rows; 'bun scripts/design-lint.ts' exits 1; 'bun
+    scripts/typecheck.ts' prints the skip note and exits 0. Same divergence in
+    Projects/co-security (verify-memory reports 3 errors against an audit-green
+    run).
   triage: ready
   flagged: false
   triage_reasons:
@@ -33,4 +59,4 @@ upstream:
   dedupe_key: 33b63f14c7b143a7da0a1fc865404295a5280853c09d9d8168818d0c10de4603
   duplicates:
     - project: co-develop
-      at: 2026-10-06T00:20:20.779Z
+      at: '2026-10-06T00:20:20.779Z'

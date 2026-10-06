@@ -3,13 +3,25 @@ id: U-20261006-001
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: backlog
+status: review
 attempts: 0
-created_at: 2026-10-06T00:11:51.924Z
+created_at: '2026-10-06T00:11:51.924Z'
 history:
-  - at: 2026-10-06T00:11:51.924Z
+  - at: '2026-10-06T00:11:51.924Z'
     from: null
     to: backlog
+  - at: '2026-10-06T18:02:51.248Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-06T18:04:25.832Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-06T18:04:31.872Z'
+    from: waiting
+    to: running
+  - at: '2026-10-06T18:39:28.814Z'
+    from: running
+    to: review
 result: null
 error: null
 upstream:
@@ -19,13 +31,44 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts-snapshot.json in scaffolded projects is written once at scaffold/adopt (new-project.ts step 5.5c and adopt-project.ts step 15, both calling the L0 helper scripts/helpers/write-scripts-snapshot.ts against the L0 SCRIPTS.md registry) and never refreshed afterwards: scripts/lib/upgrade-policy.ts classifies it under PROJECT_STATE_FILES (''exists in projects but is never template-delivered''), so upgrade-project preserves it as-is and does not regenerate it after delivering newer scripts (unlike REGENERATED_FILES such as docs/VERSION_MANIFEST.md, which are regenerated post-upgrade). Consequences observed in Projects/co-develop (snapshot dated 2026-08-30, survived template upgrades 0.6.0 -> 0.10.0 -> 0.12.0) and Projects/co-security (2026-09-04), identical numbers: the snapshot lists 157 unique script filenames while the project ships 139 .ts files under scripts/; 76 listed filenames do not exist in the project (L0/L1-only tools such as new-project.ts, ticket.ts, skill-dependency-analysis.ts) and 58 shipped scripts are unlisted. Expected: the snapshot reflects the delivered inventory and is refreshed when upgrade-project delivers script updates, because it is the baseline for upgrade-project''s ''Script version comparison (L2 snapshot vs L1 current)'' report. Observed: that report computes outdated/deprecated findings against the 2026-08-30/2026-09-04 baseline rather than the currently delivered versions, and includes entries for scripts the project never received.'
+  symptom: >-
+    scripts-snapshot.json in scaffolded projects is written once at
+    scaffold/adopt (new-project.ts step 5.5c and adopt-project.ts step 15, both
+    calling the L0 helper scripts/helpers/write-scripts-snapshot.ts against the
+    L0 SCRIPTS.md registry) and never refreshed afterwards:
+    scripts/lib/upgrade-policy.ts classifies it under PROJECT_STATE_FILES
+    ('exists in projects but is never template-delivered'), so upgrade-project
+    preserves it as-is and does not regenerate it after delivering newer scripts
+    (unlike REGENERATED_FILES such as docs/VERSION_MANIFEST.md, which are
+    regenerated post-upgrade). Consequences observed in Projects/co-develop
+    (snapshot dated 2026-08-30, survived template upgrades 0.6.0 -> 0.10.0 ->
+    0.12.0) and Projects/co-security (2026-09-04), identical numbers: the
+    snapshot lists 157 unique script filenames while the project ships 139 .ts
+    files under scripts/; 76 listed filenames do not exist in the project
+    (L0/L1-only tools such as new-project.ts, ticket.ts,
+    skill-dependency-analysis.ts) and 58 shipped scripts are unlisted. Expected:
+    the snapshot reflects the delivered inventory and is refreshed when
+    upgrade-project delivers script updates, because it is the baseline for
+    upgrade-project's 'Script version comparison (L2 snapshot vs L1 current)'
+    report. Observed: that report computes outdated/deprecated findings against
+    the 2026-08-30/2026-09-04 baseline rather than the currently delivered
+    versions, and includes entries for scripts the project never received.
   affected_paths:
     - scripts-snapshot.json
     - scripts/lib/upgrade-policy.ts
   identity_source: cwd
-  repro: '1. cd Projects/co-develop. 2. Load scripts-snapshot.json (created 2026-08-30) and walk scripts/ for .ts files: 157 listed vs 139 present; 76 listed filenames absent from the project, 58 present scripts unlisted (Projects/co-security identical: created 2026-09-04, same counts). 3. git log --follow scripts-snapshot.json shows no regeneration across the 0.6.0/0.10.0/0.12.0 upgrade commits. 4. Run upgrade-project on the project: the ''Script version comparison (L2 snapshot vs L1 current)'' report runs against the stale baseline; scripts/lib/upgrade-policy.ts PROJECT_STATE_FILES (never template-delivered) explains why no refresh step exists.'
-  triage: inbox
+  repro: >-
+    1. cd Projects/co-develop. 2. Load scripts-snapshot.json (created
+    2026-08-30) and walk scripts/ for .ts files: 157 listed vs 139 present; 76
+    listed filenames absent from the project, 58 present scripts unlisted
+    (Projects/co-security identical: created 2026-09-04, same counts). 3. git
+    log --follow scripts-snapshot.json shows no regeneration across the
+    0.6.0/0.10.0/0.12.0 upgrade commits. 4. Run upgrade-project on the project:
+    the 'Script version comparison (L2 snapshot vs L1 current)' report runs
+    against the stale baseline; scripts/lib/upgrade-policy.ts
+    PROJECT_STATE_FILES (never template-delivered) explains why no refresh step
+    exists.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: scripts-snapshot.json'
@@ -35,4 +78,4 @@ upstream:
   dedupe_key: d651d9631d68c8f5438c2602e934f961b25ae32e472a4ccc2e7da71d6767929d
   duplicates:
     - project: co-develop
-      at: 2026-10-06T00:11:51.924Z
+      at: '2026-10-06T00:11:51.924Z'
