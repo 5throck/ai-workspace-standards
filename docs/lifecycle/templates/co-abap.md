@@ -12,6 +12,7 @@
 | 2026-09-10 | production | production | Lifecycle record created (retroactive) | lifecycle-manager |
 | 2026-09-28 | production | production | Record refreshed (T-20260927-013): ADR-0091 R3 uniform country_config declaration delivered to variant.json (commit 6551e7c7, 2026-09-27, T-20260927-002); phase unchanged | governance-ticket-runner |
 | 2026-10-05 | production | production | Record refreshed (T-20261005-025): roster count corrected 20 → 21 with i18n-specialist named (roster-surface reconciliation); pm lifecycle record backfilled variant-locally; phase unchanged | pm |
+| 2026-10-05 | production | production | Stable admission ratified per ADR-0099 (migration fast-track); criteria 6/8/10 waived, remainder verified in the 2026-10-05 scoped review — see PROMOTION_CHECKLIST.md Review History | pm |
 
 ## Summary
 

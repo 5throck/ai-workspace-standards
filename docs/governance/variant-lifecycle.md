@@ -53,7 +53,11 @@ The lifecycle status is stored in each variant's `variant.json` under the `statu
 | co-work | 2026-06-15 | Full access |
 | co-design | 2026-06-15 | Full access |
 
-> All five variants (`co-consult`, `co-design`, `co-develop`, `co-security`, `co-work`) are currently in **stable** status.
+> All five variants (`co-consult`, `co-design`, `co-develop`, `co-security`, `co-work`) entered **stable** at their 2026-06 promotions. The fleet has since grown to 14 variants; for current per-variant status see each record under `docs/lifecycle/templates/` (SSOT: `variant.json` status per ADR-0099 §4).
+
+### Migration fast-track admission
+
+A variant migrated from a proven standalone project may enter directly at `stable` when its source project was conversion-eligible (tested in 2+ engagements). The beta-window criteria are then waived with an attestation row on the PROMOTION_CHECKLIST — never recorded as "met". Generation-1 migrated variants (co-consult, co-abap, co-develop) were ratified under this policy on 2026-10-05. Admission basis, checklist requirements, and the vocabulary mapping (`stable` ≡ lifecycle `production`, `beta` ≡ `review`): [ADR-0099](../adr/0099-template-migration-admission-policy.md). New non-migrated variants follow the beta-first table above.
 
 ---
 

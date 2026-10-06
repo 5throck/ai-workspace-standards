@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261006-009
+kind: manual
+title: >-
+  upgrade-project: the agents prune walk omits the workspace-root agents/ SSOT
+  from its upstream list (tplDirs has templates/<v>/agents + common/agents but
+  skills includes root skills/) — root-SSOT-delivered agents hit the new L3 KEEP
+  with a factually wrong 'project-owned' verdict; add
+  join(workspaceRoot,'agents') to mirror the skills list so KEEP verdicts are
+  truthful
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-06T22:16:37.258Z'
+history:
+  - at: '2026-10-06T22:16:37.258Z'
+    from: null
+    to: backlog
+result: null
+error: null
