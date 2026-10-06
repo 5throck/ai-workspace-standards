@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: U-20261006-006
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-06T09:55:00.000Z'
+history:
+  - at: '2026-10-06T09:55:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.12.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/CLAUDE.md (COMMON-CLAUDE marker blocks, delivered into every scaffolded project) uses dispatch examples and tier notes that name workspace-root (L0) agents - docs-writer and automation-engineer - which do not exist in any variant project's roster. In Projects/co-security and Projects/co-develop, CLAUDE.md lines ~190-206 (inside COMMON-CLAUDE blocks) instruct things like 'Spawn a teammate using the automation-engineer agent type' and a '**docs-writer tier**: Medium' note, so a project-side agent following the example fails roster verification. Expected: the COMMON-CLAUDE examples either use roster-neutral placeholders ('[implementation specialist]') or state explicitly that the named agents exist only at the workspace root (the way AGENTS.md's L0-only note for agent-model-gate.ts does). Observed: variant projects ship instructions referencing agents they do not have; Projects/co-security locally patched the out-of-block example at line 126 to patch-engineer (marked
+    LOCAL-PATCH), but the in-block references cannot be durably fixed at L3 because the next upgrade overwrites the block.
+  affected_paths:
+    - templates/common/CLAUDE.md
+    - Projects/co-security/CLAUDE.md
+    - Projects/co-develop/CLAUDE.md
+  identity_source: cwd
+  repro: 1. sed -n '187,214p' Projects/co-security/CLAUDE.md - COMMON-CLAUDE block names docs-writer and automation-engineer. 2. ls Projects/co-security/agents/ - roster has no such agents (pm, i18n-specialist, pentester, patch-engineer, red-team-lead, report-writer, threat-modeler). 3. Same check in Projects/co-develop/CLAUDE.md (lines ~122, ~194-205). 4. templates/common/CLAUDE.md - the L0-only wording exists for agent-model-gate.ts but not for the agent examples.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - manual_filing
+    - first_request_of_this_class
+  dedupe_key: 1051f2f43ac6586a202129b6ac1a00e84844b0809b02c506f748d6f77472ca2d
+  duplicates:
+    - project: co-security
+      at: '2026-10-06T09:55:00.000Z'
