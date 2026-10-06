@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: ec7418075d0a51c6bb7ab0fbb8842403f4dbcb110ce85ec9afdbd772a1c3c9cf
+content_hash: 9f1e91e4e85a30dbb7f1228bd303590901e6f185995a395d8b8d1cb8afe74ba4
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -258,6 +258,7 @@ Every AI session begins by running this checklist (defined in `CONSTITUTION.md`)
 Each template variant in this workspace provides a highly optimized, specialized **multi-agent workflow and agent team** tailored for its specific purpose.
 
 - **co-develop**: A 6-phase linear governance pipeline for software development and verification
+- **co-learning**: Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations (beta; derived from co-develop)
 - **co-design**: A 5-phase iterative design-native workflow focused on rapid prototyping and continuous user validation
 - **co-work**: A 6-phase asynchronous collaboration workflow focused on parallel drafting and continuous stakeholder review
 - **co-security**: A 6-phase security engagement workflow covering Red Team ops, threat modeling, and Ansible-based patch automation
@@ -379,4 +380,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-06*

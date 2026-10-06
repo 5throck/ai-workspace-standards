@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261006-001
+kind: manual
+title: >-
+  co-learning deep-docs content pass: docs/user-guide.md,
+  docs/phase-definitions.md, docs/co-learning.context.md routing tables and
+  procedures/* schemas still describe the generic dev pipeline
+  (architect/code-writer/test-runner) in prose, contradicting AGENTS.md section
+  3.5 and the real 3-agent roster (pm, exam-bank-steward, i18n-specialist) -
+  needs the variant author's design input; same residue class exists in co-news
+  README section B
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-06T06:16:59.521Z'
+history:
+  - at: '2026-10-06T06:16:59.521Z'
+    from: null
+    to: backlog
+result: null
+error: null

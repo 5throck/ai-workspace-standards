@@ -51,8 +51,8 @@ const variants = readdirSync(templatesDir)
   .sort();
 
 describe('variant asset-dir claim collision guard (T-20260924-011 fleet static guard)', () => {
-  test('fleet size sanity: all 13 variant templates present', () => {
-    expect(variants).toHaveLength(13);
+  test('fleet size sanity: all 14 variant templates present', () => {
+    expect(variants).toHaveLength(14);
   });
 
   test('every walked asset file resolves to VARIANT ASSET DIRS, except procedures/** → PROCEDURES and region-profiles/** → REGION PROFILES', () => {

@@ -56,9 +56,9 @@ describe('deriveCoVariantDirs (M8)', () => {
         }
     });
 
-    test('real tree derives the 13 registered variants in sorted order', () => {
+    test('real tree derives the 14 registered variants in sorted order', () => {
         const dirs = deriveCoVariantDirs(join(WORKSPACE_ROOT, 'templates'));
-        expect(dirs.length).toBe(13);
+        expect(dirs.length).toBe(14);
         expect(dirs).toEqual([...dirs].sort());
         expect(dirs.every((d) => d.startsWith('co-'))).toBe(true);
     });

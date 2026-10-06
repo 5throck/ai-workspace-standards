@@ -1,5 +1,5 @@
 ---
-translated_from_hash: ec7418075d0a51c6bb7ab0fbb8842403f4dbcb110ce85ec9afdbd772a1c3c9cf
+translated_from_hash: 9f1e91e4e85a30dbb7f1228bd303590901e6f185995a395d8b8d1cb8afe74ba4
 sync_version: 4
 ---
 
@@ -253,6 +253,7 @@ C:\git\
 이 워크스페이스의 각 템플릿 변형(Variant)은 목적에 맞게 고도로 최적화된 고유의 **다중 에이전트 워크플로와 에이전트 팀**을 제공합니다. 
 
 - **co-develop**: 소프트웨어 개발 및 검증을 위한 6단계 선형 거버넌스 파이프라인
+- **co-learning**: 학습·평가 워크플로 — 편향 감사 문항 은행 저작, 개선 대장 검수, 시험 운영 (베타; co-develop 파생)
 - **co-design**: 빠른 프로토타이핑과 지속적인 사용자 검증에 초점을 맞춘 5단계 반복형(Iterative) 디자인 네이티브 워크플로
 - **co-work**: 병렬 작성과 지속적인 이해관계자 검토에 초점을 맞춘 6단계 비동기(Asynchronous) 협업 워크플로
 - **co-security**: 레드팀 운영, 위협 모델링, Ansible 기반 패치 자동화를 포함하는 6단계 보안 인게이지먼트 워크플로
@@ -374,4 +375,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-06*

@@ -134,10 +134,10 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/resolve-pm-stub.ts` | L0 | 1.2.0 | active | v1.2.0 (registry & platform-policy completeness batch, spec docs/designs/2026-09-25-registry-policy-completeness-design.md R2.1): pure, read-only `composeResolvedAgentContent(agentPath, commonAgentPath, variant, opts)` returns exactly the content `resolveAgentExtendsStub` would write, without touching the filesystem (validators must not mutate the tree they audit); the resolver consumes the compose path so one merge implementation exists (in-place writer stays for the new-project/adopt-project delivery paths). Prior: v1.1.0 (T-20260924-003, spec docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.2): generic `resolveAgentExtendsStub(agentPath, commonAgentPath, variant, opts)` wrapper — the pm canonical-prose check (H12) moves behind an injected `opts.isCanonicalStubBody` (pm passes isCanonicalPmStubBody; the empty-body i18n-specialist stubs skip it); `resolvePmExtendsStub` stays as a thin back-compat wrapper. Prior: Shared agents/pm.md normalization — ADR-0033 extends-stub resolution against the L1 body (H12 non-canonical prose flag) + L1-B metadata strip with project-local lifecycle regeneration; extracted verbatim from new-project §2.3b/§2.5, shared with the adopt-project settling pass | —| L0+L1 | —|
 | `helpers/adopt-plan.ts` | L0 | 1.0.0 | active | Pure scan/plan logic for adopt-project: full delivered-path derivation (upgrade-policy SSOT), collision scan, retained foreign scripts, foreign skills, secret-shaped tracked files, hook-manager conflicts, workflow traces, versioned adoption plan | —| L0 | —|
 | `helpers/variant-governance-rules.ts` | L0 | 1.2.0 | active | —| —| L0 | —|
-| `helpers/registries/variant-type-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
+| `helpers/registries/variant-type-registry.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `helpers/registries/capability-registry.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
-| `helpers/registries/promotion-policy.ts` | L0 | 1.2.1 | active | —| —| L0 | —|
-| `helpers/registries/validation-policy.ts` | L0 | 1.2.1 | active | —| —| L0+L1 | —|
+| `helpers/registries/promotion-policy.ts` | L0 | 1.3.0 | active | —| —| L0 | —|
+| `helpers/registries/validation-policy.ts` | L0 | 1.3.0 | active | —| —| L0+L1 | —|
 | `helpers/registries/index.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/variant-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
 | `helpers/plugins/game-plugin.ts` | L0 | 1.0.0 | active | —| —| L0 | —|
@@ -154,7 +154,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `helpers/prune-country-scoped-assets.ts` | L0 | 0.4.0 | active | v0.4.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md): context-doc scrub matches inline-code + bold + skill-path shapes — bold table rows no longer survive region-neutral scaffolds | —| L0 | —|
 | `helpers/scan-l3-project.ts` | L0 | 1.5.0 | active | v1.5.0 commands roots gain .codex/prompts (.agents/commands excluded per Finding D); detectPlatformScope classifies agents/codex (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 13) | —| L0 | —|
 | `helpers/substitute-placeholders.ts` | L0 | 1.3.0 | active | v1.3.0: exported pure `applySubstitutions`/`substituteFiles` (strict-UTF-8 guard, explicit file list) for adopt's scoped substitution; CLI flow guarded by import.meta.main, behavior unchanged | —| L0 | —|
-| `helpers/template-utils.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
+| `helpers/template-utils.ts` | L0 | 1.3.0 | active | v1.3.0 (2026-10-06): DEFAULT_PM_ROLE_DESCRIPTIONS gains the co-learning entry — M13 pin (registry keys ≡ deriveCoVariantDirs) requires one role description per registered variant; propagated to the L1 mirror | —| L0+L1 | —|
 | `helpers/rollback-partial-project.ts` | L0 | 1.1.0 | active | —| —| L0+L1 | —|
 | `helpers/template-validation.ts` | L0 | 1.0.2 | active | —| —| L0 | —|
 | `helpers/update-variant-lifecycle.ts` | L0 | 1.0.1 | active | —| —| L0 | —|

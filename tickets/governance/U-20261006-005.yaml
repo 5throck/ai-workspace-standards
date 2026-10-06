@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261006-005
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-06T09:55:00.000Z'
+history:
+  - at: '2026-10-06T09:55:00.000Z'
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.12.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    upgrade-project's fleet-sync pass deletes project-owned (L3) agents and skills that are not part of the variant's standard roster: commit 43dc0c4 (2026-09-12, 'chore(upgrade): design gate phase C - spec registry seed + fleet sync') hard-deleted Projects/co-develop agents/exam-bank-steward.md (85 lines) and skills/exam-bank-operations/SKILL.md (112 lines) together with every AGENTS.md registration, with no gate-moment decision record. ADR-0080 requires a decision record for every firing, sets deprecation as the default exit, and reserves hard delete for explicit user request; an upgrade pass satisfied none of these. Expected: upgrade-project touches only template-delivered (L1/L2) files and never removes project-owned roster entries (L3), or the fleet-sync step documents and records every removal. Observed: the deletion silently removed a production agent and its owned skill; the governance records under docs/lifecycle/ kept asserting the deleted files existed until the 2026-10-06
+    health inspection caught it.
+  affected_paths:
+    - scripts/upgrade-project.ts
+    - agents/exam-bank-steward.md
+    - skills/exam-bank-operations/SKILL.md
+    - AGENTS.md
+  identity_source: cwd
+  repro: 1. cd Projects/co-develop. 2. git show 43dc0c4 --diff-filter=D --name-only - lists agents/exam-bank-steward.md and skills/exam-bank-operations/SKILL.md as deleted by the fleet-sync upgrade commit. 3. git log --all -- docs/decisions/ - no decision record exists for the deletion (first decision record in the repo is DEC-20260920-01.md, later). 4. docs/lifecycle/agents/exam-bank-steward.md at 43dc0c4 still claims '[x] Defined in agents/exam-bank-steward.md' after the file was deleted in the same commit.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - manual_filing
+    - first_request_of_this_class
+  dedupe_key: fa0c8839dd13329e81adfe60933df6990a2204db881205733c8c0876514df827
+  duplicates:
+    - project: co-develop
+      at: '2026-10-06T09:55:00.000Z'

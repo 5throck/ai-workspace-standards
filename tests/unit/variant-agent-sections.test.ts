@@ -37,9 +37,9 @@ function missingSections(content: string): string[] {
 }
 
 describe('variant agent sections: resolve-and-check (registry completeness R2.2)', () => {
-  test('all 13 real i18n-specialist stubs resolve to bodies with all 7 Layer-1 sections', () => {
+  test('all 14 real i18n-specialist stubs resolve to bodies with all 7 Layer-1 sections', () => {
     const variants = variantDirs();
-    expect(variants.length).toBe(13);
+    expect(variants.length).toBe(14);
     for (const variant of variants) {
       const stubPath = join(templatesDir, variant, 'agents', 'i18n-specialist.md');
       const composed = composeResolvedAgentContent(stubPath, COMMON_I18N, variant);

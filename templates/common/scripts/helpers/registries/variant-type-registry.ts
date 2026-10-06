@@ -1,5 +1,5 @@
 // scripts/helpers/registries/variant-type-registry.ts
-// @version 1.1.0
+// @version 1.2.0
 // SSOT for variant type definitions
 
 /**
@@ -60,6 +60,11 @@ export const VARIANT_TYPE_REGISTRY = {
   safety: {
     name: 'safety',
     description: 'EHS/GxP compliance platform for Korean occupational safety, pharmaceutical quality, and medical device regulation',
+  },
+  learning: {
+    name: 'learning',
+    description: 'Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations',
+    canonicalExtensionSource: 'templates/co-learning/variant.json',
   },
 } as const;
 

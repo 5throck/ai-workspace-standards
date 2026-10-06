@@ -10,12 +10,13 @@
  *    tier-model-mapping blocks), CRLF input, key whitespace normalization.
  * 2. Unterminated blocks surface as issues, never silently drop.
  * 3. Comparison: missing key / missing content / extra content / full parity.
- * 4. Real-tree invariant: templates/common/AGENTS.md and ALL 13 variant
- *    AGENTS.md are at parity right now (pins the T-009 data fix).
+ * 4. Real-tree invariant: templates/common/AGENTS.md and ALL variant
+ *    AGENTS.md are at parity right now (pins the T-009 data fix; count
+ *    expectation tracks the registered variant set — 14 as of co-learning).
  *
  * 5. COMMON-AGENTS:START/END zone (v1.2.0, ADR-0081 / T-20260919-001):
  *    extraction, missing/mismatch comparison, and the real-tree invariant
- *    that common + all 13 variant AGENTS.md are at parity.
+ *    that common + all variant AGENTS.md are at parity.
  *
  * @version 1.1.0
  */
@@ -162,7 +163,7 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
     const variants = readdirSync(templatesDir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
       .map((e) => e.name);
-    expect(variants.length).toBe(13);
+    expect(variants.length).toBe(14);
     for (const variant of variants) {
       const issues: string[] = [];
       const variantBlocks = extractKeyedBlocks(

@@ -8,7 +8,7 @@
  *   - new-project.ts (L1→L3 project deployment: context.md)
  *   - create-l3-scaffold.ts (L3 project README stub rendering)
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -105,6 +105,7 @@ export const DEFAULT_PM_ROLE_DESCRIPTIONS: Record<string, string> = {
   'co-export':   'Trade engagement coordination, compliance approval gates, final sign-off',
   'co-game':     'Game pipeline orchestration, genre-based dispatch, test and debug gates',
   'co-hr':       'HR engagement coordination, people-domain dispatch, client approval gates',
+  'co-learning': 'Assessment pipeline orchestration, question-bank quality gates, exam delivery readiness',
   'co-news':     'Newsroom pipeline gating, editorial approval, publication readiness',
   'co-price':    'Pricing engagement governance, method dispatch, executive synthesis',
   'co-safety':   'Safety governance, regulatory evidence gates, deliverable closeout approval',

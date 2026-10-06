@@ -1,5 +1,5 @@
 // scripts/helpers/registries/promotion-policy.ts
-// @version 1.2.1
+// @version 1.3.0
 // v1.2.1: architect-review flag resolved (T-20260910-007) — safety values approved
 //         as-is, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (mirrors abap-development) — d0ddc17f registered the
@@ -70,6 +70,10 @@ export const PROMOTION_POLICIES = {
   // revisit with real engagement data at the first safety-type promotion.
   safety: {
     minEngagements: 3,
+    minBetaMonths: 2,
+  },
+  learning: {
+    minEngagements: 2,
     minBetaMonths: 2,
   },
 } satisfies Record<VariantType, PromotionPolicy>;

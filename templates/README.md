@@ -38,6 +38,7 @@ templates/
 | Variant | Status | Description |
 |---------|--------|-------------|
 | [`co-develop`](co-develop/) | ✅ Stable | Software development workflow with 7 agents (pm, architect, code-writer, designer, security-monitor, stack-setup, test-runner) |
+| [`co-learning`](co-learning/) | ⚠️ Beta | Learning and assessment workflow with 2 agents (pm, exam-bank-steward + common i18n-specialist) — bias-audited question banks and exam operations |
 | [`co-design`](co-design/) | ✅ Stable | Design workflow with 8 agents (design pm, design-lead, prototype-engineer, service-designer, etc.) |
 | [`co-work`](co-work/) | ✅ Stable | General collaboration workflow with 7 agents (pm, analyst, content-writer, ms365-expert, etc.) |
 | [`co-security`](co-security/) | ✅ Stable | Security engagement workflow with 6 agents (pm, red-team-lead, pentester, threat-modeler, etc.) |
@@ -110,4 +111,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-09-26*
+*Last Updated: 2026-10-06*
