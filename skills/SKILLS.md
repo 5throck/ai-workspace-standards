@@ -81,6 +81,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `verify-authorization` | 1.0.0 | active | pm | 2026-06-13 | — | co-security only |
 | `version` | 1.3.0 | active | version | 2026-06-20 | — | co-deck only |
 | `swe-solve` | 1.1.1 | active | pm | 2026-08-25 | — | co-develop only |
+| `exam-bank-operations` | 1.1.0 | active | exam-bank-steward | 2026-10-06 | — | co-learning only |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | co-game only |
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | co-consult only |
 | `sarif-exporter` | 1.0.1 | active | security-expert | 2026-08-25 | — | co-security only |

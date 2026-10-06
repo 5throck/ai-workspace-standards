@@ -1,0 +1,25 @@
+schema_version: "1.0"
+variant: co-learning
+output_types:
+  approved_implementation_plan:
+    description: "Registered procedure output type"
+  test_scaffold:
+    description: "Registered procedure output type"
+  implementation_commit:
+    description: "Registered procedure output type"
+  review_findings:
+    description: "Registered procedure output type"
+  environment_manifest:
+    description: "Registered procedure output type"
+  security_baseline:
+    description: "Registered procedure output type"
+  technical_findings:
+    description: "Registered procedure output type"
+  tooling_adjustments:
+    description: "Registered procedure output type"
+  regression_report:
+    description: "Registered procedure output type"
+  release_notes:
+    description: "Registered procedure output type"
+  ui_specification:
+    description: "Registered procedure output type"

@@ -1,0 +1,354 @@
+{
+  "version": 1,
+  "graph_profile": "deg/v1",
+  "nodes": [
+    {
+      "id": "code-review",
+      "type": "skill",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "exam-bank-operations",
+      "type": "skill",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "exam-bank-steward",
+      "type": "agent",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "i18n-specialist",
+      "type": "agent",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.approved_implementation_plan",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.environment_manifest",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.regression_report",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.release_notes",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.security_baseline",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.technical_findings",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.test_scaffold",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.tooling_adjustments",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "output_type.ui_specification",
+      "type": "output_type",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.architecture-design",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.environment-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.feature-implementation",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.release-verification",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.security-release-retrospective",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "procedure.co-learning.technical-planning",
+      "type": "procedure",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "refactoring",
+      "type": "skill",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
+      "layer": "variant:co-learning"
+    },
+    {
+      "id": "test-driven-development",
+      "type": "skill",
+      "layer": "variant:co-learning"
+    }
+  ],
+  "edges": [
+    {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "code-review",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.release_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "exam-bank-operations",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-learning/skills/exam-bank-operations/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "exam-bank-operations",
+      "to": "exam-bank-steward",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "exam-bank-operations",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "exam-bank-operations",
+      "to": "phase5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "output_type.approved_implementation_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "procedure.co-learning.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "procedure.co-learning.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "output_type.environment_manifest",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "procedure.co-learning.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.release-verification",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.release-verification",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-learning.release-verification",
+      "to": "procedure.co-learning.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.release-verification",
+      "to": "test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.security-release-retrospective",
+      "to": "code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.security-release-retrospective",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-learning.security-release-retrospective",
+      "to": "procedure.co-learning.release-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "output_type.technical_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "procedure.co-learning.environment-bootstrap",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "refactoring",
+      "to": "output_type.tooling_adjustments",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "test-driven-development",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    }
+  ]
+}

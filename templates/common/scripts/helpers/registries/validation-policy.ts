@@ -1,5 +1,5 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.2.1
+// @version 1.3.0
 // v1.2.1: architect-review flag resolved (T-20260910-007) — empty requiredCapabilities
 //         approved, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (empty requiredCapabilities — cannot false-block a
@@ -87,6 +87,9 @@ export const VALIDATION_POLICIES = {
     optionalSkillSections: ['## Prerequisites', '## Quality Criteria'],
   },
   collaboration: {
+    requiredCapabilities: [],
+  },
+  learning: {
     requiredCapabilities: [],
   },
   lecture: {
