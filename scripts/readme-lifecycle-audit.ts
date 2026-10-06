@@ -9,8 +9,16 @@
  *   bun scripts/readme-lifecycle-audit.ts
  *   bun scripts/readme-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.0.4
- * @last_updated 2026-08-20
+ * v1.1.0 (2026-10-06, U-20261006-007 upstream request from co-develop):
+ *          the footer detection/extraction accepts the workspace's localized
+ *          footer literals — English 'Last Updated' plus the Korean twins
+ *          '최근 갱신' (the templates README_ko convention) and
+ *          '최근 업데이트' (project README_ko.md files). A localized footer
+ *          no longer warns 'Missing "Last Updated" date'; the warning text
+ *          and fix hint list the accepted literals.
+ *
+ * @version 1.1.0
+ * @last_updated 2026-10-06
  * @license MIT
  */
 
@@ -149,15 +157,34 @@ function findReadmeFiles(dir: string): string[] {
 }
 
 // Check for Last Updated date
+// v1.1.0 (U-20261006-007): the footer date literal is a list, not an English-only
+// regex — the workspace's own README_ko convention produces a Korean footer
+// ('*최근 갱신: YYYY-MM-DD*' in the templates README_ko convention,
+// '*최근 업데이트: YYYY-MM-DD*' in project README_ko files). A localized footer
+// is a valid lifecycle footer.
+const LAST_UPDATED_LITERALS = ['Last Updated', '최근 갱신', '최근 업데이트'];
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const LAST_UPDATED_RE = new RegExp(
+  `(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join('|')}):\\s*\\d{4}-\\d{2}-\\d{2}`
+);
+
+const LAST_UPDATED_CAPTURE_RE = new RegExp(
+  `(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join('|')}):\\s*(\\d{4}-\\d{2}-\\d{2})`
+);
+
 function hasLastUpdated(filePath: string): boolean {
   const content = readFileSync(filePath, 'utf-8');
-  return /Last Updated:\s*\d{4}-\d{2}-\d{2}/.test(content);
+  return LAST_UPDATED_RE.test(content);
 }
 
 // Check if date is recent (within 90 days)
 function isDateRecent(filePath: string): boolean {
   const content = readFileSync(filePath, 'utf-8');
-  const match = content.match(/Last Updated:\s*(\d{4}-\d{2}-\d{2})/);
+  const match = content.match(LAST_UPDATED_CAPTURE_RE);
   if (!match) return false;
 
   const lastUpdated = new Date(match[1]);
@@ -273,13 +300,13 @@ function auditReadmes(jsonMode = false): AuditResult {
       }
     }
 
-    // Check for Last Updated
+    // Check for Last Updated (localized footer literals accepted — U-20261006-007)
     if (!hasLastUpdated(readmeFile)) {
       warnings.push({
         level: 'warning',
         file: relPath,
-        message: 'Missing "Last Updated" date',
-        fix: 'Add "*Last Updated: YYYY-MM-DD*" at the end of the file',
+        message: `Missing "Last Updated" date (accepted literals: ${LAST_UPDATED_LITERALS.join(' / ')})`,
+        fix: `Add "*Last Updated: YYYY-MM-DD*" (or a localized twin, e.g. "*최근 갱신: YYYY-MM-DD*") at the end of the file`,
       });
     } else if (!isDateRecent(readmeFile)) {
       warnings.push({

@@ -19,7 +19,17 @@
  *         prune iterated a 4-element literal without .codex/skills, so the
  *         foreign skill's codex copy survived every prune run.
  *
- * @version 1.1.0
+ * v1.2.0 (2026-10-06, U-20261006-005 upstream request from co-develop):
+ *         new PROJECT-OWNED PRESERVE describe block — agents/ and skills/
+ *         roster entries absent from the template trees are project-owned
+ *         (L3) and must survive --prune-removed byte-for-byte (the
+ *         2026-09-12 fleet-sync hard-deleted co-develop's exam-bank-steward
+ *         agent + exam-bank-operations skill with no ADR-0080 decision
+ *         record). A template-delivered skill retired upstream with an
+ *         explicit retirement record (root lifecycle docs/lifecycle/skills/)
+ *         is still pruned from the SSOT — the legitimate-retirement path.
+ *
+ * @version 1.2.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -149,6 +159,109 @@ describe('upgrade-project.ts PRUNE REMOVED (upstream-row semantics, v1.45.1)', (
       const out = result.stdout ?? '';
       expect(out).toContain('KEEP   scripts/stray-foreign.ts');
       expect(existsSync(join(tmp, 'scripts', 'stray-foreign.ts'))).toBe(true);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// PROJECT-OWNED PRESERVE — agents/skills prune is preserve-by-default
+// (U-20261006-005, upgrade-project v1.64.0)
+// ============================================================================
+describe('upgrade-project.ts PRUNE REMOVED — project-owned (L3) agents/skills survive (U-20261006-005)', () => {
+  test('project-owned agent + skill absent from the variant template survive byte-for-byte', () => {
+    const tmp = makeTempProject();
+    try {
+      // The exact shape the incident deleted (commit 43dc0c4): a project-owned
+      // agent persona and its owned skill, neither present in the co-develop
+      // variant template, templates/common, or the root SSOT, and not declared
+      // in any variant.json (the fixture has none — the fleet dry-run catch).
+      const agentContent = [
+        '---',
+        'name: exam-bank-steward',
+        'description: Project-owned exam-bank steward agent (L3 fixture)',
+        '---',
+        '',
+        '# Exam Bank Steward',
+        '',
+        'Project-owned roster entry — must never be silently deleted by an upgrade.',
+        '',
+      ].join('\n');
+      const skillContent = [
+        '---',
+        'name: exam-bank-operations-fixture',
+        'description: Project-owned exam-bank operations skill (L3 fixture)',
+        '---',
+        '',
+        '# Exam Bank Operations',
+        '',
+        'Project-owned skill — must never be silently deleted by an upgrade.',
+        '',
+      ].join('\n');
+      // NOTE: the fixture skill carries a `-fixture` suffix on purpose — the
+      // real incident name `exam-bank-operations` is registered in
+      // docs/workspace-schema.json variant_scoped_skills as owned by
+      // co-learning, so the registry-driven VARIANT-SCOPE SKILL PRUNE (a
+      // different, owner-curated pass) would legitimately prune it from this
+      // co-develop fixture. That pass is out of scope here; this block pins
+      // the walk-based prune's project-owned semantics.
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      mkdirSync(join(tmp, 'skills', 'exam-bank-operations-fixture'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'exam-bank-steward.md'), agentContent);
+      writeFileSync(join(tmp, 'skills', 'exam-bank-operations-fixture', 'SKILL.md'), skillContent);
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed project-owned roster'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--prune-removed', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      if (result.status !== 0) {
+        console.error('stdout:', (result.stdout ?? '').slice(-3000));
+        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
+      }
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      // KEEP verdicts with the ADR-0080 pointer, never a PRUNE verdict.
+      expect(out).toContain('KEEP   agents/exam-bank-steward.md');
+      expect(out).toContain('KEEP   skills/exam-bank-operations-fixture/');
+      expect(out).toContain('project-owned, kept');
+      expect(out).toContain('ADR-0080');
+      expect(out).not.toContain('PRUNE  agents/exam-bank-steward.md');
+      expect(out).not.toContain('PRUNE  skills/exam-bank-operations-fixture/');
+      // Byte-for-byte survival.
+      expect(readFileSync(join(tmp, 'agents', 'exam-bank-steward.md'), 'utf8')).toBe(agentContent);
+      expect(readFileSync(join(tmp, 'skills', 'exam-bank-operations-fixture', 'SKILL.md'), 'utf8')).toBe(skillContent);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('retired upstream skill (explicit retirement record) is still pruned from the SSOT', () => {
+    const tmp = makeTempProject();
+    try {
+      // `meeting` is retired at L0 with a root lifecycle record
+      // (docs/lifecycle/skills/meeting.md, Status: retired) and is absent from
+      // every upstream source — the legitimate-retirement path must stay live.
+      mkdirSync(join(tmp, 'skills', 'meeting'), { recursive: true });
+      writeFileSync(
+        join(tmp, 'skills', 'meeting', 'SKILL.md'),
+        '---\nname: meeting\ndescription: retired upstream skill (fixture copy)\n---\n'
+      );
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed retired skill'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--prune-removed', '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+      expect(out).toContain('PRUNE  skills/meeting/');
+      expect(existsSync(join(tmp, 'skills', 'meeting'))).toBe(false);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
