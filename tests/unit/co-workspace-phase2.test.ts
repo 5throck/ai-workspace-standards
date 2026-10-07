@@ -260,7 +260,9 @@ console.log('{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tok
     expect(gone.status).toBe(404);
   });
 
-  test("quota: third turn on a tenant capped at 2 returns 429 before streaming", async () => {
+  // 15s budget (cc42384d precedent): the streaming-probe turn measured 8.3s on a
+  // slow windows runner (run 37579264396) — the default 5s killed a passing test.
+  test("quota: third turn on a tenant capped at 2 returns 429 before streaming", { timeout: 15_000 }, async () => {
     const provision = await fetch(`${base}/sessions`, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: "Bearer sk-test" },
