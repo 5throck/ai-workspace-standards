@@ -44,9 +44,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.3.1
+- **Version**: 1.3.2
 - **Owner**: pm
-- **Last Updated**: 2026-09-26
+- **Last Updated**: 2026-10-08 (Version 1.3.1 → 1.3.2: Step 1.5 full mode corrected to 4 paired slots; review→resync→upgrade loop documented)
 - **Last Reviewer**: pm
 
 ## Changelog

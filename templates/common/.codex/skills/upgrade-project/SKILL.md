@@ -1,14 +1,16 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: 1.5.2
+version: 1.6.0
 status: active
 scope: workspace
 owner: pm
-last_reviewed: 2026-09-27
+last_reviewed: 2026-10-08
 relates_to:
   - skill: promote-variant
     type: follows
+  - skill: project-resync
+    type: composes_with
 metadata:
   type: scaffolding
   triggers:
@@ -37,7 +39,7 @@ Upgrades an existing project created from a variant template to match the curren
 
 ## Script
 
-**Script**: `scripts/upgrade-project.ts` (v1.39.0)
+**Script**: `scripts/upgrade-project.ts` (see the `@version` header in the script)
 **Location**: Workspace root only (`L0` per ADR-0073 Amendment 1 — projects do not carry a copy; from inside a project use `bun ../../scripts/upgrade-project.ts .`)
 **Usage**: `bun scripts/upgrade-project.ts <project-path> [--variant <name>] [--platform claude|antigravity|codex|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync]`
 
@@ -132,12 +134,15 @@ variants / quarterly. Full procedure: `skills/context-commonization-review/SKILL
 
 ## Step-by-Step Procedure
 
-1. **Check version**: `cat <project>/.claude/template-version.txt`
-2. **Dry run**: `bun scripts/upgrade-project.ts <project> --dry-run`
-3. **Commit local changes**: `cd <project> && git add -A && git commit -m "chore: pre-upgrade"`
-4. **Run upgrade**: `bun scripts/upgrade-project.ts <project>`
-5. **Verify**: `cd <project> && git status && git diff --cached`
-6. **Commit**: `git commit -m "chore: upgrade template to vX.Y.Z"`
+Run the upgrader from the workspace root (`bun scripts/upgrade-project.ts Projects/<p> ...`).
+
+1. **Check version**: `cat Projects/<p>/.claude/template-version.txt`
+2. **Dry run**: `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-removed`
+3. **Ensure a clean tree**: the pre-upgrade stash reverts uncommitted changes, so land local work first via the project's own pipeline: `cd Projects/<p> && bun scripts/dev-sync.ts --body-file <body> "<msg>"`
+4. **Run upgrade**: `bun scripts/upgrade-project.ts Projects/<p> --prune-removed` (`--prune-removed` is mandatory to retire stale engine copies; see project-resync Step 4)
+5. **Review**: `cd Projects/<p> && git status && git diff --cached`
+6. **Land**: from the project, `bun scripts/dev-sync.ts --body-file <body> "chore: upgrade template to vX.Y.Z"`
+7. **Verify**: in the project, confirm `.claude/template-version.txt` shows the new version, then run `bun scripts/audit.ts` and `bun scripts/verify-scripts.ts --verify`. Both must exit 0. If ghost entries appear, the project's `scripts/SCRIPTS.md` may need manual cleanup (see the Tier 3 SCRIPTS.md Filtering section of the script-lifecycle governance docs at the workspace root).
 
 ### Rollback
 
@@ -154,13 +159,6 @@ git stash pop stash@{0}
 - [Variant Conversion Guide](../../docs/guides/variant-conversion-guide.md)
 - [Fork Model (ADR-0031)](../../docs/adr/0031-l1-l2-fork-model.md)
 
-## Post-Upgrade Verification
+## Related
 
-After upgrading, run the following to confirm script registry consistency:
-
-```bash
-cd <project-directory>
-bun scripts/verify-scripts.ts --verify
-```
-
-Must exit 0 with 0 errors. If ghost entries appear, the project's `scripts/SCRIPTS.md` may need manual cleanup (see the Tier 3 SCRIPTS.md Filtering section of the script-lifecycle governance docs at the workspace root).
+- **project-resync**: fleet-level cycle that invokes this skill (Step 4). Loop: project-review (diagnose) → project-resync (fleet sync/backport) → upgrade-project (deliver) → project-review baseline-only (verify).

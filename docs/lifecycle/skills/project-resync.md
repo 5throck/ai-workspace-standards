@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.6.0
+- **Version**: 1.6.1
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-10-07 (Version 1.5.1 → 1.6.0 adds Step 2e upstream request ledger and Step 2f daily learning extraction — bidirectional carrier per user directive 2026-10-07; spec `2026-10-07-daily-fleet-learning-extraction-design`, AC-5 dry-run passed with 8 learning tickets T-20261007-007..014. Previous: 2026-09-23 Version 1.5.0 → 1.5.1: Step 4 `--prune-removed` rationale rewritten for the registry-aware prune and engine-only L0-only scope — ADR-0073 Amendment 3, spec `2026-09-23-upgrade-engine-l0-only-completion-design`; previous: 2026-09-22 Version 1.4.0 → 1.5.0 adds Step 2c fleet echo check — report-only cross-project drift reporting per ADR-0031 Principle 5 — plus Step 0 PRESUME-STALE verdict from resync-audit.ts v1.1.0 and the `scripts/backport-diff.ts` v1.0.0 Step 2 support tool; previous: 2026-09-19 Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6))
+- **Last Updated**: 2026-10-08 (Version 1.6.0 → 1.6.1: renumber Steps 2e/2f → 2d/2e, Output Format adds ledger + learning bullets, Step 4 history prose rewritten as current behavior. Previous: 2026-10-07 Version 1.5.1 → 1.6.0 adds Step 2e upstream request ledger and Step 2f daily learning extraction — bidirectional carrier per user directive 2026-10-07; spec `2026-10-07-daily-fleet-learning-extraction-design`, AC-5 dry-run passed with 8 learning tickets T-20261007-007..014. Previous: 2026-09-23 Version 1.5.0 → 1.5.1: Step 4 `--prune-removed` rationale rewritten for the registry-aware prune and engine-only L0-only scope — ADR-0073 Amendment 3, spec `2026-09-23-upgrade-engine-l0-only-completion-design`; previous: 2026-09-22 Version 1.4.0 → 1.5.0 adds Step 2c fleet echo check — report-only cross-project drift reporting per ADR-0031 Principle 5 — plus Step 0 PRESUME-STALE verdict from resync-audit.ts v1.1.0 and the `scripts/backport-diff.ts` v1.0.0 Step 2 support tool; previous: 2026-09-19 Version 1.3.1 → 1.4.0 adds Step 2b Evidence plane review, running `scripts/evidence-backport-scan.ts` per design §4.8 / ADR-0084 Decision 6))
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit
