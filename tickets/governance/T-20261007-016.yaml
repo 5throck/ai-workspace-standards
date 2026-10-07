@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261007-016
+kind: manual
+title: >-
+  learning: promote co-deck's registry provenance normalizer to L0/common
+  tooling and run it fleet-wide — tests/normalize-registry-provenance.ts
+  (idempotent, --dry/--root/--strict, built for cross-project reuse) already
+  found the same fossil-L0-stamp defect in 7 sibling projects (co-safety 33,
+  co-consult 9, co-architect 6, co-game 3, co-price 2, co-design 1, co-abap 1;
+  co-newbiz needs format review) while fixing co-deck's 60 via PR #168.
+  Evidence: docs/designs/2026-10-07-registry-provenance-normalization-design.md,
+  PR #168. Class: L0 tooling improvement
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:04.320Z'
+history:
+  - at: '2026-10-07T16:45:04.320Z'
+    from: null
+    to: backlog
+result: null
+error: null

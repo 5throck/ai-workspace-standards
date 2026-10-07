@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261007-021
+kind: manual
+title: >-
+  learning: XSS regression via source-slice + structural inertness assertions —
+  for no-exports browser deliverables, regex-slice the verbatim
+  esc+renderMarkdown source between stable markers, eval via new Function, then
+  assert every emitted tag belongs to the renderer TAGS allowlist, anchor
+  attribute keys are allowlisted (href/target/rel), and every href matches the
+  scheme allowlist — plus the protocol-relative rule: link allowlists need
+  /^(https?:\/\/|\/(?!\/))/ because a bare \/ permits arbitrary external-host
+  redirects. Pollinate to co-deck lecture HTML (inline-JS web deliverable).
+  Evidence: Projects/co-learning PR #13 D2+D3, tests/lms-delivery.test.mjs test
+  10, deliverables/harness-assessment/app.js ~1683. Class: test-infrastructure
+  improvement, cross-pollination
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:31.432Z'
+history:
+  - at: '2026-10-07T16:45:31.432Z'
+    from: null
+    to: backlog
+result: null
+error: null

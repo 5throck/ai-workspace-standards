@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261007-023
+kind: manual
+title: >-
+  learning: backport co-deck's ADR layer (ADR-0001 skill-graph adoption,
+  ADR-0002 deck-video-asset verification and injector binding) into
+  templates/co-deck/docs/adr/ — the PR #164/#165 template backport carried the
+  footnotes/clicker features but skipped the governance layer that made
+  lecture-v4 videos safe (identity/audio/context gates); a future deck project
+  templated from co-deck regresses to topic-only video selection. Either
+  byte-copy both ADRs (variant-generic) or record an explicit template decision
+  that ADRs are project-owned. Extends T-20261007-007's scope. Evidence:
+  Projects/co-deck/docs/adr/0002, Slot A finding 2026-10-08. Class: template
+  governance enhancement
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:31.460Z'
+history:
+  - at: '2026-10-07T16:45:31.460Z'
+    from: null
+    to: backlog
+result: null
+error: null

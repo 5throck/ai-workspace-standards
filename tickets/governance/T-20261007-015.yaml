@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261007-015
+kind: manual
+title: >-
+  URGENT hardening: co-deck .hermes html-build mirror stale (1.5.0 vs 1.6.0,
+  4-of-5 backport miss) and no validator covers variant-owned skill mirrors —
+  (a) byte-copy templates/co-deck/.claude/skills/html-build/SKILL.md to the
+  .hermes mirror, (b) extend validate-templates variant-mirror-parity to
+  version-compare inVariant mirror copies against the variant skills SSOT
+  (semverOlder exists; the class passed all gates because inVariant loops hit
+  continue), (c) add .hermes to VA07_MIRROR_DIRS guarded by existsSync BEFORE
+  its 2026-10-09 WARN-to-FAIL flip (T-20260925-006) promotes the blind spot into
+  a fail-gate, (d) update the promote-variant checklist from the 2-mirror
+  convention to the 5-mirror PLATFORM_MIRROR_DIRS SSOT and fix the 'four
+  platform mirrors' pass message. Coordinate with the co-deck session live on
+  templates/co-deck. Found 2026-10-08 Slots A/B/C deduped; live instance correct
+priority: urgent
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:44:36.631Z'
+history:
+  - at: '2026-10-07T16:44:36.631Z'
+    from: null
+    to: backlog
+result: null
+error: null

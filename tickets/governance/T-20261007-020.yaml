@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261007-020
+kind: manual
+title: >-
+  learning: server-spawning test determinism bundle + test-discovery naming —
+  free-port scan with retry cap, identity guard (refuse to drive a non-fresh
+  server via status probe), HTTP readiness poll instead of fixed sleeps,
+  process.on(exit) child-kill+temp cleanup, and derive-expected-state-from-seed
+  instead of hardcoded strings (cross-run state absorption via a fixed port +
+  orphaned mutated server caused co-learning's order-test flake; prior art
+  existed in run-pilot.mjs); plus the discovery-naming debt:
+  works-admin-api-test.mjs was invisible to bun test and never ran in CI —
+  verify the runner glob matches file naming. Residual hazard:
+  tests/harness-assessment-flow.test.mjs:16 still hardcodes port 8891. Evidence:
+  Projects/co-learning PR #13 D1, tests/works-admin-api.test.mjs. Class:
+  test-infrastructure improvement, pollination to any spawn-server integration
+  test
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:31.417Z'
+history:
+  - at: '2026-10-07T16:45:31.417Z'
+    from: null
+    to: backlog
+result: null
+error: null

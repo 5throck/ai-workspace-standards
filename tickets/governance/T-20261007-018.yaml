@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261007-018
+kind: manual
+title: >-
+  learning: regenerate upgrade PR bodies from the actual delivery manifest —
+  co-deck PR #166's body described the runner's deferred 0.12.0 wave (audit
+  2.46->2.48.1, scaffold-markers 1.7->1.8) while the merged content was the
+  0.13.1 delivery: the body was carried over from a prior attempt and never
+  regenerated. upgrade-project.ts should compose the PR body from
+  .claude/last-upgrade-delivery.json. Evidence: gh pr view 166 -R
+  5throck/co-deck vs template-version.txt. Class: template/tooling enhancement
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:04.349Z'
+history:
+  - at: '2026-10-07T16:45:04.349Z'
+    from: null
+    to: backlog
+result: null
+error: null
