@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261007-008
+kind: manual
+title: >-
+  learning: promote co-deck's idempotent post-build injection pattern (inject,
+  don't fork the builder) into templates/co-deck tooling —
+  inject_video_players.py post-processes built lecture HTML from slidedata.json
+  SSOT with marker-based idempotent replace, triple play-mode fallback (local
+  mp4 -> inline iframe -> new-tab over file:// to dodge YouTube embed error
+  153), MutationObserver stop-on-slide-change; include the injector re-run rule
+  + node --check syntax gate for injected script blocks (stale indices attached
+  videos to wrong slides in v4). Evidence: inject_video_players.py, ADR-0002
+  decision 2, design D6, PR #164. Class: L0/template tooling improvement. NOTE:
+  the co-deck session is actively working templates/co-deck — coordinate before
+  any implementation
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T13:54:31.612Z'
+history:
+  - at: '2026-10-07T13:54:31.612Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261007-007
+kind: manual
+title: >-
+  learning: promote co-deck's three-gate video asset verification into the
+  lecture-deck-production procedure (context gate, ffmpeg -af volumedetect audio
+  gate at -60dB, identity gate with per-video folders) — proven against four
+  real defects (wrong file, -91dB silent clip, 2 context mismatches) during
+  lecture v4; paired with the known-defective download_all_videos.py
+  (newest-in-temp assumption) which needs its project-side fix before promotion.
+  Evidence:
+  Projects/co-deck/docs/adr/0002-deck-video-asset-verification-and-injector-binding.md,
+  docs/designs/2026-10-06-ai-deck-v4-flow-rework-design.md D5, PR #164. Class:
+  new reusable procedure/skill, cross-pollination candidate for any deck-bearing
+  variant with embedded media
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T13:54:31.597Z'
+history:
+  - at: '2026-10-07T13:54:31.597Z'
+    from: null
+    to: backlog
+result: null
+error: null
