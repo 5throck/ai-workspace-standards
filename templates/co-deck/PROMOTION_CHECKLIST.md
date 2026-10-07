@@ -20,7 +20,7 @@
 > No tool maintains beta lifecycle metadata after promotion
 > (`variant.json` → `betaLifecycleSummary` is `null`).
 
-## Promotion Criteria (beta → stable) — met at the 2026-08-30 promotion
+## Promotion Criteria (beta → stable) — state at the 2026-08-30 promotion (criteria 6/8/10 waived per ADR-0099, ratified 2026-10-07)
 
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|-----------------|
