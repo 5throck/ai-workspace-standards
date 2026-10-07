@@ -32,6 +32,7 @@
  *          (T-20260915-008): upgrade-project fixture 1.4.1 → 1.5.0.
  * v1.3.1 (T-20260921-007): upgrade-project fixture 1.5.0 → 1.5.1
  *          (--platform doc fix; SKILL.md + lifecycle record bumped in lockstep).
+ * v1.3.2: upgrade-project fixture 1.5.2 → 1.6.0 (procedure routed through dev-sync).
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
@@ -111,7 +112,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     const cases: Array<[string, string, string]> = [
       ['sync', '1.7.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['upgrade-project', '1.5.2', 'pm'],
+      ['upgrade-project', '1.6.0', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {
       const fm = parseSkillFrontmatter(

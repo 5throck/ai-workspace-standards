@@ -22889,12 +22889,6 @@
       }
     },
     {
-      "type": "references",
-      "from": "project-resync",
-      "to": "upgrade-project",
-      "source": "prose"
-    },
-    {
       "type": "composes_with",
       "from": "project-to-variant",
       "to": "promote-variant",
@@ -25945,6 +25939,18 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "upgrade-project",
+      "to": "project-resync",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/upgrade-project/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "follows",

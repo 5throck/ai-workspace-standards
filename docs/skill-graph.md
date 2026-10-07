@@ -206,7 +206,7 @@
 | `ui-component-design` | variant:co-price | — | — | cost-shock-analysis (follows), financial-statement-prep (follows) | — | — |
 | `ui-ux-design-intelligence` | L0 | design-lead, design-lead, ux-researcher, visual-designer, visual-designer | phase1, phase2, phase3 | documentation-writing (follows) | — | — |
 | `update-bun-packages` | L0 | — | — | — | — | — |
-| `upgrade-project` | L0 | — | — | promote-variant (follows) | — | — |
+| `upgrade-project` | L0 | — | — | project-resync (composes_with), promote-variant (follows) | — | — |
 | `van-westendorp-psm` | variant:co-price | — | — | gabor-granger (follows), pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
 | `variant-feature` | L0 | — | — | upgrade-project (composes_with) | — | — |
 | `verify-authorization` | variant:co-security | pentester, red-team-lead | phase1, phase3 | stride-threat-matrix (follows) | — | — |

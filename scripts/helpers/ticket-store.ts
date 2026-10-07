@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-10-08, ticket KST unification): ids, created_at, history.at and
+//          not_before read as Korea Standard Time via helpers/kst-time.ts; existing
+//          UTC 'Z' timestamps stay valid. The --next sort compares Date.parse values
+//          (lexical comparison mis-ordered mixed Z and +09:00 strings).
 // v1.11.0 (2026-10-07, U-20261006 runner batch): moveTicketUnlocked validates
 //          the mutated ticket before the atomic write — the schema invariants
 //          were read-path-only, so a move could write a state (upstream
@@ -49,20 +53,10 @@ import {
   type Ticket,
   type UpstreamBlock,
 } from './ticket-schema.ts';
+import { kstDate, kstIso } from './kst-time.ts';
 
 const MAX_YAML_BYTES = 64 * 1024;
 const PRIORITY_RANK: Record<Priority, number> = { urgent: 0, high: 1, normal: 2, low: 3 };
-
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-// Same UTC-normalized YYYY-MM-DD convention as spec-register.ts's today() — duplicated
-// (not imported) because spec-register.ts is a CLI-only script with top-level argv
-// parsing/process.exit side effects, unsafe to import as a module.
-function today(): string {
-  return new Date().toISOString().split('T')[0];
-}
 
 function loadYamlCapped<T>(path: string): T {
   const stat = statSync(path);
@@ -161,7 +155,7 @@ export function withTicketLock<T>(dir: string, holder: string, fn: () => T): T {
     }
   }
   try {
-    writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: process.pid, token, holder, at: nowIso() }), 'utf-8');
+    writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: process.pid, token, holder, at: kstIso() }), 'utf-8');
   } catch { /* the lock was stolen between mkdir and owner write — release below is a no-op */ }
   try {
     return fn();
@@ -203,15 +197,16 @@ export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind
   return tickets.filter(t =>
     (filter?.status === undefined || t.status === filter.status) &&
     (filter?.kind === undefined || t.kind === filter.kind) &&
-    (filter?.ready !== true || (READY_STATUSES.includes(t.status) && (t.not_before === undefined || t.not_before <= today())))
+    (filter?.ready !== true || (READY_STATUSES.includes(t.status) && (t.not_before === undefined || t.not_before <= kstDate())))
   );
 }
 
-/** UTC-normalized (T-20261004-015): ids, created_at and the --ready not_before
- * filter all read as UTC dates, so a 00:30 KST ticket cannot carry a local date
- * that disagrees with its own created_at day. Mirrors today() above. */
+/** KST-normalized (supersedes the UTC choice of T-20261004-015, design
+ * docs/designs/2026-10-08-ticket-kst-timezone-design.md): ticket ids, created_at,
+ * history.at and the --ready not_before filter all read as KST dates. Existing UTC
+ * 'Z' timestamps and ids remain valid; comparisons use Date.parse, not strings. */
 function todayPrefix(): string {
-  return `T-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+  return `T-${kstDate().replace(/-/g, '')}`;
 }
 
 function nextSeqGuess(dir: string, prefix: string): number {
@@ -278,8 +273,8 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
       not_before: input.not_before,
       status: 'backlog',
       attempts: 0,
-      created_at: nowIso(),
-      history: [{ at: nowIso(), from: null, to: 'backlog' }],
+      created_at: kstIso(),
+      history: [{ at: kstIso(), from: null, to: 'backlog' }],
       result: null,
       error: null,
     };
@@ -398,7 +393,7 @@ function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptio
     );
   }
   ticket.status = to;
-  ticket.history.push({ at: nowIso(), from, to });
+  ticket.history.push({ at: kstIso(), from, to });
   if (isRetry) ticket.attempts = nextAttempts;
   if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
   if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
@@ -447,7 +442,7 @@ export function setUpstreamTriage(
       // The adjacency map has no backward edge, so an inbox demotion from a
       // waiting/review ticket needs --force. This is a demotion (never skips a
       // forward gate) and the triage field + this history entry carry the audit trail.
-      ticket.history.push({ at: nowIso(), from: ticket.status, to: target });
+      ticket.history.push({ at: kstIso(), from: ticket.status, to: target });
       ticket.status = target;
     }
     writeTicketAtomic(dir, ticket);
@@ -508,7 +503,7 @@ export function setUpstreamResolution(
     }
     let from: Status = ticket.status;
     for (const to of chain) {
-      ticket.history.push({ at: nowIso(), from, to });
+      ticket.history.push({ at: kstIso(), from, to });
       from = to;
     }
     ticket.status = 'done';
@@ -525,7 +520,7 @@ export function setUpstreamResolution(
  * then creation order) and atomically moves it to `running`. Never returns a manual ticket. */
 export function nextServiceTicket(dir: string): Ticket | null {
   const candidates = listTickets(dir, { status: 'waiting', kind: 'service' })
-    .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || a.created_at.localeCompare(b.created_at));
+    .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || Date.parse(a.created_at) - Date.parse(b.created_at));
   if (candidates.length === 0) return null;
   return moveTicket(dir, candidates[0].id, 'running', { force: false });
 }

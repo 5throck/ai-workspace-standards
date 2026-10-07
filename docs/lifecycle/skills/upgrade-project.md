@@ -3,10 +3,10 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
-- **Version**: 1.5.2
+- **Version**: 1.6.0
 - **Owner**: pm
 - **Created**: 2026-07-31
-- **Last Updated**: 2026-09-27
+- **Last Updated**: 2026-10-08 (Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
 
 ## Description
 Upgrades an existing L2/L3 project to the current template version: syncs template improvements into a variant-based project's scripts, agents, skills, docs, and commands through the policy-driven TEMPLATE TREE SYNC engine (`scripts/upgrade-project.ts`, backed by `lib/upgrade-policy.ts`), with country-aware .env.sample delivery and conflict warnings for locally-modified files.

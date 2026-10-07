@@ -48,7 +48,7 @@
   "common_skills": {
     "project-review": {
       "source": "skills/project-review/SKILL.md",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "overridable": false,
       "description": "Comprehensive parallel project review — universal across all variants"
     },
@@ -451,7 +451,7 @@
       "gemini_source": ".gemini/skills/project-resync/SKILL.md",
       "agents_source": ".agents/skills/project-resync/SKILL.md",
       "codex_source": ".codex/skills/project-resync/SKILL.md",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "description": "Full bidirectional sync cycle for Projects/co-* instances: provenance-audit uncommitted content, sync each project to its GitHub remote, selectively promote reusable work back into templates/L0, run the root /sync, upgrade projects from their variant templates, and land upgrade PRs. Use when: user says \"project-resync\", \"resync projects\", \"resync the project fleet\", \"sync project cycle\", or asks to sync/backport/upgrade the Projects/* fleet. Distinct from the `sync` skill (single-repo commit→PR pipeline): this is the whole-fleet, bidirectional cycle.",
       "propagated_to_common": true
     },
@@ -496,7 +496,7 @@
       "gemini_source": ".gemini/skills/upgrade-project/SKILL.md",
       "agents_source": ".agents/skills/upgrade-project/SKILL.md",
       "codex_source": ".codex/skills/upgrade-project/SKILL.md",
-      "version": "1.5.2",
+      "version": "1.6.0",
       "description": "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands.",
       "propagated_to_common": true
     },

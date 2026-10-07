@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.6.0
+version: 1.6.1
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,7 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-10-07
+last_reviewed: 2026-10-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -160,7 +160,7 @@ Report-only: this step never edits sibling projects. ADR-0031 Principle 5
 REPORTING is the sanctioned direction. Each project adopts its echo fixes
 through its own reviewed resync cycle.
 
-## Step 2e — Upstream request ledger (design 2026-10-07-daily-fleet-learning-extraction)
+## Step 2d — Upstream request ledger (design 2026-10-07-daily-fleet-learning-extraction)
 
 Read-only upward-carrier reporting; added by user direction 2026-10-07:
 
@@ -175,7 +175,7 @@ Read-only upward-carrier reporting; added by user direction 2026-10-07:
    project requested, state the pairing explicitly ("co-develop's U-20261006-001
    reached the fleet via v0.13.1"). Report only — no edits.
 
-## Step 2f — Learning extraction (design 2026-10-07-daily-fleet-learning-extraction)
+## Step 2e — Learning extraction (design 2026-10-07-daily-fleet-learning-extraction)
 
 For each project with **merged landings in the window** (PRs merged, or
 commits landed by its own session), dispatch one scoped review pass over the
@@ -215,12 +215,11 @@ review category plan → run with the same flags → verify
 `lib/upgrade-policy.ts` stays delivered as the shared data module project
 `dev-sync.ts`/`validate-templates.ts` import), so any project still holding
 an engine copy (`scripts/upgrade-project.ts`, `helpers/skills-registry.ts`)
-gets it retired by this flag — v1.44.0 also drops the pruned script's
-registry row itself. A registered project-local script (SCRIPTS.md source
+gets it retired by this flag and drops the pruned script's registry row itself. A registered project-local script (SCRIPTS.md source
 cell = the variant name) is never pruned; if one still disappears, that is a
 pruner defect — file a ticket, do not hand-restore silently.
 
-Since `upgrade-project` v1.19.0 the delivered scripts` SCRIPTS.md
+The delivered scripts' SCRIPTS.md
 registry rows reconcile automatically (common-registry fallback, layer
 rewrite, duplicate-row removal). Still proof-check the upgrade:
 `bun scripts/verify-scripts.ts --verify` per project must exit clean — an
@@ -258,6 +257,8 @@ After Step 5's merges:
 - Step 2: per-variant judgment report.
 - Step 2b: evidence-backport-scan verdict table per project + human-triage rows.
 - Step 2c: fleet echo-check verdict table per backport candidate.
+- Step 2d: upstream request ledger (read-only upward-carrier report).
+- Step 2e: learning-extraction outputs.
 - Cycle summary: one table — project → synced? / promoted? / upgraded? / final state.
 
 ## Related Skills
@@ -266,3 +267,4 @@ After Step 5's merges:
 - **upgrade-project**: L2→L3 delivery (Step 4).
 - **project-to-variant**: standalone-project promotion (different concern —
   not part of this cycle).
+- **project-review**: loop: project-review (diagnose) → project-resync (fleet sync/backport) → upgrade-project (deliver) → project-review baseline-only (verify).
