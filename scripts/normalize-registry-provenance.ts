@@ -28,6 +28,14 @@
 // Exit codes: 0 = normalized or nothing to do; 1 = fatal (no registry, ghost rows
 // reported and --strict passed, or snapshot unreadable).
 //
+// @version 1.1.0 (2026-10-07, same spec, co-newbiz review follow-up):
+//          explicit nonstandard-vocabulary handling + duplicate-row report. Rows whose
+//          shape matches a registry row but whose source/layer vocabulary is a per-repo
+//          convention (e.g. co-newbiz's `co-newbiz | L3-only (<prose>)` — truthful, zero
+//          variant-delivered scripts) are now SKIPPED AND REPORTED explicitly instead of
+//          falling out of the parse regex silently; duplicate script keys across parseable
+//          rows are reported (report-only, no auto-edit — the co-newbiz dedup was done by
+//          hand: 5 paste-duplicates + 1 --fix fossil).
 // @version 1.0.0 (2026-10-07, spec docs/designs/2026-10-07-registry-provenance-normalization-design.md):
 //          initial release — relabels fossil `L0|common` provenance in inherited project
 //          registries (60 rows in co-deck); wired into upgrade-project.ts as a
@@ -90,15 +98,31 @@ let inRegistry = false;
 let changed = 0;
 const ghosts: string[] = [];
 const fixes: Array<[string, string, string]> = [];
+const nonstandard: string[] = [];
+const rowKeyCounts = new Map<string, number>();
 
 const out = lines.map((line) => {
   if (/^## Registry/.test(line)) { inRegistry = true; return line; }
   if (inRegistry && /^## /.test(line)) { inRegistry = false; return line; }
   if (!inRegistry) return line;
 
+  // Bookkeeping for every registry row (also rows this tool never edits)
+  if (/^\| `[^`]+` \| /.test(line)) {
+    const key = line.split('|')[1].trim();
+    rowKeyCounts.set(key, (rowKeyCounts.get(key) || 0) + 1);
+  }
+
   // Row shape: | `script` | source | version | status | ... | layer | ... |
   const m = line.match(/^(\| `[^`]+` \| )(\S+)( \| \S+ \| \S+ \|[^|]*\|[^|]*\| )(\S+)( \|)/);
-  if (!m) return line;
+  if (!m) {
+    if (/^\| `[^`]+` \| /.test(line)) {
+      // Shape-valid row with nonstandard vocabulary (e.g. co-newbiz's
+      // `co-newbiz | L3-only (<prose>)`) — a deliberate per-repo convention.
+      // Leave untouched; report so the skip is a contract, not a regex accident.
+      nonstandard.push(line.split('|')[1].trim());
+    }
+    return line;
+  }
   const [, head, source, mid, layer, tail] = m;
   const script = line.match(/^`([^`]+)`/)?.[1] || line.match(/`([^`]+)`/)?.[1] || '';
   if (!script) return line;
@@ -131,10 +155,15 @@ const out = lines.map((line) => {
 
 if (changed > 0 && !DRY) writeFileSync(REG, out.join('\n'));
 
-console.log(`${DRY ? '[DRY] ' : ''}${basename(PROJECT)}: ${changed} row(s) normalized, ${ghosts.length} ghost(s)`);
+console.log(`${DRY ? '[DRY] ' : ''}${basename(PROJECT)}: ${changed} row(s) normalized, ${ghosts.length} ghost(s), ${nonstandard.length} nonstandard (left untouched)`);
 for (const [s, from, to] of fixes.slice(0, 8)) console.log(`  ${s}: ${from} → ${to}`);
 if (fixes.length > 8) console.log(`  … +${fixes.length - 8} more`);
 for (const g of ghosts) console.log(`  ⚠️ ghost (exists nowhere): ${g}`);
+if (nonstandard.length > 0) {
+  console.log(`  ℹ️ nonstandard row shape (per-repo convention — left untouched, review separately): ${nonstandard.slice(0, 3).join(', ')}${nonstandard.length > 3 ? ` … +${nonstandard.length - 3} more` : ''}`);
+}
+const dups = [...rowKeyCounts.entries()].filter(([, n]) => n > 1).map(([k]) => k);
+if (dups.length > 0) console.log(`  ⚠️ duplicate registry row(s) (report-only — dedup by hand): ${dups.join(', ')}`);
 
 if (import.meta.main && STRICT && ghosts.length > 0) {
   logError(fatalError(

@@ -40,7 +40,7 @@ New L0 tool `scripts/normalize-registry-provenance.ts` (ADR-0054 error handling;
 
 - Registry provenance reads truthfully; Check A semantics unchanged (it keys on file↔row version, not provenance).
 - New scaffolds are immune (they inherit the clean L1 registry); existing projects converge via the next upgrade or a one-shot run.
-- co-newbiz needs a format review before the tool can touch it (its rows use a nonstandard source value and column shape); deliberately left untouched.
+- co-newbiz format review COMPLETED (same day): its `co-newbiz | L3-only (<prose>)` vocabulary is truthful — `templates/co-newbiz/scripts/` delivers zero scripts, every row is project-local — and stays as an accepted per-repo convention; only 6 hand-deduped duplicate rows were removed there (co-newbiz PR #457). The normalizer v1.1.0 now skips-and-reports such rows explicitly (81 at co-newbiz review time) instead of relying on regex accident, and reports duplicate registry keys (report-only).
 
 ## Verification
 
