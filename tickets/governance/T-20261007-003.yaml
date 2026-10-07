@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261007-003
+kind: manual
+title: >-
+  validator-hardening: verify-skills.ts --check clean path is unreachable —
+  buildSkillsIndexContent embeds 'Generated: <now>' so a curated index can never
+  byte-match across runs; drift exit-1 fires on every curated file and the
+  remediation loop can never pass (and only the drift case is tested) —
+  normalize the Generated line out of both sides before comparison, add a
+  clean-path test, and correct the CHANGELOG 'read-only' wording (the gate
+  writes for missing/stub files)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T05:52:41.076Z'
+history:
+  - at: '2026-10-07T05:52:41.076Z'
+    from: null
+    to: backlog
+result: null
+error: null

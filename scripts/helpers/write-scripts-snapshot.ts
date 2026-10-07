@@ -2,11 +2,12 @@
 /**
  * write-scripts-snapshot.ts — Write scripts-snapshot.json with the DELIVERED
  * script version map
- * @version 1.1.0
+ * @version 1.1.1
  *
  * Usage:
  *   bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>
  *
+ * v1.1.1 (2026-10-07, run-10b review Slot C): l1-source resolution join→resolve — adopt/upgrade pass ABSOLUTE common/scripts paths and join(cwd, abs) mis-prefixed them, silently falling back to the L0 registry on 2 of 3 call sites (the exact defect the 1.1.0 port fixed); integration test pins absolute-path resolution.
  * v1.1.0 (2026-10-07, U-20261006-001): two root causes fixed —
  *  - Inventory: the map now comes from the L1 registry the delivery actually
  *    uses (<cwd>/<l1-source>/SCRIPTS.md, e.g. templates/common/scripts), plus
@@ -26,7 +27,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 export interface ScriptSnapshotEntry {
   version: string;
@@ -66,7 +67,9 @@ function main(): void {
     process.exit(1);
   }
 
-  const l1RegistryPath = join(process.cwd(), l1Source, 'SCRIPTS.md');
+  // resolve (not join): l1Source may be absolute (adopt/upgrade pass absolute
+  // common/scripts paths); join would prefix cwd and silently fall back to L0.
+  const l1RegistryPath = resolve(process.cwd(), l1Source, 'SCRIPTS.md');
   const registryPath = existsSync(l1RegistryPath)
     ? l1RegistryPath
     : join(process.cwd(), 'scripts', 'SCRIPTS.md');

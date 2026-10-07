@@ -4,6 +4,7 @@
 **Date**: 2026-10-05
 **Deciders**: pm (user-directed remediation, 2026-10-05 scoped review T-20261005-021)
 **Amends**: ADR-0051 (co-abap Stable Promotion — correction, see Context)
+**Amended**: 2026-10-07 (T-20261006-005 — Decision 1 ratification extended to co-deck, whose 74-day beta window predates the 3-month criterion)
 
 ## Context
 
@@ -20,6 +21,8 @@ Leaving the records as-is is worse than either alternative: "stable v1.0.0" is t
 ## Decision
 
 1. **Migration fast-track admission is legitimate** and is the governing basis for the generation-1 migrated variants (co-consult, co-abap, co-develop; the same-day co-work/co-design promotions predate this ADR and may be ratified under it in a follow-up — extended 2026-10-07, T-20261006-005, to co-deck, whose 74-day beta window (2026-06-17 → 2026-08-30) fell below the 3-month criterion and is ratified in the same follow-up). A migrated variant may enter at stable when its source project was conversion-eligible per `skills/project-to-variant` (tested in 2+ engagements).
+
+   **Extension scope (2026-10-07)**: the co-deck extension covers a second, distinct admission basis — a **beta-window shortfall waiver** (pre-ADR promotion, waiver + PM approval) — not migration fast-track: co-deck was created as a variant (docs/lifecycle/templates/co-deck.md, 2026-06-17), never migrated from a project, so §1's conversion-eligibility test does not apply to it. For such non-migrated ratifications the checklist marker may read **"N/A per ADR-0099 — ratified admission"**; the "migration fast-track" string remains reserved for true migrated cases.
 2. **Attestation replaces criterion simulation.** For each ratified variant, the PROMOTION_CHECKLIST must: (a) state `Current Status: stable`, with the beta-window criteria that require engagement-tracking machinery — engagement (6), beta duration (8), user feedback (10) — marked **"N/A per ADR-0099 — migration fast-track"** rather than "Pending"; criteria that can be verified directly (e.g. bug count) are checked with evidence; (b) have the remaining criteria verified against review evidence; (c) carry a Review History row recording the ratification (date, basis = this ADR, reviewer). Checklists must not claim beta gates were "met" when they were waived.
 3. **Correction to ADR-0051**: its statements that "the promotion checklist criteria have been met" and that the lifecycle is "defined in CONSTITUTION.md" are incorrect and are superseded by this ADR — co-abap's admission basis is migration fast-track under this policy, not a constitution-defined beta gate. ADR-0051 otherwise stands.
 4. **Vocabulary mapping (SSOT)**: `variant.json status: "stable"` ≡ lifecycle-record phase `production` ≡ checklist `stable`. `beta` ≡ `review` (pre-production). Documented in `docs/lifecycle/README.md`.

@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261007-004
+kind: manual
+title: >-
+  ticket-store legacy-history repair: U-20261006-001/005/006/007 carry a doubled
+  backlog→waiting edge (from contradicts previous to) and U-005/006/007 have
+  non-monotonic retroactive-looking created_at (2026-1006T09:55 stamp earlier
+  than the first transition) — one-off repair via ticket.ts-family tooling
+  leveraging the new validateTicket (drop duplicate edges, reconcile created_at
+  with the first transition), or extend ticket-schema validation with a
+  non-monotonic-timestamp check so legacy shapes fail loudly going forward;
+  machine checks currently pass over histories ticket-store could not have
+  produced
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T05:52:41.091Z'
+history:
+  - at: '2026-10-07T05:52:41.091Z'
+    from: null
+    to: backlog
+result: null
+error: null

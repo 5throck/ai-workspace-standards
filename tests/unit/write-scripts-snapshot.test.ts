@@ -10,6 +10,10 @@
  */
 
 import { describe, expect, test } from 'bun:test';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { parseScriptRegistry } from '../../scripts/helpers/write-scripts-snapshot.ts';
 
 const REGISTRY = `# SCRIPTS.md — Script Lifecycle Registry
@@ -59,5 +63,37 @@ describe('parseScriptRegistry (U-20261006-001)', () => {
 
   test('non-row lines never match', () => {
     expect(parseScriptRegistry('# header\nplain text\n|---|---|---|\n| skill | source | version | status |\n')).toEqual({});
+  });
+});
+
+describe('CLI l1-source resolution (v1.1.1 — absolute paths must not fall back to L0)', () => {
+  test('absolute common/scripts path selects the L1 registry, not the L0 fallback', () => {
+    const ws = mkdtempSync(join(tmpdir(), 'wss-abs-'));
+    try {
+      // L0 fallback registry: only a workspace-only tool the project never receives
+      mkdirSync(join(ws, 'scripts'), { recursive: true });
+      writeFileSync(join(ws, 'scripts', 'SCRIPTS.md'),
+        '| `ticket.ts` | L0 | 1.9.1 | active | tickets | —| L0 | —|\n');
+      // L1 delivered registry: the script the project actually receives
+      const l1dir = join(ws, 'templates', 'common', 'scripts');
+      mkdirSync(l1dir, { recursive: true });
+      writeFileSync(join(l1dir, 'SCRIPTS.md'),
+        '| `audit.ts` | L0+L1 | 2.51.0 | active | standards | —| L0+L1 | —|\n');
+      const project = join(ws, 'project');
+      mkdirSync(project, { recursive: true });
+
+      const r = spawnSync('bun', [
+        resolve('scripts/helpers/write-scripts-snapshot.ts'),
+        project, '2026-10-07', 'co-test',
+        l1dir, // ABSOLUTE l1-source — the adopt/upgrade call shape
+      ], { cwd: ws, encoding: 'utf-8' });
+      expect(r.stderr).toBe('');
+
+      const snap = JSON.parse(readFileSync(join(project, 'scripts-snapshot.json'), 'utf-8'));
+      expect(snap.scripts['audit.ts']).toBeDefined();   // L1 delivered script present
+      expect(snap.scripts['ticket.ts']).toBeUndefined(); // L0 fallback NOT used
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
   });
 });
