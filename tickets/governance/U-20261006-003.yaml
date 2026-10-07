@@ -3,7 +3,7 @@ id: U-20261006-003
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-06T00:20:20.634Z'
 history:
@@ -16,7 +16,16 @@ history:
   - at: '2026-10-06T18:39:28.850Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-07T01:42:30.594Z'
+    from: review
+    to: done
+result: >-
+  Confirmed: fonts check evaluated <value> placeholders in
+  docs/design-tokens.template.css as real stacks, so fresh scaffolds failed 6
+  findings forever. Fixed upstream (design-lint 2.1.0, root+L1 byte-identical)
+  by promoting the proven co-develop LOCAL-PATCH verbatim: skip *.template.*
+  files and <>/values. Projects can drop their LOCAL-PATCH guards on next
+  upgrade. Pinned by tests/unit/design-lint-fonts-placeholder.test.ts.
 error: null
 upstream:
   project: co-develop
@@ -54,3 +63,15 @@ upstream:
   duplicates:
     - project: co-develop
       at: '2026-10-06T00:20:20.634Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1446
+    template_version: unreleased
+    summary: >-
+      Confirmed: fonts check evaluated <value> placeholders in
+      docs/design-tokens.template.css as real stacks, so fresh scaffolds failed
+      6 findings forever. Fixed upstream (design-lint 2.1.0, root+L1
+      byte-identical) by promoting the proven co-develop LOCAL-PATCH verbatim:
+      skip *.template.* files and <>/values. Projects can drop their LOCAL-PATCH
+      guards on next upgrade. Pinned by
+      tests/unit/design-lint-fonts-placeholder.test.ts.

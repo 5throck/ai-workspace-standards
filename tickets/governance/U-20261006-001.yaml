@@ -3,7 +3,7 @@ id: U-20261006-001
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-06T00:11:51.924Z'
 history:
@@ -22,7 +22,17 @@ history:
   - at: '2026-10-06T18:39:28.814Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-07T01:42:30.539Z'
+    from: review
+    to: done
+result: >-
+  Confirmed: PROJECT_STATE_FILES froze scripts-snapshot.json at scaffold/adopt,
+  so upgrade-project's Script version comparison re-reported scaffold-era drift
+  forever. Fixed upstream: reclassified to REGENERATED_FILES (upgrade-policy
+  1.22.0) + post-upgrade regeneration next to VERSION_MANIFEST (upgrade-project
+  1.65.0, warning-only on failure). Spec
+  2026-10-07-upstream-validator-trust-wave-design;
+  tests/unit/upgrade-policy-scripts-snapshot.test.ts.
 error: null
 upstream:
   project: co-develop
@@ -79,3 +89,15 @@ upstream:
   duplicates:
     - project: co-develop
       at: '2026-10-06T00:11:51.924Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1446
+    template_version: unreleased
+    summary: >-
+      Confirmed: PROJECT_STATE_FILES froze scripts-snapshot.json at
+      scaffold/adopt, so upgrade-project's Script version comparison re-reported
+      scaffold-era drift forever. Fixed upstream: reclassified to
+      REGENERATED_FILES (upgrade-policy 1.22.0) + post-upgrade regeneration next
+      to VERSION_MANIFEST (upgrade-project 1.65.0, warning-only on failure).
+      Spec 2026-10-07-upstream-validator-trust-wave-design;
+      tests/unit/upgrade-policy-scripts-snapshot.test.ts.
