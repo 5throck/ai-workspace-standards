@@ -68,3 +68,31 @@ Fixes land at L0/L1 in this change set; scaffolded projects converge on their ne
 ## 7. Ticket references
 
 U-20261006-001 (snapshot staleness), U-20261006-002 (SKILLS.md clobber), U-20261006-003 (fonts placeholder false positives), U-20261006-004 (skip-as-pass reporting). Related follow-up: T-20261006-007 (L1 SCRIPTS.md tail — pre-existing stale rows outside this wave's scope were not touched except for the scripts changed here).
+
+## 8. Follow-up port (T-20261007-002, same day)
+
+U-20261006-001 had two root causes; this wave's PR #1446 fixed only the refresh
+timing (snapshot never regenerated). The parallel fleet PR #1441 — closed as
+superseded because its core-script changes conflicted with this wave — carried
+the CONTENT half and is ported here verbatim from its branch:
+
+- `scripts/helpers/write-scripts-snapshot.ts` 1.0.1 → 1.1.0: inventory from the
+  delivered registry (`<cwd>/<l1-source>/SCRIPTS.md`, falling back to the L0
+  root registry) plus the variant overlay registry — not the L0 root registry,
+  which lists workspace-only tools the project never receives and omits
+  delivered scripts; 8-column row-shape parsing replaces the `## Registry`
+  lazy-lookahead capture (which stopped at the first `###` subsection);
+  `parseScriptRegistry` exported behind an import guard for tests; the 4-arg
+  CLI signature is unchanged and all three call sites (new-project §5.5c,
+  adopt-project §15, upgrade-project post-upgrade v1.65.0) verified compatible.
+- `scripts/helpers/ticket-schema.ts` 1.5.1 → 1.6.0: `running` joins the ready
+  branch of the triage↔status invariant (store-mediated claim of a
+  triaged-ready upstream ticket is a legitimate tool-written state).
+- `scripts/helpers/ticket-store.ts` 1.10.1 → 1.11.0: `moveTicketUnlocked`
+  validates the mutated ticket before the atomic write (invariants were
+  read-path-only; a move could write a state no command could then read).
+- Tests ported: `tests/unit/write-scripts-snapshot.test.ts`,
+  `tests/unit/ticket-upstream-triage.test.ts` updates.
+
+The helpers are L0-only (no template mirrors). Registry rows updated for all
+three. Re-verification was mandatory: the source branch never went green on CI.

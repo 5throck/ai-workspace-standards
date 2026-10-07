@@ -228,13 +228,17 @@ describe('withTicketLock (T-20261002-005, H4)', () => {
 
   test('a STALE lock (>30s) is taken over atomically and the mutation proceeds', () => {
     const t = writeUpstreamTicket({ id: 'U-20261002-963' });
+    // v1.11.0 store: a move now validates the mutated ticket before writing,
+    // so the takeover payload must be a schema-consistent transition
+    // (triage ready first: inbox+backlog → ready+waiting, then waiting → review).
+    setUpstreamTriage(dir, t.id, 'ready');
     const lockDir = join(dir, '.ticket-lock');
     mkdirSync(lockDir, { recursive: true });
     writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: 999999, token: 'crashed', holder: 'crashed-process' }), 'utf-8');
     const old = new Date(Date.now() - 60_000);
     utimesSync(lockDir, old, old);
-    const moved = moveTicket(dir, t.id, 'waiting');
-    expect(moved.status).toBe('waiting');
+    const moved = moveTicket(dir, t.id, 'review');
+    expect(moved.status).toBe('review');
     expect(existsSync(lockDir)).toBe(false);
   });
 });
