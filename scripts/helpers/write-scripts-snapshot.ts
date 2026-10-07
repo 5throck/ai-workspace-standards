@@ -2,11 +2,12 @@
 /**
  * write-scripts-snapshot.ts — Write scripts-snapshot.json with the DELIVERED
  * script version map
- * @version 1.1.1
+ * @version 1.2.0
  *
  * Usage:
  *   bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>
  *
+ * v1.2.0 (2026-10-07, run-10b Phase II): write the workspace-root-RELATIVE l1_source into the tracked snapshot (adopt/upgrade pass absolute paths; the absolute form tripped co-game's audit-variant machine-local-path ban on the first post-upgrade regen).
  * v1.1.1 (2026-10-07, run-10b review Slot C): l1-source resolution join→resolve — adopt/upgrade pass ABSOLUTE common/scripts paths and join(cwd, abs) mis-prefixed them, silently falling back to the L0 registry on 2 of 3 call sites (the exact defect the 1.1.0 port fixed); integration test pins absolute-path resolution.
  * v1.1.0 (2026-10-07, U-20261006-001): two root causes fixed —
  *  - Inventory: the map now comes from the L1 registry the delivery actually
@@ -27,7 +28,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 
 export interface ScriptSnapshotEntry {
   version: string;
@@ -70,6 +71,9 @@ function main(): void {
   // resolve (not join): l1Source may be absolute (adopt/upgrade pass absolute
   // common/scripts paths); join would prefix cwd and silently fall back to L0.
   const l1RegistryPath = resolve(process.cwd(), l1Source, 'SCRIPTS.md');
+  // Snapshot files are TRACKED: store the workspace-root-relative form, never
+  // the machine-local absolute input (audit-variant D1 machine-local path ban).
+  const l1SourceRel = relative(process.cwd(), resolve(process.cwd(), l1Source));
   const registryPath = existsSync(l1RegistryPath)
     ? l1RegistryPath
     : join(process.cwd(), 'scripts', 'SCRIPTS.md');
@@ -85,7 +89,7 @@ function main(): void {
   const snapshot = {
     created: date,
     variant,
-    l1_source: l1Source,
+    l1_source: l1SourceRel,
     scripts,
   };
 
