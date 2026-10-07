@@ -17,12 +17,28 @@ title: >-
   ticket-upstream-triage.test.ts); the branch never went green on CI so
   re-verify before landing
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T02:27:17.934Z'
 history:
   - at: '2026-10-07T02:27:17.934Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-07T02:44:34.300Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-07T02:44:34.338Z'
+    from: waiting
+    to: review
+  - at: '2026-10-07T02:44:34.353Z'
+    from: review
+    to: done
+result: >-
+  Ported from PR #1441 branch and merged via PR #1448: write-scripts-snapshot
+  1.1.0 (delivered-registry inventory + 8-column row parsing; end-to-end
+  verified on Projects/co-develop — regenerated snapshot is set-identical with
+  the 139 delivered scripts, zero phantom/unlisted), ticket-schema 1.6.0
+  (running joins ready invariant), ticket-store 1.11.0 (validate-before-write).
+  Helpers are L0-only; registry rows updated; port addendum appended to the wave
+  design doc (spec updated).
 error: null
