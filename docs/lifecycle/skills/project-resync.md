@@ -17,6 +17,9 @@ upgrade-project per project, and upgrade PR landing. Operator-level skill
 (workspace root); `l2_propagate: false`.
 
 ## Changelog
+
+- 2026-10-07: 1.6.0 — Steps 2e (upstream request ledger) + 2f (daily learning extraction); AC-5 dry-run passed (T-20261007-007..014)
+- 2026-09-23: 1.5.1 — Step 4 `--prune-removed` rationale rewrite (ADR-0073 Amendment 3)
 - 2026-09-22: 1.5.0 — added Step 2c fleet echo check (grep-based sibling drift reporting, report-only per ADR-0031 Principle 5); Step 0 verdict table gains PRESUME-STALE (resync-audit.ts v1.1.0 mtime/order corroboration buffer); Step 2 documents the `scripts/backport-diff.ts` v1.0.0 support tool
 - 2026-09-12: 1.3.1 — removed stale co-develop master branch exception; PR base must always be the repository default branch
 - 2026-09-07: 1.2.0 — added Step 4 proof-check (commit `9d187b5a`)

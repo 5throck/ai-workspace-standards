@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261007-024
+kind: manual
+title: >-
+  scaffold hygiene (2 items): (1) new-project.ts should WARN + emit a
+  post-scaffold checklist item when --description/--type are omitted — co-hr and
+  co-news shipped with TODO(project-overview) identity placeholders in
+  docs/project.md on day one (fleet norm is populated; co-deck has the same
+  older gap), (2) templates/co-news/docs/co-news.context.md:3 still carries the
+  'Auto-generated scaffold stub — update after Phase A' banner while the body is
+  real content — fix the template copy. Evidence: Slot A 2026-10-08 findings
+  M-2/L-2
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:31.473Z'
+history:
+  - at: '2026-10-07T16:45:31.473Z'
+    from: null
+    to: backlog
+result: null
+error: null

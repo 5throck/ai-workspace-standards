@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261007-019
+kind: manual
+title: >-
+  learning: record a rendering-environment fingerprint alongside co-deck's
+  visual-regression baselines and codify the HEAD-engine control run as the
+  documented drift-triage procedure — baselines are environment-bound
+  (fonts/Chromium build) and any session-owned env can silently redefine truth
+  by regenerating them; the triage that proved engine changes pixel-neutral
+  exists only as a memory note. Related: T-20261007-006 (reproducibility
+  strategy). Evidence: co-deck memory/2026-10-07.md sync-skill observation, PR
+  #166 baseline size jumps (22KB->177KB), PR #167 design section 5. Class:
+  tooling/docs enhancement
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:04.364Z'
+history:
+  - at: '2026-10-07T16:45:04.364Z'
+    from: null
+    to: backlog
+result: null
+error: null

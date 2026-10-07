@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261007-022
+kind: manual
+title: >-
+  learning: generated-report labels must derive from their window/period
+  parameters, never hardcode the default — co-learning's ops-review generator
+  printed '30-day deltas' while --since-days N is a parameter (fixed to
+  ${SINCE_DAYS}-day). Applies to any pack/report generator (ops packs, finance
+  reports). Evidence: Projects/co-learning PR #13 D4, ops-review.mjs. Class:
+  minor pattern
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:31.446Z'
+history:
+  - at: '2026-10-07T16:45:31.446Z'
+    from: null
+    to: backlog
+result: null
+error: null

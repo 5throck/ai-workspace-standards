@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261007-017
+kind: manual
+title: >-
+  learning: upgrade-pipeline provenance pruning — prune project registries
+  against the delivered L1 set on upgrade, as explicitly proposed-and-deferred
+  in co-deck's registry-provenance design (rejected there for blast radius;
+  requires upgrade-policy/resync changes) so fossil rows cannot re-accumulate.
+  Evidence:
+  Projects/co-deck/docs/designs/2026-10-07-registry-provenance-normalization-design.md
+  deferred-candidates section, co-deck 2f extraction 2026-10-08. Class: L0
+  tooling improvement (design input needed)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T16:45:04.335Z'
+history:
+  - at: '2026-10-07T16:45:04.335Z'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-08](2026-10-08.md) | docs(review): daily fleet review 2026-10-08 |
 | [2026-10-07](2026-10-07.md) | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
 | [2026-10-06](2026-10-06.md) | chore: update |
 | [2026-10-05](2026-10-05.md) | chore: update |
@@ -14,7 +15,7 @@
 | [2026-10-03](2026-10-03.md) | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | [2026-10-02](2026-10-02.md) | feat(governance): process backlog T-20261001-015..021 — soak exit, triage commands, intake hardening, surface validator |
 | [2026-10-01](2026-10-01.md) | docs(review): daily fleet review 2026-10-01 |
-| [2026-09-30](2026-09-30.md) | fix(services): stop docker-mode turn containers on cancel and reap orphans on restart |
+| 2026-09-30 | fix(services): stop docker-mode turn containers on cancel and reap orphans on restart |
 | 2026-09-29 | docs(review): daily fleet review 2026-09-29 |
 | 2026-09-28 | chore: update |
 | 2026-09-27 | docs(review): daily fleet review 2026-09-27 |
