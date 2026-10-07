@@ -2,7 +2,7 @@
 
 **Variant:** co-consult
 **Current Status:** stable
-**Beta Since:** 2026-06-03
+**Beta Since:** 2026-06-03 (variant creation — migrated same-day from the co-consult project)
 **Phase A Complete:** true
 
 > **Post-promotion ratification record.** co-consult was created and entered

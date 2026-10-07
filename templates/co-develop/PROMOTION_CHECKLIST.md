@@ -2,7 +2,7 @@
 
 **Variant:** co-develop
 **Current Status:** stable
-**Beta Since:** 2026-06-09
+**Beta Since:** 2026-06-09 (variant creation — migrated to stable 2026-06-13, four days later, from the co-develop project)
 **Phase A Complete:** true
 
 > **Post-promotion ratification record.** co-develop was created on 2026-06-09
