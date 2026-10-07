@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261007-006
+kind: manual
+title: >-
+  co-deck theme-visual-regression suite is not machine-reproducible — fresh
+  renders differ from committed baselines at 100.000% on every pair (32 pairs)
+  when run outside the authoring session: #165's slides embed live YouTube
+  players (network-dependent frames), baselines were regenerated in the
+  authoring session right before its push, and system fonts + the local
+  Playwright Chromium build differ per environment. Define a deterministic
+  render strategy (disable/embed video posters in test renders, font embedding,
+  or CI-rendered baselines checked in from one authoritative env) — until then
+  template upgrades to co-deck cannot pass its local pre-push visual gate (the
+  0.13.1 upgrade content is fully prepared and re-runnable)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T07:32:01.492Z'
+history:
+  - at: '2026-10-07T07:32:01.492Z'
+    from: null
+    to: backlog
+result: null
+error: null
