@@ -247,6 +247,7 @@
     - ThumbnailNav: thumbnail-panel sidebar for supported themes
     - FullscreenManager: browser Fullscreen API toggle via F key or button
     - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
+    - FootnoteBuilder: abbreviation footnotes from slideData[i].footnotes
     - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
 
   ─── Shared Runtime Contract ─────────────────────────────────────────────
@@ -1319,6 +1320,34 @@ function closeTOC() {
   if (btn) btn.classList.remove('active');
 }
 
+// ── FootnoteBuilder (abbreviation footnotes) ─────────────────────────────
+// Renders slideData[i].footnotes (array of "ABBR: definition" strings) as a
+// small wrap-enabled line at the bottom-left of each slide that declares it.
+// Authoring convention (from the 2026-10 abbreviation-footnote rollout):
+// define an abbreviation at its FIRST appearance within each PART; skip
+// divider/video slides and widely known terms (AI, company/model names).
+// Styling lives in ppt-engine.css (.slide-footnote); themes and styles can
+// override via the --footnote-color / --footnote-bg CSS variables.
+
+var FootnoteBuilder = {
+  render: function() {
+    var data;
+    try {
+      data = (typeof slideData !== 'undefined') ? slideData : (window.slideData || []);
+    } catch (e) { return; }
+    var slides = document.querySelectorAll('.slide');
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+      if (!d || !d.footnotes || !d.footnotes.length) continue;
+      var host = slides[i];
+      if (!host || host.querySelector('.slide-footnote')) continue;
+      var box = el('div', 'slide-footnote');
+      box.textContent = d.footnotes.join('  ·  ');
+      host.appendChild(box);
+    }
+  }
+};
+
 // ── Shared navigation (used by all PPT themes) ─────────────────────────
 
 var currentSlide = 0;
@@ -1371,17 +1400,35 @@ function changeSlide(delta) {
 }
 
 // ── Keyboard shortcuts ──────────────────────────────────────────────────
+// Navigation keys match presenter remotes (clickers), which typically send
+// PageDown/PageUp or arrow keycodes. Themes with their own scroll-based
+// navigation (outlook, vertical) override these via capture-phase handlers.
+//   Next slide:     ArrowRight, ArrowDown, PageDown, Space
+//   Previous slide: ArrowLeft, ArrowUp, PageUp
+//   First slide:    Home
+//   Last slide:     End
+//   Other:          F (fullscreen), Escape, S (script), T (TOC),
+//                   P (narration), A (auto-advance)
 document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
     e.preventDefault();
     changeSlide(-1);
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(0);
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    var slides = document.querySelectorAll('.slide');
+    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
@@ -1463,6 +1510,8 @@ function initPPT(options) {
       TOCBuilder.init(slideData, 'toc-list');
     }
     ThumbnailNav.init();
+    // Abbreviation footnotes (slideData[i].footnotes) — no-op when absent
+    FootnoteBuilder.render();
   });
 
   // Initialize narration engine (TTS) — pass narrationConfig

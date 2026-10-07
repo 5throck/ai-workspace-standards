@@ -666,6 +666,26 @@ body {
   color: var(--text-primary);
 }
 
+/* ── Abbreviation footnotes (slideData[i].footnotes) ─────────────────
+   Bottom-left single-line definitions; wraps instead of truncating.
+   Transparent over photos by default (white text + shadow) — override
+   --footnote-color / --footnote-bg per theme/style for light decks. */
+.slide-footnote {
+  position: absolute;
+  left: 1.1rem;
+  right: 1.1rem;
+  bottom: 3.5rem;
+  z-index: 3;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  color: var(--footnote-color, rgba(255, 255, 255, 0.82));
+  background: var(--footnote-bg, transparent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
 /* ── Neutralize base.css responsive scaling for PPT themes ───────────
    base.css applies transform: scale(calc(100vw / 1280)) on .slide at
    ≤1340px for viewport-based layouts.

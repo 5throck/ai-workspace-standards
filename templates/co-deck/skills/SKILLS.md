@@ -7,7 +7,7 @@ Curated registry for the co-deck variant-exclusive skills (T-20260924-009). One 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `design` | 1.2.1 | active | design | 2026-08-24 | — | co-deck only — visual style locking — layout, palette, fonts |
-| `html-build` | 1.5.0 | active | html-build | 2026-06-24 | — | co-deck only — HTML slide generation from slide_deck.md + design_spec.md |
+| `html-build` | 1.6.0 | active | html-build | 2026-10-07 | — | co-deck only — HTML slide generation; v1.6.0 adds footnotes (abbreviation) field docs |
 | `pdf-export` | 2.1.1 | active | pdf-export | 2026-08-25 | — | co-deck only — PDF generation from the measured layout spec |
 | `prep-pdf` | 2.0.0 | active | pdf-export | 2026-06-23 | — | co-deck only — PDF layout preparation with estimate-layout.ts calibration |
 | `presenter-mode` | 1.0.1 | active | html-build | 2026-08-16 | — | co-deck only — dual-window presenter state sync (BroadcastChannel) |

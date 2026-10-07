@@ -249,6 +249,99 @@ describe('ppt-engine.js documentation header', () => {
   });
 });
 
+// ── Part D: Keyboard navigation contract (presenter-remote support) ────
+
+describe('keyboard navigation contract — presenter remotes (clickers)', () => {
+  const keydownSection = () => {
+    const source = readFileSync(pptEnginePath, 'utf-8');
+    const idx = source.indexOf("addEventListener('keydown'");
+    expect(idx).toBeGreaterThan(0);
+    return source.slice(idx, idx + 2500);
+  };
+
+  it('shared engine should navigate on PageDown/PageUp (clicker keycodes)', () => {
+    const section = keydownSection();
+    // Next-slide group must include PageDown alongside arrows/space
+    expect(section).toContain("e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' '");
+    // Previous-slide group must include PageUp
+    expect(section).toContain("e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp'");
+  });
+
+  it('shared engine should jump to first/last slide on Home/End', () => {
+    const section = keydownSection();
+    expect(section).toContain("e.key === 'Home'");
+    expect(section).toContain("e.key === 'End'");
+  });
+
+  it('vertical template override should use capture phase (no double-advance)', () => {
+    const template = readFileSync(
+      join(ROOT, 'docs', 'html-themes', 'themes', 'vertical', 'template.html'),
+      'utf-8',
+    );
+    // The scroll-based override must stop the shared engine handler from
+    // also firing on the same keypress, and must run in capture phase.
+    expect(template).toContain('stopImmediatePropagation');
+    expect(template).toMatch(/\}, true\);.*capture phase to override/s);
+    // Override must cover Left/Right too — remotes send them as well
+    expect(template).toContain("e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown'");
+    expect(template).toContain("e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp'");
+  });
+
+  it('built decks should inline the full key set', () => {
+    // Every PPT-engine theme build must carry the clicker keys in its output
+    for (const theme of PPT_THEMES) {
+      const result = buildThemeDeck(makeOpts({ theme, style: 'classic' }));
+      if (result.errors.length > 0) continue; // skip incompatible combos
+      expect(result.html).toContain("'PageDown'");
+      expect(result.html).toContain("'PageUp'");
+      expect(result.html).toContain("'Home'");
+      expect(result.html).toContain("'End'");
+    }
+  });
+});
+
+// ── Part E: Abbreviation footnotes contract (slideData[i].footnotes) ───
+
+describe('abbreviation footnotes contract', () => {
+  it('shared engine should define FootnoteBuilder and call it from initPPT', () => {
+    const source = readFileSync(pptEnginePath, 'utf-8');
+    expect(source).toContain('FootnoteBuilder');
+    expect(source).toMatch(/var FootnoteBuilder = \{/);
+    // initPPT must invoke the renderer after slides exist
+    expect(source).toMatch(/FootnoteBuilder\.render\(\);/);
+    // Renderer reads slideData[i].footnotes (array) and appends .slide-footnote
+    expect(source).toContain("d.footnotes");
+    expect(source).toContain("'slide-footnote'");
+  });
+
+  it('shared CSS should style .slide-footnote with wrap (no truncation)', () => {
+    const css = readFileSync(
+      join(ROOT, 'docs', 'html-themes', 'themes', '_shared', 'ppt-engine.css'),
+      'utf-8',
+    );
+    expect(css).toContain('.slide-footnote');
+    expect(css).toMatch(/white-space:\s*normal/);
+    expect(css).toMatch(/--footnote-color/);
+  });
+
+  it('built decks should inline the footnote renderer', () => {
+    for (const theme of PPT_THEMES) {
+      const result = buildThemeDeck(makeOpts({ theme, style: 'classic' }));
+      if (result.errors.length > 0) continue;
+      expect(result.html).toContain('FootnoteBuilder.render()');
+    }
+  });
+
+  it('slideData with footnotes field should survive the build unescaped-invalid', () => {
+    const data = JSON.parse(JSON.stringify(SLIDE_DATA));
+    data[0].footnotes = ['SMR: 소형모듈원전(Small Modular Reactor)'];
+    const result = buildThemeDeck(makeOpts({ slideData: data }));
+    expect(result.errors).toHaveLength(0);
+    expect(result.html).toContain('"footnotes"');
+    expect(result.html).toContain('Small Modular Reactor');
+  });
+});
+
 // ── Cleanup ────────────────────────────────────────────────────────────
 
 describe('cleanup: ppt-engine integration test output', () => {

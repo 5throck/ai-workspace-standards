@@ -14,7 +14,7 @@
     4. [INJECT:slides] is satisfied at RUNTIME by renderSlide()/initSlides()
 
   CONTENT RULES (from theme.json):
-    - max 3 bullets per slide, max 30 chars in title
+    - max 5 bullets per slide, max 50 chars in title
     - Background image expected on every slide for visual storytelling
     - No side image panel — background covers entire slide
 
@@ -228,6 +228,7 @@
     - ThumbnailNav: thumbnail-panel sidebar for supported themes
     - FullscreenManager: browser Fullscreen API toggle via F key or button
     - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
+    - FootnoteBuilder: abbreviation footnotes from slideData[i].footnotes
     - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
 
   ─── Shared Runtime Contract ─────────────────────────────────────────────
@@ -1300,6 +1301,34 @@ function closeTOC() {
   if (btn) btn.classList.remove('active');
 }
 
+// ── FootnoteBuilder (abbreviation footnotes) ─────────────────────────────
+// Renders slideData[i].footnotes (array of "ABBR: definition" strings) as a
+// small wrap-enabled line at the bottom-left of each slide that declares it.
+// Authoring convention (from the 2026-10 abbreviation-footnote rollout):
+// define an abbreviation at its FIRST appearance within each PART; skip
+// divider/video slides and widely known terms (AI, company/model names).
+// Styling lives in ppt-engine.css (.slide-footnote); themes and styles can
+// override via the --footnote-color / --footnote-bg CSS variables.
+
+var FootnoteBuilder = {
+  render: function() {
+    var data;
+    try {
+      data = (typeof slideData !== 'undefined') ? slideData : (window.slideData || []);
+    } catch (e) { return; }
+    var slides = document.querySelectorAll('.slide');
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+      if (!d || !d.footnotes || !d.footnotes.length) continue;
+      var host = slides[i];
+      if (!host || host.querySelector('.slide-footnote')) continue;
+      var box = el('div', 'slide-footnote');
+      box.textContent = d.footnotes.join('  ·  ');
+      host.appendChild(box);
+    }
+  }
+};
+
 // ── Shared navigation (used by all PPT themes) ─────────────────────────
 
 var currentSlide = 0;
@@ -1352,17 +1381,35 @@ function changeSlide(delta) {
 }
 
 // ── Keyboard shortcuts ──────────────────────────────────────────────────
+// Navigation keys match presenter remotes (clickers), which typically send
+// PageDown/PageUp or arrow keycodes. Themes with their own scroll-based
+// navigation (outlook, vertical) override these via capture-phase handlers.
+//   Next slide:     ArrowRight, ArrowDown, PageDown, Space
+//   Previous slide: ArrowLeft, ArrowUp, PageUp
+//   First slide:    Home
+//   Last slide:     End
+//   Other:          F (fullscreen), Escape, S (script), T (TOC),
+//                   P (narration), A (auto-advance)
 document.addEventListener('keydown', function(e) {
   // Don't capture if user is typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
     e.preventDefault();
     changeSlide(1);
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
     e.preventDefault();
     changeSlide(-1);
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(0);
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    var slides = document.querySelectorAll('.slide');
+    showSlide(slides.length - 1);
   }
   if (e.key === 'f' || e.key === 'F') FullscreenManager.toggle();
   if (e.key === 'Escape') {
@@ -1444,6 +1491,8 @@ function initPPT(options) {
       TOCBuilder.init(slideData, 'toc-list');
     }
     ThumbnailNav.init();
+    // Abbreviation footnotes (slideData[i].footnotes) — no-op when absent
+    FootnoteBuilder.render();
   });
 
   // Initialize narration engine (TTS) — pass narrationConfig
@@ -1462,18 +1511,32 @@ function initPPT(options) {
 
 // ── Zen slide renderer ─────────────────────────────────────
     // Presentation Zen style: fullscreen background image with gradient overlay
-    // and centered key message. Max 3 bullets as subtle secondary text.
+    // and centered key message. Max 5 bullets as subtle secondary text.
     // No visualImage/right-panel rendering — background covers entire slide.
 
     function buildBullets_zen(parent, arr) {
       var container = el("div", "bullets-container");
-      var bullets = Array.isArray(arr) ? arr.slice(0, 3) : [];
+      var bullets = Array.isArray(arr) ? arr.slice(0, 5) : [];
       bullets.forEach(function(b) {
         var item = el("div", "bullet-item");
         appendInline(item, b);
         container.appendChild(item);
       });
       parent.appendChild(container);
+    }
+
+    // Titles support **keyword** markup like bullets, plus explicit line
+    // breaks: "\n" in slideData titles renders <br> so a 50-char title can
+    // break into two lines at the author-chosen point (long titles also wrap
+    // naturally via CSS).
+    function inlineTitle(tag, text) {
+      var node = el(tag, "slide-title");
+      var parts = String(text == null ? '' : text).split('\n');
+      for (var i = 0; i < parts.length; i++) {
+        if (i > 0) node.appendChild(document.createElement('br'));
+        appendInline(node, parts[i]);
+      }
+      return node;
     }
 
     function slideType(d) {
@@ -1509,7 +1572,7 @@ function initPPT(options) {
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h2", "slide-title", title));
+        content.appendChild(inlineTitle("h2", title));
         card.appendChild(content);
         slide.appendChild(card);
         return;
@@ -1519,7 +1582,7 @@ function initPPT(options) {
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.subtitle != null) content.appendChild(el("p", "slide-subtitle", data.subtitle));
         if (data.meta != null) content.appendChild(el("p", "cover-meta", data.meta));
         card.appendChild(content);
@@ -1532,7 +1595,7 @@ function initPPT(options) {
         addZenOverlay(card);
         var content = el("div", "slide-content");
         if (data.partNum != null) content.appendChild(el("div", "part-number", data.partNum));
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.desc != null) content.appendChild(el("p", "slide-subtitle", data.desc));
         card.appendChild(content);
         slide.appendChild(card);
@@ -1548,7 +1611,7 @@ function initPPT(options) {
           avatar.className = "profile-avatar";
           content.appendChild(avatar);
         }
-        content.appendChild(el("h1", "slide-title", data.speakerName || data.profileName || title));
+        content.appendChild(inlineTitle("h1", data.speakerName || data.profileName || title));
         if (data.speakerTitle || data.profileTitle) content.appendChild(el("p", "slide-subtitle", data.speakerTitle || data.profileTitle));
         if (data.speakerBio) content.appendChild(el("p", "slide-subtitle", data.speakerBio));
         card.appendChild(content);
@@ -1560,7 +1623,7 @@ function initPPT(options) {
         var card = el("div", "slide-card");
         addZenOverlay(card);
         var content = el("div", "slide-content");
-        content.appendChild(el("h1", "slide-title", title));
+        content.appendChild(inlineTitle("h1", title));
         if (data.contactEmail) content.appendChild(el("p", "contact-item", data.contactEmail));
         if (data.contactLinkedIn) content.appendChild(el("p", "contact-item", data.contactLinkedIn));
         if (data.contactPhone) content.appendChild(el("p", "contact-item", data.contactPhone));
@@ -1572,7 +1635,7 @@ function initPPT(options) {
       var card = el("div", "slide-card");
       addZenOverlay(card);
       var content = el("div", "slide-content");
-      content.appendChild(el("h2", "slide-title", title));
+      content.appendChild(inlineTitle("h2", title));
       if (data.subtitle != null) content.appendChild(el("p", "slide-subtitle", data.subtitle));
       buildBullets_zen(content, data.bullets);
       card.appendChild(content);

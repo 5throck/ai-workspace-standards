@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: 1.5.0
+version: 1.6.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-06-24
+last_reviewed: 2026-10-07
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -89,6 +89,14 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 // Punchline (impactful closing)
 { isPunchlineSlide: true, section: "", title: "핵심 메시지" }
+
+// Abbreviation footnotes (optional, any slide type)
+// Renders as a small wrap-enabled line at the bottom-left of the slide
+// (shared FootnoteBuilder — runs from initPPT, no per-theme work needed).
+// Rule: define each abbreviation at its FIRST appearance per PART;
+// skip divider/video slides and widely known terms (AI, company/model names).
+{ section: "섹션명", title: "슬라이드 제목", bullets: ["불릿 1"],
+  footnotes: ["SMR: 소형모듈원전(Small Modular Reactor)", "EREV: 주행거리 연장형 전동화(Extended-Range Electric Vehicle)"] }
 ```
 
 Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
@@ -104,7 +112,7 @@ Available themes: `outline | pitch | pitch-enhanced | vertical | zen`. Available
 > **Deterministic Builder (Task 4 — pending implementation):** A CLI `build-theme-deck.ts` will automate CSS injection, marker replacement, and ppt-engine.js inlining. Once available, html-build will invoke the builder instead of performing these steps manually. The builder handles: theme/style resolution, package validation, INJECT marker replacement, CSS link generation, ppt-engine.js inlining, strict-JSON slideData injection. html-build remains responsible for: slide content generation, image path binding, narration/auto-advance config assembly, and renderSlide() (template-provided).
 
 **Theme capabilities:**
-- All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, and `isPunchlineSlide`.
+- All 5 themes support `visualImage`, `visualTitle`/`visualDisplay` text panels, profile avatars, `contactPhone`, `isPunchlineSlide`, and `footnotes` (abbreviation footnotes via the shared FootnoteBuilder).
 - `pitch` and `pitch-enhanced` use `slide-content` grid (left text + right visual panel) for standard slides.
 - `outline`, `pitch-enhanced`, `zen`, `vertical` use `slide-card` (content + right-panel) for standard slides.
 - `outline`, `pitch-enhanced`, `zen`, `vertical` support PPT features (TOC drawer, transitions, timer, speaker notes, TTS).

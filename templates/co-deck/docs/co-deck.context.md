@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-10-05
+# Last Updated: 2026-10-07
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -175,7 +175,8 @@ Themes `outline`, `pitch-enhanced`, `zen`, and `vertical` share a common PPT eng
 | **NarrationEngine v2.4 (TTS)** | **Web Speech API — reads `slideData[i].script` aloud; two independent config sections: `narration` (TTS controls, auto_play) and `auto_advance` (timer controls, start_as_auto); each with own `enabled` flag for UI visibility; independent P/A keyboard shortcut guards; configurable via `narrationConfig` + `autoAdvanceConfig`; v2.4: `scriptLanguage` declares primary script field language for correct getScript() routing, per-engine UI hiding** |
 | **FullscreenManager** | **Browser Fullscreen API — toggle via F key or footer button (⤢/⤡); all 6 themes supported (PPT themes via ppt-engine.js, pitch and outlook via their own footer button); Escape exits fullscreen first before closing overlays** |
 | **@media print** | **Ctrl+P renders one slide per page in landscape orientation; all UI chrome (footer, TOC, script panel, timer, etc.) hidden; slide cards flow as block with page-break-after** |
-| Keyboard shortcuts | Arrow keys, Space (navigate), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Vertical theme: PageUp/PageDown, Home/End. |
+| Keyboard shortcuts | Arrow keys, PageDown/PageUp, Space (navigate), Home/End (first/last slide), S (script), T (TOC drawer), P (play/pause narration), A (toggle auto-advance), **F (toggle fullscreen)**, Escape (exit fullscreen → close/stop narration). Presenter remotes (clickers) work — they send PageDown/PageUp or arrow keycodes. |
+| Abbreviation footnotes | `slideData[i].footnotes` (array of `"ABBR: definition"` strings) renders as a wrap-enabled bottom-left line per slide via the shared `FootnoteBuilder` (initPPT). Define each abbreviation at its first appearance per PART; skip dividers, videos, widely known terms. |
 | Footer navigation bar | Progress bar + slide counter + transition mode selector + **narration controls (language dropdown, play, auto-advance, voice selector dropdown)** + **fullscreen button** + nav buttons |
 
 The original `pitch` theme (v1.0.0) is preserved with its native TOC drawer, scale+translateY transition, and its own CSS (not ppt-engine.css). Its chrome/UI colors also use the shared CSS variable system.
