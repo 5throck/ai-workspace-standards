@@ -15,12 +15,24 @@ title: >-
   platform mirrors' pass message. Coordinate with the co-deck session live on
   templates/co-deck. Found 2026-10-08 Slots A/B/C deduped; live instance correct
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T16:44:36.631Z'
 history:
   - at: '2026-10-07T16:44:36.631Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-07T20:55:38.636Z'
+    from: backlog
+    to: done
+result: >-
+  Landed via the 03:00 governance batch PR #1469 (validate-templates 1.52.0:
+  VA07_MIRROR_DIRS gains .hermes, variant-mirror-parity FAILs on inVariant
+  mirror copies older than the variant skills/ SSOT; promote-variant checklist
+  5-mirror; suffix-locale declarations across 15 variants; new-project WARN;
+  prune truths) + pre-release mirror byte-sync PR #1463 (T-015a). Full-tree
+  validate-templates 0 errors post-landing; implemented spec
+  docs/designs/2026-10-08-variant-mirror-version-guard-design.md. (A parallel
+  partial implementation by the 01:30 runner session was discarded in favor of
+  this batch's landing.)
 error: null
