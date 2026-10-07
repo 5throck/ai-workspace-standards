@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.5.1
+ * @version 1.5.2
  * Verifies all skills in skills/ directory are loadable and properly formatted
  *
  * v1.5.1: skillName derivation is separator-tolerant (skills[/\\]) — Windows
@@ -227,16 +227,34 @@ async function main(): Promise<void> {
   const regenerable = existing === null || isExactGeneratedStub(existing);
   if (process.argv.includes("--check")) {
     const generated = await buildSkillsIndexContent(checks);
-    if (regenerable) {
-      // A missing/stub index is not drift — regenerate it and exit 0.
+    // T-20261007-003: the volatile `Generated:` timestamp line is normalized
+    // out of BOTH sides — a file carries the stamp from whenever it was last
+    // written, so a raw byte-compare made the clean path unreachable (every
+    // run rewrote the stamp and drift exit-1 fired on every curated file).
+    const normGenerated = normalizeGeneratedLine(generated);
+    if (existing === null) {
+      // A missing index is not drift — regenerate it and exit 0.
       await Bun.write(skillsMdPath, generated);
       console.log(`\n📝 Generated skills index: ${skillsMdPath}`);
       return;
     }
-    if (existing !== generated) {
+    const normExisting = normalizeGeneratedLine(existing);
+    if (isExactGeneratedStub(existing)) {
+      if (normExisting === normGenerated) {
+        // Content already matches the current generation — the clean path:
+        // exit 0 WITHOUT rewriting (a stamp-only rewrite would churn forever).
+        console.log("\n✅ skills/SKILLS.md matches the generated index (--check clean)");
+        return;
+      }
+      // A stub whose body is stale — regenerate it and exit 0.
+      await Bun.write(skillsMdPath, generated);
+      console.log(`\n📝 Generated skills index: ${skillsMdPath}`);
+      return;
+    }
+    if (normExisting !== normGenerated) {
       console.error(`\n❌ SKILLS.md drift: ${skillsMdPath} differs from the generated index (--check)`);
-      const curLines = existing.split("\n");
-      const genLines = generated.split("\n");
+      const curLines = normExisting.split("\n");
+      const genLines = normGenerated.split("\n");
       for (let i = 0; i < Math.max(curLines.length, genLines.length); i++) {
         if (curLines[i] !== genLines[i]) {
           console.error(`   first differing line: ${i + 1}`);
@@ -263,6 +281,14 @@ async function main(): Promise<void> {
  */
 function isExactGeneratedStub(content: string): boolean {
   return (content.split(/\r?\n/, 1)[0] ?? "").trimEnd() === "# Skills Index";
+}
+
+/**
+ * Drop the volatile `Generated: <timestamp>` line from index content
+ * (T-20261007-003) so the --check comparison is stable across runs.
+ */
+export function normalizeGeneratedLine(content: string): string {
+  return content.split("\n").filter((l) => !/^Generated: /.test(l)).join("\n");
 }
 
 async function scanSkills(): Promise<SkillCheck[]> {

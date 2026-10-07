@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # co-price
 
 > 언어: [English](README.md) · **한국어**

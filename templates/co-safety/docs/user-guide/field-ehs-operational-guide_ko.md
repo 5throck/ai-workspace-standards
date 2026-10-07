@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 현장 EHS 실무 운영 가이드 (Field EHS Operational Guide)
 
 > **문서 유형**: Layer C — 한국어 실무 가이드  

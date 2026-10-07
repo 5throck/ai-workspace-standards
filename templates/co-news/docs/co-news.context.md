@@ -1,7 +1,5 @@
 # co-news Context
 
-> Auto-generated scaffold stub — update after Phase A.
-
 ## Overview
 
 Business/finance journalism variant for economics reporters covering listed companies. Grounded in regulator financial disclosures (KR: DART) and commercial-law research (KR: Korean Commercial Act), it produces fact-checked, naturally human-written articles — output language per the active country profile (KR defaults to ko) and project i18n settings.

@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Safety OS — 사용자 가이드
 
 > **대상**: 안전보건관리자, EHS 전문가, 컴플라이언스 책임자

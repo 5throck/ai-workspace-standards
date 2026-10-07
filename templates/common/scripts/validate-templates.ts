@@ -1,8 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.51.0
+ * @version 1.52.0
  *
+ * v1.52.0 (2026-10-08, T-20261007-015 urgent): variant-mirror-parity gains the
+ *          inVariant stale-copy arm — a variant-owned mirror SKILL.md older than
+ *          its skills/ SSOT now FAILS (the co-deck html-build 1.5.0-vs-1.6.0
+ *          class passed every gate because the inVariant arm hit `continue`);
+ *          VA07_MIRROR_DIRS gains `.hermes` (existence-guarded per variant) so
+ *          the version-sync check covers all five platform mirrors; the
+ *          platform-mirror-freshness pass message says five.
  * v1.50.5 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
  *          repoint size-budget Fix string to HERMES.md "Hermes Platform Mechanics" +
  *          context.md §11; v1.50.4 (2026-10-02): pointer-integrity strips the
@@ -2120,7 +2127,7 @@ function checkPlatformMirrorFreshness(): void {
   }
   const drift = collectMirrorFreshnessDrift({ ssotSkillsDir, commonDir, mirrorDirs: PLATFORM_MIRROR_DIRS });
   if (drift.length === 0) {
-    pass('platform-mirror-freshness: all four platform skill mirrors carry SSOT versions');
+    pass('platform-mirror-freshness: all five platform skill mirrors carry SSOT versions');
     return;
   }
   for (const d of drift) {
@@ -2231,6 +2238,21 @@ function checkVariantMirrorParity(): void {
               fail(entry.name, 'variant-mirror-parity',
                 `${mirror}/${name}/ is a stale platform-mirror copy of common skill "${name}" (mirror v${mirrorVersion} vs common v${commonVersion}) with no variant declaration, no skills/ SSOT copy, and no peer carrying it — regrown D1/D2-class drift`,
                 `Delete templates/${entry.name}/${mirror}/${name}/ (stale copy of common v${commonVersion}) or declare the variant-specific copy in variant.json`);
+              errors++;
+              continue;
+            }
+          } else if (inVariant) {
+            // T-20261007-015: a variant-owned mirror copy must carry the SSOT's
+            // version. The co-deck html-build class (mirror 1.5.0 vs skills/
+            // SSOT 1.6.0) passed every gate because this arm hit `continue`
+            // without any comparison — mirrors survive upgrades untouched, so
+            // drift here means a hand-edit bypassed the SSOT.
+            const ssotVersion = readFmVersion(join(vSkills, name, 'SKILL.md'));
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, 'SKILL.md'));
+            if (ssotVersion && mirrorVersion && semverOlder(mirrorVersion, ssotVersion)) {
+              fail(entry.name, 'variant-mirror-parity',
+                `${mirror}/${name}/ is a stale platform-mirror copy of variant-owned skill "${name}" (mirror v${mirrorVersion} vs skills/ SSOT v${ssotVersion})`,
+                `Byte-copy templates/${entry.name}/skills/${name}/SKILL.md over templates/${entry.name}/${mirror}/${name}/SKILL.md (or re-run sync-skills for ${entry.name})`);
               errors++;
               continue;
             }
@@ -3895,7 +3917,11 @@ export interface MirrorVersionMismatch {
   message: string;
 }
 
-const VA07_MIRROR_DIRS = ['.claude', '.gemini', '.agents', '.codex'] as const;
+// T-20261007-015: `.hermes` joins the version-sync comparison — the co-deck
+// html-build staleness (1.5.0 vs 1.6.0) was invisible because .hermes was
+// outside this list. The loop below existence-guards each mirror dir, so
+// variants without a .hermes tree are unaffected.
+const VA07_MIRROR_DIRS = ['.claude', '.gemini', '.agents', '.codex', '.hermes'] as const;
 
 /**
  * Pure core of VA-07 (T-004 convention): enumerate the union of skill dirs

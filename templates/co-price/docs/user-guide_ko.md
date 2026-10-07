@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 790a5f12bf9211714478016d17450fff2abecd394409eb12b85336afa3fc6b6f
 ---
 # co-price 사용자 가이드

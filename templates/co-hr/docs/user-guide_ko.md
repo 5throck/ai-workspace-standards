@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: d18e58aab4046f7c5b0b1ed89c1ffc207ad796e33483dd05dbce826dc21f17fc
 ---
 # Co-HR 사용자 가이드

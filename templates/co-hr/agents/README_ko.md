@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # agents/
 
 > TODO: 이 variant의 에이전트 정의 파일을 여기에 추가하세요.

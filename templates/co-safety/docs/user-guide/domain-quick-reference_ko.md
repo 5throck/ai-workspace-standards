@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Safety OS 22대 전 산업 도메인 빠른 참조 카드 (Domain Quick Reference)
 
 > **문서 유형**: Layer C — 한국어 실무 빠른 참조 가이드  

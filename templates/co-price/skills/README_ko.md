@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # skills/ — co-price 스킬 정의
 
 이 디렉터리는 variant 전용 스킬 세트를 보유합니다. 각 스킬은 폴더 하나와 그 안의

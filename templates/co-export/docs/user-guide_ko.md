@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 9286bd940f9a65649c68464ade1e3f76099874efc53afb0bf3730c1ff03718ef
 ---
 # Co-Export 사용자 가이드

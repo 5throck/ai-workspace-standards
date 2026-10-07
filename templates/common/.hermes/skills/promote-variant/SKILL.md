@@ -147,21 +147,26 @@ bun scripts/new-project.ts --help
 # Should list co-<name> in the available variants output
 ```
 
-### Step 6.5: Verify Antigravity coverage
+### Step 6.5: Verify platform-mirror coverage
 
-Before running validate-templates.ts, confirm Antigravity parity is complete:
+Before running validate-templates.ts, confirm skill-mirror parity is complete
+across all five platform mirrors (`PLATFORM_MIRROR_DIRS` in
+`scripts/lib/platforms.ts` is the SSOT — .claude, .gemini, .agents, .codex, .hermes):
 
 ```bash
-# Verify .gemini/ mirrors .claude/
-diff <(ls templates/co-<variant-name>/.claude/commands/) \
-     <(ls templates/co-<variant-name>/.gemini/commands/)
-diff <(ls templates/co-<variant-name>/.claude/skills/) \
-     <(ls templates/co-<variant-name>/.gemini/skills/)
+# Verify every platform mirror carries the .claude/ set (SSOT-first convention):
+for m in .gemini .agents .codex .hermes; do
+  diff <(ls templates/co-<variant-name>/.claude/skills/) \
+       <(ls templates/co-<variant-name>/$m/skills/) || true
+done
+# Or heal directly:
+bun scripts/sync-skills.ts --dir templates/co-<variant-name>
 ```
 
 Check that:
 - [ ] All commands in `.claude/commands/` have a matching file in `.gemini/commands/` (or explicit `gemini-parity: skip` frontmatter)
-- [ ] All skills in `.claude/skills/` have a matching file in `.gemini/skills/` (or `gemini-parity: skip`)
+- [ ] All skills in `.claude/skills/` have a matching file in every platform mirror's `skills/` (or `mirror-parity: skip`)
+- [ ] Every mirror SKILL.md carries the same frontmatter version as the skills/ SSOT (VA-07 enforces; the 2026-10-08 co-deck html-build staleness class)
 - [ ] `GEMINI.md` variant context section identical to `CLAUDE.md` variant context section
 - [ ] Each `agents/*.md` file has Section C (Antigravity Integration)
 
@@ -230,8 +235,8 @@ bun run agent:verify
 - [ ] `tag-template.ts` run and tag published
 - [ ] Workspace AGENTS.md updated (if needed)
 - [ ] `SECURITY.md` completed (not just stub)
+- [ ] All FIVE platform skill mirrors (`.claude/`, `.gemini/`, `.agents/`, `.codex/`, `.hermes/` — the `PLATFORM_MIRROR_DIRS` SSOT in `scripts/lib/platforms.ts`) carry the variant's mirrorable skills at the SSOT version (or `mirror-parity: skip` declared); `bun scripts/sync-skills.ts --dir templates/co-<name>` heals, validate-templates variant-mirror-parity + VA-07 enforce
 - [ ] `.gemini/commands/` mirrors `.claude/commands/` (or gemini-parity: skip declared)
-- [ ] `.gemini/skills/` mirrors `.claude/skills/` (or gemini-parity: skip declared)
 - [ ] All `agents/*.md` have Section C: Antigravity Integration
 - [ ] L3 project `scripts/SCRIPTS.md` passes `bun scripts/verify-scripts.ts --verify` (no ghost entries, no PAIR MISSING)
 - [ ] Variant `scripts/<variant>/SCRIPTS.md` sub-registry exists and lists all variant-specific scripts

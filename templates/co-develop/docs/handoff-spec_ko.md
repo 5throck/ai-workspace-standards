@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 에이전트 핸드오프 명세서
 
 이 문서는 멀티 에이전트 워크플로우에서 에이전트 간 JSON 기반 핸드오프 형식을 정의합니다.

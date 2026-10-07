@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Safety OS 입문 튜토리얼
 
 > **대상**: Safety OS를 처음 사용하는 EHS 관리자, 안전보건관리자, 준법 담당자
@@ -359,4 +364,4 @@ PM에게: "저희 시설이 PSM 의무 대상인지 확인해 주세요.
 
 ---
 
-*Last Updated: 2026-09-11*
+*Last Updated: 2026-10-08*

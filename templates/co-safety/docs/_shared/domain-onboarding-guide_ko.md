@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 도메인 온보딩 가이드
 
 > Safety OS에 신규 도메인(예: GDP, GLP, GCP, GVP)을 추가하기 위한 **표준 운영 절차(SOP)**.

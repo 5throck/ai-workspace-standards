@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 39d43dac487a275a91a12f4c5ed53576680ffaf2f6e6a69c463d3ee633b3edb0
 ---
 # Co-ABAP 사용자 가이드

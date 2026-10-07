@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Domain Classification Guide
 
 > **Purpose**: Safety OS 도메인의 기능적/산업적 혼재를 명확히 분류하고, 사용자 dispatch 시 적절한 도메인(또는 다중 도메인)을 선택하는 가이드.

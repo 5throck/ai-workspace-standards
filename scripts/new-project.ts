@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.33.0
+// @version 1.34.0
+// v1.34.0 (2026-10-08, T-20261007-024): WARN + post-scaffold checklist item when
+//          --description/--type are omitted — the co-hr/co-news class shipped
+//          TODO(project-overview) identity placeholders on day one; the scaffold
+//          now says so itself instead of waiting for the first audit WARN.
 // v1.33.0 (2026-09-29, T-20260929-002): initial scaffold commit — after setup,
 // a fresh scaffold with zero commits is seeded with `chore: initial scaffold
 // (new-project)` (upgrade-project aborts on zero-commit targets, T-20260921-001
@@ -1169,6 +1173,13 @@ if (existsSync(substitutePlaceholders)) {
       }
       writeFileSync(identityOutPath, identity, 'utf-8');
       console.log('  ✅ docs/project.md rendered from the identity seed template');
+      // T-20261007-024: an undescribed project ships TODO(project-overview)
+      // placeholders on day one (the co-hr/co-news class) — say so at scaffold
+      // time with an explicit checklist item, not only via the later audit WARN.
+      if (!projectDescription || !projectType) {
+        const missing = [!projectDescription ? '--description' : null, !projectType ? '--type' : null].filter(Boolean).join(' and ');
+        console.warn(`  ⚠️  ${missing} omitted — docs/project.md keeps its TODO(project-overview) placeholder(s). Post-scaffold checklist: populate docs/project.md Description/Type (audit WARNs until they are filled).`);
+      }
     } catch (err) {
       console.error(`❌ Failed to render docs/project.md from the identity seed: ${(err as Error).message}`);
       if (import.meta.main) process.exit(1);

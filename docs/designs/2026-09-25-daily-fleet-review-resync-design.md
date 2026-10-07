@@ -66,7 +66,7 @@ Two governance gaps motivate this registration:
 ### 4.2b Phase 1b — per-variant project-review (Amendment 1, 2026-10-05)
 
 - R43. Derive the variant set with the glob `templates/co-*`. Never hardcode the count.
-- R44. Run the per-variant machine battery every day: `bun scripts/audit.ts` and `bun scripts/verify-scripts.ts --verify` inside each variant. A battery that crashes in template context is itself a finding.
+- R44. Run the per-variant machine battery every day — the validators that actually operate on template trees, from the workspace root (Amendment 2, 2026-10-08, T-20261006-002): `bun scripts/validate-variant-claims.ts --template <variant>` and `bun scripts/validate-variant-readiness.ts --variant <variant>`. The originally specced `audit.ts` + `verify-scripts.ts` "inside each variant" are L0/L1 scripts delivered at scaffold/upgrade — L2 template directories carry no `scripts/` tree, so every variant battery failed with Module-not-found on the first run (2026-10-07); the replacement pair is verified working (14/14 PASS) and runs from the root against the template tree. A battery that crashes in template context is itself a finding.
 - R45. Run a variant's agent review scoped to its window delta. Variants with no window changes and a clean battery run baseline-only.
 - R46. Escalate a single variant to FULL mode when its own structural triggers fire (3+ of its agent files, workspace-schema/common-contract, or a promotion touching it).
 - R47. Extend the Friday FULL override to Phase 1b: every variant gets a scoped review of its full surface, batched.

@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # MCP 통합 가이드
 
 > **목적**: Safety OS가 규제 인덱스 데이터를 위해 한국 규제 MCP 서버와 어떻게 연결되는지 설명합니다.
