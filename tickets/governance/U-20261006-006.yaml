@@ -5,15 +5,12 @@ title: Upstream request from co-security
 priority: normal
 status: done
 attempts: 0
-created_at: '2026-10-06T09:55:00.000Z'
+created_at: '2026-10-06T07:01:51.120Z'
 history:
-  - at: '2026-10-06T09:55:00.000Z'
+  - at: '2026-10-06T07:01:51.120Z'
     from: null
     to: backlog
   - at: '2026-10-06T07:01:51.120Z'
-    from: backlog
-    to: waiting
-  - at: '2026-10-06T07:04:13.068Z'
     from: backlog
     to: waiting
   - at: '2026-10-06T07:04:13.084Z'
@@ -31,7 +28,7 @@ error: null
 upstream:
   project: co-security
   variant: co-security
-  template_version: "0.12.0"
+  template_version: 0.12.0
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
@@ -76,5 +73,9 @@ upstream:
       at: '2026-10-06T09:55:00.000Z'
   resolution:
     outcome: fixed
-    summary: "COMMON-CLAUDE block examples annotated as workspace-root agents at all 4 sites (root CLAUDE.md source + templates/common mirror byte-synced, managed-block-parity 60/60): automation-engineer/docs-writer examples kept with an explicit substitute-in-scaffold note"
+    summary: >-
+      COMMON-CLAUDE block examples annotated as workspace-root agents at all 4
+      sites (root CLAUDE.md source + templates/common mirror byte-synced,
+      managed-block-parity 60/60): automation-engineer/docs-writer examples kept
+      with an explicit substitute-in-scaffold note
     pr_url: https://github.com/5throck/ai-workspace-standards/pull/1439

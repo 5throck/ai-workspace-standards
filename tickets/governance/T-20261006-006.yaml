@@ -9,12 +9,21 @@ title: >-
   exclusion, theme_manifest truth) and wire the battery entry into test.yml next
   to the docs-links --all step (sub-second, verified cheap)
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-06T22:16:24.455Z'
 history:
   - at: '2026-10-06T22:16:24.455Z'
     from: null
     to: backlog
+  - at: '2026-10-08T07:43:59.714+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T07:43:59.728+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T07:43:59.744+09:00'
+    from: running
+    to: review
 result: null
 error: null

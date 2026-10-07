@@ -9,12 +9,27 @@ title: >-
   found 2026-10-07 Slot D — land the declarations mirroring README_ko.md
   (sync_version/translated_from_hash/lang/lang_reason)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:11:40.074Z'
 history:
   - at: '2026-10-06T22:11:40.074Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.283+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.299+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.314+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.330+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: co-learning's three _ko docs carry the sanctioned pattern
+  (sync_version/translated_from_hash with real git hashes/lang: ko/lang_reason:
+  source-material), mirroring README_ko.md.
 error: null

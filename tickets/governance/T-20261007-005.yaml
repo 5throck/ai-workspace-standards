@@ -8,12 +8,27 @@ title: >-
   #dispatch--handoff-chain); the docs-link pre-flight blocked co-export's 0.13.1
   upgrade landing — fix the template copy and release in the next patch
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T06:13:11.785Z'
 history:
   - at: '2026-10-07T06:13:11.785Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.218+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.233+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.251+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.267+09:00'
+    from: review
+    to: done
+result: >-
+  Verified already resolved on current main: validate-docs-links --all exits 0
+  tree-wide and the co-export anchor slug matches the heading — premise predated
+  a template wave. No change needed; disposition in memory/2026-10-08.md.
 error: null

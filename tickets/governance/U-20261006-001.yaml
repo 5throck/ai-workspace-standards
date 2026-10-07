@@ -13,9 +13,6 @@ history:
   - at: '2026-10-06T18:02:51.248Z'
     from: backlog
     to: waiting
-  - at: '2026-10-06T18:04:25.832Z'
-    from: backlog
-    to: waiting
   - at: '2026-10-06T18:04:31.872Z'
     from: waiting
     to: running

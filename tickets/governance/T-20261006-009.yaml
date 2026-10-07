@@ -9,12 +9,27 @@ title: >-
   join(workspaceRoot,'agents') to mirror the skills list so KEEP verdicts are
   truthful
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:16:37.258Z'
 history:
   - at: '2026-10-06T22:16:37.258Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.093+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.108+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.123+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.139+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: the PRUNE REMOVED agents/ category consults the
+  workspace-root agents/ SSOT (upgrade-project 1.67.0) — root-SSOT-delivered
+  agents no longer get the factually wrong project-owned KEEP basis.
 error: null
