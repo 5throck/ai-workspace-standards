@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.5.1
+version: 1.6.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,7 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-09-23
+last_reviewed: 2026-10-07
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -159,6 +159,45 @@ Report-only: this step never edits sibling projects. ADR-0031 Principle 5
 (`docs/adr/0031-l1-l2-fork-model.md`) forbids automated sibling sync — drift
 REPORTING is the sanctioned direction. Each project adopts its echo fixes
 through its own reviewed resync cycle.
+
+## Step 2e — Upstream request ledger (design 2026-10-07-daily-fleet-learning-extraction)
+
+Read-only upward-carrier reporting; added by user direction 2026-10-07:
+
+1. Read every open upstream-request ticket (`kind: manual`, `U-` ids) in the
+   workspace store and every `LOCAL-PATCH(upstream-request: <id>)` marker in
+   the fleet.
+2. Report each in the cycle report as the **upstream request ledger**:
+   requesting project, subject, disposition stage (received / designed /
+   fixed / re-delivered), and — when re-delivered — the template version that
+   carried the fix to the requesting project.
+3. Loop-closing duty: when this cycle's upgrade wave delivered a fix a
+   project requested, state the pairing explicitly ("co-develop's U-20261006-001
+   reached the fleet via v0.13.1"). Report only — no edits.
+
+## Step 2f — Learning extraction (design 2026-10-07-daily-fleet-learning-extraction)
+
+For each project with **merged landings in the window** (PRs merged, or
+commits landed by its own session), dispatch one scoped review pass over the
+delta (daily cadence, user directive 2026-10-07 — nightly batches are 1–3
+landings, small and fresh):
+
+1. Identify reusable assets: template enhancement, new/reusable skill, L0
+   tooling improvement, cross-pollination candidate.
+2. File one ticket per asset — `kind: manual`, title prefix `learning:` —
+   citing evidence refs (files, PRs). Requests only.
+3. **No silence rule**: a landing with no reusable assets gets a one-line
+   "reviewed, nothing to extract" entry. Every landing produces either a
+   request or an explicit negative.
+4. **Never write into `templates/`, sibling projects, or promotion surfaces**
+   from this step. Promotion remains human-judged (user directive 2026-10-07);
+   this step adds reporting and requests, moving no promotion authority
+   (ADR-0031 unchanged).
+5. Budget: review up to 3 landings per night; overflow is listed and carried
+   to the next night first-in-first-reviewed. Pollination (Step 2c) is
+   redefined to seed from these extracted assets, not only from backport
+   diffs. The Friday FULL sweep reviews the cumulative week as the safety
+   net for anything a nightly pass missed or degraded.
 
 ## Step 3 — Root PR
 
