@@ -28,7 +28,7 @@ import { parseSkillRegistryRows, splitRootRegistry, collectCatalogEntries, forma
 const templatesDir = resolve(import.meta.dir, '..', '..', 'templates');
 
 const EXPECTED_COUNTS: Record<string, number> = {
-  'co-consult': 18,
+  'co-consult': 19,
   'co-deck': 10,
   'co-security': 6,
   'co-develop': 4,
