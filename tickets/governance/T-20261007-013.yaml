@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261007-013
+kind: manual
+title: >-
+  learning: promote co-consult's industry-research-pack methodology as a
+  reusable skill — source-priority ladder (official bodies > corporate filings >
+  wire media > research firms, blogs excluded), 1-source-1-doc packaging with a
+  5-section per-source skeleton (metadata table, summary with per-bullet
+  [Source: URL], figure-by-figure cross-validation vs a named 2nd source,
+  implication lenses, reliability grading), the warning-mark protocol for
+  single-source figures, the verify-user-hypotheses rule (judgments rendered
+  AGAINST user hypotheses in t11-01/t13-01), and the search-quota-exhaustion
+  fallback — currently one-off prose in the project design; target a co-consult
+  skill (industry-research-pack) related to skills/research-analysis (generic
+  process, no output format) and skills/evidence-ledger (the prose-shaped
+  sibling of its row-per-claim ledger). Evidence:
+  Projects/co-consult/docs/designs/2026-10-06-ai-industry-research-pack-design.md
+  (spec implemented), docs/reports/2026-10-ai-industry-research/ 33 files, PR
+  #86 (the actual origin — #89 only landed memory/manifests). Class: new skill
+  candidate, strongest of the co-consult landing
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-07T13:58:33.393Z'
+history:
+  - at: '2026-10-07T13:58:33.393Z'
+    from: null
+    to: backlog
+result: null
+error: null

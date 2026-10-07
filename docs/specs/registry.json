@@ -2220,7 +2220,7 @@
       "id": "2026-10-07-daily-fleet-learning-extraction-design",
       "title": "daily fleet learning extraction design",
       "file": "docs/designs/2026-10-07-daily-fleet-learning-extraction-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "pm",
       "created": "2026-10-07",
       "last_updated": "2026-10-07"

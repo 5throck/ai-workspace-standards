@@ -1,6 +1,6 @@
 # Design: Daily Fleet Learning Extraction & Bidirectional Carrier (project-resync v2)
 
-- **Spec id**: `2026-10-07-daily-fleet-learning-extraction`
+- **Spec id**: `2026-10-07-daily-fleet-learning-extraction` (approved by user 2026-10-07; implemented same day — AC-5 dry-run passed, see docs/reports/2026-10-07-learning-extraction-dryrun.md; runner prompt updated to skill v1.6.0 with Steps 2e/2f, first nightly run 2026-10-08 01:30 KST)
 - **Date**: 2026-10-07
 - **Author**: Template Architect (Design Gate, ADR-0074)
 - **Source**: user directive 2026-10-07 — the daily fleet review+resync must not merely sync state; it must understand and carry what the fleet produces. Daily cadence explicitly chosen over weekly (user directive: run the extraction daily, not weekly).

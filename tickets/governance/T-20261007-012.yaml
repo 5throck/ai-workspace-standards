@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261007-012
+kind: manual
+title: >-
+  learning: record co-learning's monthly ops-review pack as a PROSPECTIVE
+  reusable skill (generated KPI pack over a live system: fixed skeleton —
+  KPIs/windowed deltas/auto-detected data-quality notes/human-filled D-numbered
+  decisions with next-review date; read-only discipline; acted on in a scheduled
+  meeting) — file for the skill backlog, gated on a second variant adopting the
+  pattern; same-need-absent recorded across the fleet today (echo check
+  negative, R7). Evidence: ops-review-2026-10-07.md,
+  docs/designs/2026-10-07-kpi-operations-review-design.md sections 7-8, PR #11.
+  Class: prospective skill (single instance)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-07T13:54:52.399Z'
+history:
+  - at: '2026-10-07T13:54:52.399Z'
+    from: null
+    to: backlog
+result: null
+error: null
