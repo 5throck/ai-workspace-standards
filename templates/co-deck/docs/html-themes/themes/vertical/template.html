@@ -285,30 +285,40 @@
     }
 
     // ── Vertical keyboard overrides ───────────────────────────────────
-    // Override ppt-engine.js defaults: ArrowDown/Space/ArrowUp/PageUp/PageDown
-    // all use scrollToSlide instead of changeSlide.
+    // Override ppt-engine.js defaults: all navigation keys use scrollToSlide
+    // (smooth scroll) instead of changeSlide. Capture phase +
+    // stopImmediatePropagation prevent the ppt-engine.js handler from also
+    // firing (double-advance bug). ArrowRight/ArrowLeft are included because
+    // presenter remotes send them alongside PageDown/PageUp.
+    //   Next: ArrowDown, ArrowRight, PageDown, Space
+    //   Prev: ArrowUp, ArrowLeft, PageUp
+    //   Home/End: first/last slide
 
     document.addEventListener('keydown', function (e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         scrollToSlide(currentSlide + 1);
       }
-      if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         scrollToSlide(currentSlide - 1);
       }
       if (e.key === 'Home') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         scrollToSlide(0);
       }
       if (e.key === 'End') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         var slides = document.querySelectorAll('.slide');
         scrollToSlide(slides.length - 1);
       }
-    });
+    }, true);  // capture phase to override ppt-engine.js handlers
 
     // ── Init ────────────────────────────────────────────────────────────
     function initAll() {

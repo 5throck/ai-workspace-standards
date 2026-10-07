@@ -2226,6 +2226,24 @@
       "last_updated": "2026-10-07"
     },
     {
+      "id": "2026-10-07-engine-promotion-to-co-deck-template-design",
+      "title": "engine promotion to co deck template design",
+      "file": "docs/designs/2026-10-07-engine-promotion-to-co-deck-template-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-07",
+      "last_updated": "2026-10-07"
+    },
+    {
+      "id": "2026-10-07-registry-provenance-normalization-design",
+      "title": "registry provenance normalization design",
+      "file": "docs/designs/2026-10-07-registry-provenance-normalization-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-07",
+      "last_updated": "2026-10-07"
+    },
+    {
       "id": "2026-10-07-upstream-validator-trust-wave-design",
       "title": "upstream validator trust wave design",
       "file": "docs/designs/2026-10-07-upstream-validator-trust-wave-design.md",

@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.65.0
+// @version 1.66.0
+// v1.66.0 (2026-10-07, spec docs/designs/2026-10-07-registry-provenance-normalization-design.md):
+//          new POST-UPGRADE PROVENANCE NORMALIZE pass — after the scripts-snapshot
+//          regeneration, `normalize-registry-provenance.ts` relabels fossil
+//          provenance stamps in the project's scripts/SCRIPTS.md (variant-delivered
+//          rows → `L2 | L2-only`, project-local rows → `L3 | L3`). Fossil `L0 | common`
+//          stamps from the pre-restructure era survived every upgrade because no pass
+//          touched the provenance columns (fleet inspection 2026-10-07: co-deck 60,
+//          co-safety 33, co-consult 9, co-architect 6, co-game 3, co-price 2,
+//          co-design 1, co-abap 1 rows). Non-fatal, dry-run aware — same contract as
+//          the snapshot/manifest regeneration blocks.
 // v1.65.0 (2026-10-07, U-20261006-001): scripts-snapshot.json is regenerated
 //          post-upgrade. The snapshot (the L2 script-version baseline the
 //          Script version comparison reads) was written only at scaffold/adopt
@@ -3599,6 +3609,34 @@ if (existsSync(snapshotHelper) && existsSync(scriptsMd)) {
     }
   } else {
     console.log('  [DRY RUN] Would run: bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>');
+  }
+  console.log('');
+}
+
+// ── Post-upgrade: normalize script-registry provenance (2026-10-07) ───────────
+// Template deliveries change which scripts are variant-delivered vs project-
+// local, but inherited project registries never reconciled their provenance
+// columns — fossil `L0 | common` stamps from the pre-restructure era survived
+// every upgrade (60 rows in co-deck, 33 in co-safety; fleet inspection
+// 2026-10-07, spec docs/designs/2026-10-07-registry-provenance-normalization-design.md).
+// Run the L0 normalizer against the project registry as a non-fatal post-
+// upgrade step (same contract as the VERSION_MANIFEST / scripts-snapshot
+// regeneration blocks above): a missing script or failed run warns and
+// continues; the project's next upgrade retries.
+const provenanceScript = join(workspaceRoot, 'scripts', 'normalize-registry-provenance.ts');
+if (existsSync(scriptsMd) && existsSync(provenanceScript)) {
+  console.log('--- Post-upgrade: Normalizing script-registry provenance ---');
+  if (!dryRun) {
+    const provGen = spawnSync(process.execPath, [provenanceScript, '--root', projectDir], { cwd: workspaceRoot, encoding: 'utf8', timeout: 60000, stdio: 'pipe' });
+    if (provGen.status === 0) {
+      if (provGen.stdout) console.log((provGen.stdout || '').trim());
+      console.log('  ✅ Project registry provenance normalized (variant rows → L2|L2-only, project-local → L3|L3)');
+    } else {
+      console.log(`  ⚠️ normalize-registry-provenance.ts exited with status ${provGen.status} — the registry stays as-is; the next upgrade will retry`);
+      if (provGen.stderr) console.log(`  STDERR: ${provGen.stderr.trim()}`);
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: bun scripts/normalize-registry-provenance.ts --root <project-dir>');
   }
   console.log('');
 }
