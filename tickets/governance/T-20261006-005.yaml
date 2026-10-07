@@ -10,12 +10,33 @@ title: >-
   line-26 baseline count 6/6→7/7; and add the co-abap-style migrated-same-day
   parenthetical to the Beta Since lines in co-consult and co-develop checklists
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:16:24.439Z'
 history:
   - at: '2026-10-06T22:16:24.439Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-07T02:52:34.754Z'
+    from: backlog
+    to: waiting
+  - at: '2026-10-07T02:52:34.783Z'
+    from: waiting
+    to: review
+  - at: '2026-10-07T02:52:34.798Z'
+    from: review
+    to: done
+result: >-
+  ADR-0099 checklist-coherence wave 2 landed via PR #1449: co-deck
+  PROMOTION_CHECKLIST re-marked criteria 6/8/10 as 'N/A per ADR-0099 — migration
+  fast-track' with honest evidence (74-day beta window 2026-06-17 to 2026-08-30
+  below the 3-month criterion; engagement/feedback records not separately
+  maintained), Beta Since 2026-06-17 line restored from git history (verified
+  commit 2cdf0864-era), post-promotion note rewritten as ratification record,
+  2026-10-07 ratification row added to Review History; criterion 5 baseline
+  count corrected 6/6 to 7/7 (verified by running review-baseline --template
+  co-deck: 7/7 green incl. validate-variant-claims); ADR-0099 Decision 1
+  parenthetical extended to name co-deck; co-consult Beta Since gains the
+  co-abap-style migrated-same-day parenthetical and co-develop the 4-day-window
+  equivalent. validate-variant-claims PASS 0 findings on all three variants.
 error: null
