@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 프로젝트 문서
 
 이 디렉토리에는 모든 프로젝트 문서와 아키텍처 아티팩트가 포함되어 있습니다.

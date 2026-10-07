@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 9e236e5c4ed54e5d8d659393a25944f879e8a8ebb83b24d8163ca8493632e1db
 ---
 # co-develop 사용자 가이드

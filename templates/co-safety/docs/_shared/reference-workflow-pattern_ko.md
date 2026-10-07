@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Reference 워크플로우 패턴 가이드
 
 > **패턴 기원**: 2026-06-17 MSDS 도메인 회의(`memory/meeting-2026-06-17-msds-open-questions-resolution.md` Q1 결의)에 따라 확립.

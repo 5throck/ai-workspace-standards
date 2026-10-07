@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 9fd29a75869b3cbc367e6ba96d6d0c5b34a90fc44f69379439a731b38e2b7b05
 ---
 # co-game 사용자 가이드

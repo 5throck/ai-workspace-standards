@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 개인정보보호 설계 체크리스트 — 개인데이터 컨설팅 산출물
 
 *privacy-design-checklist_ko.md version: 1.0 — 영문판과 함께 갱신 (2026-09-06)

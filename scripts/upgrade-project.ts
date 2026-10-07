@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.66.0
+// @version 1.67.0
+// v1.67.0 (2026-10-08, T-20261006-009 + T-20261006-010): the PRUNE REMOVED
+//          agents/ category consults the workspace-root agents/ SSOT (mirroring
+//          skills/ v1.35.0) — root-SSOT-delivered agents no longer get the
+//          factually wrong "project-owned" KEEP basis; the VARIANT-SCOPE SKILL
+//          PRUNE's registry-curated deletion exemption (the registry IS the
+//          ADR-0080 record) is documented in the v1.64.0 block and the pass
+//          ordering is pinned by tests/unit/upgrade-prune-order.test.ts.
 // v1.66.0 (2026-10-07, spec docs/designs/2026-10-07-registry-provenance-normalization-design.md):
 //          new POST-UPGRADE PROVENANCE NORMALIZE pass — after the scripts-snapshot
 //          regeneration, `normalize-registry-provenance.ts` relabels fossil
@@ -35,6 +42,13 @@
 //          retired-mirror sweep already uses — hoisted and shared). The
 //          scripts/ registry-aware retirement path (scriptIsRetiredDelivery)
 //          is unchanged.
+//          T-20261006-010 ordering note: the VARIANT-SCOPE SKILL PRUNE pass
+//          (registry-curated, docs/workspace-schema.json variant_scoped_skills)
+//          runs BEFORE this preservation walk by design — a foreign-variant
+//          skill is deleted on the strength of the owner-curated registry
+//          itself, which IS the ADR-0080 decision record (the registry-curated
+//          deletion exemption), so it never reaches the project-owned KEEP
+//          verdict. The ordering is pinned by tests/unit/upgrade-prune-order.test.ts.
 // v1.63.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
 //          the COUNTRY-SCOPED SKILL PRUNE context-doc scrub filter now matches
 //          bold table rows (**k-dart**) and skill-path mentions
@@ -3143,7 +3157,11 @@ if (pruneRemoved) {
   // Check scripts/
   const pruneCategories = [
     { projDir: join(projectDir, 'scripts'), tplDirs: [join(commonDir, 'scripts')], ext: '.ts', label: 'scripts/' },
-    { projDir: join(projectDir, 'agents'), tplDirs: [join(templatesDir, 'agents'), join(commonDir, 'agents')], ext: '.md', label: 'agents/', skipFiles: ['README.md', 'README_ko.md', '_COMMON.md'] },
+    // v1.66.0 (T-20261006-009): consult the workspace-root agents/ SSOT too —
+    // mirroring the skills/ category's v1.35.0 fix. An agent delivered from
+    // the root SSOT (in agents/ but absent from variant/L1 trees) otherwise
+    // hits the KEEP verdict with a factually wrong "project-owned" basis.
+    { projDir: join(projectDir, 'agents'), tplDirs: [join(templatesDir, 'agents'), join(commonDir, 'agents'), join(workspaceRoot, 'agents')].filter(existsSync), ext: '.md', label: 'agents/', skipFiles: ['README.md', 'README_ko.md', '_COMMON.md'] },
     // v1.22.1: the skills category MUST consult the variant template's skills/ too —
     // variant-owned skills (e.g. co-abap's sap-*) are delivered by the VARIANT SKILLS
     // pass and are template-owned; consulting only templates/common/skills marked them

@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.0
+// v1.15.0 (2026-10-08, T-20261006-004): suffix-style locale files inside the
+//           official perimeter (README_ko.md, guide-ja.yaml — the [._-]locale.\ext
+//           form) must DECLARE their language (any legal locale value) instead of
+//           being silently excluded; missing/unknown declarations FAIL. Wholesale
+//           locale directories stay excluded, the base locale (en) is never a
+//           translation marker, and the gate runs after the official-document
+//           filter (runtime/service data stays out of scope). 51 template docs
+//           stamped with `lang: ko` + `lang_reason: source-material` in the same
+//           pass (the README_ko.md precedent); co-learning's three _ko docs carry
+//           the full sync_version/translated_from_hash pattern (T-20261006-003).
 // v1.14.0 (2026-10-05, T-20261005-004, spec docs/designs/2026-10-05-scripts-hygiene-batch-design.md):
 //           inline-code stripping extracted to the exported pure helper
 //           stripCodeForLanguageScan() and hardened for CommonMark
@@ -252,6 +262,20 @@ function isI18nLocalePath(filePath: string): boolean {
 }
 
 /**
+ * The locale declared by a SUFFIX-style locale filename (README_ko.md → "ko",
+ * guide-ja.md → "ja"), or null (T-20261006-004). Only the suffix form —
+ * wholesale locale directories (ko/, locales/ko/) stay wholesale-excluded.
+ * The base locale ("en") is not a translation marker — README.en.md is an
+ * English ORIGINAL, and the default language never needs a declaration.
+ */
+function suffixLocaleOfFile(filePath: string): string | null {
+  const normalized = filePath.replace(/\\/g, "/");
+  const m = normalized.match(new RegExp(`[._-](${SUPPORTED_LOCALES.join('|')})\\.(md|ya?ml)$`));
+  if (!m || m[1] === 'en') return null;
+  return m[1];
+}
+
+/**
  * Check if file path should be explicitly excluded (locale files, infrastructure)
  */
 function isExcludedPath(filePath: string): boolean {
@@ -429,13 +453,40 @@ async function validateMarkdownLanguage(): Promise<void> {
   let officialCount = 0;
 
   for (const file of candidateFiles) {
-    // Skip excluded paths (locales, planning docs)
-    if (isExcludedPath(file)) {
+    // Only validate official documents
+    if (!isOfficialDocument(file)) {
       continue;
     }
 
-    // Only validate official documents
-    if (!isOfficialDocument(file)) {
+    // T-20261006-004: a suffix-style locale file (README_ko.md, guide-ja.yaml)
+    // inside the official perimeter is not silently excluded — it must DECLARE
+    // its language (any legal locale value) so declaration drift fails. The
+    // Korean prose scan still skips it (a locale file is expected to be in its
+    // language); the declaration is the gate. Order matters: AFTER the official
+    // filter (runtime state and service data are out of scope like every other
+    // check here), BEFORE isExcludedPath — whose suffix-locale arm would
+    // otherwise swallow exactly these files. Wholesale locale directories
+    // (ko/, locales/ko/) stay excluded.
+    const suffixLocale = suffixLocaleOfFile(file);
+    if (suffixLocale) {
+      let declared: string | null | undefined;
+      try {
+        const content = readFileSync(file, "utf-8");
+        declared = parseLangDeclaration(content, /\.ya?ml$/.test(file)).lang;
+      } catch { declared = undefined; }
+      if (declared === undefined || declared === null || !SUPPORTED_LOCALES.includes(declared)) {
+        violations.push({
+          file,
+          reason: declared
+            ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(', ')}`
+            : `${suffixLocale}-suffixed file carries locale content without a lang declaration — add 'lang: ${suffixLocale}' (markdown: frontmatter; yaml: top-level key)`,
+        });
+      }
+      continue;
+    }
+
+    // Skip excluded paths (locales, planning docs)
+    if (isExcludedPath(file)) {
       continue;
     }
 

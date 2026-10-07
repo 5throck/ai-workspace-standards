@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # Skills 디렉토리
 
 재사용 가능한 워크플로우 지식을 **스킬**로 정의합니다.

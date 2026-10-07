@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # agents/
 
 Safety OS 에이전트 정의 — 전체 로스터와 디스패치 규칙은

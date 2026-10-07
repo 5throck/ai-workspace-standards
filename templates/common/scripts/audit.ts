@@ -1,4 +1,7 @@
-// @version 2.51.0
+// @version 2.51.1
+// v2.51.1 (2026-10-08, T-20261007-001): the designLint.enabled !== true branch
+//          joins the Skip verdict — the last Pass-shaped silent skip in the
+//          battery; all three design-lint self-skip branches read [SKIP] now.
 // v2.51.0 (2026-10-07, U-20261006-004): Skip verdict — self-skipped gates stop
 //          reading as passes. New Skip() helper (cyan [SKIP] + skipped counter,
 //          distinct from Pass in the summary line); the verify-memory gate now
@@ -1721,7 +1724,9 @@ function checkDesignLint() {
     }
 
     if (config.enabled !== true) {
-        Pass('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
+        // T-20261007-001: the last Pass-shaped silent skip — all three
+        // design-lint self-skip branches now read [SKIP] consistently.
+        Skip('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
         return;
     }
     const roots = (config.scanRoots ?? []).filter((r) => fs.existsSync(r));

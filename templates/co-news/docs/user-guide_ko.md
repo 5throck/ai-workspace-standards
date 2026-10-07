@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 4e53f944d6f4d3d56a591911ec86d229b50e7ebc2586be02f9e29bfa90027652
 ---
 # Co-News 사용자 가이드

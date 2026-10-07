@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: 1e4166c20381e8c4bc5ca129dc92025ab565f455abf5136edb83f283e5ab11db
 ---
 # co-deck 사용자 가이드

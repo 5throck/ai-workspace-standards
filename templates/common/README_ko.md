@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 sync_version: 1
 ---
 

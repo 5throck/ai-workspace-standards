@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 프로젝트 스크립트 (Project Scripts)
 
 프로젝트 운영을 위한 유틸리티 스크립트입니다.

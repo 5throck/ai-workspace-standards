@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # AI 워크스페이스 템플릿
 
 ![Template Version](https://img.shields.io/badge/version-0.5.3-blue)
@@ -110,4 +115,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 갱신
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-10-08*

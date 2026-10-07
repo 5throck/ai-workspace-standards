@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 에이전트 디렉토리 (Agents Directory)
 
 이 디렉토리에는 멀티 에이전트 워크플로우에서 사용되는 에이전트 정의 파일이 있습니다.

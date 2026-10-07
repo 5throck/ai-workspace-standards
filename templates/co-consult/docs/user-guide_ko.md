@@ -1,4 +1,6 @@
 ---
+lang: ko
+lang_reason: source-material
 translated_from_hash: dbbfb229e1a54e13761e366ea8af0dab44058929fc11356d99a36f7da807f6dc
 ---
 # Co-Consult — 사용자 가이드

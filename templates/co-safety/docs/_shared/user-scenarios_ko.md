@@ -1,3 +1,8 @@
+---
+lang: ko
+lang_reason: source-material
+---
+
 # 사용자 시나리오 — Safety OS 활용 가이드
 
 > **처음 사용하는 분들을 위한 실전 워크스루**: 에이전트 팀과 워크플로우를 활용한 일반적인 EHS/GxP 업무 시나리오
