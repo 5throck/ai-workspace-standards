@@ -11,12 +11,30 @@ title: >-
   Evidence: docs/designs/2026-10-07-registry-provenance-normalization-design.md,
   PR #168. Class: L0 tooling improvement
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:04.320Z'
 history:
   - at: '2026-10-07T16:45:04.320Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T07:50:16.572+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T07:50:16.590+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T07:50:16.605+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T07:50:16.620+09:00'
+    from: review
+    to: done
+result: >-
+  Already delivered: scripts/normalize-registry-provenance.ts 1.1.0 promoted at
+  HEAD by the parallel provenance-normalization wave (upgrade-project v1.66.0
+  POST-UPGRADE pass) — spec
+  docs/designs/2026-10-07-registry-provenance-normalization-design.md. Fleet
+  dry-run re-verified 16/16 projects clean (0 rows to normalize, 0 ghosts) on
+  2026-10-08; a duplicate re-promotion from the co-deck copy was reverted.
 error: null

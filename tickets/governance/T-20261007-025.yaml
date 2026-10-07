@@ -12,12 +12,15 @@ title: >-
   reason; earlier wave PRs (14) merged before the wall hit with green checks.
   After billing is fixed: re-run failed checks on open PRs, then merge
 priority: urgent
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-07T17:44:24.801Z'
 history:
   - at: '2026-10-07T17:44:24.801Z'
     from: null
     to: backlog
+  - at: '2026-10-08T07:47:18.154+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

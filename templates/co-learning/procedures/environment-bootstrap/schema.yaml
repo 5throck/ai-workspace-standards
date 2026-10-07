@@ -1,3 +1,4 @@
+# co-learning roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
 schema_version: "1.0"
 procedure_id: co-learning-environment-bootstrap
 variant: co-learning
@@ -5,7 +6,7 @@ version: "1.0.0"
 title: Environment Bootstrap
 phase: 0
 status: active
-owner_agent: stack-setup
+owner_agent: pm
 purpose: >
   Prepare a secure, reproducible development environment before any planning
   or implementation work.
@@ -14,14 +15,14 @@ preconditions:
   - "Project scope agreed and target stack identified."
 steps:
   - id: 1
-    agent_key: stack-setup
+    agent_key: pm
     skill_key: test-driven-development
     output_type: environment_manifest
     description: >
       Provision the toolchain and project skeleton with the test runner in
       place.
   - id: 2
-    agent_key: security-monitor
+    agent_key: pm
     skill_key: code-review
     output_type: security_baseline
     description: >

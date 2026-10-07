@@ -11,12 +11,27 @@ title: >-
   real content — fix the template copy. Evidence: Slot A 2026-10-08 findings
   M-2/L-2
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:31.473Z'
 history:
   - at: '2026-10-07T16:45:31.473Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.346+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.362+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.377+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.393+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: new-project 1.34.0 WARNs + emits a post-scaffold checklist
+  item when --description/--type are omitted; the co-news context stub banner
+  removed over real content.
 error: null

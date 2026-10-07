@@ -19,12 +19,21 @@ title: >-
   #86 (the actual origin — #89 only landed memory/manifests). Class: new skill
   candidate, strongest of the co-consult landing
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-07T13:58:33.393Z'
 history:
   - at: '2026-10-07T13:58:33.393Z'
     from: null
     to: backlog
+  - at: '2026-10-08T07:43:59.437+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T07:43:59.453+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T07:43:59.468+09:00'
+    from: running
+    to: review
 result: null
 error: null

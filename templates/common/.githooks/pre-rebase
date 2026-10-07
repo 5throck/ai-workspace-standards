@@ -26,16 +26,31 @@ fi
 
 echo "🔍 Scanning for secrets in commits being rebased..."
 
-# Compute the rebase range. git passes $1 = upstream always (when given) and
-# $2 = the branch only for some invocation forms — plain `git rebase <upstream>`
-# passes ONE argument, so the branch defaults to HEAD. With no arguments at all
-# (pull.rebase implicit upstream), fall back to the last 10 commits.
+# Compute the rebase range. git passes $1 = upstream when given and $2 = the
+# branch only for some invocation forms — plain `git rebase <upstream>` passes
+# ONE argument. T-20261006-008: two forms scanned the wrong span.
+#   - `git rebase --root <branch>` also passes ONE argument (the branch being
+#     rewritten), so "$1..HEAD" was an EMPTY range that passed vacuously.
+#     Detection: the argument is not an ancestor of HEAD (or is the literal
+#     --root) — every commit is being rewritten, so scan the whole history.
+#   - Zero arguments (pull.rebase implicit upstream, or a bare --root) fell
+#     back to HEAD~10..HEAD, silently capping the scan. Prefer the branch's
+#     upstream range when one exists; without an upstream, scan all of it.
+# An empty RANGE below means a whole-history scan.
 if [ $# -ge 2 ]; then
     RANGE="$1..$2"
 elif [ $# -eq 1 ]; then
-    RANGE="$1..HEAD"
+    if [ "$1" = "--root" ] || [ -z "$(git rev-list -n 1 "${1}..HEAD" 2>/dev/null)" ]; then
+        RANGE=""
+    else
+        RANGE="$1..HEAD"
+    fi
 else
-    RANGE="HEAD~10..HEAD"
+    if UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null); then
+        RANGE="${UPSTREAM}..HEAD"
+    else
+        RANGE=""
+    fi
 fi
 
 # Single repo-mode scan of exactly the commits being replayed.
@@ -45,11 +60,23 @@ fi
 # working tree (blocking every rebase) rather than from the commits. Repo mode
 # with --log-opts scans the real commit diffs and honors the repo's
 # .gitleaks.toml allowlist.
-if gitleaks detect --no-banner --log-opts="--no-merges $RANGE"; then
-    echo "✅ No secrets found in $RANGE - rebase can proceed"
-    exit 0
+if [ -n "$RANGE" ]; then
+    if gitleaks detect --no-banner --log-opts="--no-merges $RANGE"; then
+        echo "✅ No secrets found in $RANGE - rebase can proceed"
+        exit 0
+    else
+        echo "❌ SECRET DETECTED in $RANGE"
+        echo "   Rebase blocked to prevent secret exposure"
+        exit 1
+    fi
 else
-    echo "❌ SECRET DETECTED in $RANGE"
-    echo "   Rebase blocked to prevent secret exposure"
-    exit 1
+    # Root-rebase form: the full history is being rewritten — scan all of it.
+    if gitleaks detect --no-banner --log-opts="--no-merges"; then
+        echo "✅ No secrets found in the full history (root rebase) - rebase can proceed"
+        exit 0
+    else
+        echo "❌ SECRET DETECTED in the commit history (root rebase)"
+        echo "   Rebase blocked to prevent secret exposure"
+        exit 1
+    fi
 fi

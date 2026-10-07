@@ -8,12 +8,28 @@ title: >-
   value) in _ko-suffixed files instead of excluding them, so missing
   declarations fail
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:11:40.088Z'
 history:
   - at: '2026-10-06T22:11:40.088Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.032+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.047+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.062+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.078+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: validate-md-language 1.15.0 — suffix-style locale files in
+  the official perimeter must declare lang: <locale> (base locale en exempt;
+  gate after the official filter, before the exclusion arm); 51 template docs
+  stamped lang: ko + lang_reason: source-material.
 error: null

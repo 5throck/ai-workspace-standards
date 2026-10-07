@@ -2,18 +2,20 @@
 
 This document defines the workflow phases used by the `co-learning` variant. It follows the standard workspace phase structure (see `templates/common/docs/phase-definitions.md`) with co-learning's actual specialist agents mapped to each phase, per each agent's `phases:` frontmatter field in `agents/*.md` and the Phase Determination table in `AGENTS.md §3.5`.
 
+> **Roster note (T-20261006-001)**: the variant roster is three agents — `pm` (orchestration), `exam-bank-steward` (question-bank content and exam operations), `i18n-specialist` (locale documentation). Dev-slot work (design/implementation/docs) is dispatched by PM to generic specialists per the §3.5 Deliverable-Type Gate; there is no named architect/code-writer/test-runner/designer/stack-setup/security-monitor roster in this variant.
+
 ---
 
 ## Phase Overview
 
 | Phase | Name | PM Role | Who Acts |
 |-------|------|---------|----------|
-| 0 | Team Assembly & Environment Baseline | Orchestrator | PM, `stack-setup` (optional), `security-monitor` |
-| 1 | Analysis & Stack Setup | Observer | `architect`, `stack-setup` (optional) |
-| 2 | Design Review & Approval | Gate Keeper | PM + `architect` |
-| 3 | UI/UX Design | Coordinator | `designer` (optional) |
-| 4 | Implementation & QA Gate | Coordinator | `code-writer`, `test-runner` |
-| 5 | Security Review & Lifecycle Finalization | Owner | `security-monitor`, PM (updates governance records, logs decisions) |
+| 0 | Team Assembly & Environment Baseline | Orchestrator | PM |
+| 1 | Analysis | Observer | PM-dispatched design specialist (§3.5) |
+| 2 | Design Review & Approval | Gate Keeper | PM + design specialist |
+| 3 | Content Production | Coordinator | `exam-bank-steward`; `i18n-specialist` on demand |
+| 4 | Implementation & QA Gate | Coordinator | PM-dispatched implementation specialist; PM verifies |
+| 5 | Security Review & Lifecycle Finalization | Owner | PM (runs `security-scan` in the QA gate, updates governance records, logs decisions) |
 | 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, `/sync`, creates PR) |
 
 ---
@@ -22,43 +24,41 @@ This document defines the workflow phases used by the `co-learning` variant. It 
 
 ### Phase 0 — Team Assembly & Environment Baseline
 **PM opens the phase**: clarify the request, confirm scope, assemble the team.
-- PM reviews the request and classifies it
-- `stack-setup` (Tier: Low, optional) identifies the tech stack when it is unrecognized and produces a risk-assessed setup plan — only dispatched when no known project manifest exists
-- `security-monitor` (Tier: Medium) runs a post-scaffold baseline scan to establish the initial `security/` findings state
-- **Output**: confirmed scope, team assignment, environment baseline (if stack-setup engaged)
+- PM reviews the request and classifies it per the §3.5 Deliverable-Type Gate
+- PM runs the post-scaffold baseline scan (the `security-scan` skill) to establish the initial findings state
+- **Output**: confirmed scope, dispatch plan, environment baseline
 
-### Phase 1 — Analysis & Stack Setup
+### Phase 1 — Analysis
 **PM observes**: specialists work autonomously.
-- `architect` (Tier: High) analyzes requirements and acceptance criteria, begins design work
-- `stack-setup` (Tier: Low, optional) continues environment bootstrap for unrecognized stacks, handing off to `architect` once the stack is confirmed
+- The design specialist (§3.5, High tier) analyzes requirements and acceptance criteria, begins design work
 - PM intervenes only if quality standards are not met
-- **Output**: requirements + acceptance criteria, confirmed dev environment
-- **Gate**: none — phase ends when agents signal completion
+- **Output**: requirements + acceptance criteria
+- **Gate**: none — phase ends when the specialist signals completion
 
 ### Phase 2 — Design Review & Approval
 **PM enforces the gate**: no execution without explicit user approval.
-- `architect` (Tier: High) produces the implementation plan (data model, API surface, file changes, trade-offs) and an ADR (`docs/adr/NNNN-slug.md`) for significant architectural decisions
+- The design specialist produces the implementation plan (data model, API surface, file changes, trade-offs) and an ADR (`docs/adr/NNNN-slug.md`) for significant architectural decisions
 - PM synthesizes the plan into a decision recommendation
 - **USER APPROVAL REQUIRED** before proceeding to Phase 3/4
 - **Output**: approved implementation plan + ADR
 
-### Phase 3 — UI/UX Design
-**PM coordinates**: design work proceeds when the approved plan includes a user-facing component.
-- `designer` (Tier: Medium, optional) translates the approved plan into wireframes, component specs, interaction states, and design tokens; flags accessibility (WCAG AA) concerns before implementation
-- Skipped entirely when no UI/UX component is in scope (per `variant.json → agent_manifest.optional`)
-- Hands off directly to `code-writer`
-- **Output**: design specification (when engaged), or pass-through to Phase 4 when out of scope
+### Phase 3 — Content Production
+**PM coordinates**: content work proceeds when the approved plan includes question-bank or locale deliverables.
+- `exam-bank-steward` (Tier: Medium) authors/reviews question-bank content, runs bias remediation through the remediation ledger, and performs exam operations — every rewrite is human-reviewed
+- `i18n-specialist` (Tier: Medium, on demand) covers locale documentation and translation-zone work for the produced content
+- Skipped entirely when no question-bank/locale deliverable is in scope
+- **Output**: reviewed content set (when engaged), or pass-through to Phase 4
 
 ### Phase 4 — Implementation & QA Gate
 **PM coordinates**: implementation and verification proceed per the approved plan.
-- `code-writer` (Tier: Low) implements exactly what the approved plan specifies — no scope creep, no redesign; hands off to `test-runner`
-- `test-runner` (Tier: Medium) runs the audit script and full test suite, verifies every acceptance criterion from the implementation plan, and reports a pass/fail QA verdict
-- Loop up to 3 iterations between `code-writer` and `test-runner` on failures before escalating to PM
+- The implementation specialist (§3.5) implements exactly what the approved plan specifies — no scope creep, no redesign
+- PM runs the audit script and full test suite, verifies every acceptance criterion from the implementation plan, and reports a pass/fail QA verdict (the `security-scan` skill covers the security check for auth/secrets/infra changes)
+- Loop up to 3 QA iterations on failures before escalating to the user
 - **Output**: implemented change set, QA report (READY FOR PR or BLOCKED)
 
 ### Phase 5 — Security Review & Lifecycle Finalization
-**PM owns**: security review clears the change and governance records are updated.
-- `security-monitor` (Tier: Medium) runs a pre-PR advisory check (read-only) — reports any active CRITICAL/HIGH findings before the PR proceeds; required for any change touching auth, secrets, or infra (per `co-learning.context.md § Domain Rules`)
+**PM owns**: the security check clears the change and governance records are updated.
+- PM runs the pre-PR advisory check (`security-scan`) — any CRITICAL/HIGH finding blocks the PR; required for any change touching auth, secrets, or infra
 - PM updates governance documents for agent/skill/script changes
 - PM logs decisions to `memory/YYYY-MM-DD.md`
 - **Output**: security advisory report, governance records updated, drift report or "no drift" confirmation
@@ -78,17 +78,14 @@ This document defines the workflow phases used by the `co-learning` variant. It 
 
 Per each agent's frontmatter `phases:` field in `templates/co-learning/agents/*.md` (also mirrored in `AGENTS.md §2` and `§3.5`):
 
-| Agent | Phases | Tier | Optional? |
-|-------|--------|------|-----------|
-| `stack-setup` | 0, 1 | Low | Yes — skip when the stack is already configured |
-| `architect` | 1, 2 | High | No |
-| `designer` | 3 | Medium | Yes — skip if no UI/UX component in scope |
-| `code-writer` | 4 | Low | No |
-| `test-runner` | 4 | Medium | No |
-| `security-monitor` | 0, 5 | Medium | No |
-| `i18n-specialist` | 5 | Medium | Yes — engaged on demand for locale deliverables (common extends-stub; not part of the sequential pipeline) |
+| Agent | Phases | Tier | Notes |
+|-------|--------|------|-------|
+| `pm` | 0-6 | — | Orchestration, QA gate, security-scan runs, `/sync` |
+| `exam-bank-steward` | 4, 5 | Medium | Question-bank authoring/review, bias remediation, exam operations; human-reviewed via the remediation ledger |
+| `i18n-specialist` | 5 | Medium | Locale documentation and translation zones (common extends-stub; engaged on demand for locale deliverables) |
+| design / implementation / docs specialists | per §3.5 row | High / Low-Medium / Medium | Generic PM-dispatched specialists — no agent file in this variant; the §3.5 Deliverable-Type Gate names the slot and tier |
 
-`designer` and `stack-setup` are declared optional in `variant.json → agent_manifest.optional`, matching the "(optional)" annotations in `AGENTS.md` Agent Roster and Dispatch Trigger tables.
+The `designer`/`stack-setup` optionality annotations once described in this document belonged to a generic-pipeline roster this variant never shipped; `variant.json` carries no `pipeline` field and `agents/` contains exactly the three roster agents above.
 
 ---
 
@@ -97,28 +94,11 @@ Per each agent's frontmatter `phases:` field in `templates/co-learning/agents/*.
 co-learning declares its specialist agents per phase in `AGENTS.md §3.5 Phase Determination` and each agent's `agents/<name>.md` frontmatter:
 
 ```yaml
-# Example agent frontmatter (code-writer)
-phases: [4]
-handoff_to: [test-runner]
-handoff_from: [designer, architect]
-required_skills: [code-review, refactoring]
+# Example agent frontmatter (exam-bank-steward)
+phases: [4, 5]
 ```
 
 The PM role and Phase 0/6 structure are consistent with the workspace-standard phase model. co-learning differs from the standard template by:
-- Splitting security work into two touchpoints: a Phase 0 baseline scan and a Phase 5 pre-PR advisory check, both owned by `security-monitor`.
-- Making `stack-setup` a Phase 0-1 specialist that only activates for unrecognized tech stacks, always requiring explicit user approval (via `CONFIRM HIGH RISK` for risky commands) before executing any setup step.
-- Merging "Execution" and "QA Gate" into a single Phase 4, reflecting the tight `code-writer` → `test-runner` loop (max 3 iterations) defined in `co-learning.context.md § Subagent Pattern`.
-
----
-
-## PM Facilitation per Phase
-
-| Phase | PM Opening | PM Monitoring | PM Synthesis |
-|-------|-----------|---------------|--------------|
-| 0 | Set objective, nominate team (incl. optional `stack-setup`) | Confirm environment baseline complete | Scope document + security baseline |
-| 1 | Brief `architect`/`stack-setup` on requirements | Check quality of analysis | Requirements + acceptance criteria |
-| 2 | Present implementation plan + ADR for approval | — | Decision + approved plan |
-| 3 | Hand off approved plan to `designer` (if in scope) | Intervene if off-plan | Design specification or pass-through |
-| 4 | Hand off approved plan to `code-writer` | Track `code-writer` ↔ `test-runner` loop (max 3x) | QA report (READY FOR PR / BLOCKED) |
-| 5 | Request pre-PR advisory check from `security-monitor` | Verify lifecycle drift | Security report + drift report or "no drift" confirmation |
-| 6 | Run audit + `/sync` | Fix issues (max 2 iterations) | Audit pass report + PR link |
+- Making question-bank content a first-class phase (Phase 3) owned by `exam-bank-steward`, with every rewrite human-reviewed via the remediation ledger.
+- Keeping the security check inside the QA gate (Phase 5) via the PM-run `security-scan` skill rather than a dedicated agent.
+- Merging "Execution" and "QA Gate" into a single Phase 4 (max 3 iterations) defined in `co-learning.context.md § Subagent Pattern`.

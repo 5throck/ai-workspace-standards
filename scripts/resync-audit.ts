@@ -2,7 +2,12 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.4.0
+ * @version 1.5.0
+ *
+ * v1.5.0 (2026-10-08, T-20261007-027): --final-state mode — a read-only fleet
+ *          state table (project/branch/dirty/unpushed/open-PR/template-version)
+ *          for every Projects/co-* repo; gh pr list against the parsed origin
+ *          slug, upstream-aware unpushed count, template-version.txt parse.
  *
  * v1.4.0 (2026-10-05, T-20261004-019):
  *  - porcelain first-row fix: git()'s whole-output trim consumed the leading
@@ -80,7 +85,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 
 interface FileRow {
   file: string;
@@ -108,6 +113,7 @@ function parseArgs(): { projects: string[]; json: boolean; snapshotDir?: string;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--help" || args[i] === "-h") help = true;
     else if (args[i] === "--json") json = true;
+    else if (args[i] === "--final-state") continue; // consumed in main (T-20261007-027)
     else if (args[i] === "--snapshot-dir") snapshotDir = args[++i];
     else if (args[i] === "--project") projects.push(args[++i]);
     else projects.push(args[i]);
@@ -477,9 +483,42 @@ export async function main(): Promise<void> {
 
 Usage:
   bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]
+  bun scripts/resync-audit.ts --final-state          fleet dirty/unpushed/open-PR/template-version table
 
 Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     process.exit(0);
+  }
+  if (process.argv.includes("--final-state")) {
+    // T-20261007-027: read-only fleet state table — per project, the four
+    // numbers the resync decision needs (dirty files, unpushed commits, open
+    // PRs on the current branch, delivered template version). Read-only: the
+    // only subprocesses are git rev-list/status, gh pr list, and file reads.
+    const targets0 = projects.length > 0 ? projects : defaultProjects();
+    console.log("| project | branch | dirty | unpushed | open PR | template-version |");
+    console.log("|---|---|---|---|---|---|");
+    for (const project of targets0.sort()) {
+      if (!existsSync(join(project, ".git"))) continue;
+      const branch = git(project, ["rev-parse", "--abbrev-ref", "HEAD"]) || "?";
+      const dirty = git(project, ["status", "--porcelain"]).split("\n").filter(Boolean).length;
+      const unpushedRaw = git(project, ["rev-list", "--count", "@{upstream}..HEAD"]);
+      const unpushed = /^\d+$/.test(unpushedRaw) ? unpushedRaw : "no upstream";
+      const remoteUrl = git(project, ["remote", "get-url", "origin"]);
+      let openPr = "(no remote)";
+      const slug = remoteUrl.match(/[:/]([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?:\.git)?$/);
+      if (slug) {
+        const ghOut = spawnSync("gh", ["pr", "list", "-R", `${slug[1]}/${slug[2]}`, "--head", branch, "--state", "open", "--json", "number"], { encoding: "utf-8" });
+        try {
+          openPr = String((JSON.parse(ghOut.stdout || "[]") as Array<unknown>).length);
+        } catch { openPr = "(gh n/a)"; }
+      }
+      let tplVersion = "—";
+      const tvPath = join(project, "template-version.txt");
+      if (existsSync(tvPath)) {
+        tplVersion = readFileSync(tvPath, "utf-8").match(/^version=(.*)$/m)?.[1]?.trim() || tplVersion;
+      }
+      console.log(`| ${project} | ${branch} | ${dirty} | ${unpushed} | ${openPr} | ${tplVersion} |`);
+    }
+    return;
   }
   const targets = projects.length > 0 ? projects : defaultProjects();
   if (targets.length === 0) {

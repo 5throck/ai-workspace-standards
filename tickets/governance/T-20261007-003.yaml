@@ -10,12 +10,29 @@ title: >-
   clean-path test, and correct the CHANGELOG 'read-only' wording (the gate
   writes for missing/stub files)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-07T05:52:41.076Z'
 history:
   - at: '2026-10-07T05:52:41.076Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:01.906+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:01.925+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:01.940+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:01.956+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged (CI 8/8 green): verify-skills 1.5.2 --check normalizes the
+  volatile Generated: stamp out of both sides; exact-stub files matching the
+  current generation exit 0 without rewriting (clean path reachable, no stamp
+  churn); clean-path subprocess test added; CHANGELOG read-only wording
+  corrected.
 error: null

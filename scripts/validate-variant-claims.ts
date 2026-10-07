@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-08, T-20261006-006): the calibration-sensitive pure helpers
+//          (splitMdRow, markerTableNames, setDiff, extractBareImports,
+//          isBuiltin, lineOf, isRosterAgent) are exported for unit tests
+//          (tests/unit/validate-variant-claims.test.ts pins them). Behavior
+//          unchanged.
 /**
  * validate-variant-claims.ts — variant contract-truth validator (D6 of
  * docs/designs/2026-10-05-co-deck-review-remediation-design.md; T-20261005-011..014;
@@ -120,7 +125,7 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as yamlLoad } from 'js-yaml';
 
-const VERSION = '1.4.0';
+const VERSION = '1.5.0';
 const WORKSPACE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
@@ -188,7 +193,7 @@ function readText(p: string): string | null {
 }
 
 /** 1-based line of the first occurrence of `needle` (undefined when absent or text unread). */
-function lineOf(text: string | null, needle: string): number | undefined {
+export function lineOf(text: string | null, needle: string): number | undefined {
   if (!text || !needle) return undefined;
   const idx = text.indexOf(needle);
   if (idx < 0) return undefined;
@@ -219,7 +224,7 @@ function parseYamlFile(p: string): { ok: true; data: unknown } | { ok: false; er
 const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
 
 /** Rows of a markdown table line: `| a | b | c |` → ['a','b','c']. */
-function splitMdRow(line: string): string[] {
+export function splitMdRow(line: string): string[] {
   return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
 }
 
@@ -373,7 +378,7 @@ function checkA(): void {
 // ── Check b — theme_manifest truth ───────────────────────────────────────────
 
 /** Names from the first markdown table between AUTO-GENERATED markers. */
-function markerTableNames(md: string, marker: string): string[] {
+export function markerTableNames(md: string, marker: string): string[] {
   const start = md.indexOf(`<!-- ${marker}:START`);
   const end = md.indexOf(`<!-- ${marker}:END`);
   if (start < 0 || end < 0 || end < start) return [];
@@ -388,7 +393,7 @@ function markerTableNames(md: string, marker: string): string[] {
   return names;
 }
 
-function setDiff(actual: string[], declared: string[]): { missing: string[]; extra: string[] } {
+export function setDiff(actual: string[], declared: string[]): { missing: string[]; extra: string[] } {
   const a = new Set(actual);
   const d = new Set(declared);
   return {
@@ -589,7 +594,7 @@ function checkD(): { skipped?: string } {
 
 // ── Check e — owner validity (owners ∈ roster) ───────────────────────────────
 
-function isRosterAgent(name: string): boolean {
+export function isRosterAgent(name: string): boolean {
   return roster.has(name) || [...roster].some((r) => r.toLowerCase() === name.toLowerCase());
 }
 
@@ -849,7 +854,7 @@ const IMPORT_PATTERNS: RegExp[] = [
   /\brequire\(\s*["']([^"']+)["']\s*\)/g,
 ];
 
-function extractBareImports(text: string): Array<{ spec: string; line: number }> {
+export function extractBareImports(text: string): Array<{ spec: string; line: number }> {
   const out: Array<{ spec: string; line: number }> = [];
   text.split('\n').forEach((line, i) => {
     for (const re of IMPORT_PATTERNS) {
@@ -861,7 +866,7 @@ function extractBareImports(text: string): Array<{ spec: string; line: number }>
   return out;
 }
 
-function isBuiltin(spec: string): boolean {
+export function isBuiltin(spec: string): boolean {
   if (spec.startsWith('node:') || spec.startsWith('bun:')) return true;
   return BUILTIN_MODULES.has(spec.split('/')[0]);
 }

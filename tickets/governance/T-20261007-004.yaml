@@ -12,12 +12,21 @@ title: >-
   machine checks currently pass over histories ticket-store could not have
   produced
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-07T05:52:41.091Z'
 history:
   - at: '2026-10-07T05:52:41.091Z'
     from: null
     to: backlog
+  - at: '2026-10-08T07:43:59.759+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T07:43:59.774+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T07:43:59.789+09:00'
+    from: running
+    to: review
 result: null
 error: null

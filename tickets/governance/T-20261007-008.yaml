@@ -14,12 +14,21 @@ title: >-
   the co-deck session is actively working templates/co-deck — coordinate before
   any implementation
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-07T13:54:31.612Z'
 history:
   - at: '2026-10-07T13:54:31.612Z'
     from: null
     to: backlog
+  - at: '2026-10-08T07:50:23.357+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T07:50:23.407+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T07:50:23.434+09:00'
+    from: running
+    to: review
 result: null
 error: null

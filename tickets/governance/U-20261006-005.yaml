@@ -5,15 +5,12 @@ title: Upstream request from co-develop
 priority: normal
 status: done
 attempts: 0
-created_at: '2026-10-06T09:55:00.000Z'
+created_at: '2026-10-06T07:01:51.090Z'
 history:
-  - at: '2026-10-06T09:55:00.000Z'
+  - at: '2026-10-06T07:01:51.090Z'
     from: null
     to: backlog
   - at: '2026-10-06T07:01:51.090Z'
-    from: backlog
-    to: waiting
-  - at: '2026-10-06T07:04:12.972Z'
     from: backlog
     to: waiting
   - at: '2026-10-06T07:04:12.990Z'
@@ -32,7 +29,7 @@ error: null
 upstream:
   project: co-develop
   variant: co-develop
-  template_version: "0.12.0"
+  template_version: 0.12.0
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
@@ -77,5 +74,10 @@ upstream:
       at: '2026-10-06T09:55:00.000Z'
   resolution:
     outcome: fixed
-    summary: "upgrade-project 1.64.0: --prune-removed now treats agents/skills files absent from every template tree as project-owned (L3) and KEEP-verifies them with an ADR-0080 deprecation pointer instead of deleting; skills SSOT prune fires only through explicit retirement records; regression tests pin project-owned survival byte-for-byte plus a legitimate retirement case"
+    summary: >-
+      upgrade-project 1.64.0: --prune-removed now treats agents/skills files
+      absent from every template tree as project-owned (L3) and KEEP-verifies
+      them with an ADR-0080 deprecation pointer instead of deleting; skills SSOT
+      prune fires only through explicit retirement records; regression tests pin
+      project-owned survival byte-for-byte plus a legitimate retirement case
     pr_url: https://github.com/5throck/ai-workspace-standards/pull/1439

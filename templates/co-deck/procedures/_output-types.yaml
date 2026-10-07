@@ -73,3 +73,28 @@ output_types:
     format: json
     evidence_model: null
     retention: engagement
+
+  slidedata_json:
+    description: >-
+      The deck SSOT (slide IDs, titles, videos, lead-in scripts, bullet links)
+      owned by the Slidedata-Derived Document Sync procedure (T-20261007-010).
+    owner_agent: pm
+    format: json
+    evidence_model: null
+    retention: engagement
+  equality_report:
+    description: >-
+      Pass/fail report of the built HTML's embedded slide data versus
+      slidedata.json (embedded-data equality check, T-20261007-010).
+    owner_agent: pm
+    format: markdown
+    evidence_model: null
+    retention: engagement
+  citation_check:
+    description: >-
+      Footnote citation truncation check result — zero ellipsis-truncated
+      citations allowed (PR #165 footnote-wrap rule, T-20261007-010).
+    owner_agent: pm
+    format: markdown
+    evidence_model: null
+    retention: engagement

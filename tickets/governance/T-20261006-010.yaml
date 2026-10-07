@@ -8,12 +8,27 @@ title: >-
   deletion is exempt from the ADR-0080 record requirement) in the v1.64.0 header
   or add a KEEP path there, and pin the pass ordering with a test
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:16:37.281Z'
 history:
   - at: '2026-10-06T22:16:37.281Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.472+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.487+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.502+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.518+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: the registry-curated deletion exemption documented in the
+  v1.64.0 header block; the VARIANT-SCOPE-before-preservation pass ordering
+  pinned by tests/unit/upgrade-prune-order.test.ts.
 error: null

@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-10-08, T-20261007-004): history shape validation — entries
+//          chronologically non-decreasing, first entry is the null→backlog
+//          creation, consecutive entries chain, and created_at does not
+//          postdate the earliest event; repair via ticket.ts repair-history.
+// v1.6.0 (2026-10-07, U-20261006 runner batch): `running` joins the ready
 // v1.6.0 (2026-10-07, U-20261006 runner batch): `running` joins the ready
 //          branch of the triage↔status invariant — claiming a triaged-ready
 //          upstream ticket (move → running) is store-mediated, not a hand-edit.
@@ -198,6 +203,43 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     fail(`ticket.not_before must be an ISO YYYY-MM-DD string: ${JSON.stringify(t.not_before)}`);
   }
   if (!Array.isArray(t.history)) fail('ticket.history must be an array');
+  // T-20261007-004: history shape — entries are chronologically non-decreasing,
+  // the first entry is the creation (from: null), consecutive entries chain
+  // (each `from` equals the previous `to`), and created_at does not postdate
+  // the earliest recorded event. The legacy upstream imports violated all of
+  // these (doubled backlog→waiting edges, retroactive created_at stamps);
+  // `ticket.ts repair-history <id>` rewrites them into this shape.
+  {
+    const hist = t.history as Array<{ at: unknown; from: unknown; to: unknown }>;
+    let prevAt: string | null = null;
+    let prevTo: Status | null = null;
+    for (let i = 0; i < hist.length; i++) {
+      const e = hist[i];
+      if (typeof e.at !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(e.at)) {
+        fail(`history[${i}].at must be an ISO timestamp: ${JSON.stringify(e.at)}`);
+      }
+      if (prevAt !== null && e.at < prevAt) {
+        fail(`history[${i}].at (${e.at}) predates the previous entry (${prevAt}) — non-monotonic history (repair with: ticket.ts repair-history)`);
+      }
+      if (i === 0 && t.status !== 'done') {
+        // A done ticket may carry a TRIMMED history (archived/legacy shapes
+        // keep only the closing review→done edge) — the creation rules bind
+        // only to tickets still in flight.
+        if (e.from !== null) fail('history[0].from must be null (the creation transition)');
+        if (e.to !== 'backlog' && e.to !== 'waiting') fail('history[0].to must be backlog (or waiting for a directly-triaged import)');
+      } else if (i > 0 && prevTo !== null && e.from !== prevTo) {
+        fail(`history[${i}].from (${JSON.stringify(e.from)}) does not chain from history[${i - 1}].to (${JSON.stringify(prevTo)}) — duplicated or divergent edge (repair with: ticket.ts repair-history)`);
+      }
+      prevAt = e.at as string;
+      prevTo = e.to as Status;
+    }
+    if (hist.length > 0 && typeof t.created_at === 'string' && (hist[0].at as string) >= t.created_at) {
+      const minAt = hist.reduce((m: string, e) => ((e.at as string) < m ? (e.at as string) : m), hist[0].at as string);
+      if (minAt < t.created_at) {
+        fail(`ticket.created_at (${t.created_at}) postdates the earliest history entry (${minAt}) — reconcile with: ticket.ts repair-history`);
+      }
+    }
+  }
   // attempts must equal the number of failed → waiting transitions in history —
   // the field is a derived retry count, not independent state (T-20260917-003).
   const expectedAttempts = (t.history as unknown[]).filter(

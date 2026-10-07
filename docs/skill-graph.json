@@ -2033,6 +2033,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "industry-research-pack",
+      "type": "skill",
+      "layer": "variant:co-consult"
+    },
+    {
       "id": "insight-synthesis",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -2333,6 +2338,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "output_type.citation_check",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "output_type.classification_groundwork",
       "type": "output_type",
       "layer": "variant:co-export"
@@ -2486,6 +2496,11 @@
       "id": "output_type.environment_manifest",
       "type": "output_type",
       "layer": "variant:co-develop"
+    },
+    {
+      "id": "output_type.equality_report",
+      "type": "output_type",
+      "layer": "variant:co-deck"
     },
     {
       "id": "output_type.evidence_pack",
@@ -3280,6 +3295,11 @@
     },
     {
       "id": "procedure.co-deck.lecture-deck-production",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.slidedata-derived-doc-sync",
       "type": "procedure",
       "layer": "variant:co-deck"
     },
@@ -11101,6 +11121,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-learning/docs/phase-definitions.md",
+      "to": "security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-learning/docs/user-guide_ko.md",
       "to": "code-review",
       "source": "workflow-doc"
@@ -11132,31 +11158,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-learning/docs/user-guide.md",
-      "to": "code-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-learning/docs/user-guide.md",
       "to": "project-review",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-learning/docs/user-guide.md",
-      "to": "refactoring",
+      "to": "security-scan",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-learning/docs/user-guide.md",
       "to": "sync",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-learning/docs/user-guide.md",
-      "to": "test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -13091,6 +13105,12 @@
       "type": "references",
       "from": "evidence-ledger",
       "to": "decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "evidence-ledger",
+      "to": "industry-research-pack",
       "source": "prose"
     },
     {
@@ -15205,6 +15225,74 @@
       "from": "image-curator",
       "to": "html-build",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "company-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "competitive-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "composes_with",
@@ -19528,6 +19616,88 @@
     },
     {
       "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.citation_check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.equality_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.html_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
+    },
+    {
+      "type": "produces",
       "from": "procedure.co-deck.source-research",
       "to": "output_type.research_pack",
       "source": "procedure_schema"
@@ -21295,13 +21465,6 @@
       "source": "process_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.architecture-design",
-      "to": "architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "step_uses_skill",
       "from": "procedure.co-learning.architecture-design",
       "to": "code-review",
@@ -21312,6 +21475,13 @@
       "from": "procedure.co-learning.architecture-design",
       "to": "output_type.approved_implementation_plan",
       "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "enables",
@@ -21338,24 +21508,24 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "enables",
       "from": "procedure.co-learning.environment-bootstrap",
       "to": "procedure.co-learning.technical-planning",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.environment-bootstrap",
-      "to": "security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.environment-bootstrap",
-      "to": "stack-setup",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -21364,24 +21534,10 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.feature-implementation",
-      "to": "architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "step_uses_skill",
       "from": "procedure.co-learning.feature-implementation",
       "to": "code-review",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.feature-implementation",
-      "to": "code-writer",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
@@ -21403,19 +21559,33 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.feature-implementation",
       "to": "refactoring",
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.feature-implementation",
-      "to": "security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "step_uses_skill",
       "from": "procedure.co-learning.feature-implementation",
       "to": "test-driven-development",
@@ -21426,13 +21596,6 @@
       "from": "procedure.co-learning.feature-implementation",
       "to": "test-driven-development",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.release-verification",
-      "to": "code-writer",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -21447,6 +21610,20 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.release-verification",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.release-verification",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.release-verification",
       "to": "procedure.co-learning.feature-implementation",
@@ -21457,13 +21634,6 @@
       "from": "procedure.co-learning.release-verification",
       "to": "test-driven-development",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.release-verification",
-      "to": "test-runner",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "step_uses_skill",
@@ -21478,30 +21648,37 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.security-release-retrospective",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.security-release-retrospective",
       "to": "procedure.co-learning.release-verification",
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.security-release-retrospective",
-      "to": "security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.technical-planning",
-      "to": "architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "produces",
       "from": "procedure.co-learning.technical-planning",
       "to": "output_type.technical_findings",
       "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",
@@ -21520,13 +21697,6 @@
       "from": "procedure.co-learning.technical-planning",
       "to": "research-analysis",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-learning.technical-planning",
-      "to": "stack-setup",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "produces",

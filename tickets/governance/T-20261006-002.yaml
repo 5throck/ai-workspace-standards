@@ -12,12 +12,28 @@ title: >-
   workspace root (both verified working, 14/14 PASS), and update the runner
   prompt + design doc R44 in lockstep
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-06T22:03:23.373Z'
 history:
   - at: '2026-10-06T22:03:23.373Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-08T06:46:02.409+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-08T06:46:02.424+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-08T06:46:02.440+09:00'
+    from: running
+    to: review
+  - at: '2026-10-08T06:46:02.456+09:00'
+    from: review
+    to: done
+result: >-
+  PR #1469 merged: R44 Amendment 2 — the per-variant battery is
+  validate-variant-claims --template + validate-variant-readiness --variant from
+  the workspace root, with the Module-not-found history. User-side 01:30
+  scheduler prompt still needs the same one-line update.
 error: null

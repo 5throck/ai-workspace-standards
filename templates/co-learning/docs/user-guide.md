@@ -23,7 +23,7 @@ co-learning is driven entirely through the **PM Gateway pattern**: you talk to P
 5. **PM runs the QA gate** (`bun scripts/audit.ts`) and verifies acceptance criteria.
 6. **PM finalizes with `/sync "type(scope): message"`** — this single command runs the full pipeline: memory log → CHANGELOG entry → audit → commit → push → PR. You never run `git commit`/`git push` directly; the pre-commit hook blocks it outside `/sync`.
 
-**Rule of thumb**: if you find yourself about to ask an agent file (`agents/code-writer.md` etc.) to do something directly, stop — route it through PM instead.
+**Rule of thumb**: if you find yourself about to ask an agent file directly to do something, stop — route it through PM instead. The variant roster is three agents — `pm` (orchestration), `exam-bank-steward` (question-bank content and exam operations), `i18n-specialist` (locale documentation) — plus generic specialists PM dispatches per the §3.5 Deliverable-Type Gate; there is no generic dev pipeline.
 
 ---
 
@@ -33,35 +33,32 @@ Use this table to anticipate which agent/skill PM will likely dispatch. You don'
 
 | Your task | Likely agent | Likely skill | Notes |
 |-----------|--------------|--------------|-------|
-| New feature / new endpoint | `architect` → `code-writer` → `test-runner` | `test-driven-development` | Architect produces the plan/ADR first; code-writer implements only after the plan is approved |
-| Bug fix | `code-writer` → `test-runner` | `test-driven-development` | Write/confirm a failing test before the fix (red-green-refactor) |
-| Code review / PR feedback | `security-monitor` or PM-directed reviewer | `code-review` | Focuses on correctness, maintainability, security, best practices |
-| Refactor / tech-debt cleanup | `code-writer` | `refactoring` | Preserves behavior; pair with `test-runner` to confirm no regressions |
-| New UI/UX or component design | `designer` | — | Produces wireframes, component specs, design tokens before implementation |
-| Unrecognized tech stack / environment setup | `stack-setup` | — | Runs a research + security-review workflow; requires your explicit approval before executing any setup command |
-| Test writing / QA gate / acceptance criteria check | `test-runner` | `test-driven-development` | Runs the test suite and audit script; reports pass/fail per acceptance criterion |
-| Security review, secret scanning, dependency advisories | `security-monitor` | — | Runs at Phase 0 (baseline scan) and Phase 5 (pre-PR advisory check) |
-| Architecture decision / trade-off evaluation | `architect` | — | Produces an implementation plan and ADR before any code is written |
+| New design, schema, ADR, directory/structure work | PM-dispatched design specialist (§3.5, High) | — | Design precedes implementation; PM presents the plan for your approval |
+| Implementation against an approved plan | PM-dispatched implementation specialist (§3.5) | — | Surgical changes only; the plan gates scope |
+| Documentation update / writing | PM-dispatched docs specialist (§3.5) | — | |
+| Question-bank authoring/review, bias remediation, exam operations | `exam-bank-steward` | — | Every rewrite is human-reviewed via the remediation ledger (Phase Gate) |
+| Locale documentation, translation zones, Korean plain-language output | `i18n-specialist` | — | Language-policy enforcement for co-learning content |
+| Security review, secret scanning | PM | `security-scan` | Runs inside the QA gate |
+| Architecture decision / trade-off evaluation | PM-dispatched design specialist (§3.5) | — | Produces an implementation plan and ADR before any code is written |
 | Commit, push, open a PR | PM | `sync` | Always via `/sync "type(scope): message"` — never direct `git commit`/`git push` |
 | Add a changelog entry mid-session | PM | `changelog` | `/changelog "..."` before the final `/sync` |
 | Log a session note without a full sync | PM | `memlog` | `/memlog "summary"` |
-| Full multi-agent project review | PM | `project-review` | Auto-detects roster, dispatches all specialists in parallel, produces a prioritized Critical/High/Medium/Low plan |
+| Full multi-agent project review | PM | `project-review` | Dispatches the roster per the §3.5 classification, produces a prioritized plan |
 
 ---
 
 ## 3. The Development Pipeline Walkthrough
 
-co-learning follows a fixed **pipeline order**: `architect → designer → stack-setup → code-writer → test-runner → security-monitor` (from `variant.json`). `designer` and `stack-setup` are optional and are skipped when there is no UI/UX component in scope, or when the project already has a configured stack, respectively.
+There is no fixed named-agent pipeline. PM classifies every request through the **§3.5 Deliverable-Type Gate** (AGENTS.md) and dispatches accordingly — generic design/implementation/docs specialists for the dev slots, `exam-bank-steward` for question-bank content and exam operations, `i18n-specialist` for locale work.
 
 ### Step-by-step
 
-1. **Architect (Phase 1-2)** — produces an implementation plan and ADR. Nothing gets implemented before this plan is approved by you.
-2. **Designer (Phase 3, optional)** — if the task touches UI/UX, produces wireframes/component specs/design tokens. Skipped for pure backend/logic changes.
-3. **Stack-setup (Phase 0-1, optional)** — only triggers when the project's tech stack is unrecognized. It identifies the stack, researches the *official* setup docs, runs a mandatory security review on every command (flagging `curl | sh`-style pipe-to-shell patterns as HIGH risk), and will not execute anything until you type an explicit approval keyword (`APPROVE`, or `CONFIRM HIGH RISK` for flagged steps).
-4. **Code-writer (Phase 4)** — implements strictly from the approved plan. Does not design, does not decide scope — surgical changes only.
-5. **Test-runner (Phase 4)** — runs `bun scripts/audit.ts` (documentation/lifecycle gate) plus the project's test command, then checks off each acceptance criterion individually. Reports a `READY FOR PR` or `BLOCKED` verdict. Maximum 3 QA iterations before escalating back to PM.
-6. **Security-monitor (Phase 0, Phase 5)** — runs a baseline scan early and a pre-PR advisory check late, particularly for anything touching auth, secrets, or infrastructure.
-7. **PM finalizes** — logs decisions to `memory/YYYY-MM-DD.md`, checks the Phase 5 lifecycle triggers (did an agent/skill/script change? did a variant status change?), and runs `/sync "type(scope): message"`.
+1. **PM triage (§3.5)** — classifies the deliverable type and names the dispatch plan. Multi-agent work never starts without your approval of that plan.
+2. **Design (Phase 1-2)** — a PM-dispatched design specialist produces the implementation plan and ADR. Nothing gets implemented before you approve the plan.
+3. **Implementation (Phase 4)** — a PM-dispatched implementation specialist executes strictly from the approved plan — surgical changes only.
+4. **Question-bank content (Phase 4-5)** — `exam-bank-steward` authors/reviews question-bank content and runs exam operations; every rewrite is human-reviewed via the remediation ledger.
+5. **QA gate (Phase 4)** — PM runs `bun scripts/audit.ts` (documentation/lifecycle gate) plus the project's test command, then checks off each acceptance criterion individually. Maximum 3 QA iterations before escalating back to you.
+6. **PM finalizes** — logs decisions to `memory/YYYY-MM-DD.md`, checks the lifecycle triggers (did an agent/skill/script change? did a variant status change?), and runs `/sync "type(scope): message"`.
 
 ### Key commands
 
@@ -84,14 +81,14 @@ co-learning uses the canonical linear, gated 7-phase model (see `AGENTS.md` §3.
 | Phase | Name | What Happens | Gate Criteria |
 |-------|------|---------------|---------------|
 | 0 | Team Assembly & Environment Baseline | PM assesses requirements, creates agents/skills if needed; project scaffolded and dev environment verified; security baseline scan | Project scaffolded, dev environment verified, CI pipeline configured |
-| 1 | Analysis & Stack Setup | PM classifies the request; `architect` analyzes requirements and acceptance criteria; read-only agents dispatched in parallel for research | — |
-| 2 | Design Review & Approval | `architect` produces the implementation plan + ADR; PM presents it for explicit user approval | Architecture review approved, tech stack confirmed, sprint plan defined |
-| 3 | UI/UX Design | `designer` (optional) produces UI/UX specs, wireframes, and design tokens when in scope | — |
-| 4 | Implementation & QA Gate | Code Writer implements; Test Runner verifies; loop up to 3x on failures | Code review passed, tests green, no critical lint errors |
-| 5 | Security Review & Lifecycle Finalization | `security-monitor` runs the pre-PR advisory check; PM logs decisions and updates governance records | Security advisory check clear for auth/secrets/infra changes, governance records updated |
+| 1 | Analysis | PM classifies the request per §3.5; the design specialist analyzes requirements and acceptance criteria | — |
+| 2 | Design Review & Approval | The design specialist produces the implementation plan + ADR; PM presents it for explicit user approval | Plan approved, scope confirmed |
+| 3 | Content Production | `exam-bank-steward` authors/reviews question-bank content; `i18n-specialist` covers locale documentation when in scope | Content human-reviewed via the remediation ledger |
+| 4 | Implementation & QA Gate | The implementation specialist executes the approved plan; PM verifies; loop up to 3x on failures | Code review passed, tests green, no critical lint errors |
+| 5 | Security Review & Lifecycle Finalization | PM runs `security-scan` inside the QA gate; PM logs decisions and updates governance records | Security check clear for auth/secrets/infra changes, governance records updated |
 | 6 | Quality Assurance & Finalization | PM runs the audit, `/sync`, opens PR; deployment verified; documentation updated | Deployment verified, documentation updated, retrospective completed |
 
-**Tier ceiling rule**: an agent's tier can be downgraded for simple tasks but never upgraded above its defined baseline (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
+**Tier ceiling rule**: an agent's tier can be downgraded for simple tasks but never upgraded above its defined baseline (`exam-bank-steward`: Medium, `i18n-specialist`: Medium; generic specialists take the §3.5 row's tier).
 
 ---
 

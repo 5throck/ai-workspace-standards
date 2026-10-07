@@ -152,6 +152,7 @@ describe('validateTicket attempts ↔ history (T-20260917-003)', () => {
       attempts: 0,
       history: [
         ...base.history,
+        { at: '2026-09-17T11:00:00+09:00', from: 'backlog', to: 'waiting' },
         { at: '2026-09-17T12:00:00+09:00', from: 'waiting', to: 'running' },
         { at: '2026-09-17T13:00:00+09:00', from: 'running', to: 'failed' },
         { at: '2026-09-17T14:00:00+09:00', from: 'failed', to: 'waiting' },
@@ -228,17 +229,17 @@ describe('upstream cross-field invariants (T-20261002-007, M2)', () => {
     expect(() => validateTicket(base({
       status: 'done',
       history: [
-        { at: 'x', from: null, to: 'backlog' },
-        { at: 'x', from: 'backlog', to: 'waiting' },
-        { at: 'x', from: 'waiting', to: 'running' },
-        { at: 'x', from: 'running', to: 'review' },
-        { at: 'x', from: 'review', to: 'done' },
+        { at: '2026-01-01T00:00:01Z', from: null, to: 'backlog' },
+        { at: '2026-01-01T00:00:02Z', from: 'backlog', to: 'waiting' },
+        { at: '2026-01-01T00:00:03Z', from: 'waiting', to: 'running' },
+        { at: '2026-01-01T00:00:04Z', from: 'running', to: 'review' },
+        { at: '2026-01-01T00:00:05Z', from: 'review', to: 'done' },
       ],
       upstream: { ...upstream(), triage: 'ready', resolution: { outcome: 'fixed', summary: 's' } },
     }))).not.toThrow(); // ready + done ✓
     expect(() => validateTicket(base({
       status: 'waiting',
-      history: [{ at: 'x', from: null, to: 'backlog' }, { at: 'x', from: 'backlog', to: 'waiting' }],
+      history: [{ at: '2026-01-01T00:00:06Z', from: null, to: 'backlog' }, { at: '2026-01-01T00:00:07Z', from: 'backlog', to: 'waiting' }],
       upstream: { ...upstream(), triage: 'ready' },
     }))).not.toThrow(); // ready + waiting ✓
   });
@@ -247,11 +248,11 @@ describe('upstream cross-field invariants (T-20261002-007, M2)', () => {
     expect(() => validateTicket(base({
       status: 'done',
       history: [
-        { at: 'x', from: null, to: 'backlog' },
-        { at: 'x', from: 'backlog', to: 'waiting' },
-        { at: 'x', from: 'waiting', to: 'running' },
-        { at: 'x', from: 'running', to: 'review' },
-        { at: 'x', from: 'review', to: 'done' },
+        { at: '2026-01-01T00:00:08Z', from: null, to: 'backlog' },
+        { at: '2026-01-01T00:00:09Z', from: 'backlog', to: 'waiting' },
+        { at: '2026-01-01T00:00:10Z', from: 'waiting', to: 'running' },
+        { at: '2026-01-01T00:00:11Z', from: 'running', to: 'review' },
+        { at: '2026-01-01T00:00:12Z', from: 'review', to: 'done' },
       ],
     }))).toThrow(/requires upstream\.resolution/);
     expect(() => validateTicket(withUp({ resolution: { outcome: 'fixed' } }))).toThrow(/summary/);
@@ -268,11 +269,11 @@ describe('upstream cross-field invariants (T-20261002-007, M2)', () => {
     expect(() => validateTicket(base({
       status: 'done',
       history: [
-        { at: 'x', from: null, to: 'backlog' },
-        { at: 'x', from: 'backlog', to: 'waiting' },
-        { at: 'x', from: 'waiting', to: 'running' },
-        { at: 'x', from: 'running', to: 'review' },
-        { at: 'x', from: 'review', to: 'done' },
+        { at: '2026-01-01T00:00:13Z', from: null, to: 'backlog' },
+        { at: '2026-01-01T00:00:14Z', from: 'backlog', to: 'waiting' },
+        { at: '2026-01-01T00:00:15Z', from: 'waiting', to: 'running' },
+        { at: '2026-01-01T00:00:16Z', from: 'running', to: 'review' },
+        { at: '2026-01-01T00:00:17Z', from: 'review', to: 'done' },
       ],
       upstream: { ...upstream(), triage: 'inbox', resolution: { outcome: 'fixed', pr_url: 'https://github.com/x/pull/2', summary: 'legacy' } },
     }))).not.toThrow();
