@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.9.2
+// @version 1.10.0
+// v1.10.0 (2026-10-08, ticket KST unification): upstream request ids (U-YYYYMMDD-NNN),
+//          daily audit log file names and ticket created_at/history timestamps use
+//          Korea Standard Time via helpers/kst-time.ts. Audit line `ts` fields stay UTC ISO.
 // v1.9.2 (2026-10-05, T-20261005-001): Windows M5 parallel-intake flake — ticket-id
 //           publication via linkSync fails EPERM on Windows under file-system
 //           filter/AV pressure, throwing inside the accept path (1 of 6 parallel
@@ -84,13 +87,14 @@ import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import { withTicketLock } from './helpers/ticket-store.ts';
+import { kstDate, kstIso } from './helpers/kst-time.ts';
 import { upstreamIdentitySource, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.9.2';
+export const SERVER_VERSION = '1.10.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -365,13 +369,8 @@ function dedupeKey(paths: string[], symptom: string): string {
   return createHash('sha256').update(`${sorted}\n${normalized}`, 'utf-8').digest('hex');
 }
 
-function todayStr(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 function todayPrefix(): string {
-  return `U-${todayStr().replace(/-/g, '')}`;
+  return `U-${kstDate().replace(/-/g, '')}`;
 }
 
 function nextSeqForToday(): number {
@@ -389,7 +388,7 @@ function nextSeqForToday(): number {
 
 function appendAuditLog(entry: Record<string, unknown>): void {
   mkdirSync(LOGS_DIR, { recursive: true });
-  appendFileSync(join(LOGS_DIR, `${todayStr()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8');
+  appendFileSync(join(LOGS_DIR, `${kstDate()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8');
 }
 
 // M6 (T-20261002-010): reject-path audit lines are written OUTSIDE the intake lock by
@@ -406,7 +405,7 @@ export function _resetRejectAuditForTests(): void {
 }
 
 function appendRejectAudit(project: string, entry: Record<string, unknown>): void {
-  const day = todayStr();
+  const day = kstDate();
   const key = project || '(unregistered)';
   const rec = rejectAuditCounts.get(key);
   const count = rec && rec.day === day ? rec.count : 0;
@@ -416,7 +415,7 @@ function appendRejectAudit(project: string, entry: Record<string, unknown>): voi
 }
 
 function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: string }> {
-  const todayLog = join(LOGS_DIR, `${todayStr()}.jsonl`);
+  const todayLog = join(LOGS_DIR, `${kstDate()}.jsonl`);
   if (!existsSync(todayLog)) return [];
   const out: Array<{ project?: string; outcome?: string; triage?: string }> = [];
   for (const line of readFileSync(todayLog, 'utf-8').split('\n')) {
@@ -900,7 +899,7 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
 
     const triage: 'inbox' | 'ready' = failReasons.length === 0 ? 'ready' : 'inbox';
     const status = triage === 'ready' ? 'waiting' : 'backlog';
-    const now = new Date().toISOString();
+    const now = kstIso();
 
     const upstreamBlock: Record<string, unknown> = {
       project, variant, template_version: version, source: `project/${project}`,

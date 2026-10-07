@@ -19,6 +19,7 @@ import { pathToFileURL } from 'node:url';
 import { load, JSON_SCHEMA } from 'js-yaml';
 import { validateTicket, upstreamIdentitySource } from '../../scripts/helpers/ticket-schema.ts';
 import { listTickets, nextServiceTicket } from '../../scripts/helpers/ticket-store.ts';
+import { kstDate } from '../../scripts/helpers/kst-time.ts';
 
 const REPO_ROOT = resolve(import.meta.dir, '..', '..');
 const serverPath = join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts');
@@ -451,11 +452,8 @@ describe('13.2 identity', () => {
     expect(declaredStatus.body.requests[0].status).toBe('done');
     expect(declaredStatus.body.requests[0].resolution).toBeUndefined();
     // both calls are audit-logged with their identity.
-    // UTC is correct here (not local): bun test runs with TZ=UTC, and the server
-    // subprocess is pinned to TZ=UTC below for exactly this reason — without the pin
-    // the server used the machine's local day while this frame used UTC, so the read
-    // ENOENTed whenever the local day differed (KST early mornings; CI never saw it).
-    const today = new Date().toISOString().split('T')[0];
+    // KST day, matching the server's daily audit log file name (helpers/kst-time.ts).
+    const today = kstDate();
     const audit = readFileSync(join(ws.logsDir, `${today}.jsonl`), 'utf-8');
     const lines = audit.trim().split('\n').map((l) => JSON.parse(l));
     expect(lines.filter((e) => e.outcome === 'status' && e.identity === 'cwd').length).toBeGreaterThanOrEqual(1);

@@ -11,6 +11,7 @@ import {
   loadCatalog,
   resolveServiceRef,
 } from '../../scripts/helpers/ticket-store.ts';
+import { kstDate } from '../../scripts/helpers/kst-time.ts';
 
 let dir: string;
 
@@ -50,7 +51,7 @@ describe('createTicket', () => {
     // v1.4.0 read a fixed 3-char slice, so a pre-existing T-<today>-1000.yaml
     // truncated to 1000 -> "100" and the next guess started at 101, colliding
     // its way up; the parse now reads the full digit run.
-    const prefix = `T-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+    const prefix = `T-${kstDate().replace(/-/g, '')}`;
     writeFileSync(join(dir, `${prefix}-1000.yaml`), 'id: dummy\n');
     const t = createTicket(dir, { kind: 'manual', title: 'after 4-digit', priority: 'normal' });
     expect(t.id).toBe(`${prefix}-1001`);
@@ -75,14 +76,12 @@ describe('createTicket', () => {
 });
 
 describe('listTickets ready filter (not_before boundary cases)', () => {
-  // Same UTC-normalized YYYY-MM-DD convention as ticket-store.ts's today()/spec-register.ts's today().
+  // KST calendar day, the same convention ticket-store.ts uses for --ready not_before.
   function today(): string {
-    return new Date().toISOString().split('T')[0];
+    return kstDate();
   }
   function isoDaysFromToday(delta: number): string {
-    const d = new Date();
-    d.setUTCDate(d.getUTCDate() + delta);
-    return d.toISOString().split('T')[0];
+    return kstDate(new Date(Date.now() + delta * 86_400_000));
   }
 
   test('not_before unset is always ready', () => {
