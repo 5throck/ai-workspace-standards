@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261007-025
+kind: manual
+title: >-
+  URGENT: GitHub Actions billing wall — 'recent account payments have failed or
+  your spending limit needs to be increased' blocks ALL job starts (co-newbiz PR
+  #458: Documentation Audit/Dependency Audit/Secret Scan/Unit+Script Tests all
+  not-started-failed, 2026-10-08 02:3x KST). User must fix the payment method or
+  raise the spending limit (Settings > Billing & plans). Until resolved: CI is
+  down fleet-wide, nightly gate evidence cannot be produced, and PR merges
+  violate the CLEAN-checks rule — co-newbiz #458 left OPEN with this stated
+  reason; earlier wave PRs (14) merged before the wall hit with green checks.
+  After billing is fixed: re-run failed checks on open PRs, then merge
+priority: urgent
+status: backlog
+attempts: 0
+created_at: '2026-10-07T17:44:24.801Z'
+history:
+  - at: '2026-10-07T17:44:24.801Z'
+    from: null
+    to: backlog
+result: null
+error: null
