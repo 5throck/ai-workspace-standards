@@ -98,7 +98,9 @@ describe('verify-skills curated-index protection (U-20261006-002)', () => {
     const res = runVerifySkills(root, ['--check']);
     expect(res.exitCode).toBe(1);
     expect(res.stderr).toContain('SKILLS.md drift');
-    expect(res.stderr).toContain(skillsMd(root));
+    // Windows temp paths alias (RUNNER~1 vs runneradmin between the parent and
+    // the subprocess) — assert the report suffix, not the absolute path.
+    expect(res.stderr).toMatch(/skills[/\\]SKILLS\.md differs from the generated index/);
     expect(res.stderr).toContain('first differing line: 1');
     expect(readFileSync(skillsMd(root), 'utf-8')).toBe(CURATED);
   });

@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.5.0
+ * @version 1.5.1
  * Verifies all skills in skills/ directory are loadable and properly formatted
+ *
+ * v1.5.1: skillName derivation is separator-tolerant (skills[/\\]) — Windows
+ * backslash paths previously fell back to the full absolute path as the index
+ * row name/link (exposed by the curated-index tests on windows-latest).
  *
  * skills/SKILLS.md write contract (U-20261006-002): the auto-index writer only
  * ever rewrites a REGENERABLE file — one that is missing, or whose FIRST line
@@ -478,7 +482,10 @@ async function verifySkill(skillFile: string): Promise<SkillCheck> {
       }
     }
 
-    const skillName = skillFile.match(/skills\/([^/]+)\//)?.[1] || skillFile;
+    // Separator-tolerant (v1.5.1): Windows skillFile paths carry \ — the old
+    // /skills\/([^/]+)\// match missed them and the index row fell back to the
+    // full absolute path for both the name and the link target.
+    const skillName = skillFile.match(/skills[/\\]([^/\\]+)[/\\]/)?.[1] || skillFile;
 
     return {
       name: skillName,
