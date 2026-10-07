@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.0
 /**
  * typecheck.ts — TypeScript typecheck gate over scripts/ (T-20260910-012).
+ *
+ * v1.2.0 (2026-10-07, U-20261006-004): the context skip prints a [SKIP]-prefixed
+ * line instead of a plain banner — a self-skipped gate must never read as a
+ * pass in battery output ("All checks passed" must not coexist with gates that
+ * silently skipped; audit.ts now carries the same [SKIP] verdict convention in
+ * its summary). Exit code unchanged: a skip is not a failure.
  *
  * Runs `tsc --noEmit` with the repo tsconfig (include: the scripts/ tree),
  * counts the reported type errors, and compares the count against the
@@ -38,7 +44,9 @@ function main() {
     baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf-8"));
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      console.log("=== TypeScript typecheck: no baseline file in this context — skipping (root-context gate) ===");
+      // U-20261006-004: [SKIP]-prefixed so battery output never reads a skipped
+      // gate as a pass.
+      console.log("[SKIP] TypeScript typecheck: no baseline file in this context — skipping (root-context gate)");
       process.exit(0);
     }
     throw err;

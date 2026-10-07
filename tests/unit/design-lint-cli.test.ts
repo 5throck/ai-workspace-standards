@@ -1,5 +1,5 @@
 /**
- * Unit tests for scripts/design-lint.ts v2.0.0 CLI contract:
+ * Unit tests for scripts/design-lint.ts v2.1.0 CLI contract:
  * --help, --schema, --json, --check selection, usage errors, exit codes, and
  * the preserved v1.0.0 invocation surface ([paths...], --dir,
  * design-token-exempt: suppression, default scan roots).
@@ -49,7 +49,7 @@ describe("design-lint CLI flags", () => {
   test("--help exits 0 and documents the sub-check runner", async () => {
     const { exitCode, stdout } = await run("--help");
     expect(exitCode).toBe(0);
-    expect(stdout).toContain("design-lint.ts v2.0.0");
+    expect(stdout).toContain("design-lint.ts v2.1.0");
     expect(stdout).toContain("token-usage");
     expect(stdout).toContain("--schema");
     expect(stdout).toContain("design-token-exempt");
@@ -89,7 +89,7 @@ describe("design-lint --json contract", () => {
       checks: Array<{ name: string; status: string; findings: unknown[]; skipReason?: string }>;
     };
     expect(report.tool).toBe("design-lint");
-    expect(report.version).toBe("2.0.0");
+    expect(report.version).toBe("2.1.0");
     expect(report.checks.map((c) => c.name)).toEqual([
       "token-usage",
       "components",

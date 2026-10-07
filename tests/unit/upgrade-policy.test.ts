@@ -193,9 +193,18 @@ describe('upgrade-policy resolveClaim — PRESERVE / PROJECT_STATE / TEMPLATE_ON
   });
 
   test('runtime / generated state never delivered', () => {
-    for (const rel of ['package.json', 'bun.lock', 'variant.json', 'scripts-snapshot.json', 'memory/2026-01-01.md', 'docs/countries/ACTIVE.md']) {
+    for (const rel of ['package.json', 'bun.lock', 'variant.json', 'memory/2026-01-01.md', 'docs/countries/ACTIVE.md']) {
       expect(resolveClaim(rel, VARIANT).policy).toBe('PROJECT_STATE');
     }
+  });
+
+  test('scripts-snapshot.json is REGENERATED, not frozen project state (U-20261006-001)', () => {
+    // Regenerated in place post-upgrade (upgrade-project) like the other
+    // generated artifacts — never template-delivered, never stale-frozen.
+    expect(resolveClaim('scripts-snapshot.json', VARIANT)).toEqual({
+      policy: 'REGENERATED',
+      pass: '(regenerated in place)',
+    });
   });
 
   test('scaffold-removed staging zones are TEMPLATE_ONLY', () => {
