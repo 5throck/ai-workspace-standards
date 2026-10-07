@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261007-002
+kind: manual
+title: >-
+  validator-hardening: re-land PR #1441's unique non-overlapping content (closed
+  as superseded by merged #1446) — (1) write-scripts-snapshot 1.1.0: snapshot
+  inventory must come from the delivered L1 registry
+  (<cwd>/<l1-source>/SCRIPTS.md + variant overlay) instead of the L0 root
+  registry, with 8-column row-shape parsing replacing the ## Registry
+  lazy-lookahead capture that stops at the first ### subsection — this is the
+  content half of U-20261006-001 that #1446 (refresh timing only) did not cover,
+  so post-upgrade snapshots still list L0-only tools and skip delivered scripts;
+  (2) ticket-schema 1.6.0: running joins the ready branch of the triage-status
+  invariant; (3) ticket-store 1.11.0: validateTicket before the atomic write in
+  moveTicketUnlocked. Port from the closed PR's branch (pr/20261007-033909-...)
+  with its tests (write-scripts-snapshot.test.ts,
+  ticket-upstream-triage.test.ts); the branch never went green on CI so
+  re-verify before landing
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-07T02:27:17.934Z'
+history:
+  - at: '2026-10-07T02:27:17.934Z'
+    from: null
+    to: backlog
+result: null
+error: null
