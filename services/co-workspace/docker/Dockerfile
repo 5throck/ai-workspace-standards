@@ -40,7 +40,7 @@ COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
 # -f: the hermes base image already carries an npm at /usr/local/bin/npm
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
- && npm install -g --omit=dev @anthropic-ai/claude-code@2.1.288 @openai/codex@0.160.0 \
+ && npm install -g --omit=dev @anthropic-ai/claude-code@2.1.293 @openai/codex@0.161.0 \
  && claude --version >/dev/null && codex --version >/dev/null
 
 # Antigravity CLI (agy) — baked via Google's official installer (user-provided URL,
