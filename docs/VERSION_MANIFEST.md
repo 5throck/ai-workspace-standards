@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-07T22:42:35.646Z
+**Generated**: 2026-10-07T23:15:18.469Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -168,7 +168,7 @@
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-graph-fleet-report.ts | 1.1.1 | scripts/skill-graph-fleet-report.ts | N/A |
-| skill-lifecycle-audit.ts | 1.7.0 | scripts/skill-lifecycle-audit.ts | N/A |
+| skill-lifecycle-audit.ts | 1.7.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |

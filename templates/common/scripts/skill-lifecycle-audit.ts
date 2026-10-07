@@ -9,7 +9,12 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.7.0
+ * @version 1.7.1
+ * v1.7.1 (2026-10-08, E2E Test 30 fix): Check SVP's registry lookup no longer
+ *         imports the L0-only write-scripts-snapshot helper — the parse is
+ *         inlined (parseRegistryVersions) because THIS script ships to
+ *         scaffolds where that helper does not exist (static import broke
+ *         module loading). Keep in sync with the helper.
  * v1.7.0 (2026-10-08, T-20261007-026): Check SVP — a SKILL.md script version
  *         pin (`script.ts v?X.Y.Z` without a floor operator) must match the
  *         pinned script's current registry version (shared parseScriptRegistry
@@ -36,7 +41,6 @@ import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { isSelfManagedPath } from './lib/self-managed-tools.ts';
 import { lastContentCommitDate } from './agent-lifecycle-audit.ts';
-import { parseScriptRegistry } from './helpers/write-scripts-snapshot.ts';
 
 interface SkillFrontmatter {
   name: string;
@@ -455,6 +459,28 @@ function checkCircularDependencies(
 }
 
 // Main audit function
+/**
+ * Local registry parser for Check SVP (v1.7.1): identical logic to
+ * helpers/write-scripts-snapshot.ts parseScriptRegistry, inlined because that
+ * helper is L0-only (not delivered to scaffolds) while THIS script ships at
+ * L0+L1 — a static import broke module loading in every scaffolded project
+ * (E2E Test 30, 2026-10-08). Keep in sync with the helper.
+ */
+function parseRegistryVersions(content: string): Record<string, { version: string; status: string }> {
+  const scripts: Record<string, { version: string; status: string }> = {};
+  for (const line of content.split('\n')) {
+    if (!/^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(line)) continue;
+    const parts = line.split('|').map((p) => p.trim()).filter((p) => p);
+    if (parts.length < 4) continue;
+    const name = parts[0].replace(/`/g, '');
+    const version = parts[2];
+    const status = parts[3];
+    if (!/^\d+\.\d+\.\d+$/.test(version)) continue;
+    scripts[name] = { version, status };
+  }
+  return scripts;
+}
+
 function auditSkills(jsonMode = false): AuditResult {
   // Check SVP lazy registry (T-20261007-026) — loaded once on first pin found.
   let scriptRegistry: Record<string, { version: string; status: string }> | null = null;
@@ -747,7 +773,7 @@ function auditSkills(jsonMode = false): AuditResult {
       if (frontmatter.status === 'active') {
         if (scriptRegistry === null) {
           scriptRegistry = existsSync(join(ROOT, 'scripts', 'SCRIPTS.md'))
-            ? parseScriptRegistry(readFileSync(join(ROOT, 'scripts', 'SCRIPTS.md'), 'utf-8'))
+            ? parseRegistryVersions(readFileSync(join(ROOT, 'scripts', 'SCRIPTS.md'), 'utf-8'))
             : {};
         }
         const content = skillContent.replace(/\r\n/g, '\n');
