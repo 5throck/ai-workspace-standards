@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.5.1
+// @version 1.6.0
+// v1.6.0 (2026-10-07, U-20261006 runner batch): `running` joins the ready
+//          branch of the triage↔status invariant — claiming a triaged-ready
+//          upstream ticket (move → running) is store-mediated, not a hand-edit.
 // v1.5.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.5.0 (2026-10-03, T-20261003-003): optional upstream.identity_source (cwd | client_roots |
 //           self_declared) plus upstreamIdentitySource() legacy defaulting (design Appendix E.5).
@@ -244,11 +247,16 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     if (u.triage !== 'inbox' && u.triage !== 'ready') fail('upstream.triage must be inbox | ready');
     // T-20261002-007 (M2): triage↔status consistency — the store writes them in
     // step, so a file where they disagree is hand-editing or a crashed write.
+    // v1.6.0 (U-20261006 runner batch): `running` joins the ready branch — a
+    // triaged-ready upstream ticket claimed via `ticket.ts move <id> running`
+    // is a legitimate tool-mediated state (the store wrote it), not a
+    // hand-edit; the old rule made every claim of an upstream ticket wedge the
+    // file into a state no ticket.ts command could touch.
     const triageStatusConsistent = u.triage === 'inbox'
       ? (t.status === 'backlog' || t.status === 'done')
-      : (t.status === 'waiting' || t.status === 'review' || t.status === 'done');
+      : (t.status === 'waiting' || t.status === 'running' || t.status === 'review' || t.status === 'done');
     if (!triageStatusConsistent) {
-      fail(`upstream.triage ${JSON.stringify(u.triage)} is inconsistent with status ${JSON.stringify(t.status)} (inbox ⇒ backlog|done; ready ⇒ waiting|review|done)`);
+      fail(`upstream.triage ${JSON.stringify(u.triage)} is inconsistent with status ${JSON.stringify(t.status)} (inbox ⇒ backlog|done; ready ⇒ waiting|running|review|done)`);
     }
     if (typeof u.flagged !== 'boolean') fail('upstream.flagged must be a boolean');
     if (!Array.isArray(u.triage_reasons)) fail('upstream.triage_reasons must be an array');
