@@ -1,8 +1,24 @@
 #!/usr/bin/env bun
 /**
  * Skill Verification Script
- * @version 1.4.0
+ * @version 1.5.1
  * Verifies all skills in skills/ directory are loadable and properly formatted
+ *
+ * v1.5.1: skillName derivation is separator-tolerant (skills[/\\]) — Windows
+ * backslash paths previously fell back to the full absolute path as the index
+ * row name/link (exposed by the curated-index tests on windows-latest).
+ *
+ * skills/SKILLS.md write contract (U-20261006-002): the auto-index writer only
+ * ever rewrites a REGENERABLE file — one that is missing, or whose FIRST line
+ * is exactly "# Skills Index" (the generated stub's title; trailing whitespace
+ * /CR tolerated). A curated index whose first line merely STARTS WITH that
+ * prefix (e.g. "# Skills Index - co-security") is hand-maintained and is never
+ * rewritten, in any mode. `--check` adds a read-only drift gate: when a
+ * curated SKILLS.md differs from the freshly generated index content, --check
+ * prints the path plus the first differing line number and exits 1 without
+ * writing; a missing/exact-stub file is not drift — --check regenerates it and
+ * exits 0. Exit code of the non-check path is unchanged (only failing skills
+ * exit non-zero; index regeneration never does).
  */
 
 import path from "node:path";
@@ -198,17 +214,55 @@ async function main(): Promise<void> {
     console.log("✅ All skills verified");
   }
 
-  // Legacy auto-index writer — SKIP when the curated lifecycle catalog is in place.
-  // skills/SKILLS.md is a hand-maintained SSOT registry (header "# SKILLS.md — Skill
-  // Lifecycle Registry"); only the legacy "# Skills Index" stub may be regenerated.
+  // Legacy auto-index writer (U-20261006-002): only a REGENERABLE SKILLS.md is
+  // rewritten — one that is missing, or whose first line is exactly the
+  // generated stub title "# Skills Index". A curated index whose first line
+  // merely STARTS WITH that prefix (e.g. "# Skills Index - co-security") is
+  // hand-maintained and is never rewritten. In --check mode a curated file is
+  // instead compared against the generated content: any difference is reported
+  // (path + first differing line) and exits 1 without writing.
   const skillsMdPath = path.join(projectRoot, "skills", "SKILLS.md");
   const { readFileSync } = await import("node:fs");
-  const isLegacyIndex =
-    !existsSync(skillsMdPath) ||
-    readFileSync(skillsMdPath, "utf-8").startsWith("# Skills Index");
-  if (isLegacyIndex) {
+  const existing = existsSync(skillsMdPath) ? readFileSync(skillsMdPath, "utf-8") : null;
+  const regenerable = existing === null || isExactGeneratedStub(existing);
+  if (process.argv.includes("--check")) {
+    const generated = await buildSkillsIndexContent(checks);
+    if (regenerable) {
+      // A missing/stub index is not drift — regenerate it and exit 0.
+      await Bun.write(skillsMdPath, generated);
+      console.log(`\n📝 Generated skills index: ${skillsMdPath}`);
+      return;
+    }
+    if (existing !== generated) {
+      console.error(`\n❌ SKILLS.md drift: ${skillsMdPath} differs from the generated index (--check)`);
+      const curLines = existing.split("\n");
+      const genLines = generated.split("\n");
+      for (let i = 0; i < Math.max(curLines.length, genLines.length); i++) {
+        if (curLines[i] !== genLines[i]) {
+          console.error(`   first differing line: ${i + 1}`);
+          break;
+        }
+      }
+      console.error("   The file is curated (first line is not the exact generated stub) — verify-skills never rewrites it.");
+      console.error("   Align the curated index manually, then re-run with --check.");
+      process.exit(1);
+    }
+    console.log("\n✅ skills/SKILLS.md matches the generated index (--check clean)");
+    return;
+  }
+  if (regenerable) {
     await generateSkillsIndex(checks);
   }
+}
+
+/**
+ * Exact generated-stub detection (U-20261006-002): true only when the content's
+ * FIRST line is exactly "# Skills Index" (trailing whitespace/CR tolerated).
+ * A prefix match such as "# Skills Index - co-security" is a curated variant
+ * index — never regenerable.
+ */
+function isExactGeneratedStub(content: string): boolean {
+  return (content.split(/\r?\n/, 1)[0] ?? "").trimEnd() === "# Skills Index";
 }
 
 async function scanSkills(): Promise<SkillCheck[]> {
@@ -321,10 +375,11 @@ function extractSkillMetadata(content: string, skillPath: string): SkillMetadata
 }
 
 /**
- * Generate SKILLS.md index from discovered skills
+ * Build the SKILLS.md index content from discovered skills (pure — no I/O,
+ * U-20261006-002: factored out of generateSkillsIndex so --check can compare
+ * the generated content against a curated file without writing).
  */
-async function generateSkillsIndex(checks: SkillCheck[]): Promise<void> {
-  const indexPath = path.join(projectRoot, "skills", "SKILLS.md");
+async function buildSkillsIndexContent(checks: SkillCheck[]): Promise<string> {
   let content = "# Skills Index\n\n";
   content += "> Auto-generated by verify-skills.ts. Do not edit manually.\n\n";
   content += `Generated: ${new Date().toISOString()}\n\n`;
@@ -354,6 +409,15 @@ async function generateSkillsIndex(checks: SkillCheck[]): Promise<void> {
     content += "\n";
   }
 
+  return content;
+}
+
+/**
+ * Generate SKILLS.md index from discovered skills
+ */
+async function generateSkillsIndex(checks: SkillCheck[]): Promise<void> {
+  const indexPath = path.join(projectRoot, "skills", "SKILLS.md");
+  const content = await buildSkillsIndexContent(checks);
   await Bun.write(indexPath, content);
   console.log(`\n📝 Generated skills index: ${indexPath}`);
 }
@@ -418,7 +482,10 @@ async function verifySkill(skillFile: string): Promise<SkillCheck> {
       }
     }
 
-    const skillName = skillFile.match(/skills\/([^/]+)\//)?.[1] || skillFile;
+    // Separator-tolerant (v1.5.1): Windows skillFile paths carry \ — the old
+    // /skills\/([^/]+)\// match missed them and the index row fell back to the
+    // full absolute path for both the name and the link target.
+    const skillName = skillFile.match(/skills[/\\]([^/\\]+)[/\\]/)?.[1] || skillFile;
 
     return {
       name: skillName,

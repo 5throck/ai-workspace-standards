@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-06T22:34:10.693Z
+**Generated**: 2026-10-07T02:22:14.693Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -109,7 +109,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.50.0 | scripts/audit.ts | bun |
+| audit.ts | 2.51.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.0.2 | scripts/backport-diff.ts | N/A |
@@ -120,7 +120,7 @@
 | compile-tokens.ts | 1.2.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.18.0 | scripts/create-l3-scaffold.ts | N/A |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
-| design-lint.ts | 2.0.0 | scripts/design-lint.ts | js-yaml |
+| design-lint.ts | 2.1.0 | scripts/design-lint.ts | js-yaml |
 | dev-sync.ts | 1.23.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
@@ -191,8 +191,8 @@
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.9.1 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| typecheck.ts | 1.1.1 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.64.0 | scripts/upgrade-project.ts | N/A |
+| typecheck.ts | 1.2.0 | scripts/typecheck.ts | N/A |
+| upgrade-project.ts | 1.65.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
@@ -219,7 +219,7 @@
 | verify-readme-sync.ts | 1.4.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.12.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 1.7.0 | scripts/verify-skill-graph.ts | N/A |
-| verify-skills.ts | 1.4.0 | scripts/verify-skills.ts | N/A |
+| verify-skills.ts | 1.5.1 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 
 ---

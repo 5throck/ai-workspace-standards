@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.64.0
+// @version 1.65.0
+// v1.65.0 (2026-10-07, U-20261006-001): scripts-snapshot.json is regenerated
+//          post-upgrade. The snapshot (the L2 script-version baseline the
+//          Script version comparison reads) was written only at scaffold/adopt
+//          and PROJECT_STATE-preserved forever, so every upgrade after the
+//          first re-reported the same stale snapshot drift. Reclassified
+//          REGENERATED (upgrade-policy v1.22.0) and regenerated in place via
+//          the same helper new-project §5.5c / adopt-project §15 use, with the
+//          workspace-root cwd the helper's SCRIPTS.md read requires. Non-fatal:
+//          a failed regeneration warns and continues (same contract as the
+//          VERSION_MANIFEST / skill-graph regeneration blocks below).
 // v1.64.0 (2026-10-06, U-20261006-005 upstream request from co-develop):
 //          PRUNE REMOVED goes preserve-by-default for project-owned (L3)
 //          agents/ and skills/ roster entries. The 2026-09-12 fleet-sync
@@ -3562,6 +3572,33 @@ if (existsSync(manifestGenScript)) {
     }
   } else {
     console.log('  [DRY RUN] Would run: bun scripts/generate-version-manifest.ts');
+  }
+  console.log('');
+}
+
+// ── Post-upgrade: regenerate scripts-snapshot.json (U-20261006-001) ───────────
+// The upgrade just refreshed scripts/, so the project's scripts-snapshot.json
+// (the L2 script-version baseline the Script version comparison above reads)
+// is stale until the next upgrade otherwise re-reports the same drift.
+// Regenerate in place via the same helper the scaffold/adopt flows use
+// (new-project §5.5c, adopt-project §15). The helper reads scripts/SCRIPTS.md
+// from process.cwd(), so it runs with cwd = workspace root and receives the
+// project dir as an argument, exactly like the existing call sites. Non-fatal:
+// a missing helper or failed regeneration warns and continues (same contract
+// as the VERSION_MANIFEST / skill-graph regeneration blocks above).
+const snapshotHelper = join(workspaceRoot, 'scripts', 'helpers', 'write-scripts-snapshot.ts');
+if (existsSync(snapshotHelper) && existsSync(scriptsMd)) {
+  console.log('--- Post-upgrade: Regenerating scripts-snapshot.json ---');
+  if (!dryRun) {
+    const snapGen = spawnSync(process.execPath, [snapshotHelper, projectDir, new Date().toISOString().slice(0, 10), variant, join(commonDir, 'scripts')], { cwd: workspaceRoot, encoding: 'utf8', timeout: 60000, stdio: 'pipe' });
+    if (snapGen.status === 0) {
+      console.log('  ✅ Project scripts-snapshot.json regenerated (L2 baseline now matches delivered scripts)');
+    } else {
+      console.log(`  ⚠️  write-scripts-snapshot.ts exited with status ${snapGen.status} — the snapshot stays as-is; the next upgrade will retry`);
+      if (snapGen.stderr) console.log(`  STDERR: ${snapGen.stderr.trim()}`);
+    }
+  } else {
+    console.log('  [DRY RUN] Would run: bun scripts/helpers/write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>');
   }
   console.log('');
 }

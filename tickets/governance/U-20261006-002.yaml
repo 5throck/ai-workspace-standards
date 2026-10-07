@@ -3,7 +3,7 @@ id: U-20261006-002
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-06T00:20:20.491Z'
 history:
@@ -16,7 +16,16 @@ history:
   - at: '2026-10-06T18:39:28.834Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-07T01:42:30.559Z'
+    from: review
+    to: done
+result: >-
+  Confirmed: startsWith('# Skills Index') treated curated variant indexes (e.g.
+  '# Skills Index - co-security') as regenerable and silently clobbered them;
+  regeneration never affected exit code. Fixed upstream (verify-skills 1.5.0,
+  root+L1 byte-identical): exact-first-line stub detection + read-only --check
+  drift gate exiting 1 with first differing line; non-check UX unchanged. Pinned
+  by tests/unit/verify-skills-curated-index.test.ts.
 error: null
 upstream:
   project: co-develop
@@ -61,3 +70,15 @@ upstream:
   duplicates:
     - project: co-develop
       at: '2026-10-06T00:20:20.491Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1446
+    template_version: unreleased
+    summary: >-
+      Confirmed: startsWith('# Skills Index') treated curated variant indexes
+      (e.g. '# Skills Index - co-security') as regenerable and silently
+      clobbered them; regeneration never affected exit code. Fixed upstream
+      (verify-skills 1.5.0, root+L1 byte-identical): exact-first-line stub
+      detection + read-only --check drift gate exiting 1 with first differing
+      line; non-check UX unchanged. Pinned by
+      tests/unit/verify-skills-curated-index.test.ts.

@@ -1,4 +1,12 @@
-// @version 1.21.0
+// @version 1.22.0
+// v1.22.0 (2026-10-07, U-20261006-001): `scripts-snapshot.json` moves from
+//          PROJECT_STATE_FILES to REGENERATED_FILES. The snapshot is generated
+//          state — written at scaffold/adopt (new-project §5.5c, adopt-project
+//          §15, helpers/write-scripts-snapshot.ts) and now regenerated
+//          post-upgrade (upgrade-project) — never template-delivered, and
+//          never a frozen-at-scaffold artifact: PROJECT_STATE preserved it
+//          forever, so the Script version comparison re-reported the same
+//          scaffold-era drift on every upgrade.
 // v1.21.0 (2026-10-01, ADR-0076 amendment): the `.claude/skills/graft/**` → TEMPLATE TREE
 //          SYNC special case is removed. graft moved into the skills/ SSOT, so it is delivered
 //          by the platform-mirror rule (sync-skills.ts) to all five platform dirs like any skill.
@@ -235,17 +243,24 @@ const ADD_IF_MISSING_FILES = new Set(['docs/project.md']);
 /** Project runtime / generated state — exists in projects but is never template-delivered. */
 const PROJECT_STATE_FILES = new Set([
   'package.json', 'bun.lock', 'bun.lockb', 'package-lock.json',
-  'variant.json', 'scripts-snapshot.json',
+  'variant.json',
 ]);
 
 /** Project files the scaffold/upgrade flows REGENERATE in place
  *  (T-20260916-010: docs/VERSION_MANIFEST.md joined — templates stopped
  *  shipping the stub manifest; the full manifest is generated post-delivery
  *  (new-project §7.8) and regenerated post-upgrade (upgrade-project),
- *  never template-delivered). */
+ *  never template-delivered).
+ *  (U-20261006-001: scripts-snapshot.json joined — same genus: generated
+ *  post-delivery (new-project §5.5c, adopt-project §15 via
+ *  helpers/write-scripts-snapshot.ts) and now regenerated post-upgrade
+ *  (upgrade-project), never template-delivered; PROJECT_STATE preservation
+ *  froze it at scaffold/adopt, so the Script version comparison re-reported
+ *  the same stale snapshot drift on every upgrade.) */
 const REGENERATED_FILES = new Set([
   'docs/skill-graph.json', '.claude/template-version.txt',
   'docs/VERSION_MANIFEST.md',
+  'scripts-snapshot.json',
 ]);
 
 const PRESERVE_FILES = new Set([

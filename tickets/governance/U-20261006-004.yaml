@@ -3,7 +3,7 @@ id: U-20261006-004
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-06T00:20:20.779Z'
 history:
@@ -16,7 +16,17 @@ history:
   - at: '2026-10-06T18:39:28.878Z'
     from: running
     to: review
-result: null
+  - at: '2026-10-07T01:42:30.611Z'
+    from: review
+    to: done
+result: >-
+  Confirmed (2 of 3 arms verified at review; third located during fix):
+  verify-memory gate required root CONSTITUTION.md so projects self-skipped
+  while standalone verify-memory exited 1; design-lint no-roots branch read as
+  Pass. Fixed upstream (audit 2.51.0): new Skip verdict with summary counter so
+  All checks passed cannot hide non-ran gates; verify-memory also fires via
+  memory/MEMORY.md; typecheck.ts 1.2.0 labels its context skip [SKIP] at the
+  source. Follow-up ticketed: design-lint enabled!==true branch still Pass.
 error: null
 upstream:
   project: co-develop
@@ -60,3 +70,16 @@ upstream:
   duplicates:
     - project: co-develop
       at: '2026-10-06T00:20:20.779Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1446
+    template_version: unreleased
+    summary: >-
+      Confirmed (2 of 3 arms verified at review; third located during fix):
+      verify-memory gate required root CONSTITUTION.md so projects self-skipped
+      while standalone verify-memory exited 1; design-lint no-roots branch read
+      as Pass. Fixed upstream (audit 2.51.0): new Skip verdict with summary
+      counter so All checks passed cannot hide non-ran gates; verify-memory also
+      fires via memory/MEMORY.md; typecheck.ts 1.2.0 labels its context skip
+      [SKIP] at the source. Follow-up ticketed: design-lint enabled!==true
+      branch still Pass.
