@@ -1,3 +1,4 @@
+# co-learning roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
 schema_version: "1.0"
 procedure_id: co-learning-architecture-design
 variant: co-learning
@@ -5,7 +6,7 @@ version: "1.0.0"
 title: Architecture Design
 phase: 2
 status: active
-owner_agent: architect
+owner_agent: pm
 purpose: >
   Produce the approved implementation plan and module architecture for the
   feature work.
@@ -15,7 +16,7 @@ preconditions:
   - "Technical planning findings reviewed."
 steps:
   - id: 1
-    agent_key: architect
+    agent_key: pm
     skill_key: code-review
     output_type: approved_implementation_plan
     description: >

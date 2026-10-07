@@ -34,6 +34,7 @@ import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
   resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
   archiveDirFor, archiveCandidates, archiveTickets, restoreTicket, DEFAULT_ARCHIVE_DAYS,
+  repairTicketHistory,
 } from './helpers/ticket-store.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
@@ -363,6 +364,30 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       }
       break;
     }
+    case 'repair-history': {
+      // v1.10.0 (T-20261007-004): one-off legacy-history repair — drop
+      // non-chaining duplicate edges (the doubled backlog→waiting from the
+      // 2026-10-06 upstream import), sort entries chronologically, and
+      // reconcile created_at with the earliest recorded event. Dry-run by
+      // default; --apply writes (the mutated ticket is schema-validated before
+      // the atomic write, so an unrepairable shape refuses loudly).
+      const { positional, flags } = parseFlags(rest);
+      const id = positional[0];
+      if (!id) {
+        console.error('usage: ticket.ts repair-history <id> [--apply] — dry-run plan by default');
+        process.exit(1);
+      }
+      const { dir, id: resolvedId } = resolveTicketDir(id);
+      const { plan, changed } = repairTicketHistory(dir, resolvedId, { apply: flags.apply === true });
+      if (!changed) {
+        console.log(`✅ ${resolvedId}: history already schema-clean — nothing to repair`);
+      } else {
+        console.log(`${flags.apply === true ? '🛠  repaired' : '📋 plan (dry run — add --apply to write)'} ${resolvedId}:`);
+        for (const d of plan.dropped) console.log(`   drop ${d.at} ${d.from ?? 'null'} → ${d.to} (non-chaining duplicate edge)`);
+        if (plan.createdAtTo !== plan.createdAtFrom) console.log(`   created_at ${plan.createdAtFrom} → ${plan.createdAtTo} (reconciled with the earliest event)`);
+      }
+      break;
+    }
     case 'archive': {
       // v1.9.0 (design 2026-10-04-ticket-archive-design.md): done tickets leave the
       // live stores after a dwell of DEFAULT_ARCHIVE_DAYS. Dry-run by default —
@@ -415,7 +440,7 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       break;
     }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor|archive> ...');
+      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor|archive|repair-history> ...');
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {

@@ -43,6 +43,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "executive-presentation",
       "type": "skill",
       "layer": "variant:co-consult",
@@ -98,6 +103,11 @@
     {
       "id": "industry-expert",
       "type": "agent",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "industry-research-pack",
+      "type": "skill",
       "layer": "variant:co-consult"
     },
     {
@@ -239,6 +249,11 @@
       "id": "project-delivery",
       "type": "skill",
       "layer": "variant:co-consult"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
+      "layer": "L0"
     },
     {
       "id": "sample-driven-report-writing",
@@ -1051,6 +1066,74 @@
       "from": "hwp-document-processing",
       "to": "sample-driven-report-writing",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "company-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "competitive-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "industry-research-pack",
+      "to": "evidence-ledger",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "prerequisites"
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "prose"
+    },
+    {
+      "type": "requires",
+      "from": "industry-research-pack",
+      "to": "research-analysis",
+      "source": "prerequisites",
+      "provenance": {
+        "file": "templates/co-consult/skills/industry-research-pack/SKILL.md",
+        "field": "prerequisites"
+      }
     },
     {
       "type": "composes_with",

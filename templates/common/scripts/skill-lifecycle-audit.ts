@@ -9,7 +9,12 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.6.0
+ * @version 1.7.0
+ * v1.7.0 (2026-10-08, T-20261007-026): Check SVP — a SKILL.md script version
+ *         pin (`script.ts v?X.Y.Z` without a floor operator) must match the
+ *         pinned script's current registry version (shared parseScriptRegistry
+ *         lookup); floor pins (≥/>=) and unknown script names are ignored.
+ *         Two live drifts found and fixed in promote-variant/project-to-variant.
  * v1.6.0 (2026-10-05, T-20261004-020 + T-20261004-023): Check MV — an active
  *         skill's lifecycle record must carry matching header/footer Metadata
  *         Version lines and both must equal the SKILL.md frontmatter version
@@ -31,6 +36,7 @@ import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { isSelfManagedPath } from './lib/self-managed-tools.ts';
 import { lastContentCommitDate } from './agent-lifecycle-audit.ts';
+import { parseScriptRegistry } from './helpers/write-scripts-snapshot.ts';
 
 interface SkillFrontmatter {
   name: string;
@@ -450,6 +456,8 @@ function checkCircularDependencies(
 
 // Main audit function
 function auditSkills(jsonMode = false): AuditResult {
+  // Check SVP lazy registry (T-20261007-026) — loaded once on first pin found.
+  let scriptRegistry: Record<string, { version: string; status: string }> | null = null;
   const registry = getAgentRegistry();
   const skillFiles = findSkillFiles(ROOT);
   const allSkills = new Map<string, string>();
@@ -728,6 +736,34 @@ function auditSkills(jsonMode = false): AuditResult {
             message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
             fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
           });
+        }
+      }
+
+      // Check SVP (v1.7.0, T-20261007-026): SKILL.md script version pins must
+      // match the pinned script's current registry version. A pin is
+      // `script.ts v?X.Y.Z` WITHOUT a floor operator (≥/>= floors are
+      // minimums, not pins, and never drift stale). Unknown script names are
+      // ignored (prose references, other-variant tools).
+      if (frontmatter.status === 'active') {
+        if (scriptRegistry === null) {
+          scriptRegistry = existsSync(join(ROOT, 'scripts', 'SCRIPTS.md'))
+            ? parseScriptRegistry(readFileSync(join(ROOT, 'scripts', 'SCRIPTS.md'), 'utf-8'))
+            : {};
+        }
+        const content = skillContent.replace(/\r\n/g, '\n');
+        for (const m of content.matchAll(/([\w./-]+\.ts)`?[ \t]+(?:v|≥|>=)?[ \t]*(\d+\.\d+\.\d+)/g)) {
+          if (/≥|>=/.test(m[0])) continue; // floor, not a pin
+          const script = m[1];
+          const current = scriptRegistry[script];
+          if (!current) continue;
+          if (current.version !== m[2]) {
+            warnings.push({
+              level: 'warning',
+              file: relPath,
+              message: `script version pin drift: "${script} ${m[2]}" but the registry has ${current.version}`,
+              fix: `Update the ${script} version pin in the SKILL.md body to ${current.version} (or drop the pin)`,
+            });
+          }
         }
       }
     }

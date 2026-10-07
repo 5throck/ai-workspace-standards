@@ -97,7 +97,17 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "output_type.citation_check",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "output_type.design_spec",
+      "type": "output_type",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "output_type.equality_report",
       "type": "output_type",
       "layer": "variant:co-deck"
     },
@@ -174,6 +184,11 @@
     },
     {
       "id": "procedure.co-deck.lecture-deck-production",
+      "type": "procedure",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "procedure.co-deck.slidedata-derived-doc-sync",
       "type": "procedure",
       "layer": "variant:co-deck"
     },
@@ -938,6 +953,88 @@
       "from": "procedure.co-deck.lecture-deck-production",
       "to": "storyline",
       "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.citation_check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.equality_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.html_deck",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "output_type.version_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "slide-layout-gate",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "in_stage",
+      "from": "procedure.co-deck.slidedata-derived-doc-sync",
+      "to": "stage.co-deck.S2",
+      "source": "process_schema"
     },
     {
       "type": "produces",

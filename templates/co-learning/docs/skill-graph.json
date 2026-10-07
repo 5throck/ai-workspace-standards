@@ -207,6 +207,13 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.architecture-design",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "enables",
       "from": "procedure.co-learning.architecture-design",
       "to": "procedure.co-learning.feature-implementation",
@@ -229,6 +236,20 @@
       "from": "procedure.co-learning.environment-bootstrap",
       "to": "output_type.environment_manifest",
       "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "enables",
@@ -261,6 +282,27 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.feature-implementation",
       "to": "refactoring",
@@ -291,6 +333,20 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.release-verification",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.release-verification",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.release-verification",
       "to": "procedure.co-learning.feature-implementation",
@@ -315,6 +371,13 @@
       "source": "procedure_schema"
     },
     {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.security-release-retrospective",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
       "type": "follows",
       "from": "procedure.co-learning.security-release-retrospective",
       "to": "procedure.co-learning.release-verification",
@@ -325,6 +388,20 @@
       "from": "procedure.co-learning.technical-planning",
       "to": "output_type.technical_findings",
       "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-learning.technical-planning",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "follows",

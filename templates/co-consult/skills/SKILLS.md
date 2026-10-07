@@ -8,6 +8,7 @@ Curated registry for the co-consult variant-exclusive skills (T-20260924-009). O
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `change-impact-assessment` | 1.0.0 | active | change-management-partner | 2026-06-13 | — | co-consult only — change-impact mapping for the Change Management Partner |
 | `company-intelligence` | 1.0.0 | active | pm | 2026-07-19 | — | co-consult only — company and corporate-group intelligence gathering |
+| `industry-research-pack` | 1.0.0 | active | pm | 2026-10-08 | — | co-consult only — source-laddered industry research pack: 1-source-1-doc, 5-section skeleton, cross-validation + warning marks, verify-user-hypotheses |
 | `competitive-intelligence` | 1.0.0 | active | strategy-analyst | 2026-06-13 | — | co-consult only — market and competitive analysis |
 | `consulting-report-writing` | 1.0.0 | active | communications-lead | 2026-06-13 | — | co-consult only — consulting-style report writing |
 | `executive-presentation` | 1.0.0 | active | communications-lead | 2026-06-13 | — | co-consult only — C-level strategy presentation design |

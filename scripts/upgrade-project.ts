@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.67.0
+// @version 1.68.0
+// v1.68.0 (2026-10-08, T-20261007-028 + T-20261007-018): --preflight flag —
+//          checks the three apply-blockers (clean working tree, open PRs on
+//          the current branch, template-version.txt present/parseable) and
+//          exits 0/1 WITHOUT applying; the delivery manifest write now also
+//          composes .claude/last-upgrade-pr-body.md from THIS delivery at
+//          delivery time (the co-deck PR #166 stale-carried-body class).
 // v1.67.0 (2026-10-08, T-20261006-009 + T-20261006-010): the PRUNE REMOVED
 //          agents/ category consults the workspace-root agents/ SSOT (mirroring
 //          skills/ v1.35.0) — root-SSOT-delivered agents no longer get the
@@ -539,7 +545,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--preflight] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -610,6 +616,7 @@ let projectPath = '';
 let variant = '';
 let platform = 'all';
 let dryRun = false;
+let preflight = false; // T-20261007-028: check apply-blockers (clean tree, open PRs, template-version.txt) without applying
 let pruneRemoved = false;
 let rollback = false;
 let yesFlag = false;
@@ -622,6 +629,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
   if (args[i] === '--dry-run') { dryRun = true; continue; }
+  if (args[i] === '--preflight') { preflight = true; continue; }
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
@@ -853,6 +861,51 @@ if (templatesDir === join(workspaceRoot, 'templates') || !variant.trim()) {
 }
 
 if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
+
+// ── Preflight (T-20261007-028): --preflight checks the three apply-blockers ──
+// clean tree / open PRs on the current branch / template-version.txt, then
+// exits 0 (safe to apply) or 1 (blockers) WITHOUT touching the project. The
+// 2026-10-08 wave landed upgrades into trees that were dirty or already under
+// review — this makes the pre-apply state machine-checked instead of remembered.
+if (preflight) {
+  console.log('--- Preflight (no changes will be applied) ---');
+  let failures = 0;
+  const porcelain = spawnSync('git', ['-C', projectDir, 'status', '--porcelain'], { encoding: 'utf8' });
+  const dirty = (porcelain.stdout || '').split('\n').filter(Boolean);
+  if (dirty.length === 0) {
+    console.log('  ✅ working tree clean');
+  } else {
+    console.log(`  ❌ working tree has ${dirty.length} uncommitted file(s) — commit or stash before upgrading`);
+    failures++;
+  }
+  const branchOut = spawnSync('git', ['-C', projectDir, 'rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8' });
+  const branch = (branchOut.stdout || '').trim() || '?';
+  const remoteUrl = (spawnSync('git', ['-C', projectDir, 'remote', 'get-url', 'origin'], { encoding: 'utf8' }).stdout || '').trim();
+  const slug = remoteUrl.match(/[:/]([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?:\.git)?$/);
+  let openPrs = -1;
+  if (slug) {
+    const gh = spawnSync('gh', ['pr', 'list', '-R', `${slug[1]}/${slug[2]}`, '--head', branch, '--state', 'open', '--json', 'number'], { encoding: 'utf8' });
+    try { openPrs = (JSON.parse(gh.stdout || '[]') as Array<unknown>).length; } catch { openPrs = -1; }
+  }
+  if (openPrs === 0) {
+    console.log(`  ✅ no open PRs on '${branch}'`);
+  } else if (openPrs < 0) {
+    console.log('  ⚠️  open-PR check unavailable (no origin remote or gh error) — verify manually before applying');
+  } else {
+    console.log(`  ❌ ${openPrs} open PR(s) on '${branch}' — an upgrade would tangle the review`);
+    failures++;
+  }
+  const tvPath = join(projectDir, 'template-version.txt');
+  const tvMatch = existsSync(tvPath) ? readFileSync(tvPath, 'utf8').match(/^version=(.*)$/m) : null;
+  if (tvMatch && tvMatch[1].trim()) {
+    console.log(`  ✅ template-version.txt present (version=${tvMatch[1].trim()})`);
+  } else {
+    console.log('  ❌ template-version.txt missing or unparseable at the project root');
+    failures++;
+  }
+  console.log(failures === 0 ? 'Preflight PASSED — safe to apply.' : `Preflight FAILED with ${failures} blocker(s).`);
+  process.exit(failures === 0 ? 0 : 1);
+}
 if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
 
 // ── Script version comparison ──────────────────────────────────────────────────
@@ -3549,6 +3602,40 @@ if (!dryRun) {
       JSON.stringify({ timestamp: new Date().toISOString(), files }, null, 2) + '\n'
     );
     console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s))`);
+    // T-20261007-018: compose the upgrade PR body from THIS delivery at
+    // delivery time — the co-deck PR #166 class shipped a body carried over
+    // from a prior attempt describing a different wave. The project session
+    // passes it to /sync verbatim (--body-file .claude/last-upgrade-pr-body.md)
+    // instead of hand-composing or reusing a stale one.
+    try {
+      const byDir = new Map<string, number>();
+      for (const f of files) {
+        const top = f.includes('/') ? `${f.split('/')[0]}/` : '(root)';
+        byDir.set(top, (byDir.get(top) ?? 0) + 1);
+      }
+      const groups = [...byDir.entries()].sort((a, b) => b[1] - a[1])
+        .map(([dir, n]) => `- ${dir} — ${n} file(s)`).join('\n');
+      const body = [
+        '## Upgrade delivery',
+        '',
+        `Auto-composed from \`.claude/last-upgrade-delivery.json\` at delivery time — this body describes exactly the merged content.`,
+        '',
+        `- Variant: ${variant}`,
+        `- Template: ${detectedVersion || '?'} → ${currentVersion || '?'}`,
+        `- Delivered: ${files.length} file(s) at ${new Date().toISOString()}`,
+        '',
+        '### Delivery footprint',
+        '',
+        groups,
+        '',
+        '_Full inventory: `.claude/last-upgrade-delivery.json` (dev-sync Step 3.9 auto-E5 diff attribution)._',
+        '',
+      ].join('\n');
+      writeFileSync(join(projectDir, '.claude', 'last-upgrade-pr-body.md'), body);
+      console.log('  PR body composed: .claude/last-upgrade-pr-body.md (pass --body-file to the project /sync)');
+    } catch (err) {
+      console.log(`  ⚠️  could not compose the PR body (${String(err)}) — compose it from the manifest manually`);
+    }
   } catch (err) {
     console.log(`  ⚠️  could not write delivery manifest (${String(err)}) — /sync auto-E5 unavailable for this wave`);
   }

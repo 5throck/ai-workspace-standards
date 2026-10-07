@@ -1,0 +1,73 @@
+schema_version: "1.0"
+procedure_id: co-deck-slidedata-derived-doc-sync
+variant: co-deck
+version: "1.0.0"
+title: Slidedata-Derived Document Sync
+phase: 4
+stage: S2
+status: active
+owner_agent: pm
+purpose: >
+  Keep every document derived from slidedata.json (the deck SSOT) in sync with
+  it: the built HTML's embedded data, slide_deck.md, the storyline header
+  tables, and the _versions/ snapshots. T-20261007-010, distilled from co-deck
+  design D8/D4 and PR #165.
+inputs:
+  - slidedata_json
+preconditions:
+  - "slidedata.json change is complete (ID/title/lead-in/bullet/thumbnail changed together per ADR-0002 decision 3)."
+steps:
+  - id: 1
+    agent_key: pm
+    skill_key: slide-layout-gate
+    output_type: equality_report
+    description: >
+      Run the embedded-HTML data equality check: the slide data embedded in the
+      built lecture HTML must equal slidedata.json (IDs, titles, video IDs,
+      lead-ins). Any mismatch means the HTML was hand-edited past the SSOT —
+      rebuild instead of patching.
+  - id: 2
+    agent_key: pm
+    skill_key: slide-layout-gate
+    output_type: html_deck
+    description: >
+      Regenerate slide_deck.md fully from slidedata.json (never hand-patch it —
+      a full regeneration cannot drift) and update the storyline header tables
+      (video count and placement restated) per the replacement-hygiene rule.
+  - id: 3
+    agent_key: pm
+    skill_key: slide-layout-gate
+    output_type: version_record
+    description: >
+      Snapshot the pre-change documents into _versions/ with a dated suffix, so
+      every sync has a rollback point and the diff history stays reviewable.
+  - id: 4
+    agent_key: pm
+    skill_key: slide-layout-gate
+    output_type: citation_check
+    description: >
+      Footnote-wrap rule (PR #165): citations in slide footnotes must never be
+      ellipsis-truncated — a truncated citation fails review. Candidate check
+      for the slide-layout-gate skill; until automated, verify by eye here.
+outputs:
+  - type: equality_report
+  - type: html_deck
+  - type: version_record
+  - type: citation_check
+acceptance_criteria:
+  - "Embedded HTML data equals slidedata.json (equality check green)."
+  - "slide_deck.md regenerated; zero hand-edits against the SSOT."
+  - "_versions/ snapshot exists for this sync."
+  - "No slide footnote citation is ellipsis-truncated."
+relations: []
+decision_points:
+  - DG-DECK-03
+evidence:
+  - "docs/co-deck.context.md"
+failure_modes:
+  - "Embedded HTML data diverges from slidedata.json — halt and rebuild from the SSOT instead of patching the HTML."
+  - "slide_deck.md hand-edited past regeneration — discard the edits and regenerate; record intent in slidedata.json first."
+quality_gates:
+  - "Equality check: embedded HTML data equals slidedata.json."
+  - "slide_deck.md byte-derived from slidedata.json (no hand-edits)."
+  - "Citation check: zero ellipsis-truncated footnotes."

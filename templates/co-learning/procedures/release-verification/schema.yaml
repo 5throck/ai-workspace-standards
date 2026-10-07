@@ -1,3 +1,4 @@
+# co-learning roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
 schema_version: "1.0"
 procedure_id: co-learning-release-verification
 variant: co-learning
@@ -5,7 +6,7 @@ version: "1.0.0"
 title: Release Verification
 phase: 4
 status: active
-owner_agent: test-runner
+owner_agent: pm
 purpose: >
   Verify the integrated implementation end to end and finalize release
   documentation.
@@ -15,13 +16,13 @@ preconditions:
   - "Feature implementation merged with review findings resolved."
 steps:
   - id: 1
-    agent_key: test-runner
+    agent_key: pm
     skill_key: test-driven-development
     output_type: regression_report
     description: >
       Run the full regression suite across supported environments.
   - id: 2
-    agent_key: code-writer
+    agent_key: pm
     skill_key: documentation-writing
     output_type: release_notes
     description: >

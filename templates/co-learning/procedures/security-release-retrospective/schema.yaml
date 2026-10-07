@@ -1,3 +1,4 @@
+# co-learning roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
 schema_version: "1.0"
 procedure_id: co-learning-security-release-retrospective
 variant: co-learning
@@ -5,7 +6,7 @@ version: "1.0.0"
 title: Security Release Retrospective
 phase: 5
 status: active
-owner_agent: security-monitor
+owner_agent: pm
 purpose: >
   Review residual security findings and lessons after release verification.
 inputs:
@@ -15,7 +16,7 @@ preconditions:
   - "Release verification has completed and findings are triaged."
 steps:
   - id: 1
-    agent_key: security-monitor
+    agent_key: pm
     skill_key: code-review
     output_type: review_findings
     description: >

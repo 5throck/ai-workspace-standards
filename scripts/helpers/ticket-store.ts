@@ -668,3 +668,66 @@ export function resolveServiceRef(catalog: Catalog, serviceId: string, workspace
   }
   return { type: svc.run.type, ref: svc.run.ref, absPath };
 }
+
+// ── T-20261007-004: legacy history repair ─────────────────────────────────────
+// The 2026-10-06 upstream import wrote histories the store could never have
+// produced: doubled backlog→waiting edges (the second `from` contradicts the
+// previous `to`) and retroactive created_at stamps (history timestamps earlier
+// than created_at). validateTicket now fails those shapes loudly; this helper
+// rewrites them into the schema-clean form — drop non-chaining duplicate edges,
+// sort by timestamp, reconcile created_at to the earliest recorded event.
+// Dry-run by default; --apply writes (validated before the atomic write).
+
+export interface HistoryRepairPlan {
+  dropped: Array<{ at: string; from: string | null; to: string }>;
+  createdAtFrom: string | null;
+  createdAtTo: string | null;
+}
+
+export function repairTicketHistory(
+  dir: string,
+  id: string,
+  opts: { apply?: boolean } = {},
+): { plan: HistoryRepairPlan; changed: boolean } {
+  return withTicketLock(dir, `repair-history:${id}`, () => {
+    const ticket = readTicketRaw(dir, id);
+
+    const sorted = [...ticket.history].sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0));
+    // The creation edge (from: null) is always kept — re-anchored to the
+    // earliest subsequent event when its own stamp postdates real activity
+    // (the retroactive-import shape). Everything else must chain.
+    const creationIdx = sorted.findIndex((e) => e.from === null);
+    let creation = creationIdx >= 0 ? { ...sorted[creationIdx] } : null;
+    const rest = sorted.filter((e, i) => i !== creationIdx);
+    const kept: Ticket['history'] = [];
+    const dropped: HistoryRepairPlan['dropped'] = [];
+    for (const e of rest) {
+      const last = kept[kept.length - 1] ?? null;
+      const prevTo = last ? last.to : creation?.to ?? null;
+      if (prevTo !== null && e.from !== prevTo) {
+        dropped.push({ at: e.at, from: e.from, to: e.to });
+        continue;
+      }
+      kept.push(e);
+    }
+    if (creation && kept.length > 0 && kept[0].at < creation.at) {
+      creation.at = kept[0].at; // re-anchor creation to the earliest real event
+    }
+    ticket.history = creation ? [creation, ...kept] : kept;
+
+    const createdAtFrom = ticket.created_at;
+    let createdAtTo = createdAtFrom;
+    if (ticket.history.length > 0 && createdAtFrom > ticket.history[0].at) {
+      createdAtTo = ticket.history[0].at;
+      ticket.created_at = createdAtTo;
+    }
+
+    const plan: HistoryRepairPlan = { dropped, createdAtFrom, createdAtTo };
+    const changed = dropped.length > 0 || createdAtTo !== createdAtFrom;
+    if (opts.apply && changed) {
+      validateTicket(ticket);
+      writeTicketAtomic(dir, ticket);
+    }
+    return { plan, changed };
+  });
+}

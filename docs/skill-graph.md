@@ -95,6 +95,7 @@
 | `i18n-formatting` | common | i18n-specialist | — | — | — | — |
 | `i18n-layout` | common | i18n-specialist | — | — | — | — |
 | `i18n-locale-config` | common | i18n-specialist | — | — | — | — |
+| `industry-research-pack` | variant:co-consult | — | — | evidence-ledger (composes_with), research-analysis (composes_with) | — | — |
 | `insight-synthesis` | variant:co-consult | data-analyst, data-analyst, strategy-analyst, strategy-analyst | phase1, phase3 | competitive-intelligence (composes_with), financial-statement-analysis (composes_with), org-readiness-assessment (follows), solution-design (composes_with) | — | — |
 | `investigation/hazop-analysis` | variant:co-safety | — | — | — | — | — |
 | `iso14971-risk-scorer` | variant:co-safety | — | — | — | — | — |
@@ -419,9 +420,9 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-hr/README.md` | doc | `career-path-succession-planning`, `compensation-benchmarking`, `consulting-report-writing`, `hr-metrics-analysis`, `learning-curriculum-design`, `meeting-facilitation`, `org-design-framework`, `org-readiness-assessment`, `performance-system-design`, `stakeholder-alignment`, `talent-acquisition-strategy` | — | — |
 | `doc:co-learning/AGENTS.md` | doc | `agent-lifecycle-manager`, `explain-me`, `handbook`, `handbook-sync-audit`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `sync` | — | — |
 | `doc:co-learning/docs/co-learning.context.md` | doc | `agent-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
-| `doc:co-learning/docs/phase-definitions.md` | doc | `project-review` | — | — |
+| `doc:co-learning/docs/phase-definitions.md` | doc | `project-review`, `security-scan` | — | — |
 | `doc:co-learning/docs/user-guide_ko.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
-| `doc:co-learning/docs/user-guide.md` | doc | `code-review`, `project-review`, `refactoring`, `sync`, `test-driven-development` | — | — |
+| `doc:co-learning/docs/user-guide.md` | doc | `project-review`, `security-scan`, `sync` | — | — |
 | `doc:co-learning/README.md` | doc | `exam-bank-operations`, `finishing-a-development-branch`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `skill-lifecycle-manager` | — | — |
 | `doc:co-news/AGENTS.md` | doc | `agent-lifecycle-manager`, `meeting-facilitation`, `platform-command-lifecycle-manager`, `platform-skill-lifecycle-manager`, `project-review`, `security-scan`, `skill-lifecycle-manager`, `sync` | — | — |
 | `doc:co-news/agents/financial-analyst.md` | doc | `k-dart` | — | — |

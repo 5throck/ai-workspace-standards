@@ -1,3 +1,4 @@
+# co-learning roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
 schema_version: "1.0"
 procedure_id: co-learning-feature-implementation
 variant: co-learning
@@ -5,7 +6,7 @@ version: "1.0.0"
 title: Feature Implementation
 phase: 4
 status: active
-owner_agent: code-writer
+owner_agent: pm
 purpose: >
   Implement an approved feature with test-first discipline, review, and
   security monitoring.
@@ -15,13 +16,13 @@ preconditions:
   - "Implementation plan approved at the phase 2 design gate."
 steps:
   - id: 1
-    agent_key: architect
+    agent_key: pm
     skill_key: test-driven-development
     output_type: test_scaffold
     description: >
       Break the plan into testable increments and scaffold failing tests.
   - id: 2
-    agent_key: code-writer
+    agent_key: pm
     skill_key: test-driven-development
     output_type: implementation_commit
     description: >
@@ -34,7 +35,7 @@ steps:
       Specify UI behavior and states for user-facing increments before
       implementation.
   - id: 3
-    agent_key: security-monitor
+    agent_key: pm
     skill_key: code-review
     output_type: review_findings
     description: >

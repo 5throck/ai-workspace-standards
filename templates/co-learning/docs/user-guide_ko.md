@@ -2,7 +2,7 @@
 sync_version: 1
 lang: ko
 lang_reason: source-material
-translated_from_hash: 5290e04e719f0aba3d136b831d01ac0d6ae4fb9a4e793ef5a3e2b640409659c7
+translated_from_hash: 9dd3a6a9f6c3596373471c490b873ca727260a3db5a87019345514edbc7cc1b2
 ---
 # co-learning 사용자 가이드
 
