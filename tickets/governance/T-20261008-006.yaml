@@ -10,7 +10,7 @@ title: >-
   (workspace §7). Split out so T-20261006-006 could close on its delivered half.
   NOTE: executing this ticket modifies CI — obtain user approval first
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T11:21:26.422+09:00'
 history:
@@ -20,5 +20,18 @@ history:
   - at: '2026-10-08T11:29:04.010+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T11:38:29.512+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T11:38:29.530+09:00'
+    from: review
+    to: done
+result: >-
+  User-approved 2026-10-08 and landed via PR #1478: the 'Variant claims battery'
+  step in .github/workflows/test.yml runs validate-variant-claims.ts --template
+  <v> across all 14 variants from the workspace root (ubuntu-only, next to the
+  docs-links step), mirroring the daily runner's Phase 1b battery invocation;
+  measured ~0.4s for the full loop locally; first CI run green on ubuntu with
+  the step included. Windows flake on the first run was the known co-workspace
+  gateway spawn-timeout class (twin run green; failed-job rerun green).
 error: null
