@@ -11,7 +11,7 @@ title: >-
   skill). Evidence: design D8/D4, _versions/, PR #165. Class: template procedure
   enhancement
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T13:54:52.342Z'
 history:
@@ -27,5 +27,11 @@ history:
   - at: '2026-10-08T07:43:59.607+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.565+09:00'
+    from: review
+    to: done
+result: >-
+  Procedure landed: templates/co-deck/procedures/slidedata-derived-doc-sync/
+  (embedded-HTML equality, full regeneration, _versions/ snapshots, citation
+  truncation check) + 3 output types registered (sweep R2.13).
 error: null

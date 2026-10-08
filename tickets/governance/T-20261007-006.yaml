@@ -13,7 +13,7 @@ title: >-
   template upgrades to co-deck cannot pass its local pre-push visual gate (the
   0.13.1 upgrade content is fully prepared and re-runnable)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T07:32:01.492Z'
 history:
@@ -29,5 +29,12 @@ history:
   - at: '2026-10-08T07:43:59.978+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.521+09:00'
+    from: review
+    to: done
+result: >-
+  Design deliverable landed:
+  docs/designs/2026-10-08-deck-visual-reproducibility-design.md (poster-mode,
+  font pin, CI baselines; also covers T-20261007-019's env-fingerprint ask).
+  Implementation is a future work item per the design.
 error: null

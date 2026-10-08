@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: U-20261008-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-08T00:36:44.407Z
+history:
+  - at: 2026-10-08T00:36:44.407Z
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.14.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/dev-sync.ts generates non-descriptive commit messages such as "chore: update" and "chore: upgrade template to X". In co-newbiz, 97 of 544 commits in the last 30 days have this shape, which makes git history hard to read. Expected: commit messages describe the actual change, derived from the staged diff or the changelog entry.'
+  affected_paths:
+    - scripts/dev-sync.ts
+  identity_source: client_roots
+  repro: 'Run git log --since=30.days --format=%s | grep -cE "^chore: (update|upgrade)" in a scaffolded project that uses /sync.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/dev-sync.ts=false
+  dedupe_key: 0e2f4edbebbc1df33b8f952a1b801fa3ba36ccbab8de1209f02dab0286a02189
+  duplicates:
+    - project: co-newbiz
+      at: 2026-10-08T00:36:44.407Z

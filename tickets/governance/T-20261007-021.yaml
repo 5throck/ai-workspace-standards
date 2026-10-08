@@ -14,7 +14,7 @@ title: >-
   10, deliverables/harness-assessment/app.js ~1683. Class: test-infrastructure
   improvement, cross-pollination
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:31.432Z'
 history:
@@ -30,5 +30,8 @@ history:
   - at: '2026-10-08T07:43:59.422+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.724+09:00'
+    from: review
+    to: done
+result: 'Guide landed: docs/guides/browser-deliverable-xss-assertions.md (sweep R2.10).'
 error: null

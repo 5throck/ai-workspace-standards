@@ -11,7 +11,7 @@ title: >-
   storyline.md v4.2 header, PR #164. Class: reusable skill candidate + strongest
   cross-pollination
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T13:54:52.328Z'
 history:
@@ -27,5 +27,10 @@ history:
   - at: '2026-10-08T07:43:59.330+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.544+09:00'
+    from: review
+    to: done
+result: >-
+  Guide landed: docs/guides/mass-text-rewrite-verification.md (sweep R2.10) —
+  chunk-bounded rewrites with independent pre-apply verification.
 error: null

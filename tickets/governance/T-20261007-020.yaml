@@ -16,7 +16,7 @@ title: >-
   test-infrastructure improvement, pollination to any spawn-server integration
   test
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:31.417Z'
 history:
@@ -32,5 +32,8 @@ history:
   - at: '2026-10-08T07:43:59.375+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.705+09:00'
+    from: review
+    to: done
+result: 'Guide landed: docs/guides/server-spawn-test-determinism.md (sweep R2.10).'
 error: null

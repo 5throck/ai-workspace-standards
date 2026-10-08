@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261008-006
+kind: manual
+title: >-
+  validator-hardening: wire the validate-variant-claims battery entry into
+  .github/workflows/test.yml next to the docs-links --all step (sub-second,
+  verified cheap) — the test half of T-20261006-006 landed in the 2026-10-08
+  backlog sweep (tests/unit/validate-variant-claims.test.ts, 14 tests) but the
+  CI wiring was deliberately deferred: CI-file edits need explicit user approval
+  (workspace §7). Split out so T-20261006-006 could close on its delivered half.
+  NOTE: executing this ticket modifies CI — obtain user approval first
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-08T11:21:26.422+09:00'
+history:
+  - at: '2026-10-08T11:21:26.422+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

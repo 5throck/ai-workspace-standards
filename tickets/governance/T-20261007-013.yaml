@@ -19,7 +19,7 @@ title: >-
   #86 (the actual origin — #89 only landed memory/manifests). Class: new skill
   candidate, strongest of the co-consult landing
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T13:58:33.393Z'
 history:
@@ -35,5 +35,10 @@ history:
   - at: '2026-10-08T07:43:59.468+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.603+09:00'
+    from: review
+    to: done
+result: >-
+  Skill landed: templates/co-consult/skills/industry-research-pack 1.0.0 + 5
+  platform mirrors + registry row (sweep R2.11).
 error: null
