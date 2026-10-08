@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261009-005
+kind: manual
+title: >-
+  Add slash-less node_modules entry to .gitignore (dir-only pattern misses
+  symlinks) plus a tracked-path guard so a node_modules symlink can never be
+  committed again
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-09T07:11:39.171+09:00'
+history:
+  - at: '2026-10-09T07:11:39.171+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

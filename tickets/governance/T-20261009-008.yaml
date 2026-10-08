@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261009-008
+kind: manual
+title: >-
+  skill-graph fleet-report orphan triage: add HERMES.md to the docRef corpus,
+  compute triage axes for isolated agents, and preserve root-L0 edges via
+  overrides or same-capability attribution (stop flagging
+  architect/standup-synthesizer)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-09T07:12:32.405+09:00'
+history:
+  - at: '2026-10-09T07:12:32.405+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

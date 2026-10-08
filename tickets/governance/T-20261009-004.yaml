@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261009-004
+kind: manual
+title: >-
+  skill-graph: resolve standup-synthesizer isolation (new orphan vs 2026-10-08
+  snapshot, docRefs 0) — wire a doc reference or file retirement
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-09T07:11:04.076+09:00'
+history:
+  - at: '2026-10-09T07:11:04.076+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-09T07:12:32.373+09:00'
+    from: backlog
+    to: done
+result: >-
+  Superseded by scoped review: the 2026-10-09 isolation flags are v2
+  edge-re-attribution artifacts (root L0 architect/standup-synthesizer lost all
+  edges to scoped variant copies in 32096bf5; both are referenced:
+  AGENTS.md/CLAUDE.md/HERMES.md and co-work fork wiring). Real fix is the
+  fleet-report triage gap tracked by T-20261009-008. No retirement, no
+  doc-wiring needed.
+error: null

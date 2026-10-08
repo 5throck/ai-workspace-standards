@@ -7160,7 +7160,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-10-07"
       }
     },
@@ -7554,7 +7554,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-10-07"
       }
     },
@@ -8189,7 +8189,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-10-07"
       }
     },
