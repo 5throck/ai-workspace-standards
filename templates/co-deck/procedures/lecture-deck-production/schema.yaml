@@ -51,5 +51,8 @@ decision_points:
   - DG-DECK-02
 evidence:
   - "docs/co-deck.context.md"
+quality_gates:
+  - "Video gates: context/audio/identity verified per video (ADR-0002); injector re-run + node --check clean."
 failure_modes:
   - "Source material cannot be verified - halt research and flag gaps to pm rather than presenting unverified claims."
+  - "A deck video that skips the three gates reaches presentation day broken - wrong file, silent audio, or stale injector indices (lecture-v4 defect class, ADR-0002)."
