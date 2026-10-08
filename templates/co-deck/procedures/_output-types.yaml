@@ -98,3 +98,13 @@ output_types:
     format: markdown
     evidence_model: null
     retention: engagement
+
+  video_gate_report:
+    description: >-
+      Per-video three-gate verification record (context/audio/identity) plus
+      injector re-run and node --check results, from ADR-0002
+      (T-20261007-007/008 promotion).
+    owner_agent: pm
+    format: markdown
+    evidence_model: null
+    retention: engagement
