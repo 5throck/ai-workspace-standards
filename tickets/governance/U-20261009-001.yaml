@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261009-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-08T20:59:11.273Z
+history:
+  - at: 2026-10-08T20:59:11.273Z
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.14.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The graft tool (an external repo-indexing CLI) installs a generated skill at .claude/skills/graft/SKILL.md that has no `version:` frontmatter field. scripts/audit.ts then fails with "[FAIL] .claude/skills/graft/SKILL.md missing version: field", and the platform lifecycle check (verify-platform-lifecycle.ts) fails with it. That blocks every /sync commit in projects where graft is installed. The file is untracked, so CI never sees it; the failure is local-only. Expected: third-party, tool-generated skill directories that are not part of the project''s skill registry (here .claude/skills/graft/, and its mirrors under .agents/, .codex/, .gemini/ and .hermes/ skills dirs if present) are excluded from the skill version and lifecycle checks, ideally through a configurable ignore list.'
+  affected_paths:
+    - scripts/audit.ts
+    - scripts/verify-platform-lifecycle.ts
+    - .claude/skills/graft/SKILL.md
+  identity_source: client_roots
+  repro: '1. Install graft (npm i -g @nanonets/graft) in a scaffolded project and let it wire agents; it creates .claude/skills/graft/SKILL.md with no version field. 2. Run bun scripts/audit.ts: it reports the missing version field and the platform lifecycle failure. 3. Run /sync: the commit is blocked. The workaround is to move the directory out temporarily before every sync.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/audit.ts=false
+    - info:in_last_delivery scripts/verify-platform-lifecycle.ts=false
+    - info:l0_origin .claude/skills/graft/SKILL.md <- .claude/skills/graft/SKILL.md
+    - info:in_last_delivery .claude/skills/graft/SKILL.md=false
+  dedupe_key: 70f759f452a3e3d57585a798598e554367e0fe1aceb1ab25a5107770e74b376a
+  duplicates:
+    - project: co-newbiz
+      at: 2026-10-08T20:59:11.273Z
