@@ -5,7 +5,7 @@ title: >-
   validator-hardening: flag SKILL.md script version pins that drift from the
   script @version header
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T21:23:49.827Z'
 history:
@@ -21,5 +21,10 @@ history:
   - at: '2026-10-08T07:43:59.097+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.782+09:00'
+    from: review
+    to: done
+result: >-
+  skill-lifecycle-audit 1.7.0 Check SVP landed; the two live pin drifts
+  (promote-variant, project-to-variant) fixed in the same pass (sweep R2.9).
 error: null

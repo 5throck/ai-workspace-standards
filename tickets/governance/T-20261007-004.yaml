@@ -12,7 +12,7 @@ title: >-
   machine checks currently pass over histories ticket-store could not have
   produced
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T05:52:41.091Z'
 history:
@@ -28,5 +28,12 @@ history:
   - at: '2026-10-08T07:43:59.789+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.501+09:00'
+    from: review
+    to: done
+result: >-
+  Sweep bdb72db5 R2.2: ticket-schema 1.7.0 validates history shape; ticket-store
+  1.12.0 repairTicketHistory + ticket.ts repair-history CLI (dry-run default);
+  the four legacy upstream imports repaired — independently verified:
+  repair-history U-20261006-001 reports schema-clean.
 error: null

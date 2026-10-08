@@ -5,7 +5,7 @@ title: >-
   Design: split project-resync into nightly and full modes and slim
   upgrade-project skill to procedure-only
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T21:23:49.869Z'
 history:
@@ -21,5 +21,10 @@ history:
   - at: '2026-10-08T07:43:59.925+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.841+09:00'
+    from: review
+    to: done
+result: >-
+  Design deliverable landed: docs/designs/2026-10-08-resync-mode-split-design.md
+  (nightly vs full split).
 error: null

@@ -9,7 +9,7 @@ title: >-
   exclusion, theme_manifest truth) and wire the battery entry into test.yml next
   to the docs-links --all step (sub-second, verified cheap)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-06T22:16:24.455Z'
 history:
@@ -25,5 +25,12 @@ history:
   - at: '2026-10-08T07:43:59.744+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.461+09:00'
+    from: review
+    to: done
+result: >-
+  Test half delivered by sweep bdb72db5 R2.3: validate-variant-claims 1.5.0
+  exports the calibration-sensitive parsers, pinned by 14 unit tests. CI wiring
+  deliberately deferred (CI edits need explicit approval per §7) and split to a
+  follow-up ticket.
 error: null

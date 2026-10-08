@@ -12,7 +12,7 @@ title: >-
   #166 baseline size jumps (22KB->177KB), PR #167 design section 5. Class:
   tooling/docs enhancement
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:04.364Z'
 history:
@@ -28,5 +28,11 @@ history:
   - at: '2026-10-08T07:44:00.106+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.686+09:00'
+    from: review
+    to: done
+result: >-
+  Covered by the deck visual-reproducibility design (rendering-environment
+  fingerprint section),
+  docs/designs/2026-10-08-deck-visual-reproducibility-design.md (sweep R2.15).
 error: null

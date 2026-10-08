@@ -11,7 +11,7 @@ title: >-
   deferred-candidates section, co-deck 2f extraction 2026-10-08. Class: L0
   tooling improvement (design input needed)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T16:45:04.335Z'
 history:
@@ -27,5 +27,10 @@ history:
   - at: '2026-10-08T07:44:00.040+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-08T11:21:26.643+09:00'
+    from: review
+    to: done
+result: >-
+  Design deliverable landed:
+  docs/designs/2026-10-08-provenance-pruning-design.md.
 error: null
