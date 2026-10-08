@@ -50,6 +50,10 @@ credentials.json
 
 # --- Node (workspace-level package.json artifacts) ---
 node_modules/
+# slash-less twin: the dir-only pattern above cannot match a node_modules SYMLINK
+# (git classifies links by lstat, never follows) — a symlink got committed via
+# this hole on 2026-10-08 (7b154db3, reverted cfa72c07). T-20261009-005.
+node_modules
 package-lock.json
 
 # --- OS artifacts ---

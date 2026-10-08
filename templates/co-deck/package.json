@@ -5,6 +5,9 @@
   "description": "co-deck variant — presentation deck pipeline scripts (PDF/HTML build, theme tooling, tests)",
   "private": true,
   "scripts": {
+    "audit": "bun scripts/audit.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts",
     "test": "bun test scripts/co-deck/tests/",
     "test:visual": "bun test scripts/co-deck/tests/theme-visual-regression.test.ts",
     "test:visual:update": "UPDATE_BASELINES=1 bun test scripts/co-deck/tests/theme-visual-regression.test.ts",
