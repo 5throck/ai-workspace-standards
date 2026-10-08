@@ -95,9 +95,10 @@ Diff each project's committed LOCAL-WORK against its variant surface
   for cross-variant assets) — after measuring that the project copy is
   genuinely newer/richer, not just divergent.
 - **Stays-project**: engagement output, domain content, VARIANT-INJECT blocks.
-- Optional aid: `bun scripts/backport-diff.ts --project <co-name> [--base <commit>]`
-  — read-only per-file candidate table (surface / divergence direction /
-  +added/-removed) over the committed range (L0-only).
+- Optional aid: per-file candidate table over the committed range — run the
+  5-surface comparison manually (`git -C Projects/<co-name> diff --stat --cached <base>..`
+  plus surface-by-surface reads); a `scripts/backport-diff.ts` helper has been
+  referenced here historically but was never implemented (T-20261009-003).
 - Produce the per-variant judgment report (promoted / stays-project /
   discarded-stale) — it feeds Step 3's PR body and the root CHANGELOG.
 - Validate: `bun scripts/validate-templates.ts`, `bun test` (root).

@@ -6,12 +6,21 @@ title: >-
   symlinks) plus a tracked-path guard so a node_modules symlink can never be
   committed again
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-09T07:11:39.171+09:00'
 history:
   - at: '2026-10-09T07:11:39.171+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T07:51:13.123+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T07:51:13.140+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-09T07:59:31.933+09:00'
+    from: running
+    to: review
 result: null
 error: null

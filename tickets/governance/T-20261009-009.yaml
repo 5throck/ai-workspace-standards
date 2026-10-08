@@ -5,12 +5,21 @@ title: >-
   Update docs/lifecycle/templates/co-consult.md acceptance count from 18 to 19
   skills (industry-research-pack restore left the record stale)
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-09T07:12:32.434+09:00'
 history:
   - at: '2026-10-09T07:12:32.434+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T07:51:13.190+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T07:51:13.206+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-09T07:59:31.986+09:00'
+    from: running
+    to: review
 result: null
 error: null

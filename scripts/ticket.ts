@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.9.1
+// @version 1.10.0
+// v1.10.0 (T-20261007-004): one-off legacy-history repair — `repair-history` subcommand (dry-run default) rewrites corrupt history[] chains into the canonical chronological shape; also documented in the usage text.
 // v1.9.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.9.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): `archive`
 //           subcommand — a done ticket dwells >= 7 days (--days N) then moves into

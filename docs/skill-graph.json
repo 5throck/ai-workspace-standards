@@ -7913,7 +7913,7 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "84f7202690453588",
+      "content_hash": "d96dace151399e91",
       "version": "1.6.1",
       "mirrors": [
         "skills/project-resync/SKILL.md",

@@ -5,12 +5,21 @@ title: >-
   Make skill-session-review.ts upsert per date or skip zero-observation appends,
   and dedupe the 20 identical blocks in memory/skill-review/2026-10-08.md
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-09T07:12:32.450+09:00'
 history:
   - at: '2026-10-09T07:12:32.450+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T07:51:13.223+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T07:51:13.240+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-09T07:59:32.014+09:00'
+    from: running
+    to: review
 result: null
 error: null

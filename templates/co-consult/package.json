@@ -4,6 +4,11 @@
   "version": "1.0.0",
   "description": "co-consult variant — consulting deliverable scripts (DOCX/PDF report generation, HWP/HWPX pipeline, financial statement analysis)",
   "private": true,
+  "scripts": {
+    "audit": "bun scripts/audit.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts"
+  },
   "dependencies": {
     "docx": "^9.8.1",
     "mdast-util-from-markdown": "^2.1.0",

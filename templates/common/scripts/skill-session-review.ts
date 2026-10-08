@@ -292,8 +292,17 @@ if (!DRY_RUN) {
     // manually triaged diagnosis/candidate content in existing entries persists
     // via append-with-separator (entries are keyed by heading, dedup at triage).
     const separator = fs.existsSync(reviewFile) ? '\n---\n\n' : '';
-    fs.appendFileSync(reviewFile, separator + markdown, 'utf8');
-    if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
+    // A zero-observation run appends at most one block per day: repeat runs with
+    // no records must not stack identical blocks (2026-10-08 accumulated 20).
+    const dayHeading = `# Skill Session Review — ${date}`;
+    const alreadyRecordedToday = fs.existsSync(reviewFile)
+        && fs.readFileSync(reviewFile, 'utf8').includes(dayHeading);
+    if (records.size === 0 && alreadyRecordedToday) {
+        if (!JSON_MODE) console.log(`${GREEN}✓ Zero-observation run skipped — a block is already present for ${date}${RESET}`);
+    } else {
+        fs.appendFileSync(reviewFile, separator + markdown, 'utf8');
+        if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
+    }
 }
 
 if (JSON_MODE) {
