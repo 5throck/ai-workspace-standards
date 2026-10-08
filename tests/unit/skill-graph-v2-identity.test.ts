@@ -32,7 +32,7 @@ function snapshotTree(dir: string, acc: Record<string, number> = {}, base = dir)
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, e.name);
     if (e.isDirectory()) snapshotTree(full, acc, base);
-    else acc[full.slice(base.length)] = statSync(full).size;
+    else acc[full.slice(base.length).replace(/\\/g, '/')] = statSync(full).size;
   }
   return acc;
 }
