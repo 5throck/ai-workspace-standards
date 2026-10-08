@@ -1,8 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Verification Script
- * @version 1.7.0
+ * @version 2.0.0
  *
+ * v2.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §6,
+ * ADR-0060 Amendment 11): schema-v2 invariants. New ERRORs (checkGraphInvariants, exported):
+ * no dangling edges, no duplicate (from,to,type) edges, unique node ids, unique
+ * (name,scope,content_hash) and no two nodes sharing (type,name,content_hash) (failed collapse),
+ * id == type:scope/name for skill/agent/phase nodes. New non-blocking reports: isolated nodes by
+ * type (G5; adr/decision INFO), skills without used_by with E4 suggestions (G6), E2
+ * same-version-different-content (version-drift) and divergence summary. Drift comparison now
+ * covers the v2 identity attributes (scope/name/capability/content_hash/version) but never
+ * `usage` (memory-derived, volatile) or `mirrors` (checkout-dependent). Name-based relation
+ * validation (relates_to / overrides accept bare names or scoped ids).
+ *
+ * v1.7.0 *
  * v1.7.0 (2026-10-06, T-20261005-022 / D8 of docs/designs/2026-10-05-consult-
  * abap-develop-review-remediation-design.md): scope-mode verification inherits
  * the generator's README- and underscore-prefix agent exclusion —
@@ -46,7 +58,9 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGraph, buildScopeGraph, parseFrontmatter, parseRelatesTo, SkillGraph, GraphNode, GraphEdge } from './generate-skill-graph.ts';
+import { buildGraphWithReport, buildScopeGraph, parseFrontmatter, parseRelatesTo, SkillGraph, GraphNode, GraphEdge } from './generate-skill-graph.ts';
+import { findCapabilityDivergence } from './lib/skill-graph-compat.ts';
+import type { SkillGraphV2 } from './lib/skill-graph-compat.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -209,6 +223,15 @@ function formatDiff(
 }
 
 /**
+ * v2 identity attributes that participate in drift comparison. Deliberately excludes
+ * `usage` (derived from memory logs, changes every session) and `mirrors` (depends on which
+ * platform mirror dirs a checkout carries).
+ */
+function identityAttrs(n: GraphNode): string {
+  return JSON.stringify([n.name ?? null, n.scope ?? null, n.capability ?? null, n.content_hash ?? null, n.version ?? null, n.ordinal ?? null]);
+}
+
+/**
  * Compare two graphs for equality
  */
 function compareGraphs(derived: SkillGraph, committed: SkillGraph): {
@@ -225,10 +248,11 @@ function compareGraphs(derived: SkillGraph, committed: SkillGraph): {
   const missingNodes = derived.nodes.filter(n => !committedNodeIds.has(n.id));
   const extraNodes = committed.nodes.filter(n => !derivedNodeIds.has(n.id));
 
-  // For nodes that exist in both, check layer equality
+  // For nodes that exist in both, check type/layer and (v2) identity-attribute equality
+  const committedById = new Map(committed.nodes.map(n => [n.id, n]));
   for (const derivedNode of derived.nodes) {
-    const committedNode = committed.nodes.find(n => n.id === derivedNode.id);
-    if (committedNode && (derivedNode.type !== committedNode.type || derivedNode.layer !== committedNode.layer)) {
+    const committedNode = committedById.get(derivedNode.id);
+    if (committedNode && (derivedNode.type !== committedNode.type || derivedNode.layer !== committedNode.layer || identityAttrs(derivedNode) !== identityAttrs(committedNode))) {
       // Treat as missing + extra (will show up in diff)
       if (!missingNodes.includes(derivedNode)) {
         missingNodes.push(derivedNode);
@@ -385,6 +409,91 @@ function checkOverridesFile(
   }
 }
 
+export interface InvariantResult {
+  errors: string[];
+  warnings: string[];
+  info: string[];
+}
+
+/**
+ * Schema-v2 graph invariants (design §6). Pure: operates on any graph object so tests can feed
+ * crafted bad graphs. ERRORs block; warnings/info are reported counts.
+ */
+export function checkGraphInvariants(graph: Pick<SkillGraph, 'nodes' | 'edges'>): InvariantResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const info: string[] = [];
+
+  // 3a. node id uniqueness
+  const ids = new Set<string>();
+  for (const n of graph.nodes) {
+    if (ids.has(n.id)) errors.push(`duplicate node id: ${n.id}`);
+    ids.add(n.id);
+  }
+
+  // 1. no dangling edges
+  for (const e of graph.edges) {
+    if (!ids.has(e.from)) errors.push(`dangling edge ${e.type}: unknown source ${e.from} (-> ${e.to})`);
+    if (!ids.has(e.to)) errors.push(`dangling edge ${e.type}: unknown target ${e.to} (from ${e.from})`);
+  }
+
+  // 2. no duplicate (from, to, type) edges
+  const edgeKeys = new Set<string>();
+  for (const e of graph.edges) {
+    const k = `${e.from}|${e.to}|${e.type}`;
+    if (edgeKeys.has(k)) errors.push(`duplicate edge: ${e.from} -> ${e.to} (${e.type})`);
+    edgeKeys.add(k);
+  }
+
+  // 3b/4/5. skill/agent/phase identity
+  const triples = new Set<string>();
+  const nameHashes = new Map<string, string>();
+  for (const n of graph.nodes) {
+    if (n.type !== 'skill' && n.type !== 'agent' && n.type !== 'phase') continue;
+    // 4. id/attribute consistency
+    const label = n.type === 'phase' ? String(n.ordinal ?? '') : (n.name ?? '');
+    const expected = `${n.type}:${n.scope}/${label}`;
+    if (n.scope === undefined || label === '' || n.id !== expected) {
+      errors.push(`id/attribute mismatch: node "${n.id}" expected "${expected}"`);
+    }
+    if (n.type === 'phase') continue;
+    if (typeof n.content_hash !== 'string' || !n.content_hash) continue; // synthetic nodes carry no hash
+    const triple = `${n.type}|${n.name}|${n.scope}|${n.content_hash}`;
+    if (triples.has(triple)) errors.push(`duplicate (name, scope, content_hash): ${n.id}`);
+    triples.add(triple);
+    // 5. same (type, name, content_hash) on two nodes = failed collapse
+    const nh = `${n.type}|${n.name}|${n.content_hash}`;
+    const prior = nameHashes.get(nh);
+    if (prior) errors.push(`failed collapse: ${prior} and ${n.id} share name and content_hash`);
+    else nameHashes.set(nh, n.id);
+  }
+
+  // G5: isolated nodes by type (adr/decision INFO; everything else WARN)
+  const touched = new Set<string>();
+  const usedBy = new Set<string>();
+  for (const e of graph.edges) {
+    touched.add(e.from);
+    touched.add(e.to);
+    if (e.type === 'used_by') usedBy.add(e.from);
+  }
+  const isolated = new Map<string, string[]>();
+  for (const n of graph.nodes) {
+    if (touched.has(n.id)) continue;
+    if (!isolated.has(n.type)) isolated.set(n.type, []);
+    isolated.get(n.type)!.push(n.id);
+  }
+  for (const [type, list] of [...isolated.entries()].sort()) {
+    const msg = `${list.length} isolated ${type} node(s)${type === 'agent' || type === 'skill' ? `: ${list.slice(0, 5).join(', ')}${list.length > 5 ? ', …' : ''}` : ''}`;
+    (type === 'adr' || type === 'decision' ? info : warnings).push(msg);
+  }
+
+  // G6: skills with no used_by
+  const noUsedBy = graph.nodes.filter((n) => n.type === 'skill' && !usedBy.has(n.id));
+  if (noUsedBy.length > 0) warnings.push(`${noUsedBy.length} skill node(s) have no used_by edge`);
+
+  return { errors, warnings, info };
+}
+
 /**
  * Main verification logic
  */
@@ -518,14 +627,14 @@ async function main(): Promise<void> {
   const committed: SkillGraph = JSON.parse(readFileSync(committedPath, 'utf-8'));
 
   // Derive current graph from sources
-  const derived = buildGraph();
+  const { graph: derived, report: buildReport } = buildGraphWithReport();
 
   // ── Determinism check (INV-5): two consecutive builds of the same source set
   // must serialize to exactly the same normalized artifact. Run before any
   // drift comparison — this is a property of the generator, not the committed
   // file.
   if (determinism) {
-    const second = buildGraph();
+    const second = buildGraphWithReport().graph;
     const first = JSON.stringify(derived);
     const secondJson = JSON.stringify(second);
     if (first !== secondJson) {
@@ -537,6 +646,17 @@ async function main(): Promise<void> {
     }
     console.log('✓ Determinism check passed: two consecutive builds are exactly equal');
   }
+
+  // ── Schema-v2 invariants (design §6): referential integrity + uniqueness ──
+  const invariants = checkGraphInvariants(derived);
+  if (invariants.errors.length > 0) {
+    console.log('');
+    console.log('❌ Skill-graph v2 invariant violations:');
+    for (const err of invariants.errors.slice(0, 20)) console.log(`   ${err}`);
+    if (invariants.errors.length > 20) console.log(`   ... and ${invariants.errors.length - 20} more`);
+    process.exit(1);
+  }
+  console.log(`  v2 invariants: ${derived.nodes.length} nodes, ${derived.edges.length} edges (no dangling/duplicate edges, ids unique, collapse consistent)`);
 
   // ── Procedure-derived graph invariants (Procedure Schema v1.0) ──
   // The procedure YAML is the canonical source; these checks only assert that
@@ -635,11 +755,14 @@ async function main(): Promise<void> {
   const skillNames = new Set<string>();
   const agentNames = new Set<string>();
 
+  // v2 relation fields name skills by bare name (or scoped id) — accept both.
   for (const node of derived.nodes) {
     if (node.type === 'skill') {
       skillNames.add(node.id);
+      skillNames.add(node.name ?? node.id);
     } else if (node.type === 'agent') {
       agentNames.add(node.id);
+      agentNames.add(node.name ?? node.id);
     }
   }
 
@@ -692,6 +815,21 @@ async function main(): Promise<void> {
     console.log('❌ Verification failed');
     console.log('   Fix the issues above, then run: bun scripts/generate-skill-graph.ts');
     process.exit(1);
+  }
+
+  // Non-blocking reports (G5/G6/E2/E4)
+  for (const w of invariants.warnings) console.log(`⚠️  ${w}`);
+  for (const i of invariants.info) console.log(`  ℹ ${i}`);
+  if (buildReport.suggestions.length > 0) {
+    console.log(`  E4: ${buildReport.suggestions.length} skill(s) lacking used_by have a suggested required_by agent (report-only; see docs/skill-graph.md)`);
+  }
+  const skillDivergence = findCapabilityDivergence(derived as unknown as SkillGraphV2, ['skill']);
+  const drift = skillDivergence.filter((d) => d.kind === 'version-drift');
+  if (skillDivergence.length > 0) {
+    console.log(`⚠️  E2: ${drift.length} skill capabilit${drift.length === 1 ? 'y' : 'ies'} with same-version-different-content (version-drift), ${skillDivergence.length - drift.length} with divergent versions`);
+    for (const d of drift) {
+      console.log(`     version-drift: ${d.capability} — ${d.entries.map((e) => `${e.scope}@${e.version ?? '?'}`).join(', ')}`);
+    }
   }
 
   console.log('✓ Skill graph verification passed');

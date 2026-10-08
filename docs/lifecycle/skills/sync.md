@@ -3,15 +3,16 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.7.0
+- **Version**: 1.8.0
 - **Owner**: pm
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-09-17
+- **Last Updated**: 2026-10-08
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
 
 ## Changelog
+- 2026-10-08: v1.8.0 — pipeline table gains step 4.85 Version-Bump Test Gate (dev-sync v1.24.0): a staged `SKILL.md` frontmatter `version:` or script `@version` header change forces `bun run test:unit` before the audit gate, FATAL on failure; skipped when `package.json` has no `test:unit` script (user directive 2026-10-08).
 - 2026-09-17: v1.7.0 — instruction-policy wiring: step 3.9 now cites the PM routing path (ADR-0078); step 0 sentence split into single-instruction sentences per ADR-0079 (design doc docs/designs/2026-09-17-instruction-policy-wiring-design.md)
 - 2026-09-12: v1.5.0 — Universal Design Gate (ADR-0074) phase B: pipeline step 3.9 Spec Registry Check (`audit.ts --spec-check --lifecycle-only`) documented as FATAL at L0 — blocks on a code diff with no spec activity; escape hatch `--spec-exempt=E1-E5`; missing `docs/specs/registry.json` is a loud WARN (gate INACTIVE) (commit 7170c3d8)
 - 2026-09-12: v1.4.0 — scoped staging: step 0 documents task-staged-file discipline, `SYNC_SCOPED_STAGING=1` / `--scoped-staging` preview, and dev-sync v1.11.0 WARN-phase residual reporting for `git add -A` sweeps (commit 20b534a9)

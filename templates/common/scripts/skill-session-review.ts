@@ -1,4 +1,7 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-08, skill-graph v2 E3, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md):
+//           parseSkillsUsed/SkillEvidence/USAGES/OUTCOMES extracted verbatim to scripts/lib/skills-used.ts
+//           (shared with generate-skill-graph.ts); this script imports them. No behaviour change.
 // v1.1.0: fix(reporting) — Q3 2026 skill review findings: (1) renderMarkdown now
 //           distinguishes "no evidence" from "evidence parsed, zero symptoms
 //           classified" instead of always claiming the section is absent/empty;
@@ -33,8 +36,9 @@
 import { $ } from 'bun';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { parseSkillsUsed, type SkillEvidence } from './lib/skills-used.ts';
 
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const GREEN = '\x1b[32m';
 const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
@@ -51,22 +55,12 @@ const date = dateArgIdx !== -1 && args[dateArgIdx + 1]
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     })();
 
-const USAGES = new Set(['primary', 'supporting']);
-const OUTCOMES = new Set(['completed', 'partial', 'failed', 'abandoned']);
 const SYMPTOM_TYPES = new Set([
     'description_trigger_mismatch',
     'missing_procedure',
     'repeated_manual_intervention',
     'outcome_failure',
 ]);
-
-interface SkillEvidence {
-    skill: string;
-    usage: string | null;
-    outcome: string | null;
-    observations: string[];
-    schemaWarnings: string[];
-}
 
 interface ReviewRecord {
     skill: string;
@@ -93,60 +87,7 @@ function localSkillNames(): Set<string> {
     return names;
 }
 
-// ── 1. Parse `## Skills Used` from today's memory log ────────────────────────
-function parseSkillsUsed(memContent: string): SkillEvidence[] {
-    // A memory log can hold MULTIPLE `## Skills Used` sections (dev-sync
-    // appends one per session summary, and several syncs can happen per day),
-    // so iterate all of them. No `$` alternative in the lookahead — with /m,
-    // `$` matches at every line end, truncating the lazy capture to a line.
-    const sectionRe = /^## Skills Used\s*\n([\s\S]*?)(?=\n## |\n---\n)/gm;
-    const tailMatch = /^## Skills Used\s*\n([\s\S]*)$/m.exec(memContent);
-    const bodies: string[] = [];
-    let m: RegExpExecArray | null;
-    while ((m = sectionRe.exec(memContent)) !== null) bodies.push(m[1]);
-    // v1.1.0: prefix dedupe — the tail body (last section to EOF) extends the final
-    // sectionRe body past its `\n---\n` boundary, so identity comparison never fired
-    // and the last section was parsed twice (Q3 2026 review finding #2).
-    if (tailMatch && !bodies.some((b) => tailMatch[1].startsWith(b))) bodies.push(tailMatch[1]);
-    if (bodies.length === 0) return [];
-
-    // Strip HTML comment blocks — the dev-sync skeleton keeps its fill-in
-    // instructions (including a sample `- skill:` entry) inside a comment, and
-    // those examples must never be counted as real evidence.
-    const out: SkillEvidence[] = [];
-    let current: SkillEvidence | null = null;
-    for (const sectionBody of bodies) {
-        const body = sectionBody.replace(/<!--[\s\S]*?-->/g, '');
-        for (const rawLine of body.split('\n')) {
-            const line = rawLine.trim();
-            const entry = /^-\s+skill:\s*(\S+)/.exec(line);
-            if (entry) {
-                current = { skill: entry[1], usage: null, outcome: null, observations: [], schemaWarnings: [] };
-                out.push(current);
-                continue;
-            }
-            if (!current) continue;
-            let m = /^\*?\*?usage\*?\*?:\s*(\S+)/.exec(line);
-            if (m) { current.usage = m[1]; continue; }
-            m = /^\*?\*?outcome\*?\*?:\s*(\S+)/.exec(line);
-            if (m) { current.outcome = m[1]; continue; }
-            m = /^-\s+(.+)/.exec(line);
-            if (m && !line.startsWith('usage') && !line.startsWith('outcome')) {
-                current.observations.push(m[1].trim().replace(/^["']|["']$/g, ''));
-            }
-        }
-    }
-    // Schema validation (WARN only)
-    for (const e of out) {
-        if (!e.usage || !USAGES.has(e.usage)) {
-            e.schemaWarnings.push(`usage missing/invalid: "${e.usage ?? ''}" (expected primary|supporting)`);
-        }
-        if (!e.outcome || !OUTCOMES.has(e.outcome)) {
-            e.schemaWarnings.push(`outcome missing/invalid: "${e.outcome ?? ''}" (expected completed|partial|failed|abandoned)`);
-        }
-    }
-    return out;
-}
+// ── 1. Parse `## Skills Used` — see scripts/lib/skills-used.ts (shared parser) ──
 
 // ── 2. Derive Observed Symptoms from evidence ────────────────────────────────
 function deriveSymptoms(evidence: SkillEvidence[]): Map<string, ReviewRecord> {

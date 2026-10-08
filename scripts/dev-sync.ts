@@ -1,4 +1,10 @@
-// @version 1.23.0
+// @version 1.24.0
+// v1.24.0 (2026-10-08, user directive 2026-10-08): step 4.85 version-bump test gate — when the
+// task-staged change set bumps a version (a SKILL.md frontmatter `version:` line or a script
+// `@version` header line changed), `bun run test:unit` runs BEFORE the audit gate and a failure
+// is FATAL. Skipped cleanly when package.json declares no `test:unit` script (L1+ projects).
+// Detection lives in scripts/helpers/version-bump.ts (unit-tested). No escape env: dev-sync has
+// no generic skip pattern, so none was added.
 // v1.23.0 (T-20261001-015): step 6.5 scoped-staging default flip — exclusion is now the
 // default (soak exit per docs/designs/2026-09-12-dev-sync-scoped-staging-design.md);
 // opt out with SYNC_SCOPED_STAGING=0 or --warn-staging (=1 / --scoped-staging stay no-ops).
@@ -160,6 +166,7 @@ import { hasNonEnglish } from './lib/language-guard.ts';
 import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts';
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff } from './lib/upgrade-policy.ts';
+import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -1010,6 +1017,56 @@ if (fs.existsSync(genManifestTs)) {
     console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
 } else {
     console.log('📋 Step 4.7: skipped — VERSION_MANIFEST generator not present in this context');
+}
+
+// 4.85 Version-bump test gate (user directive 2026-10-08) — a staged version bump (SKILL.md
+//      frontmatter `version:` or a script `@version` header) must not ship without the unit
+//      suite passing. Runs after publish/skill-sync/graph steps (generated artifacts are
+//      current) and BEFORE the audit gate. FATAL on failure. Skipped when package.json has no
+//      `test:unit` script (L1+ projects). Detection: scripts/helpers/version-bump.ts.
+{
+    let stagedFiles: string[] = [];
+    try {
+        const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+        if (stagedRes.exitCode === 0) stagedFiles = stagedRes.stdout.toString().split('\0').filter(Boolean);
+    } catch {
+        stagedFiles = [];
+    }
+    const diffCache = new Map<string, string>();
+    const bumps: ReturnType<typeof detectVersionBumps> = [];
+    for (const f of stagedFiles) {
+        // Only SKILL.md / scripts are versioned; fetch their diff lazily (git diff per candidate file).
+        const probe = detectVersionBumps([f], () => {
+            if (!diffCache.has(f)) {
+                const r = Bun.spawnSync(['git', 'diff', '--cached', '-U0', '--', f]);
+                diffCache.set(f, r.exitCode === 0 ? r.stdout.toString() : '');
+            }
+            return diffCache.get(f)!;
+        });
+        bumps.push(...probe);
+    }
+    if (bumps.length === 0) {
+        console.log('🧪 Step 4.85: no staged version bump — unit-test gate not required');
+    } else {
+        const pkgText = fs.existsSync('package.json') ? fs.readFileSync('package.json', 'utf-8') : null;
+        if (!hasTestUnitScript(pkgText)) {
+            console.log(`${YELLOW}🧪 Step 4.85: ${bumps.length} staged version bump(s) but package.json has no test:unit script — skipped${RESET}`);
+        } else {
+            console.log(`🧪 Step 4.85: ${bumps.length} staged version bump(s) — running bun run test:unit before the audit gate`);
+            for (const b of bumps.slice(0, 10)) console.log(`${DIM}   ${b.kind}: ${b.file}${RESET}`);
+            const testRes = await $`bun run test:unit`.quiet().nothrow();
+            if (testRes.exitCode !== 0) {
+                const out = (testRes.stdout.toString() + '\n' + testRes.stderr.toString()).trim().split('\n');
+                console.error(out.slice(-60).join('\n'));
+                console.error(`${RED}❌ Step 4.85: bun run test:unit FAILED with a staged version bump — fix the failing tests (or unstage the version change) and re-run /sync.${RESET}`);
+                if (import.meta.main) {
+                    process.exit(1);
+                }
+            } else {
+                console.log(`${GREEN}✓ Step 4.85: bun run test:unit passed${RESET}`);
+            }
+        }
+    }
 }
 
 // 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)

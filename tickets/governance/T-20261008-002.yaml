@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261008-002
+kind: manual
+title: >-
+  skill-graph E2: resolve 6 variant forks of root skills with identical version
+  but different content (accessibility-audit, service-design, token-usage-lint,
+  ui-ux-design-intelligence: co-design; standup-synthesizer: co-work;
+  team-builder: co-safety) — re-sync from root or bump the variant version and
+  record the fork reason
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-08T09:25:45.637+09:00'
+history:
+  - at: '2026-10-08T09:25:45.637+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.7.0
-last_reviewed: 2026-09-17
+version: 1.8.0
+last_reviewed: 2026-10-08
 status: active
 scope: common
 l2_propagate: true
@@ -95,6 +95,7 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 4.62 | Cascade Re-publish | **FATAL** (L0) / non-fatal (L1) | Re-runs propagate-to-templates.ts --apply after skill sync — heals template platform skill copies (templates/common/.claude/.gemini/.agents/skills) changed by step 4.6 within the same sync; same gating and fatality as step 4.5 |
 | 4.6 | Skill Sync to Platforms | non-fatal | Runs `sync-skills.ts` to distribute skills to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`; warnings only |
 | 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
+| 4.85 | Version-Bump Test Gate | **FATAL** | When the task-staged change set bumps a version (a `SKILL.md` frontmatter `version:` line or a script `@version` header line changed), runs `bun run test:unit` BEFORE the audit gate; a failing suite blocks the sync. Skipped cleanly when `package.json` has no `test:unit` script (L1+ projects) and when nothing staged bumps a version. No escape env var — fix the tests or unstage the bump (detection: `scripts/helpers/version-bump.ts`; user directive 2026-10-08) |
 | 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding. Includes the auto-activating gates: skill-graph drift (ADR-0060) and upgrade coverage (`check-upgrade-coverage.ts --strict`, ADR-0073) |
 | 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
 | 6 | Sensitive File Guard + Scoped Staging + Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; scoped-staging check (S0/S1 tree snapshots — WARN-lists files that are neither task-staged nor pipeline-generated; excluded by default; `SYNC_SCOPED_STAGING=0`/`--warn-staging` restore the legacy sweep), then `git add`, `git commit`, `git push` |

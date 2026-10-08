@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.52.0
+ * @version 1.53.0
+ *
+ * v1.53.0 (2026-10-08, skill-graph v2 E2, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §7):
+ *          new WARN arm `skill-graph-version-drift` — reads docs/skill-graph.json through the compat
+ *          loader and reports skill capabilities whose scoped nodes share a version but differ in
+ *          content hash (the version no longer identifies the content), using the same helper as
+ *          verify-skill-graph.ts (lib/skill-graph-compat.ts findCapabilityDivergence). WARN only.
  *
  * v1.52.0 (2026-10-08, T-20261007-015 urgent): variant-mirror-parity gains the
  *          inVariant stale-copy arm — a variant-owned mirror SKILL.md older than
@@ -319,6 +325,7 @@ import {
   auditFixedTargets,
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
@@ -3715,6 +3722,25 @@ function checkCommonContractReverseCoverage(): void {
   }
 }
 
+// Check: skill-graph-version-drift (skill-graph v2 E2) — same skill capability, same version,
+// different content hash across scopes. Reads the committed graph; v1 graphs carry no hashes and
+// are skipped (divergence is only computable where hashes exist). WARN only.
+function checkSkillGraphVersionDrift(): void {
+  if (!JSON_MODE) console.log('\n=== Check skill-graph-version-drift: same version, different content across scopes (E2) ===');
+  const graph = loadSkillGraph(join(ROOT, 'docs', 'skill-graph.json'));
+  if (!graph) {
+    if (!JSON_MODE) console.log('  (no docs/skill-graph.json — skipped)');
+    return;
+  }
+  const drift = findCapabilityDivergence(graph, ['skill']).filter(d => d.kind === 'version-drift');
+  for (const d of drift) {
+    warn('common', 'skill-graph-version-drift',
+      `skill '${d.capability}' has the same version but different content in: ${d.entries.map(e => `${e.scope}@${e.version ?? '?'}`).join(', ')}`,
+      `Bump the version of the copy that changed, or reconcile the copies (see docs/skill-graph.md "Same-Name Divergence")`);
+  }
+  if (!JSON_MODE && drift.length === 0) console.log('  ✓ no same-version-different-content skills in the graph');
+}
+
 // Check: mirror-hygiene (R6, spec 2026-09-25-verifier-platform-expansion-design)
 // — a platform skill mirror contains ONLY skill directories. Stray files
 // (SKILLS.md, README*.md — the 2026-09-25 Finding-B class: 11 files in 9
@@ -5736,6 +5762,7 @@ function checkAgentsMdPointerIntegrity(): void {
   checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
   checkAgentsMdSizeBudget();          // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
   checkAgentsMdPointerIntegrity();    // ADR-0090 W0: pointer-table references resolve on disk
+  checkSkillGraphVersionDrift();      // skill-graph v2 E2: same-version-different-content across scopes (WARN)
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');

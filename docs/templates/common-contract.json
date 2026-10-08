@@ -84,7 +84,7 @@
     },
     "sync": {
       "source": "skills/sync/SKILL.md",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "overridable": false,
       "description": "Runs the full project sync pipeline"
     },
@@ -478,7 +478,7 @@
       "gemini_source": ".gemini/skills/skill-graph-analytics/SKILL.md",
       "agents_source": ".agents/skills/skill-graph-analytics/SKILL.md",
       "codex_source": ".codex/skills/skill-graph-analytics/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "description": "Weekly fleet analytics over the per-project skill-graph projections: consolidate root + Projects/<co-x> graphs into a dated snapshot, triage skill convergence (consolidation/promotion candidates), delivery drift (root skills missing from projects), and root-graph orphans (4-way cross-check), and record findings. Use when: the weekly analytics cadence fires (the 02:30 ticket runner may invoke it), the user says \"skill-graph analytics\", \"fleet skill graph\", \"skill graph report\", or asks which skills the project fleet carries, which root skills never reached projects, whether any agent or skill is orphaned, or what changed fleet-wide since last week.",
       "propagated_to_common": true
     },

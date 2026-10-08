@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261008-004
+kind: manual
+title: >-
+  skill-graph E2: review 12 agent capabilities whose same-name variant copies
+  differ in content (architect, change-management-partner, code-writer,
+  data-analyst, designer, devops-admin, i18n-specialist, pm, security-monitor,
+  stack-setup, storyteller, test-runner) — confirm intentional per-variant forks
+  or lift shared text to common
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-08T09:25:45.670+09:00'
+history:
+  - at: '2026-10-08T09:25:45.670+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

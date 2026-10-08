@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-08T00:22:29.223Z
+**Generated**: 2026-10-08T00:40:04.120Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -78,11 +78,11 @@
 | security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
 | service-design | 1.1.0 | active | skills/service-design/SKILL.md | workspace | service design, customer journey, service blueprint, touchpoint design, customer experience, service innovation, operational alignment | pm |
 | simulate-pipeline | 1.0.2 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
-| skill-graph-analytics | 1.1.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
+| skill-graph-analytics | 1.2.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
-| sync | 1.7.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
+| sync | 1.8.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
 | team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
@@ -121,7 +121,7 @@
 | create-l3-scaffold.ts | 1.18.0 | scripts/create-l3-scaffold.ts | N/A |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-lint.ts | 2.1.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.23.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.24.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
@@ -134,9 +134,9 @@
 | generate-raci.ts | 1.2.0 | scripts/generate-raci.ts | js-yaml |
 | generate-scripts-mirror.ts | 1.0.0 | scripts/generate-scripts-mirror.ts | N/A |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 1.15.0 | scripts/generate-skill-graph.ts | js-yaml |
+| generate-skill-graph.ts | 2.0.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.10.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
-| graph-delta-log.ts | 1.0.0 | scripts/graph-delta-log.ts | N/A |
+| graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
@@ -167,9 +167,9 @@
 | review-baseline.ts | 1.1.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-graph-fleet-report.ts | 1.1.1 | scripts/skill-graph-fleet-report.ts | N/A |
+| skill-graph-fleet-report.ts | 2.0.0 | scripts/skill-graph-fleet-report.ts | N/A |
 | skill-lifecycle-audit.ts | 1.7.1 | scripts/skill-lifecycle-audit.ts | N/A |
-| skill-session-review.ts | 1.1.0 | scripts/skill-session-review.ts | bun |
+| skill-session-review.ts | 1.2.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
@@ -206,7 +206,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.52.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.53.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
@@ -219,7 +219,7 @@
 | verify-platform-lifecycle.ts | 1.6.0 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.1 | scripts/verify-readme-sync.ts | bun, fs, path |
 | verify-scripts.ts | 1.12.0 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 1.7.0 | scripts/verify-skill-graph.ts | N/A |
+| verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 

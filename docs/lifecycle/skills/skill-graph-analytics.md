@@ -3,19 +3,21 @@
 ## Metadata
 - **Skill**: skill-graph-analytics
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 - **Created**: 2026-09-22
-- **Last Updated**: 2026-09-23
+- **Last Updated**: 2026-10-08
 
 ## Description
 Weekly fleet analytics over the per-project skill-graph projections: consolidate root + Projects/<co-x> graphs into a dated snapshot, triage skill convergence (consolidation/promotion candidates), delivery drift (root skills missing from projects), and root-graph orphans (4-way cross-check: definition+registry+mirror+reference). Triage only — tickets, no auto-modification.
 
 ## Changelog
+- 2026-10-08: v1.2.0 — capability-based convergence (skill-graph v2, ADR-0060 Amendment 11, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md): presence/convergence keyed by `capability` (v1 graphs derive it from the bare id); fleet report classifies capabilities carried by >= 3 projects as converged / convergence-with-divergence / hash-unknown; new §3.4 divergence triage (fork / drift / rename) and `--impact` pointer. fleet-report v2.0.0.
 - 2026-09-23: v1.1.0 — root-graph orphan cross-check added to the cadence (fleet-report v1.1.0 `rootOrphans` section): graph-isolated root skills/agents crossed with registry/mirror/doc-reference axes; triage rules per the 2026-09-23 orphan audit (T-20260923-001).
 - 2026-09-22: Created v1.0.0 with `scripts/skill-graph-fleet-report.ts` 1.0.0 and the `skill-graph-analyst` agent (docs/designs/2026-09-22-skill-graph-fleet-analytics-design.md; ADR-0080 hiring decision recorded there).
 
 ## Dependencies
 - `scripts/skill-graph-fleet-report.ts` (L0-only report + snapshot writer)
+- `scripts/lib/skill-graph-compat.ts` (v1/v2 graph loader + `capabilityOf`; capability is the convergence grouping key)
 - `bun scripts/ticket.ts` (triage ticket filing, §3.7.5 governance backlog)
 - `bun scripts/generate-skill-graph.ts` (remedy when graph projections are stale/missing)
 
