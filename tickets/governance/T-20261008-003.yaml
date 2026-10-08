@@ -9,7 +9,7 @@ title: >-
   skill-lifecycle-manager) — decide re-sync vs intentional fork with distinct
   capability
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T09:25:45.652+09:00'
 history:
@@ -19,5 +19,20 @@ history:
   - at: '2026-10-08T11:57:48.149+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T12:48:22.081+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T12:48:45.078+09:00'
+    from: review
+    to: done
+result: >-
+  Dispositioned via PR #1480 wave (all 8 intentional forks, no file changes,
+  documented in the wave design): pdf-export = independent co-price
+  implementation (both copies catalog-parity: skip); i18n-audit = sanctioned
+  extension fork (common names co-price as the extension point; deltas
+  price-domain-specific, no backport); translate = root 1.0.3 was version-only
+  bump, co-safety copy is Safety-OS legal format; the 5 co-safety lifecycle
+  forks carry audit_exception: safety-os-skill-structure + scaffold-context
+  adaptations — common's ahead-deltas recorded as follow-up T-20261008-008 for
+  the co-safety owner.
 error: null

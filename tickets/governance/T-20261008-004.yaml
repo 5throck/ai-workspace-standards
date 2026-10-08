@@ -8,7 +8,7 @@ title: >-
   stack-setup, storyteller, test-runner) — confirm intentional per-variant forks
   or lift shared text to common
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T09:25:45.670+09:00'
 history:
@@ -18,5 +18,19 @@ history:
   - at: '2026-10-08T11:57:48.165+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T12:48:22.097+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T12:48:45.104+09:00'
+    from: review
+    to: done
+result: >-
+  Reviewed via PR #1480 wave by full pairwise diff: all 12 agent capabilities
+  confirmed intentional per-variant forks — 10 domain-adapted full files
+  (architect, change-management-partner, code-writer, data-analyst, designer,
+  devops-admin, security-monitor, stack-setup, storyteller, test-runner) and
+  ADR-0033 extends-stubs differing only by the variant: token (i18n-specialist
+  x14, pm x15); no accidentally drifted shared prose found, zero changes needed.
+  Residual: storyteller naming ruling filed as T-20261008-007; stub-variant
+  hash-normalizer gap filed as T-20261008-009.
 error: null

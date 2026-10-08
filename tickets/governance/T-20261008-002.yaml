@@ -8,7 +8,7 @@ title: >-
   team-builder: co-safety) — re-sync from root or bump the variant version and
   record the fork reason
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T09:25:45.637+09:00'
 history:
@@ -18,5 +18,19 @@ history:
   - at: '2026-10-08T11:57:48.132+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T12:48:22.064+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T12:48:45.062+09:00'
+    from: review
+    to: done
+result: >-
+  Reconciled via PR #1480: accessibility-audit and service-design (co-design)
+  were stale copies — re-synced from root with scope: kept; token-usage-lint
+  (playground SSOT contract) and ui-ux-design-intelligence (service-design
+  follow edge) are intentional forks — kept, bumped (1.1.1 / 1.0.2), fork
+  reasons recorded in co-design registry row notes; standup-synthesizer
+  (co-work, scaffold-relative link fix f076574a) → 1.0.1 with registry note;
+  team-builder (co-safety, lang: ko legal + audit_exception) → 1.1.1,
+  documentation pre-existed.
 error: null
