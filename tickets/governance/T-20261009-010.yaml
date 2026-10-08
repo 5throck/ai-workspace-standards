@@ -5,7 +5,7 @@ title: >-
   Make skill-session-review.ts upsert per date or skip zero-observation appends,
   and dedupe the 20 identical blocks in memory/skill-review/2026-10-08.md
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-09T07:12:32.450+09:00'
 history:
@@ -21,5 +21,11 @@ history:
   - at: '2026-10-09T07:59:32.014+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-09T08:17:48.345+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via #1485. skill-session-review.ts skips duplicate zero-observation
+  appends (same-day heading check); memory/skill-review/2026-10-08.md deduped
+  20→2 unique blocks; propagated to L1 (verify-scripts parity green).
 error: null

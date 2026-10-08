@@ -5,7 +5,7 @@ title: >-
   Update docs/lifecycle/templates/co-consult.md acceptance count from 18 to 19
   skills (industry-research-pack restore left the record stale)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-09T07:12:32.434+09:00'
 history:
@@ -21,5 +21,12 @@ history:
   - at: '2026-10-09T07:59:31.986+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-09T08:17:48.326+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via #1485 incl. CI-caught supplement: co-consult lifecycle record
+  18→19, variant.json skills[] 18→19 (industry-research-pack was missing from
+  the array), PROMOTION_CHECKLIST 3 rows 18→19. Claims battery PASS 0 findings;
+  readiness READY; E2E ALL PASSED.
 error: null

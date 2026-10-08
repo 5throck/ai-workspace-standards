@@ -6,7 +6,7 @@ title: >-
   symlinks) plus a tracked-path guard so a node_modules symlink can never be
   committed again
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-09T07:11:39.171+09:00'
 history:
@@ -22,5 +22,11 @@ history:
   - at: '2026-10-09T07:59:31.933+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-09T08:17:48.263+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via #1485. Slash-less node_modules entry added to .gitignore with
+  hole-explaining comment; tracked-path guard deferred into T-20261009-002
+  scope.
 error: null
