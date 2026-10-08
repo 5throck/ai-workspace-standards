@@ -14,7 +14,7 @@ title: >-
   new reusable procedure/skill, cross-pollination candidate for any deck-bearing
   variant with embedded media
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T13:54:31.597Z'
 history:
@@ -30,5 +30,16 @@ history:
   - at: '2026-10-08T07:50:23.337+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-09T08:41:04.191+09:00'
+    from: review
+    to: done
+result: >-
+  Verified delivered via #1474 (1d8f68f8, cites this ticket) + #1475 heal:
+  three-gate video verification is in
+  templates/co-deck/procedures/lecture-deck-production/schema.yaml (quality gate
+  + lecture-v4 failure mode) and ADR-0002 is promoted to
+  templates/co-deck/docs/adr/. The paired download_all_videos.py newest-in-temp
+  defect stays project-side by design (engagement content, stays-project) and is
+  mitigated in the promoted procedure by mandatory gate 1 identity check per
+  ADR-0002 Open Items. Evidence verified 2026-10-09.
 error: null
