@@ -5,7 +5,7 @@ title: >-
   Nightly scaffold E2E red since 2026-10-06: add Tier 2 scripts (audit,
   dev-sync, sync-md) to templates/co-consult and templates/co-deck package.json
 priority: high
-status: running
+status: review
 attempts: 0
 created_at: '2026-10-09T07:11:03.987+09:00'
 history:
@@ -18,5 +18,8 @@ history:
   - at: '2026-10-09T07:51:13.070+09:00'
     from: waiting
     to: running
+  - at: '2026-10-09T07:59:31.860+09:00'
+    from: running
+    to: review
 result: null
 error: null
