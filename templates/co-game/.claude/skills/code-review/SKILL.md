@@ -3,12 +3,14 @@ name: code-review
 description: >
   Conducts thorough code reviews focusing on correctness, maintainability, security, and
   best practices. Use when: reviewing pull requests, evaluating code quality, providing
-  constructive feedback, or ensuring code standards compliance.
-version: 1.0.0
+  constructive feedback, or ensuring code standards compliance. Game-development
+  variant capability: follows arcade-physics work and test-driven-development.
+capability: game-code-review
+version: 1.0.1
 scope: co-game
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-10-08
 prerequisites: none
 relates_to:
   - skill: arcade-physics

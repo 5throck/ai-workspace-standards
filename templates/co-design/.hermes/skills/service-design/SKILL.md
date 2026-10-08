@@ -6,9 +6,10 @@ description: >
   aligning frontstage and backstage operations, or improving service delivery.
 version: 1.1.0
 scope: co-design
+l2_propagate: true
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-09-27
 prerequisites: none
 relates_to:
   - skill: accessibility-audit
@@ -506,4 +507,3 @@ Backstage:
 - Operations: Operational feasibility and constraints
 - Product Management: Business viability and roadmap
 - Marketing: Customer acquisition and communication
-",

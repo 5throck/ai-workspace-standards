@@ -2,9 +2,14 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: executive-presentation
 scope: co-price
-description: C-level presentation and decision deck design
-version: 1.0.0
-last_reviewed: 2026-08-25
+description: >
+  C-level presentation and decision deck design for pricing engagements:
+  figure-led decision decks with ledger-cited evidence under engagement-director
+  approval. Pricing-domain capability, distinct from the consulting-domain
+  sibling owned by co-consult.
+capability: pricing-executive-presentation
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: ux-specialist
 prerequisites: engagement-director approval entry; all figures ledger-cited

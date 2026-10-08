@@ -7,8 +7,9 @@ description: >
   reports. Covers issue tree structure, MECE principle application, slide/page
   design logic, and recommendation framing with impact-feasibility assessment.
   Sets the quality floor for all client-facing deliverables.
-version: 1.0.0
-last_reviewed: 2026-06-13
+capability: consulting-report-writing
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: communications-lead
 prerequisites: narrative-framework

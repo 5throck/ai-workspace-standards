@@ -7,8 +7,9 @@ description: >
   analyses (competitive research, organizational diagnostics, technical assessments)
   into a single unified strategic insight. Includes a mandatory cultural filtering
   step to ensure organizational context is not omitted.
-version: 1.0.0
-last_reviewed: 2026-06-13
+capability: consulting-insight-synthesis
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: strategy-analyst
 prerequisites: none

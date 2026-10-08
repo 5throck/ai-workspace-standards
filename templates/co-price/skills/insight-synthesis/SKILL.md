@@ -2,9 +2,14 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: insight-synthesis
 scope: co-price
-description: Multi-specialist analysis integration into strategic insight
-version: 1.0.0
-last_reviewed: 2026-08-25
+description: >
+  Multi-specialist analysis integration into strategic insight for pricing
+  engagements: closes the pricing cycle from stage-8 artifacts (netROI memo,
+  outcome classifications, re-scored trade lines). Pricing-domain capability,
+  distinct from the consulting-domain sibling owned by co-consult.
+capability: pricing-insight-synthesis
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: engagement-director
 prerequisites: cycle stage-8 artifacts present (netROI memo, outcome classifications, re-scored trade lines)

@@ -6,8 +6,9 @@ description: >
   Guides the Change Management Partner through systematic stakeholder mapping,
   resistance analysis, influence-interest prioritization, and communication
   strategy development for HR/labor consulting engagements.
-version: 1.0.0
-last_reviewed: 2026-08-23
+capability: hr-stakeholder-alignment
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: change-management-partner
 prerequisites: none

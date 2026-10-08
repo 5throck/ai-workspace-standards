@@ -1,8 +1,8 @@
 ---
 name: standup-synthesizer
 description: Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
-version: 1.0.0
-last_reviewed: 2026-08-06
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 scope: co-work
 owner: pm

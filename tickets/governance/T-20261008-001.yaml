@@ -10,12 +10,15 @@ title: >-
   to common (3+ variant rule) or declare distinct capability in frontmatter,
   then bump versions; never rename
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-08T09:25:45.621+09:00'
 history:
   - at: '2026-10-08T09:25:45.621+09:00'
     from: null
     to: backlog
+  - at: '2026-10-08T11:57:48.111+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

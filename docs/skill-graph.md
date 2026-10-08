@@ -25,21 +25,21 @@
 | `co-abap/source-command-celebrate` | variant:co-abap | 1.0.0 | co-abap/pm | co-abap/phase 6 | — | — | — |
 | `co-consult/change-impact-assessment` | variant:co-consult | 1.0.0 | co-consult/change-management-partner | co-consult/phase 1, co-consult/phase 2 | co-consult/org-readiness-assessment (composes_with), co-consult/solution-design (composes_with), co-consult/stakeholder-alignment (composes_with) | — | — |
 | `co-consult/company-intelligence` | variant:co-consult | 1.0.0 | co-consult/data-analyst, co-consult/industry-expert, co-consult/pm, co-consult/sme, co-consult/strategy-analyst | co-consult/phase 1 | co-consult/competitive-intelligence (composes_with), co-consult/financial-modeling (follows), co-consult/financial-statement-analysis (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | — | — |
-| `co-consult/competitive-intelligence` | variant:co-consult | 1.0.0 | co-consult/industry-expert, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 2 | co-consult/company-intelligence (composes_with), co-consult/financial-modeling (composes_with), co-consult/insight-synthesis (composes_with) | — | — |
-| `co-consult/consulting-report-writing` | variant:co-consult | 1.0.0 | co-consult/communications-lead | co-consult/phase 3 | co-consult/executive-presentation (composes_with), co-consult/narrative-framework (composes_with) | — | — |
-| `co-consult/executive-presentation` | variant:co-consult | 1.0.0 | co-consult/communications-lead | co-consult/phase 3 | co-consult/consulting-report-writing (composes_with), co-consult/financial-modeling (composes_with), co-consult/narrative-framework (composes_with), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | complexity-grades, business-case, readiness-scores | executive-deck |
+| `co-consult/competitive-intelligence` | variant:co-consult | 1.0.1 | co-consult/industry-expert, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 2 | co-consult/company-intelligence (composes_with), co-consult/financial-modeling (composes_with), co-consult/insight-synthesis (composes_with) | — | — |
+| `co-consult/consulting-report-writing` | variant:co-consult | 1.0.1 | co-consult/communications-lead | co-consult/phase 3 | co-consult/executive-presentation (composes_with), co-consult/narrative-framework (composes_with) | — | — |
+| `co-consult/executive-presentation` | variant:co-consult | 1.0.1 | co-consult/communications-lead | co-consult/phase 3 | co-consult/consulting-report-writing (composes_with), co-consult/financial-modeling (composes_with), co-consult/narrative-framework (composes_with), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | complexity-grades, business-case, readiness-scores | executive-deck |
 | `co-consult/financial-modeling` | variant:co-consult | 1.0.1 | co-consult/data-analyst, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 3 | co-consult/competitive-intelligence (composes_with), co-consult/executive-presentation (enables), co-consult/financial-statement-analysis (composes_with), co-consult/insight-synthesis (follows), co-consult/stakeholder-alignment (follows), co-consult/technical-feasibility (composes_with) | complexity-grades, readiness-scores, change-mgmt-cost-estimates | roi-analysis, npv-irr-payback, business-case |
 | `co-consult/financial-statement-analysis` | variant:co-consult | 1.3.1 | co-consult/data-analyst | co-consult/phase 1, co-consult/phase 3 | co-consult/company-intelligence (composes_with), co-consult/financial-modeling (composes_with), co-consult/insight-synthesis (composes_with) | — | — |
 | `co-consult/hwp-document-processing` | variant:co-consult | 2.0.1 | co-consult/communications-lead | co-consult/phase 3, co-consult/phase 4 | — | — | — |
 | `co-consult/industry-research-pack` | variant:co-consult | 1.0.0 | — | — | common/evidence-ledger (composes_with), root/research-analysis (composes_with) | — | — |
-| `co-consult/insight-synthesis` | variant:co-consult | 1.0.0 | co-consult/data-analyst, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 3 | co-consult/competitive-intelligence (composes_with), co-consult/financial-statement-analysis (composes_with), co-consult/org-readiness-assessment (follows), co-consult/solution-design (composes_with) | — | — |
+| `co-consult/insight-synthesis` | variant:co-consult | 1.0.1 | co-consult/data-analyst, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 3 | co-consult/competitive-intelligence (composes_with), co-consult/financial-statement-analysis (composes_with), co-consult/org-readiness-assessment (follows), co-consult/solution-design (composes_with) | — | — |
 | `co-consult/mece-logic-auditor` | variant:co-consult | 1.0.0 | co-consult/strategy-analyst | co-consult/phase 1 | — | — | — |
 | `co-consult/narrative-framework` | variant:co-consult | 1.0.0 | co-consult/communications-lead | co-consult/phase 3 | co-consult/consulting-report-writing (composes_with), co-consult/executive-presentation (composes_with) | — | — |
-| `co-consult/org-readiness-assessment` | variant:co-consult | 1.0.0 | co-consult/change-management-partner | co-consult/phase 1, co-consult/phase 2 | co-consult/change-impact-assessment (composes_with), co-consult/financial-modeling (enables), co-consult/stakeholder-alignment (composes_with) | — | readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates |
+| `co-consult/org-readiness-assessment` | variant:co-consult | 1.0.1 | co-consult/change-management-partner | co-consult/phase 1, co-consult/phase 2 | co-consult/change-impact-assessment (composes_with), co-consult/financial-modeling (enables), co-consult/stakeholder-alignment (composes_with) | — | readiness-scores, capability-gap-analysis, change-mgmt-cost-estimates |
 | `co-consult/project-delivery` | variant:co-consult | 1.0.0 | co-consult/delivery-manager, co-consult/workstream-lead | co-consult/phase 4 | co-consult/stakeholder-alignment (composes_with), co-consult/stakeholder-review-management (composes_with), co-consult/technical-feasibility (follows) | — | — |
 | `co-consult/sample-driven-report-writing` | variant:co-consult | 1.0.0 | co-consult/communications-lead | co-consult/phase 3, co-consult/phase 4 | — | — | — |
 | `co-consult/solution-design` | variant:co-consult | 1.0.0 | co-consult/solutions-architect, co-consult/technology-specialist | co-consult/phase 3, co-consult/phase 4 | co-consult/financial-modeling (follows), co-consult/stakeholder-alignment (composes_with), co-consult/technical-feasibility (follows) | — | — |
-| `co-consult/stakeholder-alignment` | variant:co-consult | 1.0.0 | co-consult/change-management-partner, co-consult/workstream-lead | co-consult/phase 1, co-consult/phase 2, co-consult/phase 4 | co-consult/change-impact-assessment (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/project-delivery (composes_with) | — | — |
+| `co-consult/stakeholder-alignment` | variant:co-consult | 1.0.1 | co-consult/change-management-partner, co-consult/workstream-lead | co-consult/phase 1, co-consult/phase 2, co-consult/phase 4 | co-consult/change-impact-assessment (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/stakeholder-review-management` | variant:co-consult | 1.0.0 | co-consult/delivery-manager | co-consult/phase 4 | co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/technical-feasibility` | variant:co-consult | 1.0.0 | co-consult/sme, co-consult/solutions-architect, co-consult/technology-specialist | co-consult/phase 1, co-consult/phase 2, co-consult/phase 3, co-consult/phase 4 | co-consult/change-impact-assessment (follows), co-consult/company-intelligence (composes_with), co-consult/executive-presentation (enables), co-consult/project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `co-deck/design` | variant:co-deck | 1.2.1 | co-deck/design | co-deck/phase 3 | co-deck/html-build (enables), co-deck/html-build (follows), co-deck/pdf-export (composes_with), co-deck/research (composes_with) | storyline-outline | design-spec, theme-lock |
@@ -52,12 +52,10 @@
 | `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-deck/pm | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
-| `co-design/accessibility-audit` | variant:co-design | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
-| `co-design/service-design` | variant:co-design | 1.1.0 | co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | co-design/accessibility-audit (follows), co-design/token-usage-lint (follows), co-design/ui-ux-design-intelligence (follows) | — | — |
-| `co-design/token-usage-lint` | variant:co-design | 1.1.0 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
-| `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.1 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | co-design/service-design (follows), root/documentation-writing (follows) | — | — |
-| `co-develop/code-review` | variant:co-develop | 1.0.0 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
-| `co-develop/refactoring` | variant:co-develop | 1.0.0 | co-develop/code-writer | co-develop/phase 4 | co-develop/code-review (composes_with) | — | — |
+| `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
+| `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.2 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows), root/service-design (follows) | — | — |
+| `co-develop/code-review` | variant:co-develop | 1.0.1 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
+| `co-develop/refactoring` | variant:co-develop | 1.0.1 | co-develop/code-writer, co-game/game-debugger, co-game/game-developer | co-develop/phase 4, co-game/phase 3, co-game/phase 5 | co-develop/code-review (composes_with) | — | — |
 | `co-develop/swe-solve` | variant:co-develop | 1.1.1 | co-develop/pm | co-develop/phase 4 | — | — | — |
 | `co-develop/test-driven-development` | variant:co-develop | 1.0.0 | co-develop/test-runner, co-game/game-debugger, co-game/game-developer, co-game/test-runner | co-develop/phase 4, co-game/phase 3, co-game/phase 5 | co-develop/code-review (follows) | — | — |
 | `co-export/customs-duty-drawback-workflow` | variant:co-export | 1.0.0 | co-export/customs-duty-drawback-specialist | co-export/phase 3, co-export/phase 4 | co-export/landed-cost-calculation (follows) | — | — |
@@ -72,20 +70,19 @@
 | `co-export/roo-qualification-worksheet` | variant:co-export | 1.0.0 | co-export/fta-origin-analyst | co-export/phase 1, co-export/phase 2 | co-export/halal-certification-workflow (follows) | — | — |
 | `co-export/trade-documentation-checklist` | variant:co-export | 1.0.0 | co-export/trade-documentation-specialist | co-export/phase 3 | co-export/logistics-coordination (follows) | — | — |
 | `co-game/arcade-physics` | variant:co-game | 1.0.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 4 | co-develop/test-driven-development (composes_with), co-game/code-review (composes_with), co-game/sound-synth (follows), root/documentation-writing (composes_with), root/research-analysis (composes_with) | — | — |
-| `co-game/code-review` | variant:co-game | 1.0.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-develop/test-driven-development (follows), co-game/arcade-physics (follows) | — | — |
-| `co-game/refactoring` | variant:co-game | 1.0.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | — | — | — |
+| `co-game/code-review` | variant:co-game | 1.0.1 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-develop/test-driven-development (follows), co-game/arcade-physics (follows) | — | — |
 | `co-game/sound-synth` | variant:co-game | 1.0.0 | co-game/sound-designer | co-game/phase 3, co-game/phase 4 | root/documentation-writing (follows) | — | — |
 | `co-hr/career-path-succession-planning` | variant:co-hr | 1.0.0 | co-hr/career-succession-consultant | co-hr/phase 2 | co-hr/compensation-benchmarking (composes_with), co-hr/learning-curriculum-design (composes_with), co-hr/org-design-framework (composes_with), co-hr/org-readiness-assessment (composes_with), co-hr/stakeholder-alignment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/compensation-benchmarking` | variant:co-hr | 1.0.0 | co-hr/compensation-benefits-analyst | co-hr/phase 2 | co-hr/consulting-report-writing (composes_with), co-hr/hr-metrics-analysis (follows), co-hr/learning-curriculum-design (follows), co-hr/org-design-framework (composes_with), co-hr/org-readiness-assessment (composes_with), co-hr/performance-system-design (composes_with), co-hr/stakeholder-alignment (composes_with) | — | — |
 | `co-hr/competency-modeling` | variant:co-hr | 1.0.0 | co-hr/career-succession-consultant, co-hr/learning-development-specialist, co-hr/performance-management-consultant | co-hr/phase 2 | — | — | — |
-| `co-hr/consulting-report-writing` | variant:co-hr | 1.0.0 | co-hr/pm | co-hr/phase 3 | — | — | — |
+| `co-hr/consulting-report-writing` | variant:co-hr | 1.0.1 | co-hr/pm | co-hr/phase 3 | — | — | — |
 | `co-hr/hr-metrics-analysis` | variant:co-hr | 1.0.1 | co-hr/data-analyst | co-hr/phase 1, co-hr/phase 3 | co-hr/consulting-report-writing (follows) | — | — |
 | `co-hr/labor-compliance-audit` | variant:co-hr | 1.0.0 | co-hr/labor-compliance-analyst, co-hr/labor-relations-specialist, co-hr/safety-health-officer | co-hr/phase 1, co-hr/phase 2 | co-hr/org-readiness-assessment (follows), co-hr/stakeholder-alignment (composes_with) | — | — |
 | `co-hr/learning-curriculum-design` | variant:co-hr | 1.0.0 | co-hr/learning-development-specialist | co-hr/phase 2 | co-hr/org-design-framework (composes_with), co-hr/org-readiness-assessment (composes_with), co-hr/performance-system-design (follows), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/org-design-framework` | variant:co-hr | 1.0.0 | co-hr/org-design-consultant | co-hr/phase 2, co-hr/phase 3 | co-hr/hr-metrics-analysis (follows), co-hr/org-readiness-assessment (composes_with), co-hr/performance-system-design (composes_with), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (follows) | — | — |
-| `co-hr/org-readiness-assessment` | variant:co-hr | 1.0.0 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/labor-compliance-audit (follows), co-hr/performance-system-design (composes_with), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
+| `co-hr/org-readiness-assessment` | variant:co-hr | 1.0.1 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/labor-compliance-audit (follows), co-hr/performance-system-design (composes_with), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/performance-system-design` | variant:co-hr | 1.0.0 | co-hr/performance-management-consultant | co-hr/phase 2 | co-hr/career-path-succession-planning (follows), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
-| `co-hr/stakeholder-alignment` | variant:co-hr | 1.0.0 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/org-readiness-assessment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
+| `co-hr/stakeholder-alignment` | variant:co-hr | 1.0.1 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/org-readiness-assessment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/talent-acquisition-strategy` | variant:co-hr | 1.0.0 | co-hr/talent-acquisition-specialist | co-hr/phase 2 | co-hr/compensation-benchmarking (follows) | — | — |
 | `co-learning/exam-bank-operations` | variant:co-learning | 1.1.0 | co-learning/exam-bank-steward | co-learning/phase 4, co-learning/phase 5 | root/documentation-writing (composes_with) | — | — |
 | `co-news/ai-tell-reduction` | variant:co-news | 1.0.0 | co-news/style-editor | co-news/phase 4 | co-news/financial-journalism-style (composes_with) | — | — |
@@ -94,16 +91,16 @@
 | `co-news/financial-narrative-brief` | variant:co-news | 1.0.1 | co-news/financial-analyst | co-news/phase 1 | co-news/source-verification-ledger (follows) | — | — |
 | `co-news/source-verification-ledger` | variant:co-news | 1.0.1 | co-news/fact-checker | co-news/phase 2 | — | — | — |
 | `co-news/style-lint-checklist` | variant:co-news | 1.0.1 | co-news/style-editor | co-news/phase 4 | — | — | — |
-| `co-price/competitive-intelligence` | variant:co-price | 1.0.0 | — | — | co-price/gabor-granger (composes_with), co-price/price-waterfall-analysis (composes_with), co-price/van-westendorp-psm (follows) | — | — |
+| `co-price/competitive-intelligence` | variant:co-price | 1.0.1 | — | — | co-price/gabor-granger (composes_with), co-price/price-waterfall-analysis (composes_with), co-price/van-westendorp-psm (follows) | — | — |
 | `co-price/cost-shock-analysis` | variant:co-price | 1.0.0 | — | — | co-price/double-entry-reconciliation (composes_with), co-price/financial-statement-prep (composes_with), co-price/harness-verification (composes_with), co-price/harness-verification (follows), co-price/price-waterfall-analysis (composes_with), co-price/pricing-governance (composes_with), co-price/pricing-playbook (composes_with), co-price/prisma-7 (composes_with) | — | — |
 | `co-price/double-entry-reconciliation` | variant:co-price | 2.0.0 | — | — | co-price/financial-statement-prep (composes_with), co-price/harness-verification (composes_with), co-price/i18n-audit (follows), co-price/pricing-playbook (composes_with) | — | — |
 | `co-price/excel-export` | variant:co-price | 2.0.0 | — | — | — | — | — |
-| `co-price/executive-presentation` | variant:co-price | 1.0.0 | — | — | co-price/harness-verification (follows) | — | — |
+| `co-price/executive-presentation` | variant:co-price | 1.0.1 | — | — | co-price/harness-verification (follows) | — | — |
 | `co-price/financial-statement-prep` | variant:co-price | 2.0.0 | — | — | co-price/harness-verification (composes_with), co-price/harness-verification (follows), co-price/i18n-audit (composes_with), co-price/pricing-playbook (follows), co-price/prisma-7 (composes_with), co-price/scenario-comparison (composes_with) | — | — |
 | `co-price/gabor-granger` | variant:co-price | 1.0.0 | — | — | co-price/price-waterfall-analysis (follows), co-price/pricing-playbook (enables), co-price/van-westendorp-psm (composes_with) | survey-responses-gg | demand-curve, optimal-price, elasticity-reading |
 | `co-price/harness-verification` | variant:co-price | 2.1.0 | — | — | co-price/double-entry-reconciliation (follows), co-price/i18n-audit (composes_with), co-price/pricing-playbook (composes_with), co-price/prisma-7 (composes_with), co-price/scenario-comparison (composes_with), co-price/ui-component-design (composes_with) | — | — |
 | `co-price/i18n-audit` | variant:co-price | 2.1.0 | — | — | co-price/cost-shock-analysis (follows), co-price/pricing-playbook (composes_with) | — | — |
-| `co-price/insight-synthesis` | variant:co-price | 1.0.0 | — | — | — | — | — |
+| `co-price/insight-synthesis` | variant:co-price | 1.0.1 | — | — | — | — | — |
 | `co-price/map-channel-enforcement` | variant:co-price | 1.0.0 | — | — | — | — | — |
 | `co-price/math-function-plotter` | variant:co-price | 2.0.0 | — | — | — | — | — |
 | `co-price/pdf-export` | variant:co-price | 1.1.0 | — | — | — | — | — |
@@ -175,7 +172,7 @@
 | `co-safety/sync` | variant:co-safety | 1.6.0 | — | — | — | — | — |
 | `co-safety/tank-integrity-validator` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tar-planning` | variant:co-safety | 1.1.0 | — | — | — | — | — |
-| `co-safety/team-builder` | variant:co-safety | 1.1.0 | — | — | — | — | — |
+| `co-safety/team-builder` | variant:co-safety | 1.1.1 | — | — | — | — | — |
 | `co-safety/temperature-excursion-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/thermal-burn-prevention-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tool-box-meeting` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -186,7 +183,7 @@
 | `co-security/spdx-sbom` | variant:co-security | 1.0.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
 | `co-security/stride-threat-matrix` | variant:co-security | 1.0.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
 | `co-security/verify-authorization` | variant:co-security | 1.0.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
-| `co-work/standup-synthesizer` | variant:co-work | 1.0.0 | co-work/project-coordinator | co-work/phase 4 | — | — | — |
+| `co-work/standup-synthesizer` | variant:co-work | 1.0.1 | co-work/project-coordinator | co-work/phase 4 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
 | `common/gateguard` | common | 1.0.2 | — | — | — | — | — |
@@ -204,7 +201,7 @@
 | `common/k-opendata` | common | 1.2.2 | — | — | common/k-ecos (composes_with), common/k-kosis | — | — |
 | `common/sync` | common | 1.8.0 | — | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
-| `root/accessibility-audit` | L0 | 1.1.0 | — | — | — | — | — |
+| `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
 | `root/adopt-project` | L0 | 1.1.0 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.3.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-work/technical-writer | — | — | — | — |
@@ -230,7 +227,7 @@
 | `root/research-analysis` | L0 | 1.0.2 | co-work/analyst | — | root/documentation-writing (enables) | — | — |
 | `root/script-lifecycle-manager` | L0 | 1.2.2 | — | — | — | — | — |
 | `root/security-scan` | L0 | 1.2.0 | — | — | — | — | — |
-| `root/service-design` | L0 | 1.1.0 | — | — | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
+| `root/service-design` | L0 | 1.1.0 | co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
 | `root/skill-graph-analytics` | L0 | 1.2.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
 | `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
@@ -267,18 +264,18 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`);
 - **co-deck/phase 4** (HTML Build + PDF Prep): co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/slide-layout-gate, co-deck/version
 - **co-deck/phase 5** (PDF Export + Publish): co-deck/pdf-export, co-deck/version
 - **co-deck/phase 6** (Retrospective): co-deck/version
-- **co-design/phase 1** (User Research & Narrative Foundation): co-design/service-design, co-design/ui-ux-design-intelligence
-- **co-design/phase 2** (Design Direction & Approval): co-design/accessibility-audit, co-design/service-design, co-design/ui-ux-design-intelligence
-- **co-design/phase 3** (Design System & Execution): co-design/service-design, co-design/ui-ux-design-intelligence
-- **co-design/phase 4** (Prototyping & Handoff): co-design/accessibility-audit, co-design/token-usage-lint
+- **co-design/phase 1** (User Research & Narrative Foundation): co-design/ui-ux-design-intelligence, root/service-design
+- **co-design/phase 2** (Design Direction & Approval): co-design/ui-ux-design-intelligence, root/accessibility-audit, root/service-design
+- **co-design/phase 3** (Design System & Execution): co-design/ui-ux-design-intelligence, root/service-design
+- **co-design/phase 4** (Prototyping & Handoff): co-design/token-usage-lint, root/accessibility-audit
 - **co-develop/phase 4** (Implementation & QA Gate): co-develop/code-review, co-develop/refactoring, co-develop/swe-solve, co-develop/test-driven-development
 - **co-export/phase 1** (Research / Analysis): co-export/export-control-screening, co-export/foreign-regulation-monitoring, co-export/fta-origin-determination, co-export/halal-certification-workflow, co-export/hs-classification-workflow, co-export/landed-cost-calculation, co-export/market-entry-strategy, co-export/roo-qualification-worksheet
 - **co-export/phase 2** (Design Review & Approval): co-export/export-control-screening, co-export/fta-origin-determination, co-export/halal-certification-workflow, co-export/hs-classification-workflow, co-export/landed-cost-calculation, co-export/roo-qualification-worksheet
 - **co-export/phase 3** (Execution / Creation): co-export/customs-duty-drawback-workflow, co-export/logistics-coordination, co-export/market-entry-strategy, co-export/trade-documentation-checklist
 - **co-export/phase 4** (Delivery / Integration): co-export/customs-duty-drawback-workflow, co-export/logistics-coordination, co-export/market-entry-strategy
-- **co-game/phase 3** (Design): co-develop/test-driven-development, co-game/code-review, co-game/refactoring, co-game/sound-synth
+- **co-game/phase 3** (Design): co-develop/refactoring, co-develop/test-driven-development, co-game/code-review, co-game/sound-synth
 - **co-game/phase 4** (Implementation): co-game/arcade-physics, co-game/sound-synth
-- **co-game/phase 5** (Finalization): co-develop/test-driven-development, co-game/code-review, co-game/refactoring
+- **co-game/phase 5** (Finalization): co-develop/refactoring, co-develop/test-driven-development, co-game/code-review
 - **co-hr/phase 1** (Research & Analysis): co-hr/hr-metrics-analysis, co-hr/labor-compliance-audit, co-hr/org-readiness-assessment, co-hr/stakeholder-alignment
 - **co-hr/phase 2** (Design Review & Approval): co-hr/career-path-succession-planning, co-hr/compensation-benchmarking, co-hr/competency-modeling, co-hr/labor-compliance-audit, co-hr/learning-curriculum-design, co-hr/org-design-framework, co-hr/org-readiness-assessment, co-hr/performance-system-design, co-hr/stakeholder-alignment, co-hr/talent-acquisition-strategy
 - **co-hr/phase 3** (Implementation & Delivery): co-hr/consulting-report-writing, co-hr/hr-metrics-analysis, co-hr/org-design-framework
@@ -459,9 +456,9 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/co-design.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
-| `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/service-design`, `co-design/ui-ux-design-intelligence` | — | — |
-| `doc:co-design/docs/user-guide.md` | doc | `co-design/service-design`, `co-design/ui-ux-design-intelligence` | — | — |
-| `doc:co-design/README.md` | doc | `co-design/accessibility-audit`, `co-design/service-design`, `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/meeting-facilitation` | — | — |
+| `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
+| `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
+| `doc:co-design/README.md` | doc | `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-develop/agents/designer.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/ui-ux-design-intelligence` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
@@ -478,8 +475,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-export/README.md` | doc | `co-export/customs-duty-drawback-workflow`, `co-export/export-control-screening`, `co-export/foreign-regulation-monitoring`, `co-export/fta-origin-determination`, `co-export/halal-certification-workflow`, `co-export/hs-classification-workflow`, `co-export/landed-cost-calculation`, `co-export/logistics-coordination`, `co-export/market-entry-strategy`, `co-export/roo-qualification-worksheet`, `co-export/trade-documentation-checklist`, `root/meeting-facilitation` | — | — |
 | `doc:co-game/AGENTS.md` | doc | `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-game/docs/co-game.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-game/docs/user-guide_ko.md` | doc | `co-develop/test-driven-development`, `co-game/code-review`, `co-game/refactoring`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-game/docs/user-guide.md` | doc | `co-develop/test-driven-development`, `co-game/code-review`, `co-game/refactoring`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-game/docs/user-guide_ko.md` | doc | `co-develop/refactoring`, `co-develop/test-driven-development`, `co-game/code-review`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-game/docs/user-guide.md` | doc | `co-develop/refactoring`, `co-develop/test-driven-development`, `co-game/code-review`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-game/README.md` | doc | `co-develop/test-driven-development`, `co-game/arcade-physics`, `co-game/code-review`, `co-game/sound-synth` | — | — |
 | `doc:co-hr/AGENTS.md` | doc | `common/sync`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-hr/docs/co-hr.context.md` | doc | `co-hr/career-path-succession-planning`, `co-hr/compensation-benchmarking`, `co-hr/consulting-report-writing`, `co-hr/hr-metrics-analysis`, `co-hr/learning-curriculum-design`, `co-hr/org-design-framework`, `co-hr/org-readiness-assessment`, `co-hr/performance-system-design`, `co-hr/stakeholder-alignment`, `co-hr/talent-acquisition-strategy`, `common/k-kosis`, `common/k-law`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
@@ -767,29 +764,19 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `storyteller` | agent | divergence | co-design@2.0.0 #7d5cf9c2; co-work@1.0.0 #50d9e022 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
-| `accessibility-audit` | skill | version-drift | co-design@1.1.0 #9e6da04e; root@1.1.0 #aa244933 |
 | `agent-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #cb7ad830; root@1.3.0 #5f3763d3 |
-| `code-review` | skill | version-drift | co-develop@1.0.0 #77b9b9fd; co-game@1.0.0 #11f2d55d |
-| `competitive-intelligence` | skill | version-drift | co-consult@1.0.0 #ba31588f; co-price@1.0.0 #04583abf |
-| `consulting-report-writing` | skill | version-drift | co-consult@1.0.0 #859f4090; co-hr@1.0.0 #7c46cae5 |
-| `executive-presentation` | skill | version-drift | co-consult@1.0.0 #d502739f; co-price@1.0.0 #d600cc4a |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
-| `insight-synthesis` | skill | version-drift | co-consult@1.0.0 #9ae7bc6a; co-price@1.0.0 #f0934776 |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
-| `org-readiness-assessment` | skill | version-drift | co-consult@1.0.0 #1659faeb; co-hr@1.0.0 #48cea2f6 |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.2.0 #85878525; root@1.3.2 #01931679 |
-| `refactoring` | skill | version-drift | co-develop@1.0.0 #ac456953; co-game@1.0.0 #01c935d5 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
-| `service-design` | skill | version-drift | co-design@1.1.0 #ead5c4a2; root@1.1.0 #771b7744 |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.4.0 #82d9ff48; root@1.5.0 #883308f6 |
-| `stakeholder-alignment` | skill | version-drift | co-consult@1.0.0 #b0eda8cf; co-hr@1.0.0 #020789aa |
-| `standup-synthesizer` | skill | version-drift | co-work@1.0.0 #283abcb3; root@1.0.0 #c74ddbdf |
+| `standup-synthesizer` | skill | divergence | co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #66184388; root@1.8.0 #b6fb36af |
-| `team-builder` | skill | version-drift | co-safety@1.1.0 #4fd4638e; root@1.1.0 #b2d44210 |
-| `token-usage-lint` | skill | version-drift | co-design@1.1.0 #b5f3646e; root@1.1.0 #e7762c79 |
+| `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.1.0 #b2d44210 |
+| `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
-| `ui-ux-design-intelligence` | skill | version-drift | co-design@1.0.1 #576de29c; root@1.0.1 #584f569c |
+| `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
 
 ## Isolated Nodes (G5)
 
@@ -802,7 +789,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-136 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+134 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -838,10 +825,10 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-08), window 90 days. Skill nodes with usage: 7.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (7): co-safety/project-review, co-safety/sync, common/sync, root/ci-triage, root/project-review, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (229): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 189 more
+- **unused** (0 sessions in 90 days) (226): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 186 more
 
 ## Ambiguous Name Resolutions
 
 Referenced by bare name from a scope that has no own/common/root copy while several variants define it; the first (alphabetical) node was used.
 
-agent:designer, skill:code-review, skill:executive-presentation, skill:insight-synthesis, skill:org-readiness-assessment, skill:pdf-export, skill:refactoring
+agent:designer, skill:code-review, skill:executive-presentation, skill:insight-synthesis, skill:org-readiness-assessment, skill:pdf-export

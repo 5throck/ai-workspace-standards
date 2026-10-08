@@ -8,12 +8,15 @@ title: >-
   team-builder: co-safety) — re-sync from root or bump the variant version and
   record the fork reason
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-08T09:25:45.637+09:00'
 history:
   - at: '2026-10-08T09:25:45.637+09:00'
     from: null
     to: backlog
+  - at: '2026-10-08T11:57:48.132+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

@@ -7,8 +7,9 @@ description: >
   capacity to absorb and sustain change. Produces readiness scores, capability
   gap analysis, and change management cost estimates that support engagement
   budgeting.
-version: 1.0.0
-last_reviewed: 2026-08-23
+capability: hr-org-readiness-assessment
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: change-management-partner
 prerequisites: none

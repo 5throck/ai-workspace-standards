@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261008-008
+kind: manual
+title: >-
+  co-safety fork ahead-deltas: port common's ahead-deltas (ADR-0080/0061
+  gate-moment steps, review-baseline runner, Registry Lockstep Checklist) into
+  the 3 co-safety lifecycle-skill forks (agent-lifecycle-manager,
+  project-review, skill-lifecycle-manager) — documented in the 2026-10-08
+  reconciliation wave
+  (docs/designs/2026-10-08-skill-graph-reconciliation-wave-design.md) as
+  intentional-fork follow-up candidates; needs co-safety-owner review since the
+  forks carry the safety-os-skill-structure audit_exception contract
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-08T12:38:15.995+09:00'
+history:
+  - at: '2026-10-08T12:38:15.995+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

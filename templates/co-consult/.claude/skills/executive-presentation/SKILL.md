@@ -7,8 +7,9 @@ description: >
   presentations and decision decks. Uses Pyramid Principle structure, "So What?"
   message extraction, and one-page summary design. The business case section
   requires inputs from all three prerequisite skills.
-version: 1.0.0
-last_reviewed: 2026-06-13
+capability: consulting-executive-presentation
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: communications-lead
 prerequisites: technical-feasibility, org-readiness-assessment, financial-modeling

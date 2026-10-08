@@ -7,7 +7,7 @@ description: >
   Covers requirements interview, web benchmarking, current team diagnosis, proposal generation,
   and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute.
   Triggered by: "새 팀 구성", "에이전트팀 변경", "신규 도메인 팀 빌딩", "build new agent team".
-version: 1.1.0
+version: 1.1.1
 status: active
 scope: co-safety
 owner: pm

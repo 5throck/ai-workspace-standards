@@ -8,12 +8,15 @@ title: >-
   a dry publish/--l1-pending tolerance in 3.9) so the pre-publish gate does not
   flag publish-pending L1 drift; reproduced in PR #1476
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-08T09:38:45.572+09:00'
 history:
   - at: '2026-10-08T09:38:45.572+09:00'
     from: null
     to: backlog
+  - at: '2026-10-08T11:57:48.180+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

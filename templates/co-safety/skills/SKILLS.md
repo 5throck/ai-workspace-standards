@@ -61,7 +61,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `sync` | 1.6.0 | active | pm | 2026-09-17 | — | inherited from common — customized fork (variant-maintained) |
 | `tank-integrity-validator` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Validate LNG/LPG/수소 저장탱크 구조 건전성 |
 | `tar-planning` | 1.1.0 | active | ehschem-agent | — | — | co-safety only — Chemical plant turnaround (TAR) shutdown planning — pre-TAR risk assessment, PSSR (Pre-Startup… |
-| `team-builder` | 1.1.0 | active | pm | — | — | inherited from common — customized fork (variant-maintained) |
+| `team-builder` | 1.1.1 | active | pm | — | — | inherited from common — customized fork (variant-maintained) |
 | `temperature-excursion-analyzer` | 1.0.0 | active | gdp-agent | — | — | co-safety only — Analyze temperature excursion events in cold chain pharmaceutical distribution |
 | `thermal-burn-prevention-planner` | 1.0.0 | active | food-agent | — | — | co-safety only — Plan worker thermal-burn and cooking-oil fire-risk prevention for industrial fryers, cookers, steam… |
 | `tool-box-meeting` | 1.0.0 | active | safety-workflow-manager | — | — | co-safety only — Trigger pre-work Tool Box Meeting (TBM) — cross-industry safety briefing with per-domain legal… |
