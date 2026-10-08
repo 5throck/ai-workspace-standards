@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261009-009
+kind: manual
+title: >-
+  Update docs/lifecycle/templates/co-consult.md acceptance count from 18 to 19
+  skills (industry-research-pack restore left the record stale)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-09T07:12:32.434+09:00'
+history:
+  - at: '2026-10-09T07:12:32.434+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
