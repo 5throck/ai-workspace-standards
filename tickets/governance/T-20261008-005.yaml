@@ -8,7 +8,7 @@ title: >-
   a dry publish/--l1-pending tolerance in 3.9) so the pre-publish gate does not
   flag publish-pending L1 drift; reproduced in PR #1476
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T09:38:45.572+09:00'
 history:
@@ -18,5 +18,20 @@ history:
   - at: '2026-10-08T11:57:48.180+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T12:48:22.112+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T12:48:45.121+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed via PR #1480: dev-sync 1.25.0 step 3.9 heal-by-early-publish — on gate
+  failure (after auto-E5), one early scoped propagate-to-templates --apply runs
+  and the gate retries; a pass means publish-pending L1 drift, a persistent
+  failure still blocks (gate strength unchanged; 4.5 stays as idempotent no-op).
+  Mechanics validated end-to-end by reproducing the PR #1476 shape: bump
+  mirrored rows everywhere but leave the L1 script file pending -> audit exits 1
+  -> propagate -> audit exits 0. Design:
+  docs/designs/2026-10-08-dev-sync-speccheck-heal-design.md (registered);
+  scrub-canonical L1 mirror; registry rows bumped.
 error: null

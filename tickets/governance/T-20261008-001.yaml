@@ -10,7 +10,7 @@ title: >-
   to common (3+ variant rule) or declare distinct capability in frontmatter,
   then bump versions; never rename
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-08T09:25:45.621+09:00'
 history:
@@ -20,5 +20,19 @@ history:
   - at: '2026-10-08T11:57:48.111+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-08T12:48:22.045+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-08T12:48:45.045+09:00'
+    from: review
+    to: done
+result: >-
+  Reconciled via PR #1480 (2026-10-08 skill-graph reconciliation wave, spec
+  2026-10-08-skill-graph-reconciliation-wave-design): 7 of 8 pairs declared
+  distinct capabilities with the machine-supported capability: key
+  (consulting-/pricing-/hr-/swe-/game- prefixed) + descriptions enriched, both
+  copies bumped to 1.0.1; refactoring (co-develop/co-game) was accidental drift
+  — co-game had missed Amendment 8 (57602551) and was converged to the
+  co-develop copy. 3+ variant promotion rule N/A for 2-variant pairs.
+  Skill-graph E2: 0 version-drift (was 14).
 error: null
