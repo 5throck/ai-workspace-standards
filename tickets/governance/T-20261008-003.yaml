@@ -9,12 +9,15 @@ title: >-
   skill-lifecycle-manager) — decide re-sync vs intentional fork with distinct
   capability
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-08T09:25:45.652+09:00'
 history:
   - at: '2026-10-08T09:25:45.652+09:00'
     from: null
     to: backlog
+  - at: '2026-10-08T11:57:48.149+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

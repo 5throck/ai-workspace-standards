@@ -4,11 +4,11 @@ description: >
   Improves code structure and design while preserving behavior using systematic
   refactoring techniques. Use when: cleaning up code, reducing duplication, improving
   maintainability, or paying down technical debt.
-version: 1.0.0
+version: 1.0.1
 scope: co-develop
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-10-08
 prerequisites: none
 relates_to:
   - skill: code-review

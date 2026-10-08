@@ -5,11 +5,11 @@ description: >
   rgb()/hsl() literals, raw px spacing) that bypass the tokens.json SSOT. Use when:
   reviewing generated UI code, auditing for hardcoded design values, or checking design
   token compliance in playground demos and handoff artifacts.
-version: 1.1.0
+version: 1.1.1
 scope: co-design
 status: active
 owner: pm
-last_reviewed: 2026-08-25
+last_reviewed: 2026-10-08
 prerequisites: none
 relates_to:
   - skill: ui-ux-design-intelligence

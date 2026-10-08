@@ -2,9 +2,14 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: competitive-intelligence
 scope: co-price
-description: Systematic market and competitive analysis
-version: 1.0.0
-last_reviewed: 2026-08-25
+description: >
+  Systematic market and competitive analysis for pricing engagements: builds the
+  Diagnose-stage evidence pack from CompetitorPrice observations (segment
+  Competitive Price Index, GTN band checks, WTP overlay hand-offs). Pricing-domain
+  capability, distinct from the consulting-domain sibling owned by co-consult.
+capability: pricing-competitive-intelligence
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: market-intelligence-analyst
 prerequisites: CompetitorPrice observations ingested; diagnostics GTN band available

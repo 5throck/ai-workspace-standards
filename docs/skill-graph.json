@@ -5182,9 +5182,9 @@
       "layer": "variant:co-consult",
       "name": "competitive-intelligence",
       "scope": "co-consult",
-      "capability": "competitive-intelligence",
-      "content_hash": "ba31588f87ac70ec",
-      "version": "1.0.0",
+      "capability": "consulting-competitive-intelligence",
+      "content_hash": "6be7da5f96345207",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/competitive-intelligence/SKILL.md"
       ]
@@ -5196,8 +5196,8 @@
       "name": "consulting-report-writing",
       "scope": "co-consult",
       "capability": "consulting-report-writing",
-      "content_hash": "859f4090cedddcfb",
-      "version": "1.0.0",
+      "content_hash": "b6ac625437be53a6",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/consulting-report-writing/SKILL.md"
       ]
@@ -5208,9 +5208,9 @@
       "layer": "variant:co-consult",
       "name": "executive-presentation",
       "scope": "co-consult",
-      "capability": "executive-presentation",
-      "content_hash": "d502739f384b25f2",
-      "version": "1.0.0",
+      "capability": "consulting-executive-presentation",
+      "content_hash": "7b158b20a2a4d561",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/executive-presentation/SKILL.md"
       ],
@@ -5291,9 +5291,9 @@
       "layer": "variant:co-consult",
       "name": "insight-synthesis",
       "scope": "co-consult",
-      "capability": "insight-synthesis",
-      "content_hash": "9ae7bc6af77723fa",
-      "version": "1.0.0",
+      "capability": "consulting-insight-synthesis",
+      "content_hash": "1f84be83978cb5f4",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/insight-synthesis/SKILL.md"
       ]
@@ -5330,9 +5330,9 @@
       "layer": "variant:co-consult",
       "name": "org-readiness-assessment",
       "scope": "co-consult",
-      "capability": "org-readiness-assessment",
-      "content_hash": "1659faebef4b9856",
-      "version": "1.0.0",
+      "capability": "consulting-org-readiness-assessment",
+      "content_hash": "20b16328689faab5",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/org-readiness-assessment/SKILL.md"
       ],
@@ -5387,9 +5387,9 @@
       "layer": "variant:co-consult",
       "name": "stakeholder-alignment",
       "scope": "co-consult",
-      "capability": "stakeholder-alignment",
-      "content_hash": "b0eda8cfb6d46f90",
-      "version": "1.0.0",
+      "capability": "consulting-stakeholder-alignment",
+      "content_hash": "57fdc7a36f8b179e",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/stakeholder-alignment/SKILL.md"
       ]
@@ -5592,32 +5592,6 @@
       ]
     },
     {
-      "id": "skill:co-design/accessibility-audit",
-      "type": "skill",
-      "layer": "variant:co-design",
-      "name": "accessibility-audit",
-      "scope": "co-design",
-      "capability": "accessibility-audit",
-      "content_hash": "9e6da04e275eb51c",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-design/skills/accessibility-audit/SKILL.md"
-      ]
-    },
-    {
-      "id": "skill:co-design/service-design",
-      "type": "skill",
-      "layer": "variant:co-design",
-      "name": "service-design",
-      "scope": "co-design",
-      "capability": "service-design",
-      "content_hash": "ead5c4a21bcff6b3",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-design/skills/service-design/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-design/token-usage-lint",
       "type": "skill",
       "layer": "variant:co-design",
@@ -5625,7 +5599,7 @@
       "scope": "co-design",
       "capability": "token-usage-lint",
       "content_hash": "b5f3646e577b2f9e",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-design/skills/token-usage-lint/SKILL.md"
       ]
@@ -5638,7 +5612,7 @@
       "scope": "co-design",
       "capability": "ui-ux-design-intelligence",
       "content_hash": "576de29c925f9b3d",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md"
       ]
@@ -5649,9 +5623,9 @@
       "layer": "variant:co-develop",
       "name": "code-review",
       "scope": "co-develop",
-      "capability": "code-review",
-      "content_hash": "77b9b9fd19c7676e",
-      "version": "1.0.0",
+      "capability": "swe-code-review",
+      "content_hash": "42e904a2eb48362e",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-develop/skills/code-review/SKILL.md"
       ]
@@ -5664,9 +5638,10 @@
       "scope": "co-develop",
       "capability": "refactoring",
       "content_hash": "ac456953a305a80b",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "mirrors": [
-        "templates/co-develop/skills/refactoring/SKILL.md"
+        "templates/co-develop/skills/refactoring/SKILL.md",
+        "templates/co-game/skills/refactoring/SKILL.md"
       ]
     },
     {
@@ -5858,24 +5833,11 @@
       "layer": "variant:co-game",
       "name": "code-review",
       "scope": "co-game",
-      "capability": "code-review",
-      "content_hash": "11f2d55d6a14e342",
-      "version": "1.0.0",
+      "capability": "game-code-review",
+      "content_hash": "84a8c5b0308263c0",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-game/skills/code-review/SKILL.md"
-      ]
-    },
-    {
-      "id": "skill:co-game/refactoring",
-      "type": "skill",
-      "layer": "variant:co-game",
-      "name": "refactoring",
-      "scope": "co-game",
-      "capability": "refactoring",
-      "content_hash": "01c935d58fb66469",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-game/skills/refactoring/SKILL.md"
       ]
     },
     {
@@ -5936,9 +5898,9 @@
       "layer": "variant:co-hr",
       "name": "consulting-report-writing",
       "scope": "co-hr",
-      "capability": "consulting-report-writing",
-      "content_hash": "7c46cae55e8dd89e",
-      "version": "1.0.0",
+      "capability": "hr-consulting-report-writing",
+      "content_hash": "b4d2d3ff459cd7bb",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-hr/skills/consulting-report-writing/SKILL.md"
       ]
@@ -6001,9 +5963,9 @@
       "layer": "variant:co-hr",
       "name": "org-readiness-assessment",
       "scope": "co-hr",
-      "capability": "org-readiness-assessment",
-      "content_hash": "48cea2f6ae1ffe7a",
-      "version": "1.0.0",
+      "capability": "hr-org-readiness-assessment",
+      "content_hash": "707116dea3d1858a",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-hr/skills/org-readiness-assessment/SKILL.md"
       ]
@@ -6027,9 +5989,9 @@
       "layer": "variant:co-hr",
       "name": "stakeholder-alignment",
       "scope": "co-hr",
-      "capability": "stakeholder-alignment",
-      "content_hash": "020789aa3b29c858",
-      "version": "1.0.0",
+      "capability": "hr-stakeholder-alignment",
+      "content_hash": "62b50083eeb400cf",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-hr/skills/stakeholder-alignment/SKILL.md"
       ]
@@ -6144,9 +6106,9 @@
       "layer": "variant:co-price",
       "name": "competitive-intelligence",
       "scope": "co-price",
-      "capability": "competitive-intelligence",
-      "content_hash": "04583abf45e118db",
-      "version": "1.0.0",
+      "capability": "pricing-competitive-intelligence",
+      "content_hash": "e300d9614e1ecc54",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-price/skills/competitive-intelligence/SKILL.md"
       ]
@@ -6196,9 +6158,9 @@
       "layer": "variant:co-price",
       "name": "executive-presentation",
       "scope": "co-price",
-      "capability": "executive-presentation",
-      "content_hash": "d600cc4ab1640164",
-      "version": "1.0.0",
+      "capability": "pricing-executive-presentation",
+      "content_hash": "830721d233c144de",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-price/skills/executive-presentation/SKILL.md"
       ]
@@ -6269,9 +6231,9 @@
       "layer": "variant:co-price",
       "name": "insight-synthesis",
       "scope": "co-price",
-      "capability": "insight-synthesis",
-      "content_hash": "f093477618e583ff",
-      "version": "1.0.0",
+      "capability": "pricing-insight-synthesis",
+      "content_hash": "c10f599bf2419b62",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-price/skills/insight-synthesis/SKILL.md"
       ]
@@ -7236,7 +7198,7 @@
       "scope": "co-safety",
       "capability": "team-builder",
       "content_hash": "4fd4638e28436539",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-safety/skills/team-builder/SKILL.md"
       ]
@@ -7379,7 +7341,7 @@
       "scope": "co-work",
       "capability": "standup-synthesizer",
       "content_hash": "283abcb3fc21457d",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-work/skills/standup-synthesizer/SKILL.md"
       ]
@@ -7621,6 +7583,7 @@
       "mirrors": [
         "skills/accessibility-audit/SKILL.md",
         "templates/common/skills/accessibility-audit/SKILL.md",
+        "templates/co-design/skills/accessibility-audit/SKILL.md",
         ".claude/skills/accessibility-audit/SKILL.md",
         ".gemini/skills/accessibility-audit/SKILL.md",
         ".agents/skills/accessibility-audit/SKILL.md",
@@ -8107,6 +8070,7 @@
       "mirrors": [
         "skills/service-design/SKILL.md",
         "templates/common/skills/service-design/SKILL.md",
+        "templates/co-design/skills/service-design/SKILL.md",
         ".claude/skills/service-design/SKILL.md",
         ".gemini/skills/service-design/SKILL.md",
         ".agents/skills/service-design/SKILL.md",
@@ -12257,19 +12221,13 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide_ko.md",
-      "to": "skill:co-design/service-design",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide_ko.md",
-      "to": "skill:co-design/ui-ux-design-intelligence",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/docs/user-guide.md",
-      "to": "skill:co-design/service-design",
+      "to": "skill:root/service-design",
       "source": "workflow-doc"
     },
     {
@@ -12280,14 +12238,8 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-design/README.md",
-      "to": "skill:co-design/accessibility-audit",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/README.md",
-      "to": "skill:co-design/service-design",
+      "from": "doc:co-design/docs/user-guide.md",
+      "to": "skill:root/service-design",
       "source": "workflow-doc"
     },
     {
@@ -12305,7 +12257,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/README.md",
+      "to": "skill:root/accessibility-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
       "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "skill:root/service-design",
       "source": "workflow-doc"
     },
     {
@@ -12887,6 +12851,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill:co-develop/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
       "to": "skill:co-develop/test-driven-development",
       "source": "workflow-doc"
     },
@@ -12894,12 +12864,6 @@
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide_ko.md",
       "to": "skill:co-game/code-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide_ko.md",
-      "to": "skill:co-game/refactoring",
       "source": "workflow-doc"
     },
     {
@@ -12935,6 +12899,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill:co-develop/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:co-develop/test-driven-development",
       "source": "workflow-doc"
     },
@@ -12942,12 +12912,6 @@
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:co-game/code-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide.md",
-      "to": "skill:co-game/refactoring",
       "source": "workflow-doc"
     },
     {
@@ -16548,13 +16512,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.prototype-validation",
-      "to": "skill:co-design/accessibility-audit",
+      "to": "skill:root/accessibility-audit",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.prototype-validation",
-      "to": "skill:co-design/service-design",
+      "to": "skill:root/service-design",
       "source": "procedure_schema"
     },
     {
@@ -16593,13 +16557,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.ux-discovery",
-      "to": "skill:co-design/service-design",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.ux-discovery",
-      "to": "skill:co-design/ui-ux-design-intelligence",
+      "to": "skill:root/service-design",
       "source": "procedure_schema"
     },
     {
@@ -16651,12 +16615,6 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.visual-implementation",
-      "to": "skill:co-design/service-design",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-design.visual-implementation",
       "to": "skill:co-design/token-usage-lint",
       "source": "procedure_schema"
     },
@@ -16664,6 +16622,12 @@
       "type": "step_uses_skill",
       "from": "procedure.co-design.visual-implementation",
       "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-design.visual-implementation",
+      "to": "skill:root/service-design",
       "source": "procedure_schema"
     },
     {
@@ -22784,121 +22748,6 @@
     },
     {
       "type": "used_by",
-      "from": "skill:co-design/accessibility-audit",
-      "to": "agent:co-design/ux-researcher",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-design/accessibility-audit",
-      "to": "agent:co-design/visual-designer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-design/accessibility-audit",
-      "to": "output_type.accessibility_report",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-design/accessibility-audit",
-      "to": "phase:co-design/2",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-design/accessibility-audit",
-      "to": "phase:co-design/4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-design/service-design",
-      "to": "agent:co-design/design-lead",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-design/agents/design-lead.md",
-        "field": "required_skills",
-        "index": 1
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-design/service-design",
-      "to": "agent:co-design/service-designer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-design/agents/service-designer.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-design/service-design",
-      "to": "output_type.service_blueprint",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-design/service-design",
-      "to": "output_type.touchpoint_specs",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-design/service-design",
-      "to": "phase:co-design/1",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-design/service-design",
-      "to": "phase:co-design/2",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-design/service-design",
-      "to": "phase:co-design/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "follows",
-      "from": "skill:co-design/service-design",
-      "to": "skill:co-design/accessibility-audit",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "follows",
-      "from": "skill:co-design/service-design",
-      "to": "skill:co-design/token-usage-lint",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
-        "field": "relates_to",
-        "index": 2
-      }
-    },
-    {
-      "type": "follows",
-      "from": "skill:co-design/service-design",
-      "to": "skill:co-design/ui-ux-design-intelligence",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-design/skills/service-design/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "used_by",
       "from": "skill:co-design/token-usage-lint",
       "to": "agent:co-design/prototype-engineer",
       "source": "required_skills",
@@ -22992,23 +22841,23 @@
     {
       "type": "follows",
       "from": "skill:co-design/ui-ux-design-intelligence",
-      "to": "skill:co-design/service-design",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "follows",
-      "from": "skill:co-design/ui-ux-design-intelligence",
       "to": "skill:root/documentation-writing",
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "skill:root/service-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -23064,6 +22913,18 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:co-develop/refactoring",
+      "to": "agent:co-game/game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-develop/refactoring",
+      "to": "agent:co-game/game-developer",
+      "source": "skill_manifest"
+    },
+    {
       "type": "produces",
       "from": "skill:co-develop/refactoring",
       "to": "output_type.tooling_adjustments",
@@ -23073,6 +22934,18 @@
       "type": "phase",
       "from": "skill:co-develop/refactoring",
       "to": "phase:co-develop/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/refactoring",
+      "to": "phase:co-game/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/refactoring",
+      "to": "phase:co-game/5",
       "source": "skill_manifest"
     },
     {
@@ -24161,30 +24034,6 @@
         "field": "relates_to",
         "index": 0
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/refactoring",
-      "to": "agent:co-game/game-debugger",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/refactoring",
-      "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/refactoring",
-      "to": "phase:co-game/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/refactoring",
-      "to": "phase:co-game/5",
-      "source": "skill_manifest"
     },
     {
       "type": "used_by",
@@ -29112,6 +28961,36 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:root/accessibility-audit",
+      "to": "agent:co-design/ux-researcher",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/accessibility-audit",
+      "to": "agent:co-design/visual-designer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/accessibility-audit",
+      "to": "output_type.accessibility_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/accessibility-audit",
+      "to": "phase:co-design/2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/accessibility-audit",
+      "to": "phase:co-design/4",
+      "source": "skill_manifest"
+    },
+    {
       "type": "composes_with",
       "from": "skill:root/adopt-project",
       "to": "skill:root/migrate-project",
@@ -29646,6 +29525,58 @@
       "from": "skill:root/security-scan",
       "to": "skill:root/update-bun-packages",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/service-design",
+      "to": "agent:co-design/design-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/service-design",
+      "to": "agent:co-design/service-designer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/service-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/service-design",
+      "to": "output_type.service_blueprint",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/service-design",
+      "to": "output_type.touchpoint_specs",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/service-design",
+      "to": "phase:co-design/1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/service-design",
+      "to": "phase:co-design/2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/service-design",
+      "to": "phase:co-design/3",
+      "source": "skill_manifest"
     },
     {
       "type": "follows",

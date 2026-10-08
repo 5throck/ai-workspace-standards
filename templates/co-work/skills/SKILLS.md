@@ -8,7 +8,7 @@ Curated registry for the co-work skills (T-20260925-005). One row per skill dire
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | co-work only — Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull… |
+| `standup-synthesizer` | 1.0.1 | active | pm | 2026-10-08 | — | co-work only — Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull… Forked from root `skills/standup-synthesizer` (variant-maintained): Related-Skills entries rendered as prose because the root copy's relative `../` links do not resolve in a scaffolded co-work project. |
 
 ## Usage
 

@@ -6,7 +6,7 @@ last_reviewed: 2026-08-25
 status: active
 scope: co-develop
 owner: pm
-prerequisites: Bun runtime, test-runner.ts
+prerequisites: Bun runtime, workspace-root scripts/test-runner.ts (L0 — available in the workspace dev home, not inside adopted co-develop projects; use the project's own test command there)
 metadata:
   type: process
   triggers:

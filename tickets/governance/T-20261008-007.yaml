@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261008-007
+kind: manual
+title: >-
+  skill-graph E2 follow-up: storyteller naming/capability ruling — co-design
+  2.0.0 and co-work 1.0.0 are same-name, genuinely unrelated capabilities; the
+  no-rename rule bars unilateral action, so a PM naming ruling is needed (rename
+  one under a future wave, or declare both as distinct capabilities with the
+  capability: key per the 2026-10-08 reconciliation wave convention)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-08T12:38:15.981+09:00'
+history:
+  - at: '2026-10-08T12:38:15.981+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

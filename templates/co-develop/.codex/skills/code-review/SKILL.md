@@ -3,12 +3,14 @@ name: code-review
 description: >
   Conducts thorough code reviews focusing on correctness, maintainability, security, and
   best practices. Use when: reviewing pull requests, evaluating code quality, providing
-  constructive feedback, or ensuring code standards compliance.
-version: 1.0.0
+  constructive feedback, or ensuring code standards compliance. Software-engineering
+  variant capability: composes with refactoring and follows test-driven-development.
+capability: swe-code-review
+version: 1.0.1
 scope: co-develop
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-10-08
 prerequisites: none
 relates_to:
   - skill: refactoring

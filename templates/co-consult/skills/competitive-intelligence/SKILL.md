@@ -7,8 +7,9 @@ description: >
   for consulting engagements. Includes market entry analysis module. Covers
   framework selection (Porter's Five Forces, SWOT, PESTEL, etc.), competitor
   profiling, market sizing, and opportunity assessment.
-version: 1.0.0
-last_reviewed: 2026-06-13
+capability: consulting-competitive-intelligence
+version: 1.0.1
+last_reviewed: 2026-10-08
 status: active
 owner: strategy-analyst
 prerequisites: none

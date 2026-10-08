@@ -1,4 +1,13 @@
-// @version 1.24.0
+// @version 1.25.0
+// v1.25.0 (2026-10-08, T-20261008-005): step 3.9 heal-by-early-publish — the lifecycle
+//          members of `audit.ts --spec-check --lifecycle-only` fail on publish-pending
+//          L0→L1 drift, so a change set that adds or bumps an L1-delivered script or
+//          skill blocked at 3.9 even though step 4.5 (running later) would heal it
+//          (reproduced in PR #1476). On failure (after the auto-E5 path), one early
+//          scoped `propagate-to-templates.ts --apply` runs and the gate retries: a pass
+//          means the failure was publish-pending drift; a persistent failure still
+//          blocks (gate strength unchanged). Step 4.5's publish stays — idempotent
+//          no-op after the heal.
 // v1.24.0 (2026-10-08, user directive 2026-10-08): step 4.85 version-bump test gate — when the
 // task-staged change set bumps a version (a SKILL.md frontmatter `version:` line or a script
 // `@version` header line changed), `bun run test:unit` runs BEFORE the audit gate and a failure
@@ -578,6 +587,26 @@ if (fs.existsSync(specRegPath)) {
                 }
             } catch (err) {
                 console.log(`${YELLOW}⚠️  Step 3.9: auto-E5 inspection failed (${String(err)}) — treating as unattributed diff.${RESET}`);
+            }
+        }
+        if (!handled && fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json')) {
+            // v1.25.0 (T-20261008-005): rule out publish-pending L0→L1 drift before
+            // blocking — one early scoped publish, then retry the gate. Workspace-root
+            // guard mirrors step 4.5's isWorkspaceRoot (declared later, so probed inline).
+            console.log(`${YELLOW}ℹ️  Step 3.9: attempting early L0→L1 publish to rule out publish-pending drift (T-20261008-005)...${RESET}`);
+            const earlyPub = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
+            if (earlyPub.exitCode === 0) {
+                const healRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+                    .env({ ...process.env, ...specEnv })
+                    .nothrow();
+                if (healRes.exitCode === 0) {
+                    console.log(`${GREEN}✓ Spec registry check passed after early L0→L1 publish — the failure was publish-pending L1 drift${RESET}`);
+                    handled = true;
+                } else {
+                    console.log(`${YELLOW}⚠️  Step 3.9: early publish did not heal the failure — genuine gate failure.${RESET}`);
+                }
+            } else {
+                console.log(`${YELLOW}⚠️  Step 3.9: early L0→L1 publish failed (exit ${earlyPub.exitCode}) — cannot rule out publish-pending drift.${RESET}`);
             }
         }
         if (!handled) {

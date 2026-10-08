@@ -8,8 +8,8 @@ This directory contains variant-specific skills for the `co-design` template.
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `accessibility-audit` | 1.1.0 | active | pm | 2026-09-06 | — | Automated WCAG 2.1 AA accessibility evaluation using axe-core |
 | `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
-| `token-usage-lint` | 1.1.0 | active | pm | 2026-08-25 | — | Greps generated code for raw hex/px values that bypass the `tokens.json` SSOT (backlog Low row) |
-| `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-07-19 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `token-usage-lint` | 1.1.1 | active | pm | 2026-10-08 | — | co-design fork of the root skill (variant-maintained) — binds the lint to the co-design playground SSOT contract, visual-designer palette ownership, and concrete hex examples the generic root copy generalizes away |
+| `ui-ux-design-intelligence` | 1.0.2 | active | pm | 2026-10-08 | — | co-design fork of the root skill (variant-maintained) — adds the `service-design` follow relation for the co-design process chain |
 
 All other skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
 
