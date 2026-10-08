@@ -109,6 +109,22 @@ jobs:
           bun scripts/validate-docs-links.ts
           bun scripts/validate-docs-links.ts --all
 
+      - name: Variant claims battery
+        # T-20261008-006 (split from T-20261006-006; user-approved 2026-10-08):
+        # wire the contract-truth validator into CI next to the docs-links step —
+        # the daily runner's per-variant battery (design 2026-09-25 §4.2b R44,
+        # corrected by T-20261006-002) invokes validate-variant-claims.ts
+        # --template <v> from the workspace root; run the same invocation across
+        # every variant so a claims regression cannot pass required CI.
+        # Ubuntu-only: pure file scans gain nothing from 3 OSes. Measured
+        # 14 variants in ~0.4s locally — sub-second, no meaningful CI cost.
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          set -e
+          for d in templates/co-*; do
+            bun scripts/validate-variant-claims.ts --template "$(basename "$d")"
+          done
+
       - name: Workspace audit
         if: matrix.os == 'ubuntu-latest'
         run: bun scripts/audit.ts
