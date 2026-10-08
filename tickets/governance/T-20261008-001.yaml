@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261008-001
+kind: manual
+title: >-
+  skill-graph E2: reconcile 8 cross-variant same-name skills that share version
+  1.0.0 but differ in content (code-review, refactoring: co-develop/co-game;
+  competitive-intelligence, executive-presentation, insight-synthesis:
+  co-consult/co-price; consulting-report-writing, org-readiness-assessment,
+  stakeholder-alignment: co-consult/co-hr) — per pair either merge and promote
+  to common (3+ variant rule) or declare distinct capability in frontmatter,
+  then bump versions; never rename
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-08T09:25:45.621+09:00'
+history:
+  - at: '2026-10-08T09:25:45.621+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

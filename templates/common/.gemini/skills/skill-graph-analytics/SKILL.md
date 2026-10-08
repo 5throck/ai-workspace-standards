@@ -1,6 +1,6 @@
 ---
 name: skill-graph-analytics
-version: 1.1.0
+version: 1.2.0
 description: >
   Weekly fleet analytics over the per-project skill-graph projections:
   consolidate root + Projects/<co-x> graphs into a dated snapshot, triage
@@ -15,7 +15,7 @@ status: active
 scope: workspace
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-09-22
+last_reviewed: 2026-10-08
 prerequisites: workspace-root CWD; docs/skill-graph.json + Projects/<co-x>/docs/skill-graph.json projections present
 relates_to:
   - skill: project-resync
@@ -71,7 +71,14 @@ exits 1 (fix the generator, `bun scripts/generate-skill-graph.ts`, before triage
 - **Per-project stats + Jaccard distance vs root** — bigger distance = narrower
   or more divergent projection; small projects are expected to diverge, a large
   project with rising distance is a delivery-gap signal.
-- **Presence matrix + top skills** — fleet presence counts per skill id.
+- **Presence matrix + top skills** — fleet presence counts per skill
+  **capability** (frontmatter `capability`, default = skill name; v1 project
+  graphs derive it from the bare node id, so v1 and v2 graphs join on the
+  same key).
+- **Skill convergence by capability** — capabilities carried by >= 3 project
+  graphs, split into `converged` (one content hash), `convergence-with-
+  divergence` (>= 2 hashes) and `hash-unknown` (a v1 project graph carries no
+  hashes yet); see §3 and §3.4.
 - **Root skills missing per project** — the delivery-drift surface.
 - **Root-graph orphan candidates** — graph-isolated root skills/agents with the
   4-way cross-check axes (see §3.5); feeds the orphan triage rules.
@@ -81,11 +88,38 @@ exits 1 (fix the generator, `bun scripts/generate-skill-graph.ts`, before triage
 
 | Signal | Threshold | Action |
 |---|---|---|
-| Skill present in project graphs but **absent from the root graph** | >= 3 project graphs | Consolidation/promotion candidate — file a ticket: `bun scripts/ticket.ts create --manual "skill-graph: <skill-id> converged in N projects, absent from root — consolidation review" --priority normal` (routes through §3.7.5 governance-backlog triage) |
+| **Capability** present in project graphs but **absent from the root graph**, `converged` class (single content hash) | >= 3 project graphs | Consolidation/promotion candidate — file a ticket: `bun scripts/ticket.ts create --manual "skill-graph: <capability> converged in N projects, absent from root — consolidation review" --priority normal` (routes through §3.7.5 governance-backlog triage) |
+| Capability in the `convergence-with-divergence` class (>= 3 projects, >= 2 content hashes) | any | **Reconciliation candidate, not a promotion candidate** — see §3.4; never auto-promote |
+| Capability in the `hash-unknown` class | >= 3 project graphs | Treat as a promotion *candidate* by presence only; content equality is unverified until the carrying v1 projects are upgraded (`upgrade-project` delivers the v2 generator) — compare the SKILL.md files by hand before filing a promotion ticket |
 | **Root skill missing from many projects** | missing from >= 3 project graphs | Delivery-gap candidate — file a ticket naming the skill and the missing projects (likely template-delivery drift; check `templates/common/skills/` and the variant contract) |
 | NEW/VANISHED skills in the diff | any | Verify each is intentional (new skill landed / skill deprecated) — unexplained entries are tickets |
 | **Root-graph orphan candidate** (report section "Root-graph orphan candidates") | any isolated skill/agent | Apply the 4-way orphan criteria below — never treat graph isolation alone as proof of orphanhood |
 | Everything else | — | No action; the snapshot is the record |
+
+### 3.4 Divergence triage (capability-based convergence)
+
+Since skill-graph v2 (ADR-0060 Amendment 11) a skill node's identity is
+`skill:<scope>/<name>` with a `content_hash`, and fleet convergence groups by
+**capability** rather than by raw node id, so same-named skills whose content
+differs no longer look identical. For each `convergence-with-divergence`
+capability in the report:
+
+1. Read the hash groups (`hash: projects`) and diff the SKILL.md copies of the
+   largest and smallest group.
+2. Classify: **fork** (intentional variant specialisation — set a distinct
+   `capability:` in the forked SKILL.md frontmatter, or keep and record why),
+   **drift** (accidental divergence — reconcile to one copy, then the group
+   becomes `converged` and a promotion candidate), or **rename** (same job,
+   different name — set the same `capability:` on both so they group).
+3. File one reconciliation ticket per capability (`bun scripts/ticket.ts create
+   --manual "skill-graph: <capability> diverged across N projects — reconcile"
+   --priority normal`); never edit the project copies from this skill.
+
+The root `docs/skill-graph.md` section "Same-Name Divergence (E2)" and
+`bun scripts/verify-skill-graph.ts` carry the same signal inside the workspace
+(`version-drift` = same version, different content — bump or reconcile).
+`bun scripts/generate-skill-graph.ts --impact <skill>` lists the agents,
+procedures, scopes, tests and contracts a change to a skill touches.
 
 ### 3.5 Root-graph orphan cross-check (4-way criteria)
 
@@ -136,8 +170,10 @@ delivery-gap or convergence observation that did not merit a ticket.
 
 ## Notes
 
-- Name-keyed limitation: presence is keyed by graph node id. Semantic
-  duplicates under different ids need content-similarity matching — out of
-  scope (design doc §Out of Scope).
+- Capability-keyed presence: presence is keyed by `capability` (default = skill
+  name). Semantic duplicates under *different* names need an explicit shared
+  `capability:` in frontmatter (or content-similarity matching — out of scope,
+  design doc §Out of Scope). Hashes cover SKILL.md only (supporting files under
+  `references/` and `scripts/` are not hashed).
 - Snapshots accumulate under `memory/skill-graph-metrics/`; they are the input
   for future trend analysis (Phase 3, future work). Do not hand-edit them.

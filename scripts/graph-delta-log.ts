@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 
 /**
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-10-08, skill-graph v2, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §8):
+ * the committed graph is read through scripts/lib/skill-graph-compat.ts, so a v1 -> v2 schema
+ * transition diffs on scoped ids (a v1 file is upgraded in memory) and is recorded once with
+ * `migration: "skill-graph-v1-to-v2"` instead of as ~1000 node changes.
  *
  * Compute and persist a Graph Delta Log record for the skill graph.
  *
@@ -40,6 +45,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { buildGraph, SkillGraph, GraphNode, GraphEdge } from './generate-skill-graph.ts';
+import { upgradeSkillGraph } from './lib/skill-graph-compat.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,6 +65,8 @@ interface DeltaRecord {
   };
   by_node_type: Record<string, { added: number; removed: number }>;
   by_edge_type: Record<string, { added: number; removed: number }>;
+  /** Present when the committed graph was a v1 file upgraded in memory for this diff. */
+  migration?: 'skill-graph-v1-to-v2';
   ids: {
     nodes_added?: string[];
     nodes_removed?: string[];
@@ -287,8 +295,11 @@ async function main() {
     process.exit(0);
   }
 
+  let migrated = false;
   try {
-    committed = JSON.parse(readFileSync(committedPath, 'utf-8'));
+    const parsed = JSON.parse(readFileSync(committedPath, 'utf-8'));
+    migrated = parsed.version !== 2;
+    committed = (migrated ? upgradeSkillGraph(parsed) : parsed) as unknown as SkillGraph;
   } catch (e) {
     // Failed to load committed graph. Report warning and continue.
     console.warn(
@@ -318,6 +329,7 @@ async function main() {
     // No changes, no delta to persist
     process.exit(0);
   }
+  if (migrated) record.migration = 'skill-graph-v1-to-v2';
 
   // Persist delta (non-blocking on failure)
   const success = persistDelta(rootDir, record);

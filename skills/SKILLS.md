@@ -30,7 +30,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.2 | active | automation-engineer | 2026-09-21 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
-| `sync` | 1.7.0 | active | pm | 2026-09-17 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
+| `sync` | 1.8.0 | active | pm | 2026-10-08 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
 | `team-builder` | 1.1.0 | active | pm | 2026-06-13 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-08-24 | — | — |
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
@@ -57,7 +57,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
 | `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
-| `skill-graph-analytics` | 1.1.0 | active | pm | 2026-09-22 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
+| `skill-graph-analytics` | 1.2.0 | active | pm | 2026-10-08 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
 | `graft` | 1.0.0 | active | pm | 2026-10-04 | — | — |
 
 ### Variant-Exclusive Skills

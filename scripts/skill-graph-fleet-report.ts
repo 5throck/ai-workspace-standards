@@ -2,8 +2,18 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
- * @version 1.1.1
+ * @version 2.0.0
  *
+ * v2.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §3.3,
+ *         ADR-0060 Amendment 11): graphs load through scripts/lib/skill-graph-compat.ts (v1 and v2
+ *         mixed fleets) and the presence matrix, missing-from-project lists, Jaccard distance and
+ *         NEW/VANISHED diff are keyed by CAPABILITY (frontmatter `capability`, default = name; v1
+ *         graphs derive it from the bare id) instead of the raw node id. Adds the convergence
+ *         classification (threshold 3 projects, preserved): `converged` (single content hash),
+ *         `convergence-with-divergence` (>= 2 hashes, reconciliation candidate, not auto-promoted)
+ *         and `hash-unknown` (presence confirmed but a v1 project graph carries no hashes). The
+ *         union of the three equals the pre-v2 "present in >= 3 projects" set (regression-pinned).
+ *         Snapshot gains an additive `convergence` field; fleetPresence keeps its shape.
  * v1.1.1 (2026-09-24, spec docs/designs/2026-09-24-platform-ssot-constant-design.md):
  *         behavior-neutral constant adoption — the MIRROR_BASES literal becomes
  *         PLATFORM_MIRROR_DIRS (./lib/platforms.ts). NO behavior change.
@@ -62,28 +72,16 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join } from "node:path";
 import { localDateISO } from "./lib/local-date.ts";
 import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
+import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
+import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "1.1.1";
+const VERSION = "2.0.0";
 
-/** Node as stored in docs/skill-graph.json (id/type/layer observed in the wild). */
-interface GraphNode {
-  id: string;
-  type?: string;
-  layer?: string;
-}
+/** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
+export const CONVERGENCE_THRESHOLD = 3;
 
-/** Edge as stored in docs/skill-graph.json (from/to/type observed in the wild). */
-interface GraphEdge {
-  type?: string;
-  from?: string;
-  to?: string;
-}
-
-/** A skill-graph projection: the fields this tool consumes. */
-interface SkillGraph {
-  nodes?: GraphNode[];
-  edges?: GraphEdge[];
-}
+/** A skill-graph projection (v1 or v2 file, always read through the compat loader). */
+type SkillGraph = SkillGraphV2;
 
 interface ProjectStats {
   project: string;
@@ -98,6 +96,8 @@ interface Snapshot {
   fleetPresence: Record<string, number>;
   missingFromProjects: Record<string, string[]>;
   jaccard: Record<string, number>;
+  /** v2.0.0: capability-keyed convergence classification (threshold = CONVERGENCE_THRESHOLD). */
+  convergence?: ConvergenceResult;
   /** v1.1.0: root-graph orphan cross-check (4-way: definition+registry+mirror+reference). */
   rootOrphans?: {
     isolatedSkills: Array<{
@@ -108,6 +108,66 @@ interface Snapshot {
     }>;
     isolatedAgents: string[];
   };
+}
+
+export interface ConvergenceResult {
+  threshold: number;
+  /** Present in >= threshold projects, single content hash across all of them. */
+  converged: string[];
+  /** Present in >= threshold projects with >= 2 distinct content hashes. */
+  convergenceWithDivergence: Array<{ capability: string; hashes: Record<string, string[]> }>;
+  /** Present in >= threshold projects but >= 1 project graph (v1) carries no hash. */
+  hashUnknown: string[];
+}
+
+/** Per project: capability -> content hashes of its skill nodes (null = unknown, e.g. v1 graph). */
+export function skillCapabilities(graph: SkillGraph): Map<string, Set<string | null>> {
+  const out = new Map<string, Set<string | null>>();
+  for (const n of graph.nodes ?? []) {
+    if (n.type !== "skill") continue;
+    const cap = capabilityOf(n);
+    if (!out.has(cap)) out.set(cap, new Set());
+    out.get(cap)!.add(typeof n.content_hash === "string" && n.content_hash ? n.content_hash : null);
+  }
+  return out;
+}
+
+/**
+ * Classify capabilities by fleet convergence (design §3.3). Pure: input is the per-project
+ * capability -> hashes map; only project graphs count (root is the source, not a project).
+ */
+export function classifyConvergence(
+  projects: Map<string, Map<string, Set<string | null>>>,
+  threshold: number = CONVERGENCE_THRESHOLD,
+): ConvergenceResult {
+  const carriers = new Map<string, string[]>();
+  for (const [project, caps] of projects) {
+    for (const cap of caps.keys()) {
+      if (!carriers.has(cap)) carriers.set(cap, []);
+      carriers.get(cap)!.push(project);
+    }
+  }
+  const result: ConvergenceResult = { threshold, converged: [], convergenceWithDivergence: [], hashUnknown: [] };
+  for (const [cap, list] of [...carriers.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    if (list.length < threshold) continue;
+    const byHash = new Map<string, string[]>();
+    let unknown = false;
+    for (const project of list.sort()) {
+      for (const h of projects.get(project)!.get(cap)!) {
+        if (h === null) { unknown = true; continue; }
+        if (!byHash.has(h)) byHash.set(h, []);
+        byHash.get(h)!.push(project);
+      }
+    }
+    if (byHash.size >= 2) {
+      result.convergenceWithDivergence.push({ capability: cap, hashes: Object.fromEntries(byHash) });
+    } else if (unknown) {
+      result.hashUnknown.push(cap);
+    } else {
+      result.converged.push(cap);
+    }
+  }
+  return result;
 }
 
 function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
@@ -133,23 +193,37 @@ function defaultProjects(): string[] {
   return out.sort();
 }
 
-/** Load a graph projection file; null when absent or unparseable. */
+/** Load a graph projection file (v1 or v2) as a v2 view; null when absent or unparseable. */
 function loadGraph(path: string): SkillGraph | null {
-  if (!existsSync(path)) return null;
-  try {
-    const parsed = JSON.parse(readFileSync(path, "utf-8")) as SkillGraph;
-    return Array.isArray(parsed.nodes) ? parsed : null;
-  } catch {
-    return null;
-  }
+  return loadSkillGraph(path);
+}
+
+/**
+ * Cross-graph node key: skills/agents join on capability (v1 bare ids and v2 scoped ids meet);
+ * phase nodes are skipped (v1 graphs never had them as nodes); everything else is its id.
+ */
+function nodeKey(n: SkillGraphNodeV2): string | null {
+  if (n.type === "phase") return null;
+  if (n.type === "skill" || n.type === "agent") return `${n.type}:${capabilityOf(n)}`;
+  return n.id;
 }
 
 function nodeIds(graph: SkillGraph): Set<string> {
-  return new Set((graph.nodes ?? []).map((n) => n.id));
+  const out = new Set<string>();
+  for (const n of graph.nodes ?? []) {
+    const k = nodeKey(n);
+    if (k !== null) out.add(k);
+  }
+  return out;
 }
 
+/** Skill capabilities (the presence-matrix key; equals the bare skill id for v1 graphs). */
 function skillIds(graph: SkillGraph): Set<string> {
-  return new Set((graph.nodes ?? []).filter((n) => n.type === "skill").map((n) => n.id));
+  return new Set(skillCapabilities(graph).keys());
+}
+
+function skillNodeCount(graph: SkillGraph): number {
+  return (graph.nodes ?? []).filter((n) => n.type === "skill").length;
 }
 
 /**
@@ -223,6 +297,8 @@ function analyzeRootOrphans(
     if (e.from) connected.add(e.from);
     if (e.to) connected.add(e.to);
   }
+  // v2: the root graph carries every variant's scoped copy; the orphan cross-check is about the
+  // workspace-root (L0) assets, matched by bare name against registry/mirrors/doc corpus.
   const isolated = (rootGraph.nodes ?? []).filter((n) => n.type && !connected.has(n.id));
 
   const registryPath = join("skills", "SKILLS.md");
@@ -250,12 +326,12 @@ function analyzeRootOrphans(
   const isolatedSkills = isolated
     .filter((n) => n.type === "skill" && n.layer === "L0")
     .map((n) => ({
-      id: n.id,
-      registry: registry.includes(`| \`${n.id}\``),
-      mirrors: MIRROR_BASES.filter((b) => existsSync(join(b, n.id, "SKILL.md"))),
-      docRefs: corpus.split(n.id.toLowerCase()).length - 1,
+      id: nameOf(n),
+      registry: registry.includes(`| \`${nameOf(n)}\``),
+      mirrors: MIRROR_BASES.filter((b) => existsSync(join(b, nameOf(n), "SKILL.md"))),
+      docRefs: corpus.split(nameOf(n).toLowerCase()).length - 1,
     }));
-  const isolatedAgents = isolated.filter((n) => n.type === "agent" && n.layer === "L0").map((n) => n.id);
+  const isolatedAgents = isolated.filter((n) => n.type === "agent" && n.layer === "L0").map((n) => nameOf(n));
 
   return { isolatedSkills, isolatedAgents };
 }
@@ -270,11 +346,13 @@ function markdownReport(
   diff: { newSkills: string[]; vanishedSkills: string[] } | null,
   diffBase: { file: string; date: string } | null,
   orphans: NonNullable<Snapshot["rootOrphans"]> | null,
+  convergence: ConvergenceResult | null = null,
+  v1Projects: string[] = [],
 ): string {
   const lines: string[] = [
     `# skill-graph fleet report — ${localDateISO()}`,
     "",
-    `Root graph: ${rootGraph.nodes?.length ?? 0} nodes · ${rootGraph.edges?.length ?? 0} edges · ${skillIds(rootGraph).size} skill nodes. Projects covered: ${stats.length}${skipped.length > 0 ? ` (skipped, no graph: ${skipped.join(", ")})` : ""}.`,
+    `Root graph: ${rootGraph.nodes?.length ?? 0} nodes · ${rootGraph.edges?.length ?? 0} edges · ${skillNodeCount(rootGraph)} skill nodes. Projects covered: ${stats.length}${skipped.length > 0 ? ` (skipped, no graph: ${skipped.join(", ")})` : ""}.`,
     "",
   ];
 
@@ -303,6 +381,31 @@ function markdownReport(
     lines.push(`| ${id} | ${projects.length} | ${projects.length > 0 ? projects.join(", ") : "(root only)"} |`);
   }
   lines.push("");
+
+  // v2.0.0 — convergence by capability (threshold preserved at 3 project graphs)
+  if (convergence) {
+    const total = convergence.converged.length + convergence.convergenceWithDivergence.length + convergence.hashUnknown.length;
+    lines.push(`## Skill convergence by capability (>= ${convergence.threshold} projects)`, "");
+    lines.push(`${total} capabilities are carried by >= ${convergence.threshold} project graphs: ${convergence.converged.length} converged (single content hash), ${convergence.convergenceWithDivergence.length} convergence-with-divergence (>= 2 hashes), ${convergence.hashUnknown.length} hash-unknown.`);
+    if (v1Projects.length > 0) {
+      lines.push("", `Hash-unknown means presence is confirmed by capability but at least one carrier is a v1 project graph (no content hashes) — projects on v1: ${v1Projects.join(", ")}. Divergence becomes computable once \`upgrade-project\` delivers the v2 generator.`);
+    }
+    lines.push("");
+    lines.push(`- converged (${convergence.converged.length}): ${convergence.converged.length > 0 ? convergence.converged.join(", ") : "—"}`);
+    lines.push(`- hash-unknown (${convergence.hashUnknown.length}): ${convergence.hashUnknown.length > 0 ? convergence.hashUnknown.join(", ") : "—"}`);
+    lines.push("");
+    lines.push("### Convergence with divergence (reconciliation candidates — not auto-promoted)", "");
+    if (convergence.convergenceWithDivergence.length === 0) {
+      lines.push("None.");
+    } else {
+      lines.push("| capability | hash groups (hash: projects) |", "|---|---|");
+      for (const d of convergence.convergenceWithDivergence) {
+        const groups = Object.entries(d.hashes).map(([h, ps]) => `${h.slice(0, 8)}: ${ps.join(", ")}`).join(" · ");
+        lines.push(`| ${d.capability} | ${groups} |`);
+      }
+    }
+    lines.push("");
+  }
 
   // (c) root skills missing per project (capped display)
   const MISSING_CAP = 15;
@@ -382,6 +485,8 @@ same-date). Read-only over all inputs.`);
   const skipped: string[] = [];
   const projectSkillSets = new Map<string, Set<string>>();
   const projectNodeSets = new Map<string, Set<string>>();
+  const projectCaps = new Map<string, Map<string, Set<string | null>>>();
+  const v1Projects: string[] = [];
 
   for (const g of graphPaths) {
     if (g.name === "root") continue;
@@ -394,7 +499,9 @@ same-date). Read-only over all inputs.`);
     const skillSet = skillIds(graph);
     projectSkillSets.set(g.name, skillSet);
     projectNodeSets.set(g.name, nodeIds(graph));
-    stats.push({ project: g.name, nodes: graph.nodes?.length ?? 0, edges: graph.edges?.length ?? 0, skills: skillSet.size });
+    projectCaps.set(g.name, skillCapabilities(graph));
+    if (graph.upgradedFrom === 1) v1Projects.push(g.name);
+    stats.push({ project: g.name, nodes: graph.nodes?.length ?? 0, edges: graph.edges?.length ?? 0, skills: skillNodeCount(graph) });
   }
 
   const loadedCount = stats.length + (rootGraph ? 1 : 0);
@@ -445,6 +552,7 @@ same-date). Read-only over all inputs.`);
     fleetPresence,
     missingFromProjects,
     jaccard,
+    convergence: classifyConvergence(projectCaps),
   };
 
   // v1.1.0 — root-graph orphan cross-check
@@ -463,7 +571,7 @@ same-date). Read-only over all inputs.`);
     console.log(JSON.stringify(snapshot, null, 2));
   } else {
     console.log(markdownReport(
-      rootGraph ?? { nodes: [], edges: [] },
+      rootGraph ?? { version: 2, nodes: [], edges: [] },
       stats,
       skipped,
       presence,
@@ -472,6 +580,8 @@ same-date). Read-only over all inputs.`);
       diff,
       previous ? { file: previous.file, date: previous.date } : null,
       orphans,
+      snapshot.convergence ?? null,
+      v1Projects,
     ));
   }
   process.exit(0);

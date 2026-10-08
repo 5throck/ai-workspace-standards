@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261008-003
+kind: manual
+title: >-
+  skill-graph E2: triage 8 divergent-version skill forks (pdf-export co-deck
+  2.1.1 vs co-price 1.1.0; i18n-audit co-price 2.1.0 vs common 1.0.0; translate
+  co-safety 1.0.1 vs root 1.0.3; co-safety forks of agent-lifecycle-manager,
+  meeting-facilitation, project-review, script-lifecycle-manager,
+  skill-lifecycle-manager) — decide re-sync vs intentional fork with distinct
+  capability
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-08T09:25:45.652+09:00'
+history:
+  - at: '2026-10-08T09:25:45.652+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

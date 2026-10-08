@@ -1,6 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 2.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md,
+ * ADR-0060 Amendment 11): skill-graph schema v2 (`graph_profile: deg/v2`) for the full graph.
+ * Skill/agent/phase node ids are `type:scope/name`; copies of the same name with identical
+ * normalized content collapse to one node (scope = highest-precedence location, `mirrors[]`
+ * lists every path), distinct content under one name yields one node per hash. Every skill/agent
+ * node carries name, scope, content_hash, version, capability (frontmatter `capability`, default
+ * = name; the fleet-convergence grouping key), mirrors. Edges resolve names scope-first (same
+ * variant, then common, then root). `phase:<scope>/<n>` nodes are emitted (G3), duplicate
+ * (from,to,type) edges are dropped (G4). New: `--impact <skill>` (E1, read-only), usage attribute
+ * from memory `## Skills Used` (E3), report-only required_by suggestions (E4), isolated-node and
+ * no-used_by reports (G5/G6) in docs/skill-graph.md. buildScopeGraph (per-template scope graphs)
+ * intentionally stays on the v1 shape; all readers go through scripts/lib/skill-graph-compat.ts.
  * @version 1.15.0 (2026-10-06, T-20261005-022 / D8 of
  * docs/designs/2026-10-05-consult-abap-develop-review-remediation-design.md):
  * buildScopeGraph agent discovery now applies the same README- and
@@ -117,10 +129,15 @@ import { readFileSync, existsSync, readdirSync, writeFileSync, mkdirSync } from 
 import { join, resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as yamlLoad } from 'js-yaml';
+import { contentHash, frontmatterVersion, scopeOfLayer, dedupeEdges, splitScopedId, upgradeSkillGraph, capabilityOf, nameOf, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
+import type { SkillGraphV2 } from './lib/skill-graph-compat.ts';
+import { PLATFORM_MIRROR_DIRS } from './lib/platforms.ts';
+import { parseSkillsUsed } from './lib/skills-used.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, '..');
+// SKILL_GRAPH_ROOT overrides the derived workspace root (test fixtures only; never set in pipelines).
+const ROOT = process.env.SKILL_GRAPH_ROOT ? resolve(process.env.SKILL_GRAPH_ROOT) : resolve(__dirname, '..');
 const templatesDir = join(ROOT, 'templates');
 // Run-context detection: the workspace root is the only context that has a
 // templates/common (platform template layer) directory. Scaffolded projects may
@@ -153,11 +170,26 @@ export interface GraphNode {
   // 'stage' = domain execution stage node (DEG, ADR-0083); id form: `stage.<variant>.<id>`
   // 'decision_gate' = decision gate node (DEG, ADR-0083); id form: `gate.<variant>.<id>`
   // 'evidence_model' = evidence schema node (DEG, ADR-0083); id form: `evidence.<variant>.<name>`
-  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role' | 'doc';
+  // 'phase' = lifecycle phase node (v2, G3); id form: `phase:<scope>/<n>`
+  type: 'skill' | 'agent' | 'decision' | 'adr' | 'procedure' | 'output_type' | 'term' | 'stage' | 'decision_gate' | 'evidence_model' | 'human_role' | 'doc' | 'phase';
   layer: 'L0' | 'L3' | 'common' | `variant:${string}`;
   /** Opaque input/output labels from SKILL.md frontmatter (skill nodes only). */
   inputs?: string[];
   outputs?: string[];
+  // ── v2 identity (skill/agent nodes; phase nodes carry scope/ordinal/label) ──
+  name?: string;
+  scope?: string;
+  /** Cross-project grouping key (frontmatter `capability`, default = name). */
+  capability?: string;
+  /** sha256/16 of the normalized SKILL.md/agent .md; null for synthetic nodes. */
+  content_hash?: string | null;
+  version?: string | null;
+  /** Every tracked path carrying identical content (primary first). */
+  mirrors?: string[];
+  /** E3: memory `## Skills Used` join (omitted when never used). Excluded from drift comparison. */
+  usage?: { sessions: number; last_used: string | null };
+  ordinal?: number;
+  label?: string;
 }
 
 type EdgeType =
@@ -199,8 +231,8 @@ export interface GraphEdge {
 }
 
 export interface SkillGraph {
-  version: 1;
-  graph_profile?: 'deg/v1';
+  version: 1 | 2;
+  graph_profile?: 'deg/v1' | 'deg/v2';
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
@@ -472,112 +504,235 @@ export function listVariantDirs(dir: string): string[] {
     .sort(compareVariantNames);
 }
 
+/** One on-disk copy of a skill/agent file. */
+interface NodeCopy {
+  scope: string;
+  layer: GraphNode['layer'];
+  abs: string;
+  rel: string;
+  hash: string;
+  version: string | null;
+  capability: string;
+}
+
 /**
- * Discover all skills and agents in the workspace
+ * v2 node registry: skill/agent nodes keyed `type:scope/name`, one per distinct
+ * (type, name, content_hash). Identical copies collapse onto the node of the
+ * highest-precedence location (root > common > variants alphabetical).
  */
-function discoverNodes(): { skills: Map<string, GraphNode>, agents: Map<string, GraphNode> } {
-  const skills = new Map<string, GraphNode>();
-  const agents = new Map<string, GraphNode>();
+export interface Registry {
+  skills: GraphNode[];
+  agents: GraphNode[];
+  /** `${type}:${name}` -> nodes, in precedence order. */
+  byKey: Map<string, GraphNode[]>;
+  /** node id -> copies (primary first). */
+  copies: Map<string, NodeCopy[]>;
+  skillNames: Set<string>;
+  agentNames: Set<string>;
+  /** `${type}:${name}` keys that were resolved without any scope match (first-wins fallback). */
+  ambiguous: Set<string>;
+}
 
-  // L0 skills (workspace root)
-  const skillsDir = join(ROOT, 'skills');
-  if (existsSync(skillsDir)) {
-    const entries = readdirSync(skillsDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const skillFile = join(skillsDir, entry.name, 'SKILL.md');
-        if (existsSync(skillFile)) {
-          skills.set(entry.name, { id: entry.name, type: 'skill', layer: localLayer });
+function relPath(abs: string): string {
+  return relative(ROOT, abs).replace(/\\/g, '/');
+}
+
+function frontmatterCapability(content: string, fallback: string): string {
+  const fm = parseFrontmatter(content) as Record<string, unknown> | null;
+  const cap = fm?.capability;
+  return typeof cap === 'string' && cap.trim() ? cap.trim() : fallback;
+}
+
+function readCopy(abs: string, scope: string, layer: GraphNode['layer'], name: string): NodeCopy {
+  const content = readFileSync(abs, 'utf-8');
+  return {
+    scope,
+    layer,
+    abs,
+    rel: relPath(abs),
+    hash: contentHash(content),
+    version: frontmatterVersion(content),
+    capability: frontmatterCapability(content, name),
+  };
+}
+
+/** Is `dir` safe to list as platform mirror evidence (tracked, so CI and local agree)? */
+const trackedDirCache = new Map<string, boolean>();
+function isTrackedMirrorDir(absDir: string): boolean {
+  if (!trackedDirCache.has(absDir)) trackedDirCache.set(absDir, hasTrackedFilesUnder(absDir));
+  return trackedDirCache.get(absDir)!;
+}
+
+/**
+ * Discover all skills and agents in the workspace as v2 nodes (scoped ids,
+ * identical-content collapse, capability key). Iteration order is the scope
+ * precedence order, so the first copy of a group is its primary location.
+ */
+function discoverRegistry(): Registry {
+  const skillGroups = new Map<string, { name: string; copies: NodeCopy[] }>();
+  const agentGroups = new Map<string, { name: string; copies: NodeCopy[] }>();
+
+  const addCopy = (groups: Map<string, { name: string; copies: NodeCopy[] }>, name: string, copy: NodeCopy): void => {
+    const key = `${name}\u0000${copy.hash}`;
+    if (!groups.has(key)) groups.set(key, { name, copies: [] });
+    groups.get(key)!.copies.push(copy);
+  };
+
+  const scanSkills = (dir: string, scope: string, layer: GraphNode['layer']): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const skillFile = join(dir, entry.name, 'SKILL.md');
+      if (existsSync(skillFile)) addCopy(skillGroups, entry.name, readCopy(skillFile, scope, layer, entry.name));
+    }
+  };
+  const scanAgents = (dir: string, scope: string, layer: GraphNode['layer'], skipHandoff: boolean): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir)) {
+      // Exclude folder READMEs and _-prefixed files (directory docs, not agents) —
+      // scaffolded projects' agents/ dirs carry them (2026-09-23 orphan audit).
+      if (!entry.endsWith('.md') || /^README/.test(entry) || entry.startsWith('_')) continue;
+      if (skipHandoff && entry === 'handoff-spec.md') continue;
+      const name = entry.replace('.md', '');
+      addCopy(agentGroups, name, readCopy(join(dir, entry), scope, layer, name));
+    }
+  };
+
+  // Precedence order: root, common, variants (alphabetical, locale-independent).
+  scanSkills(join(ROOT, 'skills'), 'root', localLayer);
+  scanSkills(join(ROOT, 'templates', 'common', 'skills'), 'common', 'common');
+  const variants = existsSync(templatesDir) ? listVariantDirs(templatesDir) : [];
+  for (const v of variants) scanSkills(join(templatesDir, v, 'skills'), v, `variant:${v}`);
+
+  scanAgents(join(ROOT, 'agents'), 'root', localLayer, true);
+  scanAgents(join(ROOT, 'templates', 'common', 'agents'), 'common', 'common', true);
+  for (const v of variants) scanAgents(join(templatesDir, v, 'agents'), v, `variant:${v}`, false);
+
+  const copies = new Map<string, NodeCopy[]>();
+  const byKey = new Map<string, GraphNode[]>();
+  const build = (type: 'skill' | 'agent', groups: Map<string, { name: string; copies: NodeCopy[] }>): GraphNode[] => {
+    const nodes: GraphNode[] = [];
+    for (const g of groups.values()) {
+      const primary = g.copies[0];
+      const id = `${type}:${primary.scope}/${g.name}`;
+      const mirrors = g.copies.map((c) => c.rel);
+      if (type === 'skill') {
+        for (const dir of PLATFORM_MIRROR_DIRS) {
+          const absDir = join(ROOT, dir);
+          if (!isTrackedMirrorDir(absDir)) continue;
+          const f = join(absDir, g.name, 'SKILL.md');
+          if (!existsSync(f)) continue;
+          try {
+            if (contentHash(readFileSync(f, 'utf-8')) === primary.hash) mirrors.push(relPath(f));
+          } catch { /* unreadable mirror: not evidence */ }
         }
       }
+      const node: GraphNode = {
+        id,
+        type,
+        layer: primary.layer,
+        name: g.name,
+        scope: primary.scope,
+        capability: primary.capability,
+        content_hash: primary.hash,
+        version: primary.version,
+        mirrors,
+      };
+      nodes.push(node);
+      copies.set(id, g.copies);
+      const key = `${type}:${g.name}`;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key)!.push(node);
     }
-  }
+    return nodes;
+  };
+  const skills = build('skill', skillGroups);
+  const agents = build('agent', agentGroups);
 
-  // Common skills (templates/common)
-  const commonSkillsDir = join(ROOT, 'templates', 'common', 'skills');
-  if (existsSync(commonSkillsDir)) {
-    const entries = readdirSync(commonSkillsDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const skillFile = join(commonSkillsDir, entry.name, 'SKILL.md');
-        if (existsSync(skillFile) && !skills.has(entry.name)) {
-          skills.set(entry.name, { id: entry.name, type: 'skill', layer: 'common' });
-        }
+  return {
+    skills,
+    agents,
+    byKey,
+    copies,
+    skillNames: new Set(skills.map((n) => n.name!)),
+    agentNames: new Set(agents.map((n) => n.name!)),
+    ambiguous: new Set(),
+  };
+}
+
+/** Every scope a node's content lives in (primary scope first). */
+function scopesOf(reg: Registry, node: GraphNode): string[] {
+  const out: string[] = [node.scope ?? scopeOfLayer(node.layer)];
+  for (const c of reg.copies.get(node.id) ?? []) if (!out.includes(c.scope)) out.push(c.scope);
+  return out;
+}
+
+/**
+ * Scope-first name resolution: nodes living in any scope of `ctx` (in order), then
+ * `common`, then `root`; otherwise the first candidate (recorded as ambiguous when
+ * several exist). Unknown names return undefined.
+ */
+function resolveNode(reg: Registry, type: 'skill' | 'agent', name: string, ctx: string[]): GraphNode | undefined {
+  const cands = reg.byKey.get(`${type}:${name}`);
+  if (!cands || cands.length === 0) return undefined;
+  if (cands.length === 1) return cands[0];
+  for (const scope of [...ctx, 'common', 'root']) {
+    const hit = cands.find((n) => scopesOf(reg, n).includes(scope));
+    if (hit) return hit;
+  }
+  reg.ambiguous.add(`${type}:${name}`);
+  return cands[0];
+}
+
+/** Primary on-disk file of a skill/agent node. */
+function primaryPath(reg: Registry, node: GraphNode): string {
+  return reg.copies.get(node.id)![0].abs;
+}
+
+/** Resolution context for edges authored inside a node's content. */
+function ctxOfNode(reg: Registry, node: GraphNode): string[] {
+  return scopesOf(reg, node);
+}
+
+/**
+ * Bridges the shared derive* helpers to either the v2 registry (scoped ids) or the
+ * v1 bare-id universe used by buildScopeGraph.
+ */
+interface Linker {
+  /** Resolve (or materialize) a skill referenced from `ctx`; returns the node id. */
+  skillId(key: string, ctx: string[], layer: GraphNode['layer'], allNodes: Map<string, GraphNode>): string;
+  /** Resolve an agent key to a node id, or undefined if no such agent exists. */
+  agentId(key: string, ctx: string[], allNodes: Map<string, GraphNode>): string | undefined;
+}
+
+const LEGACY_LINKER: Linker = {
+  skillId(key, _ctx, layer, allNodes) {
+    if (!allNodes.has(key)) allNodes.set(key, { id: key, type: 'skill', layer });
+    return key;
+  },
+  agentId(key, _ctx, allNodes) {
+    return allNodes.has(key) ? key : undefined;
+  },
+};
+
+function registryLinker(reg: Registry): Linker {
+  return {
+    skillId(key, ctx, layer, allNodes) {
+      const hit = resolveNode(reg, 'skill', key, ctx);
+      if (hit) return hit.id;
+      // Nested skill keys (e.g. co-safety `daily/risk-assessment`) live below the flat
+      // discovery depth — materialize a synthetic, hash-less skill node in the caller's scope.
+      const scope = ctx[0] ?? 'root';
+      const id = `skill:${scope}/${key}`;
+      if (!allNodes.has(id)) {
+        allNodes.set(id, { id, type: 'skill', layer, name: key, scope, capability: key, content_hash: null, version: null, mirrors: [] });
       }
-    }
-  }
-
-  // Variant skills
-  if (existsSync(templatesDir)) {
-    for (const variantName of listVariantDirs(templatesDir)) {
-      const variantSkillsDir = join(templatesDir, variantName, 'skills');
-      if (existsSync(variantSkillsDir)) {
-        const entries = readdirSync(variantSkillsDir, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isDirectory()) {
-            const skillFile = join(variantSkillsDir, entry.name, 'SKILL.md');
-            if (existsSync(skillFile) && !skills.has(entry.name)) {
-              skills.set(entry.name, { id: entry.name, type: 'skill', layer: `variant:${variantName}` });
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // L0 agents
-  const agentsDir = join(ROOT, 'agents');
-  if (existsSync(agentsDir)) {
-    const entries = readdirSync(agentsDir);
-    for (const entry of entries) {
-      // Exclude folder READMEs and _-prefixed files — scaffolded projects'
-      // agents/ dirs carry them and they were being counted as agent nodes.
-      if (entry.endsWith('.md') && entry !== 'handoff-spec.md' && !/^README/.test(entry) && !entry.startsWith('_')) {
-        const name = entry.replace('.md', '');
-        agents.set(name, { id: name, type: 'agent', layer: localLayer });
-      }
-    }
-  }
-
-  // Common agents (templates/common/agents/) - DEDUP: skip if already in L0
-  const commonAgentsDir = join(ROOT, 'templates', 'common', 'agents');
-  if (existsSync(commonAgentsDir)) {
-    const entries = readdirSync(commonAgentsDir);
-    for (const entry of entries) {
-      // Exclude non-agent files: handoff-spec.md and underscore-prefixed
-      // directory docs (e.g. _COMMON.md is the folder README, not an agent)
-      if (entry.endsWith('.md') && entry !== 'handoff-spec.md' && !entry.startsWith('_')) {
-        const name = entry.replace('.md', '');
-        // Dedup rule: keep L0 node, skip common-layer duplicate
-        if (!agents.has(name)) {
-          agents.set(name, { id: name, type: 'agent', layer: 'common' });
-        }
-      }
-    }
-  }
-
-  // Variant agents
-  if (existsSync(templatesDir)) {
-    for (const variantName of listVariantDirs(templatesDir)) {
-      const variantAgentsDir = join(templatesDir, variantName, 'agents');
-      if (existsSync(variantAgentsDir)) {
-        const entries = readdirSync(variantAgentsDir);
-        for (const entry of entries) {
-          // Exclude folder READMEs and _-prefixed files — same rule as the L0 pass
-          // above; co-abap's agents/README.md was being emitted as an "agent" node
-          // (2026-09-23 orphan audit, ticket T-20260923-001).
-          if (entry.endsWith('.md') && !/^README/.test(entry) && !entry.startsWith('_')) {
-            const name = entry.replace('.md', '');
-            if (!agents.has(name)) {
-              agents.set(name, { id: name, type: 'agent', layer: `variant:${variantName}` });
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return { skills, agents };
+      return id;
+    },
+    agentId(key, ctx) {
+      return resolveNode(reg, 'agent', key, ctx)?.id;
+    },
+  };
 }
 
 /**
@@ -627,6 +782,9 @@ function resolveActorType(agentKey: string, humanRoles: Set<string>): "human" | 
   return undefined;
 }
 
+/** E4 collector: (procedure, skill, agent) triples seen while deriving procedure steps. */
+let stepPairSink: Array<{ procedure: string; skill: string; agent: string }> | null = null;
+
 /**
  * Derive procedure/output_type nodes and procedure edges from a directory of
  * procedure schemas (<dir>/<name>/schema.yaml). Shared by buildGraph (variant
@@ -648,6 +806,7 @@ function deriveProceduresFromDir(
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
   variantDir?: string,
+  link: Linker = LEGACY_LINKER,
 ): void {
   if (!existsSync(procDir)) return;
 
@@ -678,6 +837,8 @@ function deriveProceduresFromDir(
       : namespace;
 
     const procId: string = `procedure.${ns}.${entry.name}`;
+    // Scope context for skill/agent name resolution (v2): the procedure's own variant first.
+    const ctx = [ns === 'l0' ? 'root' : ns];
     allNodes.set(procId, { id: procId, type: 'procedure', layer });
 
     const ensureOutputType = (type: string): void => {
@@ -686,14 +847,10 @@ function deriveProceduresFromDir(
         allNodes.set(id, { id, type: 'output_type', layer });
       }
     };
-    // Nested skill keys (e.g. co-safety `daily/risk-assessment`) may exist on
-    // disk below the flat discovery depth — materialize them as skill nodes so
-    // the unknown-target invariant holds.
-    const ensureSkill = (key: string): void => {
-      if (!allNodes.has(key)) {
-        allNodes.set(key, { id: key, type: 'skill', layer });
-      }
-    };
+    // Resolve a procedure's skill key scope-first; nested skill keys (e.g. co-safety
+    // `daily/risk-assessment`) may exist on disk below the flat discovery depth — the
+    // linker materializes them as skill nodes so the unknown-target invariant holds.
+    const skillRef = (key: string): string => link.skillId(key, ctx, layer, allNodes);
 
     const procedureOutputs = new Set<string>();
     if (Array.isArray(data.outputs)) {
@@ -710,20 +867,24 @@ function deriveProceduresFromDir(
     if (Array.isArray(data.steps)) {
       for (const step of data.steps) {
         if (!step || typeof step !== 'object') continue;
+        let stepSkillId: string | undefined;
         if (typeof step.skill_key === 'string' && step.skill_key) {
-          ensureSkill(step.skill_key);
-          edges.push({ type: 'step_uses_skill', from: procId, to: step.skill_key, source: 'procedure_schema' });
+          stepSkillId = skillRef(step.skill_key);
+          edges.push({ type: 'step_uses_skill', from: procId, to: stepSkillId, source: 'procedure_schema' });
           if (typeof step.output_type === 'string' && step.output_type && !procedureOutputs.has(step.output_type)) {
             ensureOutputType(step.output_type);
-            edges.push({ type: 'produces', from: step.skill_key, to: `output_type.${step.output_type}`, source: 'procedure_schema' });
+            edges.push({ type: 'produces', from: stepSkillId, to: `output_type.${step.output_type}`, source: 'procedure_schema' });
           }
         }
-        if (typeof step.agent_key === 'string' && step.agent_key && allNodes.has(step.agent_key)) {
+        const stepAgentId = typeof step.agent_key === 'string' && step.agent_key ? link.agentId(step.agent_key, ctx, allNodes) : undefined;
+        // E4 evidence: a step that names both a skill and an owning agent.
+        if (stepSkillId && stepAgentId) stepPairSink?.push({ procedure: procId, skill: stepSkillId, agent: stepAgentId });
+        if (stepAgentId) {
           const actorType = variantDir ? resolveActorType(step.agent_key, humanRoles) : undefined;
           edges.push({
             type: 'step_by_agent',
             from: procId,
-            to: step.agent_key,
+            to: stepAgentId,
             source: 'procedure_schema',
             ...(actorType && { actor_type: actorType }),
           });
@@ -749,8 +910,7 @@ function deriveProceduresFromDir(
           }
           edges.push({ type, from: procId, to: target, source: 'procedure_schema' });
         } else if (skillMatch) {
-          ensureSkill(skillMatch[1]);
-          edges.push({ type, from: procId, to: skillMatch[1], source: 'procedure_schema' });
+          edges.push({ type, from: procId, to: skillRef(skillMatch[1]), source: 'procedure_schema' });
         }
       }
     }
@@ -805,14 +965,12 @@ function extractTermsFromCategory(entries: [string, unknown][], out: Set<string>
  * per-skill drift-check script's job, not the generator's.
  */
 function deriveTermNodesAndEdges(
-  skills: Map<string, GraphNode>,
+  reg: Registry,
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
 ): void {
-  for (const [skillName, node] of skills) {
-    const skillDir = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName)
-      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName)
-      : join(ROOT, 'skills', skillName);
+  for (const node of reg.skills) {
+    const skillDir = dirname(primaryPath(reg, node));
     const termsPath = join(skillDir, 'references', 'terms-ko.json');
     if (!existsSync(termsPath)) continue;
 
@@ -834,7 +992,7 @@ function deriveTermNodesAndEdges(
         }
         edges.push({
           type: 'references',
-          from: skillName,
+          from: node.id,
           to: termId,
           source: 'terms-ko.json',
           provenance: prov(termsPath, 'terms-ko.json')
@@ -909,6 +1067,7 @@ function deriveRACIFromYaml(
   allNodes: Map<string, GraphNode>,
   edges: GraphEdge[],
   variantDir: string,
+  link: Linker = LEGACY_LINKER,
 ): void {
   if (!existsSync(raciPath)) return;
 
@@ -923,6 +1082,9 @@ function deriveRACIFromYaml(
 
   // Load human-roles registry if present (ADR-0084, §3.4)
   const humanRoles = loadHumanRoles(variantDir);
+  const ctx = [variant === 'l0' ? 'root' : variant];
+  // Agent key -> node id when an agent file exists, else the bare key (human_role / unknown).
+  const actorId = (key: string): string => link.agentId(key, ctx, allNodes) ?? key;
 
   const rows = data.rows as Array<{
     activity?: string;
@@ -947,7 +1109,7 @@ function deriveRACIFromYaml(
       for (const [agentKey, actorType] of Object.entries(row.actor_types)) {
         if (actorType === 'human') {
           const humanRoleId = agentKey;
-          if (!allNodes.has(humanRoleId)) {
+          if (!allNodes.has(humanRoleId) && link.agentId(humanRoleId, ctx, allNodes) === undefined) {
             allNodes.set(humanRoleId, { id: humanRoleId, type: 'human_role', layer });
           }
         }
@@ -959,7 +1121,7 @@ function deriveRACIFromYaml(
       const actorType = row.actor_types?.[row.accountable];
       edges.push({
         type: 'accountable_for',
-        from: row.accountable,
+        from: actorId(row.accountable),
         to: procId,
         source: 'raci_matrix',
         ...(actorType && { actor_type: actorType }),
@@ -973,7 +1135,7 @@ function deriveRACIFromYaml(
           const actorType = row.actor_types?.[agent];
           edges.push({
             type: 'consulted_on',
-            from: agent,
+            from: actorId(agent),
             to: procId,
             source: 'raci_matrix',
             ...(actorType && { actor_type: actorType }),
@@ -989,7 +1151,7 @@ function deriveRACIFromYaml(
           const actorType = row.actor_types?.[agent];
           edges.push({
             type: 'informed_of',
-            from: agent,
+            from: actorId(agent),
             to: procId,
             source: 'raci_matrix',
             ...(actorType && { actor_type: actorType }),
@@ -1085,6 +1247,7 @@ function deriveWorkflowDocCitations(
   knownSkillNames: Set<string>,
   edges: GraphEdge[],
   localLayer: GraphNode['layer'],
+  resolveSkill: (name: string, ctx: string[]) => string | undefined = (name) => name,
 ): void {
   const seenCitations = new Set<string>();
 
@@ -1117,8 +1280,11 @@ function deriveWorkflowDocCitations(
     if (!allNodes.has(docId)) {
       allNodes.set(docId, { id: docId, type: 'doc', layer });
     }
-    for (const skillId of hits) {
-      if (skillId === docId) continue;
+    const ctx = layer.startsWith('variant:') ? [layer.slice('variant:'.length)] : ['root'];
+    for (const skillName of [...hits].sort()) {
+      if (skillName === docId) continue;
+      const skillId = resolveSkill(skillName, ctx);
+      if (!skillId) continue;
       const key = `${docId}->${skillId}`;
       if (seenCitations.has(key)) continue;
       seenCitations.add(key);
@@ -1177,209 +1343,235 @@ function deriveWorkflowDocCitations(
   }
 }
 
-export function buildGraph(): SkillGraph {
-  const { skills, agents } = discoverNodes();
-  const allNodes = new Map<string, GraphNode>();
+/** Report-only findings produced alongside the v2 graph (rendered into docs/skill-graph.md). */
+export interface BuildReport {
+  /** `type:name` keys resolved without a scope match (first-wins fallback). */
+  ambiguousRefs: string[];
+  /** G5: node ids with no edge, grouped by node type. */
+  isolated: Record<string, string[]>;
+  /** G6: skill node ids with no outgoing `used_by` edge. */
+  skillsWithoutUsedBy: string[];
+  /** E4: suggested `required_by` agents for G6 skills (never written to SKILL.md). */
+  suggestions: Array<{ skill: string; agents: Array<{ agent: string; procedures: string[] }> }>;
+  /** E3: memory-derived usage summary. `asOf` = newest memory log date. */
+  usage: { asOf: string | null; windowDays: number; unused: string[]; usedButUnlinked: string[]; usedCount: number };
+  /** G4: duplicate (from,to,type) edges dropped. */
+  droppedDuplicateEdges: number;
+}
 
-  // Collect all nodes
-  for (const [id, node] of skills) {
-    allNodes.set(id, node);
+const USAGE_WINDOW_DAYS = 90;
+
+/** Normalize a `- skill:` evidence value to a bare skill name. */
+function normalizeUsedSkillName(raw: string): string {
+  return raw
+    .replace(/[`"',;]+/g, '')
+    .replace(/^\.?\/?(?:\.?[a-z]+\/)?skills\//, '')
+    .replace(/\/SKILL\.md$/, '')
+    .replace(/\/$/, '');
+}
+
+/**
+ * E3: join memory/YYYY-MM-DD.md `## Skills Used` evidence onto skill nodes. Names resolve through
+ * `capability` (a session naming `pdf-export` counts for every node of that capability: the log
+ * does not say which copy ran). The reference date is the newest memory log, not the wall clock,
+ * so the result is a pure function of the repo content.
+ */
+function attachUsage(reg: Registry): BuildReport['usage'] & { sessionsByNode: Map<string, string[]> } {
+  const memDir = join(ROOT, 'memory');
+  const sessionsByNode = new Map<string, string[]>();
+  const result = { asOf: null as string | null, windowDays: USAGE_WINDOW_DAYS, unused: [] as string[], usedButUnlinked: [] as string[], usedCount: 0, sessionsByNode };
+  if (!existsSync(memDir)) return result;
+
+  const byCapability = new Map<string, GraphNode[]>();
+  for (const n of reg.skills) {
+    for (const key of new Set([n.capability ?? n.name!, n.name!])) {
+      if (!byCapability.has(key)) byCapability.set(key, []);
+      byCapability.get(key)!.push(n);
+    }
   }
-  for (const [id, node] of agents) {
-    allNodes.set(id, node);
+
+  const files = readdirSync(memDir).filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f)).sort();
+  for (const f of files) {
+    const date = f.slice(0, 10);
+    let text: string;
+    try { text = readFileSync(join(memDir, f), 'utf-8'); } catch { continue; }
+    if (!result.asOf || date > result.asOf) result.asOf = date;
+    const seen = new Set<string>();
+    for (const ev of parseSkillsUsed(text)) {
+      for (const node of byCapability.get(normalizeUsedSkillName(ev.skill)) ?? []) seen.add(node.id);
+    }
+    for (const id of seen) {
+      if (!sessionsByNode.has(id)) sessionsByNode.set(id, []);
+      sessionsByNode.get(id)!.push(date);
+    }
   }
+  for (const node of reg.skills) {
+    const dates = sessionsByNode.get(node.id);
+    if (dates && dates.length > 0) node.usage = { sessions: dates.length, last_used: dates[dates.length - 1] };
+  }
+  return result;
+}
+
+/** Heading/table label for lifecycle phase `n` from a phase-definitions.md file, if present. */
+const phaseLabelCache = new Map<string, string>();
+function phaseLabel(docPath: string, n: number): string | undefined {
+  if (!existsSync(docPath)) return undefined;
+  if (!phaseLabelCache.has(docPath)) {
+    try { phaseLabelCache.set(docPath, readFileSync(docPath, 'utf-8')); } catch { phaseLabelCache.set(docPath, ''); }
+  }
+  const text = phaseLabelCache.get(docPath)!;
+  const row = text.match(new RegExp(`^\\|\\s*${n}\\s*\\|\\s*([^|]+?)\\s*\\|`, 'm'));
+  const heading = row ? null : text.match(new RegExp(`^#{2,4}\\s*Phase\\s+${n}\\b[:\\s\\u2014\\u2013-]*(.+)$`, 'm'));
+  const raw = (row ?? heading)?.[1];
+  if (!raw) return undefined;
+  return raw.replace(/[*`]/g, '').trim().slice(0, 80) || undefined;
+}
+
+export function buildGraph(): SkillGraph {
+  return buildGraphWithReport().graph;
+}
+
+/**
+ * Build the v2 skill graph (scoped ids, capability key, phase nodes, deduped edges) from all
+ * sources, plus the report-only findings. Exported for verify-skill-graph.ts, graph-delta-log.ts.
+ */
+export function buildGraphWithReport(): { graph: SkillGraph; report: BuildReport } {
+  const reg = discoverRegistry();
+  const link = registryLinker(reg);
+  const allNodes = new Map<string, GraphNode>();
+  for (const n of reg.skills) allNodes.set(n.id, n);
+  for (const n of reg.agents) allNodes.set(n.id, n);
 
   const edges: GraphEdge[] = [];
-  const skillNames = new Set(skills.keys());
-  const agentNames = new Set(agents.keys());
+  const stepPairs: Array<{ procedure: string; skill: string; agent: string }> = [];
+  stepPairSink = stepPairs;
+  const skillAt = (name: string, ctx: string[]): GraphNode | undefined => resolveNode(reg, 'skill', name, ctx);
+  const agentAt = (name: string, ctx: string[]): GraphNode | undefined => resolveNode(reg, 'agent', name, ctx);
 
-  // Source 1: SKILL.md prerequisites field
-  for (const [skillName, node] of skills) {
-    const skillPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
-      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md')
-      : join(ROOT, 'skills', skillName, 'SKILL.md');
+  // Phase nodes (G3): `phase:<scope>/<n>`, scoped because numbering is per variant.
+  const ensurePhase = (scope: string, layer: GraphNode['layer'], n: number, docPath: string): string => {
+    const id = `phase:${scope}/${n}`;
+    if (!allNodes.has(id)) {
+      const label = phaseLabel(docPath, n);
+      allNodes.set(id, { id, type: 'phase', layer, scope, ordinal: n, ...(label ? { label } : {}) });
+    }
+    return id;
+  };
 
-    if (!existsSync(skillPath)) continue;
-
+  // Source 1: SKILL.md prerequisites + relates_to (+ inputs/outputs)
+  for (const node of reg.skills) {
+    const skillPath = primaryPath(reg, node);
+    const ctx = ctxOfNode(reg, node);
     const content = readFileSync(skillPath, 'utf-8');
     const frontmatter = parseFrontmatter(content) as SkillFrontmatter;
 
-    if (Array.isArray(frontmatter?.inputs) || Array.isArray(frontmatter?.outputs)) {
-      const skillNode = allNodes.get(skillName);
-      if (skillNode) {
-        if (Array.isArray(frontmatter.inputs)) skillNode.inputs = frontmatter.inputs.filter((x: unknown) => typeof x === 'string');
-        if (Array.isArray(frontmatter.outputs)) skillNode.outputs = frontmatter.outputs.filter((x: unknown) => typeof x === 'string');
-      }
-    }
+    if (Array.isArray(frontmatter?.inputs)) node.inputs = frontmatter.inputs.filter((x: unknown) => typeof x === 'string');
+    if (Array.isArray(frontmatter?.outputs)) node.outputs = frontmatter.outputs.filter((x: unknown) => typeof x === 'string');
 
     if (frontmatter?.prerequisites) {
-      const prereqs = parsePrerequisites(frontmatter.prerequisites, skillNames);
-      for (const prereq of prereqs) {
-        if (skillNames.has(prereq)) {
-          edges.push({ type: 'requires', from: skillName, to: prereq, source: 'prerequisites', provenance: prov(skillPath, 'prerequisites') });
-        }
+      for (const prereq of parsePrerequisites(frontmatter.prerequisites, reg.skillNames)) {
+        const target = skillAt(prereq, ctx);
+        if (target) edges.push({ type: 'requires', from: node.id, to: target.id, source: 'prerequisites', provenance: prov(skillPath, 'prerequisites') });
       }
     }
 
     if (frontmatter?.relates_to) {
       for (const rel of parseRelatesTo(frontmatter.relates_to, skillPath)) {
-        if (skillNames.has(rel.to)) {
-          edges.push({
-            type: rel.type,
-            from: skillName,
-            to: rel.to,
-            source: 'relates_to',
-            ...(rel.symmetric ? { symmetric: true as const } : {}),
-            ...(rel.extra ? { extra: rel.extra } : {}),
-            provenance: prov(skillPath, 'relates_to', rel.index)
-          });
-        }
+        const target = reg.skillNames.has(rel.to) ? skillAt(rel.to, ctx) : undefined;
+        if (!target) continue;
+        edges.push({
+          type: rel.type,
+          from: node.id,
+          to: target.id,
+          source: 'relates_to',
+          ...(rel.symmetric ? { symmetric: true as const } : {}),
+          ...(rel.extra ? { extra: rel.extra } : {}),
+          provenance: prov(skillPath, 'relates_to', rel.index)
+        });
       }
     }
   }
 
   // Source 1b: Korean term vocabulary from references/terms-ko.json (ADR-0072)
-  deriveTermNodesAndEdges(skills, allNodes, edges);
+  deriveTermNodesAndEdges(reg, allNodes, edges);
 
   // Source 2: Agent required_skills
-  for (const [agentName, node] of agents) {
-    const agentPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'agents', `${agentName}.md`)
-      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`)
-      : join(ROOT, 'agents', `${agentName}.md`);
-
-    if (!existsSync(agentPath)) continue;
-
-    const content = readFileSync(agentPath, 'utf-8');
-    const frontmatter = parseFrontmatter(content) as AgentFrontmatter;
+  for (const node of reg.agents) {
+    const agentPath = primaryPath(reg, node);
+    const ctx = ctxOfNode(reg, node);
+    const frontmatter = parseFrontmatter(readFileSync(agentPath, 'utf-8')) as AgentFrontmatter;
 
     if (frontmatter?.required_skills && Array.isArray(frontmatter.required_skills)) {
       frontmatter.required_skills.forEach((skill: string, index: number) => {
-        if (skillNames.has(skill)) {
-          edges.push({ type: 'used_by', from: skill, to: agentName, source: 'required_skills', provenance: prov(agentPath, 'required_skills', index) });
+        const target = reg.skillNames.has(skill) ? skillAt(skill, ctx) : undefined;
+        if (target) {
+          edges.push({ type: 'used_by', from: target.id, to: node.id, source: 'required_skills', provenance: prov(agentPath, 'required_skills', index) });
         }
       });
     }
   }
 
-  // Source 3: variant.json skill_manifest
-  if (existsSync(templatesDir)) {
-    const variants = readdirSync(templatesDir, { withFileTypes: true });
-    for (const variant of variants) {
-      if (!variant.isDirectory() || !variant.name.startsWith('co-')) continue;
+  // Source 3 / 3b: variant.json skill_manifest — templates/co-* at the workspace root, or a
+  // scaffolded project's own variant.json (scope `root`: the project's local skills/agents).
+  const applyManifest = (manifestPath: string, scope: string, layer: GraphNode['layer'], phaseDoc: string): void => {
+    if (!existsSync(manifestPath)) return;
+    try {
+      const variantSpecific = JSON.parse(readFileSync(manifestPath, 'utf-8'))?.skill_manifest?.variant_specific;
+      if (!Array.isArray(variantSpecific)) return;
+      for (const entry of variantSpecific) {
+        const manifest = entry as SkillManifestEntry;
+        const skill = skillAt(manifest.name, [scope]);
+        if (!skill) continue;
 
-      const variantJsonPath = join(templatesDir, variant.name, 'variant.json');
-      if (!existsSync(variantJsonPath)) continue;
-
-      try {
-        const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
-        const variantSpecific = variantJson?.skill_manifest?.variant_specific;
-
-        if (Array.isArray(variantSpecific)) {
-          for (const entry of variantSpecific) {
-            const manifest = entry as SkillManifestEntry;
-            if (!skillNames.has(manifest.name)) continue;
-
-            // used_by_agents edges (skill -> agent)
-            if (manifest.used_by_agents && Array.isArray(manifest.used_by_agents)) {
-              for (const agent of manifest.used_by_agents) {
-                if (agentNames.has(agent)) {
-                  edges.push({ type: 'used_by', from: manifest.name, to: agent, source: 'skill_manifest' });
-                }
-              }
-            }
-
-            // phase edges (skill -> phase string)
-            if (manifest.phases && Array.isArray(manifest.phases)) {
-              for (const phase of manifest.phases) {
-                edges.push({ type: 'phase', from: manifest.name, to: `phase${phase}`, source: 'skill_manifest' });
-              }
-            }
+        // used_by_agents edges (skill -> agent)
+        if (manifest.used_by_agents && Array.isArray(manifest.used_by_agents)) {
+          for (const agentName of manifest.used_by_agents) {
+            const agent = agentAt(agentName, [scope]);
+            if (agent) edges.push({ type: 'used_by', from: skill.id, to: agent.id, source: 'skill_manifest' });
           }
         }
-      } catch {
-        // Invalid JSON, skip this variant
-      }
-    }
-  }
 
-  // Source 3b: project-local variant.json. The loop above only fires at the
-  // workspace root, where templates/co-* directories live; a scaffolded project
-  // ships its own variant.json with the same skill_manifest shape
-  // (used_by_agents, phases), but no templates/co-* copy — so without this
-  // branch its manifest edges never materialize (same shape as the L0 loop;
-  // targets validated against the project's local skill/agent sets).
-  const projectVariantJsonPath = join(ROOT, 'variant.json');
-  if (existsSync(projectVariantJsonPath)) {
-    try {
-      const variantJson = JSON.parse(readFileSync(projectVariantJsonPath, 'utf-8'));
-      const variantSpecific = variantJson?.skill_manifest?.variant_specific;
-
-      if (Array.isArray(variantSpecific)) {
-        for (const entry of variantSpecific) {
-          const manifest = entry as SkillManifestEntry;
-          if (!skillNames.has(manifest.name)) continue;
-
-          if (manifest.used_by_agents && Array.isArray(manifest.used_by_agents)) {
-            for (const agent of manifest.used_by_agents) {
-              if (agentNames.has(agent)) {
-                edges.push({ type: 'used_by', from: manifest.name, to: agent, source: 'skill_manifest' });
-              }
-            }
-          }
-
-          if (manifest.phases && Array.isArray(manifest.phases)) {
-            for (const phase of manifest.phases) {
-              edges.push({ type: 'phase', from: manifest.name, to: `phase${phase}`, source: 'skill_manifest' });
-            }
+        // phase edges (skill -> phase node)
+        if (manifest.phases && Array.isArray(manifest.phases)) {
+          for (const phase of manifest.phases) {
+            edges.push({ type: 'phase', from: skill.id, to: ensurePhase(scope, layer, phase, phaseDoc), source: 'skill_manifest' });
           }
         }
       }
     } catch {
-      // Invalid JSON, skip project manifest
+      // Invalid JSON, skip this manifest
+    }
+  };
+  if (existsSync(templatesDir)) {
+    for (const variantName of listVariantDirs(templatesDir)) {
+      applyManifest(
+        join(templatesDir, variantName, 'variant.json'),
+        variantName,
+        `variant:${variantName}`,
+        join(templatesDir, variantName, 'docs', 'phase-definitions.md'),
+      );
     }
   }
+  applyManifest(join(ROOT, 'variant.json'), 'root', localLayer, join(ROOT, 'docs', 'phase-definitions.md'));
 
   // Source 4: Prose backtick references
-  for (const [skillName, node] of skills) {
-    const skillPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'skills', skillName, 'SKILL.md')
-      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'skills', skillName, 'SKILL.md')
-      : join(ROOT, 'skills', skillName, 'SKILL.md');
-
-    if (!existsSync(skillPath)) continue;
-
-    const content = readFileSync(skillPath, 'utf-8');
+  for (const node of [...reg.skills, ...reg.agents]) {
+    const content = readFileSync(primaryPath(reg, node), 'utf-8');
     const bodyParts = content.split('---');
     const body = bodyParts.length > 1 ? bodyParts.slice(1).join('---') : content;
-
-    const refs = extractBacktickReferences(body, skillNames);
-    for (const ref of refs) {
-      if (ref !== skillName) { // Skip self-references
-        edges.push({ type: 'references', from: skillName, to: ref, source: 'prose' });
-      }
-    }
-  }
-
-  for (const [agentName, node] of agents) {
-    const agentPath = node.layer === 'common' ? join(ROOT, 'templates', 'common', 'agents', `${agentName}.md`)
-      : node.layer.startsWith('variant:') ? join(templatesDir, node.layer.replace('variant:', ''), 'agents', `${agentName}.md`)
-      : join(ROOT, 'agents', `${agentName}.md`);
-
-    if (!existsSync(agentPath)) continue;
-
-    const content = readFileSync(agentPath, 'utf-8');
-    const bodyParts = content.split('---');
-    const body = bodyParts.length > 1 ? bodyParts.slice(1).join('---') : content;
-
-    const refs = extractBacktickReferences(body, skillNames);
-    for (const ref of refs) {
-      edges.push({ type: 'references', from: agentName, to: ref, source: 'prose' });
+    const ctx = ctxOfNode(reg, node);
+    for (const ref of extractBacktickReferences(body, reg.skillNames)) {
+      const target = skillAt(ref, ctx);
+      if (!target) continue;
+      if (node.type === 'skill' && target.id === node.id) continue; // Skip self-references
+      edges.push({ type: 'references', from: node.id, to: target.id, source: 'prose' });
     }
   }
 
   // Source 4.8: Workflow-doc citations (bounded corpus → doc: nodes + cites_skill
   // edges) — closes the graph-isolation gap for skills dispatched through workflow
   // documents rather than SKILL.md/agent prose (ticket T-20260923-001).
-  deriveWorkflowDocCitations(allNodes, skillNames, edges, localLayer);
+  deriveWorkflowDocCitations(allNodes, reg.skillNames, edges, localLayer, (name, ctx) => skillAt(name, ctx)?.id);
 
   // Source 4.5: Document layer — decision records + ADRs (ADR-0060 amendment
   // 2026-08-25, generalizing the co-newbiz multi-element pilot). Decision
@@ -1400,9 +1592,8 @@ export function buildGraph(): SkillGraph {
       const skillsUsed = frontmatter['skills_used'];
       if (Array.isArray(skillsUsed)) {
         for (const s of skillsUsed) {
-          if (typeof s === 'string' && skillNames.has(s)) {
-            edges.push({ type: 'cites_skill', from: docId, to: s, source: 'skills_used' });
-          }
+          const target = typeof s === 'string' && reg.skillNames.has(s) ? skillAt(s, ['root']) : undefined;
+          if (target) edges.push({ type: 'cites_skill', from: docId, to: target.id, source: 'skills_used' });
         }
       }
 
@@ -1413,7 +1604,7 @@ export function buildGraph(): SkillGraph {
       const knowledgeRefs = frontmatter['knowledge_refs'];
       if (Array.isArray(knowledgeRefs)) {
         for (const ref of knowledgeRefs) {
-          const m = typeof ref === 'string' ? /^ADR-(\d{4})$/.exec(ref.trim()) : null;
+          const m = typeof ref === 'string' ? ref.trim().match(/^ADR-(\d{4})$/) : null;
           if (m) {
             edges.push({ type: 'references', from: docId, to: `adr:${m[1]}`, source: 'knowledge_refs' });
           }
@@ -1422,7 +1613,7 @@ export function buildGraph(): SkillGraph {
 
       // supersedes/amends via prose labels (exact token match on same line)
       for (const line of body.split('\n')) {
-        const m = /supersedes?:?\s*(ADR-\d{4}|DEC-\d{8}-\d{2})/i.exec(line);
+        const m = line.match(/supersedes?:?\s*(ADR-\d{4}|DEC-\d{8}-\d{2})/i);
         if (m) {
           const targetId = m[1].startsWith('ADR') ? `adr:${m[1].slice(4)}` : `dec:${m[1]}`;
           if (targetId !== docId) {
@@ -1436,15 +1627,15 @@ export function buildGraph(): SkillGraph {
   const adrsDir = join(ROOT, 'docs', 'adr');
   if (existsSync(adrsDir)) {
     for (const f of readdirSync(adrsDir)) {
-      const m = /^(\d{4})-.*\.md$/.exec(f);
+      const m = f.match(/^(\d{4})-.*\.md$/);
       if (!m) continue;
       const adrId = `adr:${m[1]}`;
       allNodes.set(adrId, { id: adrId, type: 'adr', layer: localLayer });
 
       const content = readFileSync(join(adrsDir, f), 'utf-8');
-      const refs = extractBacktickReferences(content, skillNames);
-      for (const ref of refs) {
-        edges.push({ type: 'references', from: adrId, to: ref, source: 'prose' });
+      for (const ref of extractBacktickReferences(content, reg.skillNames)) {
+        const target = skillAt(ref, ['root']);
+        if (target) edges.push({ type: 'references', from: adrId, to: target.id, source: 'prose' });
       }
     }
   }
@@ -1463,6 +1654,7 @@ export function buildGraph(): SkillGraph {
         allNodes,
         edges,
         join(templatesDir, variantName),
+        link,
       );
     }
   }
@@ -1471,7 +1663,7 @@ export function buildGraph(): SkillGraph {
   // directories must not influence the committed graph projection.
   const rootProceduresDir = join(ROOT, 'procedures');
   if (localLayer !== 'L0' || hasTrackedFilesUnder(rootProceduresDir)) {
-    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges, ROOT);
+    deriveProceduresFromDir(rootProceduresDir, 'l0', localLayer, allNodes, edges, ROOT, link);
   }
 
   // Source 5.8: Stages — domain execution stages derived from process/stages.yaml (ADR-0083)
@@ -1497,6 +1689,7 @@ export function buildGraph(): SkillGraph {
         allNodes,
         edges,
         join(templatesDir, variantName),
+        link,
       );
     }
   }
@@ -1513,14 +1706,32 @@ export function buildGraph(): SkillGraph {
       );
     }
   }
+  stepPairSink = null;
 
-  // Source 5: Overrides (L0) — loaded and applied via shared helper
+  // Source 5: Overrides (L0) — loaded and applied via shared helper. Bare keys (`skill:<name>`
+  // is not required) fan out to every node carrying that name (v2 compat, design §5).
   const { overrides } = loadOverridesFile(join(ROOT, 'docs'));
-  applyOverrides(overrides, allNodes, edges);
+  const warnedFanOut = new Set<string>();
+  applyOverrides(overrides, allNodes, edges, (key) => {
+    if (allNodes.has(key)) return [key];
+    const hits = [...(reg.byKey.get(`skill:${key}`) ?? []), ...(reg.byKey.get(`agent:${key}`) ?? [])].map((n) => n.id);
+    if (hits.length > 1 && !warnedFanOut.has(key)) {
+      warnedFanOut.add(key);
+      console.warn(`Warning: bare override key "${key}" fans out to ${hits.length} nodes (${hits.join(', ')}); use a scoped key to pin one`);
+    }
+    return hits;
+  });
+
+  // E3: usage attribute from memory `## Skills Used`
+  const usage = attachUsage(reg);
+
+  // G4: drop duplicate (from, to, type) edges (first wins; insertion order is deterministic)
+  const dedupedEdges = dedupeEdges(edges);
+  const droppedDuplicateEdges = edges.length - dedupedEdges.length;
 
   // Sort deterministically
   const sortedNodes = Array.from(allNodes.values()).sort((a, b) => a.id.localeCompare(b.id));
-  const sortedEdges = edges.sort((a, b) => {
+  const sortedEdges = dedupedEdges.sort((a, b) => {
     const fromCompare = a.from.localeCompare(b.from);
     if (fromCompare !== 0) return fromCompare;
     const toCompare = a.to.localeCompare(b.to);
@@ -1528,11 +1739,75 @@ export function buildGraph(): SkillGraph {
     return a.type.localeCompare(b.type);
   });
 
+  const graph: SkillGraph = { version: 2, graph_profile: 'deg/v2', nodes: sortedNodes, edges: sortedEdges };
+  return { graph, report: computeReport(graph, reg, stepPairs, usage, droppedDuplicateEdges) };
+}
+
+/** G5/G6/E3/E4 findings over a built v2 graph. */
+function computeReport(
+  graph: SkillGraph,
+  reg: Registry,
+  stepPairs: Array<{ procedure: string; skill: string; agent: string }>,
+  usage: ReturnType<typeof attachUsage>,
+  droppedDuplicateEdges: number,
+): BuildReport {
+  const touched = new Set<string>();
+  const usedBy = new Set<string>();
+  for (const e of graph.edges) {
+    touched.add(e.from);
+    touched.add(e.to);
+    if (e.type === 'used_by') usedBy.add(e.from);
+  }
+  const isolated: Record<string, string[]> = {};
+  for (const n of graph.nodes) {
+    if (touched.has(n.id)) continue;
+    (isolated[n.type] ??= []).push(n.id);
+  }
+
+  const skillsWithoutUsedBy = graph.nodes.filter((n) => n.type === 'skill' && !usedBy.has(n.id)).map((n) => n.id).sort();
+  const withoutSet = new Set(skillsWithoutUsedBy);
+
+  // E4: agents that own a procedure step citing the skill (report-only).
+  const bySkill = new Map<string, Map<string, Set<string>>>();
+  for (const p of stepPairs) {
+    if (!withoutSet.has(p.skill)) continue;
+    if (!bySkill.has(p.skill)) bySkill.set(p.skill, new Map());
+    const agents = bySkill.get(p.skill)!;
+    if (!agents.has(p.agent)) agents.set(p.agent, new Set());
+    agents.get(p.agent)!.add(p.procedure);
+  }
+  const suggestions = [...bySkill.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([skill, agents]) => ({
+      skill,
+      agents: [...agents.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([agent, procs]) => ({ agent, procedures: [...procs].sort() })),
+    }));
+
+  // E3 summary
+  let cutoff = '';
+  if (usage.asOf) {
+    const d = new Date(`${usage.asOf}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - usage.windowDays);
+    cutoff = d.toISOString().slice(0, 10);
+  }
+  const unused: string[] = [];
+  const usedButUnlinked: string[] = [];
+  let usedCount = 0;
+  for (const n of graph.nodes) {
+    if (n.type !== 'skill') continue;
+    const dates = usage.sessionsByNode.get(n.id) ?? [];
+    if (dates.length > 0) usedCount++;
+    if (!dates.some((d) => d >= cutoff)) unused.push(n.id);
+    if (dates.length > 0 && withoutSet.has(n.id)) usedButUnlinked.push(n.id);
+  }
+
   return {
-    version: 1,
-    graph_profile: 'deg/v1',
-    nodes: sortedNodes,
-    edges: sortedEdges
+    ambiguousRefs: [...reg.ambiguous].sort(),
+    isolated,
+    skillsWithoutUsedBy,
+    suggestions,
+    usage: { asOf: usage.asOf, windowDays: usage.windowDays, unused: unused.sort(), usedButUnlinked: usedButUnlinked.sort(), usedCount },
+    droppedDuplicateEdges,
   };
 }
 
@@ -1566,7 +1841,13 @@ function loadOverridesFile(docsDir: string): { path: string; overrides: Override
  * (source !== 'override'; override-vs-override suppression is not supported).
  * reledgev §3 L-B layer.
  */
-function applyOverrides(overrides: Overrides, allNodes: Map<string, GraphNode>, edges: GraphEdge[]): void {
+function applyOverrides(
+  overrides: Overrides,
+  allNodes: Map<string, GraphNode>,
+  edges: GraphEdge[],
+  /** Expand an override endpoint to node ids (v2: bare names fan out to every node of that name). */
+  expand: (key: string) => string[] = (key) => (allNodes.has(key) ? [key] : []),
+): void {
   const now = new Date();
   for (const override of overrides.edges) {
     // Check expiration
@@ -1579,33 +1860,41 @@ function applyOverrides(overrides: Overrides, allNodes: Map<string, GraphNode>, 
     }
 
     // Validate endpoint nodes exist
-    if (override.from && !allNodes.has(override.from)) {
+    const fromIds = override.from ? expand(override.from) : [];
+    const toIds = override.to ? expand(override.to) : [];
+    if (override.from && fromIds.length === 0) {
       console.warn(`Warning: Override references unknown node: ${override.from}`);
       continue;
     }
-    if (override.to && !allNodes.has(override.to)) {
+    if (override.to && toIds.length === 0) {
       console.warn(`Warning: Override references unknown node: ${override.to}`);
       continue;
     }
 
     if (override.suppress) {
+      const fromSet = new Set(fromIds);
+      const toSet = new Set(toIds);
       for (let i = edges.length - 1; i >= 0; i--) {
         const e = edges[i];
         if (e.source === 'override') continue;
-        if (e.from === override.from && e.to === override.to && (!override.type || e.type === override.type)) {
+        if (fromSet.has(e.from) && toSet.has(e.to) && (!override.type || e.type === override.type)) {
           edges.splice(i, 1);
         }
       }
       continue;
     }
 
-    edges.push({
-      type: override.type as GraphEdge['type'],
-      from: override.from,
-      to: override.to,
-      source: 'override',
-      reason: override.reason
-    });
+    for (const from of fromIds) {
+      for (const to of toIds) {
+        edges.push({
+          type: override.type as GraphEdge['type'],
+          from,
+          to,
+          source: 'override',
+          reason: override.reason
+        });
+      }
+    }
   }
 }
 
@@ -1826,10 +2115,24 @@ export function buildScopeGraph(scope: string): SkillGraph {
   };
 }
 
+/** Display form of a scoped id: `skill:co-deck/pdf-export` -> `co-deck/pdf-export`. */
+function displayId(id: string): string {
+  const sp = splitScopedId(id);
+  if (!sp) return id;
+  return sp.type === 'phase' ? `${sp.scope}/phase ${sp.name}` : `${sp.scope}/${sp.name}`;
+}
+
+const REPORT_LIST_CAP = 40;
+
+function capped(items: string[], cap = REPORT_LIST_CAP): string {
+  if (items.length <= cap) return items.join(', ');
+  return `${items.slice(0, cap).join(', ')} … and ${items.length - cap} more`;
+}
+
 /**
  * Generate human-readable markdown catalog
  */
-function generateMarkdown(graph: SkillGraph): string {
+function generateMarkdown(graph: SkillGraph, report?: BuildReport): string {
   const lines: string[] = [];
 
   lines.push('# Skill Relationship Graph');
@@ -1837,6 +2140,8 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('> **Generated by `scripts/generate-skill-graph.ts` — do not edit.**');
   lines.push('> ');
   lines.push('> Relations are advisory only (ADR-0060). They do not gate loading, deprecation, or propagation.');
+  lines.push('> Node identity is `type:scope/name` (schema v2, ADR-0060 Amendment 11): identical copies collapse to one node,');
+  lines.push('> distinct content under one name gets one node per content hash; `capability` is the cross-project grouping key.');
   lines.push('');
   lines.push('## Skill Catalog');
   lines.push('');
@@ -1860,58 +2165,63 @@ function generateMarkdown(graph: SkillGraph): string {
 
   for (const edge of graph.edges) {
     if (edge.type === 'requires' && skillRelations.has(edge.from)) {
-      skillRelations.get(edge.from)!.requires.push(edge.to);
+      skillRelations.get(edge.from)!.requires.push(displayId(edge.to));
     } else if (edge.type === 'relates_to' && skillRelations.has(edge.from)) {
-      skillRelations.get(edge.from)!.relates_to.push(edge.to);
+      skillRelations.get(edge.from)!.relates_to.push(displayId(edge.to));
     } else if (TYPED_LABEL[edge.type] && skillRelations.has(edge.from)) {
-      skillRelations.get(edge.from)!.relates_to.push(`${edge.to} (${TYPED_LABEL[edge.type]})`);
+      skillRelations.get(edge.from)!.relates_to.push(`${displayId(edge.to)} (${TYPED_LABEL[edge.type]})`);
     } else if (edge.type === 'used_by' && skillRelations.has(edge.from)) {
-      skillRelations.get(edge.from)!.used_by_agents.push(edge.to);
+      skillRelations.get(edge.from)!.used_by_agents.push(displayId(edge.to));
     } else if (edge.type === 'phase' && skillRelations.has(edge.from)) {
-      skillRelations.get(edge.from)!.phases.push(edge.to);
+      skillRelations.get(edge.from)!.phases.push(displayId(edge.to));
     }
   }
 
   // Output per-skill table
-  lines.push('| Skill | Layer | Required-by Agents | Phases | Relates-to | Inputs | Outputs |');
-  lines.push('|-------|-------|-------------------|--------|------------|--------|---------|');
+  lines.push('| Skill (scope/name) | Layer | Version | Required-by Agents | Phases | Relates-to | Inputs | Outputs |');
+  lines.push('|--------------------|-------|---------|-------------------|--------|------------|--------|---------|');
 
-  const allSkills = Array.from(skillRelations.keys()).sort();
+  const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
+  const allSkills = Array.from(skillRelations.keys()).sort((a, b) => displayId(a).localeCompare(displayId(b)));
   for (const skillId of allSkills) {
-    const node = graph.nodes.find(n => n.id === skillId && n.type === 'skill');
+    const node = nodeById.get(skillId);
     if (!node) continue;
 
     const relations = skillRelations.get(skillId)!;
     const agents = relations.used_by_agents.sort().join(', ') || '—';
     const phases = relations.phases.sort().join(', ') || '—';
     const relates = relations.relates_to.sort().join(', ') || '—';
-    const inputs = ((node as GraphNode).inputs ?? []).join(', ') || '—';
-    const outputs = ((node as GraphNode).outputs ?? []).join(', ') || '—';
+    const inputs = (node.inputs ?? []).join(', ') || '—';
+    const outputs = (node.outputs ?? []).join(', ') || '—';
 
-    lines.push(`| \`${skillId}\` | ${node.layer} | ${agents} | ${phases} | ${relates} | ${inputs} | ${outputs} |`);
+    lines.push(`| \`${displayId(skillId)}\` | ${node.layer} | ${node.version ?? '—'} | ${agents} | ${phases} | ${relates} | ${inputs} | ${outputs} |`);
   }
 
   lines.push('');
   lines.push('## Lifecycle Phase Grouping');
   lines.push('');
-  lines.push('Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`):');
+  lines.push('Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`); phase numbering is per scope:');
   lines.push('');
 
-  // Group by phase
+  // Group by phase node
   const phaseSkills = new Map<string, string[]>();
   for (const edge of graph.edges) {
-    if (edge.type === 'phase' && edge.to.startsWith('phase')) {
+    if (edge.type === 'phase' && edge.to.startsWith('phase:')) {
       if (!phaseSkills.has(edge.to)) {
         phaseSkills.set(edge.to, []);
       }
-      phaseSkills.get(edge.to)!.push(edge.from);
+      phaseSkills.get(edge.to)!.push(displayId(edge.from));
     }
   }
 
-  const sortedPhases = Array.from(phaseSkills.keys()).sort();
+  const sortedPhases = Array.from(phaseSkills.keys()).sort((a, b) => {
+    const pa = nodeById.get(a), pb = nodeById.get(b);
+    return (pa?.scope ?? '').localeCompare(pb?.scope ?? '') || (pa?.ordinal ?? 0) - (pb?.ordinal ?? 0);
+  });
   for (const phase of sortedPhases) {
+    const pn = nodeById.get(phase);
     const skills = phaseSkills.get(phase)!.sort().join(', ');
-    lines.push(`- **${phase}**: ${skills}`);
+    lines.push(`- **${displayId(phase)}**${pn?.label ? ` (${pn.label})` : ''}: ${skills}`);
   }
 
   lines.push('');
@@ -1922,7 +2232,7 @@ function generateMarkdown(graph: SkillGraph): string {
   lines.push('| `requires` | From SKILL.md `prerequisites` field (skill → skill) |');
   lines.push('| `relates_to` | From SKILL.md `relates_to` field or overrides (skill ↔ skill) |');
   lines.push('| `used_by` | Agent ↔ skill relation (from `required_skills` or `used_by_agents`) |');
-  lines.push('| `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`) |');
+  lines.push('| `phase` | Skill used in a lifecycle phase (from `variant.json` `skill_manifest.phases`; target is a `phase:<scope>/<n>` node) |');
   lines.push('| `supersedes` | Supersession — overrides (manual) or decision-record prose labels |');
   lines.push('| `references` | Backtick reference in SKILL.md/agent/ADR body prose, DEC `knowledge_refs[]` naming an ADR, or skill → `term:` node from references/terms-ko.json (ADR-0072) |');
   lines.push('| `cites_skill` | Decision record `skills_used[]` and workflow-doc citations (`doc:` nodes, Source 4.8, ticket T-20260923-001) validated against the skill set |');
@@ -1951,11 +2261,11 @@ function generateMarkdown(graph: SkillGraph): string {
     for (const n of docNodes.sort((a, b) => a.id.localeCompare(b.id))) {
       const cites = graph.edges
         .filter(e => e.type === 'cites_skill' && e.from === n.id)
-        .map(e => `\`${e.to}\``)
+        .map(e => `\`${displayId(e.to)}\``)
         .join(', ');
       const refs = graph.edges
         .filter(e => e.type === 'references' && e.from === n.id)
-        .map(e => e.to)
+        .map(e => displayId(e.to))
         .join(', ');
       const sup = graph.edges
         .filter(e => e.type === 'supersedes' && e.from === n.id)
@@ -1982,13 +2292,249 @@ function generateMarkdown(graph: SkillGraph): string {
     for (const n of termNodes.sort((a, b) => a.id.localeCompare(b.id))) {
       const skills = graph.edges
         .filter(e => e.type === 'references' && e.source === 'terms-ko.json' && e.to === n.id)
-        .map(e => `\`${e.from}\``)
+        .map(e => `\`${displayId(e.from)}\``)
         .join(', ');
       lines.push(`| \`${n.id.replace(/^term:/, '')}\` | ${n.layer} | ${skills || '—'} |`);
     }
     lines.push('');
   }
 
+  // ── v2 report sections (G5/G6/E2/E3/E4) ──
+  const divergences = findCapabilityDivergence(graph as unknown as SkillGraphV2);
+  lines.push('## Same-Name Divergence (E2)');
+  lines.push('');
+  if (divergences.length === 0) {
+    lines.push('None — every capability has a single content hash.');
+  } else {
+    lines.push('Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes share a version but differ in content (the version no longer identifies the content); `divergence` = contents and versions both differ (reconciliation candidate).');
+    lines.push('');
+    lines.push('| Capability | Type | Kind | Nodes (scope@version #hash) |');
+    lines.push('|------------|------|------|-----------------------------|');
+    for (const d of divergences) {
+      const nodes = d.entries.map((e) => `${e.scope}@${e.version ?? '?'} #${e.content_hash.slice(0, 8)}`).join('; ');
+      lines.push(`| \`${d.capability}\` | ${d.type} | ${d.kind} | ${nodes} |`);
+    }
+  }
+  lines.push('');
+
+  if (report) {
+    lines.push('## Isolated Nodes (G5)');
+    lines.push('');
+    const isoTypes = Object.keys(report.isolated).sort();
+    if (isoTypes.length === 0) {
+      lines.push('None.');
+    } else {
+      lines.push('| Type | Count | Nodes |');
+      lines.push('|------|-------|-------|');
+      for (const t of isoTypes) {
+        const ids = report.isolated[t];
+        lines.push(`| ${t} | ${ids.length} | ${t === 'adr' || t === 'decision' ? '(expected until docs `references` edges are mined)' : capped(ids.map(displayId))} |`);
+      }
+    }
+    lines.push('');
+
+    lines.push('## Skills Without `used_by` (G6)');
+    lines.push('');
+    lines.push(`${report.skillsWithoutUsedBy.length} skill nodes have no \`used_by\` edge (no agent \`required_skills\` / manifest \`used_by_agents\` entry).`);
+    lines.push('');
+    lines.push('### Suggested `required_by` agents (E4, report-only)');
+    lines.push('');
+    if (report.suggestions.length === 0) {
+      lines.push('No suggestions: no procedure step pairs one of these skills with an owning agent.');
+    } else {
+      lines.push('Inferred from procedure steps that cite the skill and are owned via `step_by_agent`. This report never edits SKILL.md.');
+      lines.push('');
+      lines.push('| Skill | Suggested agents (via procedures) |');
+      lines.push('|-------|-----------------------------------|');
+      for (const sg of report.suggestions) {
+        const agents = sg.agents.map((a) => `${displayId(a.agent)} (${a.procedures.map((p) => p.replace(/^procedure\./, '')).join(', ')})`).join('; ');
+        lines.push(`| \`${displayId(sg.skill)}\` | ${agents} |`);
+      }
+    }
+    lines.push('');
+
+    lines.push('## Skill Usage (E3)');
+    lines.push('');
+    if (!report.usage.asOf) {
+      lines.push('No memory logs found — usage not computed.');
+    } else {
+      lines.push(`Joined from memory \`## Skills Used\` sections (names resolve via capability); reference date = newest memory log (${report.usage.asOf}), window ${report.usage.windowDays} days. Skill nodes with usage: ${report.usage.usedCount}.`);
+      lines.push('');
+      lines.push(`- **used-but-unlinked** (usage > 0, no \`used_by\`) (${report.usage.usedButUnlinked.length}): ${report.usage.usedButUnlinked.length > 0 ? capped(report.usage.usedButUnlinked.map(displayId)) : '—'}`);
+      lines.push(`- **unused** (0 sessions in ${report.usage.windowDays} days) (${report.usage.unused.length}): ${report.usage.unused.length > 0 ? capped(report.usage.unused.map(displayId)) : '—'}`);
+    }
+    lines.push('');
+
+    if (report.ambiguousRefs.length > 0) {
+      lines.push('## Ambiguous Name Resolutions');
+      lines.push('');
+      lines.push('Referenced by bare name from a scope that has no own/common/root copy while several variants define it; the first (alphabetical) node was used.');
+      lines.push('');
+      lines.push(capped(report.ambiguousRefs));
+      lines.push('');
+    }
+  }
+
+  return lines.join('\n');
+}
+
+// ── E1: --impact ───────────────────────────────────────────────────────────
+
+export interface ImpactResult {
+  query: string;
+  targets: Array<{ id: string; scope: string; version: string | null; mirrors: string[] }>;
+  agents: string[];
+  procedures: string[];
+  skills: string[];
+  docs: string[];
+  variants: string[];
+  tests: string[];
+  contracts: string[];
+}
+
+/** Edge types that do not express "X depends on Y" and are not walked by --impact. */
+const IMPACT_SKIP_EDGES = new Set(['produces', 'phase', 'in_stage', 'stage_follows', 'gated_by', 'decides_on', 'evidenced_by']);
+
+function scanFilesFor(dir: string, needles: string[], exts: string[], out: string[], root: string): void {
+  if (!existsSync(dir)) return;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      scanFilesFor(full, needles, exts, out, root);
+    } else if (entry.isFile() && exts.some((x) => entry.name.endsWith(x))) {
+      let text = '';
+      try { text = readFileSync(full, 'utf-8'); } catch { continue; }
+      if (needles.some((nd) => text.includes(nd))) out.push(relative(root, full).replace(/\\/g, '/'));
+    }
+  }
+}
+
+/**
+ * E1: reverse-edge BFS from a skill/agent (bare name, capability, or scoped id). A bare name
+ * expands to every node of that capability. Read-only: operates on the passed graph and scans
+ * tests/ and contracts/ for literal references.
+ */
+export function computeImpact(graphIn: SkillGraphV2, query: string, rootDir: string = ROOT): ImpactResult {
+  const graph = graphIn;
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  const exact = byId.get(query);
+  const targets = exact
+    ? [exact]
+    : graph.nodes.filter((n) => (n.type === 'skill' || n.type === 'agent') && (capabilityOf(n) === query || nameOf(n) === query));
+
+  // Reverse adjacency: who is affected when `key` changes. Direct dependents (depth 1) use every
+  // edge type; transitive expansion follows only strong dependency edges so weak prose mentions
+  // (`references`, `cites_skill`, relates_to family) do not flood the blast radius.
+  const STRONG = new Set(['requires', 'step_uses_skill', 'used_by', 'step_by_agent']);
+  const revAll = new Map<string, Set<string>>();
+  const revStrong = new Map<string, Set<string>>();
+  const addRev = (m: Map<string, Set<string>>, k: string, v: string): void => {
+    if (!m.has(k)) m.set(k, new Set());
+    m.get(k)!.add(v);
+  };
+  for (const e of graph.edges) {
+    if (IMPACT_SKIP_EDGES.has(e.type)) continue;
+    // `used_by` runs skill -> agent: the agent is the dependent.
+    const [dep, dependent] = e.type === 'used_by' ? [e.from, e.to] : [e.to, e.from];
+    addRev(revAll, dep, dependent);
+    if (STRONG.has(e.type)) addRev(revStrong, dep, dependent);
+    if (e.symmetric) addRev(revAll, e.from, e.to);
+  }
+
+  const seen = new Set<string>(targets.map((t) => t.id));
+  let frontier = targets.map((t) => t.id);
+  let depth = 0;
+  while (frontier.length > 0) {
+    const nextFrontier: string[] = [];
+    for (const cur of frontier) {
+      for (const next of (depth === 0 ? revAll : revStrong).get(cur) ?? []) {
+        if (seen.has(next)) continue;
+        seen.add(next);
+        const nt = byId.get(next)?.type;
+        // Walk through skills and procedures; agents, docs, ADRs, decisions are leaves.
+        if (nt === 'skill' || nt === 'procedure') nextFrontier.push(next);
+      }
+    }
+    frontier = nextFrontier;
+    depth++;
+  }
+  const targetIds = new Set(targets.map((t) => t.id));
+  const hit = [...seen].filter((id) => !targetIds.has(id)).map((id) => byId.get(id)).filter((n): n is SkillGraphV2['nodes'][number] => !!n);
+  const idsOf = (pred: (n: SkillGraphV2['nodes'][number]) => boolean): string[] => hit.filter(pred).map((n) => n.id).sort();
+
+  const scopes = new Set<string>();
+  const mirrorPaths = new Set<string>();
+  for (const t of targets) {
+    if (t.scope) scopes.add(t.scope);
+    for (const m of t.mirrors ?? []) {
+      mirrorPaths.add(m);
+      const vm = m.match(/^templates\/(co-[^/]+|common)\//);
+      if (vm) scopes.add(vm[1]);
+    }
+  }
+  for (const n of hit) {
+    if (n.type === 'skill' || n.type === 'agent') {
+      if (n.scope) scopes.add(n.scope);
+    } else if (n.type === 'procedure') {
+      const pm = n.id.match(/^procedure\.([^.]+)\./);
+      if (pm) scopes.add(pm[1] === 'l0' ? 'root' : pm[1]);
+    }
+  }
+
+  const needles = [...new Set(targets.flatMap((t) => [nameOf(t), capabilityOf(t)]).concat(exact ? [] : [query]))].filter(Boolean);
+  const tests: string[] = [];
+  const contracts: string[] = [];
+  if (needles.length > 0) {
+    scanFilesFor(join(rootDir, 'tests'), needles, ['.ts', '.json', '.md', '.yaml'], tests, rootDir);
+    scanFilesFor(join(rootDir, 'contracts'), needles, ['.ts', '.json', '.md', '.yaml'], contracts, rootDir);
+    const contractFile = join(rootDir, 'docs', 'templates', 'common-contract.json');
+    if (existsSync(contractFile)) {
+      try {
+        const txt = readFileSync(contractFile, 'utf-8');
+        if (needles.some((nd) => txt.includes(`"${nd}"`))) contracts.push('docs/templates/common-contract.json');
+      } catch { /* unreadable contract file: skip */ }
+    }
+  }
+
+  return {
+    query,
+    targets: targets.map((t) => ({ id: t.id, scope: t.scope ?? scopeOfLayer(t.layer), version: t.version ?? null, mirrors: t.mirrors ?? [] })),
+    agents: idsOf((n) => n.type === 'agent'),
+    procedures: idsOf((n) => n.type === 'procedure'),
+    skills: idsOf((n) => n.type === 'skill'),
+    docs: idsOf((n) => n.type === 'doc' || n.type === 'adr' || n.type === 'decision'),
+    variants: [...scopes].sort(),
+    tests: tests.sort(),
+    contracts: contracts.sort(),
+  };
+}
+
+export function formatImpact(r: ImpactResult): string {
+  const lines: string[] = [];
+  lines.push(`Impact of "${r.query}" — ${r.targets.length} matching node(s)`);
+  if (r.targets.length === 0) {
+    lines.push('  (no skill/agent node with that id, name or capability)');
+    return lines.join('\n');
+  }
+  lines.push('');
+  lines.push('Targets:');
+  for (const t of r.targets) lines.push(`  - ${t.id}  [scope ${t.scope}, v${t.version ?? '?'}, ${t.mirrors.length} mirror path(s)]`);
+  const section = (title: string, items: string[]): void => {
+    lines.push('');
+    lines.push(`${title} (${items.length}):`);
+    for (const i of items) lines.push(`  - ${i}`);
+  };
+  section('Agents', r.agents);
+  section('Procedures', r.procedures);
+  section('Dependent skills', r.skills);
+  section('Docs / ADRs / decisions', r.docs);
+  section('Variants / scopes', r.variants);
+  lines.push('');
+  lines.push('Mirror paths:');
+  for (const t of r.targets) for (const m of t.mirrors) lines.push(`  - ${m}`);
+  section('Tests referencing it', r.tests);
+  section('Contracts referencing it', r.contracts);
   return lines.join('\n');
 }
 
@@ -1998,6 +2544,26 @@ function generateMarkdown(graph: SkillGraph): string {
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const scopeIdx = args.indexOf('--scope');
+  const impactIdx = args.indexOf('--impact');
+
+  // ── E1 impact mode: read-only, writes nothing ──
+  if (impactIdx !== -1) {
+    const query = args[impactIdx + 1];
+    if (!query) {
+      console.error('ERROR: --impact requires a skill/agent name, capability or scoped id');
+      process.exit(1);
+    }
+    const committed = join(ROOT, 'docs', 'skill-graph.json');
+    let graph: SkillGraphV2 | null = null;
+    if (existsSync(committed)) {
+      graph = upgradeSkillGraph(JSON.parse(readFileSync(committed, 'utf-8')));
+    } else {
+      graph = upgradeSkillGraph(buildGraph());
+    }
+    const result = computeImpact(graph, query);
+    console.log(args.includes('--json') ? JSON.stringify(result, null, 2) : formatImpact(result));
+    process.exit(result.targets.length === 0 ? 1 : 0);
+  }
 
   // ── Scope mode: single template layer → templates/<scope>/docs/skill-graph.json ──
   if (scopeIdx !== -1) {
@@ -2034,7 +2600,7 @@ async function main(): Promise<void> {
 
   console.log('Generating skill relationship graph...');
 
-  const graph = buildGraph();
+  const { graph, report } = buildGraphWithReport();
 
   // Ensure docs directory exists
   const docsDir = join(ROOT, 'docs');
@@ -2049,7 +2615,7 @@ async function main(): Promise<void> {
 
   // Write Markdown output
   const mdPath = join(docsDir, 'skill-graph.md');
-  const markdown = generateMarkdown(graph);
+  const markdown = generateMarkdown(graph, report);
   writeFileSync(mdPath, markdown);
   console.log(`✓ Generated: ${mdPath}`);
 

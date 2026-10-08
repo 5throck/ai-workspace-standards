@@ -521,3 +521,62 @@ shared audit:
 Design record, per-project PR list, and operational lessons (clean-tree
 upgrades, Bun/JSC `$nn` substitution hazard):
 `docs/designs/2026-09-06-skill-graph-drift-gate-autoactivation-design.md`.
+
+## Amendment 2026-10-08 — Schema v2: Scoped Node Identity with Capability Grouping (Amendment 11)
+
+(Amendment 10 stays reserved for the DEG vocabulary follow-up named in ADR-0083.)
+
+Inspection of the committed root graph (v1, `deg/v1`, 1038 nodes / 2984 edges) found
+that bare-name node ids collapsed distinct artifacts — agent and skill nodes of the
+same name overwrote each other (first-seen wins), variant skills with the same name but
+different content (e.g. `pdf-export` in co-deck vs co-price) became one node, 160
+`phase` edges pointed at never-emitted `phase<N>` targets, and 128 duplicate
+`(from, to, type)` edges existed — none of which the verifier saw, because it checked
+schema shape rather than referential integrity. Fleet convergence (ADR-0060
+Amendment 9 era, `skill-graph-analytics`) additionally keyed on the raw node id, so any
+fix that made ids scope-unique would have stopped `co-deck/pdf-export` and
+`co-price/pdf-export` from ever meeting. No skill is renamed by this amendment.
+
+Decision (design of record:
+`docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md`):
+
+- **(a) Node identity.** Skill, agent and phase node ids are `type:scope/name`
+  (`skill:co-deck/pdf-export`, `agent:co-abap/pm`, `phase:co-deck/3`), where `scope` is
+  `root`, `common` or a variant. Copies of one name with identical normalized content
+  (root, `templates/common`, variants, tracked platform mirrors) collapse to a single
+  node scoped to the highest-precedence location (root > common > variants
+  alphabetical) with `mirrors[]` listing every path; distinct content under one name
+  yields one node per `content_hash`. The hash is sha256/16 of the file with the
+  frontmatter stamps `version`, `last_updated`, `last_reviewed` and `scope` and trailing
+  whitespace normalized out (the propagation engine rewrites `scope:` per delivery
+  layer); supporting files are not hashed. Edges authored inside a scope resolve names
+  scope-first (same variant, then common, then root); unresolvable names are not
+  emitted as dangling edges.
+- **(b) Capability is the cross-project grouping key and the contract for fleet
+  convergence.** Every skill/agent node carries `capability` (optional frontmatter
+  field, default = name). Fleet convergence groups by capability, not id:
+  `converged` (>= 3 project graphs, one hash), `convergence-with-divergence` (>= 3
+  projects, >= 2 hashes — a reconciliation candidate, never auto-promoted) and
+  `hash-unknown` (a v1 project graph carries no hashes). The 3-project threshold is
+  unchanged. Same capability + same version + different hash is `version-drift` (E2).
+- **(c) Referential integrity and uniqueness are verifier invariants.** New ERRORs in
+  `verify-skill-graph.ts`: no dangling edges, no duplicate `(from, to, type)` edges,
+  unique node ids, unique `(name, scope, content_hash)`, no two nodes sharing
+  `(type, name, content_hash)` (failed collapse), `id == type:scope/name`. Isolated
+  nodes (agents WARN; ADR/decision INFO), skills without `used_by` (with report-only
+  `required_by` suggestions inferred from procedure steps) and E2 version-drift are
+  reported, non-blocking. The drift comparison covers the identity attributes but not
+  the memory-derived `usage` attribute or the checkout-dependent `mirrors`.
+- **(d) v1 graphs are read through a compat loader for one template minor cycle.**
+  `scripts/lib/skill-graph-compat.ts` (`loadSkillGraph`) upgrades a v1 file in memory
+  (scoped ids from `layer`, `capability = name`, `content_hash = null`, phase targets
+  materialized as nodes, duplicate edges dropped); every reader goes through it.
+  Projects' committed graphs stay v1 until `upgrade-project` delivers the v2 generator.
+  After one template minor cycle v1 support may be dropped by a follow-up ADR.
+
+Scope notes: the per-template scope graphs (`generate-skill-graph.ts --scope`,
+Amendment 2) keep the v1 shape in this amendment (consumers read them through the
+compat loader); overrides keyed by a bare name fan out to every node carrying that name
+(scoped keys are accepted). New read-only/report surfaces: `--impact <skill>` (reverse
+dependency blast radius), `usage` attribute joined from memory `## Skills Used`
+(`unused` / `used-but-unlinked` reports). Neither edits any SKILL.md.
