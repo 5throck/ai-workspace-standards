@@ -7,7 +7,7 @@ title: >-
   overrides or same-capability attribution (stop flagging
   architect/standup-synthesizer)
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-09T07:12:32.405+09:00'
 history:
@@ -20,5 +20,12 @@ history:
   - at: '2026-10-09T08:59:05.090+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-09T09:34:08.118+09:00'
+    from: running
+    to: done
+result: >-
+  Landed via #1488 under design 2026-10-09-skill-graph-triage-hardening:
+  HERMES.md in corpus, agent 4-way axes, same-capability edge attribution — live
+  rerun: isolatedSkills [], carriedByScoped [architect, standup-synthesizer];
+  auditor correctly remains isolated with visible axes.
 error: null
