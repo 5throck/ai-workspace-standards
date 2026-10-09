@@ -359,6 +359,10 @@
       {
         "name": "html-to-pdf",
         "path": "scripts/co-deck/html-to-pdf.ts"
+      },
+      {
+        "name": "inject-video-players",
+        "path": "scripts/co-deck/inject-video-players.ts"
       }
     ],
     "external": []

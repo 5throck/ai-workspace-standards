@@ -14,8 +14,8 @@ description: >
   phase schema changes, workspace-schema.json modified, new variant added);
   QA escalation from auditor (audit.ts ERROR >= 3 or security Critical finding).
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-09-08
+version: 1.3.3
+last_reviewed: 2026-10-09
 prerequisites: []
 metadata:
   type: process
@@ -50,21 +50,25 @@ catches that class mechanically, not by agent effort.
 
 ## Documentation/link ownership
 
-`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation 
+`project-review` owns routine documentation link-check evidence. Use `baseline-only` mode for weekly or pre-closeout docs/link validation.
 
 ## Step 0 — Machine Baseline (run BEFORE any agent dispatch)
 
 Run the validator battery and record results — this is (a) the report's Baseline
 section and (b) the reference for classifying findings as `script-gap` later.
 
+One-shot consolidated runner (T-20260912-030): `bun scripts/review-baseline.ts` is the workspace-root equivalent —
+runs the battery below in read-only mode with a PASS/FAIL summary
+(`--quiet` for summary only). In this project, run the project-local commands:
+
 ```bash
 bun run audit                                     # project/workspace standards
 bun run verify-scripts --verify                   # SCRIPTS.md registry sync
 bun run agent-lifecycle-audit                     # agent health
 bun run skill-lifecycle-audit                     # skill health
-```
 
 When operating in the workspace root, also run the template integrity and L1/L2 drift gates documented in the root maintainer playbook.
+```
 
 Record per script: PASS/FAIL/WARN counts. In variant projects, run the project's own
 `bun scripts/audit.ts` instead of the root battery.
@@ -149,7 +153,7 @@ files and cross-validate; mcp__base-map__review_code on critical scripts.]
 **Fallbacks**:
 - Background dispatch blocked by concurrency limits → run slots sequentially
   (foreground), or merge two slots into one prompt.
-- On Antigravity/Gemini CLI: `/meeting "project review" --agents [list] --rounds 2 --dialogue`.
+- On Antigravity/Gemini CLI: the meeting-facilitation skill with topic "project review" and options `--agents [list] --rounds 2 --dialogue` (the legacy `/meeting` slash command is retired).
 - No Agent tool at all: PM role-plays each slot sequentially using the same prompts.
 
 ## Step 4 — Collect, Classify, Persist
@@ -247,6 +251,8 @@ ticket was not landed.
 ## Related Skills
 
 - **project-resync**: fleet-level close-out after fixes land (commit/PR pipeline)
+- **upgrade-project**: delivers template updates to the project
+- Loop: project-review (diagnose) → project-resync (fleet sync/backport) → upgrade-project (deliver) → project-review baseline-only (verify).
 - **meeting-facilitation**: Antigravity/Gemini dispatch path for Step 3
 
 ## Output Format
