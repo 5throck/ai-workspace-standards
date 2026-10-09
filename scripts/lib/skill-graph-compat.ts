@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-09, T-20261008-009, design docs/designs/2026-10-09-skill-graph-triage-hardening-design.md D5):
+//           normalizeForHash() strips the ADR-0033 extends-stub `variant:` token alongside
+//           `scope:` — stub agent families (i18n-specialist ×14, pm ×15) differing only by
+//           that token no longer re-appear as E2 same-version-different-content findings.
 // v1.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md,
 //           ADR-0060 Amendment 11): skill-graph v2 identity primitives shared by the generator,
 //           verifier, fleet report, graph-delta-log and validate-templates:
@@ -100,7 +104,7 @@ export function normalizeForHash(content: string): string {
   if (m) {
     const fm = m[1]
       .split('\n')
-      .filter((l) => !/^(version|last_updated|last_reviewed|scope)\s*:/.test(l))
+      .filter((l) => !/^(version|last_updated|last_reviewed|scope|variant)\s*:/.test(l))
       .join('\n');
     out = `---\n${fm}\n---${lf.slice(m[0].length)}`;
   }

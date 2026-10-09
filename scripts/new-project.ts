@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.34.0
+// @version 1.35.0
+// v1.35.0 (2026-10-09, T-20261009-002): §2 overlay merges a variant package.json over
+//          the §2.5c-generated one (scalar keys variant-wins, object keys per-key via
+//          lib/package-merge.ts) instead of clobbering it — the #1432/#1433 class
+//          lost the generated Tier 2 scripts and kept the nightly scaffold E2E red
+//          2026-10-06..08.
 // v1.34.0 (2026-10-08, T-20261007-024): WARN + post-scaffold checklist item when
 //          --description/--type are omitted — the co-hr/co-news class shipped
 //          TODO(project-overview) identity placeholders on day one; the scaffold
@@ -185,6 +190,7 @@ import { computeContentHash } from './verify-readme-sync.ts';
 import { localDateISO } from './lib/local-date.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
+import { mergePackageJson } from './lib/package-merge.ts';
 import { resolveProvenanceVersion } from './helpers/template-version.ts';
 import {
   NEW_PROJECT_COPY_SKIP_ENTRIES,
@@ -859,6 +865,23 @@ for (const srcFile of walkFiles(templatesDir)) {
   // carry the file at all) — variants legitimately ship their SKILLS.md.
   if (relPath === 'skills/SKILLS.md') {
     console.log(`  ⏭️  Skipped variant overlay (registry reconcile seeds from common): ${relPath}`);
+    continue;
+  }
+  // v1.35.0 (T-20261009-002): a variant package.json MERGES over the §2.5c-generated
+  // one (scalar keys variant-wins, object keys merge per-key) instead of clobbering
+  // it — the generated file carries the Tier 2 scripts (audit/dev-sync/sync-md) a
+  // variant file may not define (the #1432/#1433 regression class kept the nightly
+  // scaffold E2E red 2026-10-06..08). Same overlay-local pattern as skills/SKILLS.md.
+  if (relPath === 'package.json') {
+    try {
+      const variantPkg = JSON.parse(readFileSync(srcFile, 'utf-8'));
+      const generatedPath = join(projectDir, 'package.json');
+      const generated = JSON.parse(readFileSync(generatedPath, 'utf-8'));
+      writeFileSync(generatedPath, JSON.stringify(mergePackageJson(generated, variantPkg), null, 2) + '\n', 'utf-8');
+      console.log(`  🔀 Merged variant package.json over generated (variant wins per key; Tier 2 scripts preserved)`);
+    } catch (err) {
+      console.log(`  ⚠️  Variant package.json unparseable — kept generated file: ${err instanceof Error ? err.message : String(err)}`);
+    }
     continue;
   }
   const destFile = join(projectDir, relPath);

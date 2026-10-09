@@ -1,4 +1,7 @@
-// @version 2.51.1
+// @version 2.52.0
+// v2.52.0 (2026-10-09, T-20261009-005/-002): tracked node_modules guard — any
+//          git-tracked node_modules path is a hard FAIL (the 7b154db3 symlink
+//          incident class; complements the slash-less .gitignore entry).
 // v2.51.1 (2026-10-08, T-20261007-001): the designLint.enabled !== true branch
 //          joins the Skip verdict — the last Pass-shaped silent skip in the
 //          battery; all three design-lint self-skip branches read [SKIP] now.
@@ -2280,6 +2283,28 @@ checkTemplateDependencyMirror();
 // Workspace root detection: presence of CONSTITUTION.md (and absence of variant.json)
 // distinguishes the governance root from generated project copies.
 const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('variant.json');
+
+// ── Tracked node_modules guard (T-20261009-005 follow-through; design
+//    2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md D4) ─────
+// The 2026-10-08 incident (7b154db3, reverted cfa72c07) committed a node_modules
+// SYMLINK through the dir-only .gitignore hole. The slash-less ignore entry closed
+// the ignore gap; this check makes any tracked node_modules path a hard FAIL so a
+// `git add -A` recurrence surfaces in the battery instead of in CI.
+{
+  const ls = Bun.spawnSync(['git', 'ls-files'], { stdout: 'pipe', stderr: 'pipe' });
+  if (ls.exitCode === 0) {
+    const tracked = new TextDecoder().decode(ls.stdout)
+      .split('\n')
+      .filter((f) => f === 'node_modules' || f.startsWith('node_modules/'));
+    if (tracked.length > 0) {
+      Fail(`Tracked node_modules paths present (${tracked.length}): ${tracked.slice(0, 5).join(', ')}${tracked.length > 5 ? ' …' : ''} — untrack them (git rm -r --cached) before landing; .gitignore cannot be trusted for this tree`);
+    } else {
+      Pass('Tracked node_modules guard: clean');
+    }
+  } else {
+    Warn('Tracked node_modules guard skipped (git ls-files failed — not a git worktree?)');
+  }
+}
 
 // ── Docs relative-link gate (design-foundation v1.2 PR-2; T-20261004-024) ─────
 // design-foundation.md §8 previously shipped a stale project path and rotted

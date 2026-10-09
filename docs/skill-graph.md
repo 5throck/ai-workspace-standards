@@ -24,7 +24,7 @@
 | `co-abap/sap-sd` | variant:co-abap | 1.0.0 | co-abap/architect, co-abap/dba, co-abap/sd-analyst | co-abap/phase 1, co-abap/phase 2 | co-abap/sap-mm (follows) | — | — |
 | `co-abap/source-command-celebrate` | variant:co-abap | 1.0.0 | co-abap/pm | co-abap/phase 6 | — | — | — |
 | `co-consult/change-impact-assessment` | variant:co-consult | 1.0.0 | co-consult/change-management-partner | co-consult/phase 1, co-consult/phase 2 | co-consult/org-readiness-assessment (composes_with), co-consult/solution-design (composes_with), co-consult/stakeholder-alignment (composes_with) | — | — |
-| `co-consult/company-intelligence` | variant:co-consult | 1.0.0 | co-consult/data-analyst, co-consult/industry-expert, co-consult/pm, co-consult/sme, co-consult/strategy-analyst | co-consult/phase 1 | co-consult/competitive-intelligence (composes_with), co-consult/financial-modeling (follows), co-consult/financial-statement-analysis (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | — | — |
+| `co-consult/company-intelligence` | variant:co-consult | 1.0.0 | co-abap/pm, co-consult/data-analyst, co-consult/industry-expert, co-consult/sme, co-consult/strategy-analyst | co-consult/phase 1 | co-consult/competitive-intelligence (composes_with), co-consult/financial-modeling (follows), co-consult/financial-statement-analysis (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | — | — |
 | `co-consult/competitive-intelligence` | variant:co-consult | 1.0.1 | co-consult/industry-expert, co-consult/strategy-analyst | co-consult/phase 1, co-consult/phase 2 | co-consult/company-intelligence (composes_with), co-consult/financial-modeling (composes_with), co-consult/insight-synthesis (composes_with) | — | — |
 | `co-consult/consulting-report-writing` | variant:co-consult | 1.0.1 | co-consult/communications-lead | co-consult/phase 3 | co-consult/executive-presentation (composes_with), co-consult/narrative-framework (composes_with) | — | — |
 | `co-consult/executive-presentation` | variant:co-consult | 1.0.1 | co-consult/communications-lead | co-consult/phase 3 | co-consult/consulting-report-writing (composes_with), co-consult/financial-modeling (composes_with), co-consult/narrative-framework (composes_with), co-consult/org-readiness-assessment (composes_with), co-consult/technical-feasibility (composes_with) | complexity-grades, business-case, readiness-scores | executive-deck |
@@ -50,13 +50,13 @@
 | `co-deck/research` | variant:co-deck | 1.2.1 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
 | `co-deck/slide-layout-gate` | variant:co-deck | 1.0.0 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
 | `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
-| `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-deck/pm | — | — | — | — |
+| `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-abap/pm | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
 | `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.2 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows), root/service-design (follows) | — | — |
 | `co-develop/code-review` | variant:co-develop | 1.0.1 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
 | `co-develop/refactoring` | variant:co-develop | 1.0.1 | co-develop/code-writer, co-game/game-debugger, co-game/game-developer | co-develop/phase 4, co-game/phase 3, co-game/phase 5 | co-develop/code-review (composes_with) | — | — |
-| `co-develop/swe-solve` | variant:co-develop | 1.1.1 | co-develop/pm | co-develop/phase 4 | — | — | — |
+| `co-develop/swe-solve` | variant:co-develop | 1.1.1 | co-abap/pm | co-develop/phase 4 | — | — | — |
 | `co-develop/test-driven-development` | variant:co-develop | 1.0.0 | co-develop/test-runner, co-game/game-debugger, co-game/game-developer, co-game/test-runner | co-develop/phase 4, co-game/phase 3, co-game/phase 5 | co-develop/code-review (follows) | — | — |
 | `co-export/customs-duty-drawback-workflow` | variant:co-export | 1.0.0 | co-export/customs-duty-drawback-specialist | co-export/phase 3, co-export/phase 4 | co-export/landed-cost-calculation (follows) | — | — |
 | `co-export/export-control-screening` | variant:co-export | 1.0.0 | co-export/export-control-compliance-specialist | co-export/phase 1, co-export/phase 2 | co-export/fta-origin-determination (composes_with), co-export/halal-certification-workflow (composes_with), co-export/hs-classification-workflow (composes_with), co-export/hs-classification-workflow (follows), co-export/market-entry-strategy (composes_with), co-export/roo-qualification-worksheet (composes_with) | — | — |
@@ -758,11 +758,10 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |
-| `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #47b04928; co-consult@1.0.0 #be8cda1c; co-deck@1.0.0 #d713af1c; co-design@1.0.0 #745d29d9; co-develop@1.0.0 #d4b4ef74; co-export@1.0.0 #51b3465d; co-game@1.0.0 #7dfe00c8; co-hr@1.0.0 #111d18eb; co-learning@1.0.0 #1e05d975; co-news@1.0.0 #6115f822; co-price@1.0.0 #1c440e73; co-safety@1.0.0 #c11ec2f1; co-security@1.0.0 #b0cccf66; co-work@1.0.0 #b84feeb2; common@1.1.0 #2cbfb77a |
-| `pm` | agent | version-drift | co-abap@1.0.0 #a33b35ce; co-consult@1.0.0 #5b453f77; co-deck@1.1.0 #9545a1d3; co-design@1.1.0 #0d8ecb22; co-develop@1.1.0 #797f196a; co-export@1.1.0 #a3ad2819; co-game@1.1.1 #4ada88f4; co-hr@0.1.0 #585a987f; co-learning@1.1.0 #78251854; co-news@1.1.0 #872e3e15; co-price@2.0.1 #541a1344; co-safety@1.0.0 #a399720d; co-security@1.0.0 #e1476efd; co-work@1.1.0 #f08897c6; common@1.3.0 #62efc3e7; root@1.2.2 #6da5972d |
+| `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #2cbfb77a |
+| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #62efc3e7; root@1.2.2 #6da5972d |
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
-| `storyteller` | agent | divergence | co-design@2.0.0 #7d5cf9c2; co-work@1.0.0 #50d9e022 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
 | `agent-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #cb7ad830; root@1.3.0 #5f3763d3 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
@@ -783,7 +782,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | Type | Count | Nodes |
 |------|-------|-------|
 | adr | 54 | (expected until docs `references` edges are mined) |
-| agent | 26 | co-abap/i18n-specialist, co-consult/i18n-specialist, co-deck/i18n-specialist, co-design/i18n-specialist, co-design/pm, co-develop/i18n-specialist, co-export/i18n-specialist, co-game/i18n-specialist, co-game/pm, co-hr/i18n-specialist, co-learning/i18n-specialist, co-news/i18n-specialist, co-news/pm, co-price/i18n-specialist, co-price/pm, co-safety/i18n-specialist, co-security/i18n-specialist, co-security/pm, co-work/i18n-specialist, co-work/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
+| agent | 11 | co-abap/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
 | decision | 2 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/standup-synthesizer |
 

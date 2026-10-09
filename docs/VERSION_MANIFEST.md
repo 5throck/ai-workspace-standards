@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-08T23:41:36.939Z
+**Generated**: 2026-10-09T00:27:58.780Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -109,7 +109,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.51.1 | scripts/audit.ts | bun |
+| audit.ts | 2.52.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.0.2 | scripts/backport-diff.ts | N/A |
@@ -149,7 +149,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.0.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.34.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.35.0 | scripts/new-project.ts | N/A |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
@@ -164,10 +164,10 @@
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | resync-audit.ts | 1.5.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
-| review-baseline.ts | 1.1.0 | scripts/review-baseline.ts | N/A |
+| review-baseline.ts | 1.2.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-graph-fleet-report.ts | 2.0.0 | scripts/skill-graph-fleet-report.ts | N/A |
+| skill-graph-fleet-report.ts | 2.1.0 | scripts/skill-graph-fleet-report.ts | N/A |
 | skill-lifecycle-audit.ts | 1.7.1 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.2.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
@@ -206,7 +206,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.53.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.54.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |

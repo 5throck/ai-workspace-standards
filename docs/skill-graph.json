@@ -536,10 +536,19 @@
       "name": "i18n-specialist",
       "scope": "co-abap",
       "capability": "i18n-specialist",
-      "content_hash": "47b049288941a9d0",
+      "content_hash": "20bb654b5b697fef",
       "version": "1.0.0",
       "mirrors": [
-        "templates/co-abap/agents/i18n-specialist.md"
+        "templates/co-abap/agents/i18n-specialist.md",
+        "templates/co-consult/agents/i18n-specialist.md",
+        "templates/co-deck/agents/i18n-specialist.md",
+        "templates/co-design/agents/i18n-specialist.md",
+        "templates/co-export/agents/i18n-specialist.md",
+        "templates/co-game/agents/i18n-specialist.md",
+        "templates/co-price/agents/i18n-specialist.md",
+        "templates/co-safety/agents/i18n-specialist.md",
+        "templates/co-security/agents/i18n-specialist.md",
+        "templates/co-work/agents/i18n-specialist.md"
       ]
     },
     {
@@ -588,10 +597,18 @@
       "name": "pm",
       "scope": "co-abap",
       "capability": "pm",
-      "content_hash": "a33b35ce3382c005",
+      "content_hash": "f79b19cef3257d9f",
       "version": "1.0.0",
       "mirrors": [
-        "templates/co-abap/agents/pm.md"
+        "templates/co-abap/agents/pm.md",
+        "templates/co-consult/agents/pm.md",
+        "templates/co-deck/agents/pm.md",
+        "templates/co-design/agents/pm.md",
+        "templates/co-develop/agents/pm.md",
+        "templates/co-game/agents/pm.md",
+        "templates/co-learning/agents/pm.md",
+        "templates/co-security/agents/pm.md",
+        "templates/co-work/agents/pm.md"
       ]
     },
     {
@@ -738,19 +755,6 @@
       ]
     },
     {
-      "id": "agent:co-consult/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-consult",
-      "name": "i18n-specialist",
-      "scope": "co-consult",
-      "capability": "i18n-specialist",
-      "content_hash": "be8cda1cb5b68273",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-consult/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-consult/industry-expert",
       "type": "agent",
       "layer": "variant:co-consult",
@@ -761,19 +765,6 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-consult/agents/industry-expert.md"
-      ]
-    },
-    {
-      "id": "agent:co-consult/pm",
-      "type": "agent",
-      "layer": "variant:co-consult",
-      "name": "pm",
-      "scope": "co-consult",
-      "capability": "pm",
-      "content_hash": "5b453f770b7daac2",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-consult/agents/pm.md"
       ]
     },
     {
@@ -907,19 +898,6 @@
       ]
     },
     {
-      "id": "agent:co-deck/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-deck",
-      "name": "i18n-specialist",
-      "scope": "co-deck",
-      "capability": "i18n-specialist",
-      "content_hash": "d713af1cc4d36901",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-deck/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-deck/image-curator",
       "type": "agent",
       "layer": "variant:co-deck",
@@ -956,19 +934,6 @@
       "version": "2.1.1",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
-      ]
-    },
-    {
-      "id": "agent:co-deck/pm",
-      "type": "agent",
-      "layer": "variant:co-deck",
-      "name": "pm",
-      "scope": "co-deck",
-      "capability": "pm",
-      "content_hash": "9545a1d33b354e20",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-deck/agents/pm.md"
       ]
     },
     {
@@ -1037,32 +1002,6 @@
       ]
     },
     {
-      "id": "agent:co-design/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-design",
-      "name": "i18n-specialist",
-      "scope": "co-design",
-      "capability": "i18n-specialist",
-      "content_hash": "745d29d9d22b8d04",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-design/agents/i18n-specialist.md"
-      ]
-    },
-    {
-      "id": "agent:co-design/pm",
-      "type": "agent",
-      "layer": "variant:co-design",
-      "name": "pm",
-      "scope": "co-design",
-      "capability": "pm",
-      "content_hash": "0d8ecb22ed5b282d",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-design/agents/pm.md"
-      ]
-    },
-    {
       "id": "agent:co-design/prototype-engineer",
       "type": "agent",
       "layer": "variant:co-design",
@@ -1094,9 +1033,9 @@
       "layer": "variant:co-design",
       "name": "storyteller",
       "scope": "co-design",
-      "capability": "storyteller",
-      "content_hash": "7d5cf9c29eadf392",
-      "version": "2.0.0",
+      "capability": "design-brand-narrative",
+      "content_hash": "4456602ea42f139c",
+      "version": "2.1.0",
       "mirrors": [
         "templates/co-design/agents/storyteller.md"
       ]
@@ -1186,23 +1125,11 @@
       "name": "i18n-specialist",
       "scope": "co-develop",
       "capability": "i18n-specialist",
-      "content_hash": "d4b4ef74aad80e1e",
+      "content_hash": "02317f2aa681eab6",
       "version": "1.0.0",
       "mirrors": [
-        "templates/co-develop/agents/i18n-specialist.md"
-      ]
-    },
-    {
-      "id": "agent:co-develop/pm",
-      "type": "agent",
-      "layer": "variant:co-develop",
-      "name": "pm",
-      "scope": "co-develop",
-      "capability": "pm",
-      "content_hash": "797f196a6bc618b2",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-develop/agents/pm.md"
+        "templates/co-develop/agents/i18n-specialist.md",
+        "templates/co-learning/agents/i18n-specialist.md"
       ]
     },
     {
@@ -1323,19 +1250,6 @@
       ]
     },
     {
-      "id": "agent:co-export/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-export",
-      "name": "i18n-specialist",
-      "scope": "co-export",
-      "capability": "i18n-specialist",
-      "content_hash": "51b3465d505f05d6",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-export/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-export/logistics-coordinator",
       "type": "agent",
       "layer": "variant:co-export",
@@ -1368,7 +1282,7 @@
       "name": "pm",
       "scope": "co-export",
       "capability": "pm",
-      "content_hash": "a3ad281972d531af",
+      "content_hash": "e8fec1369f7ce17e",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-export/agents/pm.md"
@@ -1463,32 +1377,6 @@
       "version": "1.0.1",
       "mirrors": [
         "templates/co-game/agents/game-developer.md"
-      ]
-    },
-    {
-      "id": "agent:co-game/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-game",
-      "name": "i18n-specialist",
-      "scope": "co-game",
-      "capability": "i18n-specialist",
-      "content_hash": "7dfe00c86351248c",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-game/agents/i18n-specialist.md"
-      ]
-    },
-    {
-      "id": "agent:co-game/pm",
-      "type": "agent",
-      "layer": "variant:co-game",
-      "name": "pm",
-      "scope": "co-game",
-      "capability": "pm",
-      "content_hash": "4ada88f4908f17eb",
-      "version": "1.1.1",
-      "mirrors": [
-        "templates/co-game/agents/pm.md"
       ]
     },
     {
@@ -1628,10 +1516,11 @@
       "name": "i18n-specialist",
       "scope": "co-hr",
       "capability": "i18n-specialist",
-      "content_hash": "111d18eb53b78011",
+      "content_hash": "909b0ed3850e5e28",
       "version": "1.0.0",
       "mirrors": [
-        "templates/co-hr/agents/i18n-specialist.md"
+        "templates/co-hr/agents/i18n-specialist.md",
+        "templates/co-news/agents/i18n-specialist.md"
       ]
     },
     {
@@ -1706,7 +1595,7 @@
       "name": "pm",
       "scope": "co-hr",
       "capability": "pm",
-      "content_hash": "585a987fff821112",
+      "content_hash": "d82c3dadcb746067",
       "version": "0.1.0",
       "mirrors": [
         "templates/co-hr/agents/pm.md"
@@ -1752,32 +1641,6 @@
       ]
     },
     {
-      "id": "agent:co-learning/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-learning",
-      "name": "i18n-specialist",
-      "scope": "co-learning",
-      "capability": "i18n-specialist",
-      "content_hash": "1e05d975128d9837",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-learning/agents/i18n-specialist.md"
-      ]
-    },
-    {
-      "id": "agent:co-learning/pm",
-      "type": "agent",
-      "layer": "variant:co-learning",
-      "name": "pm",
-      "scope": "co-learning",
-      "capability": "pm",
-      "content_hash": "782518543594c54a",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-learning/agents/pm.md"
-      ]
-    },
-    {
       "id": "agent:co-news/fact-checker",
       "type": "agent",
       "layer": "variant:co-news",
@@ -1804,19 +1667,6 @@
       ]
     },
     {
-      "id": "agent:co-news/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-news",
-      "name": "i18n-specialist",
-      "scope": "co-news",
-      "capability": "i18n-specialist",
-      "content_hash": "6115f822427e84fe",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-news/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-news/legal-researcher",
       "type": "agent",
       "layer": "variant:co-news",
@@ -1836,7 +1686,7 @@
       "name": "pm",
       "scope": "co-news",
       "capability": "pm",
-      "content_hash": "872e3e155fcdd4d4",
+      "content_hash": "954d30fd33ad0112",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-news/agents/pm.md"
@@ -1960,19 +1810,6 @@
       ]
     },
     {
-      "id": "agent:co-price/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-price",
-      "name": "i18n-specialist",
-      "scope": "co-price",
-      "capability": "i18n-specialist",
-      "content_hash": "1c440e731607b9f4",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-price/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-price/l10n-auditor",
       "type": "agent",
       "layer": "variant:co-price",
@@ -2018,7 +1855,7 @@
       "name": "pm",
       "scope": "co-price",
       "capability": "pm",
-      "content_hash": "541a13445627a83d",
+      "content_hash": "82dc797aac11f8e3",
       "version": "2.0.1",
       "mirrors": [
         "templates/co-price/agents/pm.md"
@@ -2090,26 +1927,13 @@
       ]
     },
     {
-      "id": "agent:co-safety/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-safety",
-      "name": "i18n-specialist",
-      "scope": "co-safety",
-      "capability": "i18n-specialist",
-      "content_hash": "c11ec2f16480b9bf",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-safety/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-safety/pm",
       "type": "agent",
       "layer": "variant:co-safety",
       "name": "pm",
       "scope": "co-safety",
       "capability": "pm",
-      "content_hash": "a399720dc6c4af9d",
+      "content_hash": "04bb3d351f1ba184",
       "version": "1.0.0",
       "mirrors": [
         "templates/co-safety/agents/pm.md"
@@ -2142,19 +1966,6 @@
       ]
     },
     {
-      "id": "agent:co-security/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-security",
-      "name": "i18n-specialist",
-      "scope": "co-security",
-      "capability": "i18n-specialist",
-      "content_hash": "b0cccf660d8cd2eb",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-security/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-security/patch-engineer",
       "type": "agent",
       "layer": "variant:co-security",
@@ -2178,19 +1989,6 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-security/agents/pentester.md"
-      ]
-    },
-    {
-      "id": "agent:co-security/pm",
-      "type": "agent",
-      "layer": "variant:co-security",
-      "name": "pm",
-      "scope": "co-security",
-      "capability": "pm",
-      "content_hash": "e1476efdb4034c9b",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-security/agents/pm.md"
       ]
     },
     {
@@ -2259,19 +2057,6 @@
       ]
     },
     {
-      "id": "agent:co-work/i18n-specialist",
-      "type": "agent",
-      "layer": "variant:co-work",
-      "name": "i18n-specialist",
-      "scope": "co-work",
-      "capability": "i18n-specialist",
-      "content_hash": "b84feeb232a860c0",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-work/agents/i18n-specialist.md"
-      ]
-    },
-    {
       "id": "agent:co-work/ms365-expert",
       "type": "agent",
       "layer": "variant:co-work",
@@ -2282,19 +2067,6 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-work/agents/ms365-expert.md"
-      ]
-    },
-    {
-      "id": "agent:co-work/pm",
-      "type": "agent",
-      "layer": "variant:co-work",
-      "name": "pm",
-      "scope": "co-work",
-      "capability": "pm",
-      "content_hash": "f08897c6831d7cd2",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-work/agents/pm.md"
       ]
     },
     {
@@ -2316,9 +2088,9 @@
       "layer": "variant:co-work",
       "name": "storyteller",
       "scope": "co-work",
-      "capability": "storyteller",
-      "content_hash": "50d9e02222b23c27",
-      "version": "1.0.0",
+      "capability": "org-culture-narrative",
+      "content_hash": "7284567c5085ead0",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-work/agents/storyteller.md"
       ]
@@ -9826,6 +9598,12 @@
     },
     {
       "type": "accountable_for",
+      "from": "agent:co-abap/pm",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
       "from": "agent:co-abap/security-monitor",
       "to": "procedure.co-abap.security-closeout-review",
       "source": "raci_matrix"
@@ -9882,12 +9660,6 @@
       "type": "accountable_for",
       "from": "agent:co-deck/pdf-export",
       "to": "procedure.co-deck.deck-publish-and-version",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "agent:co-deck/pm",
-      "to": "procedure.co-deck.lecture-deck-production",
       "source": "raci_matrix"
     },
     {
@@ -16103,7 +15875,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-deck.slidedata-derived-doc-sync",
-      "to": "agent:co-deck/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -17846,7 +17618,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.architecture-design",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -17877,7 +17649,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.environment-bootstrap",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -17908,14 +17680,14 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.feature-implementation",
-      "to": "agent:co-develop/designer",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.feature-implementation",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-develop/designer",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -17952,7 +17724,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.release-verification",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -17983,7 +17755,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.security-release-retrospective",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -18008,7 +17780,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-learning.technical-planning",
-      "to": "agent:co-learning/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -20395,6 +20167,12 @@
     {
       "type": "used_by",
       "from": "skill:co-consult/company-intelligence",
+      "to": "agent:co-abap/pm",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-consult/company-intelligence",
       "to": "agent:co-consult/data-analyst",
       "source": "required_skills",
       "provenance": {
@@ -20413,12 +20191,6 @@
         "field": "required_skills",
         "index": 0
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-consult/company-intelligence",
-      "to": "agent:co-consult/pm",
-      "source": "skill_manifest"
     },
     {
       "type": "used_by",
@@ -22576,7 +22348,7 @@
     {
       "type": "used_by",
       "from": "skill:co-deck/theme-authoring",
-      "to": "agent:co-deck/pm",
+      "to": "agent:co-abap/pm",
       "source": "skill_manifest"
     },
     {
@@ -22963,7 +22735,7 @@
     {
       "type": "used_by",
       "from": "skill:co-develop/swe-solve",
-      "to": "agent:co-develop/pm",
+      "to": "agent:co-abap/pm",
       "source": "skill_manifest"
     },
     {

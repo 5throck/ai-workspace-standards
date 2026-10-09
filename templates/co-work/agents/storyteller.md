@@ -2,9 +2,10 @@
 name: storyteller
 role: Organizational culture, change narratives, and institutional knowledge specialist
 status: active
-version: "1.0.0"
+version: "1.1.0"
+capability: org-culture-narrative
 formal_name: Organizational Storyteller & Culture Steward
-last_updated: "2026-06-20"
+last_updated: "2026-10-09"
 tier:
   claude: medium
   gemini: medium

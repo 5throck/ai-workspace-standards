@@ -1,8 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.53.0
+ * @version 1.54.0
  *
+ * v1.54.0 (2026-10-09, T-20261009-002, design docs/designs/2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md D2):
+ *          new VA-08 scaffold-package-contract — common package.json retains the Tier 2 trio
+ *          (audit/dev-sync/sync-md); every variant package.json parses and simulates the
+ *          v1.35.0 scaffold merge into a trio-superset. Complements the nightly E2E
+ *          (Test 11) whose conclusion review-baseline battery #8 now surfaces.
  * v1.53.0 (2026-10-08, skill-graph v2 E2, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §7):
  *          new WARN arm `skill-graph-version-drift` — reads docs/skill-graph.json through the compat
  *          loader and reports skill capabilities whose scoped nodes share a version but differ in
@@ -326,6 +331,7 @@ import {
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
+import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
@@ -400,6 +406,42 @@ function fail(variant: string, check: string, msg: string, fix?: string) {
   if (!JSON_MODE) {
     console.log(`${colors.red}[FAIL]${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
+  }
+}
+
+// VA-08 (T-20261009-002, design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2):
+// the scaffold package contract — templates/common/package.json retains the Tier 2 trio
+// (audit, dev-sync, sync-md) and every variant package.json (optional since v1.35.0
+// scaffold-time merge) parses and merges into a trio-superset. Static simulation of the
+// new-project.ts §2 merge; the runtime guarantee is the nightly E2E (surfaced by
+// review-baseline battery #8).
+let packageContractCommonChecked = false;
+function checkVariantPackageContract(variant: string): void {
+  if (!packageContractCommonChecked) {
+    packageContractCommonChecked = true;
+    try {
+      const commonPkg = JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8'));
+      const commonVerdict = evaluateScaffoldPackageContract(commonPkg, null);
+      if (!commonVerdict.ok) {
+        fail('common', 'scaffold-package-contract', `scaffold package contract violated: ${commonVerdict.reason}`, 'Restore the Tier 2 scripts — templates/common/package.json is the SSOT every project package.json is generated from');
+      }
+    } catch (err) {
+      fail('common', 'scaffold-package-contract', `templates/common/package.json unparseable: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  const variantPkgPath = join('templates', variant, 'package.json');
+  let variantPkg: { scripts?: unknown } | null = null;
+  if (existsSync(variantPkgPath)) {
+    try {
+      variantPkg = JSON.parse(readFileSync(variantPkgPath, 'utf8'));
+    } catch (err) {
+      fail(variant, 'scaffold-package-contract', `templates/${variant}/package.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`, 'Fix or remove the variant package.json — scaffolds merge it over the generated one (variant wins per key)');
+      return;
+    }
+  }
+  const verdict = evaluateScaffoldPackageContract(JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8')), variantPkg);
+  if (!verdict.ok) {
+    fail(variant, 'scaffold-package-contract', `scaffold package contract violated: ${verdict.reason}`, 'See design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2 — the scaffold merges common ∪ variant (variant wins per key)');
   }
 }
 
@@ -5636,6 +5678,7 @@ function main(): number {
       // Script parity check removed (dead code after ADR-0036 TypeScript migration)
       checkContextSync(variant);
       checkReadmePresence(variant);
+      checkVariantPackageContract(variant);   // VA-08: scaffold package contract (T-20261009-002)
       variantsChecked++;
     }
   }

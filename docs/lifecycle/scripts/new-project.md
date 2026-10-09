@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.34.0
+- **Version**: 1.35.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-08
 - **Last Reviewer**: automation-engineer
@@ -43,6 +43,7 @@
 | 2026-09-27 | production | production | v1.32.0 (T-20260927-019): pinned variant detection repaired — getValidVariants used `git archive <tag> --list` (invalid syntax; every --version scaffold failed); replaced with `git ls-tree -r --name-only <tag> -- templates/`. Live-verified via pinned gateway scaffold (template-v0.7.0). | automation-engineer |
 | 2026-10-08 | production | production | v1.34.0 (T-20261007-024): WARN + post-scaffold checklist item when --description/--type are omitted — the co-hr/co-news class shipped TODO(project-overview) placeholders on day one; the scaffold says so itself. | automation-engineer |
 | 2026-09-29 | production | production | v1.33.0 (T-20260929-002): §9.5 seeds the initial scaffold commit (`chore: initial scaffold (new-project)`) — zero-commit scaffolds abort upgrade-project (T-20260921-001 class); the seed commit satisfies the scaffolded pre-commit sync-context contract with a single-use nonce. §5a hashes README via verify-readme-sync's own computeContentHash (local strip kept the frontmatter's trailing newline — stale-by-construction hashes) and stamps the Last Updated date so the hook auto-date is a no-op. E2E Test 4 asserts HEAD exists (test-new-project 1.9.0). | automation-engineer |
+| 2026-10-09 | production | production | v1.35.0 (T-20261009-002): §2 overlay merges a variant package.json over the §2.5c-generated one (scalar keys variant-wins, object keys per-key via helpers/package-merge.ts 1.0.0) instead of clobbering it — ends the #1432/#1433 Tier-2-loss class that kept the nightly scaffold E2E red 2026-10-06..08. Spec: docs/designs/2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md | automation-engineer |
 
 ## Acceptance Criteria
 
