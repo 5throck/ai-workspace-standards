@@ -6,7 +6,7 @@ title: >-
   a standing validator and surface nightly E2E conclusions in the daily review
   machine baseline
 priority: high
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-09T07:11:04.018+09:00'
 history:
@@ -19,5 +19,15 @@ history:
   - at: '2026-10-09T08:59:05.059+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-09T09:34:08.101+09:00'
+    from: running
+    to: done
+result: >-
+  Landed via #1488 under design
+  2026-10-09-scaffold-package-merge-and-baseline-surfacing: new-project 1.35.0
+  variant package.json merge (E2E ALL PASSED, merge line verified),
+  validate-templates 1.54.0 VA-08 scaffold-package-contract, review-baseline
+  1.2.0 battery #8 nightly conclusion surfacing, audit 2.52.0 tracked
+  node_modules guard (T-20261009-005 follow-through). Upgrade-time package merge
+  noted as open follow-up in upgrade-policy comment.
 error: null
