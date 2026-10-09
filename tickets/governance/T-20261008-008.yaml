@@ -11,7 +11,7 @@ title: >-
   intentional-fork follow-up candidates; needs co-safety-owner review since the
   forks carry the safety-os-skill-structure audit_exception contract
 priority: low
-status: waiting
+status: review
 attempts: 0
 created_at: '2026-10-08T12:38:15.995+09:00'
 history:
@@ -21,5 +21,8 @@ history:
   - at: '2026-10-09T09:34:08.217+09:00'
     from: backlog
     to: waiting
+  - at: '2026-10-09T10:09:02.126+09:00'
+    from: waiting
+    to: review
 result: null
 error: null
