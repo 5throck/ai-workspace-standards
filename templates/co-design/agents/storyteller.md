@@ -2,8 +2,9 @@
 name: storyteller
 status: active
 formal_name: Brand Narrative & Design Principles Lead
-last_updated: "2026-08-16"
-version: "2.0.0"
+last_updated: "2026-10-09"
+version: "2.1.0"
+capability: design-brand-narrative
 tier:
   claude: medium
   gemini: medium

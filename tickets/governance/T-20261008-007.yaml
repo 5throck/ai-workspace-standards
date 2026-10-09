@@ -8,12 +8,18 @@ title: >-
   one under a future wave, or declare both as distinct capabilities with the
   capability: key per the 2026-10-08 reconciliation wave convention)
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-08T12:38:15.981+09:00'
 history:
   - at: '2026-10-08T12:38:15.981+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T08:59:05.167+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T08:59:05.182+09:00'
+    from: waiting
+    to: running
 result: null
 error: null

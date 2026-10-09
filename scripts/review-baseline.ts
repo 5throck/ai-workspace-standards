@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-09, T-20261009-002): battery #8 — nightly scaffold E2E conclusion
+//          surfacing via gh run list; red nightly surfaces as a passed-with-WARN note
+//          that prints even under --quiet. Network-dependent, never fails the battery.
+// v1.1.0 (earlier): variant-claims battery entry.
 /**
  * review-baseline.ts — consolidated read-only runner for the project-review
  * Step 0 baseline battery (T-20260912-030).
@@ -93,6 +97,42 @@ for (const v of validators) {
   } else if (!quiet) {
     console.log(`✅ ${v.name} — ${note}`);
   }
+}
+
+// T-20261009-002 (design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D3):
+// battery #8 — surface the nightly scaffold E2E conclusion. The 2026-10-06..08 red
+// streak went unnoticed because no local battery looked at CI. Network-dependent:
+// gh unavailability must NOT fail the battery; a red nightly is surfaced as a
+// passed-with-WARN note that prints even under --quiet (the 01:30 runner runs
+// exactly --quiet, design R10).
+{
+  const name = "nightly E2E conclusion surfacing (nightly-scaffold-e2e.yml)";
+  let ok = true;
+  let warn = false;
+  let note = "skipped (gh unavailable or timed out)";
+  const gh = Bun.spawnSync(
+    ["gh", "run", "list", "--workflow=nightly-scaffold-e2e.yml", "--limit", "1", "--json", "conclusion,createdAt,url,databaseId"],
+    { stdout: "pipe", stderr: "pipe", timeout: 15_000 },
+  );
+  if (gh.exitCode === 0) {
+    try {
+      const runs = JSON.parse(new TextDecoder().decode(gh.stdout));
+      const r = Array.isArray(runs) ? runs[0] : undefined;
+      if (r?.conclusion === "success") {
+        note = `nightly green as of ${r.createdAt}`;
+      } else if (r?.conclusion === "failure") {
+        warn = true;
+        note = `WARN: nightly scaffold E2E FAILED — run ${r.databaseId} (${r.createdAt}) ${r.url} — scaffold-contract regression class (T-20261009-002); run bun scripts/test-new-project.ts to reproduce`;
+      } else {
+        note = `nightly status: ${r?.status ?? "unknown"}, conclusion: ${r?.conclusion ?? "none"}`;
+      }
+    } catch {
+      note = "skipped (unparseable gh output)";
+    }
+  }
+  results.push({ name, ok, note });
+  if (warn) console.error(`⚠️  ${name} — ${note}`);
+  else if (!quiet) console.log(`✅ ${name} — ${note}`);
 }
 
 const failures = results.filter((r) => !r.ok);

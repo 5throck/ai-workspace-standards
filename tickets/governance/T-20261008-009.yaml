@@ -8,12 +8,18 @@ title: >-
   every analysis run — noted by the 2026-10-08 reconciliation wave; scripts/
   change
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-08T12:38:16.015+09:00'
 history:
   - at: '2026-10-08T12:38:16.015+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T08:59:05.135+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T08:59:05.151+09:00'
+    from: waiting
+    to: running
 result: null
 error: null

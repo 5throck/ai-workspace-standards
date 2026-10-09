@@ -2,7 +2,14 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
- * @version 2.0.0
+ * @version 2.1.0
+ *
+ * v2.1.0 (2026-10-09, T-20261009-008, design docs/designs/2026-10-09-skill-graph-triage-hardening-design.md D1-D3):
+ *          HERMES.md joins the docRef corpus (5 bases); isolated agents carry the same
+ *          4-way axes as skills; same-capability edge attribution — L0 nodes whose
+ *          same-name scoped copies hold the edges report under rootOrphans.carriedByScoped
+ *          instead of flagging as isolated (the 2026-10-09 architect/standup-synthesizer
+ *          false-positive class).
  *
  * v2.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §3.3,
  *         ADR-0060 Amendment 11): graphs load through scripts/lib/skill-graph-compat.ts (v1 and v2
@@ -75,7 +82,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -98,7 +105,9 @@ interface Snapshot {
   jaccard: Record<string, number>;
   /** v2.0.0: capability-keyed convergence classification (threshold = CONVERGENCE_THRESHOLD). */
   convergence?: ConvergenceResult;
-  /** v1.1.0: root-graph orphan cross-check (4-way: definition+registry+mirror+reference). */
+  /** v1.1.0: root-graph orphan cross-check (4-way: definition+registry+mirror+reference).
+   *  v2.1.0: isolatedAgents carries the same axes as skills; carriedByScoped lists L0
+   *  nodes whose same-name scoped copies hold the edges (v2 re-attribution, not isolation). */
   rootOrphans?: {
     isolatedSkills: Array<{
       id: string;
@@ -106,7 +115,13 @@ interface Snapshot {
       mirrors: string[];
       docRefs: number;
     }>;
-    isolatedAgents: string[];
+    isolatedAgents: Array<{
+      id: string;
+      registry: boolean;
+      mirrors: string[];
+      docRefs: number;
+    }>;
+    carriedByScoped: string[];
   };
 }
 
@@ -285,28 +300,60 @@ function fleetSkillSet(
  * v1.1.0 — Root-graph orphan cross-check. Isolation = zero edges in the root
  * graph. Each isolated root skill/agent is cross-checked on the remaining axes
  * of the 4-way orphan criteria (definition=the node itself, registry, mirror,
- * reference): registry = SKILLS.md row, mirrors = which of the 4 platform
- * skill bases carry the skill, docRefs = occurrences in the bounded workflow-doc
- * corpus (platform/agent context docs + procedures/ + process/).
+ * reference): registry = SKILLS.md row (skills) or the VERSION_MANIFEST row /
+ * lifecycle record (agents), mirrors = which of the 5 platform skill bases
+ * carry the skill (skills) or the root agents/ directory (agents), docRefs =
+ * occurrences in the bounded workflow-doc corpus (platform/agent context docs +
+ * procedures/ + process/).
+ *
+ * v2.1.0 (T-20261009-008, design docs/designs/2026-10-09-skill-graph-triage-hardening-design.md D3):
+ * same-capability edge attribution — an L0 node whose same-name scoped copies
+ * hold ≥1 edge is NOT isolated (v2 re-attributed the edges at scope time); the
+ * name is reported under carriedByScoped instead of the isolated lists.
  */
 function analyzeRootOrphans(
   rootGraph: SkillGraph,
 ): NonNullable<Snapshot["rootOrphans"]> {
-  const connected = new Set<string>();
+  const edgeTouch = new Map<string, number>();
   for (const e of rootGraph.edges ?? []) {
-    if (e.from) connected.add(e.from);
-    if (e.to) connected.add(e.to);
+    if (e.from) edgeTouch.set(e.from, (edgeTouch.get(e.from) ?? 0) + 1);
+    if (e.to) edgeTouch.set(e.to, (edgeTouch.get(e.to) ?? 0) + 1);
   }
+  const connected = new Set<string>(edgeTouch.keys());
   // v2: the root graph carries every variant's scoped copy; the orphan cross-check is about the
   // workspace-root (L0) assets, matched by bare name against registry/mirrors/doc corpus.
-  const isolated = (rootGraph.nodes ?? []).filter((n) => n.type && !connected.has(n.id));
+  // D3: scoped copies holding edges attribute to their bare name.
+  const scopedEdgesByName = new Map<string, number>();
+  for (const n of rootGraph.nodes ?? []) {
+    if (n.type === "phase" || n.layer === "L0") continue;
+    const touch = edgeTouch.get(n.id) ?? 0;
+    if (touch > 0) scopedEdgesByName.set(nameOf(n), (scopedEdgesByName.get(nameOf(n)) ?? 0) + touch);
+  }
+  const isolated = (rootGraph.nodes ?? []).filter(
+    (n) => n.type && n.layer === "L0" && !connected.has(n.id) && !(scopedEdgesByName.get(nameOf(n)) ?? 0),
+  );
+  const carriedByScoped = (rootGraph.nodes ?? [])
+    .filter(
+      (n) =>
+        n.type &&
+        n.type !== "phase" &&
+        n.layer === "L0" &&
+        !connected.has(n.id) &&
+        (scopedEdgesByName.get(nameOf(n)) ?? 0) > 0,
+    )
+    .map((n) => nameOf(n));
 
   const registryPath = join("skills", "SKILLS.md");
   const registry = existsSync(registryPath) ? readFileSync(registryPath, "utf8") : "";
+  const agentsRegistry = existsSync(join("docs", "VERSION_MANIFEST.md"))
+    ? readFileSync(join("docs", "VERSION_MANIFEST.md"), "utf8")
+    : "";
+  const agentRegistered = (name: string): boolean =>
+    agentsRegistry.includes(`\`${name}\``) || existsSync(join("docs", "lifecycle", "agents", `${name}.md`));
   const MIRROR_BASES = PLATFORM_MIRROR_DIRS;
 
   const corpusFiles: string[] = [];
-  for (const f of ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md"]) {
+  for (const f of ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"]) {
     if (existsSync(f)) corpusFiles.push(f);
   }
   const walkCorpus = (dir: string, depth: number): void => {
@@ -331,9 +378,16 @@ function analyzeRootOrphans(
       mirrors: MIRROR_BASES.filter((b) => existsSync(join(b, nameOf(n), "SKILL.md"))),
       docRefs: corpus.split(nameOf(n).toLowerCase()).length - 1,
     }));
-  const isolatedAgents = isolated.filter((n) => n.type === "agent" && n.layer === "L0").map((n) => nameOf(n));
+  const isolatedAgents = isolated
+    .filter((n) => n.type === "agent" && n.layer === "L0")
+    .map((n) => ({
+      id: nameOf(n),
+      registry: agentRegistered(nameOf(n)),
+      mirrors: existsSync(join("agents", `${nameOf(n)}.md`)) ? ["agents/"] : [],
+      docRefs: corpus.split(nameOf(n).toLowerCase()).length - 1,
+    }));
 
-  return { isolatedSkills, isolatedAgents };
+  return { isolatedSkills, isolatedAgents, carriedByScoped };
 }
 
 function markdownReport(
@@ -434,26 +488,44 @@ function markdownReport(
   }
 
   // v1.1.0 — root-graph orphan cross-check (4-way: definition+registry+mirror+reference)
+  // v2.1.0 — agent axes + carriedByScoped attribution (T-20261009-008)
   lines.push("## Root-graph orphan candidates (4-way cross-check)", "");
-  if (!orphans || (orphans.isolatedSkills.length === 0 && orphans.isolatedAgents.length === 0)) {
+  const orphanCount = orphans
+    ? orphans.isolatedSkills.length + orphans.isolatedAgents.length
+    : 0;
+  if (!orphans || (orphanCount === 0 && orphans.carriedByScoped.length === 0)) {
     lines.push("None — every root skill and agent carries at least one graph edge.");
     lines.push("");
   } else {
-    lines.push("Graph-isolated (zero edges). Cross-axes: registry = SKILLS.md row, mirrors = platform skill bases, refs = workflow-doc corpus mentions.");
-    lines.push("Triage: all four axes present → graph-edge gap (file an overrides entry or citation); zero axes → true orphan (retire or wire in).");
-    lines.push("");
-    if (orphans.isolatedAgents.length > 0) {
-      lines.push(`- isolated agents: ${orphans.isolatedAgents.join(", ")}`);
+    if (orphans.carriedByScoped.length > 0) {
+      lines.push(`Carried by scoped copies (v2 edge re-attribution — NOT isolated): ${orphans.carriedByScoped.join(", ")}`);
+      lines.push("");
     }
-    for (const o of orphans.isolatedSkills) {
-      const axes = [
-        o.registry ? "registry ✓" : "registry ✗",
-        `mirrors ${o.mirrors.length}/4`,
-        `refs ${o.docRefs}`,
-      ].join(", ");
-      lines.push(`- ${o.id}: ${axes}`);
+    if (orphanCount > 0) {
+      lines.push("Graph-isolated (zero edges, no scoped-copy attribution). Cross-axes: registry = SKILLS.md row (skills) or VERSION_MANIFEST/lifecycle record (agents), mirrors = platform skill bases (skills) or root agents/ (agents), refs = workflow-doc corpus mentions.");
+      lines.push("Triage: all four axes present → graph-edge gap (file an overrides entry or citation); zero axes → true orphan (retire or wire in).");
+      lines.push("");
+      if (orphans.isolatedAgents.length > 0) {
+        lines.push("- isolated agents:");
+        for (const o of orphans.isolatedAgents) {
+          const axes = [
+            o.registry ? "registry ✓" : "registry ✗",
+            o.mirrors.length > 0 ? "agents/ ✓" : "agents/ ✗",
+            `refs ${o.docRefs}`,
+          ].join(", ");
+          lines.push(`  - ${o.id}: ${axes}`);
+        }
+      }
+      for (const o of orphans.isolatedSkills) {
+        const axes = [
+          o.registry ? "registry ✓" : "registry ✗",
+          `mirrors ${o.mirrors.length}/5`,
+          `refs ${o.docRefs}`,
+        ].join(", ");
+        lines.push(`- ${o.id}: ${axes}`);
+      }
+      lines.push("");
     }
-    lines.push("");
   }
   return lines.join("\n");
 }

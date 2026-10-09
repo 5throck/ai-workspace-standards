@@ -3129,22 +3129,22 @@
     ]
   },
   "jaccard": {
-    "co-abap": 0.9063386944181646,
-    "co-architect": 0.9431500465983225,
-    "co-consult": 0.7509433962264151,
-    "co-deck": 0.928030303030303,
-    "co-design": 0.9345971563981043,
-    "co-develop": 0.9385633270321361,
-    "co-export": 0.771563981042654,
-    "co-game": 0.9214015151515151,
-    "co-hr": 0.771996215704825,
-    "co-learning": 0.9379699248120301,
-    "co-newbiz": 0.7722132471728594,
-    "co-news": 0.7886255924170616,
-    "co-price": 0.7572906867356538,
-    "co-safety": 0.753514526710403,
-    "co-security": 0.9328287606433302,
-    "co-work": 0.943127962085308
+    "co-abap": 0.9064272211720227,
+    "co-architect": 0.9441860465116279,
+    "co-consult": 0.7511781338360037,
+    "co-deck": 0.9280983916745507,
+    "co-design": 0.935666982024598,
+    "co-develop": 0.9386213408876298,
+    "co-export": 0.771780303030303,
+    "co-game": 0.9214758751182592,
+    "co-hr": 0.772211720226843,
+    "co-learning": 0.9380281690140845,
+    "co-newbiz": 0.7723970944309928,
+    "co-news": 0.7888257575757576,
+    "co-price": 0.7575187969924813,
+    "co-safety": 0.7537453183520599,
+    "co-security": 0.9328922495274102,
+    "co-work": 0.9441816461684012
   },
   "convergence": {
     "threshold": 3,
@@ -3203,27 +3203,52 @@
     ]
   },
   "rootOrphans": {
-    "isolatedSkills": [
+    "isolatedSkills": [],
+    "isolatedAgents": [
       {
-        "id": "standup-synthesizer",
+        "id": "auditor",
         "registry": true,
         "mirrors": [
-          ".claude/skills",
-          ".gemini/skills",
-          ".agents/skills",
-          ".codex/skills",
-          ".hermes/skills"
+          "agents/"
         ],
-        "docRefs": 0
+        "docRefs": 13
+      },
+      {
+        "id": "automation-engineer",
+        "registry": true,
+        "mirrors": [
+          "agents/"
+        ],
+        "docRefs": 15
+      },
+      {
+        "id": "docs-writer",
+        "registry": true,
+        "mirrors": [
+          "agents/"
+        ],
+        "docRefs": 11
+      },
+      {
+        "id": "security-expert",
+        "registry": true,
+        "mirrors": [
+          "agents/"
+        ],
+        "docRefs": 3
+      },
+      {
+        "id": "skill-graph-analyst",
+        "registry": true,
+        "mirrors": [
+          "agents/"
+        ],
+        "docRefs": 2
       }
     ],
-    "isolatedAgents": [
+    "carriedByScoped": [
       "architect",
-      "auditor",
-      "automation-engineer",
-      "docs-writer",
-      "security-expert",
-      "skill-graph-analyst"
+      "standup-synthesizer"
     ]
   }
 }

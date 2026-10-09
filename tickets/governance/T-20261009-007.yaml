@@ -5,12 +5,18 @@ title: >-
   Pin docs/skill-graph.overrides.json scoped-key resolution with a unit fixture
   test (bare-key fan-out removal is untested)
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-09T07:11:39.224+09:00'
 history:
   - at: '2026-10-09T07:11:39.224+09:00'
     from: null
     to: backlog
+  - at: '2026-10-09T08:59:05.106+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-09T08:59:05.121+09:00'
+    from: waiting
+    to: running
 result: null
 error: null
