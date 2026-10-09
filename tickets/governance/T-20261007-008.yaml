@@ -14,7 +14,7 @@ title: >-
   the co-deck session is actively working templates/co-deck — coordinate before
   any implementation
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-07T13:54:31.612Z'
 history:
@@ -30,5 +30,17 @@ history:
   - at: '2026-10-08T07:50:23.434+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-09T10:09:02.109+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered via #1490 under design 2026-10-09-co-deck-injector-promotion-design:
+  the pattern promoted as a TypeScript generalization
+  (scripts/co-deck/inject-video-players.ts 1.0.0 — idempotent marker replace,
+  triple fallback, stop-on-slide-change, deck-relative paths), NOT the
+  engagement .py copy (ADR-0031 backport gate + ADR-0036 TS mandate; the
+  engagement copy carries a JS syntax-error remnant). Registry row, variant.json
+  declaration, and 3 pin tests (idempotency double-run byte-identical) landed.
+  Procedure gates already in since #1474/#1475. Coordination note satisfied: the
+  template-side session work had landed via #1474/#1475 before this change.
 error: null
