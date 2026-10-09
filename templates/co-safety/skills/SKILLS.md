@@ -6,7 +6,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `agent-lifecycle-manager` | 1.2.0 | active | pm | 2026-09-18 | — | inherited from common — customized fork (variant-maintained) |
+| `agent-lifecycle-manager` | 1.3.1 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
 | `arc-flash-analyzer` | 1.0.0 | active | powergen-agent | — | — | co-safety only — Arc flash hazard analysis per IEEE 1584 |
 | `asset-integrity-check` | 1.0.0 | active | asset-integrity-agent | — | — | co-safety only — Coordinate mechanical integrity and preventative maintenance checks |
 | `audit-preparation` | 1.0.0 | active | audit-agent | — | — | co-safety only — Prepare documentation and evidence for regulatory EHS audits |
@@ -44,7 +44,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `permit-to-work` | 1.0.1 | active | safety-workflow-manager | — | — | co-safety only — Trigger permit-to-work (PTW) issuance workflow for high-risk or non-routine work |
 | `pre-construction-technical-review` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Execute KGS Code pre-construction technical review (시설·기술 기준) for gas terminal facilities… |
 | `process-hazard-screening` | 1.0.0 | active | ehschem-agent | — | — | co-safety only — Initial hazard screening for chemical plant processes |
-| `project-review` | 1.2.0 | active | pm | 2026-09-08 | — | inherited from common — customized fork (variant-maintained) |
+| `project-review` | 1.3.3 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
 | `protocol-deviation-analyzer` | 1.0.0 | active | gcp-agent | — | — | co-safety only — Analyze clinical trial protocol deviations per ICH E6(R3) |
 | `psm-loto` | 1.0.0 | active | psm-agent | — | — | co-safety only — Execute Lockout/Tagout (LOTO) procedure verification per KOSHA GUIDE Z-40-2022 and 안전보건기준규칙 Article… |
 | `psm-moc` | 1.0.0 | active | psm-agent | — | — | co-safety only — Manage Process Safety Management (PSM) Management of Change (MOC) workflows |
@@ -57,7 +57,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `safety-inspection-validator` | 1.0.0 | active | ehsconst-agent | — | — | co-safety only — Validate construction safety inspections per OSHA-KR construction provisions |
 | `script-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | inherited from common — customized fork (variant-maintained) |
 | `signal-detector` | 1.0.0 | active | gvp-agent | — | — | co-safety only — Statistical signal detection in pharmacovigilance case database |
-| `skill-lifecycle-manager` | 1.4.0 | active | pm | 2026-09-18 | — | inherited from common — customized fork (variant-maintained) |
+| `skill-lifecycle-manager` | 1.5.1 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
 | `sync` | 1.6.0 | active | pm | 2026-09-17 | — | inherited from common — customized fork (variant-maintained) |
 | `tank-integrity-validator` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Validate LNG/LPG/수소 저장탱크 구조 건전성 |
 | `tar-planning` | 1.1.0 | active | ehschem-agent | — | — | co-safety only — Chemical plant turnaround (TAR) shutdown planning — pre-TAR risk assessment, PSSR (Pre-Startup… |

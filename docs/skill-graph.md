@@ -113,7 +113,7 @@
 | `co-price/trade-promotion-roi` | variant:co-price | 1.0.0 | — | — | — | — | — |
 | `co-price/ui-component-design` | variant:co-price | 2.0.0 | — | — | co-price/cost-shock-analysis (follows), co-price/financial-statement-prep (follows) | — | — |
 | `co-price/van-westendorp-psm` | variant:co-price | 1.0.0 | — | — | co-price/gabor-granger (follows), co-price/pricing-playbook (enables) | survey-responses-vw | price-corridor, opp-price-point |
-| `co-safety/agent-lifecycle-manager` | variant:co-safety | 1.2.0 | — | — | co-safety/skill-lifecycle-manager (composes_with) | — | — |
+| `co-safety/agent-lifecycle-manager` | variant:co-safety | 1.3.1 | — | — | co-safety/skill-lifecycle-manager (composes_with) | — | — |
 | `co-safety/arc-flash-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/asset-integrity-check` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/audit-preparation` | variant:co-safety | 1.0.0 | — | — | co-safety/hazop-analysis (composes_with) | — | — |
@@ -155,7 +155,7 @@
 | `co-safety/permit-to-work` | variant:co-safety | 1.0.1 | co-safety/safety-workflow-manager | — | — | — | — |
 | `co-safety/pre-construction-technical-review` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/process-hazard-screening` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/project-review` | variant:co-safety | 1.2.0 | — | — | — | — | — |
+| `co-safety/project-review` | variant:co-safety | 1.3.3 | — | — | — | — | — |
 | `co-safety/protocol-deviation-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/psm-loto` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/psm-moc` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -168,7 +168,7 @@
 | `co-safety/safety-inspection-validator` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/script-lifecycle-manager` | variant:co-safety | 1.2.0 | — | — | — | — | — |
 | `co-safety/signal-detector` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/skill-lifecycle-manager` | variant:co-safety | 1.4.0 | — | — | co-safety/script-lifecycle-manager (composes_with) | — | — |
+| `co-safety/skill-lifecycle-manager` | variant:co-safety | 1.5.1 | — | — | co-safety/script-lifecycle-manager (composes_with) | — | — |
 | `co-safety/sync` | variant:co-safety | 1.6.0 | — | — | — | — | — |
 | `co-safety/tank-integrity-validator` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tar-planning` | variant:co-safety | 1.1.0 | — | — | — | — | — |
@@ -763,13 +763,13 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
-| `agent-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #cb7ad830; root@1.3.0 #5f3763d3 |
+| `agent-lifecycle-manager` | skill | divergence | co-safety@1.3.1 #a5b6fdf8; root@1.3.0 #5f3763d3 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
-| `project-review` | skill | divergence | co-safety@1.2.0 #85878525; root@1.3.2 #01931679 |
+| `project-review` | skill | divergence | co-safety@1.3.3 #b6ce05f4; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
-| `skill-lifecycle-manager` | skill | divergence | co-safety@1.4.0 #82d9ff48; root@1.5.0 #883308f6 |
+| `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
 | `standup-synthesizer` | skill | divergence | co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #66184388; root@1.8.0 #b6fb36af |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.1.0 #b2d44210 |
