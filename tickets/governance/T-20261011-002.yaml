@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261011-002
+kind: manual
+title: >-
+  validator-hardening: VA-08 checkVariantPackageContract crashes uncaught when
+  templates/common/package.json is unparseable — the guarded block records the
+  'common' fail but the per-variant verdict re-parses the same file unguarded,
+  throwing SyntaxError at the first variant and destroying triage (remaining
+  variants unchecked, no issues summary). Fix: parse common once, cache the
+  parsed result, reuse per variant, early-return when the common parse already
+  failed. Also removes the per-variant double parse. Evidence:
+  scripts/validate-templates.ts checkVariantPackageContract, Slot C 2026-10-11
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:28.640+09:00'
+history:
+  - at: '2026-10-11T01:45:28.640+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

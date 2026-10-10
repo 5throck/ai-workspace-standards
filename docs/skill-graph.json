@@ -6749,11 +6749,7 @@
       "version": "1.3.3",
       "mirrors": [
         "templates/co-safety/skills/project-review/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-03"
-      }
+      ]
     },
     {
       "id": "skill:co-safety/protocol-deviation-analyzer",
@@ -6937,7 +6933,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
+        "sessions": 2,
         "last_used": "2026-10-07"
       }
     },
@@ -7331,7 +7327,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
+        "sessions": 2,
         "last_used": "2026-10-07"
       }
     },
@@ -7714,11 +7710,7 @@
         ".agents/skills/project-review/SKILL.md",
         ".codex/skills/project-review/SKILL.md",
         ".hermes/skills/project-review/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-03"
-      }
+      ]
     },
     {
       "id": "skill:root/project-to-variant",
@@ -7962,7 +7954,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
+        "sessions": 2,
         "last_used": "2026-10-07"
       }
     },
@@ -8001,11 +7993,7 @@
         ".agents/skills/ticket-run/SKILL.md",
         ".codex/skills/ticket-run/SKILL.md",
         ".hermes/skills/ticket-run/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-03"
-      }
+      ]
     },
     {
       "id": "skill:root/token-usage-lint",

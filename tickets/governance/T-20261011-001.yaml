@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261011-001
+kind: manual
+title: >-
+  governance: T-20261008-008 (co-safety ahead-deltas port) was closed done on a
+  runner-recorded post-hoc sign-off with no gate-moment artifact — no
+  docs/decisions/ record, no quoted owner direction, the sign-off session's
+  memory block says 'Decisions: None', and the memory log itself calls it
+  'post-hoc sign-off'. The fork carries the safety-os-skill-structure
+  audit_exception contract and the ticket title required co-safety-owner review.
+  Remedy: append a gate-moment decision record (DEC-20261009-NN per ADR-0061
+  with evidence_refs pointing at the actual owner direction) or reopen the
+  ticket to review until that artifact exists. Found 2026-10-11 Slot A
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:28.626+09:00'
+history:
+  - at: '2026-10-11T01:45:28.626+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

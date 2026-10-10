@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261011-004
+kind: manual
+title: >-
+  validator-hardening: review-baseline battery #8 (nightly E2E surfacing) reads
+  '8/8 green' in the summary even when the nightly FAILED — ok:true is
+  unconditional and the summary loop drops the note, so under --quiet the only
+  trace is one stderr WARN the summary contradicts and exit stays 0 (by design
+  R10, but consumers keying on the summary see green). Add a warn flag to
+  results, render the warn in the summary loop ('7 green, 1 warn'), keep exit 0
+  per R10. Evidence: scripts/review-baseline.ts ~130/140, Slot C 2026-10-11
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:28.666+09:00'
+history:
+  - at: '2026-10-11T01:45:28.666+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
