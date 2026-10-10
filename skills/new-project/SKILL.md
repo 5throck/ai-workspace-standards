@@ -60,8 +60,9 @@ or a new development workspace from `co-develop`.
 ### Step 2: Decide name, platform, and identity
 
 - [ ] Project name: unique in `Projects/` (bare name lands at `Projects/<name>`)
-- [ ] Platform profile: `claude` | `antigravity` | `codex` | `hermes` | `all`
-      (`hermes` delivers `.hermes/skills/` + AGENTS.md only; `all` delivers every platform surface)
+- [ ] Platform profile: `claude` | `antigravity` | `codex` | `hermes` | `all`, or a comma-separated list such as `claude,codex`
+      (`hermes` delivers `.hermes/skills/` + AGENTS.md only; `all` delivers every platform surface;
+      a list delivers the union of its profiles, e.g. `claude,codex` = CLAUDE.md + CODEX.md + `.codex/`)
 - [ ] Optional: `--description "<one sentence>"` and `--type web|cli|api|mcp` fill `docs/project.md` identity
 - [ ] Optional: `--country <CODE>` when the variant declares `country_config` and the engagement is jurisdiction-specific
 

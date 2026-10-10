@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
+//          --platform accepts a comma-separated list incl. `hermes` (lib/platforms.ts
+//          parsePlatformList). expectedPlatformTwins derives required/absent from
+//          PROFILE_OWNED_PATHS (union rule), so a single `codex` migration expects the
+//          CLAUDE/GEMINI twins to be removed.
 // v1.0.0 (2026-09-23, migrate-project end-to-end adoption — spec
 //          2026-09-23-migrate-project-design): one command for the full external-project
 //          migration: GitHub baseline (ensure-github-repo subprocess) → adoption plan
@@ -11,12 +16,13 @@
 //          stop at advice.
 //
 // Usage:
-//   bun scripts/migrate-project.ts <project-path> --variant co-<x> [--platform all|claude|antigravity|codex]
+//   bun scripts/migrate-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all]
 //                                  [--org <org>] [--public] [--skip-github] [--dry-run] [--yes]
 
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, ownedPathsForProfiles, parsePlatformList } from './lib/platforms.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -40,16 +46,17 @@ function git(cwd: string, ...args: string[]): { status: number; out: string } {
 // Pure verification-plan helpers (exported for unit tests)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export type PlatformProfile = 'all' | 'claude' | 'antigravity' | 'codex';
+/** Canonical --platform list (e.g. `all`, `claude`, `claude,codex`). */
+export type PlatformProfile = string;
 
-/** Platform twins a migrated project must (or must NOT) carry — mirrors new-project §2.7. */
+/**
+ * Platform twins a migrated project must (or must NOT) carry — mirrors new-project §2.7
+ * (union rule over PROFILE_OWNED_PATHS). Throws on an invalid list.
+ */
 export function expectedPlatformTwins(platform: PlatformProfile): { required: string[]; absent: string[] } {
-  switch (platform) {
-    case 'claude': return { required: ['CLAUDE.md'], absent: ['GEMINI.md', 'CODEX.md'] };
-    case 'antigravity': return { required: ['GEMINI.md'], absent: ['CLAUDE.md', 'CODEX.md'] };
-    case 'codex': return { required: ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'], absent: [] };
-    case 'all': return { required: ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'], absent: [] };
-  }
+  const { profiles } = parsePlatformList(platform);
+  const absent = PLATFORM_PROFILES.filter(p => !profiles.includes(p)).flatMap(p => [...PROFILE_OWNED_PATHS[p]]);
+  return { required: ownedPathsForProfiles(profiles), absent };
 }
 
 export interface VerificationCheck {
@@ -115,17 +122,19 @@ function main(): void {
   const DRY_RUN = args.includes('--dry-run');
   const YES = args.includes('--yes') || args.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
   const SKIP_GITHUB = args.includes('--skip-github');
-  const platform = (getArg('--platform') ?? 'all') as PlatformProfile;
+  let platform: PlatformProfile = getArg('--platform') ?? 'all';
   const org = getArg('--org');
   const projectArg = args.find((a, i) => !a.startsWith('--') && (i === 0 || !['--variant', '--platform', '--org'].includes(args[i - 1])));
   const variant = getArg('--variant');
 
   if (!projectArg) {
-    console.error('Usage: bun scripts/migrate-project.ts <project-path> --variant co-<x> [--platform all|claude|antigravity|codex] [--org <org>] [--public] [--skip-github] [--dry-run] [--yes]');
+    console.error('Usage: bun scripts/migrate-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--org <org>] [--public] [--skip-github] [--dry-run] [--yes]');
     process.exit(1);
   }
-  if (!['all', 'claude', 'antigravity', 'codex'].includes(platform)) {
-    fail(`Invalid --platform '${platform}' (all|claude|antigravity|codex)`);
+  try {
+    platform = parsePlatformList(platform).canonical;
+  } catch (e) {
+    fail(`Invalid --platform: ${(e as Error).message}`);
   }
   const projectDir = resolve(projectArg);
 

@@ -52,6 +52,13 @@ describe('partitionProseTargetsByDelivery', () => {
     { file: 'CODEX.md', label: '3-Tier mapping' },
   ];
 
+  test('claude,codex project (eight-platform design §3.6): codex target stays active', () => {
+    const present = new Set(['AGENTS.md', 'CLAUDE.md', 'CODEX.md', '.codex']);
+    const { active, skipped } = partitionProseTargetsByDelivery(targets, (f: string) => present.has(f));
+    expect(active.map(t => t.file)).toEqual(['AGENTS.md', 'CLAUDE.md', 'CODEX.md']);
+    expect(skipped.map(t => t.file)).toEqual(['GEMINI.md']);
+  });
+
   test('codex-opt-out project (neither CODEX.md nor .codex/): only the codex target skips', () => {
     const present = new Set(['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']);
     const { active, skipped } = partitionProseTargetsByDelivery(targets, (rel) => present.has(rel));

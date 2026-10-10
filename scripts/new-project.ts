@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.35.0
+// @version 1.36.0
+// v1.36.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
+//          --platform takes a comma-separated list (claude,codex; all). Pruning keeps the
+//          UNION of the selected profiles' owned paths (lib/platforms.ts PROFILE_OWNED_PATHS)
+//          and removes every other profile's. Behavior fix: single `codex` now drops the
+//          CLAUDE.md/GEMINI.md twins (ADR-0077 §10 intent). template-version.txt writes the
+//          canonical list (platform=claude,codex; platform=all for 4-of-4).
 // v1.35.0 (2026-10-09, T-20261009-002): §2 overlay merges a variant package.json over
 //          the §2.5c-generated one (scalar keys variant-wins, object keys per-key via
 //          lib/package-merge.ts) instead of clobbering it — the #1432/#1433 class
@@ -173,7 +179,7 @@
 //           line (docs/context.md version footer survives for upgrade version-sync);
 //           shared pattern moved to helpers/l0-ref-policy.ts.
 // new-project.ts — Scaffold a new project under Projects/ (or an explicit workspace-relative path)
-// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]
+// Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]
 //
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
@@ -214,13 +220,14 @@ import {
   reconcileSkillRegistry,
 } from './helpers/skills-registry.ts';
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
-import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
+import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
+import { pruneUnselectedProfiles } from './lib/platform-prune.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
 let variant = '';
 let templateVer = '';
-let platform = 'all';
+let platform = 'all'; // canonical --platform value (list-normalized below)
 let country = '';
 let projectDescription = '';
 let projectType = '';
@@ -276,8 +283,8 @@ for (let i = 0; i < args.length; i++) {
   // consumes it from process.argv directly (it never takes a value here).
   if (args[i].startsWith('--') && args[i] !== '--yes') {
     console.error(`❌ Unknown flag: '${args[i]}'.`);
-    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform claude|antigravity|codex|hermes|all | --country <CODE>');
-    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform <profile>[,<profile>...]|all | --country <CODE>');
+    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
     if (import.meta.main) {
       process.exit(1);
     }
@@ -286,7 +293,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
   console.error('       --description/--type are optional; when omitted, docs/project.md keeps its TODO(project-overview) fallback lines.');
   if (import.meta.main) {
     process.exit(1);
@@ -308,9 +315,15 @@ if (projectName.length > 64) {
   }
 }
 
-// Validate platform
-if (!['claude', 'antigravity', 'all', 'codex', 'hermes'].includes(platform)) {
-  console.error('❌ --platform must be: claude, antigravity, codex, hermes, or all (default: all)');
+// Validate platform (comma-separated list; see lib/platforms.ts parsePlatformList)
+let selectedProfiles: PlatformProfile[] = ['claude', 'antigravity', 'codex', 'hermes'];
+try {
+  const parsed = parsePlatformList(platform);
+  selectedProfiles = parsed.profiles;
+  platform = parsed.canonical;
+  for (const w of parsed.warnings) console.warn(`⚠️  --platform: ${w}`);
+} catch (e) {
+  console.error(`❌ --platform: ${(e as Error).message}. Use one or more of claude, antigravity, codex, hermes (comma-separated) or all (default: all).`);
   if (import.meta.main) {
     process.exit(1);
   }
@@ -1045,32 +1058,10 @@ for (const d of L1_ONLY_DIRS) { // docs/specs stays (ADR-0074) — not in L1_ONL
 }
 
 // ── 2.7. Apply platform profile ───────────────────────────────────────────────
-if (platform === 'claude') { const f = join(projectDir, 'GEMINI.md'); if (existsSync(f)) rmSync(f); }
-if (platform === 'antigravity') { const f = join(projectDir, 'CLAUDE.md'); if (existsSync(f)) rmSync(f); }
-// ADR-0077 §10: `codex` is a codex-primary profile — keeps CODEX.md + .codex/ and drops the
-// legacy twins. `all` keeps every platform's files, including CODEX.md/.codex/. Single-platform
-// legacy profiles (`claude`/`antigravity`) are codex-opt-out: the twin and platform dir are
-// template overlay, removed here unless explicitly opted in.
-if (platform !== 'codex' && platform !== 'all') {
-  for (const f of [join(projectDir, 'CODEX.md'), join(projectDir, '.codex')]) {
-    if (existsSync(f)) rmSync(f, { recursive: true });
-  }
-}
-// ADR-0088: `hermes` is a hermes-primary profile — the legacy instruction twins
-// (CLAUDE/GEMINI/CODEX) are dropped (codex-primary analogy); ADR-0093: the hermes
-// instruction file `HERMES.md` (templates/common delivery, common-owned) is KEPT by
-// `hermes`. `.hermes/` is kept by `hermes` and `all`; every other profile is
-// hermes-opt-out (platform dir + HERMES.md = template overlay, removed here).
-if (platform === 'hermes') {
-  for (const f of [join(projectDir, 'CLAUDE.md'), join(projectDir, 'GEMINI.md')]) {
-    if (existsSync(f)) rmSync(f);
-  }
-}
-if (platform !== 'hermes' && platform !== 'all') {
-  for (const f of [join(projectDir, 'HERMES.md'), join(projectDir, '.hermes')]) {
-    if (existsSync(f)) rmSync(f, { recursive: true });
-  }
-}
+// Union rule (spec §3.3): keep every selected profile's owned paths; remove every
+// unselected profile's owned paths. `all` selects everything, so nothing is removed.
+// Shared files (AGENTS.md, skills/, .agents/) are never owned by a profile.
+pruneUnselectedProfiles(projectDir, selectedProfiles);
 
 // Remove .cmd files
 for (const f of walkFiles(projectDir)) {
