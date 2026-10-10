@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261011-006
+kind: manual
+title: >-
+  learning: distill co-abap's agent-shell hardening into a workspace
+  checklist/skill — tiered controls (docs are guidance, not controls;
+  enforcement tiering server-authz > server feature flags > proxy gate),
+  approvals stored outside the repo (HMAC-signed single-use input-hash-bound
+  human-confirmed on /dev/tty), integrity seal dropping to read-only on
+  mismatch, unknown-tool-fails-closed, deny-rule SSOT per platform with a parity
+  validator; cites both co-abap (permission integrity) and co-learning
+  (output-encoding XSS) as instances of 'allowlist strictness + committed
+  regression proof' without claiming either covers the other. Evidence:
+  Projects/co-abap SECURITY.md + ADR-0006/0007, PR #194; co-learning PR #13; 2f
+  extractions 2026-10-11. Class: new skill candidate (strongest of this window)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:48.245+09:00'
+history:
+  - at: '2026-10-11T01:45:48.245+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

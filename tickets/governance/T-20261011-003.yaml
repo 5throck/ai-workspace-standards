@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261011-003
+kind: manual
+title: >-
+  governance: run the spec hygiene sweep — 5 approved specs are past the 14-day
+  adjudication window with stale 2026-10-01 review_notes (2026-09-19
+  actor-model, 2026-09-19 template-domain-os, 2026-09-2x hermes-platform,
+  mcp-governance-server, kr-llm-config; ages 15-22d as of 2026-10-11):
+  disposition each via spec-register --update (implement, or archive with
+  archive_note per the 2026-09-06 sweep precedent) and refresh review_notes; the
+  2026-09-30/10-01 noted specs (ages 10-11d) should be dispositioned in the next
+  window
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:28.653+09:00'
+history:
+  - at: '2026-10-11T01:45:28.653+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

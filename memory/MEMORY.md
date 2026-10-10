@@ -7,6 +7,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-10-10](2026-10-10.md) | feat(platform): comma-separated --platform and 8-tool coverage docs |
+| [2026-10-11](2026-10-11.md) | docs(review): daily fleet review 2026-10-11 |
 | [2026-10-09](2026-10-09.md) | docs(review): daily fleet review 2026-10-09 |
 | [2026-10-08](2026-10-08.md) | docs(review): daily fleet review 2026-10-08 |
 | [2026-10-07](2026-10-07.md) | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
@@ -15,6 +16,8 @@
 | [2026-10-04](2026-10-04.md) | chore: update |
 | [2026-10-03](2026-10-03.md) | fix(installer): detect Hermes home on Windows |
 | [2026-10-03](2026-10-03.md) | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
+| 2026-10-03 | fix(installer): detect Hermes home on Windows |
+| 2026-10-03 | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | 2026-10-02 | feat(governance): process backlog T-20261001-015..021 — soak exit, triage commands, intake hardening, surface validator |
 | 2026-10-01 | docs(review): daily fleet review 2026-10-01 |
 | 2026-09-30 | fix(services): stop docker-mode turn containers on cancel and reap orphans on restart |

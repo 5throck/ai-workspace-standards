@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261011-010
+kind: manual
+title: >-
+  learning: archive-don't-delete for audit-referenced records +
+  enumerate-before-cleanup (co-newbiz S8 legacy cleanup) — records referenced by
+  adoption/gate decisions are archived (nullable archived_at/by) so they drop
+  from lists but still resolve in decision views with a label; and a cleanup
+  affordance keyed on an aggregate count that included items the filtered view
+  never showed let a correct-looking action destroy the wrong records — cleanup
+  affordances must enumerate the exact set they act on, never an aggregate. L0
+  pattern note; candidate checklist item for review passes. Evidence: co-newbiz
+  PR #489, migration 0133, 2f extraction. Class: data-lifecycle/UX pattern
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:46:04.418+09:00'
+history:
+  - at: '2026-10-11T01:46:04.418+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

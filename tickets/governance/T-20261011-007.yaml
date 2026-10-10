@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261011-007
+kind: manual
+title: >-
+  learning: co-abap parallel-dispatch grants pattern + cross-platform command
+  SSOT — write-capable parallel agent work bounded by one human decision per run
+  (rows typed read/write, write rows declare exact-object scope, dispatcher
+  stops for a grant, out-of-scope denied, grant revoked at run end, per-row git
+  worktrees, staged SIGTERM->10s->SIGKILL); commands single-sourced in
+  config/commands/ and rendered to Claude/Codex md + Gemini TOML with a --check
+  CI gate ('ask means deny' identical across 8 platforms). Evidence: co-abap
+  ADR-0007/0005 D4, PR #194;
+  templates/co-abap/scripts/co-abap/dispatch-parallel.ts predates the grant
+  model. Class: dispatch-pattern upgrade + template enhancement
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:45:48.269+09:00'
+history:
+  - at: '2026-10-11T01:45:48.269+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
