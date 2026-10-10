@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261011-012
+kind: manual
+title: >-
+  co-abap + co-deck 0.16.0 upgrade landings deferred on environment-bound local
+  test suites: co-abap test:unit fails without the session's untracked vsp
+  binary + .env setup (vsp restored via install-vsp.ts but hardening tests still
+  need session state); co-deck visual gate per T-006/T-019. Both upgrades are
+  mechanically complete and re-runnable; the projects' own sessions converge
+  themselves (co-deck self-upgraded to 0.14.0-era content on 10-09). Also file:
+  upgrade-project stash/pop drops gitignored machine artifacts (vsp binary) —
+  warn before stashing untracked tooling
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T02:49:11.518+09:00'
+history:
+  - at: '2026-10-11T02:49:11.518+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
