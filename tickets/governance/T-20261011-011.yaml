@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261011-011
+kind: manual
+title: >-
+  template/co-safety fork coherence + template hygiene (deferred batch): (1)
+  co-safety project-review fork self-contradiction — the port added
+  upgrade-project to the fork body (SKILL.md:254-255) while fork frontmatter
+  related_skills omits it and the design's fork keeper says 'no upgrade-project
+  related_skill'; pick one and correct the design doc, (2)
+  templates/co-deck/presentations/_smoke_test/_vr_matrix_helper.mjs carries
+  /Users/techcross absolute paths and is an undocumented template surface
+  (design Surfaces omits it) — rewrite with import.meta.url resolution or
+  remove, and add the Surfaces row. Deferred from the 2026-10-11 cap
+  (T-20261011-001..008 filled today's 10)
+priority: low
+not_before: '2026-10-12'
+status: backlog
+attempts: 0
+created_at: '2026-10-11T01:46:04.441+09:00'
+history:
+  - at: '2026-10-11T01:46:04.441+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
