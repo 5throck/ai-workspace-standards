@@ -392,7 +392,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0085` | adr | — | common/i18n-audit, common/i18n-formatting, common/i18n-layout, common/i18n-locale-config, root/upgrade-project | — |
 | `adr:0086` | adr | — | — | — |
 | `adr:0087` | adr | — | common/handbook | — |
-| `adr:0088` | adr | — | root/upgrade-project | — |
+| `adr:0088` | adr | — | root/adopt-project, root/migrate-project, root/upgrade-project | — |
 | `adr:0089` | adr | — | root/project-resync, root/project-review | — |
 | `adr:0090` | adr | — | — | — |
 | `adr:0091` | adr | — | — | — |
@@ -404,6 +404,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0097` | adr | — | — | — |
 | `adr:0098` | adr | — | — | — |
 | `adr:0099` | adr | — | — | — |
+| `adr:0100` | adr | — | root/adopt-project, root/migrate-project | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |

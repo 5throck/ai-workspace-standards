@@ -27,7 +27,7 @@ Requirement (user, 2026-09-24): projects scaffolded from `templates/co-*` should
 
 - **Positive**: co-* scaffolded projects gain a first-class Hermes integration from scaffold time with zero skill rewrites — skills remain platform-neutral markdown served identically to all five mirrors; the existing four surfaces are byte-for-byte unaffected; baseline compatibility already existed via `.agents/skills` and now becomes governed and primary-path.
 - **Cost**: a fifth mirror copy (disk + drift surface) — absorbed by the existing idempotent pipeline and now watched by the freshness validator; N-platform constant refactor remains deferred (second consecutive deferral — tracked in the follow-up ticket with `verify-platform-lifecycle.ts` generalization).
-- **Neutral**: `--platform hermes` joins the scaffold profiles; `all` includes `.hermes/`; existing fleet repos receive `.hermes/` on their next routine `upgrade-project` run (no dedicated rollout — `.agents/skills` already provides a working fallback).
+- **Neutral**: `--platform hermes` joins the scaffold profiles *(Amended by ADR-0100, 2026-10-10: `adopt-project`/`migrate-project` now accept `hermes`, and it composes in comma-separated lists; see docs/adr/0100-eight-tool-platform-profiles.md)*; `all` includes `.hermes/`; existing fleet repos receive `.hermes/` on their next routine `upgrade-project` run (no dedicated rollout — `.agents/skills` already provides a working fallback).
 
 ## References
 

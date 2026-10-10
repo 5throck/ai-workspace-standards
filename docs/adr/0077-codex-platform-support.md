@@ -29,7 +29,7 @@ Requirement (user, 2026-09-12): extend the ecosystem to **OpenAI Codex CLI and C
 
 - **Positive**: Codex users get the full workspace contract (PM Gateway, skills, prompts, MCP) from scaffold time and across the fleet with no governance bypass; the twin/marker model extends cleanly (`COMMON-CODEX`) instead of forking; the fleet-mirror-update gap is closed at the engine level before rollout.
 - **Cost**: three new mirror copies of skills/prompts (disk + drift surface) — absorbed by the existing idempotent sync pipeline; validator work stays pair-based in this effort (N-platform constant refactor deferred to a follow-up governance ticket); pointer-follow risk on Desktop App handled by the annex fallback. Relocating model mappings into managed sections means future model changes intentionally overwrite those sections in projects (conflict-warned) — that is the distribution mechanism working; project-owned files with model literals (hand-added `.env.sample` keys, project configs) are out of delivery scope and surfaced by the W5 post-check.
-- **Neutral**: `both` platform-profile value keeps its legacy meaning (claude+antigravity); `codex` joins as a new profile value; `.agents/` scaffold-overlay exclusion is left as-is and noted for the follow-up ticket.
+- **Neutral**: `both` platform-profile value keeps its legacy meaning (claude+antigravity); `codex` joins as a new profile value *(Amended by ADR-0100, 2026-10-10: `--platform` takes a comma-separated list, a single `codex` now drops CLAUDE.md/GEMINI.md, and `both` is treated as `all`; see docs/adr/0100-eight-tool-platform-profiles.md)*; `.agents/` scaffold-overlay exclusion is left as-is and noted for the follow-up ticket.
 
 ## References
 

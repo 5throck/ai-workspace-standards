@@ -413,6 +413,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0100",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
@@ -9547,6 +9552,18 @@
     {
       "type": "references",
       "from": "adr:0088",
+      "to": "skill:root/adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0088",
+      "to": "skill:root/migrate-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0088",
       "to": "skill:root/upgrade-project",
       "source": "prose"
     },
@@ -9566,6 +9583,18 @@
       "type": "references",
       "from": "adr:0096",
       "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0100",
+      "to": "skill:root/adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0100",
+      "to": "skill:root/migrate-project",
       "source": "prose"
     },
     {

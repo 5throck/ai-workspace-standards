@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: 9f1e91e4e85a30dbb7f1228bd303590901e6f185995a395d8b8d1cb8afe74ba4
+content_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -123,6 +123,34 @@ bun scripts/new-project.ts "my-project-name" --variant co-develop
 # Use a specific template version (see available: bun scripts/list-template-versions.ts)
 bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
+
+#### Supported platforms (8 tools, 4 profiles)
+
+Eight AI tools map onto four platform profiles. Select profiles with `--platform` (ADR-0100).
+
+| Tool | Profile | Instruction file |
+|------|---------|------------------|
+| Claude Code CLI, Claude Code Desktop App | `claude` | `CLAUDE.md` |
+| Gemini CLI, Antigravity IDE, Antigravity CLI | `antigravity` | `GEMINI.md` |
+| Codex CLI, Codex Desktop App, Codex IDE extension | `codex` | `CODEX.md`, `.codex/` |
+| Hermes Agent | `hermes` | `HERMES.md`, `.hermes/` |
+
+```bash
+# All profiles (default)
+bun scripts/new-project.ts "my-project-name" --platform all
+
+# One profile
+bun scripts/new-project.ts "my-project-name" --platform claude
+
+# A comma-separated list keeps the union of the selected profiles' files
+bun scripts/new-project.ts "my-project-name" --platform claude,codex
+```
+
+- `--platform` accepts `all` (default), one profile, or a comma list. `all` cannot be mixed with other values.
+- The project keeps the files of every selected profile and drops the files of every unselected profile. Shared files (`AGENTS.md`, `skills/`, `.agents/`) are always kept.
+- The legacy value `both` still works as `all` and prints a warning.
+- `--platform codex` alone now drops `CLAUDE.md` and `GEMINI.md`. Use `--platform codex,claude,antigravity` for the previous result.
+- `adopt-project` and `migrate-project` also accept `hermes`. The chosen list is recorded in `.claude/template-version.txt` as `platform=<list>`.
 
 > **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` and `.\scripts\new-project.ps1` have been replaced by `bun scripts/new-project.ts` (ADR-0036). Update any aliases or CI pipelines accordingly.
 
@@ -380,4 +408,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-06*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*

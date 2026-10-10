@@ -85,9 +85,14 @@ bun scripts/new-project.ts my-project
 # variant 명시
 bun scripts/new-project.ts my-project --variant co-design
 
-# 플랫폼 및 버전 태그 지정
-bun scripts/new-project.ts my-project --variant co-develop --platform both --version 0.5.3
+# 플랫폼 및 버전 태그 지정 (all = 모든 프로필, 기본값)
+bun scripts/new-project.ts my-project --variant co-develop --platform all --version 0.5.3
+
+# 일부 프로필만 남기기: claude|antigravity|codex|hermes를 쉼표로 나열
+bun scripts/new-project.ts my-project --variant co-develop --platform claude,codex
 ```
+
+> `--platform codex`만 쓰면 `CLAUDE.md`와 `GEMINI.md`도 지워집니다. 남기려면 `codex,claude,antigravity`를 쓰세요. 예전 값 `both`는 경고와 함께 `all`로 처리됩니다 (ADR-0100).
 
 ### 자동화 및 테스트 스크립트 (templates/common/scripts)
 
@@ -115,4 +120,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 갱신
 
-*Last Updated: 2026-10-08*
+*Last Updated: 2026-10-10*

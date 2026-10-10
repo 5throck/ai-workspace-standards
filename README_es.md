@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 6ff6317a491dec725937916be12074cea9686d1555c174cdb8b76863adf06156
+translated_from_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
 sync_version: 4
 ---
 
@@ -123,6 +123,34 @@ bun scripts/new-project.ts "nombre-de-mi-proyecto" --variant co-develop
 # Usar una versión específica de la plantilla (ver disponibles: bun scripts/list-template-versions.ts)
 bun scripts/new-project.ts "nombre-de-mi-proyecto" --version 0.6.0
 ```
+
+#### Plataformas compatibles (8 herramientas, 4 perfiles)
+
+Ocho herramientas de IA se asignan a cuatro perfiles de plataforma. Seleccione los perfiles con `--platform` (ADR-0100).
+
+| Herramienta | Perfil | Archivo de instrucciones |
+|-------------|--------|--------------------------|
+| Claude Code CLI, Claude Code Desktop App | `claude` | `CLAUDE.md` |
+| Gemini CLI, Antigravity IDE, Antigravity CLI | `antigravity` | `GEMINI.md` |
+| Codex CLI, Codex Desktop App, Codex IDE extension | `codex` | `CODEX.md`, `.codex/` |
+| Hermes Agent | `hermes` | `HERMES.md`, `.hermes/` |
+
+```bash
+# Todos los perfiles (predeterminado)
+bun scripts/new-project.ts "nombre-de-mi-proyecto" --platform all
+
+# Un solo perfil
+bun scripts/new-project.ts "nombre-de-mi-proyecto" --platform claude
+
+# Una lista separada por comas conserva la unión de los archivos de los perfiles elegidos
+bun scripts/new-project.ts "nombre-de-mi-proyecto" --platform claude,codex
+```
+
+- `--platform` acepta `all` (predeterminado), un perfil o una lista separada por comas. `all` no se puede combinar con otros valores.
+- El proyecto conserva los archivos de cada perfil elegido y elimina los de cada perfil no elegido. Los archivos compartidos (`AGENTS.md`, `skills/`, `.agents/`) siempre se conservan.
+- El valor heredado `both` sigue funcionando como `all` y muestra una advertencia.
+- `--platform codex` por sí solo ahora elimina `CLAUDE.md` y `GEMINI.md`. Use `--platform codex,claude,antigravity` para el resultado anterior.
+- `adopt-project` y `migrate-project` también aceptan `hermes`. La lista elegida se registra en `.claude/template-version.txt` como `platform=<lista>`.
 
 > **[Cambio Importante — 11-06-2026]**: `bash scripts/new-project.sh` y `.\scripts\new-project.ps1` han sido reemplazados por `bun scripts/new-project.ts` (ADR-0036). Actualice cualquier alias o tubería de CI en consecuencia.
 

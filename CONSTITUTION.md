@@ -595,15 +595,16 @@ One of thirteen project archetypes. Stable: `co-abap`, `co-consult`, `co-deck`, 
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Values:
-- `claude` — includes `CLAUDE.md` only; `GEMINI.md` is excluded
-- `antigravity` — includes `GEMINI.md` only; `CLAUDE.md` is excluded
-- `both` — includes both, i.e. claude + antigravity (legacy value; default for all new projects)
-- `codex` — additionally includes `CODEX.md` and the `.codex/` platform directory (ADR-0077)
-- `hermes` — includes the `.hermes/` platform directory; `CLAUDE.md` and `GEMINI.md` are excluded (Hermes reads `AGENTS.md` natively — ADR-0088)
+- `claude` — Claude Code CLI and Desktop App; owns `CLAUDE.md`
+- `antigravity` — Gemini CLI, Antigravity IDE and Antigravity CLI; owns `GEMINI.md`
+- `codex` — Codex CLI, Desktop App and IDE extension; owns `CODEX.md` and `.codex/` (ADR-0077)
+- `hermes` — Hermes Agent; owns `HERMES.md` and `.hermes/` (ADR-0088)
+- `all` — every profile (default for new projects); legacy `both` is treated as `all` with a warning
+- A comma-separated list (for example `claude,codex`) keeps the union of the selected profiles' owned files and prunes the rest; shared files (`AGENTS.md`, `skills/`, `.agents/`) belong to no profile and are never pruned
 
-`codex` composes with the legacy values: a project's effective Codex surface is opt-in via the `codex` profile value or the `.codex/` template overlay delivered by upgrade. `hermes` follows the same opt-in model: the `.hermes/` platform directory rides the `hermes` profile value or the `.hermes/` template overlay delivered by upgrade (ADR-0088).
+Since ADR-0100 (`docs/adr/0100-eight-tool-platform-profiles.md`), `--platform` takes a comma-separated list of `claude|antigravity|codex|hermes` or `all` (legacy `both` = `all`); unselected profiles' owned paths (`PROFILE_OWNED_PATHS`) are pruned, so a single `codex` (previously additive) now drops `CLAUDE.md`/`GEMINI.md`.
 
-Recorded in `.claude/template-version.txt` as `platform=<value>`.
+Recorded in `.claude/template-version.txt` as `platform=<value>` (a canonical comma-separated list).
 
 #### context.md vs variant.context.template.md
 
@@ -838,4 +839,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-10-04*
+*Last Updated: 2026-10-10*

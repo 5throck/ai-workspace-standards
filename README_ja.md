@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 6ff6317a491dec725937916be12074cea9686d1555c174cdb8b76863adf06156
+translated_from_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
 sync_version: 4
 ---
 
@@ -123,6 +123,34 @@ bun scripts/new-project.ts "my-project-name" --variant co-develop
 # 特定のテンプレートバージョンを使用（利用可能: bun scripts/list-template-versions.ts）
 bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
+
+#### 対応プラットフォーム（ツール8種、プロファイル4つ）
+
+8つのAIツールは4つのプラットフォームプロファイルに対応します。`--platform`でプロファイルを選択します（ADR-0100）。
+
+| ツール | プロファイル | 指示ファイル |
+|--------|--------------|--------------|
+| Claude Code CLI、Claude Code Desktop App | `claude` | `CLAUDE.md` |
+| Gemini CLI、Antigravity IDE、Antigravity CLI | `antigravity` | `GEMINI.md` |
+| Codex CLI、Codex Desktop App、Codex IDE extension | `codex` | `CODEX.md`、`.codex/` |
+| Hermes Agent | `hermes` | `HERMES.md`、`.hermes/` |
+
+```bash
+# すべてのプロファイル（デフォルト）
+bun scripts/new-project.ts "my-project-name" --platform all
+
+# 単一のプロファイル
+bun scripts/new-project.ts "my-project-name" --platform claude
+
+# カンマ区切りのリストは、選択したプロファイルのファイルの和集合を残します
+bun scripts/new-project.ts "my-project-name" --platform claude,codex
+```
+
+- `--platform`には`all`（デフォルト）、単一のプロファイル、またはカンマ区切りのリストを指定できます。`all`は他の値と併用できません。
+- 選択したプロファイルのファイルはすべて残り、選択しなかったプロファイルのファイルは削除されます。共有ファイル（`AGENTS.md`、`skills/`、`.agents/`）は常に残ります。
+- 旧値`both`は`all`として扱われ、警告が表示されます。
+- `--platform codex`単独では`CLAUDE.md`と`GEMINI.md`も削除されるようになりました。従来の結果が必要な場合は`--platform codex,claude,antigravity`を使用してください。
+- `adopt-project`と`migrate-project`も`hermes`を受け付けます。選択したリストは`.claude/template-version.txt`に`platform=<リスト>`として記録されます。
 
 > **[破壊的変更 — 2026-06-11]**: `bash scripts/new-project.sh`および`.\scripts\new-project.ps1`は`bun scripts/new-project.ts`に置き換えられました（ADR-0036）。それに応じてエイリアスやCIパイプラインを更新してください。
 
@@ -378,4 +406,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-04*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*

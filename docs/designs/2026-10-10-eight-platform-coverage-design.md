@@ -1,6 +1,6 @@
 ---
 title: Eight-platform coverage for new projects
-status: proposed
+status: implemented
 created: 2026-10-10
 last_updated: 2026-10-10
 owner: architect
@@ -137,6 +137,18 @@ Every reader treats a `platform=` value as a list: `both` → `all`, and an unkn
 
 Phasing note: PR #1 scripts must work against the *current* templates, and they do, because
 pruning depends only on file presence. PR #2 is documentation only.
+
+## 5.1 Implementation notes / deviations
+
+Implemented on 2026-10-10 in PR #1493. Decision record: [ADR-0100](../adr/0100-eight-tool-platform-profiles.md). Deviations from the plan above:
+
+- **Extra module.** Pruning lives in a new `scripts/lib/platform-prune.ts` (`pruneUnselectedProfiles`), not inline in `new-project.ts`. `adopt-project.ts` reuses it.
+- **Single PR, not two.** The `templates/common` copies shipped in the same PR through the standard L0→L1 publish (`propagate-to-templates.ts --apply`). CI `validate-templates` requires the L0 and L1 script copies to match, so a split would fail CI. The CLAUDE.md §9 boundary rule covers manual cross-edits, not the pipeline publish.
+- **GEMINI.md "Google surfaces".** This is a bold paragraph plus a table, not a `###` heading, because `validate-templates` enforces CLAUDE.md/GEMINI.md heading parity.
+- **Codex single profile (user-approved).** `--platform codex` alone now drops `CLAUDE.md` and `GEMINI.md`.
+- **adopt/migrate.** `adopt-project.ts` and `migrate-project.ts` now accept `hermes`.
+- **Legacy `both`.** Treated as `all`, with a warning.
+- **Not verified live.** A live scaffold with `--platform claude,codex` (acceptance criterion 1) was not run; it is covered by unit tests only.
 
 ## 6. Acceptance criteria
 1. `bun scripts/new-project.ts X --variant co-<v> --platform claude,codex` produces exactly the union of the owned files and writes `platform=claude,codex`.
