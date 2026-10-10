@@ -81,9 +81,14 @@ bun scripts/new-project.ts my-project
 # Explicit variant
 bun scripts/new-project.ts my-project --variant co-design
 
-# Specify platform and version tag
-bun scripts/new-project.ts my-project --variant co-develop --platform both --version 0.6.0
+# Specify platform and version tag (all = every profile, the default)
+bun scripts/new-project.ts my-project --variant co-develop --platform all --version 0.6.0
+
+# Keep only some profiles: comma-separated list of claude|antigravity|codex|hermes
+bun scripts/new-project.ts my-project --variant co-develop --platform claude,codex
 ```
+
+> `--platform codex` alone drops `CLAUDE.md` and `GEMINI.md`; use `codex,claude,antigravity` to keep them. The legacy value `both` is treated as `all` with a warning (ADR-0100).
 
 ### Automation & Testing Scripts (templates/common/scripts)
 
@@ -111,4 +116,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-10-10*

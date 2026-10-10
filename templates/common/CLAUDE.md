@@ -61,21 +61,21 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 }
 ```
 
-> **Desktop App Hook Status**: Per Anthropic documentation, Claude Code Desktop App uses the bundled CLI and hooks should fire. However, workspace testing (2026-05) observed intermittent behavior. If hooks appear non-functional in the Desktop App, run `bun scripts/hooks/post-write-lifecycle-check.ts` manually as fallback.
+> **Desktop App Hook Status**: Per Anthropic documentation, Claude Code Desktop App uses the bundled CLI and hooks should fire. However, workspace testing (2026-05) observed intermittent behavior, so every Desktop App row below is marked ⚠️ (GateGuard keeps ✅* because the agent self-enforces as fallback). If hooks appear non-functional, run the matching script manually as fallback.
 
 | Hook | Environment | Active? | Notes |
 |------|-------------|:-------:|-------|
 | SessionStart (git hooks) | Claude Code CLI | ✅ | runs `git config core.hooksPath .githooks` |
-| SessionStart (git hooks) | Claude Code Desktop App | ✅ | hooks don't fire; run manually |
+| SessionStart (git hooks) | Claude Code Desktop App | ⚠️ | Should fire via bundled CLI; intermittent in testing — if missing, run `git config core.hooksPath .githooks` manually |
 | PostToolUse (lifecycle check) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async after every Write/Edit |
-| PostToolUse (lifecycle check) | Claude Code Desktop App | ✅ | Hooks don't fire; run `bun scripts/hooks/post-write-lifecycle-check.ts` manually |
+| PostToolUse (lifecycle check) | Claude Code Desktop App | ⚠️ | Hooks intermittent; run `bun scripts/hooks/post-write-lifecycle-check.ts` manually |
 | Gemini CLI equivalent | — | — | Gemini AfterTool fires the same script with `--platform gemini` |
 | PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
 | PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
-| TeammateIdle (lifecycle) | Claude Code Desktop App | ✅ | Hooks don't fire; run manually |
+| TeammateIdle (lifecycle) | Claude Code Desktop App | ⚠️ | Hooks intermittent; run manually |
 | TaskCompleted (QA gate) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async when a task is marked complete |
-| TaskCompleted (QA gate) | Claude Code Desktop App | ✅ | Hooks don't fire; run manually |
+| TaskCompleted (QA gate) | Claude Code Desktop App | ⚠️ | Hooks intermittent; run manually |
 
 **Recommended workflow split:**
 - **CLI**: Automated workflows, pre-commit-enforced audits, multi-agent orchestration.
@@ -361,7 +361,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-06 — annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+*Last Updated: 2026-10-10 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
 
 

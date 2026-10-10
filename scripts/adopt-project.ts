@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
+//          --platform accepts a comma-separated list incl. `hermes` (lib/platforms.ts
+//          parsePlatformList; legacy `both` = all). Platform prune is the union rule over
+//          PROFILE_OWNED_PATHS, removing only files/dirs this adoption delivered.
 // v1.2.0 (2026-09-25, T-20260924-003 — spec
 //          docs/designs/2026-09-25-inventory-decisions-batch-design.md R2.3):
 //          the settling pass generalizes extends-stub resolution from pm.md-only
@@ -46,6 +50,7 @@ import { isCanonicalPmStubBody } from './helpers/scaffold-markers.ts';
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
 import { substituteFiles } from './helpers/substitute-placeholders.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
+import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
 import { setStateFile, resetStateFile, saveState, loadState, type PipelineState } from './lib/pipeline-state.ts';
 
 const GREEN = '\x1b[32m';
@@ -95,17 +100,23 @@ function getArg(flag: string): string | undefined {
 const VALUE_FLAGS = new Set(['--variant', '--platform', '--project']);
 const DRY_RUN = args.includes('--dry-run');
 const YES = args.includes('--yes') || args.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
-const platform = getArg('--platform') ?? 'all';
+let platform = getArg('--platform') ?? 'all';
+let selectedProfiles: PlatformProfile[] = [...PLATFORM_PROFILES];
 let variant = getArg('--variant') ?? '';
 const positional = args.find((a, i) => !a.startsWith('--') && (i === 0 || args[i - 1]?.startsWith('--') !== true || !VALUE_FLAGS.has(args[i - 1])));
 const projectArg = getArg('--project') ?? positional;
 
 if (!projectArg) {
-  console.error('Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform all|claude|antigravity|codex] [--dry-run] [--yes]');
+  console.error('Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--dry-run] [--yes]');
   process.exit(1);
 }
-if (!['all', 'claude', 'antigravity', 'codex'].includes(platform)) {
-  fail(`Invalid --platform '${platform}' (all|claude|antigravity|codex)`);
+try {
+  const parsed = parsePlatformList(platform);
+  selectedProfiles = parsed.profiles;
+  platform = parsed.canonical;
+  for (const w of parsed.warnings) console.warn(`WARN: --platform: ${w}`);
+} catch (e) {
+  fail(`Invalid --platform: ${(e as Error).message}`);
 }
 
 const projectDir = resolve(projectArg);
@@ -646,10 +657,20 @@ spawnSync(process.execPath, [join(WORKSPACE_ROOT, 'scripts', 'helpers', 'write-s
   projectDir, new Date().toISOString().slice(0, 10), variant, join(COMMON_DIR, 'scripts')], { stdio: 'inherit', cwd: WORKSPACE_ROOT });
 
 // 16. Platform profile — root twins + .codex only (never platform skill mirrors).
-if (platform === 'claude') removeIfDelivered('GEMINI.md');
-if (platform === 'antigravity') removeIfDelivered('CLAUDE.md');
+for (const p of PLATFORM_PROFILES) {
+  if (selectedProfiles.includes(p)) continue;
+  for (const rel of PROFILE_OWNED_PATHS[p]) removeOwnedIfDelivered(rel);
+}
 for (const f of walkFiles(projectDir)) {
   if (f.endsWith('.cmd')) rmSync(f);
+}
+// Dir-owned entries (e.g. .codex): remove only the files this adoption delivered, so a
+// pre-existing user-owned dir keeps everything the workspace did not deliver.
+function removeOwnedIfDelivered(rel: string): void {
+  if (deliveredSet.has(rel)) { removeIfDelivered(rel); return; }
+  for (const d of deliveredSet) {
+    if (d.startsWith(rel + '/')) removeIfDelivered(d);
+  }
 }
 function removeIfDelivered(rel: string): void {
   const abs = join(projectDir, rel);

@@ -392,7 +392,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0085` | adr | — | common/i18n-audit, common/i18n-formatting, common/i18n-layout, common/i18n-locale-config, root/upgrade-project | — |
 | `adr:0086` | adr | — | — | — |
 | `adr:0087` | adr | — | common/handbook | — |
-| `adr:0088` | adr | — | root/upgrade-project | — |
+| `adr:0088` | adr | — | root/adopt-project, root/migrate-project, root/upgrade-project | — |
 | `adr:0089` | adr | — | root/project-resync, root/project-review | — |
 | `adr:0090` | adr | — | — | — |
 | `adr:0091` | adr | — | — | — |
@@ -404,6 +404,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0097` | adr | — | — | — |
 | `adr:0098` | adr | — | — | — |
 | `adr:0099` | adr | — | — | — |
+| `adr:0100` | adr | — | root/adopt-project, root/migrate-project | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |
@@ -821,10 +822,10 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-09), window 90 days. Skill nodes with usage: 7.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-10), window 90 days. Skill nodes with usage: 6.
 
-- **used-but-unlinked** (usage > 0, no `used_by`) (7): co-safety/project-review, co-safety/sync, common/sync, root/ci-triage, root/project-review, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (226): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 186 more
+- **used-but-unlinked** (usage > 0, no `used_by`) (6): co-safety/project-review, co-safety/sync, common/sync, root/project-review, root/sync, root/ticket-run
+- **unused** (0 sessions in 90 days) (227): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 187 more
 
 ## Ambiguous Name Resolutions
 

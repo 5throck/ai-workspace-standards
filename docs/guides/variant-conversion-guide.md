@@ -141,7 +141,7 @@ You have an existing project that was created independently (not from a variant 
 bun scripts/adopt-project.ts <project-path> --variant co-<name> --dry-run
 
 # Adopt for real (interactive confirmations; --yes accepts defaults)
-bun scripts/adopt-project.ts <project-path> --variant co-<name> [--platform all|claude|antigravity|codex] [--yes]
+bun scripts/adopt-project.ts <project-path> --variant co-<name> [--platform all|<profile>[,<profile>...]] [--yes]
 ```
 
 ### What the tool guarantees
@@ -153,7 +153,7 @@ bun scripts/adopt-project.ts <project-path> --variant co-<name> [--platform all|
 | Foreign skills | Protected from registry-driven prunes via a variant.json skill_manifest seed (removed post-delivery) |
 | Foreign scripts | Retained `scripts/*.ts` are registered in the project SCRIPTS.md (with a `@version 0.0.1` stamp when missing) so the project audit passes |
 | package.json | Created from the template when absent; merged (project keys win, workspace script surface + deps added) when present |
-| Platform twins | Delivered per `--platform`; existing foreign twin prose is preserved via managed-block merge |
+| Platform twins | Delivered per `--platform` (`all`, one profile, or a list such as `claude,codex`; profiles: claude, antigravity, codex, hermes; a single `codex` drops `CLAUDE.md`/`GEMINI.md`, use `codex,claude,antigravity` to keep them); existing foreign twin prose is preserved via managed-block merge |
 | Refusals (`--yes` cannot bypass) | Tracked secret-shaped files, hook-manager conflicts (husky/simple-git-hooks/lefthook), gitleaks findings in pre-existing content |
 | Failure | Guided recovery (recorded HEAD SHA + backup path); resumable state ledger |
 

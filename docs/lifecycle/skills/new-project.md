@@ -10,7 +10,7 @@
 ## Description
 Scaffolds a fresh project instance from an existing variant template
 (`templates/<variant>`) via the E2E-tested engine `scripts/new-project.ts`
-(subprocess dispatch, `--platform` profiles including `hermes`, `--country`/
+(subprocess dispatch, `--platform` takes `all`, one profile, or a comma list of `claude|antigravity|codex|hermes` per ADR-0100, `--country`/
 `--description`/`--type` identity flags, pre-flight variant-readiness gates,
 automatic rollback on failure). Fills the dispatch gap left when the README
 `/new-project` shortcut references were removed as dead (T-20260927-011): the

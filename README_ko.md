@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 9f1e91e4e85a30dbb7f1228bd303590901e6f185995a395d8b8d1cb8afe74ba4
+translated_from_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
 sync_version: 4
 ---
 
@@ -122,6 +122,34 @@ bun scripts/new-project.ts "my-project-name" --variant co-develop
 # 특정 템플릿 버전 사용 (목록 확인: bun scripts/list-template-versions.ts)
 bun scripts/new-project.ts "my-project-name" --version 0.6.0
 ```
+
+#### 지원 플랫폼 (도구 8종, 프로필 4개)
+
+AI 도구 8종은 플랫폼 프로필 4개로 묶입니다. `--platform`으로 프로필을 고릅니다 (ADR-0100).
+
+| 도구 | 프로필 | 지침 파일 |
+|------|--------|-----------|
+| Claude Code CLI, Claude Code Desktop App | `claude` | `CLAUDE.md` |
+| Gemini CLI, Antigravity IDE, Antigravity CLI | `antigravity` | `GEMINI.md` |
+| Codex CLI, Codex Desktop App, Codex IDE extension | `codex` | `CODEX.md`, `.codex/` |
+| Hermes Agent | `hermes` | `HERMES.md`, `.hermes/` |
+
+```bash
+# 모든 프로필 (기본값)
+bun scripts/new-project.ts "my-project-name" --platform all
+
+# 프로필 하나
+bun scripts/new-project.ts "my-project-name" --platform claude
+
+# 쉼표로 나눈 목록은 고른 프로필들의 파일을 합쳐서 남깁니다
+bun scripts/new-project.ts "my-project-name" --platform claude,codex
+```
+
+- `--platform`에는 `all`(기본값), 프로필 하나, 또는 쉼표로 나눈 목록을 쓸 수 있습니다. `all`은 다른 값과 함께 쓸 수 없습니다.
+- 고른 프로필의 파일은 모두 남고, 고르지 않은 프로필의 파일은 지워집니다. 공용 파일(`AGENTS.md`, `skills/`, `.agents/`)은 늘 남습니다.
+- 예전 값 `both`는 `all`로 처리되며 경고가 나옵니다.
+- 이제 `--platform codex`만 쓰면 `CLAUDE.md`와 `GEMINI.md`도 지워집니다. 예전 결과가 필요하면 `--platform codex,claude,antigravity`를 쓰세요.
+- `adopt-project`와 `migrate-project`도 `hermes`를 받습니다. 고른 목록은 `.claude/template-version.txt`에 `platform=<목록>`으로 적힙니다.
 
 > **[Breaking Change — 2026-06-11]**: `bash scripts/new-project.sh` 및 `.\scripts\new-project.ps1`은 `bun scripts/new-project.ts`로 대체되었습니다 (ADR-0036). 기존 alias나 CI 파이프라인을 갱신하세요.
 
@@ -375,4 +403,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-06*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*

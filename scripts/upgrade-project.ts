@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.68.0
+// @version 1.69.0
+// v1.69.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
+//          --platform accepts a comma-separated list (lib/platforms.ts parsePlatformList;
+//          legacy `both` = all). MERGE_FILES and COMMANDS_DIRS are the union of the selected
+//          profiles. template-version.txt writes the canonical list.
 // v1.68.0 (2026-10-08, T-20261007-028 + T-20261007-018): --preflight flag —
 //          checks the three apply-blockers (clean working tree, open PRs on
 //          the current branch, template-version.txt present/parseable) and
@@ -545,7 +549,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--preflight] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--preflight] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -604,7 +608,7 @@ import {
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
-import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
+import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
 import {
   buildMergedTemplateBlocks,
   mergeManagedBlocks,
@@ -640,11 +644,17 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform claude|antigravity|codex|hermes|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]');
   process.exit(1);
 }
-if (!['claude', 'antigravity', 'codex', 'hermes', 'all'].includes(platform)) {
-  console.error('ERROR: --platform must be one of: claude, antigravity, codex, hermes, all');
+let selectedProfiles: PlatformProfile[] = [];
+try {
+  const parsed = parsePlatformList(platform);
+  selectedProfiles = parsed.profiles;
+  platform = parsed.canonical;
+  for (const w of parsed.warnings) console.warn(`WARN: --platform: ${w}`);
+} catch (e) {
+  console.error(`ERROR: --platform: ${(e as Error).message}`);
   process.exit(1);
 }
 
@@ -1530,10 +1540,11 @@ console.log('');
 // ── MERGE files ────────────────────────────────────────────────────────────────
 console.log('--- MERGE files (WORKSPACE-MANAGED sections) ---');
 const MERGE_FILES: string[] = [];
-if (platform === 'claude' || platform === 'all') MERGE_FILES.push('CLAUDE.md');
-if (platform === 'antigravity' || platform === 'all') MERGE_FILES.push('GEMINI.md');
-if (platform === 'codex' || platform === 'all') MERGE_FILES.push('CODEX.md');
-if (platform === 'hermes' || platform === 'all') MERGE_FILES.push('HERMES.md');
+// Union of the selected profiles' instruction files (literal sites: upgrade-policy drift guard).
+if (selectedProfiles.includes('claude')) MERGE_FILES.push('CLAUDE.md');
+if (selectedProfiles.includes('antigravity')) MERGE_FILES.push('GEMINI.md');
+if (selectedProfiles.includes('codex')) MERGE_FILES.push('CODEX.md');
+if (selectedProfiles.includes('hermes')) MERGE_FILES.push('HERMES.md');
 MERGE_FILES.push(
   '.gitignore', 'agents/pm.md', CI_WORKFLOW_REL,
 );
@@ -1723,8 +1734,8 @@ console.log('');
 // ── COMMANDS_SYNC: platform command files (.claude/commands, .gemini/commands) ──
 console.log('--- COMMANDS_SYNC: platform commands (hash-based) ---');
 const COMMANDS_DIRS: string[] = [];
-if (platform === 'claude' || platform === 'all') COMMANDS_DIRS.push('.claude/commands');
-if (platform === 'antigravity' || platform === 'all') COMMANDS_DIRS.push('.gemini/commands');
+if (selectedProfiles.includes('claude')) COMMANDS_DIRS.push('.claude/commands');
+if (selectedProfiles.includes('antigravity')) COMMANDS_DIRS.push('.gemini/commands');
 
 for (const cmdDir of COMMANDS_DIRS) {
   // Check variant template first, then common

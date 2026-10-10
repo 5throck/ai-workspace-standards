@@ -22,11 +22,27 @@ afterEach(() => {
 });
 
 describe('expectedPlatformTwins', () => {
-  test('mirrors new-project §2.7 platform profiles', () => {
-    expect(expectedPlatformTwins('all')).toEqual({ required: ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'], absent: [] });
-    expect(expectedPlatformTwins('claude')).toEqual({ required: ['CLAUDE.md'], absent: ['GEMINI.md', 'CODEX.md'] });
-    expect(expectedPlatformTwins('antigravity')).toEqual({ required: ['GEMINI.md'], absent: ['CLAUDE.md', 'CODEX.md'] });
-    expect(expectedPlatformTwins('codex')).toEqual({ required: ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'], absent: [] });
+  test('derives required/absent from PROFILE_OWNED_PATHS (union rule)', () => {
+    expect(expectedPlatformTwins('all')).toEqual({
+      required: ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.codex', 'HERMES.md', '.hermes'], absent: [],
+    });
+    expect(expectedPlatformTwins('claude')).toEqual({
+      required: ['CLAUDE.md'], absent: ['GEMINI.md', 'CODEX.md', '.codex', 'HERMES.md', '.hermes'],
+    });
+    expect(expectedPlatformTwins('antigravity')).toEqual({
+      required: ['GEMINI.md'], absent: ['CLAUDE.md', 'CODEX.md', '.codex', 'HERMES.md', '.hermes'],
+    });
+    // Behavior fix (eight-platform design §3.3): single codex drops the CLAUDE/GEMINI twins.
+    expect(expectedPlatformTwins('codex')).toEqual({
+      required: ['CODEX.md', '.codex'], absent: ['CLAUDE.md', 'GEMINI.md', 'HERMES.md', '.hermes'],
+    });
+  });
+
+  test('accepts a list and hermes', () => {
+    expect(expectedPlatformTwins('claude,codex')).toEqual({
+      required: ['CLAUDE.md', 'CODEX.md', '.codex'], absent: ['GEMINI.md', 'HERMES.md', '.hermes'],
+    });
+    expect(expectedPlatformTwins('hermes').required).toEqual(['HERMES.md', '.hermes']);
   });
 });
 

@@ -21,7 +21,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 2. Only then execute the work — Codex has **no native subagent tool**, so PM loads each specialist's [`agents/<name>.md`](agents/pm.md) definition as role context and performs the steps sequentially in-session
 3. Never bypass PM workflow — skipping the execution plan table is forbidden
 
-> **Codex CLI & Desktop App**: This file governs both surfaces. Role Declaration and the Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway on Codex — treat them as strictly binding.
+> **Codex CLI, Desktop App & IDE extension**: This file governs all three surfaces. Role Declaration and the Mandatory Execution Plan are the sole enforcement mechanisms for the PM Gateway on Codex — treat them as strictly binding.
 
 ---
 
@@ -31,16 +31,17 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 Codex does not run the workspace hook suite in Phase 1 (no `PreToolUse`/`PostToolUse` equivalents are wired). Governance rules are **prompt-enforced**: the agent self-enforces every gate a hook would otherwise apply, exactly as Antigravity sessions do (CONSTITUTION §11).
 
-| Gate | Codex CLI | Codex Desktop App | Manual fallback |
-|------|:---------:|:-----------------:|-----------------|
-| Pre-Edit Quality Gate | ✅ Prompt (self-enforced) | ✅ Prompt (self-enforced) | follow §2 before first edit per file |
-| Post-write lifecycle check | ❌ Not fired | ❌ Not fired | `bun scripts/hooks/post-write-lifecycle-check.ts` before committing |
-| QA audit | ❌ Not fired | ❌ Not fired | `bun scripts/audit.ts` after each task |
-| Secret scan / gitleaks | ❌ Not fired | ❌ Not fired | runs in the pre-commit hook at commit time |
+| Gate | Codex CLI | Codex Desktop App | Codex IDE extension | Manual fallback |
+|------|:---------:|:-----------------:|:-------------------:|-----------------|
+| Pre-Edit Quality Gate | ✅ Prompt (self-enforced) | ✅ Prompt (self-enforced) | ✅ Prompt (self-enforced) | follow §2 before first edit per file |
+| Post-write lifecycle check | ❌ Not fired | ❌ Not fired | ❌ Not fired | `bun scripts/hooks/post-write-lifecycle-check.ts` before committing |
+| QA audit | ❌ Not fired | ❌ Not fired | ❌ Not fired | `bun scripts/audit.ts` after each task |
+| Secret scan / gitleaks | ❌ Not fired | ❌ Not fired | ❌ Not fired | runs in the pre-commit hook at commit time |
 
 **Recommended workflow split** (mirrors the Claude pattern):
 - **CLI**: automated sync pipeline runs, multi-step refactors, long sessions.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel review sessions.
+- **IDE extension**: in-editor edits and inline review next to the open file; same prompt-enforced gates as the CLI (hooks are not wired).
 
 ### 2. Pre-Edit Quality Gate (All Platforms)
 
@@ -56,7 +57,7 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Claude Code CLI | ✅ Hook (automatic) | PreToolUse `ask` mode |
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode |
 | Antigravity | ✅ Prompt (manual) | self-enforced |
-| Codex CLI / Desktop App | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces |
+| Codex CLI / Desktop App / IDE extension | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces |
 
 ### 3. Slash Commands & Custom Prompts
 

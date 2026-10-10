@@ -413,6 +413,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0100",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
@@ -6932,7 +6937,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 4,
+        "sessions": 3,
         "last_used": "2026-10-07"
       }
     },
@@ -7326,7 +7331,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 4,
+        "sessions": 3,
         "last_used": "2026-10-07"
       }
     },
@@ -7436,11 +7441,7 @@
         ".agents/skills/ci-triage/SKILL.md",
         ".codex/skills/ci-triage/SKILL.md",
         ".hermes/skills/ci-triage/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-02"
-      }
+      ]
     },
     {
       "id": "skill:root/context-commonization-review",
@@ -7629,7 +7630,7 @@
       "name": "new-project",
       "scope": "root",
       "capability": "new-project",
-      "content_hash": "0ee526d205bc6325",
+      "content_hash": "8bf762c3585de7fa",
       "version": "1.0.0",
       "mirrors": [
         "skills/new-project/SKILL.md",
@@ -7961,7 +7962,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 4,
+        "sessions": 3,
         "last_used": "2026-10-07"
       }
     },
@@ -9551,6 +9552,18 @@
     {
       "type": "references",
       "from": "adr:0088",
+      "to": "skill:root/adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0088",
+      "to": "skill:root/migrate-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0088",
       "to": "skill:root/upgrade-project",
       "source": "prose"
     },
@@ -9570,6 +9583,18 @@
       "type": "references",
       "from": "adr:0096",
       "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0100",
+      "to": "skill:root/adopt-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0100",
+      "to": "skill:root/migrate-project",
       "source": "prose"
     },
     {
