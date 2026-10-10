@@ -34,6 +34,16 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 ## Gemini-Specific & Antigravity Workflows
 
+**Google surfaces (Gemini CLI, Antigravity IDE, Antigravity CLI)**
+
+All three Google surfaces share the `antigravity` platform profile and this file (see `docs/designs/2026-10-10-eight-platform-coverage-design.md`).
+
+| Surface | Instruction file | Platform dirs | Hooks | Dispatch |
+|---------|------------------|---------------|-------|----------|
+| Gemini CLI | `GEMINI.md` | `.gemini/` | BeforeTool/AfterTool/PreCompress fire | `invoke_subagent` |
+| Antigravity IDE | `GEMINI.md` | `.gemini/`, `.agents/` | Do not fire (agent self-enforces) | `invoke_subagent`; Agent Manager for parallel workspaces |
+| Antigravity CLI | `GEMINI.md` | `.gemini/`, `.agents/` | Do not fire (agent self-enforces) | `invoke_subagent` |
+
 ### 1. Active Antigravity Tool Suite Mapping & Safeguards
 Antigravity utilizes the following specialized, fine-grained toolset for filesystem and system operations. Refer to this mapping and the mandatory operational safeguards below:
 
@@ -359,7 +369,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-10-02 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-10-10 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- graft:start -->
 ## Graft — repo context graph
