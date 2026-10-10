@@ -14,8 +14,8 @@
 | [2026-10-06](2026-10-06.md) | chore: update |
 | [2026-10-05](2026-10-05.md) | chore: update |
 | [2026-10-04](2026-10-04.md) | chore: update |
-| [2026-10-03](2026-10-03.md) | fix(installer): detect Hermes home on Windows |
-| [2026-10-03](2026-10-03.md) | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
+| 2026-10-03 | fix(installer): detect Hermes home on Windows |
+| 2026-10-03 | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | 2026-10-03 | fix(installer): detect Hermes home on Windows |
 | 2026-10-03 | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
 | 2026-10-02 | feat(governance): process backlog T-20261001-015..021 — soak exit, triage commands, intake hardening, surface validator |
