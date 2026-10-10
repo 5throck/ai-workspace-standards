@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
 // v1.2.0 (2026-10-09, T-20261009-002): battery #8 — nightly scaffold E2E conclusion
 //          surfacing via gh run list; red nightly surfaces as a passed-with-WARN note
 //          that prints even under --quiet. Network-dependent, never fails the battery.
@@ -52,7 +52,10 @@ const validators: Array<{
 ];
 
 const quiet = process.argv.includes("--quiet");
-const results: Array<{ name: string; ok: boolean; note: string }> = [];
+// T-20261011-004: `warn` rides alongside ok — battery #8 (nightly E2E) can be
+// ok:true (exit 0 by design R10) while carrying a WARN the summary loop used
+// to drop, so --quiet consumers saw "8/8 green" against a failed nightly.
+const results: Array<{ name: string; ok: boolean; note: string; warn?: boolean }> = [];
 
 for (const v of validators) {
   const proc = Bun.spawnSync(v.cmd, { stdout: "pipe", stderr: "pipe" });
@@ -130,15 +133,17 @@ for (const v of validators) {
       note = "skipped (unparseable gh output)";
     }
   }
-  results.push({ name, ok, note });
+  results.push({ name, ok, note, warn });
   if (warn) console.error(`⚠️  ${name} — ${note}`);
   else if (!quiet) console.log(`✅ ${name} — ${note}`);
 }
 
 const failures = results.filter((r) => !r.ok);
 if (!quiet || failures.length > 0) {
-  console.log(`\n=== Review baseline summary: ${results.length - failures.length}/${results.length} green ===`);
-  for (const r of results) console.log(`  ${r.ok ? "✅" : "❌"} ${r.name}`);
+  const warned = results.filter((r) => r.warn && r.ok).length;
+  const green = results.length - failures.length - warned;
+  console.log(`\n=== Review baseline summary: ${green}/${results.length} green, ${warned} warn, ${failures.length} fail ===`);
+  for (const r of results) console.log(`  ${r.ok ? (r.warn ? "⚠️" : "✅") : "❌"} ${r.name}${r.warn ? " (warn)" : ""}`);
 }
 
 process.exit(failures.length > 0 ? 1 : 0);

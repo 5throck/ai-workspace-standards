@@ -2,9 +2,10 @@
   "id": "2026-09-19-template-domain-operating-system-design",
   "title": "template domain operating system design",
   "file": "docs/designs/2026-09-19-template-domain-operating-system-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "architect",
   "created": "2026-09-19",
-  "last_updated": "2026-09-19",
-  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+  "last_updated": "2026-10-10",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required.",
+  "review_notes": "spec hygiene sweep 2026-10-11 (T-20261011-003): adjudicated implemented — Domain Operating Model shipped as ADR-0083/0084 (procedure gates, raci.yaml, Step 2d DOM diff in project-resync)."
 }

@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.54.0
+ * @version 1.55.0
+ *
+ * v1.55.0 (2026-10-11, T-20261011-002): checkVariantPackageContract crash fix —
+ *          the per-variant verdict re-parsed templates/common/package.json
+ *          UNGUARDED, so an unparseable common manifest crashed the whole
+ *          validator at the first variant (triage destroyed, remaining variants
+ *          unchecked). The common parse is now cached once; a failed parse
+ *          early-returns per variant with the recorded 'common' fail only.
  *
  * v1.54.0 (2026-10-09, T-20261009-002, design docs/designs/2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md D2):
  *          new VA-08 scaffold-package-contract — common package.json retains the Tier 2 trio
@@ -416,19 +423,28 @@ function fail(variant: string, check: string, msg: string, fix?: string) {
 // new-project.ts §2 merge; the runtime guarantee is the nightly E2E (surfaced by
 // review-baseline battery #8).
 let packageContractCommonChecked = false;
+let packageContractCommon: { scripts?: unknown } | null = null;
 function checkVariantPackageContract(variant: string): void {
   if (!packageContractCommonChecked) {
     packageContractCommonChecked = true;
     try {
-      const commonPkg = JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8'));
-      const commonVerdict = evaluateScaffoldPackageContract(commonPkg, null);
+      const parsed = JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8')) as { scripts?: unknown };
+      const commonVerdict = evaluateScaffoldPackageContract(parsed, null);
+      packageContractCommon = parsed;
       if (!commonVerdict.ok) {
         fail('common', 'scaffold-package-contract', `scaffold package contract violated: ${commonVerdict.reason}`, 'Restore the Tier 2 scripts — templates/common/package.json is the SSOT every project package.json is generated from');
       }
     } catch (err) {
+      packageContractCommon = null;
       fail('common', 'scaffold-package-contract', `templates/common/package.json unparseable: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
+  // T-20261011-002: when the common parse already failed, the 'common' fail is
+  // recorded and per-variant evaluation is impossible (nothing to merge from).
+  // The old code re-parsed the same unparseable file unguarded at the first
+  // variant — SyntaxError crashed the whole validator, destroying triage.
+  if (packageContractCommon === null) return;
+  const commonPkg = packageContractCommon;
   const variantPkgPath = join('templates', variant, 'package.json');
   let variantPkg: { scripts?: unknown } | null = null;
   if (existsSync(variantPkgPath)) {
@@ -439,7 +455,7 @@ function checkVariantPackageContract(variant: string): void {
       return;
     }
   }
-  const verdict = evaluateScaffoldPackageContract(JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8')), variantPkg);
+  const verdict = evaluateScaffoldPackageContract(commonPkg, variantPkg);
   if (!verdict.ok) {
     fail(variant, 'scaffold-package-contract', `scaffold package contract violated: ${verdict.reason}`, 'See design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2 — the scaffold merges common ∪ variant (variant wins per key)');
   }

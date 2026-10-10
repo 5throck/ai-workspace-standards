@@ -2,9 +2,10 @@
   "id": "2026-09-25-mcp-governance-server-design",
   "title": "mcp governance server design",
   "file": "docs/designs/2026-09-25-mcp-governance-server-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "architect",
   "created": "2026-09-25",
-  "last_updated": "2026-09-25",
-  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+  "last_updated": "2026-10-10",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required.",
+  "review_notes": "spec hygiene sweep 2026-10-11 (T-20261011-003): adjudicated implemented — scripts/mcp-upstream-server.ts live (v1.9.x) with installer + doc-command gates; heavily iterated 2026-10."
 }
