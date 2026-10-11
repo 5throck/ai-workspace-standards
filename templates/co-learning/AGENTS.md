@@ -83,7 +83,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
 - **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-5.6-sol)
 - **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-5.6-terra)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-4-5 / gemini-3.8-flash / gpt-5.6-luna)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-5.6-luna)
 <!-- /WORKSPACE-MANAGED -->
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->

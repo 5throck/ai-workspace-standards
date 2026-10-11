@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 39d43dac487a275a91a12f4c5ed53576680ffaf2f6e6a69c463d3ee633b3edb0
+translated_from_hash: 8a225a4ff1ab8ed706ff4a506c4c917da894e428b408794381b5a500d6bca20b
 ---
 # Co-ABAP 사용자 가이드
 
@@ -26,8 +26,8 @@ translated_from_hash: 39d43dac487a275a91a12f4c5ed53576680ffaf2f6e6a69c463d3ee633
    | 작업 | 에이전트 | 티어 | 모델 | 플랫폼 |
    |------|----------|------|------|--------|
    | 모듈 요구사항 분석 | sd-analyst | Medium | claude-sonnet-5-5 | Claude Code |
-   | ABAP 구현 | code-writer | Low | claude-haiku-4-5 | Claude Code |
-   | QA 체인 | test-runner | Low | claude-haiku-4-5 | Claude Code |
+   | ABAP 구현 | code-writer | Low | claude-haiku-5-5 | Claude Code |
+   | QA 체인 | test-runner | Low | claude-haiku-5-5 | Claude Code |
 
 4. 구현은 `code-writer`가 수행하며, 모든 `WriteSource` / `EditSource` 직후에
    **post-write 필수 체인**(`SyntaxCheck → RunUnitTests → GetCodeCoverage →
