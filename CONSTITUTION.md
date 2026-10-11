@@ -284,6 +284,13 @@ Skills are reusable workflows defined as `skills/<name>/SKILL.md` or `.claude/sk
 
 **Flat Skill Directory Layout and Frontmatter Categories (ADR-0075)**: Skills are organized in a flat directory structure (`skills/<name>/SKILL.md`) rather than nested subdirectories, with categorization via `metadata.type` frontmatter instead — eliminating coupling between skill discovery and layout paths, enabling the upgrade skill pass to synchronize nested skills, and supporting the `mirror: false` sync-exclusion mechanism for domain-specific agent-dispatched skills. This flattened layout also resolves skill-graph projection gaps where nested categories were not discovered. → Details: [ADR-0075](docs/adr/0075-flat-skill-layout-frontmatter-categories.md).
 
+<!-- COMMON-CONSTITUTION:START -->
+#### Model-ID Hygiene in Skills
+
+Skills (`SKILL.md` and their `references/` files) MUST NOT hardcode literal model IDs (e.g. `claude-haiku-5-5`, `gemini-3.8-flash`). Model assignments change over time, and stale literals in derived documents rot silently and mislead dispatch. Registry IDs live only in `docs/workspace-schema.json` (`models.*` — the single source) and the tier→alias translation prose in `CLAUDE.md` §6 / `AGENTS.md` §3.6; skill-facing documents reference models by TIER plus a registry pointer instead, keeping operational aliases (`opus` / `sonnet` / `haiku`) that are stable across model swaps. Enforced by `skill-lifecycle-audit.ts` Check MM (ERROR per offending file; workspace directive 2026-10-11). To change a model mapping, use the `model-migration` skill.
+<!-- COMMON-CONSTITUTION:END -->
+
+---
 ---
 
 ### 6.5 Script Lifecycle Management
@@ -839,4 +846,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-10-11*
+*Last Updated: 2026-10-12*

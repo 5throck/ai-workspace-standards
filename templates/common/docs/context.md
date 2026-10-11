@@ -245,6 +245,12 @@ authoritative within its project, and this baseline applies where no project lis
 <!-- COMMON-CONSTITUTION:END -->
 
 <!-- COMMON-CONSTITUTION:START -->
+#### Model-ID Hygiene in Skills
+
+Skills (`SKILL.md` and their `references/` files) MUST NOT hardcode literal model IDs (e.g. `claude-haiku-5-5`, `gemini-3.8-flash`). Model assignments change over time, and stale literals in derived documents rot silently and mislead dispatch. Registry IDs live only in `docs/workspace-schema.json` (`models.*` — the single source) and the tier→alias translation prose in `CLAUDE.md` §6 / `AGENTS.md` §3.6; skill-facing documents reference models by TIER plus a registry pointer instead, keeping operational aliases (`opus` / `sonnet` / `haiku`) that are stable across model swaps. Enforced by `skill-lifecycle-audit.ts` Check MM (ERROR per offending file; workspace directive 2026-10-11). To change a model mapping, use the `model-migration` skill.
+<!-- COMMON-CONSTITUTION:END -->
+
+<!-- COMMON-CONSTITUTION:START -->
 #### Language Policy Exception — Korean Legal/Regulatory Content
 
 The English-only policy admits a narrow exception for files where Korean is legally
