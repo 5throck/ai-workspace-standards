@@ -51,6 +51,15 @@ Standard operating procedures, developer guides, variant creation workflows, and
 - [**Variant Conversion Guide**](guides/variant-conversion-guide.md) — Operational guide for converting existing non-variant repositories into workspace variants
 - [**Variant Creation Workflow**](guides/variant-creation-workflow.md) — Detailed workflow stages and lifecycle milestones for variant initialization
 - [**External Framework References**](guides/external-references.md) — Mappings, integrations, and compatibility references for external tools and frameworks
+- [**Graft Platform Integration**](guides/graft-platform-integration.md) — Repo context-graph tooling integration notes
+- [**Agent-Shell Hardening Checklist**](guides/agent-shell-hardening.md) — Tiered enforcement (server-authz > feature flags > proxy gate), out-of-repo approvals (co-abap wave)
+- [**Parallel-Dispatch Grants**](guides/parallel-dispatch-grants.md) — Write-capable parallel agent work bounded by one human grant per run
+- [**Record Lifecycle Hygiene**](guides/record-lifecycle-hygiene.md) — Archive-don't-delete for audit-referenced records; enumerate-before-cleanup
+- [**Financial-Model Per-Subject Audit**](guides/financial-model-per-subject-audit.md) — Per-subject parameter consumption checklist (store/consume gap)
+- [**Production Inspection Runbook**](guides/production-inspection-runbook.md) — Read-only live-database inspection with a PII boundary
+- [**Verified Mass-Rewrite Technique**](guides/mass-text-rewrite-verification.md) — Bounded-chunk rewrites with independent pre-apply verification
+- [**Server-Spawn Test Determinism**](guides/server-spawn-test-determinism.md) — Free-port scan, identity guard, readiness poll, exit-path cleanup
+- [**Browser-Deliverable XSS Assertions**](guides/browser-deliverable-xss-assertions.md) — Source-slice + structural inertness assertions for inline renderers
 
 ---
 

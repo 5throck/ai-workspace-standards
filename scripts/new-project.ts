@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.36.0
+// @version 1.36.1
+// v1.36.1 (2026-10-12, T-20261012-001 + T-20261012-006-class scaffold registry fix):
+//           §6.6 registers variant-delivered scripts into the project
+//           scripts/SCRIPTS.md — the L1 snapshot §6.5 keeps has no rows for
+//           variant top-level/nested-delivered scripts (co-abap's
+//           sap-mcp-proxy.ts, hooks/sap-action-*.ts, lib/sap-action-lib.ts),
+//           so the first verify-scripts failed with "not found in SCRIPTS.md"
+//           (nightly scaffold E2E red 2026-10-11). Recursive walk excludes the
+//           scripts/<variant>/ sub-tree (covered by the delivered
+//           sub-registry); rows carry the script's own @version, L2-only.
 // v1.36.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
 //          --platform takes a comma-separated list (claude,codex; all). Pruning keeps the
 //          UNION of the selected profiles' owned paths (lib/platforms.ts PROFILE_OWNED_PATHS)
@@ -1565,6 +1574,64 @@ if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
 
   writeFileSync(projectScriptsMd, rewritten, 'utf-8');
   console.log(`  📝 Filtered SCRIPTS.md: removed ${removed} L0-only registry entries`);
+}
+
+// ── 6.6. Register variant-delivered top-level scripts (T-20261012-001) ───────
+// Variant top-level scripts (e.g. co-abap's sap-mcp-proxy.ts from the #194
+// proxy-seam wave) deliver to the project scripts/ ROOT, but the L1 registry
+// snapshot §6.5 keeps has no row for them — verify-scripts fails the first
+// audit with "not found in SCRIPTS.md" (nightly scaffold E2E red 2026-10-11).
+// Append a row per delivered variant top-level script the registry lacks,
+// versioned from the script's own @version header.
+const variantScriptsTopDir = join(templatesDir, 'scripts');
+if (variant && existsSync(variantScriptsTopDir) && existsSync(projectScriptsMd)) {
+  // Recursive walk EXCLUDING the scripts/<variant>/ sub-tree — those rows come
+  // from the delivered variant sub-registry (scripts/<variant>/SCRIPTS.md).
+  const delivered: Array<{ name: string; version: string }> = [];
+  const walkVariantScripts = (dir: string, rel: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const childRel = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        if (e.name === variant) continue;
+        walkVariantScripts(join(dir, e.name), childRel);
+        continue;
+      }
+      if (!e.name.endsWith('.ts')) continue;
+      const header = readFileSync(join(dir, e.name), 'utf-8');
+      const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? '1.0.0';
+      delivered.push({ name: childRel, version });
+    }
+  };
+  walkVariantScripts(variantScriptsTopDir, '');
+  if (delivered.length > 0) {
+    const mdContent = readFileSync(projectScriptsMd, 'utf-8');
+    const existingRows = new Set(
+      mdContent.split('\n')
+        .filter((l) => /^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(l))
+        .map((l) => l.split('|')[1]?.replace(/`/g, '').trim())
+        .filter(Boolean) as Array<string>,
+    );
+    const missing = delivered.filter((d) => !existingRows.has(d.name));
+    if (missing.length > 0) {
+      const lines = mdContent.split('\n');
+      // Insert after the last table row of the FIRST registry table block.
+      const regStart = lines.findIndex((l) => /^## Registry/.test(l));
+      if (regStart >= 0) {
+        let insertAt = -1;
+        for (let i = regStart; i < lines.length; i++) {
+          if (/^\|\s*`/.test(lines[i])) insertAt = i + 1;
+          else if (insertAt >= 0 && !/^\|/.test(lines[i])) break;
+        }
+        if (insertAt > 0) {
+          const rows = missing.map((d) =>
+            `| \`${d.name}\` | L2-only | ${d.version} | active | Variant-delivered top-level script (auto-registered at scaffold, T-20261012-001) | —| L2-only | —|`);
+          lines.splice(insertAt, 0, ...rows);
+          writeFileSync(projectScriptsMd, lines.join('\n'), 'utf-8');
+          console.log(`  📝 SCRIPTS.md: registered ${missing.length} variant-delivered script(s): ${missing.map((d) => d.name).join(', ')}`);
+        }
+      }
+    }
+  }
 }
 
 // ── 7. Initialize git ──────────────────────────────────────────────────────────

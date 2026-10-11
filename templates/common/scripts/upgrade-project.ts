@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.70.0
+// @version 1.70.1
+// v1.70.1 (2026-10-12, T-20261012-001): the VARIANT SCRIPTS SYNC pass appends
+//          registry rows for delivered variant scripts missing from the
+//          project scripts/SCRIPTS.md — co-abap's sap-mcp-proxy.ts delivered
+//          without a row failed the project's first verify-scripts. Rows carry
+//          the script's own @version, source/layer L2-only.
 // v1.70.0 (2026-10-11, T-20261011-014): pre-upgrade stash inventory warning —
 //          `git stash push -u` snapshots untracked but NOT gitignored files, so
 //          machine-local tooling (co-abap's vsp binary — observed casualty)
@@ -2059,6 +2064,56 @@ if (existsSync(variantScriptsSrc)) {
     }
   };
   preserveVariantScripts(variantScriptsDst, '');
+
+  // T-20261012-001: variant top-level/nested-delivered scripts need registry
+  // rows in the project scripts/SCRIPTS.md — the L1 snapshot has no rows for
+  // them (co-abap's sap-mcp-proxy.ts failed the project's first verify-scripts).
+  // Append a row per delivered variant script the registry lacks, versioned
+  // from the script's own @version header. Rows land at the end of the FIRST
+  // registry table; source/layer stay L2-only (variant-delivered).
+  const projectRegPath = join(projectDir, 'scripts', 'SCRIPTS.md');
+  if (existsSync(projectRegPath)) {
+    const reg = readFileSync(projectRegPath, 'utf-8');
+    const existingRows = new Set(
+      reg.split('\n')
+        .filter((l) => /^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(l))
+        .map((l) => l.split('|')[1]?.replace(/`/g, '').trim())
+        .filter(Boolean) as Array<string>,
+    );
+    const missingRows: string[] = [];
+    const scanVariantScripts = (dir: string, rel: string): void => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const childRel = rel ? `${rel}/${e.name}` : e.name;
+        if (e.isDirectory()) {
+          if (e.name === 'hooks' || e.name === 'temp') continue;
+          scanVariantScripts(join(dir, e.name), childRel);
+          continue;
+        }
+        if (!e.name.endsWith('.ts')) continue;
+        if (existingRows.has(childRel) || existingRows.has(e.name)) continue;
+        const header = readFileSync(join(dir, e.name), 'utf-8');
+        const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? '1.0.0';
+        missingRows.push(`| \`${childRel}\` | L2-only | ${version} | active | Variant-delivered script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`);
+      }
+    };
+    scanVariantScripts(variantScriptsDst, '');
+    if (missingRows.length > 0) {
+      const lines = reg.split('\n');
+      const regStart = lines.findIndex((l) => /^## Registry/.test(l));
+      if (regStart >= 0) {
+        let insertAt = -1;
+        for (let i = regStart; i < lines.length; i++) {
+          if (/^\|\s*`/.test(lines[i])) insertAt = i + 1;
+          else if (insertAt >= 0 && !/^\|/.test(lines[i])) break;
+        }
+        if (insertAt > 0) {
+          lines.splice(insertAt, 0, ...missingRows);
+          writeFileSync(projectRegPath, lines.join('\n'), 'utf-8');
+          console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
+        }
+      }
+    }
+  }
   // Sync the variant SCRIPTS.md registry from the template.
   const variantRegSrc = join(variantScriptsSrc, 'SCRIPTS.md');
   const variantRegDst = join(variantScriptsDst, 'SCRIPTS.md');
