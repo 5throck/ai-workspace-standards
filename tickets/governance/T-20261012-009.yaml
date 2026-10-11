@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261012-009
+kind: manual
+title: >-
+  templates/co-abap/docs/platform-setup/antigravity.md:11,15 dangling security
+  links — line 15 (residual-risk paragraph, the doc's safety-critical closure
+  pointer) links SECURITY.md#agent-shell-hardening-all-platforms but
+  templates/co-abap/SECURITY.md does not exist and the common SECURITY.md lacks
+  that heading; line 11 links ../tooling-matrix.md which also does not project.
+  The only 2 warnings in validate-docs-links --all. Fix: promote the Agent-shell
+  hardening section (and a tooling matrix) into the template tree, or repoint to
+  content that ships, then re-run --all to clear. Evidence: Slot D 2026-10-11
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:47:45.539+09:00'
+history:
+  - at: '2026-10-12T01:47:45.539+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

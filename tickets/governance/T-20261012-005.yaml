@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261012-005
+kind: manual
+title: >-
+  learning: percentage-colgroup column-sizing two-step refactoring sequence —
+  screen-local constants (X_COL_PCT as const) rendered as a percentage colgroup
+  fixing single-column absorption under table-layout:fixed, then generalized
+  same-day into a shared ColGroup helper with a dev-only widths-sum-to-100
+  guard, .table-fixed-pct CSS rules, guard test, and lint rule across ~125 table
+  markups (co-newbiz batch 1, commit 75369bd4; design names PR #509 as the base
+  pattern). Two-step path (screen-local -> shared helper with dev invariant) is
+  the reusable refactoring sequence. Evidence: co-newbiz PR #509,
+  components/stages/our-company/constants.ts:56-58, design
+  2026-10-11-table-column-sizing-system-design. Class: component refactoring
+  sequence learning note
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:41:53.333+09:00'
+history:
+  - at: '2026-10-12T01:41:53.333+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

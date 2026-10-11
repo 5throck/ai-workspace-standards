@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261012-008
+kind: manual
+title: >-
+  templates/co-deck/presentations/_smoke_test/_vr_matrix_helper.mjs hardcodes
+  /Users/techcross absolute paths (lines 2-4: import + root constant) and is an
+  undocumented template surface (design Surfaces omits it) — added in PR #1490
+  alongside the injector promotion; breaks on any other machine/scaffold. Fix:
+  resolve from import.meta.url, or remove the one-shot matrix dumper, and add
+  the Surfaces row if kept. Evidence: Slots A/D 2026-10-11
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:47:45.526+09:00'
+history:
+  - at: '2026-10-12T01:47:45.526+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

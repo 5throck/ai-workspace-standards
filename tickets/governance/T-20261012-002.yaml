@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261012-002
+kind: manual
+title: >-
+  BACKFILL for dangling ID T-20261011-015 (Check MM / model-migration rollout
+  record) — the 2026-10-11 model-migration wave (PR #1511: skill-lifecycle-audit
+  Check MM, sync-model-registry.ts, lib/model-literal-patterns.ts,
+  skills/model-migration + 5 mirrors + lifecycle records + tests + constitution
+  zone) shipped citing ticket T-20261011-015 in 9 places (lifecycle record Phase
+  History, SCRIPTS.md rows 219/245, skill-lifecycle-audit.ts,
+  sync-model-registry.ts, 4 test files) but that ticket was never filed. This
+  entry records the rollout result so grep resolves: Check MM enforces
+  model-literal hygiene in skills via the shared pattern lib;
+  sync-model-registry.ts sweeps stale literals with the SKILL.md-step-1 caution.
+  Discovered 2026-10-12 Slot B; the owning session should treat this as the
+  closure record
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-12T01:41:36.080+09:00'
+history:
+  - at: '2026-10-12T01:41:36.080+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-12T01:41:36.164+09:00'
+    from: backlog
+    to: done
+result: >-
+  Check MM rollout recorded; 9 dangling references now resolve to this entry via
+  title grep. Filed 2026-10-12 by the nightly runner after Slot B flagged the
+  dangling provenance
+error: null
