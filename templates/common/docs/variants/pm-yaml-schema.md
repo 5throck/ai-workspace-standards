@@ -276,7 +276,7 @@ dispatch_protocol:
 **Tier Values**:
 - `high`: High-complexity reasoning and design adjudication (claude-opus-5-5, gemini-3.1-pro)
 - `medium`: Standard orchestration (claude-sonnet-5-5, gemini-3.8-flash)
-- `low`: Simple coordination (claude-haiku-4-5)
+- `low`: Simple coordination (claude-haiku-5-5)
 
 > Template PMs and the workspace-root PM are all `medium` (orchestration and coordination; workspace-root aligned 2026-09-15). A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 

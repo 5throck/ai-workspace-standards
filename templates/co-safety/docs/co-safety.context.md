@@ -250,7 +250,7 @@ dispatch triggers: `AGENTS.md` Specialist Agent Roster.
   |------|-------------------|------------------------------------------|
   | High | `claude-opus-5-5` | `opus` |
   | Medium | `claude-sonnet-5-5` | `sonnet` |
-  | Low | `claude-haiku-4-5` | `haiku` |
+  | Low | `claude-haiku-5-5` | `haiku` |
 
   Omitting `model` causes the subagent to silently inherit the parent session's model regardless of the tier written in the plan table. Verify the `model` argument (e.g. `model = "haiku"`) is present on every `Agent()` call before dispatching — do not rely on `subagent_type` alone.
 - *Phase Gate for New File Design*: Any new workflow file, evidence schema, or regulation metadata requires SGM review (equivalent to architect Phase 1-2) before SWM executes.

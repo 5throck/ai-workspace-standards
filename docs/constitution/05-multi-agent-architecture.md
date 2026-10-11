@@ -29,7 +29,7 @@ name: <agent-slug>              # kebab-case, matches filename
 role: <one-line role description>
 status: active
 tier:
-  claude: high|medium|low       # claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-4-5
+  claude: high|medium|low       # claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5
   gemini: high|medium|low       # gemini-3.1-pro | gemini-3.8-flash
   antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.8-flash
   gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.8-flash
@@ -181,7 +181,7 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 |------|--------|------|----------------|
 | **High** | claude-opus-5-5, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
 | **Medium** | claude-sonnet-5-5, gemini-3.8-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-4-5, gemini-3.8-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
+| **Low** | claude-haiku-5-5, gemini-3.8-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
 

@@ -155,7 +155,7 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
     expect((tierList.match(/gpt-5\.6-/g) ?? []).length).toBe(3);
     expect(tierList).toContain('claude-opus-5-5');
     expect(tierList).toContain('claude-sonnet-5-5');
-    expect(tierList).toContain('claude-haiku-4-5');
+    expect(tierList).toContain('claude-haiku-5-5');
   });
 
   test('every templates/co-*/AGENTS.md is at parity with common', () => {

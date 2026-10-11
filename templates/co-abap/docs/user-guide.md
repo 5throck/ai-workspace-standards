@@ -21,8 +21,8 @@
    | Task | Agent | Tier | Model | Platform |
    |------|-------|------|-------|----------|
    | Module requirements analysis | sd-analyst | Medium | claude-sonnet-5-5 | Claude Code |
-   | ABAP implementation | code-writer | Low | claude-haiku-4-5 | Claude Code |
-   | QA chain | test-runner | Low | claude-haiku-4-5 | Claude Code |
+   | ABAP implementation | code-writer | Low | claude-haiku-5-5 | Claude Code |
+   | QA chain | test-runner | Low | claude-haiku-5-5 | Claude Code |
 
 4. Implementation runs through `code-writer` with the **post-write mandatory chain**
    (`SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck`) after every
