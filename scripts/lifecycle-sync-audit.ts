@@ -20,7 +20,11 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.17.1
+ * @version 1.18.0
+ * v1.18.0 (2026-10-11, T-20261011-014 landing): 'upgrade-project:helpers/write-scripts-snapshot' joins
+ *          INTENTIONAL_CROSS_REFS — upgrade-project's post-upgrade snapshot regeneration (U-20261006-001
+ *          wave) spawns the L0-only helper behind an existsSync guard, the same sanctioned shape as
+ *          'audit:upgrade-project' (v1.5.0) and 'dev-sync:propagate-to-templates' (v1.6.0).
  *
  * v1.17.1 (2026-10-02): INTENTIONAL_CROSS_REFS gains audit:validate-ticket-doc-commands and
  *          audit:sync-variant-settings — both existsSync-guarded L0-only spawns in audit.ts
@@ -1190,6 +1194,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
   'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
   'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
+  'upgrade-project:helpers/write-scripts-snapshot',     // upgrade-project.ts: post-upgrade snapshot regeneration spawns the L0-only helper behind an existsSync guard (T-20261011-014 landing)
   'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
   'audit:upgrade-project',                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
   'audit:validate-ticket-doc-commands',           // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only lint is absent (T-20261002-008)

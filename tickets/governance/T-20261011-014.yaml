@@ -10,12 +10,15 @@ title: >-
   artifacts and WARN with an inventory (or exclude them from the stash) so
   machine-local setup survives upgrades. From T-20261011-012's deferral record
 priority: low
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-11T11:29:32.816+09:00'
 history:
   - at: '2026-10-11T11:29:32.816+09:00'
     from: null
     to: backlog
+  - at: '2026-10-11T13:10:00.885+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
