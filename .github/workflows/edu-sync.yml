@@ -122,7 +122,7 @@ jobs:
       - name: Update education content (patch generation only — unprivileged)
         id: edu
         if: steps.changes.outputs.lines != '0' && steps.pat.outputs.present == 'true'
-        uses: anthropics/claude-code-action@12dd8d74c712f5f3669365b2369b558c495b1104 # v1 (commit dereferenced from tag object d9fa72aedd427e79c6dcec0388f2656619eb3c6a; fixes #849: step lacked `uses` and was rejected at workflow startup)
+        uses: anthropics/claude-code-action@6fed3ca145920b639991cb756090506e1bcaf515 # v1 (commit dereferenced from tag object d9fa72aedd427e79c6dcec0388f2656619eb3c6a; fixes #849: step lacked `uses` and was rejected at workflow startup)
         env:
           # T-20260912-026: the agent is deliberately run WITHOUT the PAT and
           # WITHOUT any GitHub write token. It edits local clones, commits to
@@ -324,7 +324,7 @@ jobs:
           } > edu-forensics.txt
           cat edu-forensics.txt
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: edu-sync-forensics
