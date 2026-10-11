@@ -1,4 +1,11 @@
-// @version 2.52.0
+// @version 2.53.0
+// v2.53.0 (2026-10-11, U-20261009-001, spec
+//          docs/designs/2026-10-11-backlog-batch-2-design.md): the platform-lifecycle
+//          Fail hint names the third-party-skill escape hatches — tool-generated
+//          skills like graft are version-exempt via docs/self-managed-surfaces.json
+//          or the loader's built-in default (scripts/lib/self-managed-tools.ts
+//          v1.1.0), so a graft install can no longer block every /sync. Message-only
+//          change; the check wiring is unchanged.
 // v2.52.0 (2026-10-09, T-20261009-005/-002): tracked node_modules guard — any
 //          git-tracked node_modules path is a hard FAIL (the 7b154db3 symlink
 //          incident class; complements the slash-less .gitignore entry).
@@ -1003,7 +1010,7 @@ if (hasBun) {
     if (fs.existsSync(path.join('scripts', 'verify-platform-lifecycle.ts'))) {
         const out = await $`bun ${path.join('scripts', 'verify-platform-lifecycle.ts')}`.nothrow();
         if (out.exitCode !== 0)
-            Fail("Platform lifecycle verification failed (run 'bun scripts/verify-platform-lifecycle.ts' to see details)");
+            Fail("Platform lifecycle verification failed (run 'bun scripts/verify-platform-lifecycle.ts' to see details; third-party tool skills like graft are version-exempt via docs/self-managed-surfaces.json or the built-in default in scripts/lib/self-managed-tools.ts)");
     }
 
     // Script lifecycle verification: version headers

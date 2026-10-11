@@ -1,0 +1,32 @@
+# Hermes Agent MCP registration for the co-abap SAP server (routed through the SAP MCP proxy).
+#
+# Hermes reads MCP servers ONLY from the user-level config (~/.hermes/config.yaml); there is no
+# project-level MCP file and no `cwd` key, so absolute paths are required.
+# Merge this block into ~/.hermes/config.yaml and replace <ABS_PATH_TO_REPO> with the absolute
+# path of your co-abap clone (Windows: use forward slashes, e.g. C:/work/co-abap).
+#
+# The proxy resolves the repo root from its own location, loads <repo>/.env (SAP_URL, SAP_USER,
+# SAP_PASSWORD, SAP_CLIENT ...), applies safe SAP_* defaults and enforces the SAP action policy,
+# approvals and audit for every call. Do not point Hermes at ./vsp directly.
+mcp_servers:
+  abap:
+    command: bun
+    args:
+      - <ABS_PATH_TO_REPO>/scripts/sap-mcp-proxy.ts
+      - "--"
+      - "--mode"
+      - hyperfocused
+    # Dispatch env forwarded to the proxy (UNVERIFIED on-device: Hermes may not expand ${VAR}; set literal values per run if not).
+    env:
+      SAP_PROXY_MAX_CLASS: ${SAP_PROXY_MAX_CLASS}
+      SAP_DISPATCH_GRANT: ${SAP_DISPATCH_GRANT}
+      SAP_DISPATCH_ROW: ${SAP_DISPATCH_ROW}
+    timeout: 120
+    # tools:
+    #   include: []    # leave unset: the proxy already gates every call
+
+# Agent-shell hardening (config/platforms/protected-paths.json; docs/platform-setup/hermes.md).
+# Hermes has no per-command/per-path deny list, so keep dangerous-command approval on manual
+# and never use "off". Run Hermes in a container or as a separate OS user for real isolation.
+approvals:
+  mode: manual

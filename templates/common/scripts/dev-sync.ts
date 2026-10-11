@@ -1,4 +1,15 @@
-// @version 1.25.0
+// @version 1.26.0
+// v1.26.0 (2026-10-11, U-20261008-001, spec
+//          docs/designs/2026-10-11-backlog-batch-2-design.md): step 1 descriptive
+//          commit messages — weak caller messages (no message, bare "chore: update",
+//          bare "chore: upgrade template to X") are replaced at composition time by a
+//          conventional-commit summary derived from the task-staged change set
+//          (primary path-group picks type(scope); docs/designs changes cite the spec
+//          id while the 72-char budget allows; no classifiable paths fall back to
+//          "chore: workspace sync (<n> files)"). Descriptive caller messages are kept
+//          verbatim. The derived message feeds the language gate, PR slug, commit,
+//          and PR title — one message everywhere. Composition lives in
+//          scripts/helpers/commit-message.ts (pure, unit-tested).
 // v1.25.0 (2026-10-08, T-20261008-005): step 3.9 heal-by-early-publish — the lifecycle
 //          members of `audit.ts --spec-check --lifecycle-only` fail on publish-pending
 //          L0→L1 drift, so a change set that adds or bumps an L1-delivered script or
@@ -176,6 +187,7 @@ import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
+import { composeCommitMessage } from './helpers/commit-message.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -245,11 +257,30 @@ for (let i = 0; i < rawArgs.length; i++) {
     msgArgs.push(arg);
   }
 }
-const msg = (msgArgs.join(' ') || "chore: update")
+let msg = (msgArgs.join(' ') || "chore: update")
   // Collapse newlines/control chars — safe for git -m and gh --title arguments
   .replace(/[\r\n\t]+/g, ' ')
   .replace(/\s+/g, ' ')
   .trim() || "chore: update";
+
+// Step 1 (U-20261008-001): weak messages — the no-arg fallback "chore: update" and
+// the bare "chore: upgrade template to X" shape — are replaced by a descriptive
+// conventional-commit summary derived from the task-staged change set. Snapshot the
+// staged set here (nothing stages between this point and the step 6.5 snapshot, so
+// this IS the task-staged set). Composition is pure (helpers/commit-message.ts) and
+// its output is English by construction, so the language gate below still applies
+// unchanged to caller-supplied text.
+if (import.meta.main) {
+  try {
+    const earlyStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+    if (earlyStagedRes.exitCode === 0) {
+      const stagedPaths = earlyStagedRes.stdout.toString().split('\0').filter(Boolean);
+      msg = composeCommitMessage(msg, stagedPaths);
+    }
+  } catch (e) {
+    console.error(`[dev-sync] commit-message derivation skipped: ${e}`);
+  }
+}
 
 // Language gate — commit messages / PR titles must be English (context.md §3).
 // Runs before any git mutation so a non-English message never reaches a commit or PR

@@ -140,6 +140,10 @@ services/co-workspace/data/
 # Gateway tenant storage now lives at services/co-workspace/data/ (already ignored above).
 # Runtime-image staging for the hermes bake (build-runtime-image.sh) is local-only.
 services/co-workspace/docker/runtime-hermes/
+# co-deck visual-regression scratch (theme-visual-regression.browser.mjs regenerates
+# presentations/_smoke_test/ at run time; a committed copy leaked /Users/* absolute
+# paths into the template — T-20261011-011).
+templates/co-deck/presentations/_smoke_test/
 
 nul
 NUL

@@ -1,0 +1,143 @@
+{
+  "ui": {
+    "useAlternateBuffer": true,
+    "terminalBuffer": true
+  },
+  "mcpServers": {
+    "abap": {
+      "command": "bun",
+      "args": [
+        "scripts/sap-mcp-proxy.ts",
+        "--",
+        "--mode",
+        "hyperfocused"
+      ],
+      "env": {
+        "SAP_PROXY_MAX_CLASS": "$SAP_PROXY_MAX_CLASS",
+        "SAP_DISPATCH_GRANT": "$SAP_DISPATCH_GRANT",
+        "SAP_DISPATCH_ROW": "$SAP_DISPATCH_ROW"
+      }
+    },
+    "abap-docs": {
+      "type": "http",
+      "url": "https://mcp-abap.marianzeis.de/mcp"
+    },
+    "sap-docs": {
+      "type": "http",
+      "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    }
+  },
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_console_logs",
+      "mcp__Claude_Preview__preview_screenshot",
+      "mcp__Claude_Preview__preview_snapshot",
+      "mcp__Claude_Preview__preview_logs",
+      "mcp__Claude_Preview__preview_list",
+      "mcp__abap__SAP",
+      "mcp__abap-docs__*",
+      "mcp__sap-docs__*",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '*)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git credential *)",
+      "Bash(git check-ignore *)",
+      "Bash(powershell -Command *)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "abap",
+    "abap-docs",
+    "sap-docs"
+  ],
+  "terminal.executionPolicy": "Off",
+  "artifact.reviewPolicy": "Auto",
+  "mcp.toolApproval": "Manual",
+  "terminal.denyList": [
+    "./vsp",
+    "vsp",
+    "bun scripts/sap-approve.ts",
+    "node scripts/sap-approve.ts",
+    "bun -e",
+    "bun --eval",
+    "node -e",
+    "node --eval",
+    "script",
+    "git stash",
+    "git checkout --",
+    "git restore",
+    "git clean",
+    "rm vsp",
+    "rm ./vsp",
+    "mv vsp",
+    "mv ./vsp",
+    "cp vsp",
+    "cp ./vsp",
+    "bun scripts/sap-integrity.ts",
+    "node scripts/sap-integrity.ts",
+    "bun scripts/sap-mcp-proxy.ts",
+    "node scripts/sap-mcp-proxy.ts",
+    "python -c",
+    "python3 -c",
+    "perl -e",
+    "expect",
+    "unbuffer",
+    "socat",
+    "deno eval",
+    "cat .env",
+    "less .env",
+    "head .env",
+    "tail .env"
+  ],
+  "general": {
+    "defaultApprovalMode": "default"
+  },
+  "security": {
+    "disableYoloMode": true
+  },
+  "tools": {
+    "exclude": [
+      "run_shell_command(./vsp)",
+      "run_shell_command(vsp)",
+      "run_shell_command(bun scripts/sap-approve.ts)",
+      "run_shell_command(node scripts/sap-approve.ts)",
+      "run_shell_command(bun -e)",
+      "run_shell_command(bun --eval)",
+      "run_shell_command(node -e)",
+      "run_shell_command(node --eval)",
+      "run_shell_command(script)",
+      "run_shell_command(git stash)",
+      "run_shell_command(git checkout --)",
+      "run_shell_command(git restore)",
+      "run_shell_command(git clean)",
+      "run_shell_command(rm vsp)",
+      "run_shell_command(rm ./vsp)",
+      "run_shell_command(mv vsp)",
+      "run_shell_command(mv ./vsp)",
+      "run_shell_command(cp vsp)",
+      "run_shell_command(cp ./vsp)",
+      "run_shell_command(bun scripts/sap-integrity.ts)",
+      "run_shell_command(node scripts/sap-integrity.ts)",
+      "run_shell_command(bun scripts/sap-mcp-proxy.ts)",
+      "run_shell_command(node scripts/sap-mcp-proxy.ts)",
+      "run_shell_command(python -c)",
+      "run_shell_command(python3 -c)",
+      "run_shell_command(perl -e)",
+      "run_shell_command(expect)",
+      "run_shell_command(unbuffer)",
+      "run_shell_command(socat)",
+      "run_shell_command(deno eval)",
+      "run_shell_command(cat .env)",
+      "run_shell_command(less .env)",
+      "run_shell_command(head .env)",
+      "run_shell_command(tail .env)"
+    ]
+  }
+}

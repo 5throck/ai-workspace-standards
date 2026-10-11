@@ -153,6 +153,10 @@ Required env keys (see `.env.sample`):
 | `scratch-cleanup.ts` | Scratch workspace hygiene (temp purge, task archival, status) — *variant: scripts/co-abap/* | active |
 | `install-vsp.ts` | VSP (VS Code extension) installation — *variant: scripts/co-abap/* | active |
 | `install-bun.ts` | Bun runtime installation — *variant: scripts/co-abap/* | active |
+| `sap-mcp-proxy.ts` | Platform-neutral stdio MCP proxy in front of vsp — the single SAP enforcement point (allow/ask/deny, HMAC approvals, integrity seal, dispatch grants) — *variant overlay: scripts/* | active |
+| `sap-approve.ts` | Human-only approval CLI (single-use, input-hash-bound, /dev/tty-confirmed; also grants `--grant <runId>`) — *variant overlay: scripts/* | active |
+| `sap-integrity.ts` | Policy + enforcement-code integrity seal (init/sign/verify/verify-audit); mismatch drops the proxy to read-only — *variant overlay: scripts/* | active |
+| `validate-abap-platform-parity.ts` | Cross-platform parity: MCP proxy routing, deny-rules SSOT rendering, instruction sections, skill mirrors, schema models — *variant overlay: scripts/* | active |
 
 ---
 

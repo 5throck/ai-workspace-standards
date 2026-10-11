@@ -1,0 +1,579 @@
+{
+  "$comment": "Single source of truth for the agent-shell protected set on all 8 platforms. Checked by `bun scripts/validate-abap-platform-parity.ts` (check id: deny-rules). Residual risk: a same-UID agent with an unrestricted shell can still read ~/.config/co-abap/approval.key; full closure needs a separate OS user (see SECURITY.md).",
+  "version": 1,
+  "commands": [
+    {
+      "id": "vsp-exec",
+      "description": "Execute vsp directly (bypasses the proxy)",
+      "claude": [
+        "Bash(./vsp*)",
+        "Bash(*/vsp)",
+        "Bash(*/vsp *)"
+      ],
+      "gemini": [
+        "./vsp",
+        "vsp",
+        "run_shell_command(./vsp)",
+        "run_shell_command(vsp)"
+      ],
+      "codex": [
+        [
+          "./vsp"
+        ],
+        [
+          "vsp"
+        ]
+      ]
+    },
+    {
+      "id": "approve-cli",
+      "description": "Run sap-approve (human-only)",
+      "claude": [
+        "Bash(bun *sap-approve*)",
+        "Bash(node *sap-approve*)"
+      ],
+      "gemini": [
+        "bun scripts/sap-approve.ts",
+        "node scripts/sap-approve.ts",
+        "run_shell_command(bun scripts/sap-approve.ts)",
+        "run_shell_command(node scripts/sap-approve.ts)"
+      ],
+      "codex": [
+        [
+          "bun",
+          "scripts/sap-approve.ts"
+        ],
+        [
+          "bun",
+          "./scripts/sap-approve.ts"
+        ],
+        [
+          "node",
+          "scripts/sap-approve.ts"
+        ],
+        [
+          "node",
+          "./scripts/sap-approve.ts"
+        ]
+      ]
+    },
+    {
+      "id": "grant-approval",
+      "description": "Call grantApproval from inline code",
+      "claude": [
+        "Bash(*grantApproval*)"
+      ],
+      "gemini": [],
+      "codex": []
+    },
+    {
+      "id": "consume-approval",
+      "description": "Call consumeProxyApproval from inline code",
+      "claude": [
+        "Bash(*consumeProxyApproval*)"
+      ],
+      "gemini": [],
+      "codex": []
+    },
+    {
+      "id": "inline-eval",
+      "description": "Inline code execution (bun -e / --eval, node -e)",
+      "claude": [
+        "Bash(bun -e*)",
+        "Bash(bun --eval*)",
+        "Bash(node -e*)",
+        "Bash(node --eval*)"
+      ],
+      "gemini": [
+        "bun -e",
+        "bun --eval",
+        "node -e",
+        "node --eval",
+        "run_shell_command(bun -e)",
+        "run_shell_command(bun --eval)",
+        "run_shell_command(node -e)",
+        "run_shell_command(node --eval)"
+      ],
+      "codex": [
+        [
+          "bun",
+          "-e"
+        ],
+        [
+          "bun",
+          "--eval"
+        ],
+        [
+          "node",
+          "-e"
+        ],
+        [
+          "node",
+          "--eval"
+        ]
+      ]
+    },
+    {
+      "id": "script",
+      "description": "script(1) pseudo-TTY wrapper (defeats the TTY check)",
+      "claude": [
+        "Bash(script *)"
+      ],
+      "gemini": [
+        "script",
+        "run_shell_command(script)"
+      ],
+      "codex": [
+        [
+          "script"
+        ]
+      ]
+    },
+    {
+      "id": "git-stash",
+      "description": "git stash (clobbers other agents' work)",
+      "claude": [
+        "Bash(git stash*)"
+      ],
+      "gemini": [
+        "git stash",
+        "run_shell_command(git stash)"
+      ],
+      "codex": [
+        [
+          "git",
+          "stash"
+        ]
+      ]
+    },
+    {
+      "id": "git-checkout-paths",
+      "description": "git checkout -- <paths>",
+      "claude": [
+        "Bash(git checkout -- *)"
+      ],
+      "gemini": [
+        "git checkout --",
+        "run_shell_command(git checkout --)"
+      ],
+      "codex": [
+        [
+          "git",
+          "checkout",
+          "--"
+        ]
+      ]
+    },
+    {
+      "id": "git-restore",
+      "description": "git restore",
+      "claude": [
+        "Bash(git restore *)"
+      ],
+      "gemini": [
+        "git restore",
+        "run_shell_command(git restore)"
+      ],
+      "codex": [
+        [
+          "git",
+          "restore"
+        ]
+      ]
+    },
+    {
+      "id": "git-clean",
+      "description": "git clean",
+      "claude": [
+        "Bash(git clean *)"
+      ],
+      "gemini": [
+        "git clean",
+        "run_shell_command(git clean)"
+      ],
+      "codex": [
+        [
+          "git",
+          "clean"
+        ]
+      ]
+    },
+    {
+      "id": "vsp-fs",
+      "description": "rm/mv/cp on the vsp binary",
+      "claude": [
+        "Bash(rm *vsp*)",
+        "Bash(mv *vsp*)",
+        "Bash(cp *vsp*)"
+      ],
+      "gemini": [
+        "rm vsp",
+        "rm ./vsp",
+        "mv vsp",
+        "mv ./vsp",
+        "cp vsp",
+        "cp ./vsp",
+        "run_shell_command(rm vsp)",
+        "run_shell_command(rm ./vsp)",
+        "run_shell_command(mv vsp)",
+        "run_shell_command(mv ./vsp)",
+        "run_shell_command(cp vsp)",
+        "run_shell_command(cp ./vsp)"
+      ],
+      "codex": [
+        [
+          "rm",
+          "vsp"
+        ],
+        [
+          "rm",
+          "./vsp"
+        ],
+        [
+          "rm",
+          "-f",
+          "vsp"
+        ],
+        [
+          "rm",
+          "-f",
+          "./vsp"
+        ],
+        [
+          "mv",
+          "vsp"
+        ],
+        [
+          "mv",
+          "./vsp"
+        ],
+        [
+          "cp",
+          "vsp"
+        ],
+        [
+          "cp",
+          "./vsp"
+        ]
+      ]
+    },
+    {
+      "id": "sap-integrity",
+      "description": "Run sap-integrity init/sign (human-only; defeats the integrity seal)",
+      "claude": [
+        "Bash(bun *sap-integrity*)",
+        "Bash(node *sap-integrity*)"
+      ],
+      "gemini": [
+        "bun scripts/sap-integrity.ts",
+        "run_shell_command(bun scripts/sap-integrity.ts)",
+        "node scripts/sap-integrity.ts",
+        "run_shell_command(node scripts/sap-integrity.ts)"
+      ],
+      "codex": [
+        [
+          "bun",
+          "scripts/sap-integrity.ts"
+        ],
+        [
+          "bun",
+          "./scripts/sap-integrity.ts"
+        ],
+        [
+          "node",
+          "scripts/sap-integrity.ts"
+        ],
+        [
+          "node",
+          "./scripts/sap-integrity.ts"
+        ]
+      ]
+    },
+    {
+      "id": "proxy-direct",
+      "description": "Run the SAP MCP proxy directly (outside the MCP client)",
+      "claude": [
+        "Bash(*sap-mcp-proxy*)"
+      ],
+      "gemini": [
+        "bun scripts/sap-mcp-proxy.ts",
+        "run_shell_command(bun scripts/sap-mcp-proxy.ts)",
+        "node scripts/sap-mcp-proxy.ts",
+        "run_shell_command(node scripts/sap-mcp-proxy.ts)"
+      ],
+      "codex": [
+        [
+          "bun",
+          "scripts/sap-mcp-proxy.ts"
+        ],
+        [
+          "bun",
+          "./scripts/sap-mcp-proxy.ts"
+        ],
+        [
+          "node",
+          "scripts/sap-mcp-proxy.ts"
+        ]
+      ]
+    },
+    {
+      "id": "pty-wrappers",
+      "description": "Scripting/pty wrappers that can fake a TTY or run inline code",
+      "claude": [
+        "Bash(python -c*)",
+        "Bash(python3 -c*)",
+        "Bash(perl -e*)",
+        "Bash(expect*)",
+        "Bash(unbuffer*)",
+        "Bash(socat*)",
+        "Bash(deno eval*)"
+      ],
+      "gemini": [
+        "python -c",
+        "run_shell_command(python -c)",
+        "python3 -c",
+        "run_shell_command(python3 -c)",
+        "perl -e",
+        "run_shell_command(perl -e)",
+        "expect",
+        "run_shell_command(expect)",
+        "unbuffer",
+        "run_shell_command(unbuffer)",
+        "socat",
+        "run_shell_command(socat)",
+        "deno eval",
+        "run_shell_command(deno eval)"
+      ],
+      "codex": [
+        [
+          "python",
+          "-c"
+        ],
+        [
+          "python3",
+          "-c"
+        ],
+        [
+          "perl",
+          "-e"
+        ],
+        [
+          "expect"
+        ],
+        [
+          "unbuffer"
+        ],
+        [
+          "socat"
+        ],
+        [
+          "deno",
+          "eval"
+        ]
+      ]
+    },
+    {
+      "id": "key-access",
+      "description": "Speed bump: shell access to the approval key or user config dir (bypassable)",
+      "claude": [
+        "Bash(*approval.key*)",
+        "Bash(*.config/co-abap*)"
+      ],
+      "gemini": [],
+      "codex": []
+    },
+    {
+      "id": "env-read",
+      "description": "Speed bump: reading .env through the shell (bypassable)",
+      "claude": [
+        "Bash(cat *.env*)",
+        "Bash(less *.env*)",
+        "Bash(head *.env*)",
+        "Bash(tail *.env*)"
+      ],
+      "gemini": [
+        "cat .env",
+        "run_shell_command(cat .env)",
+        "less .env",
+        "run_shell_command(less .env)",
+        "head .env",
+        "run_shell_command(head .env)",
+        "tail .env",
+        "run_shell_command(tail .env)"
+      ],
+      "codex": [
+        [
+          "cat",
+          ".env"
+        ],
+        [
+          "less",
+          ".env"
+        ],
+        [
+          "head",
+          ".env"
+        ],
+        [
+          "tail",
+          ".env"
+        ]
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "id": "env",
+      "pattern": ".env*",
+      "noRead": true
+    },
+    {
+      "id": "vsp",
+      "pattern": "vsp"
+    },
+    {
+      "id": "mcp-json",
+      "pattern": ".mcp.json"
+    },
+    {
+      "id": "codex-config",
+      "pattern": ".codex/config.toml"
+    },
+    {
+      "id": "gemini-settings",
+      "pattern": ".gemini/settings.json"
+    },
+    {
+      "id": "agents-mcp",
+      "pattern": ".agents/mcp.json"
+    },
+    {
+      "id": "sap-policy",
+      "pattern": "config/sap-action-policy.json"
+    },
+    {
+      "id": "platform-config",
+      "pattern": "config/platforms/**"
+    },
+    {
+      "id": "action-lib",
+      "pattern": "scripts/lib/sap-action-lib.ts"
+    },
+    {
+      "id": "proxy",
+      "pattern": "scripts/sap-mcp-proxy.ts"
+    },
+    {
+      "id": "approve-script",
+      "pattern": "scripts/sap-approve.ts"
+    },
+    {
+      "id": "integrity",
+      "pattern": "scripts/sap-integrity.ts"
+    },
+    {
+      "id": "gate-hook",
+      "pattern": "scripts/hooks/sap-action-gate.ts"
+    },
+    {
+      "id": "audit-hook",
+      "pattern": "scripts/hooks/sap-action-audit.ts"
+    },
+    {
+      "id": "dispatcher",
+      "pattern": "scripts/dispatch-parallel.ts"
+    },
+    {
+      "id": "codex-rules",
+      "pattern": ".codex/rules/**"
+    },
+    {
+      "id": "geminiignore",
+      "pattern": ".geminiignore"
+    },
+    {
+      "id": "claude-settings",
+      "pattern": ".claude/settings.json"
+    },
+    {
+      "id": "claude-settings-local",
+      "pattern": ".claude/settings.local.json"
+    },
+    {
+      "id": "claude-hooks",
+      "pattern": ".claude/hooks/**"
+    },
+    {
+      "id": "bunfig",
+      "pattern": "bunfig.toml"
+    },
+    {
+      "id": "package-json",
+      "pattern": "package.json"
+    },
+    {
+      "id": "audit",
+      "pattern": "memory/audit/**"
+    },
+    {
+      "id": "user-config",
+      "pattern": "~/.config/co-abap/**",
+      "noRead": true
+    }
+  ],
+  "platforms": {
+    "claude": {
+      "files": [
+        ".claude/settings.json"
+      ],
+      "manual": {}
+    },
+    "gemini": {
+      "files": [
+        ".gemini/settings.json",
+        ".gemini/settings.json.sample",
+        ".geminiignore"
+      ],
+      "manual": {
+        "grant-approval": "Inline-code strings cannot be matched by Gemini prefix rules; covered by blocking `bun -e`/`node -e` (inline-eval).",
+        "consume-approval": "Same as grant-approval.",
+        "path:*": "Gemini CLI cannot scope write_file/replace by path (tools.exclude is per tool). Reads of .env*/vsp are hidden through .geminiignore; writes are NOT blocked (this includes scripts/sap-integrity.ts, scripts/hooks/sap-action-*.ts, scripts/dispatch-parallel.ts, .geminiignore itself and ~/.config/co-abap/**). Residual risk, see SECURITY.md. Also unprotected here: .claude/settings*.json, .claude/hooks/**, bunfig.toml, package.json.",
+        "key-access": "Not expressible as a prefix rule; reading approval.key or ~/.config/co-abap through the shell cannot be blocked here. Residual risk; full closure needs a separate OS user or OS keychain (SECURITY.md)."
+      }
+    },
+    "codex": {
+      "files": [
+        ".codex/rules/default.rules",
+        ".codex/config.toml"
+      ],
+      "manual": {
+        "grant-approval": "Execpolicy matches argv prefixes, not substrings; covered by forbidding `bun -e`/`node -e` (inline-eval).",
+        "consume-approval": "Same as grant-approval.",
+        "path:*": "Codex has no per-path deny. The workspace-write sandbox (sandbox_mode) limits writes to the workspace; paths inside the workspace stay writable (this includes scripts/sap-integrity.ts, scripts/hooks/sap-action-*.ts, scripts/dispatch-parallel.ts and .codex/rules/**; ~/.config/co-abap/** is outside the workspace sandbox). Residual risk, see SECURITY.md. Also unprotected here: .claude/settings*.json, .claude/hooks/**, bunfig.toml, package.json.",
+        "key-access": "Not expressible as a prefix rule; reading approval.key or ~/.config/co-abap through the shell cannot be blocked here. Residual risk; full closure needs a separate OS user or OS keychain (SECURITY.md)."
+      }
+    },
+    "antigravity": {
+      "files": [
+        "docs/platform-setup/antigravity.md",
+        ".gemini/settings.json"
+      ],
+      "manual": {
+        "cmd:*": "Antigravity IDE/CLI read no repo-level deny file. Set the terminal policy to Off/Request Review and add the commands to the IDE deny list by hand (docs/platform-setup/antigravity.md).",
+        "path:*": "No per-path deny in Antigravity; reads/writes cannot be restricted. Residual risk, see SECURITY.md. Includes the new entries (sap-integrity, hooks, .claude/*, bunfig.toml, package.json).",
+        "key-access": "Not expressible as a prefix rule; reading approval.key or ~/.config/co-abap through the shell cannot be blocked here. Residual risk; full closure needs a separate OS user or OS keychain (SECURITY.md)."
+      }
+    },
+    "hermes": {
+      "files": [
+        "config/platforms/hermes-mcp.example.yaml",
+        "docs/platform-setup/hermes.md"
+      ],
+      "manual": {
+        "cmd:*": "Hermes has no user-configurable per-command deny list; use approvals.mode=manual (see yaml example) and run Hermes in a container/separate OS user (docs/platform-setup/hermes.md).",
+        "path:*": "No per-path deny in Hermes. Residual risk, see SECURITY.md. Includes the new entries (sap-integrity, hooks, .claude/*, bunfig.toml, package.json).",
+        "key-access": "Not expressible as a prefix rule; reading approval.key or ~/.config/co-abap through the shell cannot be blocked here. Residual risk; full closure needs a separate OS user or OS keychain (SECURITY.md)."
+      }
+    }
+  }
+}

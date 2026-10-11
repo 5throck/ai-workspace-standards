@@ -1,0 +1,167 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Documentation Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          # Full history: the VERSION_MANIFEST gate derives per-file dates from
+          # `git log` — a depth-1 clone collapses every date to the checkout
+          # commit and makes the gate fail on any manifest generated elsewhere.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Pinned to 1.4 minor line — `latest` can resolve to a Bun that cannot
+          # parse lockfileVersion 2 written by the current toolchain. Bumped deliberately.
+          bun-version: "1.4.x"
+
+      # package.json lives at the repository root, not under scripts/.
+      - name: Install dependencies
+        if: ${{ hashFiles('package.json') != '' }}
+        run: bun install --frozen-lockfile
+
+      - name: Run audit
+        run: bun scripts/audit.ts
+
+      # Variant overlay (T-20261011-008/T-20261011-013, spec
+      # docs/designs/2026-10-11-backlog-batch-2-design.md): the co-abap hardening
+      # wave's CI jobs. Typecheck runs only where a scripts/tsconfig.json exists
+      # (the template does not mandate one); platform parity enforces the
+      # deny-rules SSOT + proxy-seam routing shipped by this wave.
+      - name: Typecheck
+        if: ${{ hashFiles('scripts/tsconfig.json') != '' }}
+        run: bun run typecheck
+
+      - name: Validate documentation links
+        run: bun scripts/validate-docs-links.ts --all
+
+      - name: Validate platform parity
+        run: bun scripts/validate-abap-platform-parity.ts
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Pinned to 1.4 minor line — `latest` can resolve to a Bun that cannot
+          # parse lockfileVersion 2 written by the current toolchain. Bumped deliberately.
+          bun-version: "1.4.x"
+
+      - name: Install dependencies
+        if: ${{ hashFiles('bun.lock') != '' }}
+        run: bun install --frozen-lockfile
+
+      - name: Security audit - dependency vulnerabilities
+        shell: bash
+        # Fleet dependency-vulnerability gate (2026-10-01 fleet assessment FW-1),
+        # waiver-aware since T-20261003-011. Threshold: fail on high or critical;
+        # low/moderate findings are reported only. The script keeps the old
+        # fail-closed behavior (empty/unparseable audit output = loud infra
+        # failure) and adds a REVIEWED advisory-waiver channel:
+        # .github/dependency-waivers.toml suppresses specific no-fix advisories.
+        # The channel itself fails closed: a malformed file, an expired
+        # revisit-by date, or a stale waiver (advisory no longer in the audit
+        # output, or version drift vs the installed tree) fails the job, so a
+        # waiver can never decay into a silent ignore-all.
+        run: bun scripts/dependency-audit.ts
+
+
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Run the gitleaks binary directly rather than gitleaks/gitleaks-action.
+      # The action requires a GITLEAKS_LICENSE for private repositories and needs
+      # pull-requests:read to annotate PRs — neither is warranted here, since all
+      # this job needs is a pass/fail scan. Config comes from .gitleaks.toml.
+      - name: Run gitleaks
+        # Digest = ghcr.io/gitleaks/gitleaks:v8.28.0 multi-arch index
+        # (fetched 2026-10-01 via the ghcr registry API, anonymous pull token).
+        uses: docker://ghcr.io/gitleaks/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854
+        with:
+          args: detect --source=/github/workspace --config=/github/workspace/.gitleaks.toml --redact --verbose --no-banner
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    # Release 2 (T-20260930-026, ADR-0094): default-on. Set the repository
+    # variable CI_SKIP_DEFAULT_UNIT_TESTS to "true" to opt out. (Release 1 used
+    # the inverse opt-in CI_ENABLE_DEFAULT_UNIT_TESTS and was verified live on
+    # co-newbiz: green run, job correctly skipped without the variable.)
+    if: ${{ vars.CI_SKIP_DEFAULT_UNIT_TESTS != 'true' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          # Depth 1 is enough for tests; full history is only needed by the
+          # VERSION_MANIFEST gate in the audit job above.
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Pinned minor line — `latest` is intentionally avoided here; bump this
+          # deliberately so unit tests track a known Bun release.
+          bun-version: "1.4.x"
+
+      # The detect step (not the job-level if) is the real gate: it is the only
+      # way to check package.json for a test:unit script, since hashFiles() is
+      # unavailable in job-level conditions.
+      - name: Detect test:unit script
+        id: detect
+        run: |
+          if [ -f package.json ] && grep -q '"test:unit"' package.json; then
+            echo "has_unit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_unit=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::unit-tests skipped: no test:unit script in package.json"
+          fi
+
+      - name: Install dependencies
+        if: steps.detect.outputs.has_unit == 'true'
+        # Root install first, then every nested project directory that carries
+        # its own bun.lock — projects commonly host an app workspace (e.g.
+        # app/web-next, projects/<game>) outside the root lockfile, and unit
+        # tests import from those packages (U-20261002-001: co-newbiz failed
+        # with "Cannot find module 'next/server'" before this step existed).
+        # frozen-lockfile keeps every install reproducible.
+        run: |
+          bun install --frozen-lockfile
+          find . -mindepth 2 -maxdepth 4 \( -name 'bun.lock' -o -name 'bun.lockb' \) \
+            -not -path '*/node_modules/*' | while read -r lock; do
+              (cd "$(dirname "$lock")" && bun install --frozen-lockfile)
+            done
+
+      - name: Run unit tests
+        if: steps.detect.outputs.has_unit == 'true'
+        run: bun run test:unit
+
+  # PROJECT-JOBS-BEGIN
+  # Project-local jobs go here. upgrade-project preserves this region; it is validated, not trusted.
+  # Project-owned test jobs for other stacks (Python/pytest, setup-python, etc.) belong here too.
+  # PROJECT-JOBS-END
