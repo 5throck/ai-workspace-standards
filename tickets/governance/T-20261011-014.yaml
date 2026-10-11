@@ -10,7 +10,7 @@ title: >-
   artifacts and WARN with an inventory (or exclude them from the stash) so
   machine-local setup survives upgrades. From T-20261011-012's deferral record
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-11T11:29:32.816+09:00'
 history:
@@ -20,5 +20,24 @@ history:
   - at: '2026-10-11T13:10:00.885+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-11T13:33:04.414+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T13:33:04.435+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1507: upgrade-project 1.70.0 warns with an inventory before the
+  pre-upgrade stash — stash push -u skips gitignored files, so machine-local
+  tooling (the observed vsp casualty) falls outside the rollback snapshot; new
+  pure helper scripts/helpers/ignored-tooling.ts (selectIgnoredToolingArtifacts:
+  extensionless executables + binary extensions, dep/cache/build trees and OS
+  junk excluded) with a 5-case unit test; warning-only by design (the ticket's
+  exclusion alternative could surprise the rollback contract). Side landing:
+  lifecycle-sync-audit 1.18.0 adds
+  upgrade-project:helpers/write-scripts-snapshot to INTENTIONAL_CROSS_REFS (the
+  U-001 wave's existsSync-guarded helper spawn tripped the Check X added since)
+  and backfills the lifecycle-sync-audit L1 registry row the eight-platform wave
+  missed; mirror-span pin 146→147. Design:
+  docs/designs/2026-10-11-upgrade-stash-tooling-warning-design.md (registered).
 error: null
