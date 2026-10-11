@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261012-011
+kind: manual
+title: >-
+  tooling: dev-sync should derive the PR title/branch from the full
+  branch-vs-main diff and refuse to branch a new sync off a closed PR's branch —
+  PR #1509 (45 files) was closed unmerged but its content commit landed via PR
+  #1510 titled 'workspace sync (1 file)', under-representing the review surface
+  47 files. Related LOW: bare 'chore: workspace sync' without count when no
+  paths classify (commit-message.ts:94 total==0 branch) and the #1504 slug count
+  computed pre-main-merge. Evidence: Slot C 2026-10-11
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:47:45.567+09:00'
+history:
+  - at: '2026-10-12T01:47:45.567+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

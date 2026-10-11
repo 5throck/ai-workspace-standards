@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261012-004
+kind: manual
+title: >-
+  learning: opt-in data-scope filter for list endpoints done correctly without
+  FKs — co-newbiz companies route adds scope=targets excluding group/affiliate
+  companies + synergy-registry sentinel while leaving the default response
+  byte-identical; match-rule discipline: DART-code equality first, trimmed exact
+  name only when no code, UI back-link from the filtered screen to the row
+  manager; branch-complete real-sqlite integration test including negatives
+  (same name + different code kept, soft-deleted member kept). Learning note
+  only (schema is co-newbiz-specific). Evidence: PR #509,
+  app/web-next/app/api/companies/route.ts,
+  tests/unit/companies-list-scope.test.ts, design
+  2026-10-11-companies-list-exclude-group-affiliates. Class: data-scope
+  correctness pattern
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:41:53.314+09:00'
+history:
+  - at: '2026-10-12T01:41:53.314+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

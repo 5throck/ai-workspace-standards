@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261012-006
+kind: manual
+title: >-
+  HIGH: L1-published upgrade-project.ts imports 4 L0-only helpers that scaffolds
+  delete — templates/common/scripts/upgrade-project.ts (published to L1 by PR
+  #1507) imports ./helpers/local-patch-scan.ts:593,
+  ./helpers/substitute-placeholders.ts:594, ./lib/env-sample.ts:619,
+  ./lib/managed-block-merge.ts:624 but all four are L0-only per layer-filter
+  (new-project deletes L0-only scripts from fresh scaffolds), so the
+  project-side upgrade entry point is runtime-broken (4x TS2307 on standalone
+  tsc). Gates miss it: verify-scripts --check-drift compares content hashes
+  only; the E2E never executes project-side upgrade-project. Fix: deliver the
+  four helpers to L1, OR guarded/dynamic imports with a workspace-only notice,
+  OR add an L1 import-resolution check to validate-templates so a delivered
+  script never ships undeliverable imports. Evidence: Slot C 2026-10-12
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:47:45.498+09:00'
+history:
+  - at: '2026-10-12T01:47:45.498+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

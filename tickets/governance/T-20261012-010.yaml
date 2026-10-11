@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261012-010
+kind: manual
+title: >-
+  docs: index the 3 new guides —
+  docs/guides/{agent-shell-hardening,parallel-dispatch-grants,record-lifecycle-hygiene}.md
+  are not listed in docs/index.md section 2 (only 6 older guides listed; 15
+  files in guides/) and no docs/guides/README.md exists. Add one-line entries
+  (title — purpose — ticket ref) and optionally a guides mini-index. Evidence:
+  Slot D 2026-10-11
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:47:45.552+09:00'
+history:
+  - at: '2026-10-12T01:47:45.552+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

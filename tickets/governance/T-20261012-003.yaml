@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261012-003
+kind: manual
+title: >-
+  learning: view-model extraction pattern (pure lib separating view logic from
+  page components) — co-newbiz deal-overview: lib/deal-overview-view.ts splits a
+  504-line page re-layout into pure client-safe helpers (stage-status mapping,
+  what/why/cta copy composition, four-state fact rendering, chip-kind/hold-date
+  derivation, documentTitle) with semantic-invariant unit tests and no DOM (no
+  raw enums in copy, pending never renders generic, verb-doubling guard). The
+  data-contract layer (lib/deal-overview.ts) stays separate from presentation
+  mapping. Learning note + cross-pollination candidate for any web-deliverable
+  project with fat page components (co-newbiz is currently the only app/ project
+  — second adopter triggers template candidacy). Evidence: Projects/co-newbiz PR
+  #509, lib/deal-overview-view.ts, tests/unit/deal-overview-view.test.ts, design
+  2026-10-11-deal-overview-ui-refinement. Class: testable-architecture learning
+  note
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-12T01:41:53.294+09:00'
+history:
+  - at: '2026-10-12T01:41:53.294+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
