@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.69.0
+// @version 1.70.0
+// v1.70.0 (2026-10-11, T-20261011-014): pre-upgrade stash inventory warning —
+//          `git stash push -u` snapshots untracked but NOT gitignored files, so
+//          machine-local tooling (co-abap's vsp binary — observed casualty)
+//          falls outside the rollback snapshot and a delivery pass replacing
+//          their directory destroys it. Before the stash, gitignored untracked
+//          files are enumerated via scripts/helpers/ignored-tooling.ts
+//          (unit-tested selection heuristic) and tooling-like entries are
+//          warned with an inventory; the stash behavior itself is unchanged.
 // v1.69.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
 //          --platform accepts a comma-separated list (lib/platforms.ts parsePlatformList;
 //          legacy `both` = all). MERGE_FILES and COMMANDS_DIRS are the union of the selected
@@ -584,6 +592,7 @@ import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
+import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
@@ -1021,6 +1030,20 @@ if (!dryRun) {
   const hasHead = spawnSync('git', ['-C', projectDir, 'rev-parse', '--verify', '-q', 'HEAD'], { encoding: 'utf8' }).status === 0;
   if (!hasHead) {
     console.log('  INFO: no commits yet (fresh scaffold) — pre-upgrade stash skipped.');
+  }
+  // T-20261011-014: `git stash push -u` snapshots untracked but NOT gitignored
+  // files, so machine-local tooling (co-abap's gitignored vsp binary is the
+  // observed casualty) falls outside the rollback snapshot — and a delivery
+  // pass that replaces their directory destroys them. Warn with an inventory
+  // before the stash so the operator can back machine-local setup up.
+  if (hasHead) {
+    const ignoredList = spawnSync('git', ['-C', projectDir, 'ls-files', '--others', '--ignored', '--exclude-standard'], { encoding: 'utf8' });
+    const toolingArtifacts = selectIgnoredToolingArtifacts(String(ignoredList.stdout ?? '').split('\n'));
+    if (toolingArtifacts.length > 0) {
+      const samples = toolingArtifacts.slice(0, 5).join(', ');
+      console.log(`  ⚠️  ${toolingArtifacts.length} gitignored tooling-like artifact(s) are NOT covered by the pre-upgrade stash (stash push -u skips gitignored files): ${samples}${toolingArtifacts.length > 5 ? ` … (+${toolingArtifacts.length - 5} more)` : ''}`);
+      console.log('     If these are machine-local setup (project tool binaries), back them up before upgrading — a delivery pass may replace their directory.');
+    }
   }
   const snapDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   // C2 (2026-09-15 project review): without -u, untracked files were absent
