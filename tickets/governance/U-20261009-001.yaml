@@ -3,14 +3,33 @@ id: U-20261009-001
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-08T20:59:11.273Z
+created_at: '2026-10-08T20:59:11.273Z'
 history:
-  - at: 2026-10-08T20:59:11.273Z
+  - at: '2026-10-08T20:59:11.273Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:30:13.121+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:30:13.159+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:30:13.159+09:00'
+    from: review
+    to: done
+result: >-
+  Confirmed; root cause deeper than reported — the T-20261002-001
+  self-managed-surfaces exemption registry is L0-only (docs domain disabled per
+  ADR-0069), so fresh scaffolds loaded an empty set and graft's unversioned
+  generated SKILL.md kept re-blocking /sync in projects. Fixed:
+  scripts/lib/self-managed-tools.ts 1.1.0 ships built-in
+  DEFAULT_SELF_MANAGED_PATHS (graft across all 5 platform mirrors +
+  skills/graft/) applied with or without the registry; registry entries and
+  SELF_MANAGED_SURFACES_EXCL env can only add (fail-safe);
+  verify-platform-lifecycle 1.6.1 documents it; audit's Fail hint names the
+  escape hatches. 5-case unit test.
 error: null
 upstream:
   project: co-newbiz
@@ -19,22 +38,55 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The graft tool (an external repo-indexing CLI) installs a generated skill at .claude/skills/graft/SKILL.md that has no `version:` frontmatter field. scripts/audit.ts then fails with "[FAIL] .claude/skills/graft/SKILL.md missing version: field", and the platform lifecycle check (verify-platform-lifecycle.ts) fails with it. That blocks every /sync commit in projects where graft is installed. The file is untracked, so CI never sees it; the failure is local-only. Expected: third-party, tool-generated skill directories that are not part of the project''s skill registry (here .claude/skills/graft/, and its mirrors under .agents/, .codex/, .gemini/ and .hermes/ skills dirs if present) are excluded from the skill version and lifecycle checks, ideally through a configurable ignore list.'
+  symptom: >-
+    The graft tool (an external repo-indexing CLI) installs a generated skill at
+    .claude/skills/graft/SKILL.md that has no `version:` frontmatter field.
+    scripts/audit.ts then fails with "[FAIL] .claude/skills/graft/SKILL.md
+    missing version: field", and the platform lifecycle check
+    (verify-platform-lifecycle.ts) fails with it. That blocks every /sync commit
+    in projects where graft is installed. The file is untracked, so CI never
+    sees it; the failure is local-only. Expected: third-party, tool-generated
+    skill directories that are not part of the project's skill registry (here
+    .claude/skills/graft/, and its mirrors under .agents/, .codex/, .gemini/ and
+    .hermes/ skills dirs if present) are excluded from the skill version and
+    lifecycle checks, ideally through a configurable ignore list.
   affected_paths:
     - scripts/audit.ts
     - scripts/verify-platform-lifecycle.ts
     - .claude/skills/graft/SKILL.md
   identity_source: client_roots
-  repro: '1. Install graft (npm i -g @nanonets/graft) in a scaffolded project and let it wire agents; it creates .claude/skills/graft/SKILL.md with no version field. 2. Run bun scripts/audit.ts: it reports the missing version field and the platform lifecycle failure. 3. Run /sync: the commit is blocked. The workaround is to move the directory out temporarily before every sync.'
-  triage: inbox
+  repro: >-
+    1. Install graft (npm i -g @nanonets/graft) in a scaffolded project and let
+    it wire agents; it creates .claude/skills/graft/SKILL.md with no version
+    field. 2. Run bun scripts/audit.ts: it reports the missing version field and
+    the platform lifecycle failure. 3. Run /sync: the commit is blocked. The
+    workaround is to move the directory out temporarily before every sync.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
     - info:in_last_delivery scripts/audit.ts=false
     - info:in_last_delivery scripts/verify-platform-lifecycle.ts=false
-    - info:l0_origin .claude/skills/graft/SKILL.md <- .claude/skills/graft/SKILL.md
+    - >-
+      info:l0_origin .claude/skills/graft/SKILL.md <-
+      .claude/skills/graft/SKILL.md
     - info:in_last_delivery .claude/skills/graft/SKILL.md=false
   dedupe_key: 70f759f452a3e3d57585a798598e554367e0fe1aceb1ab25a5107770e74b376a
   duplicates:
     - project: co-newbiz
-      at: 2026-10-08T20:59:11.273Z
+      at: '2026-10-08T20:59:11.273Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1504
+    template_version: unreleased
+    summary: >-
+      Confirmed; root cause deeper than reported — the T-20261002-001
+      self-managed-surfaces exemption registry is L0-only (docs domain disabled
+      per ADR-0069), so fresh scaffolds loaded an empty set and graft's
+      unversioned generated SKILL.md kept re-blocking /sync in projects. Fixed:
+      scripts/lib/self-managed-tools.ts 1.1.0 ships built-in
+      DEFAULT_SELF_MANAGED_PATHS (graft across all 5 platform mirrors +
+      skills/graft/) applied with or without the registry; registry entries and
+      SELF_MANAGED_SURFACES_EXCL env can only add (fail-safe);
+      verify-platform-lifecycle 1.6.1 documents it; audit's Fail hint names the
+      escape hatches. 5-case unit test.

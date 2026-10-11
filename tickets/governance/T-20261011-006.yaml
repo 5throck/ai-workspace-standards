@@ -14,12 +14,24 @@ title: >-
   Projects/co-abap SECURITY.md + ADR-0006/0007, PR #194; co-learning PR #13; 2f
   extractions 2026-10-11. Class: new skill candidate (strongest of this window)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:48.245+09:00'
 history:
   - at: '2026-10-11T01:45:48.245+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.371+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.390+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.407+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: docs/guides/agent-shell-hardening.md (tiered enforcement,
+  out-of-repo approvals, integrity seal, fail-closed unknown tools, deny-rule
+  SSOT + parity validation).
 error: null

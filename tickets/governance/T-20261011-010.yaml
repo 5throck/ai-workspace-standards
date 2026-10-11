@@ -12,12 +12,23 @@ title: >-
   pattern note; candidate checklist item for review passes. Evidence: co-newbiz
   PR #489, migration 0133, 2f extraction. Class: data-lifecycle/UX pattern
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:46:04.418+09:00'
 history:
   - at: '2026-10-11T01:46:04.418+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.592+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.610+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.627+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: docs/guides/record-lifecycle-hygiene.md
+  (archive-don't-delete with archived_at/by + enumerate-before-cleanup).
 error: null

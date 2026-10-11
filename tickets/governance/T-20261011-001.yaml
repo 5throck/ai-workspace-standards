@@ -12,12 +12,27 @@ title: >-
   with evidence_refs pointing at the actual owner direction) or reopen the
   ticket to review until that artifact exists. Found 2026-10-11 Slot A
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:28.626+09:00'
 history:
   - at: '2026-10-11T01:45:28.626+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.078+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.100+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.135+09:00'
+    from: review
+    to: done
+result: >-
+  Governance remedy applied per the ticket's own alternative: T-20261008-008
+  reopened to review (--force, documented) pending a genuine gate-moment
+  artifact (docs/decisions/ DEC record with quoted co-safety-owner direction per
+  ADR-0061). No such artifact exists today — the post-hoc runner sign-off cannot
+  be retroactively legitimized, so the port stays unratified until the co-safety
+  owner signs off.
 error: null

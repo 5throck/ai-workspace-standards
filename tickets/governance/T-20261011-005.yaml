@@ -13,12 +13,26 @@ title: >-
   fork-PR skip. Evidence: Projects/co-abap PR #196 diff, co-abap 2f extraction
   2026-10-11. Class: L0/templates.common tooling adoption
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:48.230+09:00'
 history:
   - at: '2026-10-11T01:45:48.230+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.318+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.335+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.353+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: delete-merged-branches.yml ported to
+  templates/common/.github/workflows/ (dry_run default, no project literals);
+  delivery on upgrade verified via resolveClaim (SYNC / TEMPLATE TREE SYNC).
+  Repo-side activation of THIS repo's workflow deliberately deferred — live CI
+  edit needs separate user approval.
 error: null

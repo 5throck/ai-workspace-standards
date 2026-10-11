@@ -13,12 +13,24 @@ title: >-
   templates/co-abap/scripts/co-abap/dispatch-parallel.ts predates the grant
   model. Class: dispatch-pattern upgrade + template enhancement
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:48.269+09:00'
 history:
   - at: '2026-10-11T01:45:48.269+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.426+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.443+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.462+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: docs/guides/parallel-dispatch-grants.md (one human
+  decision per run, typed rows, exact-object scope, per-row worktrees, staged
+  SIGTERM ladder, command SSOT + --check gate).
 error: null

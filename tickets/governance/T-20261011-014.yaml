@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261011-014
+kind: manual
+title: >-
+  upgrade-project: stash/pop drops gitignored machine artifacts — during a
+  project upgrade the stash/pop of the working tree silently discards gitignored
+  local tooling (observed: co-abap's vsp binary vanished across an upgrade;
+  install-vsp.ts restores it but session state around it was lost). Before
+  stashing, detect gitignored untracked files that look like tooling/binary
+  artifacts and WARN with an inventory (or exclude them from the stash) so
+  machine-local setup survives upgrades. From T-20261011-012's deferral record
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-11T11:29:32.816+09:00'
+history:
+  - at: '2026-10-11T11:29:32.816+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
