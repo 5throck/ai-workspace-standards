@@ -2,9 +2,10 @@
   "id": "2026-09-25-hermes-agent-platform-support-design",
   "title": "hermes agent platform support design",
   "file": "docs/designs/2026-09-25-hermes-agent-platform-support-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "architect",
   "created": "2026-09-25",
-  "last_updated": "2026-09-25",
-  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+  "last_updated": "2026-10-10",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required.",
+  "review_notes": "spec hygiene sweep 2026-10-11 (T-20261011-003): adjudicated implemented — ADR-0093 shipped — HERMES.md MERGE pass, .hermes/ fifth platform mirror, PLATFORM_MIRROR_DIRS 5-mirror SSOT."
 }

@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261011-013
+kind: manual
+title: >-
+  co-abap 0.16.0 upgrade blocked on template-behind-project security posture:
+  the 0.16.0 delivery reverts #194-196 hardening (ci.yml loses
+  Typecheck/deny-rules jobs, .claude/settings.json re-adds direct vsp launch
+  over the proxy seam, deny-rules SSOT absent) because the hardening wave is
+  project-side only pending the proxy-seam/deny-rules promotion decision
+  (human-judged per design; see also the learning tickets on this bundle).
+  Resolution path: decide the promotion, backport to templates/co-abap, release,
+  then re-run this upgrade. The 0.16.0 content is otherwise prepared (includes a
+  test fix for the macOS /var logical-vs-physical path assertion — itself a
+  template test bug to promote). Note: an earlier copy of this ticket (filed
+  2026-10-11 morning) was lost to a git clean race during a concurrent landing —
+  re-filed verbatim. Evidence: 2026-10-11 run, git diff on the abandoned upgrade
+  tree
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-11T09:58:05.479+09:00'
+history:
+  - at: '2026-10-11T09:58:05.479+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
