@@ -228,7 +228,7 @@ ENDCLASS.
 **Workflow**:
 1. Run the audit script:
    ```bash
-   bun scripts/vsp-audit.ts
+   bun scripts/co-abap/vsp-audit.ts
    ```
 2. **Analyze Results**:
    - If audit passes: proceed to `/sync`.
@@ -268,7 +268,7 @@ Each sub-section produces its own structured output:
 - **Unit Architect**: Test class skeleton code with method-per-AC mapping and coverage report from `RunUnitTests`.
 - **Performance Analyzer**: Finding list with problem patterns, recommended fixes, and before/after metrics.
 - **Impact Architecture**: Impact Summary table (object, type, caller count, risk level) and Risk Assessment block.
-- **Documentation Audit**: Pass/fail result from `bun scripts/vsp-audit.ts` with error details if applicable.
+- **Documentation Audit**: Pass/fail result from `bun scripts/co-abap/vsp-audit.ts` with error details if applicable.
 
 ## Related Skills
 

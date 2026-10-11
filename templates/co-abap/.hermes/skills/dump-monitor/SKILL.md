@@ -1,6 +1,6 @@
 ---
 name: dump-monitor
-description: Use when checking SAP system health, investigating reported errors, or performing a periodic operational health check. Provides a standardized workflow using ListDumps/GetDump to detect ABAP short dumps and route new findings into /triage for investigation.
+description: Use when checking SAP system health, investigating reported errors, or performing a periodic operational health check. Provides a standardized workflow using ListDumps/GetDump to detect ABAP short dumps and route new findings into PM triage for investigation.
 version: 1.0.0
 last_reviewed: 2026-08-15
 status: active
@@ -56,12 +56,13 @@ may run it as part of a health check.
    GetDump(dump_id) → capture: program, exception, call stack, timestamp, user/client
 
 3. Classify
-   - Runtime error in a Z*/custom object → candidate for /triage with classification "Debug"
+   - Runtime error in a Z*/custom object → candidate for PM triage (classification: "Debug")
    - Runtime error in an SAP standard object → note only, do not modify standard code
    - Repeated dump (same program/exception, multiple occurrences) → escalate priority
 
 4. Route
-   - New, actionable dump → run `/triage "Investigate dump: <program> — <exception>"`
+   - New, actionable dump → hand to the PM with the note "Investigate dump: <program> — <exception>";
+     the PM triage convention (not a registered command) creates the task file and dispatches investigation
    - Already-tracked dump → skip (avoid duplicate task files)
 
 5. Record
@@ -78,7 +79,7 @@ may run it as part of a health check.
 
 | # | Program | Exception | Timestamp | Occurrences | Action |
 |---|---------|-----------|-----------|--------------|--------|
-| 1 | ZCL_EXAMPLE | UNCAUGHT_EXCEPTION | 2026-07-10 14:02 | 3 | Routed to /triage |
+| 1 | ZCL_EXAMPLE | UNCAUGHT_EXCEPTION | 2026-07-10 14:02 | 3 | Routed to PM triage |
 
 **Verdict**: <Clean / N actionable dump(s) routed to triage>
 ```
@@ -94,7 +95,7 @@ it to one platform's session-level scheduler.
 ## Related
 
 - [agents/devops-admin.md](../../agents/devops-admin.md) — primary owner
-- [.claude/commands/triage.md](../../.claude/commands/triage.md) — destination for actionable findings
+- PM triage convention (`AGENTS.md` §3.1 step 1) — destination for actionable findings (workflow convention, not a registered command)
 - [skills/performance-tuning/SKILL.md](../performance-tuning/SKILL.md) — use together when a dump indicates a performance-related timeout
 
 ## Context
@@ -106,7 +107,7 @@ This skill provides a standardized workflow for detecting and triaging ABAP shor
 1. **List recent dumps** — Call `ListDumps` with a time window (default: last 24 hours or last check timestamp).
 2. **Retrieve details** — For each new dump not already triaged, call `GetDump` to capture program, exception, call stack, timestamp, and user/client.
 3. **Classify** — Determine if the dump is in a custom Z* object (actionable) or SAP standard (note only). Flag repeated dumps for escalation.
-4. **Route** — Actionable dumps are routed to `/triage` for investigation; already-tracked dumps are skipped to avoid duplicates.
+4. **Route** — Actionable dumps are routed to the PM (triage convention) for investigation; already-tracked dumps are skipped to avoid duplicates.
 5. **Record** — Append a Dump Monitoring Report to the current session's `memory/YYYY-MM-DD.md`.
 
 ## Output Format

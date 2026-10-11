@@ -1,0 +1,30 @@
+# Agent-shell hardening (config/platforms/protected-paths.json). Execpolicy rules: .codex/rules/default.rules
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+
+[sandbox_workspace_write]
+network_access = false
+
+[features]
+codex_hooks = true
+
+# Routed through the SAP MCP proxy (policy gate, approvals, audit). Safe SAP_* defaults and .env are applied by the proxy.
+[mcp_servers.abap]
+command = "bun"
+args = ["scripts/sap-mcp-proxy.ts", "--", "--mode", "hyperfocused"]
+# Forward parallel-dispatch grant env to the proxy (UNVERIFIED on-device: Codex `env_vars` key).
+env_vars = ["SAP_PROXY_MAX_CLASS", "SAP_DISPATCH_GRANT", "SAP_DISPATCH_ROW"]
+
+[mcp_servers.abap-docs]
+url = "https://mcp-abap.marianzeis.de/mcp"
+
+[mcp_servers.sap-docs]
+url = "https://mcp-sap-docs.marianzeis.de/mcp"
+
+[[skills.config]]
+enabled = true
+path = "skills"
+
+[mcp_servers.graft]
+command = "bunx"
+args = ["@nanonets/graft", "mcp"]

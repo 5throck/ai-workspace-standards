@@ -155,7 +155,7 @@
 | `co-safety/permit-to-work` | variant:co-safety | 1.0.1 | co-safety/safety-workflow-manager | — | — | — | — |
 | `co-safety/pre-construction-technical-review` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/process-hazard-screening` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/project-review` | variant:co-safety | 1.3.3 | — | — | — | — | — |
+| `co-safety/project-review` | variant:co-safety | 1.3.4 | — | — | — | — | — |
 | `co-safety/protocol-deviation-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/psm-loto` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/psm-moc` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -768,7 +768,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
-| `project-review` | skill | divergence | co-safety@1.3.3 #b6ce05f4; root@1.3.2 #01931679 |
+| `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
 | `standup-synthesizer` | skill | divergence | co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |

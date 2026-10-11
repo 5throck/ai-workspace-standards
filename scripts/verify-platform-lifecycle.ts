@@ -18,7 +18,15 @@
  * The .hermes legs preceded on 2026-09-25 (T-20260925-008: live hermes-agent
  * E2E verification green). Pre-existing .claude/.gemini semantics unchanged.
  *
- * @version 1.6.0
+ * @version 1.6.1
+ *
+ * v1.6.1 (2026-10-11, U-20261009-001, spec
+ *          docs/designs/2026-10-11-backlog-batch-2-design.md): the Check E/F version
+ *          exemption now holds even when docs/self-managed-surfaces.json is absent —
+ *          scripts/lib/self-managed-tools.ts carries a built-in graft default (the
+ *          registry is L0-only, so fresh scaffolded projects loaded an empty set and
+ *          a graft install re-blocked every /sync). Extension paths: the registry
+ *          file (ADD-only) or SELF_MANAGED_SURFACES_EXCL.
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -38,7 +46,9 @@ const issues: Array<{ level: 'error' | 'warning'; check: string; message: string
 // Seeded from docs/self-managed-surfaces.json (T-20261002-001): tool-owned mirror
 // skills whose frontmatter the owning tool rewrites are exempt from version checks.
 // The set stays as the mechanism — a future tool-owned mirror skill joins it via the
-// registry, not by editing this file.
+// registry, not by editing this file. U-20261009-001: the loader also applies a
+// built-in graft default when the registry file is absent (fresh scaffolds — the
+// registry is L0-only), so a third-party graft install can never re-block /sync.
 const VERSION_EXEMPT_PLATFORM_SKILLS = selfManagedMirrorSkills(ROOT);
 
 // (Historical) net-new mirror legs soaked in WARN (ADR-0055) until promotion.

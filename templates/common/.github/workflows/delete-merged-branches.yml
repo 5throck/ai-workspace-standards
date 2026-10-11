@@ -1,0 +1,93 @@
+# Ported from Projects/co-abap (.github/workflows/delete-merged-branches.yml, PR #196
+# class) via T-20261011-005 — parameterized for any repo (no project-specific literals).
+# Rationale transfers: agent-session git proxies return 403 on branch deletion, so
+# merged head branches pile up; this runner prunes them automatically (event leg) and
+# on demand (manual sweep, dry_run default true).
+name: Delete Merged Branches
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List what would be deleted without deleting"
+        type: boolean
+        default: true
+
+permissions: {}
+
+jobs:
+  delete-head-ref:
+    name: Delete merged PR branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != github.event.repository.default_branch
+    permissions:
+      contents: write
+    steps:
+      - name: Delete head ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -u
+          if out=$(gh api -X DELETE "repos/${REPO}/git/refs/heads/${HEAD_REF}" 2>&1); then
+            echo "Deleted branch: ${HEAD_REF}"
+          elif echo "$out" | grep -qE '404|422|Reference does not exist'; then
+            echo "Branch already deleted: ${HEAD_REF}"
+          else
+            echo "$out" >&2
+            exit 1
+          fi
+
+  sweep:
+    name: Sweep merged branches
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Delete fully merged branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -u
+          deleted=(); kept=()
+          echo "dry_run=${DRY_RUN} default=${DEFAULT_BRANCH}"
+          while IFS= read -r branch; do
+            [ -z "$branch" ] && continue
+            [ "$branch" = "$DEFAULT_BRANCH" ] && continue
+            enc=$(jq -rn --arg b "$branch" '$b|@uri')
+            tip=$(gh api "repos/${REPO}/branches/${enc}" --jq '.commit.sha' 2>/dev/null || true)
+            if [ -z "$tip" ]; then kept+=("${branch}: cannot read tip"); continue; fi
+            # A merged PR whose head sha equals the branch tip
+            match=$(gh api --paginate "repos/${REPO}/pulls?state=closed&head=${OWNER}:${enc}&per_page=100" \
+              --jq ".[] | select(.merged_at != null and .head.sha == \"${tip}\") | .number" | head -n1)
+            if [ -z "$match" ]; then
+              kept+=("${branch}: no merged PR with head == tip ${tip:0:7}")
+              continue
+            fi
+            if [ "$DRY_RUN" = "true" ]; then
+              deleted+=("${branch}: would delete (merged PR #${match})")
+            elif gh api -X DELETE "repos/${REPO}/git/refs/heads/${branch}" >/dev/null 2>&1; then
+              deleted+=("${branch}: deleted (merged PR #${match})")
+            else
+              kept+=("${branch}: delete failed or already gone")
+            fi
+          done < <(gh api --paginate "repos/${REPO}/branches?protected=false&per_page=100" --jq '.[].name')
+          echo "== Deleted / would delete (${#deleted[@]}) =="
+          printf '%s\n' "${deleted[@]+"${deleted[@]}"}"
+          echo "== Kept (${#kept[@]}) =="
+          printf '%s\n' "${kept[@]+"${kept[@]}"}"

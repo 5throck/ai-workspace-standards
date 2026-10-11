@@ -531,6 +531,17 @@ All agents, regardless of their role, must adhere to the following:
 - **Source Attribution**: When presenting research findings, external data, or factual claims, always cite the source using `[Source: URL/document]` inline or a `## References` section. If a source cannot be verified, explicitly mark it as `⚠️ Unverified` and recommend manual verification. Never present unverified information as established fact.
 - **Computational Integrity**: Never perform high-precision or safety-critical numerical calculations directly. For aerospace, aviation, precision control, or regulated financial computations, delegate to a validated external tool (Fortran, Python+NumPy/SciPy, Julia, etc.). If the tool is missing, request installation through the PM — **never install tools without security review and explicit user approval**. Label any AI-generated numerical estimate explicitly as **approximate**. For all other reported numbers (aggregations, statistics, percentages, metrics), compute via executed code (bun/TypeScript scripts) — never by mental arithmetic.
 
+## §7.1: SAP Safety (Proxy) & Approvals
+
+Same rules on every platform; only the config file differs. Enforcement tiering and residual-risk statement: `SECURITY.md`.
+
+- **Single enforcement point**: the `abap` MCP server is launched through `scripts/sap-mcp-proxy.ts`, never `vsp` directly. The proxy classifies every SAP tool call (allow / ask / deny), writes the audit line and QA evidence, and gates transport release on passed QA evidence. Platform SAP hooks are optional UX; SAP enforcement does not depend on them.
+- **Approvals**: an `ask` (or unapproved R3) call returns `APPROVAL_REQUIRED id=<id>` and is not sent to SAP. Stop and show the id to the user. A **human** runs `bun scripts/sap-approve.ts <id>` in their own terminal and types the first 6 characters of the id on `/dev/tty`; then repeat the identical call once (single use, input-bound, short TTL). Pending requests and approvals live outside the repo in `~/.config/co-abap/{pending,approvals}/<repo-hash>/`, HMAC-signed with `~/.config/co-abap/approval.key` (0600); the approver is the OS user.
+- **Integrity**: a human runs `bun scripts/sap-integrity.ts init` once, and `bun scripts/sap-integrity.ts sign` after reviewed changes to the policy or enforcement scripts; until then the proxy is R0 (read-only). `verify` and `verify-audit` are read-only checks.
+- **Deny-rule SSOT**: the protected command/path set is single-sourced in `config/platforms/protected-paths.json` and rendered into every platform config; `bun scripts/validate-abap-platform-parity.ts` (CI-checked) fails on drift.
+- **Agents must never run `sap-approve.ts` or `sap-integrity.ts init|sign`**, write approval or pending files, read `~/.config/co-abap/`, or launch `vsp` outside the proxy. The former manual profile is retired.
+- **Parallel dispatch**: `bun scripts/co-abap/dispatch-parallel.ts --plan <plan-file>` runs one CLI process per plan row. Each row has `mode: read|write`; read rows run at R0. Write rows declare `sapScope {packages, objects, actions, maxClass}`; the dispatcher writes a grant request and stops. A human runs `bun scripts/sap-approve.ts --grant <runId>`, then re-runs the dispatcher with `--run-id <runId>` (or `--wait-grant`). Children work under the grant, out-of-scope calls are denied, and the grant is revoked at run end. Timeouts: SIGTERM, 10s grace (`--kill-grace`), then SIGKILL; the proxy finishes in-flight calls. SAP calls from children always pass through the proxy.
+
 ---
 
 ## §8: Lifecycle Management
@@ -552,4 +563,4 @@ All agents, regardless of their role, must adhere to the following:
 
 ---
 
-*Last Updated: 2026-10-06 (co-abap v1.0.0)*
+*Last Updated: 2026-10-11 (co-abap v1.0.0)*

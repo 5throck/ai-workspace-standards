@@ -1,0 +1,4 @@
+# Hides credentials and enforcement files from Gemini CLI file tools (read side only).
+# Source of truth: config/platforms/protected-paths.json (checked by validate-abap-platform-parity.ts).
+.env*
+vsp

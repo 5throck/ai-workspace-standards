@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "abap": {
+      "command": "bun",
+      "args": [
+        "scripts/sap-mcp-proxy.ts",
+        "--",
+        "--mode",
+        "hyperfocused"
+      ],
+      "env": {
+        "SAP_PROXY_MAX_CLASS": "$SAP_PROXY_MAX_CLASS",
+        "SAP_DISPATCH_GRANT": "$SAP_DISPATCH_GRANT",
+        "SAP_DISPATCH_ROW": "$SAP_DISPATCH_ROW"
+      }
+    },
+    "graft": {
+      "command": "graft",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

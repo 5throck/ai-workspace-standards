@@ -44,7 +44,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `permit-to-work` | 1.0.1 | active | safety-workflow-manager | — | — | co-safety only — Trigger permit-to-work (PTW) issuance workflow for high-risk or non-routine work |
 | `pre-construction-technical-review` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Execute KGS Code pre-construction technical review (시설·기술 기준) for gas terminal facilities… |
 | `process-hazard-screening` | 1.0.0 | active | ehschem-agent | — | — | co-safety only — Initial hazard screening for chemical plant processes |
-| `project-review` | 1.3.3 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
+| `project-review` | 1.3.4 | active | pm | 2026-10-11 | — | inherited from common — customized fork (variant-maintained) |
 | `protocol-deviation-analyzer` | 1.0.0 | active | gcp-agent | — | — | co-safety only — Analyze clinical trial protocol deviations per ICH E6(R3) |
 | `psm-loto` | 1.0.0 | active | psm-agent | — | — | co-safety only — Execute Lockout/Tagout (LOTO) procedure verification per KOSHA GUIDE Z-40-2022 and 안전보건기준규칙 Article… |
 | `psm-moc` | 1.0.0 | active | psm-agent | — | — | co-safety only — Manage Process Safety Management (PSM) Management of Change (MOC) workflows |

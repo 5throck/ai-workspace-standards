@@ -1,0 +1,447 @@
+{
+  "version": 1,
+  "classes": {
+    "R0": [
+      "GetSource",
+      "GetRevisionSource",
+      "SearchObject",
+      "GetTable",
+      "GetTableContents",
+      "GetCDSDependencies",
+      "GetCDSImpactAnalysis",
+      "GetCDSExposure",
+      "GetODataMetadata",
+      "GetFunctionGroup",
+      "GetContext",
+      "GetArguments",
+      "GetAPIReleaseState",
+      "GetConnectionInfo",
+      "GetSystemInfo",
+      "ListDumps",
+      "GetDump",
+      "ListTransports",
+      "GetTransport",
+      "ListTraces",
+      "GetTrace",
+      "ListSQLTraces",
+      "GetSQLTraceState",
+      "GetCallGraph",
+      "RunQuery"
+    ],
+    "R1": [
+      "SyntaxCheck",
+      "RunUnitTests",
+      "GetCodeCoverage",
+      "RunATCCheck",
+      "TraceExecution"
+    ],
+    "R2": [
+      "WriteSource",
+      "EditSource",
+      "Activate",
+      "CreateTransport",
+      "AddToTransport"
+    ],
+    "R3": [
+      "ReleaseTransport",
+      "RunReport",
+      "RunOptions",
+      "InstallZADTVSP",
+      "InstallAbapGit"
+    ]
+  },
+  "r3Patterns": [
+    "^Delete",
+    "Delete$",
+    "^Install",
+    "Deploy",
+    "^Drop",
+    "^Insert",
+    "^Modify",
+    "^Import",
+    "^UI5",
+    "Publish",
+    "Unpublish",
+    "^Upload",
+    "ServiceBinding"
+  ],
+  "defaultUnknown": "ask",
+  "allowedPackages": [
+    "Z*",
+    "$TMP",
+    "$ZADT_VSP",
+    "$VSP_ADT"
+  ],
+  "runQuery": {
+    "selectOnly": true
+  },
+  "approval": {
+    "_doc": "Approvals live outside the workspace in ~/.config/co-abap/approvals/<repo-hash>/ (hardcoded, HMAC-signed by sap-approve.ts). Only ttlMinutes is read here.",
+    "ttlMinutes": 15
+  },
+  "release": {
+    "requireEvidence": true
+  },
+  "vspFeatures": {
+    "_doc": "SAP_FEATURE_* keys that .env or the client env may turn on. Empty: every privileged vsp feature stays off. Changing this requires re-signing (bun scripts/sap-integrity.ts sign).",
+    "allowOn": []
+  },
+  "hyperfocused": {
+    "_doc": "vsp v2.60.0 SAP_MODE=hyperfocused: one tool `SAP` {action,target,params}. Sub-type is params.type, params.op or a single-word target. Unknown action/sub-type => ask. Data only; logic in scripts/lib/sap-action-lib.ts.",
+    "actions": {
+      "read": "R0",
+      "search": "R0",
+      "grep": "R0",
+      "revisions": "R0",
+      "info": "R0",
+      "help": "R0",
+      "lint": "R0",
+      "query": {
+        "class": "R0",
+        "sql": true
+      },
+      "test": {
+        "class": "R1",
+        "subFrom": [
+          "type",
+          "target"
+        ],
+        "subDefault": "unit",
+        "unknown": "ask",
+        "sub": {
+          "unit": {
+            "class": "R1",
+            "evidence": [
+              "RunUnitTests"
+            ],
+            "evidenceIfParam": {
+              "coverage": [
+                "GetCodeCoverage"
+              ],
+              "with_coverage": [
+                "GetCodeCoverage"
+              ]
+            }
+          },
+          "atc": {
+            "class": "R1",
+            "evidence": [
+              "RunATCCheck"
+            ]
+          },
+          "atc_customizing": "R0"
+        }
+      },
+      "analyze": {
+        "class": "R0",
+        "subFrom": [
+          "type"
+        ],
+        "unknown": "ask",
+        "sub": {
+          "abap_help": "R0",
+          "analyze_call_graph": "R0",
+          "analyze_deps": "R0",
+          "application_log": "R0",
+          "call_graph": "R0",
+          "callees": "R0",
+          "callers": "R0",
+          "cds_impact": "R0",
+          "check_abap": "R0",
+          "check_boundaries": "R0",
+          "class_components": "R0",
+          "co_change": "R0",
+          "compare_call_graphs": "R0",
+          "completion": "R0",
+          "context": "R0",
+          "cr_boundaries": "R0",
+          "cr_history": "R0",
+          "definition": "R0",
+          "documentation": "R0",
+          "dump_impact": "R0",
+          "effects": "R0",
+          "explain_dump": "R0",
+          "fm_test_data": "R0",
+          "get_dump": "R0",
+          "get_pretty_printer_settings": "R0",
+          "get_trace": "R0",
+          "graph_stats": "R0",
+          "group_dumps": "R0",
+          "health": "R0",
+          "img_activity": "R0",
+          "img_search": "R0",
+          "impact": "R0",
+          "inactive_objects": "R0",
+          "job_list": "R0",
+          "job_log": "R0",
+          "list_dumps": "R0",
+          "list_sql_traces": "R0",
+          "list_traces": "R0",
+          "loads": "R0",
+          "object_structure": "R0",
+          "parse_abap": "R0",
+          "pretty_print": "R0",
+          "references": "R0",
+          "similar_dumps": "R0",
+          "spool_list": "R0",
+          "spool_read": "R0",
+          "sql_trace_state": "R0",
+          "tr_boundaries": "R0",
+          "type_hierarchy": "R0",
+          "usage_examples": "R0",
+          "variants": "R0",
+          "where_used_config": "R0",
+          "syntax_check": {
+            "class": "R1",
+            "evidence": [
+              "SyntaxCheck"
+            ]
+          },
+          "trace_execution": "R1",
+          "set_pretty_printer_settings": {
+            "class": "R2",
+            "write": false
+          },
+          "execute_abap": "R3",
+          "cluster_read": "R3"
+        }
+      },
+      "edit": {
+        "class": "R2",
+        "subFrom": [
+          "target"
+        ],
+        "unknown": "default",
+        "sub": {
+          "compare_source": "R0",
+          "activate": {
+            "class": "R2",
+            "write": false
+          },
+          "activate_multi": {
+            "class": "R2",
+            "write": false
+          },
+          "activate_package": {
+            "class": "R2",
+            "write": false
+          },
+          "lock": {
+            "class": "R2",
+            "write": false
+          },
+          "unlock": {
+            "class": "R2",
+            "write": false
+          },
+          "publish_service": {
+            "class": "R3",
+            "write": false
+          },
+          "unpublish_service": {
+            "class": "R3",
+            "write": false
+          }
+        }
+      },
+      "create": "R2",
+      "i18n": {
+        "class": "R2",
+        "subFrom": [
+          "op"
+        ],
+        "unknown": "ask",
+        "sub": {
+          "compare_languages": "R0",
+          "data_element_labels": "R0",
+          "message_class_texts": "R0",
+          "texts": "R0",
+          "texts_get": "R0",
+          "texts_set": "R2",
+          "write_message_texts": "R2"
+        }
+      },
+      "delete": "R3",
+      "debug": "R3",
+      "system": {
+        "class": "R2",
+        "subFrom": [
+          "type",
+          "target"
+        ],
+        "unknown": "r3pattern",
+        "sub": {
+          "info": "R0",
+          "components": "R0",
+          "connection": "R0",
+          "features": "R0",
+          "system_info": "R0",
+          "list_transports": "R0",
+          "get_transport": "R0",
+          "get_user_transports": "R0",
+          "get_transport_info": "R0",
+          "transport_status": "R0",
+          "transport_buffer": "R0",
+          "import_status": "R0",
+          "git_types": "R0",
+          "git_import_status": "R0",
+          "git_object_versions": "R0",
+          "list_dependencies": "R0",
+          "create_transport": "R2",
+          "add_transport_object": "R2",
+          "remove_transport_object": "R2",
+          "move_transport_object": "R2",
+          "deploy_from_file": "R2",
+          "git_import_zip": "R2",
+          "rename": "R2",
+          "save_to_file": {
+            "class": "R2",
+            "write": false
+          },
+          "git_export": {
+            "class": "R2",
+            "write": false
+          },
+          "delete_transport": "R3",
+          "merge_transports": "R3",
+          "copy_to_toc": "R3",
+          "upload_transport": "R3",
+          "install_zadt_vsp": "R3",
+          "deploy_zip": "R3",
+          "git_delete_objects": "R3",
+          "release_transport": {
+            "class": "R3",
+            "canonical": "ReleaseTransport"
+          }
+        }
+      },
+      "rfc": {
+        "class": "R0",
+        "subFrom": [
+          "op"
+        ],
+        "subDefault": "describe",
+        "defaultNeedsTarget": true,
+        "unknown": "ask",
+        "sub": {
+          "info": "R0",
+          "ping": "R0",
+          "probe": "R0",
+          "describe": "R0",
+          "search": "R0",
+          "job": "R0",
+          "call": "R3",
+          "run": "R3",
+          "read_table": "R3"
+        }
+      }
+    },
+    "packageKeys": [
+      "package",
+      "package_name",
+      "dev_class",
+      "devclass",
+      "packageName",
+      "packages",
+      "new_package"
+    ],
+    "urlTypes": {
+      "oo/classes": "CLAS",
+      "oo/interfaces": "INTF",
+      "programs/programs": "PROG",
+      "programs/includes": "INCL",
+      "functions/groups": "FUGR",
+      "ddic/ddl/sources": "DDLS",
+      "ddic/tables": "TABL",
+      "ddic/domains": "DOMA",
+      "ddic/dataelements": "DTEL",
+      "packages": "DEVC",
+      "bo/behaviordefinitions": "BDEF",
+      "ddic/srvd/sources": "SRVD",
+      "businessservices/bindings": "SRVB",
+      "businessservices/odatav2": "SRVB",
+      "businessservices/odatav4": "SRVB",
+      "ddic/ddlx/sources": "DDLX",
+      "acm/dcl/sources": "DCLS",
+      "filestore/ui5-bsp/objects": "WAPA"
+    },
+    "limuTypes": {
+      "REPT": "PROG",
+      "REPS": "PROG"
+    },
+    "escalations": [
+      {
+        "_doc": "Escalate an R2 call to R3. UI5/BSP repository (WAPA) content in any write/system call.",
+        "label": "ui5",
+        "actions": [
+          "edit",
+          "create",
+          "system"
+        ],
+        "keyTypes": [
+          "WAPA"
+        ]
+      },
+      {
+        "_doc": "deploy_from_file whose file/target is UI5/BSP content or a zip archive.",
+        "label": "ui5",
+        "actions": [
+          "system"
+        ],
+        "subs": [
+          "deploy_from_file"
+        ],
+        "valueKeys": [
+          "file_path",
+          "path",
+          "zip_path",
+          "archive",
+          "app_path",
+          "webapp_path",
+          "folder",
+          "directory",
+          "source_dir",
+          "bsp_name",
+          "app_name",
+          "application",
+          "object_type",
+          "type"
+        ],
+        "valuePatterns": [
+          "\\.zip$",
+          "(^|[\\\\/])manifest\\.json$",
+          "(^|[\\\\/])webapp([\\\\/]|$)",
+          "(^|[\\\\/])(ui5|bsp)([\\\\/.]|$)",
+          "\\.(wapa|ui5|bsp)\\.",
+          "^(WAPA|UI5|BSP)(/.*)?$"
+        ]
+      },
+      {
+        "_doc": "RAP service binding publish/unpublish expressed as params on an SRVB object (documented form is edit PUBLISH_SERVICE/UNPUBLISH_SERVICE, handled as sub-types). Plain SRVB create/edit stays R2.",
+        "label": "srvb_publish",
+        "actions": [
+          "edit",
+          "create"
+        ],
+        "keyTypes": [
+          "SRVB"
+        ],
+        "paramsTruthy": [
+          "publish",
+          "unpublish",
+          "publish_service",
+          "unpublish_service"
+        ],
+        "paramsWordKeys": [
+          "op",
+          "operation",
+          "mode",
+          "type",
+          "action"
+        ],
+        "paramsWords": "^(un)?publish"
+      }
+    ]
+  },
+  "_legacyNote": "Top-level classes/r3Patterns cover LEGACY (non-hyperfocused) vsp tool names only. Production runs SAP_MODE=hyperfocused (single SAP tool; see 'hyperfocused'). GetAPIReleaseState does not exist in vsp v2.60.0 and is kept as R0 only for legacy-mode safety; see docs/co-abap.context.md 'vsp Tool Reference (Hyperfocused Mode)'."
+}
