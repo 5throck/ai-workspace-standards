@@ -13,6 +13,7 @@
 
 import { describe, expect, test } from 'bun:test';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { findModelLiterals } from '../../scripts/lib/model-literal-patterns.ts';
 import { scanSkillTreeForModelLiterals } from '../../scripts/skill-lifecycle-audit.ts';
@@ -56,7 +57,7 @@ describe('findModelLiterals (Check MM detection patterns)', () => {
 });
 
 describe('scanSkillTreeForModelLiterals (Check MM skill-tree walk)', () => {
-  const tmpRoot = mkdtempSync('/tmp/skill-mm-audit-');
+  const tmpRoot = mkdtempSync(join(tmpdir(), 'skill-mm-audit-'));
 
   test('a literal in references/** is reported per file; alias-only SKILL.md is clean', () => {
     const skillDir = join(tmpRoot, 'dirty-skill');

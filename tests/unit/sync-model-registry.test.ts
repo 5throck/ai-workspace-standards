@@ -10,6 +10,7 @@
 
 import { describe, expect, test } from 'bun:test';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   SURFACES,
@@ -155,7 +156,7 @@ describe('sweepContent', () => {
 
 describe('scanSkillsTreesForModelLiterals', () => {
   test('reports a literal planted in a fixture skills tree (/tmp)', () => {
-    const root = mkdtempSync('/tmp/sync-model-registry-');
+    const root = mkdtempSync(join(tmpdir(), 'sync-model-registry-'));
     try {
       mkdirSync(join(root, 'skills', 'some-skill', 'references'), { recursive: true });
       writeFileSync(join(root, 'skills', 'some-skill', 'SKILL.md'), 'clean alias `opus`\n');
