@@ -54,18 +54,20 @@ Agent(
 
 ### 1.2 Model Tier Mapping
 
+> Registry model IDs live ONLY in docs/workspace-schema.json (`models.*`) and the CLAUDE.md §6 prose; this page deliberately carries no literal IDs (skills must not hardcode model IDs — workspace directive 2026-10-11).
+
 | Tier | Registry Model ID | Agent `model` Parameter | Typical Use |
 |------|-------------------|------------------------|-------------|
-| High | `claude-opus-5-5` | `"opus"` | Synthesis agent, complex reasoning, merge conflicts |
-| Medium | `claude-sonnet-5-5` | `"sonnet"` | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
-| Low | `claude-haiku-5-5` | `"haiku"` | Structural validation, simple checks, formatting |
+| High | `docs/workspace-schema.json → models.claude.high` | `"opus"` | Synthesis agent, complex reasoning, merge conflicts |
+| Medium | `docs/workspace-schema.json → models.claude.medium` | `"sonnet"` | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
+| Low | `docs/workspace-schema.json → models.claude.low` | `"haiku"` | Structural validation, simple checks, formatting |
 
-> **docs-writer tier**: Medium (`claude-sonnet-5-5`) — per 2026-05-28 team restructuring.
+> **docs-writer tier**: Medium tier — per 2026-05-28 team restructuring.
 
-**Translation rule**: When dispatching, translate the agent's tier to its registry model, then to the matching alias:
-- High → `claude-opus-5-5` → `model = "opus"`
-- Medium → `claude-sonnet-5-5` → `model = "sonnet"`
-- Low → `claude-haiku-5-5` → `model = "haiku"`
+**Translation rule**: When dispatching, translate the agent's tier to its registry model (`docs/workspace-schema.json → models.claude.<tier>`), then to the matching alias:
+- High → `models.claude.high` → `model = "opus"`
+- Medium → `models.claude.medium` → `model = "sonnet"`
+- Low → `models.claude.low` → `model = "haiku"`
 
 ### 1.3 Parallel Dispatch
 
@@ -150,11 +152,11 @@ Spawn parallel instances to execute dedicated work concurrently. PM **must** exp
 
 | Tier | Model ID | Thinking Parameter | Typical Use |
 |------|----------|-------------------|-------------|
-| High | `gemini-3.1-pro` | `thinking_level="medium"` | Synthesis agent, complex reasoning |
-| Medium | `gemini-3.8-flash` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
-| Low | `gemini-3.8-flash` | (none) | Structural validation, simple checks |
+| High | `docs/workspace-schema.json → models.gemini.high` | `thinking_level="medium"` | Synthesis agent, complex reasoning |
+| Medium | `docs/workspace-schema.json → models.gemini.medium` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
+| Low | `docs/workspace-schema.json → models.gemini.low` | (none) | Structural validation, simple checks |
 
-> **Note**: Medium and Low tiers share the same model (`gemini-3.8-flash`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID (e.g. `gemini-3.1-pro`), not a Claude-style short alias.
+> **Note**: Medium and Low tiers share the same registry model (see `models.gemini.medium` / `models.gemini.low`) on the Gemini platform. The distinction is operational — Low-tier tasks get shorter prompts and simpler instructions. When writing the `Model` column in execution plan tables, use the literal Gemini model ID from the registry (`models.gemini.*`), not a Claude-style short alias.
 
 ### 2.3 send_message for Inter-Agent Communication
 
@@ -278,11 +280,11 @@ After all sequential passes, merge all findings, deduplicate, and apply fixes to
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Domain Expert | `sonnet` | `gemini-3.8-flash` |
-| Devil's Advocate | `sonnet` | `gemini-3.8-flash` |
-| Clarity Editor | `sonnet` | `gemini-3.8-flash` |
-| Consistency Auditor | `sonnet` | `gemini-3.8-flash` |
-| Synthesis + Apply | `opus` | `gemini-3.1-pro` |
+| Domain Expert | `sonnet` | `models.gemini.medium` |
+| Devil's Advocate | `sonnet` | `models.gemini.medium` |
+| Clarity Editor | `sonnet` | `models.gemini.medium` |
+| Consistency Auditor | `sonnet` | `models.gemini.medium` |
+| Synthesis + Apply | `opus` | `models.gemini.high` |
 
 **Claude Code — Parallel Dispatch (single turn)**:
 
@@ -357,13 +359,13 @@ Agent(description = "§6 Synthesis — merge findings and apply fixes",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| Grammar Checker | `sonnet` | `gemini-3.8-flash` |
-| Spelling + Terminology | `sonnet` | `gemini-3.8-flash` |
-| Loanword Refinement | `sonnet` | `gemini-3.8-flash` |
-| Style + Tone | `sonnet` | `gemini-3.8-flash` |
-| Merge + Apply | `sonnet` | `gemini-3.8-flash` |
+| Grammar Checker | `sonnet` | `models.gemini.medium` |
+| Spelling + Terminology | `sonnet` | `models.gemini.medium` |
+| Loanword Refinement | `sonnet` | `models.gemini.medium` |
+| Style + Tone | `sonnet` | `models.gemini.medium` |
+| Merge + Apply | `sonnet` | `models.gemini.medium` |
 
-> Language proofreading is less reasoning-intensive than content verification, so `sonnet`/`gemini-3.8-flash` is sufficient even for the merge step.
+> Language proofreading is less reasoning-intensive than content verification, so the Medium tier (`sonnet` / `models.gemini.medium`) is sufficient even for the merge step.
 
 **Claude Code — Parallel Dispatch (single turn)**:
 
@@ -438,7 +440,7 @@ Agent(description = "§7 Merge proofreading findings and apply",
 
 | Role | Claude Model | Gemini Model |
 |------|-------------|--------------|
-| SVG Designer | `sonnet` | `gemini-3.8-flash` |
+| SVG Designer | `sonnet` | `models.gemini.medium` |
 
 > SVG creation is a focused task that benefits from a single specialist rather than parallel dispatch. The designer receives the report section context and produces a self-contained inline SVG string.
 
@@ -490,6 +492,6 @@ Agent(
 
 | Tier | Claude Alias | Claude Registry ID | Gemini Model ID |
 |------|-------------|-------------------|-----------------|
-| **High** | `"opus"` | `claude-opus-5-5` | `gemini-3.1-pro` |
-| **Medium** | `"sonnet"` | `claude-sonnet-5-5` | `gemini-3.8-flash` |
-| **Low** | `"haiku"` | `claude-haiku-5-5` | `gemini-3.8-flash` |
+| **High** | `"opus"` | `docs/workspace-schema.json → models.claude.high` | `docs/workspace-schema.json → models.gemini.high` |
+| **Medium** | `"sonnet"` | `docs/workspace-schema.json → models.claude.medium` | `docs/workspace-schema.json → models.gemini.medium` |
+| **Low** | `"haiku"` | `docs/workspace-schema.json → models.claude.low` | `docs/workspace-schema.json → models.gemini.low` |

@@ -9,7 +9,16 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.7.1
+ * @version 1.8.0
+ * v1.8.0 (2026-10-11, T-20261011-015): Check MM — skills must not hardcode
+ *         registry model IDs (workspace directive 2026-10-11). Every skill
+ *         tree the audit walks (SKILL.md + references/** and sibling skill
+ *         files) is scanned for versioned model-ID literals (claude-/gemini-/
+ *         gpt-5.* patterns shared via lib/model-literal-patterns.ts, also used
+ *         by sync-model-registry.ts); IDs live only in docs/workspace-schema.json
+ *         (`models.*`) and the CLAUDE.md §6 / AGENTS.md §3.6 managed prose.
+ *         Distinct from validate-templates Check MM-01, which gates the
+ *         instruction twins' managed-marker placement.
  * v1.7.1 (2026-10-08, E2E Test 30 fix): Check SVP's registry lookup no longer
  *         imports the L0-only write-scripts-snapshot helper — the parse is
  *         inlined (parseRegistryVersions) because THIS script ships to
@@ -32,15 +41,16 @@
  * v1.5.1: scope validation accepts the project's variant name from
  *         .claude/template-version.txt (project dir name != variant name);
  *         orphaned-owner WARN gated to the workspace-root authoring surface.
- * @last_updated 2026-10-05
+ * @last_updated 2026-10-11
  * @license MIT
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from 'node:fs';
 import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { isSelfManagedPath } from './lib/self-managed-tools.ts';
 import { lastContentCommitDate } from './agent-lifecycle-audit.ts';
+import { findModelLiterals } from './lib/model-literal-patterns.ts';
 
 interface SkillFrontmatter {
   name: string;
@@ -423,6 +433,47 @@ function isRemovalDateExpired(removalDate: string): boolean {
   return new Date(removalDate + 'T23:59:59').getTime() <= Date.now();
 }
 
+// Text file extensions scanned for model-ID literals (Check MM). Binary and
+// unknown extensions are skipped — a file that is not text cannot carry a
+// prose model-ID literal worth reporting.
+const MODEL_LITERAL_TEXT_EXT = /\.(md|markdown|txt|json|jsonc|yaml|yml|html|htm|ts|js|mjs|cjs|css|svg)$/i;
+
+/**
+ * Check MM (v1.8.0, T-20261011-015): scan a skill's whole directory tree
+ * (SKILL.md + references/** and any other skill files) for registry model-ID
+ * literals. Returns one entry per offending file with its unique matched
+ * literals. Directory bounds mirror findSkillFiles (symlink skip, depth cap,
+ * node_modules/hidden-dir skip). Exported for unit tests.
+ */
+export function scanSkillTreeForModelLiterals(skillDir: string, depth = 0): Array<{ file: string; literals: string[] }> {
+  if (depth > 8) return [];
+  const hits: Array<{ file: string; literals: string[] }> = [];
+  let entries: Dirent<string>[];
+  try {
+    // the cast only pins the overload — Bun's readdirSync ReturnType resolves Dirent<Buffer> (verify-skills.ts precedent)
+    entries = readdirSync(skillDir, { withFileTypes: true }) as unknown as Dirent<string>[];
+  } catch {
+    return hits;
+  }
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    const full = join(skillDir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      hits.push(...scanSkillTreeForModelLiterals(full, depth + 1));
+    } else if (MODEL_LITERAL_TEXT_EXT.test(entry.name)) {
+      try {
+        const text: string = readFileSync(full, 'utf-8');
+        const literals = findModelLiterals(text);
+        if (literals.length > 0) hits.push({ file: full, literals });
+      } catch {
+        // unreadable file — skip
+      }
+    }
+  }
+  return hits;
+}
+
 // Check for circular dependencies
 function checkCircularDependencies(
   skillFile: string,
@@ -659,6 +710,33 @@ function auditSkills(jsonMode = false): AuditResult {
       });
     }
 
+    // Check MM (v1.8.0, T-20261011-015): no registry model-ID literals in
+    // skill trees (workspace directive 2026-10-11). IDs live only in
+    // docs/workspace-schema.json (`models.*`) and the CLAUDE.md §6 /
+    // AGENTS.md §3.6 managed prose. Distinct from validate-templates Check
+    // MM-01, which gates the instruction twins' managed-marker placement.
+    {
+      const skillDir = dirname(skillFile);
+      for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
+        if (hit.file === skillFile) continue; // SKILL.md reported below with its own relPath context
+        errors.push({
+          level: 'error',
+          file: relative(ROOT, hit.file).replace(/\\/g, '/'),
+          message: `Model-ID literal(s) in skill tree: ${hit.literals.join(', ')} (Check MM)`,
+          fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
+        });
+      }
+      const ownLiterals = findModelLiterals(skillContent);
+      if (ownLiterals.length > 0) {
+        errors.push({
+          level: 'error',
+          file: relPath,
+          message: `Model-ID literal(s) in skill tree: ${ownLiterals.join(', ')} (Check MM)`,
+          fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
+        });
+      }
+    }
+
     if (frontmatter.requires && frontmatter.requires.length > 0) {
       for (const req of frontmatter.requires) {
         if (!allSkills.has(req)) {
@@ -838,6 +916,18 @@ function auditSkills(jsonMode = false): AuditResult {
               file: `templates/${e.name}/skills/${s.name}/SKILL.md`,
               message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
               fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
+            });
+          }
+          // Check MM (v1.8.0): template-resident skill trees are model-ID
+          // literal-free too (same patterns, same rule as the runtime scan).
+          const skillDir = join(tplSkillsDir, s.name);
+          for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
+            const hitRel = relative(skillDir, hit.file).replace(/\\/g, '/');
+            errors.push({
+              level: 'error',
+              file: `templates/${e.name}/skills/${s.name}/${hitRel}`,
+              message: `Model-ID literal(s) in skill tree: ${hit.literals.join(', ')} (Check MM)`,
+              fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
             });
           }
         }

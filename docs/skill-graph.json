@@ -2198,7 +2198,7 @@
       "name": "lifecycle-manager",
       "scope": "root",
       "capability": "lifecycle-manager",
-      "content_hash": "af239957723d3a04",
+      "content_hash": "f42c7a2c19852fd0",
       "version": "1.1.0",
       "mirrors": [
         "agents/lifecycle-manager.md"
@@ -7620,6 +7620,24 @@
       ]
     },
     {
+      "id": "skill:root/model-migration",
+      "type": "skill",
+      "layer": "L0",
+      "name": "model-migration",
+      "scope": "root",
+      "capability": "model-migration",
+      "content_hash": "9430b05f908f0be3",
+      "version": "1.0.0",
+      "mirrors": [
+        "skills/model-migration/SKILL.md",
+        ".claude/skills/model-migration/SKILL.md",
+        ".gemini/skills/model-migration/SKILL.md",
+        ".agents/skills/model-migration/SKILL.md",
+        ".codex/skills/model-migration/SKILL.md",
+        ".hermes/skills/model-migration/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:root/new-project",
       "type": "skill",
       "layer": "L0",
@@ -10141,6 +10159,12 @@
       "type": "references",
       "from": "agent:root/lifecycle-manager",
       "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/lifecycle-manager",
+      "to": "skill:root/model-migration",
       "source": "prose"
     },
     {

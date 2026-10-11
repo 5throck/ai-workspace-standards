@@ -289,9 +289,9 @@ describe('C-CM-04 platform-skills sweep helpers (T-20260924-002 R1.3-R1.5)', () 
     ).toEqual(['.claude', '.gemini', '.agents', '.codex']);
   });
 
-  test('all 22 contract platform entries declare a codex_source (verified .codex copies)', () => {
+  test('all 23 contract platform entries declare a codex_source (verified .codex copies)', () => {
     const entries = Object.entries(contract.common_platform_skills as Record<string, Record<string, unknown>>);
-    expect(entries.length).toBe(22);
+    expect(entries.length).toBe(23); // +1 model-migration (T-20261011-015 wave: model-migration skill platform mirrors registered)
     for (const [name, entry] of entries) {
       expect(entry.codex_source).toBe(`.codex/skills/${name}/SKILL.md`);
     }
