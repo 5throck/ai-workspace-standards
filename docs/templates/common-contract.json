@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json. Country-scoped skills (k-law/k-dart/k-kosis, tracked in workspace-schema.json country_scoped_assets) and variant-scoped skills (tracked in variant_scoped_skills, living in templates/co-*/skills/) are deliberately out of this contract. The common_platform_skill_exclusions section records platform skills deliberately outside this inventory (L0-only operator skills, claude-only tools, variant-scoped skills); every skill dir under the templates/common/.{claude,gemini,agents,codex}/skills/ mirrors must be listed here, in common_skills/common_platform_skills, or documented as an exclusion (T-20260924-002 full-inventory ruling).",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -508,6 +508,15 @@
       "version": "1.0.0",
       "description": "Add features to an existing variant template. Use when: extending a variant with new agents, skills, scripts, or documentation.",
       "propagated_to_common": true
+    },
+    "model-migration": {
+      "claude_source": ".claude/skills/model-migration/SKILL.md",
+      "gemini_source": ".gemini/skills/model-migration/SKILL.md",
+      "agents_source": ".agents/skills/model-migration/SKILL.md",
+      "codex_source": ".codex/skills/model-migration/SKILL.md",
+      "hermes_source": ".hermes/skills/model-migration/SKILL.md",
+      "version": "1.0.0",
+      "description": "Model registry migration procedure — edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via scripts/sync-model-registry.ts, validate (validate-model-registry + Check MM skills-tree cleanliness); owner lifecycle-manager"
     }
   },
   "common_scripts": {

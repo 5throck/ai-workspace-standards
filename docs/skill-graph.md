@@ -216,6 +216,7 @@
 | `root/graft` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/meeting-facilitation` | L0 | 1.4.4 | — | — | — | — | — |
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |
+| `root/model-migration` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/new-project` | L0 | 1.0.0 | — | — | root/adopt-project, root/upgrade-project (follows) | — | — |
 | `root/platform-command-lifecycle-manager` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L0 | 1.0.2 | — | — | — | — | — |
@@ -789,7 +790,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-134 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+135 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -825,7 +826,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-11), window 90 days. Skill nodes with usage: 3.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, common/sync, root/sync
-- **unused** (0 sessions in 90 days) (230): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 190 more
+- **unused** (0 sessions in 90 days) (231): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 191 more
 
 ## Ambiguous Name Resolutions
 

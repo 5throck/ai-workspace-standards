@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-29
+last_updated: 2026-10-11
 name: Lifecycle Manager
 role: specialist
 status: active
@@ -156,6 +156,7 @@ Every lifecycle-manager session produces exactly one of:
 - `script-lifecycle-manager` — script domain state management
 - `platform-skill-lifecycle-manager` — platform skill domain (.claude/skills/, .gemini/skills/)
 - `platform-command-lifecycle-manager` — platform command domain (.claude/commands/, .gemini/commands/)
+- `model-migration` — registry model-ID changes: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces (sync-model-registry.ts), verify
 
 ## Dispatch Protocol
 
