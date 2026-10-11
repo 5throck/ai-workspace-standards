@@ -13,12 +13,27 @@ title: >-
   rules shows the gap. Evidence: co-abap PR #194 diffs, ADR-0005/0006, 2f
   extraction. Class: templates/co-abap enhancement bundle
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:48.284+09:00'
 history:
   - at: '2026-10-11T01:45:48.284+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.481+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.500+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.519+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: full proxy-seam/deny-rules bundle backported to
+  templates/co-abap (protected-paths.json SSOT, sap-mcp-proxy seam, hooks/gates,
+  ci.yml Typecheck + parity jobs, profile-adapted
+  validate-abap-platform-parity.ts — renamed from validate-platform-parity to
+  avoid the L0 basename classification collision). The promotion decision was
+  the user's process-all directive.
 error: null

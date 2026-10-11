@@ -14,12 +14,27 @@ title: >-
   (T-20261011-001..008 filled today's 10)
 priority: low
 not_before: '2026-10-12'
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T01:46:04.441+09:00'
 history:
   - at: '2026-10-11T01:46:04.441+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.646+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.664+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.681+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1504: (a) co-safety project-review fork made coherent — body
+  side kept, frontmatter related_skills gains upgrade-project, 5 mirrors
+  re-copied, port design note corrected with dated annotation; (b)
+  templates/co-deck/presentations/_smoke_test/_vr_matrix_helper.mjs was a
+  runtime-regenerated scratch artifact (machine paths rewritten every run) —
+  deleted and _smoke_test/ gitignored.
 error: null

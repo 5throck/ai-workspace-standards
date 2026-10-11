@@ -3,14 +3,31 @@ id: U-20261008-001
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-08T00:36:44.407Z
+created_at: '2026-10-08T00:36:44.407Z'
 history:
-  - at: 2026-10-08T00:36:44.407Z
+  - at: '2026-10-08T00:36:44.407Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:30:13.080+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:30:13.101+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:30:13.101+09:00'
+    from: review
+    to: done
+result: >-
+  Confirmed valid (orchestrator observed the same chore: update messages all
+  session). Fixed in dev-sync 1.26.0: new pure helper
+  scripts/helpers/commit-message.ts — weak shapes (bare chore: update / chore:
+  upgrade template to X) are replaced at composition time by a
+  conventional-commit summary derived from the task-staged set (path-group
+  type(scope), docs/designs cite the spec id, 72-char budget), with chore:
+  workspace sync (<n> files) as last resort; PR slug/commit/PR title share one
+  message. 12-case unit test; L1 mirrors scrub-canonical; registry rows bumped.
 error: null
 upstream:
   project: co-newbiz
@@ -19,12 +36,19 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/dev-sync.ts generates non-descriptive commit messages such as "chore: update" and "chore: upgrade template to X". In co-newbiz, 97 of 544 commits in the last 30 days have this shape, which makes git history hard to read. Expected: commit messages describe the actual change, derived from the staged diff or the changelog entry.'
+  symptom: >-
+    scripts/dev-sync.ts generates non-descriptive commit messages such as
+    "chore: update" and "chore: upgrade template to X". In co-newbiz, 97 of 544
+    commits in the last 30 days have this shape, which makes git history hard to
+    read. Expected: commit messages describe the actual change, derived from the
+    staged diff or the changelog entry.
   affected_paths:
     - scripts/dev-sync.ts
   identity_source: client_roots
-  repro: 'Run git log --since=30.days --format=%s | grep -cE "^chore: (update|upgrade)" in a scaffolded project that uses /sync.'
-  triage: inbox
+  repro: >-
+    Run git log --since=30.days --format=%s | grep -cE "^chore:
+    (update|upgrade)" in a scaffolded project that uses /sync.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -32,4 +56,18 @@ upstream:
   dedupe_key: 0e2f4edbebbc1df33b8f952a1b801fa3ba36ccbab8de1209f02dab0286a02189
   duplicates:
     - project: co-newbiz
-      at: 2026-10-08T00:36:44.407Z
+      at: '2026-10-08T00:36:44.407Z'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1504
+    template_version: unreleased
+    summary: >-
+      Confirmed valid (orchestrator observed the same chore: update messages all
+      session). Fixed in dev-sync 1.26.0: new pure helper
+      scripts/helpers/commit-message.ts — weak shapes (bare chore: update /
+      chore: upgrade template to X) are replaced at composition time by a
+      conventional-commit summary derived from the task-staged set (path-group
+      type(scope), docs/designs cite the spec id, 72-char budget), with chore:
+      workspace sync (<n> files) as last resort; PR slug/commit/PR title share
+      one message. 12-case unit test; L1 mirrors scrub-canonical; registry rows
+      bumped.

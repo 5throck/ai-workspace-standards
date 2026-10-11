@@ -11,12 +11,26 @@ title: >-
   upgrade-project stash/pop drops gitignored machine artifacts (vsp binary) —
   warn before stashing untracked tooling
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T02:49:11.518+09:00'
 history:
   - at: '2026-10-11T02:49:11.518+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.752+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.770+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.788+09:00'
+    from: review
+    to: done
+result: >-
+  Deferral re-validated and actionable kernel delivered: co-abap/co-deck 0.16.0
+  landings stay gated on project-session environment (co-deck visual gate per
+  T-006/T-019 design; co-abap vsp/.env session state) and the projects' own
+  sessions converge themselves; the requested upgrade-project stash-warning fix
+  filed as T-20261011-014.
 error: null

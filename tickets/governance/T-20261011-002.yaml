@@ -11,7 +11,7 @@ title: >-
   failed. Also removes the per-variant double parse. Evidence:
   scripts/validate-templates.ts checkVariantPackageContract, Slot C 2026-10-11
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:28.640+09:00'
 history:
@@ -24,5 +24,13 @@ history:
   - at: '2026-10-11T03:03:02.652+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-11T11:29:52.174+09:00'
+    from: running
+    to: review
+  - at: '2026-10-11T11:29:52.193+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1501 (fleet implementation + orchestrator's L1 registry-row
+  mirror fix 1.55.0): VA-08 checkVariantPackageContract crash guard.
 error: null

@@ -17,7 +17,7 @@ title: >-
   docs/designs/2026-10-10-s8-per-target-wacc-consumption-design.md, ADR-0156
   amendment 2. Class: financial-model correctness + audit-xls pollination
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-11T01:46:04.403+09:00'
 history:
@@ -30,5 +30,13 @@ history:
   - at: '2026-10-11T03:03:02.740+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-11T11:29:52.554+09:00'
+    from: running
+    to: review
+  - at: '2026-10-11T11:29:52.573+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1501: docs/guides/financial-model-per-subject-audit.md
+  (consumer-audit + consumed-scope labeling kernels).
 error: null

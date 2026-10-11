@@ -16,12 +16,26 @@ title: >-
   re-filed verbatim. Evidence: 2026-10-11 run, git diff on the abandoned upgrade
   tree
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-11T09:58:05.479+09:00'
 history:
   - at: '2026-10-11T09:58:05.479+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-11T11:29:52.699+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-11T11:29:52.716+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-11T11:29:52.733+09:00'
+    from: review
+    to: done
+result: >-
+  Template-side resolution landed via PR #1504: the co-abap
+  proxy-seam/deny-rules hardening now ships in the template, so 0.16.x+ releases
+  carry it instead of reverting it (promotion decision = the user's process-all
+  directive). Release + Projects/co-abap re-upgrade ride the standard
+  auto-release/upgrade pipeline; tracked as the release automation's next cycle.
 error: null

@@ -10,7 +10,7 @@ title: >-
   results, render the warn in the summary loop ('7 green, 1 warn'), keep exit 0
   per R10. Evidence: scripts/review-baseline.ts ~130/140, Slot C 2026-10-11
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-11T01:45:28.666+09:00'
 history:
@@ -23,5 +23,13 @@ history:
   - at: '2026-10-11T03:03:02.682+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-11T11:29:52.282+09:00'
+    from: running
+    to: review
+  - at: '2026-10-11T11:29:52.300+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1501: review-baseline battery #8 nightly-FAIL now renders as
+  warn ('7 green, 1 warn') in the summary; exit 0 per R10 preserved.
 error: null
