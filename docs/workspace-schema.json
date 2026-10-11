@@ -48,7 +48,7 @@
     "claude": {
       "high": "claude-opus-5-5",
       "medium": "claude-sonnet-5-5",
-      "low": "claude-haiku-4-5"
+      "low": "claude-haiku-5-5"
     },
     "gemini": {
       "high": "gemini-3.1-pro",

@@ -58,14 +58,14 @@ Agent(
 |------|-------------------|------------------------|-------------|
 | High | `claude-opus-5-5` | `"opus"` | Synthesis agent, complex reasoning, merge conflicts |
 | Medium | `claude-sonnet-5-5` | `"sonnet"` | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
-| Low | `claude-haiku-4-5` | `"haiku"` | Structural validation, simple checks, formatting |
+| Low | `claude-haiku-5-5` | `"haiku"` | Structural validation, simple checks, formatting |
 
 > **docs-writer tier**: Medium (`claude-sonnet-5-5`) — per 2026-05-28 team restructuring.
 
 **Translation rule**: When dispatching, translate the agent's tier to its registry model, then to the matching alias:
 - High → `claude-opus-5-5` → `model = "opus"`
 - Medium → `claude-sonnet-5-5` → `model = "sonnet"`
-- Low → `claude-haiku-4-5` → `model = "haiku"`
+- Low → `claude-haiku-5-5` → `model = "haiku"`
 
 ### 1.3 Parallel Dispatch
 
@@ -492,4 +492,4 @@ Agent(
 |------|-------------|-------------------|-----------------|
 | **High** | `"opus"` | `claude-opus-5-5` | `gemini-3.1-pro` |
 | **Medium** | `"sonnet"` | `claude-sonnet-5-5` | `gemini-3.8-flash` |
-| **Low** | `"haiku"` | `claude-haiku-4-5` | `gemini-3.8-flash` |
+| **Low** | `"haiku"` | `claude-haiku-5-5` | `gemini-3.8-flash` |

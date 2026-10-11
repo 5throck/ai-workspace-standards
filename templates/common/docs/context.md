@@ -34,7 +34,7 @@ The mapping is immutable per generation:
 **Claude Tier Mapping:**
 - **High**: `claude-opus-5-5`
 - **Medium**: `claude-sonnet-5-5`
-- **Low**: `claude-haiku-4-5`
+- **Low**: `claude-haiku-5-5`
 
 Tier layering: the workspace-root PM and template PMs are all Medium (orchestration and coordination; workspace-root aligned to Medium 2026-09-15). Design-adjudication-heavy work dispatches to the architect or the High-tier design specialists. A variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter.
 

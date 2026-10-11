@@ -232,20 +232,20 @@ A **Full Classic Pac-Man** clone running on **Web (HTML5 Canvas)**, built with *
 
 | # | Task | Agent | Tier | Model | Parallel? |
 |---|------|-------|------|-------|:---------:|
-| 1 | Scaffold Vite + TS project | `stack-setup` | Low | claude-haiku-4-5 | ✅ |
+| 1 | Scaffold Vite + TS project | `stack-setup` | Low | claude-haiku-5-5 | ✅ |
 | 2 | Baseline security scan | `security-monitor` | Medium | claude-sonnet-4-6 | ✅ |
-| 3 | Register new agents in AGENTS.md | `game-developer` | Low | claude-haiku-4-5 | — |
+| 3 | Register new agents in AGENTS.md | `game-developer` | Low | claude-haiku-5-5 | — |
 | 4 | Code architecture design | `architect` | High | claude-opus-4-7 | ✅ |
 | 5 | Game mechanics + ghost AI + level design | `game-designer` | High | claude-opus-4-7 | ✅ |
 | 6 | **PM GATE**: Design approval | PM | High | claude-opus-4-7 | — |
 | 7 | UI/UX design (screens, HUD) | `designer` | Medium | claude-sonnet-4-6 | ✅ |
 | 8 | Sprite + asset specifications | `asset-artist` | Medium | claude-sonnet-4-6 | ✅ |
 | 9 | **PM GATE**: Design approval | PM | High | claude-opus-4-7 | — |
-| 10 | Sprint 1: Foundation boilerplate | `game-developer` | Low | claude-haiku-4-5 | — |
-| 11 | Sprint 2: Core engine | `game-developer` | Low | claude-haiku-4-5 | — |
-| 12 | Sprint 3: Entity implementation | `game-developer` | Low | claude-haiku-4-5 | — |
-| 13 | Sprint 4: Gameplay systems | `game-developer` | Low | claude-haiku-4-5 | — |
-| 14 | Sprint 5: UI layer | `game-developer` | Low | claude-haiku-4-5 | — |
+| 10 | Sprint 1: Foundation boilerplate | `game-developer` | Low | claude-haiku-5-5 | — |
+| 11 | Sprint 2: Core engine | `game-developer` | Low | claude-haiku-5-5 | — |
+| 12 | Sprint 3: Entity implementation | `game-developer` | Low | claude-haiku-5-5 | — |
+| 13 | Sprint 4: Gameplay systems | `game-developer` | Low | claude-haiku-5-5 | — |
+| 14 | Sprint 5: UI layer | `game-developer` | Low | claude-haiku-5-5 | — |
 | 15 | QA testing (per sprint) | `test-runner` | Medium | claude-sonnet-4-6 | — |
 | 16 | **PM GATE**: Sprint review | PM | High | claude-opus-4-7 | — |
 | 17 | Lifecycle finalization | PM | Medium | claude-sonnet-4-6 | — |
