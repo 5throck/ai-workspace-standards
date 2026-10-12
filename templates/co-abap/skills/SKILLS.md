@@ -7,7 +7,7 @@ Curated registry for the co-abap skills (T-20260925-005). One row per skill dire
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `abap-code-review` | 1.0.0 | active | code-writer | 2026-08-25 | — | co-abap only — Use when reviewing ABAP source for Clean ABAP conformance before object activation, transport… |
-| `abap-dev` | 1.1.0 | active | code-writer | 2026-08-15 | — | co-abap only — Use when working on SAP ABAP development tasks — provides specialized workflows for BAPI… |
+| `abap-dev` | 1.2.0 | active | code-writer | 2026-10-12 | — | co-abap only — Use when working on SAP ABAP development tasks — provides specialized workflows for BAPI… |
 | `desktop-app-fallback` | 1.0.0 | active | test-runner | 2026-08-15 | — | co-abap only — Manual Post-Write QA chain for Claude Code Desktop App (hooks don't fire) |
 | `dump-monitor` | 1.0.0 | active | devops-admin | 2026-08-15 | — | co-abap only — Use when checking SAP system health, investigating reported errors, or performing a periodic… |
 | `performance-tuning` | 1.0.0 | active | dba | 2026-08-15 | — | co-abap only — Use when investigating slow ABAP programs, expensive SQL statements, or reviewing performance risk… |
