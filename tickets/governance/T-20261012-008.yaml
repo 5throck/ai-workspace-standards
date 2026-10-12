@@ -9,12 +9,28 @@ title: >-
   resolve from import.meta.url, or remove the one-shot matrix dumper, and add
   the Surfaces row if kept. Evidence: Slots A/D 2026-10-11
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:47:45.526+09:00'
 history:
   - at: '2026-10-12T01:47:45.526+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-12T03:02:43.569+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T03:02:43.583+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-12T08:37:12.127+09:00'
+    from: running
+    to: review
+  - at: '2026-10-12T08:37:12.147+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved by commit 807d29ce (workspace sync 68 files, 2026-10-11): the
+  _vr_matrix_helper.mjs helper with hardcoded /Users/techcross absolute paths
+  was deleted (27 lines) — the undocumented template surface no longer exists;
+  no Surfaces row needed for a removed file.
 error: null

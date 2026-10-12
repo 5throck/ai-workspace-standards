@@ -11,12 +11,30 @@ title: >-
   design doc. Evidence: Slot A 2026-10-11,
   templates/co-safety/skills/project-review/SKILL.md
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:47:45.512+09:00'
 history:
   - at: '2026-10-12T01:47:45.512+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-12T03:02:43.540+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T03:02:43.554+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-12T08:37:12.086+09:00'
+    from: running
+    to: review
+  - at: '2026-10-12T08:37:12.107+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved by the 2026-10-11 review pass: commit 0408e9ec/the T-20261011-011
+  correction kept the fork body's upgrade-project bullet and amended the
+  design's fork-keeper note — frontmatter (upgrade-project related_skill), body,
+  and design doc now agree. Verified on
+  templates/co-safety/skills/project-review/SKILL.md (frontmatter line 29 + body
+  Related Skills section).
 error: null

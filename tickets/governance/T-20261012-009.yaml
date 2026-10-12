@@ -11,12 +11,27 @@ title: >-
   hardening section (and a tooling matrix) into the template tree, or repoint to
   content that ships, then re-run --all to clear. Evidence: Slot D 2026-10-11
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:47:45.539+09:00'
 history:
   - at: '2026-10-12T01:47:45.539+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-12T03:02:43.598+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T03:02:43.612+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-12T07:12:09.960+09:00'
+    from: running
+    to: review
+  - at: '2026-10-12T08:42:25.739+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered via PR #1522 (merged, CI 8/8 green) — see
+  docs/designs/2026-10-08-backlog-sweep-design.md and memory/2026-10-12.md for
+  the disposition.
 error: null

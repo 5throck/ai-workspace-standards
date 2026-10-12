@@ -1,0 +1,92 @@
+schemaVersion: 1
+id: U-20261012-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-12T20:10:37.819+09:00'
+history:
+  - at: '2026-10-12T20:10:37.819+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-13T03:10:27.100+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-13T03:27:10.333+09:00'
+    from: review
+    to: done
+  - at: '2026-10-13T08:17:44.290+09:00'
+    from: done
+    to: done
+result: >-
+  Fixed via PR #1527 (merged 2026-10-13): scaffold-delivery of
+  helpers/local-patch-scan.ts restored (@l2-propagate:false dropped, v1.0.1);
+  co-newbiz's typecheck TS2307 clears on its next upgrade-project run against
+  the tagged release.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.17.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Root `bun run typecheck` fails with 4 TS2307 'Cannot find module' errors in
+    scripts/upgrade-project.ts on the scaffolded co-newbiz project: missing
+    modules ./helpers/local-patch-scan.ts, ./helpers/substitute-placeholders.ts,
+    ./lib/env-sample.ts, ./lib/managed-block-merge.ts. The typecheck-baseline
+    cannot be cleared and /sync typecheck gate stays red through no local fault.
+  affected_paths:
+    - scripts/upgrade-project.ts
+    - scripts/helpers/local-patch-scan.ts
+    - scripts/helpers/substitute-placeholders.ts
+    - scripts/lib/env-sample.ts
+    - scripts/lib/managed-block-merge.ts
+  identity_source: cwd
+  repro: >-
+    On a scaffolded L1 project (co-newbiz), run the workspace root typecheck
+    (`bun run typecheck`, scripts/typecheck.ts against
+    scripts/helpers/typecheck-baseline.json). Four TS2307 errors:
+    scripts/upgrade-project.ts:593,594 import ./helpers/local-patch-scan.ts and
+    ./helpers/substitute-placeholders.ts, and :619,624 import
+    ./lib/env-sample.ts and ./lib/managed-block-merge.ts — none of these four
+    modules exist at HEAD of the L1 project nor in the workspace templates. The
+    imports and the baseline group 'scripts/upgrade-project.ts|TS2307: 0 -> 4'
+    are pre-existing at HEAD (verified in a clean git worktree, 2026-10-12) and
+    last changed in commit 14d76a46. Looks like upgrade-project.ts was delivered
+    referencing helper modules that were never propagated to L1.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/upgrade-project.ts=true
+    - >-
+      info:l0_origin scripts/helpers/local-patch-scan.ts <-
+      scripts/helpers/local-patch-scan.ts
+    - info:in_last_delivery scripts/helpers/local-patch-scan.ts=false
+    - >-
+      info:l0_origin scripts/helpers/substitute-placeholders.ts <-
+      scripts/helpers/substitute-placeholders.ts
+    - info:in_last_delivery scripts/helpers/substitute-placeholders.ts=false
+    - info:l0_origin scripts/lib/env-sample.ts <- scripts/lib/env-sample.ts
+    - info:in_last_delivery scripts/lib/env-sample.ts=false
+    - >-
+      info:l0_origin scripts/lib/managed-block-merge.ts <-
+      scripts/lib/managed-block-merge.ts
+    - info:in_last_delivery scripts/lib/managed-block-merge.ts=false
+  dedupe_key: cbd22383b9f1af671f620e5ddad9bc1a2ea76922588fa1a33de1322a5eab01cc
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-12T20:10:37.819+09:00'
+  resolution:
+    outcome: fixed
+    summary: >-
+      Delivered and verified on origin/main: the four L0-only helper imports of
+      the L1-published upgrade-project (helpers/local-patch-scan.ts,
+      helpers/substitute-placeholders.ts, lib/env-sample.ts,
+      lib/managed-block-merge.ts) delivered to
+      templates/common/scripts/{helpers,lib}/, promoted L0+L1 in both
+      registries, mirror span 152 rows. All nine upgrade-project relative
+      imports resolve against templates/common/scripts/. Co-newbiz converges on
+      its next upgrade-project run; its typecheck TS2307 errors clear then.

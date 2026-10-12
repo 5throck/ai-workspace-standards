@@ -15,12 +15,31 @@ title: >-
   OR add an L1 import-resolution check to validate-templates so a delivered
   script never ships undeliverable imports. Evidence: Slot C 2026-10-12
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:47:45.498+09:00'
 history:
   - at: '2026-10-12T01:47:45.498+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-12T03:02:43.511+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T03:02:43.525+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-12T07:12:09.944+09:00'
+    from: running
+    to: review
+  - at: '2026-10-12T08:42:25.720+09:00'
+    from: review
+    to: done
+  - at: '2026-10-13T08:17:44.272+09:00'
+    from: done
+    to: done
+result: >-
+  Delivered via PR #1522 (CI 8/8 green) and completed by PR #1527 (merged
+  2026-10-13): L1 upgrade-project relative imports all resolve on main (four
+  helper files delivered); the local-patch-scan @l2-propagate:false drift that
+  would have re-broken scaffolds is removed in the same landing.
 error: null

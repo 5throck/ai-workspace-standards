@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261013-005
+kind: manual
+title: >-
+  validator-hardening: document/handle GitHub-server-side merge conflicts on
+  reused pr/* branches — local 3-way clean but gh pr update-branch refuses (PR
+  #1526 case); prefer fresh branches from main for superseding deliveries
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-13T08:10:55.370+09:00'
+history:
+  - at: '2026-10-13T08:10:55.370+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
