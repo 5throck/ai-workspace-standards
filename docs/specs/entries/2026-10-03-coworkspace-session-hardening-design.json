@@ -2,8 +2,9 @@
   "id": "2026-10-03-coworkspace-session-hardening-design",
   "title": "coworkspace session hardening design",
   "file": "docs/designs/2026-10-03-coworkspace-session-hardening-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-10-03",
-  "last_updated": "2026-10-03"
+  "last_updated": "2026-10-11",
+  "review_notes": "spec hygiene sweep second window 2026-10-11 (T-20261011-003): adjudicated implemented — Session hardening landed — static-asset auth exemption fix, /login page, session Cookie discipline (voice conversation wave)."
 }

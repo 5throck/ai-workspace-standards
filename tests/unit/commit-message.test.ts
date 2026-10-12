@@ -30,7 +30,7 @@ describe('isWeakCommitMessage', () => {
 
 describe('deriveCommitMessage', () => {
   test('falls back to chore: workspace sync with no classifiable paths', () => {
-    expect(deriveCommitMessage([])).toBe('chore: workspace sync');
+    expect(deriveCommitMessage([])).toBe('chore: workspace sync (0 files)'); // T-20261012-011: count always present
     expect(deriveCommitMessage(['scratch/foo.txt'])).toBe('chore: workspace sync (1 file)');
     expect(deriveCommitMessage(['scratch/a.txt', 'scratch/b.txt'])).toBe('chore: workspace sync (2 files)');
   });
@@ -96,6 +96,17 @@ describe('deriveCommitMessage', () => {
   });
 });
 
+describe('deriveCommitMessage — count always present (T-20261012-011)', () => {
+  test('empty path set carries "(0 files)"', () => {
+    expect(deriveCommitMessage([])).toBe('chore: workspace sync (0 files)');
+  });
+  test('paths that classify to nothing still carry the count', () => {
+    expect(deriveCommitMessage(['random/file.xyz', 'another/one.xyz'])).toBe(
+      'chore: workspace sync (2 files)',
+    );
+  });
+});
+
 describe('composeCommitMessage', () => {
   test('keeps descriptive caller messages verbatim', () => {
     const raw = 'fix(audit): exclude third-party generated skills from version checks';
@@ -105,6 +116,6 @@ describe('composeCommitMessage', () => {
   test('replaces weak shapes with the derived summary', () => {
     expect(composeCommitMessage('chore: update', ['scripts/dev-sync.ts'])).toBe('chore(scripts): workspace sync (1 file)');
     expect(composeCommitMessage('chore: upgrade template to 0.14.0', ['docs/x.md'])).toBe('docs(docs): workspace sync (1 file)');
-    expect(composeCommitMessage('', [])).toBe('chore: workspace sync');
+    expect(composeCommitMessage('', [])).toBe('chore: workspace sync (0 files)'); // T-20261012-011
   });
 });

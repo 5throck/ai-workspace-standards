@@ -2,8 +2,9 @@
   "id": "2026-10-03-coworkspace-cli-refresh-design",
   "title": "coworkspace cli refresh design",
   "file": "docs/designs/2026-10-03-coworkspace-cli-refresh-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-10-03",
-  "last_updated": "2026-10-03"
+  "last_updated": "2026-10-11",
+  "review_notes": "spec hygiene sweep second window 2026-10-11 (T-20261011-003): adjudicated implemented — CLI refresh shipped — pinned claude/codex in the gateway image, cli-version-drift.yml weekly check, rebuild.sh --runtime parity."
 }
