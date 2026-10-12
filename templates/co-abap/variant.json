@@ -421,7 +421,7 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": [],
+    "supported": ["KR", "US", "JP"],
     "default": null
   }
 }

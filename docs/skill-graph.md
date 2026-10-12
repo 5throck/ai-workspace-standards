@@ -11,7 +11,7 @@
 | Skill (scope/name) | Layer | Version | Required-by Agents | Phases | Relates-to | Inputs | Outputs |
 |--------------------|-------|---------|-------------------|--------|------------|--------|---------|
 | `co-abap/abap-code-review` | variant:co-abap | 1.0.0 | co-abap/code-writer, co-abap/test-runner | co-abap/phase 3, co-abap/phase 4 | co-abap/abap-dev (composes_with), co-abap/abap-dev (follows) | — | — |
-| `co-abap/abap-dev` | variant:co-abap | 1.1.0 | co-abap/architect, co-abap/code-writer, co-abap/sap-investigator, co-abap/test-runner | co-abap/phase 1, co-abap/phase 2, co-abap/phase 3, co-abap/phase 4 | co-abap/dump-monitor (composes_with), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-fi (follows), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-pp (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
+| `co-abap/abap-dev` | variant:co-abap | 1.2.0 | co-abap/architect, co-abap/code-writer, co-abap/sap-investigator, co-abap/test-runner | co-abap/phase 1, co-abap/phase 2, co-abap/phase 3, co-abap/phase 4 | co-abap/dump-monitor (composes_with), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-fi (follows), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-pp (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
 | `co-abap/desktop-app-fallback` | variant:co-abap | 1.0.0 | co-abap/code-writer, co-abap/test-runner | co-abap/phase 3, co-abap/phase 4 | — | — | — |
 | `co-abap/dump-monitor` | variant:co-abap | 1.0.0 | co-abap/devops-admin, co-abap/pm | co-abap/phase 1, co-abap/phase 6 | co-abap/abap-dev (follows), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
 | `co-abap/performance-tuning` | variant:co-abap | 1.0.0 | co-abap/architect, co-abap/dba, co-abap/sap-investigator | co-abap/phase 1, co-abap/phase 2, co-abap/phase 4 | — | — | — |
@@ -425,6 +425,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/agents/pp-analyst.md` | doc | `co-abap/sap-pp` | — | — |
 | `doc:co-abap/agents/sd-analyst.md` | doc | `co-abap/sap-sd` | — | — |
 | `doc:co-abap/docs/co-abap.context.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/sync`, `root/meeting-facilitation`, `root/project-review` | — | — |
+| `doc:co-abap/docs/sap-globalization-checklist.md` | doc | `common/i18n-formatting`, `common/i18n-locale-config` | — | — |
 | `doc:co-abap/docs/transport-release-checklist.md` | doc | `co-abap/abap-dev` | — | — |
 | `doc:co-abap/docs/user-guide_ko.md` | doc | `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-le`, `co-abap/sap-sd` | — | — |
 | `doc:co-abap/docs/user-guide.md` | doc | `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-le`, `co-abap/sap-sd` | — | — |
@@ -576,26 +577,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | Term | Layer | Referencing skills |
 |------|-------|--------------------|
 | `100대 통계지표` | common | `common/k-ecos` |
-| `balPayments` | common | `common/k-opendata` |
-| `ELW 일별매매정보` | common | `common/k-krx` |
-| `ESG` | common | `common/k-krx` |
-| `ESG 증권상품` | common | `common/k-krx` |
-| `ESG 지수` | common | `common/k-krx` |
-| `ETF 일별매매정보` | common | `common/k-krx` |
-| `ETN 일별매매정보` | common | `common/k-krx` |
-| `expDlr` | common | `common/k-opendata` |
-| `expWgt` | common | `common/k-opendata` |
-| `hsCd` | common | `common/k-opendata` |
-| `hsCode` | common | `common/k-opendata` |
-| `impDlr` | common | `common/k-opendata` |
-| `impWgt` | common | `common/k-opendata` |
-| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
-| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
-| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
-| `statCd` | common | `common/k-opendata` |
-| `statKor` | common | `common/k-opendata` |
 | `가구당월평균소득` | common | `common/k-ecos` |
 | `감사` | variant:co-consult | `co-consult/company-intelligence` |
 | `감사보고서` | variant:co-consult | `co-consult/company-intelligence` |
@@ -624,11 +605,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반년` | common | `common/k-ecos` |
 | `반월` | common | `common/k-ecos` |
 | `배출권 시장 일별매매정보` | common | `common/k-krx` |
-| `법령ID` | common | `common/k-law` |
 | `법령명한글` | common | `common/k-law` |
 | `법령용어` | common | `common/k-law` |
 | `법령일련번호` | common | `common/k-law` |
 | `법령해석례` | common | `common/k-law` |
+| `법령ID` | common | `common/k-law` |
 | `법원명` | common | `common/k-law` |
 | `별표` | common | `common/k-law` |
 | `별표서식` | common | `common/k-law` |
@@ -747,6 +728,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `현행법령` | common | `common/k-law` |
 | `활용신청` | common | `common/k-opendata` |
 | `회장` | variant:co-consult | `co-consult/company-intelligence` |
+| `balPayments` | common | `common/k-opendata` |
+| `ELW 일별매매정보` | common | `common/k-krx` |
+| `ESG` | common | `common/k-krx` |
+| `ESG 증권상품` | common | `common/k-krx` |
+| `ESG 지수` | common | `common/k-krx` |
+| `ETF 일별매매정보` | common | `common/k-krx` |
+| `ETN 일별매매정보` | common | `common/k-krx` |
+| `expDlr` | common | `common/k-opendata` |
+| `expWgt` | common | `common/k-opendata` |
+| `hsCd` | common | `common/k-opendata` |
+| `hsCode` | common | `common/k-opendata` |
+| `impDlr` | common | `common/k-opendata` |
+| `impWgt` | common | `common/k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
+| `statCd` | common | `common/k-opendata` |
+| `statKor` | common | `common/k-opendata` |
 
 ## Same-Name Divergence (E2)
 
@@ -756,7 +757,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------------|------|------|-----------------------------|
 | `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #d2a74737 |
 | `change-management-partner` | agent | version-drift | co-consult@1.0.0 #6df523f4; co-hr@1.0.0 #b048d889 |
-| `code-writer` | agent | version-drift | co-abap@1.0.0 #13e46c9a; co-develop@1.0.0 #d6f5ba14 |
+| `code-writer` | agent | divergence | co-abap@1.0.1 #9c30ecd9; co-develop@1.0.0 #d6f5ba14 |
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |

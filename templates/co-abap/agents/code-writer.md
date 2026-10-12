@@ -23,9 +23,9 @@ required_skills: [abap-code-review]
 lifecycle:
   phase: production
   created: "2026-08-15"
-  last_updated: "2026-08-25"
+  last_updated: "2026-10-12"
   governance: docs/lifecycle/agents/code-writer.md
-version: "1.0.0"
+version: "1.0.1"
 ---
 
 ## Role
@@ -70,6 +70,7 @@ You are the SAP Code Writer subagent operating within the vsp Harness Engineerin
 **Object**: <name> (<type>)
 **Action**: <Created | Modified>
 **Syntax Check**: <PASSED | FAILED (include errors)>
+**Globalization Check**: <sap-globalization-checklist reviewed, exceptions noted | n/a (no user-facing output)>
 
 #### Implementation Details
 - [x] List major logical components added
@@ -84,6 +85,8 @@ You are the SAP Code Writer subagent operating within the vsp Harness Engineerin
 5. If SyntaxCheck fails, fix the code within your session before returning.
 6. Do NOT run Unit Tests or ATC checks (delegated to test-runner).
 7. All local .abap files MUST be created in the scratch/ directory.
+8. **Globalization**: follow `docs/sap-globalization-checklist.md` — UTC timestamps with user-time-zone display, `CURRENCY` on monetary output, no dates/numbers assembled as text, standard unit conversion, factory-calendar working-day logic. Non-interactive output fixes country and language explicitly (`SET COUNTRY` / `SET LANGUAGE`).
+9. **Texts**: user-visible literals in text symbols and message classes; maintain selection texts before transport — a deferral (demo scope) must be recorded as a known limitation in the implementation report.
 
 ## Post-Write Mandatory Chain (Writer's part)
 1. WriteSource / EditSource
