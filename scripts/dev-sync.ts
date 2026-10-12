@@ -1,4 +1,12 @@
-// @version 1.26.0
+// @version 1.27.0
+// v1.27.0 (2026-10-12, T-20261012-011): (1) a branch whose PR is CLOSED
+//          unmerged refuses the sync before staging/commit — committing a new
+//          sync onto a dead branch under-represents the review surface
+//          (PR #1509's 45-file branch re-landed via the 1-file PR #1510).
+//          (2) the PR title re-derives from the full main...HEAD diff when
+//          the caller message is weak, so the title represents the whole
+//          surface; commit-message 1.1.0 keeps the file count in every
+//          fallback subject.
 // v1.26.0 (2026-10-11, U-20261008-001, spec
 //          docs/designs/2026-10-11-backlog-batch-2-design.md): step 1 descriptive
 //          commit messages — weak caller messages (no message, bare "chore: update",
@@ -187,7 +195,7 @@ import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
-import { composeCommitMessage } from './helpers/commit-message.ts';
+import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -1189,6 +1197,18 @@ if (currentBranch === "main" || currentBranch === "master") {
         }
     }
 } else {
+    // T-20261012-011: a branch whose PR was CLOSED unmerged is dead —
+    // committing a new sync onto it under-represents the review surface
+    // (PR #1509 closed with 45 files; the content re-landed via a 1-file PR
+    // #1510). Refuse before staging/commit.
+    const closedPrRes = await $`gh pr view ${branch} --json state --jq .state`.quiet().nothrow();
+    if (closedPrRes.exitCode === 0 && closedPrRes.stdout.toString().trim() === 'CLOSED') {
+        console.error(`${RED}❌ Branch '${branch}' has a CLOSED (unmerged) PR — refusing to commit a new sync onto a dead branch.${RESET}`);
+        console.error(`${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
     console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
 }
 
@@ -1560,10 +1580,31 @@ if (existingPrUrl) {
         }
     }
 
+    // T-20261012-011: the PR title represents the FULL branch-vs-main
+    // surface — when the branch carries prior commits, the staged set
+    // under-represents it (PR #1509's 45-file branch re-landed via a
+    // 1-file PR #1510). If the caller message is weak, re-derive it from
+    // the full main...HEAD diff before creating the PR.
+    let prTitle = msg;
+    try {
+        const fullDiffRes = await $`git diff --name-only origin/main...HEAD -z`.quiet().nothrow();
+        if (fullDiffRes.exitCode === 0 && isWeakCommitMessage(prTitle)) {
+            const diffPaths = fullDiffRes.stdout.toString().split('\0').filter(Boolean);
+            if (diffPaths.length > 0) {
+                prTitle = deriveCommitMessage(diffPaths);
+                if (prTitle !== msg) {
+                    console.log(`${CYAN}ℹ️  PR title derived from the full branch-vs-main diff: ${prTitle}${RESET}`);
+                }
+            }
+        }
+    } catch (err) {
+        console.log(`${YELLOW}⚠️  full-diff title derivation skipped (${String(err).split('\n')[0]})${RESET}`);
+    }
+
     let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
     if (bodySourceFile) {
         prCreateRetry = await withRetry(
-            () => $`gh pr create --title ${msg} --body-file ${bodySourceFile}`.nothrow(),
+            () => $`gh pr create --title ${prTitle} --body-file ${bodySourceFile}`.nothrow(),
             { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
             'gh pr create'
         );

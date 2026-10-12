@@ -2,8 +2,9 @@
   "id": "2026-10-03-coworkspace-cli-provider-key-design",
   "title": "coworkspace cli provider key design",
   "file": "docs/designs/2026-10-03-coworkspace-cli-provider-key-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-10-03",
-  "last_updated": "2026-10-03"
+  "last_updated": "2026-10-11",
+  "review_notes": "spec hygiene sweep second window 2026-10-11 (T-20261011-003): adjudicated implemented — Provider-key mode landed for claude/codex runtimes + deployment parity (CHANGELOG 2026-10-03; runtimeProviderKeyEnv + docker bake)."
 }

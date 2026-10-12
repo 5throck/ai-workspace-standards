@@ -2,9 +2,10 @@
   "id": "2026-10-01-l3-pm-stub-decision-design",
   "title": "l3 pm stub decision design",
   "file": "docs/designs/2026-10-01-l3-pm-stub-decision-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "architect",
   "created": "2026-10-01",
-  "last_updated": "2026-10-01",
-  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+  "last_updated": "2026-10-11",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required.",
+  "review_notes": "spec hygiene sweep second window 2026-10-11 (T-20261011-003): adjudicated implemented — L3 pm extends-stub decision shipped — resolve-pm-stub helper + settling pass in adopt-project; agents/pm.md delivered as resolved stubs fleet-wide."
 }

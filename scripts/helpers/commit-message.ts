@@ -1,4 +1,7 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-12, T-20261012-011): the count is always present — even the
+//           zero-classifiable / empty-set fallback carries "(N files)" so a PR
+//           title never under-represents the surface it stands for.
 // v1.0.0 (2026-10-11, U-20261008-001, spec
 //           docs/designs/2026-10-11-backlog-batch-2-design.md): descriptive commit-message
 //           composition for dev-sync step 1 — weak caller messages (no message, bare
@@ -91,7 +94,9 @@ export function deriveCommitMessage(paths: string[]): string {
   }
 
   if (primary === null) {
-    return `chore: workspace sync${total > 0 ? ` (${total} ${plural(total)})` : ''}`;
+    // T-20261012-011: the count is always present — a bare subject without it
+    // under-represents the surface (the PR #1509/#1510 class).
+    return `chore: workspace sync (${total} ${plural(total)})`;
   }
 
   const fileNote = `${total} ${plural(total)}`;
