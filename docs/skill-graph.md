@@ -11,7 +11,7 @@
 | Skill (scope/name) | Layer | Version | Required-by Agents | Phases | Relates-to | Inputs | Outputs |
 |--------------------|-------|---------|-------------------|--------|------------|--------|---------|
 | `co-abap/abap-code-review` | variant:co-abap | 1.0.0 | co-abap/code-writer, co-abap/test-runner | co-abap/phase 3, co-abap/phase 4 | co-abap/abap-dev (composes_with), co-abap/abap-dev (follows) | — | — |
-| `co-abap/abap-dev` | variant:co-abap | 1.1.0 | co-abap/architect, co-abap/code-writer, co-abap/sap-investigator, co-abap/test-runner | co-abap/phase 1, co-abap/phase 2, co-abap/phase 3, co-abap/phase 4 | co-abap/dump-monitor (composes_with), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-fi (follows), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-pp (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
+| `co-abap/abap-dev` | variant:co-abap | 1.2.0 | co-abap/architect, co-abap/code-writer, co-abap/sap-investigator, co-abap/test-runner | co-abap/phase 1, co-abap/phase 2, co-abap/phase 3, co-abap/phase 4 | co-abap/dump-monitor (composes_with), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-fi (follows), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-pp (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
 | `co-abap/desktop-app-fallback` | variant:co-abap | 1.0.0 | co-abap/code-writer, co-abap/test-runner | co-abap/phase 3, co-abap/phase 4 | — | — | — |
 | `co-abap/dump-monitor` | variant:co-abap | 1.0.0 | co-abap/devops-admin, co-abap/pm | co-abap/phase 1, co-abap/phase 6 | co-abap/abap-dev (follows), co-abap/sap-co (composes_with), co-abap/sap-fi (composes_with), co-abap/sap-le (composes_with), co-abap/sap-mm (composes_with), co-abap/sap-sd (composes_with), root/research-analysis (composes_with) | — | — |
 | `co-abap/performance-tuning` | variant:co-abap | 1.0.0 | co-abap/architect, co-abap/dba, co-abap/sap-investigator | co-abap/phase 1, co-abap/phase 2, co-abap/phase 4 | — | — | — |
@@ -425,6 +425,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/agents/pp-analyst.md` | doc | `co-abap/sap-pp` | — | — |
 | `doc:co-abap/agents/sd-analyst.md` | doc | `co-abap/sap-sd` | — | — |
 | `doc:co-abap/docs/co-abap.context.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/sync`, `root/meeting-facilitation`, `root/project-review` | — | — |
+| `doc:co-abap/docs/sap-globalization-checklist.md` | doc | `common/i18n-formatting`, `common/i18n-locale-config` | — | — |
 | `doc:co-abap/docs/transport-release-checklist.md` | doc | `co-abap/abap-dev` | — | — |
 | `doc:co-abap/docs/user-guide_ko.md` | doc | `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-le`, `co-abap/sap-sd` | — | — |
 | `doc:co-abap/docs/user-guide.md` | doc | `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-le`, `co-abap/sap-sd` | — | — |
@@ -756,7 +757,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------------|------|------|-----------------------------|
 | `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #d2a74737 |
 | `change-management-partner` | agent | version-drift | co-consult@1.0.0 #6df523f4; co-hr@1.0.0 #b048d889 |
-| `code-writer` | agent | version-drift | co-abap@1.0.0 #13e46c9a; co-develop@1.0.0 #d6f5ba14 |
+| `code-writer` | agent | divergence | co-abap@1.0.1 #9c30ecd9; co-develop@1.0.0 #d6f5ba14 |
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |

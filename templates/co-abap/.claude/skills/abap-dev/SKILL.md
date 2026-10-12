@@ -1,8 +1,8 @@
 ---
 name: abap-dev
 description: Use when working on SAP ABAP development tasks — provides specialized workflows for BAPI exploration, transport management, unit testing, performance analysis, impact architecture analysis, and documentation audits. Trigger on any SAP/ABAP coding, debugging, or system analysis task.
-version: 1.1.0
-last_reviewed: 2026-08-15
+version: 1.2.0
+last_reviewed: 2026-10-12
 status: active
 scope: co-abap
 owner: code-writer
@@ -219,6 +219,23 @@ ENDCLASS.
 
 ---
 
+## sap:globalization
+
+**Purpose**: Keep user-facing behavior correct across time zones, countries, and languages — code that works in a single-zone test system and breaks in a global landscape.
+
+**Trigger**: Whenever implemented code has user-facing output (reports, messages, interfaces, forms) or computes dates, amounts, quantities, or deadlines.
+
+**Rules** (full pass/fail checklist: [docs/sap-globalization-checklist.md](../../docs/sap-globalization-checklist.md)):
+
+- **Time**: store instants as UTC timestamps (`GET TIME STAMP FIELD`); display with `CONVERT TIME STAMP ... TIME ZONE sy-zonlo` (user master zone). `SY-DATUM`/`SY-UZEIT` are application-server time — never the basis for user-facing dates. No hardcoded UTC offsets or zone abbreviations (DST zones shift twice a year).
+- **Money & numbers**: monetary output always `WRITE ... CURRENCY <waers>` (TCURX decimals — KRW/JPY 0, USD 2). Never assemble dates/numbers as concatenated text. In batch, print, and file-interface contexts, fix the output country and language explicitly (`SET COUNTRY` / `SET LANGUAGE`) instead of inheriting the job user's profile.
+- **Units**: T006 internal codes with T006A display texts; convert via standard function units — never hardcoded factors; quantity and unit inseparable.
+- **Calendars**: working-day/deadline logic uses factory + holiday calendars parameterized by country, not weekday arithmetic.
+- **Texts**: user-visible literals in text symbols and message classes; maintain translations — or record the deferral as a known limitation in the implementation and release reports.
+- **Output**: choose spool device type / form page size (A4 vs US Letter) by where the document is printed, not by its language; global forms need country variants. Per-market expectations: `docs/countries/<CODE>.md`.
+
+---
+
 ## sap:documentation-audit
 
 **Purpose**: Ensure all project documentation is cross-platform compatible, links are valid, and absolute paths are avoided.
@@ -258,7 +275,8 @@ This skill provides the core ABAP development workflow patterns for AI agents op
 3. **Unit Test Architecture** — Use `sap:unit-architect` to design and implement ABAP Unit test classes mapped to acceptance criteria.
 4. **Performance Analysis** — Use `sap:performance-analyzer` to identify and resolve SQL and code performance bottlenecks.
 5. **Impact Assessment** — Use `sap:impact-architecture` to analyze the full call-graph and CDS dependency impact of a proposed change.
-6. **Documentation Audit** — Use `sap:documentation-audit` to verify documentation quality before finalization.
+6. **Globalization Check** — Apply `sap:globalization` rules (time zones, currency/number formatting, units, calendars, texts) whenever the code has user-facing output; record the outcome in the Code Writer Report.
+7. **Documentation Audit** — Use `sap:documentation-audit` to verify documentation quality before finalization.
 
 ## Output Format
 

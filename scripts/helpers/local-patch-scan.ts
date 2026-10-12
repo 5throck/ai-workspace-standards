@@ -1,10 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // v1.0.0 (2026-10-02, T-20261002-015): scan a project tree for upstream
 //           LOCAL-PATCH markers — `LOCAL-PATCH(upstream-request: <id>)` (id may be
 //           `pending`) — so an upgrade can report which local patches it is about to
 //           overwrite instead of silently removing them (upstream design Phase 3).
-// @l2-propagate: false
+// v1.0.1 (2026-10-13, U-20261012-001): drop @l2-propagate:false — upgrade-project
+//           imports this helper, so scaffolds must deliver it; the header made the
+//           delivery derivation skip it while the scaffold copied it (Test 26 drift)
+//           and projects failed typecheck TS2307.
 // Pure and import-safe: no side effects, explicit root argument.
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';

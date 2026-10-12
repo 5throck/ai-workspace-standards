@@ -450,8 +450,8 @@
       "name": "code-writer",
       "scope": "co-abap",
       "capability": "code-writer",
-      "content_hash": "13e46c9af60e9493",
-      "version": "1.0.0",
+      "content_hash": "9c30ecd9ea5247a6",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-abap/agents/code-writer.md"
       ]
@@ -2348,6 +2348,11 @@
     },
     {
       "id": "doc:co-abap/docs/co-abap.context.md",
+      "type": "doc",
+      "layer": "variant:co-abap"
+    },
+    {
+      "id": "doc:co-abap/docs/sap-globalization-checklist.md",
       "type": "doc",
       "layer": "variant:co-abap"
     },
@@ -4778,8 +4783,8 @@
       "name": "abap-dev",
       "scope": "co-abap",
       "capability": "abap-dev",
-      "content_hash": "073ecc94617cbe0d",
-      "version": "1.1.0",
+      "content_hash": "76744b642b3c7604",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-abap/skills/abap-dev/SKILL.md"
       ]
@@ -10639,6 +10644,18 @@
       "type": "cites_skill",
       "from": "doc:co-abap/docs/co-abap.context.md",
       "to": "skill:root/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/sap-globalization-checklist.md",
+      "to": "skill:common/i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-abap/docs/sap-globalization-checklist.md",
+      "to": "skill:common/i18n-locale-config",
       "source": "workflow-doc"
     },
     {
