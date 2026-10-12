@@ -13,12 +13,34 @@ title: >-
   T-20261009-002 registration-completeness class recurrence via the promotion
   wave
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:33:28.956+09:00'
 history:
   - at: '2026-10-12T01:33:28.956+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-12T03:02:43.476+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T03:02:43.497+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-12T07:12:09.928+09:00'
+    from: running
+    to: review
+  - at: '2026-10-12T08:42:25.701+09:00'
+    from: review
+    to: done
+  - at: '2026-10-13T08:17:44.253+09:00'
+    from: done
+    to: done
+result: >-
+  Delivered via PR #1522 (CI 8/8 green) and completed by PR #1527 (merged
+  2026-10-13): the four upgrade-project import dependencies
+  (helpers/local-patch-scan.ts, helpers/substitute-placeholders.ts,
+  lib/env-sample.ts, lib/managed-block-merge.ts) are on main in
+  templates/common/scripts with registry rows; local-patch-scan 1.0.1 dropped
+  @l2-propagate:false so scaffolds deliver it (Test 26 parity restored, E2E
+  41/41).
 error: null
