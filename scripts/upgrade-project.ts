@@ -1,6 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.70.1
-// v1.70.1 (2026-10-12, T-20261012-001): the VARIANT SCRIPTS SYNC pass appends
+// @version 1.70.2
+// v1.70.2 (2026-10-13, T-20261013-006): VARIANT SCRIPTS SYNC registry rows carry
+//          the <variant>/-prefixed key (scan starts at rel=variant) — bare
+//          basenames duplicated the existing nested rows as ghost entries
+//          (co-safety 0.18.0 canary: 15 ghosts failed the project's first
+//          verify-scripts). v1.70.1 (2026-10-12, T-20261012-001): the VARIANT SCRIPTS SYNC pass appends
 //          registry rows for delivered variant scripts missing from the
 //          project scripts/SCRIPTS.md — co-abap's sap-mcp-proxy.ts delivered
 //          without a row failed the project's first verify-scripts (nightly
@@ -2097,7 +2101,7 @@ if (existsSync(variantScriptsSrc)) {
         missingRows.push(`| \`${childRel}\` | L2-only | ${version} | active | Variant-delivered script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`);
       }
     };
-    scanVariantScripts(variantScriptsDst, '');
+    scanVariantScripts(variantScriptsDst, variant);
     if (missingRows.length > 0) {
       const lines = reg.split('\n');
       const regStart = lines.findIndex((l) => /^## Registry/.test(l));

@@ -4,7 +4,7 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.70.1
+- **Version**: 1.70.2
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-12
 
@@ -18,11 +18,12 @@ post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-13 | production | production | v1.70.2 (T-20261013-006): VARIANT SCRIPTS SYNC rows carry the <variant>/-prefixed key — bare basenames duplicated nested rows as 15 ghost entries (co-safety 0.18.0 canary). | governance-runner |
 | 2026-10-12 | production | production | v1.70.1 (T-20261012-001): VARIANT SCRIPTS SYNC appends registry rows for delivered variant scripts missing from the project scripts/SCRIPTS.md (co-abap sap-mcp-proxy class). | governance-runner |
 
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.70.1
+- **Version**: 1.70.2
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-12
