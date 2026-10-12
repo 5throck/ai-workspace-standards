@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-13](2026-10-13.md) | fix(templates): deliver upgrade-project helper imports to L1 (U-20261012-001 co-newbiz scaffold typecheck) |
 | [2026-10-12](2026-10-12.md) | docs(docs): workspace sync (6 files) |
 | [2026-10-10](2026-10-10.md) | feat(platform): comma-separated --platform and 8-tool coverage docs |
 | [2026-10-11](2026-10-11.md) | docs(review): daily fleet review 2026-10-11 |
@@ -13,7 +14,7 @@
 | [2026-10-08](2026-10-08.md) | docs(review): daily fleet review 2026-10-08 |
 | [2026-10-07](2026-10-07.md) | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
 | [2026-10-06](2026-10-06.md) | chore: update |
-| [2026-10-05](2026-10-05.md) | chore: update |
+| 2026-10-05 | chore: update |
 | 2026-10-04 | chore: update |
 | 2026-10-03 | fix(installer): detect Hermes home on Windows |
 | 2026-10-03 | fix(templates): pin bun-version to 1.4.x in common CI template (U-20261002-002) |
