@@ -2,9 +2,10 @@
   "id": "2026-09-30-validator-gap-port-design",
   "title": "validator gap port design",
   "file": "docs/designs/2026-09-30-validator-gap-port-design.md",
-  "status": "approved",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-09-30",
-  "last_updated": "2026-09-30",
-  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required."
+  "last_updated": "2026-10-11",
+  "review_note": "hygiene sweep 2026-10-01 (T-20261001-011): reviewed — status approved is within the 14-day adjudication window; no action required.",
+  "review_notes": "spec hygiene sweep second window 2026-10-11 (T-20261011-003): adjudicated implemented — Validator-gap port landed — the battery surface (review-baseline battery #7-8, VA-06..08 family) carries the ported checks; daily battery green."
 }
