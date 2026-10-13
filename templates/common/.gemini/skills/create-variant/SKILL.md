@@ -185,6 +185,17 @@ Edit `Projects/<variant-name>/PROMOTION_CHECKLIST.md` to replace placeholder con
 - Add domain-specific agent/skill checklists
 - Keep the bilingual user-guide condition: Phase B promotion requires `docs/user-guide.md` + `docs/user-guide_ko.md` (validate-templates WS-11) — author them in Phase A so promotion isn't blocked
 
+**Domain-checklist wiring requirement (T-20261013-004)**: a domain checklist is not
+documentation until it is wired — ship every variant checklist with all three hooks,
+mirroring `templates/co-abap/docs/sap-globalization-checklist.md` (first instance) and
+`templates/co-export/docs/export-engagement-checklist.md` (second):
+1. **Agent report-format line** — the producing agent's Output Format carries a
+   `<checklist> Check: <reviewed, gates pass | reviewed with exceptions: #N | n/a>` line;
+2. **Numbered mandatory rule** — a Constraints rule names the checklist file and states
+   that a failed or unnamed gate blocks finalization;
+3. **QA gate row** — the verifying skill/workflow re-runs one gate per deliverable.
+A checklist added without these hooks is a promotion-review finding.
+
 ### Step 9: Configure git hooks
 
 ```bash

@@ -6,12 +6,19 @@ title: >-
   new-project.ts §6.6 + upgrade-project.ts variant-sync) into scripts/helpers/ —
   evidence PR #1522/9b6dcf36
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T08:01:23.092+09:00'
 history:
   - at: '2026-10-13T08:01:23.092+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T21:07:12.157+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed via PR #1537: registry-append mechanics extracted to
+  helpers/registry-append.ts (L0+L1, mirror span 154, 3 unit tests); new-project
+  1.36.2 + upgrade-project 1.70.4 both call sites now share it — row formats
+  stay per-call-site.
 error: null
