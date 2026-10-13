@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261013-008
+kind: manual
+title: >-
+  learning: promote review-baseline L3-detection test coverage to root —
+  Projects/co-abap authored scripts/tests/review-baseline.test.ts
+  (isDetachedL3Project, l3BaselineChecks) but the upgrade's registry-aware prune
+  removed the L0-only script leaving the test orphaned; root has no equivalent
+  coverage
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-13T09:50:22.975+09:00'
+history:
+  - at: '2026-10-13T09:50:22.975+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
