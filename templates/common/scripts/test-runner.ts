@@ -1,6 +1,20 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.4.0
+ * @version 1.5.0
+ *
+ * v1.5.0 (2026-10-14, Windows CI timing budgets — CI run 38412124373):
+ * (1) Bun per-test ceiling — the runner now passes `--timeout` to `bun test`
+ * (default 15000ms; bun's implicit default is 5000ms). bun 1.4 ignores a
+ * bunfig `[test] timeout` key (verified 1.4.3), so the CLI flag is the only
+ * working knob. Spawn-heavy tests overran 5s on windows-latest with every
+ * assertion passing (script-registry-audit "validate-templates missing
+ * templates/common" 5.27s; mcp-upstream-server E13d 5.68s). (2) Per-file
+ * budget overrides for files whose win32 wall time legitimately exceeds the
+ * suite defaults — every individual test passing while the file is killed at
+ * the 120s suite wall (mcp-upstream-server, upgrade-tree-sync; observed max
+ * ~30s per test, >120s per file). An explicit `--timeout` CLI flag still wins
+ * over both knobs. Same documented win32 flake family as the
+ * hook-post-write-lifecycle 30s→120s raise (2026-10-12) and T-20261004-011.
  *
  * v1.3.0 (T-20260916-001): (1) per-suite `sequential` flag — the `scripts`
  * suite now runs its members one at a time because its E2E files stage
@@ -15,7 +29,7 @@
  * fails the suite.
  */
 import { readdirSync, existsSync, rmSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { join, basename } from 'path';
 import { availableParallelism, cpus } from 'os';
 import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
 
@@ -56,6 +70,22 @@ const suites: TestSuite[] = [
   { name: 'scripts', pattern: 'test-*.ts', timeout: 120000, dir: 'scripts', ext: '.ts', sequential: true }
 ];
 
+/** Bun per-test ceiling passed as `bun test --timeout` (ms). bun's implicit
+ * default is 5000ms, which spawn-heavy tests overrun on slow runners with
+ * every assertion passing; 15000ms keeps real hangs loud (≥3x the observed
+ * worst case outside the override list). */
+const DEFAULT_TEST_TIMEOUT_MS = 15000;
+
+/** Per-file budget overrides, basename-keyed (OS-independent): `suite` is the
+ * runner kill budget, `test` is the bun per-test ceiling. Only files whose
+ * win32 wall time legitimately exceeds the suite defaults are listed — every
+ * individual test passing while the file hits the suite wall (CI run
+ * 38412124373). Headroom ≈2.5x suite / ≥2x test over the observed win32 max. */
+const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
+  'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
+  'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
+};
+
 function getTestFiles(suite: TestSuite): string[] {
   const files: string[] = [];
   try {
@@ -80,6 +110,7 @@ function getTestFiles(suite: TestSuite): string[] {
 async function executeTestFile(
   file: string,
   timeoutMs: number,
+  bunTestTimeoutMs: number | null,
   workerId: number,
   execMode: 'bun-test' | 'bun-script' = 'bun-test'
 ): Promise<TestFileResult> {
@@ -104,7 +135,9 @@ async function executeTestFile(
     // non-zero on failure) — running them under `bun test` fails with
     // "filters did not match any test files" because their names lack a bun
     // test naming pattern. Everything else is a bun test file.
-    const argv = execMode === 'bun-script' ? [process.execPath, file] : [process.execPath, 'test', file];
+    const argv = execMode === 'bun-script'
+      ? [process.execPath, file]
+      : [process.execPath, 'test', '--timeout', String(bunTestTimeoutMs), file];
     proc = Bun.spawn(argv, {
       env,
       stdout: 'pipe',
@@ -308,7 +341,15 @@ export async function runTests(
   const concurrency = isParallel
     ? Math.max(1, options.concurrency || Math.min(files.length, defaultConcurrency))
     : 1;
-  const timeoutMs = options.timeout || suite.timeout;
+  // Explicit `--timeout` CLI wins over the per-file overrides (manual runs
+  // know what they asked for); otherwise overridden files get their budgets
+  // and everything else the suite default + DEFAULT_TEST_TIMEOUT_MS.
+  const cliTimeoutMs = options.timeout;
+  const resolveBudgets = (file: string): { suite: number; test: number } => {
+    if (cliTimeoutMs) return { suite: cliTimeoutMs, test: cliTimeoutMs };
+    const override = FILE_TIME_BUDGETS[basename(file)];
+    return { suite: override?.suite ?? suite.timeout, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
+  };
 
   const modeStr = isParallel ? `parallel (concurrency: ${concurrency})` : 'sequential';
   console.log(`Running ${suiteName} suite (${files.length} test file${files.length === 1 ? '' : 's'}, ${modeStr})...`);
@@ -321,14 +362,16 @@ export async function runTests(
     const execMode = suiteName === 'scripts' ? 'bun-script' as const : 'bun-test' as const;
     if (isParallel && concurrency > 1) {
       try {
-        results = await runInParallel(files, concurrency, (file, _, workerId) =>
-          executeTestFile(file, timeoutMs, workerId, execMode)
-        );
+        results = await runInParallel(files, concurrency, (file, _, workerId) => {
+          const budgets = resolveBudgets(file);
+          return executeTestFile(file, budgets.suite, execMode === 'bun-test' ? budgets.test : null, workerId, execMode);
+        });
       } catch (err: any) {
         console.warn(`[test-runner] Warning: Parallel execution failed (${err.message}). Falling back to sequential execution...`);
         results = [];
         for (let i = 0; i < files.length; i++) {
-          const res = await executeTestFile(files[i], timeoutMs, 1, execMode);
+          const budgets = resolveBudgets(files[i]);
+          const res = await executeTestFile(files[i], budgets.suite, execMode === 'bun-test' ? budgets.test : null, 1, execMode);
           results.push(res);
         }
       }
@@ -336,7 +379,8 @@ export async function runTests(
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         console.log(`  Running: ${file}`);
-        const res = await executeTestFile(file, timeoutMs, 1, execMode);
+        const budgets = resolveBudgets(file);
+        const res = await executeTestFile(file, budgets.suite, execMode === 'bun-test' ? budgets.test : null, 1, execMode);
         results.push(res);
       }
     }
@@ -369,7 +413,7 @@ export async function runTests(
         console.error(`\n================================================================================`);
         console.error(`FAIL: ${res.file}`);
         console.error(`--------------------------------------------------------------------------------`);
-        console.error(`Status: ${res.timedOut ? `TIMEOUT (${timeoutMs}ms)` : `FAILED (exit code ${res.exitCode})`}`);
+        console.error(`Status: ${res.timedOut ? `TIMEOUT (${resolveBudgets(res.file).suite}ms)` : `FAILED (exit code ${res.exitCode})`}`);
         if (res.error) console.error(`Error: ${res.error}`);
         if (res.stdout.trim()) {
           console.error(`--- STDOUT ---`);

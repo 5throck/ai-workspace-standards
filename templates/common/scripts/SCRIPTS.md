@@ -159,7 +159,7 @@ bun run <alias>                     # via package.json alias (preferred for CI)
 | `sync-skill-status.ts` | L0 | 1.1.0 | active | v1.1.0 scan scope adopts PLATFORM_SKILL_BASES + SSOT-precedence guard (skills/ status wins; mirrors speak only for platform-only skills) (spec docs/designs/2026-09-25-verifier-platform-expansion-design.md site 5, D5) | — | L0+L1 | — |
 | `sync-skills.ts` | L0 | 1.11.0 | active | `--dir <path>`, `--all-variants` | — | L0+L1 | — |
 | `team-builder.ts` | L0 | 1.4.1 | active | —| —| L0+L1 | —|
-| `test-runner.ts` | L0 | 1.4.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>` | —| L0+L1 | —|
+| `test-runner.ts` | L0 | 1.5.0 | active | `--parallel`, `--sequential`, `--concurrency <n>`, `--timeout <ms>`; v1.5.0 (2026-10-14, CI run 38412124373): bun per-test ceiling via `bun test --timeout` (default 15000ms) + per-file budget overrides (mcp-upstream-server, upgrade-tree-sync → suite 300s / test 30–60s) for win32 timing; explicit `--timeout` CLI still wins | —| L0+L1 | —|
 | `handbook/apply-handbook-theme.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-a11y.ts` | L0 | 1.0.0 | active | — | — | common | — |

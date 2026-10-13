@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## [Unreleased]
+- **[2026-10-14]**: fix(ci): **test-runner v1.5.0 — Windows CI timing budgets (bun per-test ceiling + per-file suite overrides).** CI run 38412124373 (PR #1542 merge) failed the windows-latest job on three files whose every assertion passed: `mcp-upstream-server.test.ts` and `upgrade-tree-sync.test.ts` were killed at the 120s suite wall, and two spawn-heavy tests overran bun's implicit 5s per-test default (script-registry-audit 5.27s, mcp-upstream-server E13d 5.68s). The runner now passes `bun test --timeout` (default 15000ms — a bunfig `[test] timeout` key is ignored by bun 1.4, verified locally) and carries per-file budget overrides (suite 300s / test 30–60s) for the two files whose legitimate win32 wall time exceeds the defaults. Explicit `--timeout` CLI still wins over both. No assertion weakened; same documented win32 flake family as hook-post-write-lifecycle 30s→120s (2026-10-12) and T-20261004-011.
 - **[2026-10-12]**: test(hooks): **hook-post-write-lifecycle Claude-mode timeout 30s → 120s.** The test spawns `bun scripts/audit.ts` as a child; under the full 182-file parallel suite on win32 the child alone can exceed the 30s budget (observed 2026-10-12 — same documented flake family as PR #785). Aligned with the test runner's 120s unit-suite budget; no assertion weakened. Landed with the co-abap template globalization delivery above.
 - **[2026-10-12]**: feat(co-abap template): **deliver the SAP globalization (I18N) runtime guidance wave into `templates/co-abap` (source: Projects/co-abap PR #205).** New `docs/sap-globalization-checklist.md` (7 pass/fail rule families — time zones/DST, number/date/currency formatting, units of measure, calendars, texts, output/paper/forms, addresses — blocker/should severities with owners; template copy adapted to the template's flat docs layout, design-doc provenance reference generalized); new `docs/countries/{KR,US,JP}.md` country profiles (ACTIVE.md deliberately excluded per `docs/country-profiles.md` — project state, not template knowledge); `agents/code-writer.md` gains globalization + texts behavior rules and a Globalization Check report line (1.0.0 → 1.0.1); `skills/abap-dev/SKILL.md` gains the `sap:globalization` section and an execution step (1.1.0 → 1.2.0). Template-local minimal delta only — the template's older agent/skill baselines were not caught up wholesale; full convergence remains a reconciliation follow-up. Skill graph regenerated.
 - **[2026-10-12]**: docs(constitution): **Model-ID hygiene in skills becomes constitution text (spec `2026-10-11-constitution-model-id-hygiene-design`).** CONSTITUTION.md §6 gains the marker-wrapped subsection 'Model-ID Hygiene in Skills' — skills (SKILL.md + references) MUST NOT hardcode literal model IDs; registry IDs live only in docs/workspace-schema.json models.* and the CLAUDE.md §6 / AGENTS.md §3.6 prose; enforced by skill-lifecycle-audit Check MM; model changes route through the model-migration skill. templates/common/docs/context.md receives the matching COMMON-CONSTITUTION zone, so scaffolded projects carry the principle and upgrades keep it in sync. Follows the Check MM machine enforcement landed in the 2026-10-11 backlog batch.
@@ -1912,8 +1913,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-10-13*
-*Last Updated: 2026-10-13*
+*Last Updated: 2026-10-14*
+*Last Updated: 2026-10-14*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency
