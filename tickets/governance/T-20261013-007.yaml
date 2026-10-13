@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261013-007
+kind: manual
+title: >-
+  defect: VARIANT SCRIPTS SYNC registry rows carried bare basenames duplicating
+  nested rows (15 ghosts, co-safety 0.18.0 canary) + explain-me PLATFORM_HARNESS
+  dangling reference restored from literals-free SSOT
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-13T09:37:24.725+09:00'
+history:
+  - at: '2026-10-13T09:37:24.725+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-13T09:37:32.827+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed via PR #1530 (merged 2026-10-13): upgrade-project 1.70.2 keys VARIANT
+  SCRIPTS SYNC rows <variant>/-prefixed (dedupe now matches nested rows);
+  templates/common explain-me PLATFORM_HARNESS.md restored from the
+  literals-free workspace SSOT. ID aliasing note: the #1530 commit message and
+  design doc 2026-10-13-variant-script-registry-key-fix-design reference
+  'T-20261013-006' narratively for this defect — that ID was never allocated
+  then and now belongs to the LOCAL-PATCH scanner false-positive ticket; this
+  entry (T-20261013-007) is the authoritative record.
+error: null

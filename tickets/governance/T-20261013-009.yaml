@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261013-009
+kind: manual
+title: >-
+  hardening: .gemini/commands delivery convention clash — template ships .md
+  commands while Projects/co-abap's render-commands SSOT renders .toml and
+  deletes .md as legacy (wave re-delivery recreates drift every upgrade);
+  converge template to the SSOT-rendered form or promote render-commands
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-13T09:50:22.990+09:00'
+history:
+  - at: '2026-10-13T09:50:22.990+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

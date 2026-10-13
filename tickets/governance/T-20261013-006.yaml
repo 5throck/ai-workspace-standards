@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261013-006
+kind: manual
+title: >-
+  validator-hardening: LOCAL-PATCH scanner false-positives — matches the marker
+  protocol text inside instruction files (CLAUDE/GEMINI/CODEX/HERMES.md,
+  agents/pm.md) and the scanner's own source (scripts/hooks/pre-commit.ts);
+  co-abap reported 27 markers of which the instruction-text class dominates;
+  exclude pattern-definition sites from the scan
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-13T09:36:55.344+09:00'
+history:
+  - at: '2026-10-13T09:36:55.344+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
