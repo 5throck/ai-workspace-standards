@@ -2,7 +2,10 @@
 /**
  * evidence-backport-scan.ts — Evidence Backporting candidate scanner
  * (project-resync skill Step 2b).
- * @version 1.1.0
+ * @version 1.2.0
+ * v1.2.0 (2026-10-13, T-20261013-011): F3 plane dual-currency M1 — the plane's
+ *           own evidence-ledger EV ids join the schema-basename targets, so genuine
+ *           decisions citing the ledger satisfy M1 (co-safety PROMOTABLE after seeding).
  *
  * v1.1.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
  *  site 14 / D14): the F1/M6 skill-dir literals adopt PLATFORM_SKILL_BASES;
@@ -48,7 +51,7 @@ import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { PLATFORM_SKILL_BASES } from "./lib/platforms.ts";
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 type Form = "F1" | "F2" | "F3" | "F0" | "MIXED" | "none";
 
@@ -626,6 +629,19 @@ function resolvesRefInPlane(form: Form, ref: string, planeTargets: string[]): bo
  * identified as the plane's evidence (signal.files) — never recomputed independently,
  * so M1-M6 evaluate against the same files the form-detection verdict was based on.
  */
+/** EV ids from the project's append-only evidence ledger, if it carries one —
+ * a schema-typed plane that also keeps a ledger has BOTH currencies, and
+ * decision records legitimately cite EV ids (T-20261013-011). */
+function ledgerEvidenceIds(projectPath: string): string[] {
+  const ledger = join(projectPath, "docs", "evidence", "ledger.md");
+  if (!existsSync(ledger)) return [];
+  const ids: string[] = [];
+  for (const m of readFileSync(ledger, "utf-8").matchAll(/EV-\d{8}-\d{2}/g)) {
+    if (!ids.includes(m[0])) ids.push(m[0]);
+  }
+  return ids;
+}
+
 function planeTargetsForForm(form: Form, projectPath: string, signalFiles: string[] | undefined): { targets: string[]; paths: string[]; nodeIds: string[] } {
   const paths = signalFiles ?? [];
   if (form === "F1") {
@@ -636,6 +652,11 @@ function planeTargetsForForm(form: Form, projectPath: string, signalFiles: strin
   }
   if (form === "F3") {
     const targets = paths.map((f) => (f.split(/[\\/]/).pop() ?? f));
+    // Dual-currency resolution: EV ledger ids join the schema-file basenames so
+    // decision records citing the plane's own ledger satisfy M1 (T-20261013-011).
+    for (const id of ledgerEvidenceIds(projectPath)) {
+      if (!targets.includes(id)) targets.push(id);
+    }
     return { targets, paths, nodeIds: targets };
   }
   return { targets: [], paths: [], nodeIds: [] };

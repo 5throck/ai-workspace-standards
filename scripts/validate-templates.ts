@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.55.0
+ * @version 1.56.0
  *
  * v1.55.0 (2026-10-11, T-20261011-002): checkVariantPackageContract crash fix —
  *          the per-variant verdict re-parsed templates/common/package.json
@@ -1481,8 +1481,11 @@ function checkCommands(variant: string): void {
       const soak = SOAK_COMMAND_SURFACES.has(`${platform}/${leaf}`);
       const emit = soak ? warn : fail;
       for (const cmd of allSharedCommands) {
-        if (!existsSync(join(commandsDir, cmd))) {
-          emit('common', 'command-missing', `${platform}/${leaf}/${cmd} not found in common/`);
+        // Gemini custom commands are TOML-only (T-20261013-009 phase 2): the
+        // .gemini surface stores `<name>.toml` rendered from the .claude SSOT.
+        const expected = platform === '.gemini' ? cmd.replace(/\.md$/, '.toml') : cmd;
+        if (!existsSync(join(commandsDir, expected))) {
+          emit('common', 'command-missing', `${platform}/${leaf}/${expected} not found in common/`);
         }
       }
       pass(`common/${platform}/${leaf}: ${allSharedCommands.length} shared commands OK${soak ? ' (soak: WARN until promotion)' : ''}`);
