@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261014-002
+kind: manual
+title: >-
+  hardening: reconcileScriptRegistry retains a second inline registry-append
+  implementation (####-bounded scan, L0→L3 rewrite) alongside
+  helpers/registry-append.ts with divergent boundary semantics — converge on the
+  shared helper
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-14T08:16:17.520+09:00'
+history:
+  - at: '2026-10-14T08:16:17.520+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
