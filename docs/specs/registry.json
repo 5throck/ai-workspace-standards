@@ -2435,6 +2435,15 @@
       "last_updated": "2026-10-12"
     },
     {
+      "id": "2026-10-14-test-timeout-budgets-design",
+      "title": "test timeout budgets design",
+      "file": "docs/designs/2026-10-14-test-timeout-budgets-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-13",
+      "last_updated": "2026-10-13"
+    },
+    {
       "id": "skillhygiene",
       "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
       "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
