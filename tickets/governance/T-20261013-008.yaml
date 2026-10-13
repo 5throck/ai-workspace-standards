@@ -8,12 +8,19 @@ title: >-
   removed the L0-only script leaving the test orphaned; root has no equivalent
   coverage
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T09:50:22.975+09:00'
 history:
   - at: '2026-10-13T09:50:22.975+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T20:20:57.800+09:00'
+    from: backlog
+    to: done
+result: >-
+  Premise corrected: co-abap's review-baseline.ts was a same-named project-local
+  L3 baseline runner, not the root tool — root promotion was wrong. Restored
+  variant-owned as scripts/co-abap/project-baseline.ts 1.5.0 + test (registered
+  L2-only rows) via PR #212; root needs no change.
 error: null

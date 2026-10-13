@@ -72,6 +72,12 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
    bun scripts/dev-sync.ts --body-file "$(git rev-parse --git-dir)/sync-pr-body.md" "$ARGUMENTS"
    ```
 
+   Branch behavior (dev-sync 1.27.0+; T-20261012-011 / T-20261013-005):
+   - On `main`/`master` the pipeline creates a fresh `pr/<timestamp>-<slug>` branch from the staged set — the PR title derives from the **full branch-vs-main diff** (`origin/main...HEAD`), never the message alone, so the review surface stays represented.
+   - On an existing branch it commits there — **unless that branch's PR is CLOSED (unmerged)**, which is refused: a dead branch under-represents the review surface (#1509's 45 files re-landed as a 1-file #1510). Re-branch from main and re-run.
+   - **Prefer fresh branches for superseding deliveries**: a reused branch can hit GitHub-server-side merge conflicts that a local 3-way merge reports clean (#1526 case). When `gh pr update-branch` refuses, re-branch the identical diff from current main, open a new PR, close the old one as superseded.
+   - When `gh pr view` fails with 403/GraphQL (cloud sessions), dev-sync resolves the open PR via the REST API (1.28.0).
+
 3. The pipeline executes the following steps in order:
 
 | Step | Name | Fatal? | Description |
