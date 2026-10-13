@@ -8,12 +8,19 @@ title: >-
   carries the ledger; split plane detection (ledger+schemas) or resolve F3 refs
   against both
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T21:38:48.402+09:00'
 history:
   - at: '2026-10-13T21:38:48.402+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T22:44:41.433+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed via PR #1540: evidence-backport-scan 1.2.0 F3 plane dual-currency M1 —
+  the plane's own ledger EV ids join the schema-basename targets. co-safety's
+  seeded records now satisfy M1 and the plane reads PROMOTABLE (all seven
+  maturity tests); the Step 2b promotion decision stays human-judged.
 error: null

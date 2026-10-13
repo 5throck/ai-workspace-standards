@@ -8,12 +8,21 @@ title: >-
   parity sections, plus project orphan-md sweep; phase 1 (root toml +
   scripts/render-commands.ts promotion) landed via the backlog-sweep-2 batch
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T21:38:48.418+09:00'
 history:
   - at: '2026-10-13T21:38:48.418+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T22:44:41.416+09:00'
+    from: backlog
+    to: done
+result: >-
+  Landed via PR #1540: templates/common/.gemini/commands converted to rendered
+  toml (legacy md removed both sides), checkCommands .gemini surface expects
+  toml (validate-templates 1.56.0), audit 2.54.0 command parity toml-aware,
+  render-commands delivered L0+L1 (span 155). Residual: existing projects keep
+  dead .md orphans until they run the delivered renderer or a sweep pass —
+  documented in the design.
 error: null
