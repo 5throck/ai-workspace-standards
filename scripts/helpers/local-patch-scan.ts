@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (2026-10-13, T-20261013-006): noise filter — inline-code spans (`…`) are
+//          stripped before matching and the marker's defining/registry surfaces are
+//          skipped (scripts/hooks/pre-commit.ts, this file, scripts/upgrade-project.ts,
+//          scripts/SCRIPTS.md); protocol documentation no longer drowns real patches.
 // v1.0.0 (2026-10-02, T-20261002-015): scan a project tree for upstream
 //           LOCAL-PATCH markers — `LOCAL-PATCH(upstream-request: <id>)` (id may be
 //           `pending`) — so an upgrade can report which local patches it is about to
@@ -34,6 +38,23 @@ const TEXT_EXTS = new Set([
 
 const MAX_FILE_BYTES = 1_000_000;
 
+/** Marker-definition/registry surfaces whose own text legitimately contains the
+ * marker string — skipped so protocol documentation never drowns real patches
+ * (co-abap reported 27 markers, instruction-text class dominated, and the noise
+ * is how real patches got dismissed during the 0.18.0 wave — T-20261013-006). */
+const SKIP_FILES = new Set([
+  'scripts/hooks/pre-commit.ts',
+  'scripts/helpers/local-patch-scan.ts',
+  'scripts/upgrade-project.ts',
+  'scripts/SCRIPTS.md',
+]);
+
+/** Inline-code spans (`…`) carry protocol documentation, never live markers —
+ * patches mark real content lines as plain comments. */
+function stripInlineCode(line: string): string {
+  return line.replace(/`[^`\n]*`/g, '``');
+}
+
 /** Every LOCAL-PATCH marker in the tree at `rootDir` (one finding per marker
  * occurrence; a file with two patches reports twice). Deterministic order:
  * path, then position in file. */
@@ -64,8 +85,11 @@ export function scanLocalPatches(rootDir: string): LocalPatchFinding[] {
         continue;
       }
       const rel = relative(rootDir, full).replace(/\\/g, '/');
-      for (const m of content.matchAll(LOCAL_PATCH_RE)) {
-        findings.push({ file: rel, id: m[1] });
+      if (SKIP_FILES.has(rel)) continue;
+      for (const line of content.split('\n')) {
+        for (const m of stripInlineCode(line).matchAll(LOCAL_PATCH_RE)) {
+          findings.push({ file: rel, id: m[1] });
+        }
       }
     }
   };

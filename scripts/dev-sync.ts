@@ -1,4 +1,8 @@
-// @version 1.27.0
+// @version 1.28.0
+// v1.28.0 (2026-10-13, T-20261013-006 batch): REST fallback for the existing-PR
+//          check — cloud sessions get 403/GraphQL on `gh pr view`, which read as
+//          "no PR" and risked duplicate PR creation; resolve via `gh api repos/<slug>/pulls?head=`.
+//          Promoted from Projects/co-abap's LOCAL-PATCH (lost in the 0.18.0 wave).
 // v1.27.0 (2026-10-12, T-20261012-011): (1) a branch whose PR is CLOSED
 //          unmerged refuses the sync before staging/commit — committing a new
 //          sync onto a dead branch under-represents the review surface
@@ -1527,7 +1531,27 @@ if (!remoteMainExists) {
 // still "succeeds" and this step would wrongly report "no new PR needed" while the
 // new commits sit with zero PR coverage. Must check state explicitly.
 const existingPrRes = await $`gh pr view ${branch} --json url,state --jq "if .state == \"OPEN\" then .url else \"\" end"`.quiet().nothrow();
-const existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
+let existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
+// REST fallback (promoted from Projects/co-abap's LOCAL-PATCH, lost in the 0.18.0
+// wave and re-landed here): cloud sessions return 403/GraphQL errors on
+// `gh pr view/create`, which would make this step read "no PR" and try to create
+// a duplicate. Detect the blocked shape and resolve the open PR via the REST API.
+const isGraphqlBlocked = (r: { exitCode: number; stderr: { toString(): string } } | null): boolean =>
+    !!r && r.exitCode !== 0 && /403|GraphQL/i.test(r.stderr.toString());
+if (!existingPrUrl && isGraphqlBlocked(existingPrRes)) {
+    const originUrl = await $`git remote get-url origin`.quiet().nothrow();
+    const slugMatch = originUrl.stdout.toString().trim().match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
+    if (slugMatch) {
+        const rest = await $`gh api ${`repos/${slugMatch[1]}/pulls?head=${slugMatch[1].split('/')[0]}:${branch}&state=open`} --jq ${'.[0].html_url // ""'}`.quiet().nothrow();
+        if (rest.exitCode === 0) {
+            const restUrl = rest.stdout.toString().trim();
+            if (restUrl) {
+                console.log(`${YELLOW}⚠️  gh pr view blocked (403/GraphQL) — resolved via REST fallback${RESET}`);
+                existingPrUrl = restUrl;
+            }
+        }
+    }
+}
 
 if (existingPrUrl) {
     console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);

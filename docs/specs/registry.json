@@ -2390,6 +2390,15 @@
       "last_updated": "2026-10-11"
     },
     {
+      "id": "2026-10-13-backlog-hardening-batch-design",
+      "title": "backlog hardening batch design",
+      "file": "docs/designs/2026-10-13-backlog-hardening-batch-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-13",
+      "last_updated": "2026-10-13"
+    },
+    {
       "id": "2026-10-13-variant-script-registry-key-fix-design",
       "title": "variant script registry key fix design",
       "file": "docs/designs/2026-10-13-variant-script-registry-key-fix-design.md",
