@@ -16,12 +16,18 @@ title: >-
   2026-10-11-deal-overview-ui-refinement. Class: testable-architecture learning
   note
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-12T01:41:53.294+09:00'
 history:
   - at: '2026-10-12T01:41:53.294+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T21:39:05.964+09:00'
+    from: backlog
+    to: done
+result: >-
+  Recorded via docs/reports/2026-10-13-co-newbiz-learning-notes.md (pattern +
+  invariants + test discipline + promotion gate consolidated); promotion stays
+  gated on a second adopter per the ticket's own condition.
 error: null
