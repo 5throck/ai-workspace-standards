@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.70.3
+// @version 1.70.4
+// v1.70.4 (2026-10-13, T-20261013-001): registry-append mechanics extracted to
+//          helpers/registry-append.ts (L0+L1, shared with new-project §6.6).
 // v1.70.3 (2026-10-13, T-20261013-010): mergeGitleaksToml extracted to
 //          helpers/gitleaks-merge.ts (L0+L1) with a replacer-FUNCTION merge — a `$'`
 //          sequence in a `$1`-interpolated replacement string substituted the
@@ -609,6 +611,7 @@ import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
+import { appendRegistryRows } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
@@ -2044,21 +2047,8 @@ if (existsSync(variantScriptsSrc)) {
       }
     };
     scanVariantScripts(variantScriptsDst, variant);
-    if (missingRows.length > 0) {
-      const lines = reg.split('\n');
-      const regStart = lines.findIndex((l) => /^## Registry/.test(l));
-      if (regStart >= 0) {
-        let insertAt = -1;
-        for (let i = regStart; i < lines.length; i++) {
-          if (/^\|\s*`/.test(lines[i])) insertAt = i + 1;
-          else if (insertAt >= 0 && !/^\|/.test(lines[i])) break;
-        }
-        if (insertAt > 0) {
-          lines.splice(insertAt, 0, ...missingRows);
-          writeFileSync(projectRegPath, lines.join('\n'), 'utf-8');
-          console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
-        }
-      }
+    if (missingRows.length > 0 && appendRegistryRows(projectRegPath, missingRows)) {
+      console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
     }
   }
   // Sync the variant SCRIPTS.md registry from the template.

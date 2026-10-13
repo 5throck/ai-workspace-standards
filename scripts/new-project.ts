@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-// @version 1.36.1
+// @version 1.36.2
+// v1.36.2 (2026-10-13, T-20261013-001): §6.6 registry-append mechanics extracted to
+//          helpers/registry-append.ts (shared with upgrade-project VARIANT SCRIPTS SYNC).
 // v1.36.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
 //          --platform takes a comma-separated list (claude,codex; all). Pruning keeps the
 //          UNION of the selected profiles' owned paths (lib/platforms.ts PROFILE_OWNED_PATHS)
@@ -222,6 +224,7 @@ import {
 import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
 import { pruneUnselectedProfiles } from './lib/platform-prune.ts';
+import { appendRegistryRows } from './helpers/registry-append.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -1604,21 +1607,10 @@ if (variant && existsSync(variantScriptsTopDir) && existsSync(projectScriptsMd))
     );
     const missing = delivered.filter((d) => !existingRows.has(d.name));
     if (missing.length > 0) {
-      const lines = mdContent.split('\n');
-      const regStart = lines.findIndex((l) => /^## Registry/.test(l));
-      if (regStart >= 0) {
-        let insertAt = -1;
-        for (let i = regStart; i < lines.length; i++) {
-          if (/^\|\s*`/.test(lines[i])) insertAt = i + 1;
-          else if (insertAt >= 0 && !/^\|/.test(lines[i])) break;
-        }
-        if (insertAt > 0) {
-          const rows = missing.map((d) =>
-            `| \`${d.name}\` | L2-only | ${d.version} | active | Variant-delivered top-level script (auto-registered at scaffold, T-20261012-001) | —| L2-only | —|`);
-          lines.splice(insertAt, 0, ...rows);
-          writeFileSync(projectScriptsMd, lines.join('\n'), 'utf-8');
-          console.log(`  📝 SCRIPTS.md: registered ${missing.length} variant-delivered script(s): ${missing.map((d) => d.name).join(', ')}`);
-        }
+      const rows = missing.map((d) =>
+        `| \`${d.name}\` | L2-only | ${d.version} | active | Variant-delivered top-level script (auto-registered at scaffold, T-20261012-001) | —| L2-only | —|`);
+      if (appendRegistryRows(projectScriptsMd, rows)) {
+        console.log(`  📝 SCRIPTS.md: registered ${missing.length} variant-delivered script(s): ${missing.map((d) => d.name).join(', ')}`);
       }
     }
   }

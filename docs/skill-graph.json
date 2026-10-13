@@ -1274,7 +1274,7 @@
       "name": "market-entry-strategist",
       "scope": "co-export",
       "capability": "market-entry-strategist",
-      "content_hash": "57d8837a135c6759",
+      "content_hash": "b018b0db9dda335b",
       "version": "1.0.0",
       "mirrors": [
         "templates/co-export/agents/market-entry-strategist.md"
@@ -7469,7 +7469,7 @@
       "name": "create-variant",
       "scope": "root",
       "capability": "create-variant",
-      "content_hash": "c687e9f82714689e",
+      "content_hash": "27bda06a5cea4321",
       "version": "1.4.2",
       "mirrors": [
         "skills/create-variant/SKILL.md",

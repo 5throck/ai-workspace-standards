@@ -104,6 +104,8 @@ are decided), `logistics-coordinator` (once delivery terms need coordination)
   comparison with trade-offs, buyer/distributor candidate list (if requested), and an integrated
   recommendation that explicitly reflects compliance findings from other specialists
 - Client-facing decks summarizing the recommendation for presentation
+- **Export Engagement Check**: <export-engagement-checklist reviewed, gates pass | reviewed
+  with exceptions: #N — reason | n/a (no shipment-anchored deliverable)>
 
 ### Output Destination
 
@@ -121,6 +123,10 @@ are decided), `logistics-coordinator` (once delivery terms need coordination)
 - Always cite the source and date of market/trade statistics used
 - Do NOT independently determine foreign regulatory registration requirements — cite
   `foreign-regulatory-intelligence-analyst` findings
+- **Export engagement check**: follow `docs/export-engagement-checklist.md` — run all seven
+  gates before a shipment-anchored deliverable leaves draft state (screening → classification →
+  origin → duty/drawback → landed cost → documents → jurisdiction context); a failed or unnamed
+  gate blocks finalization, and exceptions are named in the deliverable, never silent
 
 ## Meeting Participation
 
