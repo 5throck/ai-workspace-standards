@@ -7,12 +7,21 @@ title: >-
   deletes .md as legacy (wave re-delivery recreates drift every upgrade);
   converge template to the SSOT-rendered form or promote render-commands
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T09:50:22.990+09:00'
 history:
   - at: '2026-10-13T09:50:22.990+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T21:39:05.946+09:00'
+    from: backlog
+    to: done
+result: >-
+  Phase 1 via the backlog-sweep-2 batch: scripts/render-commands.ts 1.1.0
+  promoted from co-abap (SSOT .claude/commands → .gemini/commands/*.toml,
+  gemini-parity:skip honored, --check gate, unit-tested) and root rendered 7
+  toml commands. The 'promote render-commands' arm of this ticket is satisfied
+  at root; template/fleet convergence is the follow-up ticket T-20261013-012
+  (validator cascade designed there).
 error: null

@@ -9,12 +9,20 @@ title: >-
   next engagement cycle, then re-run bun scripts/evidence-backport-scan.ts to
   confirm M1 passes.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-03T03:36:09.341Z'
 history:
   - at: '2026-10-03T03:36:09.341Z'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T21:39:06.048+09:00'
+    from: backlog
+    to: done
+result: >-
+  Seeded 3 genuine decision records from the 2026-10-13 runner cycle
+  (DEC-20261013-01/02/03 + EV-20261013-01/02/03 in docs/evidence/ledger.md).
+  M1-F3 still fails: the scanner resolves F3 refs only against schema-file
+  basenames, so EV-ledger-citing decisions cannot count — scanner gap filed as
+  T-20261013-011 rather than fabricating inapplicable references.
 error: null

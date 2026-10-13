@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-13T12:07:21.542Z
+**Generated**: 2026-10-13T12:39:27.501Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 57
-- **Scripts**: 122 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 123 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -161,6 +161,7 @@
 | regenerate-agents-md.ts | 1.3.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
+| render-commands.ts | 1.1.0 | scripts/render-commands.ts | N/A |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | resync-audit.ts | 1.5.0 | scripts/resync-audit.ts | N/A |
