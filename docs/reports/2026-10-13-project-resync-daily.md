@@ -64,7 +64,7 @@ T-20261011-013 was already done (template-side hardening landed via #1504), so c
 
 Repair chain the upgrade surfaced (all fixed this cycle, tickets filed):
 - 27 LOCAL-PATCH markers = scanner false-positive class (protocol text + scanner source) → T-20261013-006.
-- Unit suite red post-upgrade: the root `docs/workspace-schema.json` lacked `models.hermes` (ADR-0088 D5 tier mapping existed only project-side) → root schema now registers hermes tiers with the post-bump haiku (claude-haiku-5-5); project schema restored + aligned.
+- Unit suite red post-upgrade: the root `docs/workspace-schema.json` lacked `models.hermes` (ADR-0088 D5 tier mapping existed only project-side) → root schema now registers hermes tiers with the post-bump haiku tier per the 2026-10-11 haiku-model-bump spec; project schema restored + aligned.
 - Upgrade MERGE pass corrupted `$''`-anchored regex entries in `.gitleaks.toml` (allowlist silently disabled → 6 gitleaks false positives blocked the landing) → repaired project-side; root renderer fix → T-20261013-010.
 - Orphaned project test for the pruned L0-only script → coverage promotion ticket T-20261013-008; `.gemini/commands` md-vs-toml convention clash → T-20261013-009.
 - Ticket-ID aliasing note: #1530's narrative "T-20261013-006" is authoritatively T-20261013-007 (allocator assigned 006 to the scanner ticket).
