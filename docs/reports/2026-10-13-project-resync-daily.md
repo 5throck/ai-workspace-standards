@@ -57,3 +57,14 @@ Private-repo checks failed at job START with the T-20261007-025 billing-wall sig
 - Open PRs: co-abap #209 only (stated reason: co-abap's full upgrade stays gated on T-20261011-013 human triage of the scaffolded SAP proxy scripts; #209 is its local-green harness refresh, CI billing-blocked).
 - All 15 wave projects: default branch pulled, pr/* branches pruned remote+local, zero dirty files, zero unpushed commits, template version 0.18.0 everywhere.
 - co-abap: intentionally at 0.16.0 pending T-20261011-013; tree clean after #209 opens.
+
+## Addendum — co-abap upgrade (user-directed, same cycle)
+
+T-20261011-013 was already done (template-side hardening landed via #1504), so co-abap joined the wave as item 3 of the user's follow-up: #209 (harness refresh) merged, then the 0.18.0 upgrade landed as **PR #210** — post-merge verified (version 0.18.0, audit PASS, tree clean). Hardening delivery re-verified: ci.yml keeps Typecheck/deny-rules jobs; `.claude/settings.json` vsp entries are deny-rules identical to the template. **Fleet now 16/16 at 0.18.0.**
+
+Repair chain the upgrade surfaced (all fixed this cycle, tickets filed):
+- 27 LOCAL-PATCH markers = scanner false-positive class (protocol text + scanner source) → T-20261013-006.
+- Unit suite red post-upgrade: the root `docs/workspace-schema.json` lacked `models.hermes` (ADR-0088 D5 tier mapping existed only project-side) → root schema now registers hermes tiers with the post-bump haiku tier per the 2026-10-11 haiku-model-bump spec; project schema restored + aligned.
+- Upgrade MERGE pass corrupted `$''`-anchored regex entries in `.gitleaks.toml` (allowlist silently disabled → 6 gitleaks false positives blocked the landing) → repaired project-side; root renderer fix → T-20261013-010.
+- Orphaned project test for the pruned L0-only script → coverage promotion ticket T-20261013-008; `.gemini/commands` md-vs-toml convention clash → T-20261013-009.
+- Ticket-ID aliasing note: #1530's narrative "T-20261013-006" is authoritatively T-20261013-007 (allocator assigned 006 to the scanner ticket).
