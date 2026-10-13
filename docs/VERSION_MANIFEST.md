@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-13T12:39:27.501Z
+**Generated**: 2026-10-13T13:35:44.119Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -110,7 +110,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.53.0 | scripts/audit.ts | bun |
+| audit.ts | 2.54.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.0.2 | scripts/backport-diff.ts | N/A |
@@ -127,7 +127,7 @@
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
 | ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
-| evidence-backport-scan.ts | 1.1.0 | scripts/evidence-backport-scan.ts | N/A |
+| evidence-backport-scan.ts | 1.2.0 | scripts/evidence-backport-scan.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
@@ -142,7 +142,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
-| lifecycle-sync-audit.ts | 1.18.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.18.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
@@ -209,7 +209,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.55.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.56.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
@@ -232,13 +232,13 @@
 
 | Name | File | Platform | Skill Integration |
 |------|------|----------|-------------------|
-| changelog | .claude/commands/changelog.md | all | N/A |
-| commit-push-pr | .claude/commands/commit-push-pr.md | all | N/A |
-| gateguard | .claude/commands/gateguard.md | all | N/A |
-| memlog | .claude/commands/memlog.md | all | N/A |
-| new-task | .claude/commands/new-task.md | all | N/A |
-| project-review | .claude/commands/project-review.md | all | N/A |
-| sync | .claude/commands/sync.md | all | N/A |
+| changelog | .claude/commands/changelog.md | claude | N/A |
+| commit-push-pr | .claude/commands/commit-push-pr.md | claude | N/A |
+| gateguard | .claude/commands/gateguard.md | claude | N/A |
+| memlog | .claude/commands/memlog.md | claude | N/A |
+| new-task | .claude/commands/new-task.md | claude | N/A |
+| project-review | .claude/commands/project-review.md | claude | N/A |
+| sync | .claude/commands/sync.md | claude | N/A |
 
 ---
 
@@ -246,8 +246,8 @@
 
 **Checked**: Claude (.claude/), Gemini (.gemini/), Antigravity (.agents/), Codex (.codex/ prompts mapping)
 
-- **Commands with parity (gemini mirror)**: 7 / 7
-- **Commands with codex prompts mapping**: 7 / 7
+- **Commands with parity (gemini mirror)**: 0 / 7
+- **Commands with codex prompts mapping**: 0 / 7
 - **Skills in all four mirrors**: 0 / 43
 - **Skills in claude+gemini only (both)**: 0 / 43 (common-template skills are parity-exempt)
 

@@ -1,4 +1,6 @@
-// @version 2.53.0
+// @version 2.54.0
+// v2.54.0 (2026-10-13, T-20261013-009 phase 2): command parity expects rendered
+//  .gemini/commands/*.toml (Gemini CLI loads TOML only; renderer = render-commands.ts).
 // v2.53.0 (2026-10-11, U-20261009-001, spec
 //          docs/designs/2026-10-11-backlog-batch-2-design.md): the platform-lifecycle
 //          Fail hint names the third-party-skill escape hatches — tool-generated
@@ -1152,9 +1154,12 @@ if (!LIFECYCLE_ONLY && fs.existsSync(claudeCommandsDir)) {
         const content = readUTF8File(filePath);
         if (/^gemini-parity:\s*skip/m.test(content)) continue;
 
-        const geminiCmd = path.join('.gemini', 'commands', file);
+        // Gemini custom commands are TOML-only (T-20261013-009 phase 2):
+        // scripts/render-commands.ts renders .gemini/commands/<name>.toml from the
+        // .claude/commands SSOT.
+        const geminiCmd = path.join('.gemini', 'commands', file.replace(/\.md$/, '.toml'));
         if (!fs.existsSync(geminiCmd)) {
-            Warn(`Command parity gap: .claude/commands/${file} has no matching .gemini/commands/${file} (add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)`);
+            Warn(`Command parity gap: .claude/commands/${file} has no matching .gemini/commands/${file.replace(/\.md$/, '.toml')} (run bun scripts/render-commands.ts; add 'gemini-parity: skip' to frontmatter for intentional Claude-only commands)`);
             parityWarnings++;
         }
     }
