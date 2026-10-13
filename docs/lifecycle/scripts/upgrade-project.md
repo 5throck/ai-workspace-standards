@@ -4,7 +4,7 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.70.4
+- **Version**: 1.70.5
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-12
 
@@ -18,6 +18,7 @@ post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-14 | production | production | v1.70.5 (T-20261013-009 phase 2): COMMANDS_SYNC delivers the .gemini surface's rendered toml. | governance-runner |
 | 2026-10-13 | production | production | v1.70.4 (T-20261013-001): registry-append mechanics extracted to helpers/registry-append.ts. | governance-runner |
 | 2026-10-13 | production | production | v1.70.3 (T-20261013-010): mergeGitleaksToml extracted to helpers/gitleaks-merge.ts; replacer-function merge keeps `$''`-anchored entries literal. | governance-runner |
 | 2026-10-13 | production | production | v1.70.2 (T-20261013-006): VARIANT SCRIPTS SYNC rows carry the <variant>/-prefixed key — bare basenames duplicated nested rows as 15 ghost entries (co-safety 0.18.0 canary). | governance-runner |
@@ -26,6 +27,6 @@ post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.70.4
+- **Version**: 1.70.5
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-12

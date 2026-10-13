@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261014-001
+kind: manual
+title: >-
+  validator-hardening: gemini toml conversion leaves three .md-filtered
+  validator legs vacuous — validate-templates P-02 (root↔common .gemini parity)
+  and C-CM-04 reverse coverage plus validate-platform-parity mirror scan all
+  filter .endsWith('.md') and pass vacuously over the toml-only .gemini/commands
+  dirs; make the three legs toml-aware
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-14T08:16:17.505+09:00'
+history:
+  - at: '2026-10-14T08:16:17.505+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

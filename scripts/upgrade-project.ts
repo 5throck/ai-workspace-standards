@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.70.4
+// @version 1.70.5
+// v1.70.5 (2026-10-13, T-20261013-009 phase 2): COMMANDS_SYNC delivers the .gemini
+//          surface's rendered <name>.toml files (extension-aware) — the toml-only
+//          template conversion otherwise reached no upgraded project.
 // v1.70.4 (2026-10-13, T-20261013-001): registry-append mechanics extracted to
 //          helpers/registry-append.ts (L0+L1, shared with new-project §6.6).
 // v1.70.3 (2026-10-13, T-20261013-010): mergeGitleaksToml extracted to
@@ -1720,7 +1723,11 @@ for (const cmdDir of COMMANDS_DIRS) {
   const tplCmdDir = existsSync(join(templatesDir, cmdDir)) ? join(templatesDir, cmdDir) : join(commonDir, cmdDir);
   if (!existsSync(tplCmdDir)) { console.log(`  SKIP (no template): ${cmdDir}/`); continue; }
   for (const fname of readdirSync(tplCmdDir)) {
-    if (!fname.endsWith('.md')) continue;
+    // Gemini custom commands are TOML-only (T-20261013-009 phase 2): the .gemini
+    // surface stores rendered `<name>.toml`, the .claude surface keeps `<name>.md`.
+    const isMd = fname.endsWith('.md');
+    const isToml = cmdDir === '.gemini/commands' && fname.endsWith('.toml');
+    if (!isMd && !isToml) continue;
     const rel = `${cmdDir}/${fname}`;
     const src = join(tplCmdDir, fname);
     const dest = join(projectDir, rel);
