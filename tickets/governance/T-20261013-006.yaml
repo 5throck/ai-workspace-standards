@@ -8,12 +8,20 @@ title: >-
   co-abap reported 27 markers of which the instruction-text class dominates;
   exclude pattern-definition sites from the scan
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T09:36:55.344+09:00'
 history:
   - at: '2026-10-13T09:36:55.344+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T20:20:57.726+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed via PR #1535: local-patch-scan 1.1.0 strips inline-code spans per line
+  and skips the marker's defining/registry sites (pre-commit hook, the scanner,
+  upgrade-project, scripts/SCRIPTS.md); real plain-comment markers still report
+  (unit-proven). co-abap marker report dropped 27 → 8 with the real
+  install-vsp.ts patch retained.
 error: null

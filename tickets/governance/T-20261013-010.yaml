@@ -8,12 +8,19 @@ title: >-
   allowlist and blocking the landing on 6 gitleaks false positives; repair
   delivered project-side this cycle, root fix needed in the merge renderer
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T09:54:28.911+09:00'
 history:
   - at: '2026-10-13T09:54:28.911+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T20:20:57.706+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed via PR #1535: mergeGitleaksToml extracted to helpers/gitleaks-merge.ts
+  (L0+L1, mirror span 153) with a replacer-FUNCTION merge — $''-anchored entries
+  stay literal (4 unit tests pin the round-trip). Root renderer fix delivered;
+  co-abap received it via the #212 mirror sync.
 error: null

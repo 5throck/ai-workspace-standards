@@ -6,12 +6,19 @@ title: >-
   reused pr/* branches — local 3-way clean but gh pr update-branch refuses (PR
   #1526 case); prefer fresh branches from main for superseding deliveries
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-13T08:10:55.370+09:00'
 history:
   - at: '2026-10-13T08:10:55.370+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-13T20:20:57.766+09:00'
+    from: backlog
+    to: done
+result: >-
+  Documented via PR #1535: sync skill carries the fresh-branch preference for
+  superseding deliveries with the #1526 phantom-conflict case; dev-sync 1.28.0
+  also gained the REST fallback for 403/GraphQL-blocked gh pr view (recovered
+  co-abap patch).
 error: null
