@@ -121,7 +121,8 @@
   "country_config": {
     "profiles_dir": "docs/countries",
     "supported": [
-      "KR"
+      "KR",
+      "US"
     ],
     "default": null
   },
