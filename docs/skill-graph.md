@@ -774,7 +774,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
 | `standup-synthesizer` | skill | divergence | co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |
-| `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #66184388; root@1.8.0 #b6fb36af |
+| `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #cf494776; root@1.8.0 #83013972 |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.1.0 #b2d44210 |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |

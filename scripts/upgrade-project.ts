@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.70.2
+// @version 1.70.3
+// v1.70.3 (2026-10-13, T-20261013-010): mergeGitleaksToml extracted to
+//          helpers/gitleaks-merge.ts (L0+L1) with a replacer-FUNCTION merge — a `$'`
+//          sequence in a `$1`-interpolated replacement string substituted the
+//          text-after-match and corrupted `$''`-anchored allowlist entries
+//          (co-abap .gitleaks.toml, 0.18.0 wave).
 // v1.70.2 (2026-10-13, T-20261013-006): VARIANT SCRIPTS SYNC registry rows carry
 //          the <variant>/-prefixed key (scan starts at rel=variant) — bare
 //          basenames duplicated the existing nested rows as ghost entries
@@ -603,6 +608,7 @@ import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/up
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
+import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
@@ -1401,70 +1407,6 @@ let treeChanged = 0;
 let w2HarvestLines = 0; // v1.42.0 — variant-only lines found inside W2-removed sections
 
 /**
- * Extract every `'''...'''` (or `'...'`) string literal from a named TOML array
- * (e.g. `regexes = [ ... ]` or `paths = [ ... ]`), by array name. Comment-only lines
- * are stripped first — explanatory comments routinely contain apostrophes (e.g. "AI
- * session notes" or "they're"), which a naive single-quote match mistakes for the
- * start of a string literal and misparses everything after it.
- */
-function extractGitleaksArray(content: string, arrayName: string): string[] {
-  const blockMatch = content.match(new RegExp(`${arrayName}\\s*=\\s*\\[([\\s\\S]*?)\\n\\]`));
-  if (!blockMatch) return [];
-  const codeOnly = blockMatch[1]
-    .split('\n')
-    .filter(line => !line.trim().startsWith('#'))
-    .join('\n');
-  const entries: string[] = [];
-  for (const m of codeOnly.matchAll(/'''([^']*)'''|'([^']*)'/g)) {
-    entries.push(m[1] ?? m[2]);
-  }
-  return entries;
-}
-
-/**
- * .gitleaks.toml is shared boilerplate but routinely carries project-specific allowlist
- * entries (e.g. co-abap's exclusion for vendored ABAP source that trips generic-api-key
- * false positives) — a plain LOCKED overwrite silently deletes those, and the next
- * `git push` fails the pre-push secret scan on findings that were already known-safe.
- * Preserve any project-only `regexes`/`paths` entries by appending them into the new
- * template content before writing, rather than dropping them.
- */
-function mergeGitleaksToml(dest: string, src: string): void {
-  if (!existsSync(dest)) {
-    if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
-    console.log(`  ${dryTag}WROTE: .gitleaks.toml (new)`);
-    return;
-  }
-  const destContent = readFileSync(dest, 'utf8');
-  const srcContent = readFileSync(src, 'utf8');
-  const srcRegexes = new Set(extractGitleaksArray(srcContent, 'regexes'));
-  const srcPaths = new Set(extractGitleaksArray(srcContent, 'paths'));
-  const projectOnlyRegexes = extractGitleaksArray(destContent, 'regexes').filter(e => !srcRegexes.has(e));
-  const projectOnlyPaths = extractGitleaksArray(destContent, 'paths').filter(e => !srcPaths.has(e));
-
-  let merged = srcContent;
-  if (projectOnlyRegexes.length > 0) {
-    merged = merged.replace(
-      /(regexes\s*=\s*\[[\s\S]*?)(\n\])/,
-      `$1\n  # Preserved from this project's prior .gitleaks.toml (not in the current common template):\n` +
-        projectOnlyRegexes.map(e => `  '''${e}''',`).join('\n') + `$2`
-    );
-    console.log(`  ⚠️  Preserved ${projectOnlyRegexes.length} project-specific regex allowlist entr${projectOnlyRegexes.length === 1 ? 'y' : 'ies'} that the template overwrite would have dropped`);
-  }
-  if (projectOnlyPaths.length > 0) {
-    merged = merged.replace(
-      /(paths\s*=\s*\[[\s\S]*?)(\n\])/,
-      `$1\n  # Preserved from this project's prior .gitleaks.toml (not in the current common template):\n` +
-        projectOnlyPaths.map(e => `  '''${e}''',`).join('\n') + `$2`
-    );
-    console.log(`  ⚠️  Preserved ${projectOnlyPaths.length} project-specific path exclusion${projectOnlyPaths.length === 1 ? '' : 's'} that the template overwrite would have dropped`);
-  }
-  diffSummary(dest, src);
-  if (!dryRun) writeFileSync(dest, merged, 'utf8');
-  console.log(`  ${dryTag}WROTE: .gitleaks.toml`);
-}
-
-/**
  * .gitattributes is shared boilerplate but routinely carries project-specific attribute
  * lines (GitLFS trackers, custom merge drivers, project-added eol pins — and the
  * scaffold-time `docs/context.md merge=ours` rule, which the template itself does not
@@ -1529,7 +1471,7 @@ for (const rel of LOCKED_FILES) {
     console.log(`  SKIP (no template): ${rel}`);
   } else {
     console.log(`  LOCKED (merge-aware): ${rel}`);
-    mergeGitleaksToml(dest, src);
+    mergeGitleaksToml(dest, src, { dryRun });
     lockedChanged++;
   }
 }
