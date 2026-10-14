@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.70.5
+// @version 1.70.6
+// v1.70.6 (2026-10-14, T-20261014-002): reconcileScriptRegistry's append arm
+//          delegates its boundary scan to helpers/registry-append.ts
+//          registryAppendIndex (1.1.0) — retires the second inline
+//          registry-append implementation with divergent boundary semantics
+//          (the old scan was not ## Registry-anchored).
 // v1.70.5 (2026-10-13, T-20261013-009 phase 2): COMMANDS_SYNC delivers the .gemini
 //          surface's rendered <name>.toml files (extension-aware) — the toml-only
 //          template conversion otherwise reached no upgraded project.
@@ -614,7 +619,7 @@ import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
-import { appendRegistryRows } from './helpers/registry-append.ts';
+import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
   splitIntoSections,
@@ -1188,9 +1193,9 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     return;
   }
 
-  // No row at all — append the upstream row after the last `| \`*.ts\` |` row
-  // INSIDE the registry table (stop at the first `#### \`` detail-section header,
-  // whose flag tables also contain `| \`*.ts\` |`-shaped rows).
+  // No row at all — append the upstream row at the shared registry boundary
+  // (helpers/registry-append.ts registryAppendIndex; the same `## Registry`
+  // anchor + first-`#### \`` bound the prune helpers respect).
   // Rows marked layer `L0`/`L0-only` are invisible to verify-scripts at project
   // context (L0_ONLY_LAYERS skip) while the file itself ships on disk, which
   // reads as "Unregistered script" — rewrite the layer cell to `L3` on append.
@@ -1199,13 +1204,9 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     (_m, head, layer, tail) => /^L0(-only)?$/.test(layer.trim()) ? `${head}L3${tail}` : _m,
   );
   const lines = content.split('\n');
-  let lastRowIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (/^####\s+`/.test(lines[i])) break;
-    if (/^\|\s*`[^`]+\.ts`\s*\|/.test(lines[i])) lastRowIdx = i;
-  }
-  if (lastRowIdx >= 0) {
-    lines.splice(lastRowIdx + 1, 0, appendedRow);
+  const insertAt = registryAppendIndex(lines);
+  if (insertAt > 0) {
+    lines.splice(insertAt, 0, appendedRow);
     writeFileSync(registryPath, lines.join('\n'), 'utf8');
     console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${targetVersion})`);
   }

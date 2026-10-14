@@ -7,12 +7,21 @@ title: >-
   helpers/registry-append.ts with divergent boundary semantics — converge on the
   shared helper
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-14T08:16:17.520+09:00'
 history:
   - at: '2026-10-14T08:16:17.520+09:00'
     from: null
     to: backlog
+  - at: '2026-10-14T09:53:43.701+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-14T09:53:43.717+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-14T10:27:37.919+09:00'
+    from: running
+    to: review
 result: null
 error: null
