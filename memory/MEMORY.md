@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-15](2026-10-15.md) | docs(review): daily fleet review 2026-10-15 — baseline-only, adopted #1543 spec entry |
 | [2026-10-14](2026-10-14.md) | fix(ci): test-runner v1.5.0 windows CI timing budgets (bun per-test ceiling + per-file overrides) |
 | [2026-10-13](2026-10-13.md) | fix(templates): deliver upgrade-project helper imports to L1 (U-20261012-001 co-newbiz scaffold typecheck) |
 | [2026-10-12](2026-10-12.md) | docs(docs): workspace sync (6 files) |
@@ -13,7 +14,7 @@
 | [2026-10-11](2026-10-11.md) | docs(review): daily fleet review 2026-10-11 |
 | [2026-10-09](2026-10-09.md) | docs(review): daily fleet review 2026-10-09 |
 | [2026-10-08](2026-10-08.md) | docs(review): daily fleet review 2026-10-08 |
-| [2026-10-07](2026-10-07.md) | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
+| 2026-10-07 | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
 | 2026-10-06 | chore: update |
 | 2026-10-05 | chore: update |
 | 2026-10-04 | chore: update |
