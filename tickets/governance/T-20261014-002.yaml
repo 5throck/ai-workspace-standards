@@ -7,7 +7,7 @@ title: >-
   helpers/registry-append.ts with divergent boundary semantics — converge on the
   shared helper
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-14T08:16:17.520+09:00'
 history:
@@ -23,5 +23,13 @@ history:
   - at: '2026-10-14T10:27:37.919+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-14T13:20:11.950+09:00'
+    from: review
+    to: done
+result: >-
+  registry-append 1.1.0 exports registryAppendIndex (## Registry-anchored,
+  ####-bounded); upgrade-project 1.70.6 reconcileScriptRegistry append arm
+  adopts it — second inline registry-append implementation retired. 5 new unit
+  tests. Landed via PR #1547 (merged, CI 8/8 green):
+  https://github.com/5throck/ai-workspace-standards/pull/1547
 error: null
