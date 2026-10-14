@@ -1,11 +1,35 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-14, T-20261014-002): boundary scan exported as
+//           registryAppendIndex and adopted by reconcileScriptRegistry's
+//           append arm — one boundary semantics everywhere (## Registry-
+//           anchored, bounded by the first `#### \` detail-section header,
+//           whose flag tables also contain table-shaped rows). The former
+//           "break at the first non-table line" rule is retired.
 // v1.0.0 (2026-10-13, T-20261013-001): extracted from new-project.ts §6.6 and
 //           upgrade-project.ts VARIANT SCRIPTS SYNC — both carried the same
 //           "find the first ## Registry table, splice rows after its last row,
 //           write" mechanics; only the row format differed per call site.
 
 import { readFileSync, writeFileSync } from 'node:fs';
+
+/**
+ * Index AFTER the last table row of the registry region — from the first
+ * `## Registry` heading to the first `#### \`` detail-section header, whose
+ * flag tables also contain `| \`*.ts\` |`-shaped rows (the same boundary
+ * reconcileScriptRegistry's prune helpers respect). Returns -1 when the
+ * heading or its table is missing.
+ */
+export function registryAppendIndex(lines: string[]): number {
+  const regStart = lines.findIndex((l) => /^## Registry/.test(l));
+  if (regStart < 0) return -1;
+  let lastRowIdx = -1;
+  for (let i = regStart; i < lines.length; i++) {
+    if (/^####\s+`/.test(lines[i])) break;
+    if (/^\|\s*`/.test(lines[i])) lastRowIdx = i;
+  }
+  return lastRowIdx >= 0 ? lastRowIdx + 1 : -1;
+}
 
 /**
  * Append fully-formatted registry rows at the end of the FIRST `## Registry`
@@ -15,13 +39,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 export function appendRegistryRows(regPath: string, rows: string[]): boolean {
   if (rows.length === 0) return false;
   const lines = readFileSync(regPath, 'utf-8').split('\n');
-  const regStart = lines.findIndex((l) => /^## Registry/.test(l));
-  if (regStart < 0) return false;
-  let insertAt = -1;
-  for (let i = regStart; i < lines.length; i++) {
-    if (/^\|\s*`/.test(lines[i])) insertAt = i + 1;
-    else if (insertAt >= 0 && !/^\|/.test(lines[i])) break;
-  }
+  const insertAt = registryAppendIndex(lines);
   if (insertAt <= 0) return false;
   lines.splice(insertAt, 0, ...rows);
   writeFileSync(regPath, lines.join('\n'), 'utf-8');
