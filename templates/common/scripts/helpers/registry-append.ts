@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-17, T-20261017-001): the boundary scan stops at the NEXT
+//           `## ` heading — v1.1.0's only stop condition (the first `#### \`
+//           header) let the scan run through the intermediate ## sections
+//           (Layer Classification / Ownership Layers / Lifecycle States),
+//           whose rows are also `| \`word\` |`-shaped, so the append index
+//           landed inside the Lifecycle States table and the scaffolded
+//           co-abap SCRIPTS.md failed verify-scripts (7 unregistered rows).
+//           The anchor is now the exact `## Registry` line so a preceding
+//           `## Registry Scope` section cannot hijack it.
 // v1.1.0 (2026-10-14, T-20261014-002): boundary scan exported as
 //           registryAppendIndex and adopted by reconcileScriptRegistry's
 //           append arm — one boundary semantics everywhere (## Registry-
@@ -14,17 +23,19 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 /**
- * Index AFTER the last table row of the registry region — from the first
- * `## Registry` heading to the first `#### \`` detail-section header, whose
- * flag tables also contain `| \`*.ts\` |`-shaped rows (the same boundary
- * reconcileScriptRegistry's prune helpers respect). Returns -1 when the
- * heading or its table is missing.
+ * Index AFTER the last table row of the registry region — from the exact
+ * `## Registry` heading to the next `## ` heading (the region may contain
+ * prose and ### subsections between row groups) or the first `#### \`
+ * detail-section header, whichever comes first; rows in later `##` tables
+ * (Lifecycle States and friends) are also `| \`word\` |`-shaped and must
+ * never win. Returns -1 when the heading or its table is missing.
  */
 export function registryAppendIndex(lines: string[]): number {
-  const regStart = lines.findIndex((l) => /^## Registry/.test(l));
+  const regStart = lines.findIndex((l) => /^## Registry\s*$/.test(l));
   if (regStart < 0) return -1;
   let lastRowIdx = -1;
-  for (let i = regStart; i < lines.length; i++) {
+  for (let i = regStart + 1; i < lines.length; i++) {
+    if (/^##\s/.test(lines[i])) break;
     if (/^####\s+`/.test(lines[i])) break;
     if (/^\|\s*`/.test(lines[i])) lastRowIdx = i;
   }
