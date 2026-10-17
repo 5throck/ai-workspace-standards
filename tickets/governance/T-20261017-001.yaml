@@ -13,7 +13,7 @@ title: >-
   13/14 (co-abap only, nights of 10-15/10-16). Fix: bound the scan at the next
   ## heading and anchor on the exact ## Registry line
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-17T08:18:22.825+09:00'
 history:
@@ -23,5 +23,11 @@ history:
   - at: '2026-10-17T08:23:48.714+09:00'
     from: backlog
     to: review
-result: null
+  - at: '2026-10-17T08:35:03.664+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #1554: registryAppendIndex v1.2.0 bounds the scan at the next ##
+  heading and anchors on the exact ## Registry line; regression tests added;
+  local co-abap battery 41/41; PR CI fully green
 error: null
