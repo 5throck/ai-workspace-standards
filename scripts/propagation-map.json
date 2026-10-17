@@ -201,6 +201,16 @@
       "exclude": [],
       "note": "TOML is seed-only downstream (upgrade-policy ADD_IF_MISSING, ADR-0076); co-abap/co-safety own their project Codex configs"
     },
+    "codex-hooks": {
+      "description": "L0 .codex/hooks.json → L1 templates/common/.codex/hooks.json — Codex lifecycle hooks (PM Gateway identity gates, spec docs/designs/2026-10-18-codex-user-prompt-gate-design.md)",
+      "source": ".codex",
+      "target": "templates/common/.codex",
+      "include_pattern": "hooks.json",
+      "recursive": false,
+      "l2_drift_eligible": false,
+      "exclude": [],
+      "note": "Hook wiring is L0/L1-only: variants carry no .codex config layer, and Codex loads project hooks only from a trusted project layer (/hooks review)"
+    },
     "claude-skills-json": {
       "description": "L0 .claude/skills.json → L1 templates/common/.claude/skills.json — Claude skill path registration",
       "source": ".claude",
