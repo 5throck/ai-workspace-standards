@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261017-001
+kind: manual
+title: >-
+  defect: registryAppendIndex boundary scan overshoots the Registry table —
+  after v1.1.0 retired the break-at-first-non-table-line rule the only stop
+  condition is a #### header, so the intermediate ## sections' backtick-table
+  rows (Layer Classification / Ownership Layers / Lifecycle States) still match
+  the row pattern and the append index lands inside the Lifecycle States table;
+  scaffold-time VARIANT SCRIPTS append (new-project §6.6) therefore inserts
+  co-abap variant rows into the wrong table and the delivered SCRIPTS.md fails
+  verify-scripts with 7 unregistered scripts — nightly all-variants E2E fails
+  13/14 (co-abap only, nights of 10-15/10-16). Fix: bound the scan at the next
+  ## heading and anchor on the exact ## Registry line
+priority: high
+status: review
+attempts: 0
+created_at: '2026-10-17T08:18:22.825+09:00'
+history:
+  - at: '2026-10-17T08:18:22.825+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-17T08:23:48.714+09:00'
+    from: backlog
+    to: review
+result: null
+error: null

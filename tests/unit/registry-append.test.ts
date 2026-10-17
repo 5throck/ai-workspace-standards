@@ -104,4 +104,55 @@ describe('registryAppendIndex (T-20261014-002)', () => {
     const lines = ['## Registry', '', '#### `a.ts`', '', '| `--foo` | enables foo |'];
     expect(registryAppendIndex(lines)).toBe(-1);
   });
+
+  // T-20261017-001: the real delivered SCRIPTS.md sits the Registry table in
+  // front of other ## sections whose tables are also `| \`word\` |`-shaped
+  // (Lifecycle States) — the v1.1.0 scan ran through them and the append
+  // landed inside the Lifecycle States table (nightly co-abap 13/14).
+  test('stops at the next ## section — backtick rows in later ## tables never win', () => {
+    const lines = [
+      '# SCRIPTS.md',
+      '',
+      '## Registry',
+      '',
+      '| Script | Layer | Version | Status | Notes | Deps | Delivered | Owner |',
+      '|--------|-------|---------|--------|-------|------|-----------|-------|',
+      '| `a.ts` | L0 | 1.0.0 | active | — | — | L0 | — |',
+      '| `lib/b.ts` | L0 | 2.0.0 | active | — | — | L0 | — |',
+      '',
+      '## Layer Classification Framework',
+      '',
+      'L0 is the development SSOT.',
+      '',
+      '## Lifecycle States',
+      '',
+      '| Status | Meaning | Action Required |',
+      '|--------|---------|-----------------|',
+      '| `active` | In production use | — |',
+      '| `deprecated` | Scheduled for removal | — |',
+      '',
+      '## Guide',
+      '',
+      '#### `a.ts`',
+      '',
+      '| `--foo` | enables foo |',
+    ];
+    const idx = registryAppendIndex(lines);
+    expect(lines[idx - 1]).toContain('| `lib/b.ts` |');
+    expect(idx).toBeLessThan(lines.indexOf('## Lifecycle States'));
+  });
+
+  test('anchors on the exact ## Registry heading — ## Registry Scope never wins', () => {
+    const lines = [
+      '## Registry Scope',
+      '',
+      'The registry covers top-level scripts.',
+      '',
+      '## Registry',
+      '',
+      '| `a.ts` | L0 | 1.0.0 | active | — | — | L0 | — |',
+    ];
+    const idx = registryAppendIndex(lines);
+    expect(lines[idx - 1]).toContain('| `a.ts` | L0 |');
+  });
 });
