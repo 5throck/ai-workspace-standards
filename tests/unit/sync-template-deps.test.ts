@@ -8,7 +8,10 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { alignTemplateDeps, type DepDrift, type DepReportEntry } from '../../scripts/sync-template-deps';
+import { mkdtempSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { alignTemplateDeps, pruneTemplateNodeModules, type DepDrift, type DepReportEntry } from '../../scripts/sync-template-deps';
 
 describe('alignTemplateDeps', () => {
   test('shared key updated in place + key order preserved', () => {
@@ -208,5 +211,26 @@ describe('alignTemplateDeps', () => {
 
     expect(result.enginesChanged).toBe(true);
     expect(templatePkg.engines.node).toBe('>=18.0.0');
+  });
+});
+
+// T-20261018-001: bun install creates templates/common/node_modules on every
+// real alignment and validate-templates hard-fails on it — apply mode must
+// prune it (after install and on the no-drift early exit).
+describe('pruneTemplateNodeModules (T-20261018-001)', () => {
+  test('removes an existing node_modules dir and returns true', () => {
+    const root = mkdtempSync(join(tmpdir(), 'sync-deps-prune-'));
+    const nm = join(root, 'node_modules');
+    mkdirSync(join(nm, 'some-pkg'), { recursive: true });
+    writeFileSync(join(nm, 'some-pkg', 'index.js'), 'x');
+    expect(pruneTemplateNodeModules(root)).toBe(true);
+    expect(existsSync(nm)).toBe(false);
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  test('is a no-op returning false when node_modules is absent', () => {
+    const root = mkdtempSync(join(tmpdir(), 'sync-deps-prune-'));
+    expect(pruneTemplateNodeModules(root)).toBe(false);
+    rmSync(root, { recursive: true, force: true });
   });
 });
