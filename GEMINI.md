@@ -30,6 +30,8 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 > **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
+> **Auto-enforcement (Gemini CLI)**: `scripts/hooks/pm-dispatch-gate.ts` runs as a BeforeTool hook on `invoke_subagent` (decision `deny`) — direct specialist dispatch is auto-denied unless a fresh PM-role session marker exists (`pm-role-bootstrap.ts` at SessionStart, 24h TTL). Detail: `docs/governance/agents/pm-gateway-workflow.md` §3.1.3. Antigravity does not fire hooks — self-enforce this rule.
+
 ---
 
 ## Gemini-Specific & Antigravity Workflows
@@ -144,6 +146,8 @@ Instantiate a new reusable subagent type with a unique name, specialized role pr
 
 #### Invoke Subagent (`invoke_subagent`)
 Spawn parallel instances to execute dedicated work concurrently. PM MUST explicitly use `"Workspace": "share"` for execution agents to ensure safe parallel file writing.
+
+> **Gate**: On Gemini CLI, `invoke_subagent` calls that bypass the PM Gateway are denied by `scripts/hooks/pm-dispatch-gate.ts` (BeforeTool, decision `deny`) unless a PM-role session marker exists — see the auto-enforcement note above.
 ```json
 {
   "Subagents": [
@@ -369,7 +373,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-10-10 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-10-18 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- graft:start -->
 ## Graft — repo context graph

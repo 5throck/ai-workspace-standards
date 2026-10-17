@@ -10,6 +10,16 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "matcher": "invoke_subagent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
+            "timeout": 5000
+          }
+        ]
       }
     ],
     "SessionStart": [
