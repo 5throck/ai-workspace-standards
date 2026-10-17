@@ -29,19 +29,25 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 ### 1. Enforcement & Hook Status
 
-Codex does not run the workspace hook suite in Phase 1 (no `PreToolUse`/`PostToolUse` equivalents are wired). Governance rules are **prompt-enforced**: the agent self-enforces every gate a hook would otherwise apply, exactly as Antigravity sessions do (CONSTITUTION §11).
+Codex now ships a lifecycle-hooks framework, and the PM Gateway identity chain is wired through it (`.codex/hooks.json`, spec `docs/designs/2026-10-18-codex-user-prompt-gate-design.md`): `SessionStart` runs `pm-role-bootstrap.ts` (PM bootstrap reminder + session marker) and `UserPromptSubmit` runs `codex-user-prompt-gate.ts` (blocks slash-style prompts that invoke rostered specialists directly from non-PM sessions). Everything else remains **prompt-enforced**: the agent self-enforces the remaining gates, exactly as Antigravity sessions do (CONSTITUTION §11).
 
 | Gate | Codex CLI | Codex Desktop App | Codex IDE extension | Manual fallback |
 |------|:---------:|:-----------------:|:-------------------:|-----------------|
+| PM dispatch gate (`/specialist` prompts) | ✅ Hook (`UserPromptSubmit` block; trust required) | ✅ Hook (same `hooks.json`) | ✅ Hook (same `hooks.json`) | follow AGENTS.md §3.1 — route specialist work through PM |
 | Pre-Edit Quality Gate | ✅ Prompt (self-enforced) | ✅ Prompt (self-enforced) | ✅ Prompt (self-enforced) | follow §2 before first edit per file |
 | Post-write lifecycle check | ❌ Not fired | ❌ Not fired | ❌ Not fired | `bun scripts/hooks/post-write-lifecycle-check.ts` before committing |
 | QA audit | ❌ Not fired | ❌ Not fired | ❌ Not fired | `bun scripts/audit.ts` after each task |
 | Secret scan / gitleaks | ❌ Not fired | ❌ Not fired | ❌ Not fired | runs in the pre-commit hook at commit time |
 
+**Codex hook trust-gating** (why the gate can be silently absent):
+- Project hooks load only when the project `.codex/` layer is trusted. Non-managed hooks are hash-pinned and **skipped until trusted** — review them once via `/hooks`; any edit to `hooks.json` or the hook scripts re-triggers the review.
+- `--dangerously-bypass-hook-trust` runs enabled hooks without persisted trust for a single invocation — reserved for vetted one-off automation, never routine sessions.
+- Residual risk: sessions outside this repo's root (e.g. `Projects/*` are independent git repos with no `scripts/hooks/`) surface a hook failure and continue un-gated; in those sessions the prompt-enforcement rule (AGENTS.md §3.1) is the standing control. Verify with `/hooks` that both hooks are listed and trusted.
+
 **Recommended workflow split** (mirrors the Claude pattern):
 - **CLI**: automated sync pipeline runs, multi-step refactors, long sessions.
 - **Desktop App**: PR monitoring, visual diff reviews, parallel review sessions.
-- **IDE extension**: in-editor edits and inline review next to the open file; same prompt-enforced gates as the CLI (hooks are not wired).
+- **IDE extension**: in-editor edits and inline review next to the open file; same prompt-enforced gates as the CLI (PM dispatch gate is hook-wired; remaining gates are prompt-enforced).
 
 ### 2. Pre-Edit Quality Gate (All Platforms)
 
@@ -57,7 +63,7 @@ Before editing any file for the **FIRST time in a session**, the agent MUST:
 | Claude Code CLI | ✅ Hook (automatic) | PreToolUse `ask` mode |
 | Gemini CLI | ✅ Hook (automatic) | BeforeTool `deny` mode |
 | Antigravity | ✅ Prompt (manual) | self-enforced |
-| Codex CLI / Desktop App / IDE extension | ✅ Prompt (manual) | Hooks not wired in Phase 1 — agent self-enforces |
+| Codex CLI / Desktop App / IDE extension | ✅ Prompt (manual) | Pre-Edit gate not hook-wired — agent self-enforces (PM dispatch gate IS hook-wired — §1) |
 
 ### 3. Slash Commands & Custom Prompts
 

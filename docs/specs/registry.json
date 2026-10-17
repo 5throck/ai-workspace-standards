@@ -2462,6 +2462,15 @@
       "last_updated": "2026-10-16"
     },
     {
+      "id": "2026-10-18-codex-user-prompt-gate-design",
+      "title": "codex user prompt gate design",
+      "file": "docs/designs/2026-10-18-codex-user-prompt-gate-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-17",
+      "last_updated": "2026-10-17"
+    },
+    {
       "id": "skillhygiene",
       "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
       "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
