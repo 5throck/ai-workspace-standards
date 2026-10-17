@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261017-002
+kind: manual
+title: >-
+  validator-hardening: windows-only mcp-upstream-server.test.ts E13d timeout
+  flake recurred (root #1559 windows leg 2026-10-17, 3810ms; also observed in
+  the 10-15/10-17 windows legs) — T-20261004-011's scaled budget is insufficient
+  under slow windows spawn; apply T-20261005-001's deadline-aware-wait treatment
+  (deterministic scheduler stub) to the E13d assertions
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-17T14:01:57.515+09:00'
+history:
+  - at: '2026-10-17T14:01:57.515+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
