@@ -72,6 +72,8 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 | Gemini CLI equivalent | — | — | Gemini AfterTool fires the same script with `--platform gemini` |
 | PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
 | PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
+| PreToolUse (PM dispatch gate) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/pm-dispatch-gate.ts` on the `Agent` tool (`ask` verdict) — direct specialist dispatch needs user confirmation or a PM-role session marker (`pm-role-bootstrap.ts`, 24h TTL). Detail: `docs/governance/agents/pm-gateway-workflow.md` §3.1.3 |
+| PreToolUse (PM dispatch gate) | Claude Code Desktop App | ⚠️ | Hooks intermittent; fallback: role-declaration self-enforcement |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
 | TeammateIdle (lifecycle) | Claude Code Desktop App | ⚠️ | Hooks intermittent; run manually |
 | TaskCompleted (QA gate) | Claude Code CLI | ✅ | Runs `bun scripts/audit.ts` async when a task is marked complete |
@@ -361,7 +363,7 @@ All shared Git/PR rules are in [CONSTITUTION.md §3](CONSTITUTION.md#3-github-pr
 
 - **PR Language**: Governed by [CONSTITUTION.md §3 - Mandatory English Git & PR Artifacts](CONSTITUTION.md#3-github-pr-workflow). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-11 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+*Last Updated: 2026-10-18 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
 
 
