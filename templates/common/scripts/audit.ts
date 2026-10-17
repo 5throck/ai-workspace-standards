@@ -1790,18 +1790,18 @@ if (fs.existsSync(path.join('scripts', 'validate-doc-folder.ts')) && fs.existsSy
     }
 }
 
-// T-20261002-011: variant .claude/settings.json SessionStart entries managed by the
-// workspace (pm-role-bootstrap) must stay in sync with templates/common — a stale
-// hook on 13 variants is exactly the drift class the propagation map exists to close.
+// T-20261002-011: variant .claude/.gemini settings.json managed hook entries
+// (pm-role-bootstrap, pm-dispatch-gate) must stay in sync with templates/common —
+// a stale hook on 13 variants is exactly the drift class the propagation map exists to close.
 // Remedy: bun scripts/sync-variant-settings.ts
 if (fs.existsSync(path.join('scripts', 'sync-variant-settings.ts'))) {
     const { status, stdout, stderr } = spawnSync('bun', ['scripts/sync-variant-settings.ts', '--check'], { encoding: 'utf-8' });
     if (status !== 0) {
         if (stdout) console.log(stdout);
         if (stderr) console.error(stderr);
-        Fail('variant settings.json SessionStart drift — run: bun scripts/sync-variant-settings.ts');
+        Fail('variant settings.json managed-hook drift — run: bun scripts/sync-variant-settings.ts');
     } else {
-        Pass('variant settings.json SessionStart: managed entries in sync with templates/common');
+        Pass('variant settings.json: managed hook entries in sync with templates/common');
     }
 }
 

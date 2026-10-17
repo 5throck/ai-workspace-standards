@@ -27,6 +27,15 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
+            "timeout": 5000
+          }
+        ]
       }
     ],
     "AfterTool": [

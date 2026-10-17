@@ -155,6 +155,16 @@
             "statusMessage": "GateGuard: checking first-edit importers..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
+            "timeout": 10,
+            "statusMessage": "Checking PM dispatch policy..."
+          }
+        ]
       }
     ],
     "TeammateIdle": [

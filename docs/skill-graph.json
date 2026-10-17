@@ -6936,7 +6936,11 @@
       "version": "1.6.0",
       "mirrors": [
         "templates/co-safety/skills/sync/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-18"
+      }
     },
     {
       "id": "skill:co-safety/tank-integrity-validator",
@@ -7326,7 +7330,11 @@
       "version": "1.8.0",
       "mirrors": [
         "templates/common/skills/sync/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-18"
+      }
     },
     {
       "id": "skill:common/translate",
@@ -7967,7 +7975,11 @@
         ".agents/skills/sync/SKILL.md",
         ".codex/skills/sync/SKILL.md",
         ".hermes/skills/sync/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-18"
+      }
     },
     {
       "id": "skill:root/team-builder",
