@@ -8,7 +8,7 @@ title: >-
   under slow windows spawn; apply T-20261005-001's deadline-aware-wait treatment
   (deterministic scheduler stub) to the E13d assertions
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-17T14:01:57.515+09:00'
 history:
@@ -24,5 +24,8 @@ history:
   - at: '2026-10-18T03:11:35.369+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-19T08:08:53.760+09:00'
+    from: review
+    to: done
+result: verified/closed in the constitution-scrub depth pass (PR for 2026-10-19 batch)
 error: null
