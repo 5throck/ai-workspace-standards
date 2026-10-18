@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-10-18, T-20261018-001): prune templates/common/node_modules in
+//           apply mode — bun install creates it on every real alignment and
+//           validate-templates then hard-fails ("must not exist"), blocking the
+//           sync (surfaced by the @types/node 26.6.5 bump). Pruned after a
+//           successful install AND on the no-drift early exit (self-heals
+//           leftovers from older runs).
 /**
  * sync-template-deps.ts — Automatic dependency version sync
  *
@@ -111,6 +117,19 @@ export function alignTemplateDeps(rootPkg: any, templatePkg: any): AlignResult {
   return result;
 }
 
+/**
+ * Removes templates/common/node_modules when present. validate-templates
+ * hard-fails on it, and `bun install` creates it on every real alignment —
+ * exported for unit testing; no-op when absent.
+ */
+export function pruneTemplateNodeModules(templateDir: string): boolean {
+  const nmDir = path.join(templateDir, 'node_modules');
+  if (!fs.existsSync(nmDir)) return false;
+  fs.rmSync(nmDir, { recursive: true, force: true });
+  console.log('🧹 Removed templates/common/node_modules (validate-templates forbids it)');
+  return true;
+}
+
 // ============================================================================
 // CLI BEHAVIOR (guarded by import.meta.main)
 // ============================================================================
@@ -180,9 +199,11 @@ if (import.meta.main) {
   if (mode === 'apply') {
     // Apply mode: align and regenerate lock
     const result = alignTemplateDeps(rootPkg, templatePkg);
+    const templateDir = path.dirname(templatePkgPath);
 
     if (result.changed.length === 0 && !result.enginesChanged) {
       console.log('✓ Template dependencies already in sync — no install needed');
+      pruneTemplateNodeModules(templateDir);
       process.exit(0);
     }
 
@@ -201,7 +222,6 @@ if (import.meta.main) {
     }
 
     // Regenerate bun.lock
-    const templateDir = path.dirname(templatePkgPath);
     console.log('📦 Regenerating templates/common/bun.lock...');
 
     try {
@@ -219,6 +239,7 @@ if (import.meta.main) {
       }
 
       console.log('✓ bun install completed');
+      pruneTemplateNodeModules(templateDir);
     } catch (err) {
       console.error('❌ Failed to spawn bun install');
       console.error(String(err));

@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-17T18:12:33.369Z
+**Generated**: 2026-10-17T18:13:06.147Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -181,7 +182,7 @@
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
-| sync-template-deps.ts | 1.0.0 | scripts/sync-template-deps.ts | N/A |
+| sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | N/A |
 | sync-variant-settings.ts | 1.1.0 | scripts/sync-variant-settings.ts | N/A |
 | tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.1 | scripts/team-builder.ts | N/A |

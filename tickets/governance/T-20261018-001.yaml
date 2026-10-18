@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261018-001
+kind: manual
+title: >-
+  defect: sync-template-deps --apply leaves templates/common/node_modules behind
+  when an alignment actually changes a version (bun install runs only then) —
+  validate-templates then fails with 'templates/common/node_modules must not
+  exist' and blocks the sync; surfaced by the dependabot @types/node 26.6.5 PR
+  (first real dep change since the check hardened). Fix: the helper should
+  install lockfile-only or prune node_modules after install
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-18T02:27:06.420+09:00'
+history:
+  - at: '2026-10-18T02:27:06.420+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-18T03:02:19.107+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-18T03:02:19.125+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-18T03:12:51.232+09:00'
+    from: running
+    to: review
+result: null
+error: null
