@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261019-001
+kind: manual
+title: >-
+  defect: constitution-scrub L1 transform rewrites CONSTITUTION.md references to
+  literal 'docs/context.md' regardless of the target file's depth —
+  docs/governance/agents/*.md mirrors get 7 broken context links each (3rd
+  recurrence: the 10-17 template-level fixes were re-reverted by the re-mirror),
+  and ADR/CLAUDE-anchor links keep root-depth paths that break one level
+  shallower; fix the transform to compute relative depth per source location +
+  regenerate mirrors
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-19T06:29:25.683+09:00'
+history:
+  - at: '2026-10-19T06:29:25.683+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
