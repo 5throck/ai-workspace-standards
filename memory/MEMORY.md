@@ -6,14 +6,15 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-20](2026-10-20.md) | docs(memory): resolve #1568 stale-base conflict — rebase content onto main |
 | [2026-10-18](2026-10-18.md) | chore(templates): workspace sync (52 files) |
 | [2026-10-17](2026-10-17.md) | fix(scaffold): registry-append v1.2.0 bound the append-index scan at the next section heading (T-20261017-001) |
 | [2026-10-15](2026-10-15.md) | docs(review): daily fleet review 2026-10-15 — baseline-only, adopted #1543 spec entry |
 | [2026-10-14](2026-10-14.md) | fix(ci): test-runner v1.5.0 windows CI timing budgets (bun per-test ceiling + per-file overrides) |
 | [2026-10-13](2026-10-13.md) | fix(templates): deliver upgrade-project helper imports to L1 (U-20261012-001 co-newbiz scaffold typecheck) |
-| [2026-10-12](2026-10-12.md) | docs(docs): workspace sync (6 files) |
+| 2026-10-12 | docs(docs): workspace sync (6 files) |
 | 2026-10-10 | feat(platform): comma-separated --platform and 8-tool coverage docs |
-| [2026-10-11](2026-10-11.md) | docs(review): daily fleet review 2026-10-11 |
+| 2026-10-11 | docs(review): daily fleet review 2026-10-11 |
 | 2026-10-09 | docs(review): daily fleet review 2026-10-09 |
 | 2026-10-08 | docs(review): daily fleet review 2026-10-08 |
 | 2026-10-07 | chore(memory): land stranded session-closeout blocks to unblock nightly guard |
