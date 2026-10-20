@@ -2,12 +2,14 @@
  * Tests for scrubConstitutionRefs() target-aware rule A-6 in
  * scripts/propagate-to-templates.ts.
  *
- * Pins the backward-compatibility contract: no targetPath → output
- * byte-identical to the pre-A-6 (legacy) behavior; a targetPath ending in
- * docs/context.md rewrites ](docs/context.md) links to relative ](context.md);
- * any other targetPath is a no-op.
+ * Contract since T-20261019-001 (v1.2.0): every ](docs/context.md) the
+ * blanket rules emit is rewritten to the path relative to the TARGET file's
+ * own directory — root-depth targets keep docs/context.md, deeper mirrors get
+ * ../..-style paths, and docs/context.md itself gets the self-reference-free
+ * ](context.md). No targetPath → output byte-identical to the pre-A-6
+ * (legacy) behavior.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
 import { scrubConstitutionRefs } from '../../scripts/propagate-to-templates.ts';
@@ -31,21 +33,53 @@ const LEGACY_OUTPUT = [
   'Already canonical: [docs/context.md](docs/context.md).',
 ].join('\n');
 
-describe('scrubConstitutionRefs target-aware rule A-6', () => {
+describe('scrubConstitutionRefs target-aware rule A-6 (T-20261019-001 depth relativization)', () => {
   test('(a) no targetPath → byte-identical to legacy behavior', () => {
     expect(scrubConstitutionRefs(FIXTURE)).toBe(LEGACY_OUTPUT);
   });
 
-  test('(b) targetPath ending in docs/context.md → ](docs/context.md) rewritten to ](context.md)', () => {
+  test('(b) target at docs/context.md → ](docs/context.md) rewritten to ](context.md)', () => {
     const expected = LEGACY_OUTPUT.replace(/\]\(docs\/context\.md\)/g, '](context.md)');
-    expect(scrubConstitutionRefs(FIXTURE, undefined, '/x/docs/context.md')).toBe(expected);
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/common/docs/context.md')).toBe(expected);
     // path.sep handling: Windows-style separators resolve to the same rule
-    expect(scrubConstitutionRefs(FIXTURE, undefined, 'C:\\x\\docs\\context.md')).toBe(expected);
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates\\common\\docs\\context.md')).toBe(expected);
   });
 
-  test('(c) other targetPath → unchanged vs no-targetPath output', () => {
-    expect(scrubConstitutionRefs(FIXTURE, undefined, '/x/docs/other.md')).toBe(
-      scrubConstitutionRefs(FIXTURE)
+  test('(c) deep target (docs/governance/agents/*) → ../../context.md', () => {
+    // The recurring defect: root-depth links in a three-level mirror resolve
+    // to docs/governance/agents/docs/context.md (7 broken links per mirror).
+    const expected = LEGACY_OUTPUT.replace(/\]\(docs\/context\.md\)/g, '](../../context.md)');
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/common/docs/governance/agents/workflows.md')).toBe(expected);
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/co-abap/docs/governance/agents/pm-gateway-workflow.md')).toBe(expected);
+  });
+
+  test('(d) shallow target (docs/governance/*) → ../context.md', () => {
+    const expected = LEGACY_OUTPUT.replace(/\]\(docs\/context\.md\)/g, '](../context.md)');
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/common/docs/governance/x.md')).toBe(expected);
+  });
+
+  test('(e) root-depth target → literal docs/context.md preserved', () => {
+    // Root files are the one place the blanket output already resolves —
+    // nothing to rewrite, byte-identical to the legacy output.
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/common/CLAUDE.md')).toBe(LEGACY_OUTPUT);
+    expect(scrubConstitutionRefs(FIXTURE, undefined, 'templates/co-abap/AGENTS.md')).toBe(LEGACY_OUTPUT);
+  });
+
+  test('(f) A-9: docs/adr/ link targets redirect to the depth-relative context link', () => {
+    // L1+ trees carry no docs/adr/ content (root docs/adr/ is L0-only
+    // governance) — the workflows.md mirror's ADR-0099 link broke in every
+    // scaffold. Link text preserved, target redirected (A-5b policy).
+    const fixture = FIXTURE + '\nAdmission: [ADR-0099](docs/adr/0099-template-migration-admission-policy.md).';
+    const expected =
+      LEGACY_OUTPUT.replace(/\]\(docs\/context\.md\)/g, '](../../context.md)') +
+      '\nAdmission: [ADR-0099](../../context.md).';
+    expect(scrubConstitutionRefs(fixture, undefined, 'templates/common/docs/governance/agents/workflows.md')).toBe(expected);
+  });
+
+  test('(g) A-9: anchor on an adr target is dropped with the redirect', () => {
+    const fixture = 'Ref: [§1](docs/adr/0099-template-migration-admission-policy.md#scope).';
+    expect(scrubConstitutionRefs(fixture, undefined, 'templates/common/docs/governance/agents/workflows.md')).toBe(
+      'Ref: [§1](../../context.md).'
     );
   });
 });

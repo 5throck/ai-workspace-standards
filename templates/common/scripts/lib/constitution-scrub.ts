@@ -1,7 +1,18 @@
-// @version 1.1.0
+// @version 1.2.0
 /**
  * constitution-scrub.ts — shared context.md reference scrubber
  *
+ * v1.2.0 (2026-10-19, T-20261019-001): rule A-6 generalizes from the
+ *          self-reference special case to full target-depth relativization —
+ *          every ](docs/context.md) the blanket rules emit is rewritten to the
+ *          path relative to the TARGET file's directory (a
+ *          docs/governance/agents/*.md mirror three levels deep gets
+ *          ../../context.md, not the root-depth docs/context.md that broke 7
+ *          links per mirror on every re-propagation). The in-project target
+ *          path is derived by stripping the templates/<variant>/ prefix.
+ *          New rule A-9: docs/adr/ link targets redirect to the projected
+ *          docs/context.md (L1+ trees carry no docs/adr/ content; the
+ *          workflows.md mirror's ADR-0099 link broke in every scaffold).
  * v1.1.0 (2026-10-05, T-20261004-022): code-branch state machine no longer lets
  *          a `//` line corrupt block-comment state — a `/*`-shaped glob inside a
  *          // comment (e.g. `docs/**` in a path list) used to wedge the machine
@@ -27,7 +38,8 @@
  *
  * Rules (prose files): A-1 header line, A-2/A-3 markdown links, A-4 plain-text,
  * A-5/A-5b docs/constitution/ link targets, A-7 part-file mentions, A-8 bare
- * directory mentions, A-6 target-aware self-link rewrite.
+ * directory mentions, A-6 target-aware depth relativization, A-9 docs/adr/
+ * target redirect.
  *
  * Non-targets (never scrubbed):
  *   - JSON files (.json): functional data. Field values such as
@@ -43,7 +55,7 @@
  * @license MIT
  */
 
-import { extname } from 'node:path';
+import { extname, posix } from 'node:path';
 import { isPolicySelfDescription, POLICY_SELF_DESCRIPTION_MARKERS } from '../helpers/l0-ref-policy.ts';
 
 /**
@@ -186,14 +198,29 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   work = work.replace(/,\s*`docs\/constitution\/`/g, '');
   work = work.replace(/`docs\/constitution\/`/g, '`docs/`');
   work = work.replace(/(^|[^\/\w.-])docs\/constitution\/(?![\w.-])/gi, '$1docs/');
-  // A-6. Target-aware: a target that lives at docs/context.md itself must use a
-  // relative link — ](docs/context.md) inside docs/context.md would resolve to
-  // docs/docs/context.md (broken self-reference). No targetPath → no-op.
+  // A-6. Target-aware: every ](docs/context.md) the rules above emit is
+  // root-depth-shaped, which only resolves from the project root. Rewrite the
+  // target to the path relative to the TARGET file's own directory — a
+  // docs/governance/agents/*.md mirror needs ../../context.md, a root file
+  // keeps docs/context.md, and docs/context.md itself gets context.md (the
+  // self-reference case: ](docs/context.md) inside docs/context.md would
+  // resolve to docs/docs/context.md). No targetPath → no-op (callers that
+  // cannot say where the content lands keep the legacy literal).
   if (targetPath) {
     const normalizedTarget = targetPath.replace(/\\/g, '/');
-    if (normalizedTarget.endsWith('docs/context.md')) {
-      work = work.replace(/\]\(docs\/context\.md\)/g, '](context.md)');
-    }
+    // In-project path: strip the templates/<variant>/ prefix (L1 common and
+    // L2 variants alike) — the delivered depth is what links resolve against.
+    const inProject = normalizedTarget.replace(/^.*?templates\/[^/]+\//, '').replace(/^\/+/, '');
+    const rel = posix.relative(posix.dirname('/' + inProject), '/docs/context.md');
+    work = work.replace(/\]\(docs\/context\.md\)/g, `](${rel})`);
+    // A-9. adr/ link targets have no projected home — L1+ trees carry no
+    // docs/adr/ content (root docs/adr/ is L0-only governance, §7.5), so the
+    // target redirects to the projected docs/context.md with the link text
+    // preserved and anchors dropped (A-5b policy). Depth-relative like A-6.
+    // The source may reference the ADR root-depth (docs/adr/…) or relative to
+    // its own depth (../../adr/… in docs/governance/agents/workflows.md — both
+    // shapes broke in the mirror and in every scaffold, T-20261019-001).
+    work = work.replace(/\]\((?:[^)]*\/)?adr\/[^)]*\)/g, `](${rel})`);
   }
 
   // Restore protected self-description comment blocks verbatim.

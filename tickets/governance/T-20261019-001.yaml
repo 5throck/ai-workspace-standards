@@ -10,12 +10,17 @@ title: >-
   shallower; fix the transform to compute relative depth per source location +
   regenerate mirrors
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-19T06:29:25.683+09:00'
 history:
   - at: '2026-10-19T06:29:25.683+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-19T08:09:02.530+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed: constitution-scrub v1.2.0 A-6 depth relativization + A-9 adr redirect;
+  mirrors regenerated 0 broken links; 21 scrub tests green
 error: null

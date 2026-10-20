@@ -14,7 +14,7 @@
 
 The PM agent follows a three-level inheritance model: **L0 (workspace root)** → **L1 (common template)** → **L2 (variant templates)**.
 
-> **For PM Agent Architecture**: See [docs/context.md](docs/context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
+> **For PM Agent Architecture**: See [docs/context.md](../../context.md) for complete governance workflow, L0→L1→L2 extends chain resolution, and variant-specific configuration.
 
 #### Dispatch Decision
 
@@ -68,13 +68,13 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
 | Skill-Graph Analyst | `agents/skill-graph-analyst.md` | Low | Weekly analytics cadence | Ticket filing only — `bun scripts/ticket.ts create` (Workspace root only — L0-only agent) |
 
-> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](docs/context.md).
+> **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [docs/context.md](../../context.md).
 
 ---
 
 ### §4.2 Harness Engineering Workflow
 
-Following the **PM governance workflow** defined in [docs/context.md](docs/context.md):
+Following the **PM governance workflow** defined in [docs/context.md](../../context.md):
 
 ```
 Phase 0 - Project Initiation (PM-owned)
@@ -158,11 +158,11 @@ PM will produce either a **"no drift" confirmation** or a **drift report + gover
 
 PM does NOT execute finalization updates for: pure documentation changes (body text only), README updates, memory log entries, or changes that do not affect lifecycle-tracked artifacts.
 
-> **For Agent Lifecycle procedures**: See [docs/context.md](docs/context.md) for detailed lifecycle procedures.
+> **For Agent Lifecycle procedures**: See [docs/context.md](../../context.md) for detailed lifecycle procedures.
 
 ### Variant Status Admission (ADR-0099)
 
-Template variant status promotion follows two documented paths. **New (non-migrated) variants** follow the beta-first path: draft → beta → stable with the PROMOTION_CHECKLIST criteria evidenced (co-safety convention). **Migrated variants** (converted from a proven project per `skills/project-to-variant`) may enter directly at stable under the migration fast-track per [ADR-0099](../../adr/0099-template-migration-admission-policy.md): the source project's conversion eligibility replaces the beta-window criteria, which are explicitly waived ("N/A per ADR-0099", never "met") in the PROMOTION_CHECKLIST with a ratification row in Review History. A `stable` checklist with unwaived Pending criteria, or a short-window promotion without an ADR-0099 attestation row, is a validator finding (`validate-variant-claims.ts` checks k/l). Vocabulary: variant `stable` ≡ lifecycle-record `production`; variant `beta` ≡ `review` (mapping SSOT: `docs/lifecycle/README.md`).
+Template variant status promotion follows two documented paths. **New (non-migrated) variants** follow the beta-first path: draft → beta → stable with the PROMOTION_CHECKLIST criteria evidenced (co-safety convention). **Migrated variants** (converted from a proven project per `skills/project-to-variant`) may enter directly at stable under the migration fast-track per [ADR-0099](../../context.md): the source project's conversion eligibility replaces the beta-window criteria, which are explicitly waived ("N/A per ADR-0099", never "met") in the PROMOTION_CHECKLIST with a ratification row in Review History. A `stable` checklist with unwaived Pending criteria, or a short-window promotion without an ADR-0099 attestation row, is a validator finding (`validate-variant-claims.ts` checks k/l). Vocabulary: variant `stable` ≡ lifecycle-record `production`; variant `beta` ≡ `review` (mapping SSOT: `docs/lifecycle/README.md`).
 
 ---
 
@@ -228,16 +228,16 @@ When a new `agents/<name>.md` is created, **the developer or AI agent responsibl
 1. Use the `agent-lifecycle-manager` skill to guide the process.
 2. Add a row to the Agent Roster table above.
 3. Add a row to the Subagent Roster dispatch table (with Parallelizable / Write Allowed columns).
-4. Ensure the agent file follows the frontmatter specification in [docs/context.md](docs/context.md).
+4. Ensure the agent file follows the frontmatter specification in [docs/context.md](../../context.md).
 5. If the agent uses a skill, add a row to the Skills table above.
 
 When a new skill is created in `skills/` or `.claude/skills/`:
 1. Use the `skill-lifecycle-manager` skill to guide the process.
 2. Add a row to the Skills table above.
-3. Ensure the skill follows the frontmatter specification in [docs/context.md](docs/context.md).
+3. Ensure the skill follows the frontmatter specification in [docs/context.md](../../context.md).
 
 > **For the workspace root**: AGENTS.md is the SSOT. No separate `docs/context.md` sync required.
-> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [docs/context.md](docs/context.md).
+> **For individual projects**: Keep AGENTS.md in sync with `docs/context.md ## Agents` per [docs/context.md](../../context.md).
 
 ---
 
