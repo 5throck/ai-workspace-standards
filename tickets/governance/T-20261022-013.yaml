@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-013
+kind: manual
+title: >-
+  co-newbiz: derive the promotion panel heading from the track-final stage
+  instead of hardcoding S7 to S8 — PromotionPanel.tsx:206 and
+  app/opportunities/[id]/page.tsx:426 show S7 to S8 for greenfield whose handoff
+  is S5 to S8 (finalStageOf already knows). Evidence: review L2
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.721+09:00'
+history:
+  - at: '2026-10-22T00:10:08.721+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

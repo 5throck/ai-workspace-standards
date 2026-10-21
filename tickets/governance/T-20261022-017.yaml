@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-017
+kind: manual
+title: >-
+  co-newbiz: confirm whether hiding the DD tool-count section on target-scoped
+  views is intended and document it — app/api/projects/[id]/dd/route.ts:31 omits
+  tool_counts when target_id is set, so the ADR-0157 per-target comparison flow
+  loses the DD tool cards (DdStage.tsx:519). Evidence: review L6
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.773+09:00'
+history:
+  - at: '2026-10-22T00:10:08.773+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261022-001
+kind: manual
+title: >-
+  co-newbiz Critical: align the S12 venture-scorecard requirement, applicability
+  and write path so brownfield projects can complete S12 through a sanctioned
+  route — the S12 predicate demands a scorecard for every track
+  (app/web-next/lib/process-flow.ts:727) while the only write path POST
+  /post-management/scorecard is greenfield-only 409
+  (lib/greenfield-execution.ts:869) and applicability marks brownfield
+  internal/hybrid/joint as recommended (:668); decide (a) exempt projects whose
+  portfolio_venture_monitoring applicability is false or (b) add a
+  jv-lifecycle-governance scorecard route; the brownfield demo passes only via a
+  direct seed INSERT. Evidence: co-newbiz
+  docs/reports/2026-10-21-project-review-s1-s12-tracks.md C1
+priority: urgent
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.562+09:00'
+history:
+  - at: '2026-10-22T00:10:08.562+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

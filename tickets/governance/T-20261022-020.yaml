@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261022-020
+kind: manual
+title: >-
+  co-newbiz security: the login form submits natively before the JS handler
+  attaches and exposes userId and password in the URL query
+  (login?userId=...&password=... reproduced in the in-app browser on 2026-10-21)
+  — harden the form so a pre-hydration submit never performs a GET with
+  credentials (method=post + server action, or disable the native submit until
+  hydrated), and add a regression test. Evidence: co-newbiz memory/2026-10-21.md
+  Open Issues
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:19:52.564+09:00'
+history:
+  - at: '2026-10-22T00:19:52.564+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

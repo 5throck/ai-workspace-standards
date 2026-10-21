@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261022-019
+kind: manual
+title: >-
+  co-newbiz: thread the source opportunity id into the project StageRail so
+  S1-S7 links keep the current deal — StageFrame.tsx:61 sends S1-S7 to
+  carrier-less flat stubs whose CarrierGate auto-picks the newest opportunity,
+  while StageTabs already resolves sourceOppId (StageTabs.tsx:65-76). Evidence:
+  review L8
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.799+09:00'
+history:
+  - at: '2026-10-22T00:10:08.799+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
