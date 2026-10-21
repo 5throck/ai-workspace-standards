@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261022-007
+kind: manual
+title: >-
+  co-newbiz: reject S5 greenfield write routes for brownfield carriers with 409
+  not_applicable_track — app/web-next/app/api/greenfield/[oppId]/route.ts:69-135
+  has no track or route_decision check, so the client-only TrackGate leaves the
+  route server-writable on brownfield opportunities (data is inert, pattern is
+  wrong); mirror the execution-baseline guard. Evidence: review M4
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.642+09:00'
+history:
+  - at: '2026-10-22T00:10:08.642+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

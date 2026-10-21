@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-015
+kind: manual
+title: >-
+  co-newbiz: add an errata note to ADR-0074 decision 3 and ADR-0076 decision 2
+  pointing gate decisions to ADR-0053 boundary #2 — both still say
+  screening/pre_fs/fs/dd/target_screening are agent-decided while every gate
+  route records human decisions only. Evidence: review L4
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.747+09:00'
+history:
+  - at: '2026-10-22T00:10:08.747+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

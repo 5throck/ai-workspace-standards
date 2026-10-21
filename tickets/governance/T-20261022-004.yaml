@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261022-004
+kind: manual
+title: >-
+  co-newbiz: decide whether target_screening joins the three-stage review
+  runtime or the ADR-0153 exclusion is documented — REVIEW_GATES/GATE_ENTITY
+  omit the S7 gate (app/web-next/lib/review/gate-artifacts.ts:12,19-27) so
+  brownfield's only exclusive gate records no human_final snapshot while gate
+  briefs and committees include it; ADR-0153 section 7 counts transition in its
+  place. Evidence: review M1
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.602+09:00'
+history:
+  - at: '2026-10-22T00:10:08.602+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

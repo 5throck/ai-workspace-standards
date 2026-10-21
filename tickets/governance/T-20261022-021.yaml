@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261022-021
+kind: manual
+title: >-
+  co-newbiz: bun run typecheck fails on a pre-existing typecheck-baseline drift
+  — scripts/typecheck-baseline.ts reports 44 new/increased error groups on HEAD
+  (test files and scripts/co-newbiz/backfill-capability-gap.ts; verified
+  unrelated to session changes via git stash) while tsc -p tsconfig.core.json
+  passes; refresh the baseline or clean the errors so the gate is meaningful
+  again. Evidence: co-newbiz memory/2026-10-21.md Open Issues
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:19:52.579+09:00'
+history:
+  - at: '2026-10-22T00:19:52.579+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-005
+kind: manual
+title: >-
+  co-newbiz: reword the flow.spec S4 completion criterion so greenfield
+  sub_track reads as optional — process/flow.spec.yaml:378 implies it is
+  required while the engine (lib/process-flow.ts:322) and the route-decision
+  route (:79-81) enforce sub_track only for brownfield. Evidence: review M2
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.616+09:00'
+history:
+  - at: '2026-10-22T00:10:08.616+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

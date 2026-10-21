@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261022-003
+kind: manual
+title: >-
+  validator-hardening: co-newbiz both track demo seeds must satisfy the S1-S12
+  process predicates end to end via API-only writes — the live dev DB predates
+  seed-s1-s12-demo.ts (no s11_pmi_kickoff process_run, 0
+  venture_transition_decision rows, 0 project_milestone rows, no S9 tool or PMI
+  monitoring rows), the greenfield twin demo-gf-* was never seeded and its seed
+  lacks a confirmed execution baseline so it fails its own S11 predicate; re-run
+  and extend both seeds and add an e2e that walks both demos S1 to S12 through
+  the APIs. Evidence: review H2
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.589+09:00'
+history:
+  - at: '2026-10-22T00:10:08.589+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

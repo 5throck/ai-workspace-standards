@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261022-011
+kind: manual
+title: >-
+  validator-hardening: co-newbiz recording a group_ic GO before entity_ic must
+  be rejected server-side and covered by a route test — the IC sequence lock
+  exists only in GateDecisionPanel (lib/gate-sequence-view.ts:27-33) while
+  app/api/projects/[id]/gate-decisions/route.ts:89 and gateGoPrerequisiteGaps
+  accept a group_ic GO first, which flow.spec.yaml:193 forbids. Evidence: review
+  M8
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.694+09:00'
+history:
+  - at: '2026-10-22T00:10:08.694+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
