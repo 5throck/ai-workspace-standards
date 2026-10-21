@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261022-018
+kind: manual
+title: >-
+  co-newbiz: let StageFrame resolve the carrier track on cross-track notice
+  pages instead of a hardcoded track prop — app/deals/[id]/[stage]/page.tsx:176
+  (S5 track=greenfield) and :195 (S6/S7 track=brownfield) make the rail mark the
+  other track's stages not-applicable while the TrackGate notice below links to
+  them. Evidence: review L7
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.786+09:00'
+history:
+  - at: '2026-10-22T00:10:08.786+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

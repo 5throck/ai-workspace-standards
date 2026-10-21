@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-012
+kind: manual
+title: >-
+  co-newbiz: add the missing v2.10.0 annotation to the process/flow.spec.yaml
+  header — meta.version is 2.10.0 (line 24) but the newest annotation is v2.9.1,
+  and SPEC_VERSION pins process_run rows so the version needs a definition of
+  record. Evidence: review L1
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.707+09:00'
+history:
+  - at: '2026-10-22T00:10:08.707+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261022-008
+kind: manual
+title: >-
+  co-newbiz: decide the brownfield carrier for M&A payment-condition milestones
+  — tranches exist only as the greenfield capex tab
+  (DealStructureStage.tsx:284,591) so earn-out and payment schedules have no S10
+  surface; add a brownfield payment-schedule surface or document
+  venture_transition_decision.tranche_condition as the official carrier.
+  Evidence: review M5
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T00:10:08.655+09:00'
+history:
+  - at: '2026-10-22T00:10:08.655+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
