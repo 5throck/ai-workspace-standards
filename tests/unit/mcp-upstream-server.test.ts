@@ -1675,8 +1675,30 @@ describe('M5 parallel intake (T-20261002-010)', () => {
       if (r.rpc.error === undefined && r.body?.id) accepted++;
       else if (r.rpc.result?.isError === true && JSON.parse(r.rpc.result.content[0].text).error.code === -32000) rateLimited++;
     }
+    // T-20261022-022: the windows recurrence (564ms, 10-21) failed here
+    // without leaving an assertion printout. If the counts ever mismatch,
+    // dump EVERY response's shape first — the unclassified third outcome
+    // (internal error, fail-open lock path, …) is the diagnosis.
+    if (accepted !== 3 || rateLimited !== 3) {
+      const shapes = results.map((r, i) => {
+        if (r.rpc.error !== undefined) return { i, kind: 'rpc-error', code: r.rpc.error.code };
+        if (r.rpc.result?.isError === true) {
+          const payload = JSON.parse(r.rpc.result.content[0].text);
+          return { i, kind: 'tool-error', code: payload.error?.code, message: payload.error?.message?.slice(0, 120) };
+        }
+        return { i, kind: r.body?.id ? 'accepted' : 'no-id-ok', body: r.body };
+      });
+      console.error(`[M5 diag] accepted=${accepted} rateLimited=${rateLimited}: ${JSON.stringify(shapes)}`);
+    }
     expect(accepted).toBe(3);
     expect(rateLimited).toBe(3);
+    // Slow-FS visibility: the last ticket write can land after the final
+    // response is read on win32 — poll briefly instead of racing the disk.
+    let files = ticketFiles().length;
+    for (let d = 0; files !== 3 && d < 20; d++) {
+      await Bun.sleep(100);
+      files = ticketFiles().length;
+    }
     expect(ticketFiles().length).toBe(3);
     await closeAll();
   });
