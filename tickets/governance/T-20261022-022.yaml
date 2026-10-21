@@ -11,12 +11,21 @@ title: >-
   member after E13d (T-20261017-002, fixed) and the upgrade-tree-sync budgets
   (test-runner v1.5.0)
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-22T00:34:25.890+09:00'
 history:
   - at: '2026-10-22T00:34:25.890+09:00'
     from: null
     to: backlog
+  - at: '2026-10-22T03:18:24.174+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T03:18:24.189+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-22T03:21:19.959+09:00'
+    from: running
+    to: review
 result: null
 error: null
