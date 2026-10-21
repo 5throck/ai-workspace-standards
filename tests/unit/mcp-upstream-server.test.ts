@@ -1701,7 +1701,11 @@ describe('M5 parallel intake (T-20261002-010)', () => {
     }
     expect(ticketFiles().length).toBe(3);
     await closeAll();
-  });
+  }, 30000); // E13d treatment (T-20261017-002 → b37372c9): explicit windows
+             // budget — 6 spawns + lock waits; the default 5s is tight under
+             // slow windows FS. The 564ms count race itself is server-side
+             // (lock-serialized cap accounting, tool-error-only -32000
+             // envelope) and the [M5 diag] dump above is its instrument.
 });
 
 describe('T-20261001-017 intake hardening (lock + retention)', () => {
