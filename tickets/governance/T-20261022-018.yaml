@@ -8,12 +8,30 @@ title: >-
   other track's stages not-applicable while the TrackGate notice below links to
   them. Evidence: review L7
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-22T00:10:08.786+09:00'
 history:
   - at: '2026-10-22T00:10:08.786+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-22T09:00:44.150+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T09:00:44.165+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-22T09:00:44.179+09:00'
+    from: running
+    to: review
+  - at: '2026-10-22T09:00:44.194+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in co-newbiz PR #696 (merged 2026-10-21T23:53Z under the standing
+  billing exception — failed jobs show the not-started signature: 3s runtime, 0
+  steps, no runner; local gates green: bun test 3941 pass, tsc
+  core/web-next/baseline clean, procedures validate 0 errors). Design doc
+  docs/designs/2026-10-22-review-ticket-remediation-design.md.
+  https://github.com/5throck/co-newbiz/pull/696
 error: null

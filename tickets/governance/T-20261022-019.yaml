@@ -8,12 +8,30 @@ title: >-
   while StageTabs already resolves sourceOppId (StageTabs.tsx:65-76). Evidence:
   review L8
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-22T00:10:08.799+09:00'
 history:
   - at: '2026-10-22T00:10:08.799+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-22T09:00:44.209+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T09:00:44.223+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-22T09:00:44.238+09:00'
+    from: running
+    to: review
+  - at: '2026-10-22T09:00:44.253+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in co-newbiz PR #696 (merged 2026-10-21T23:53Z under the standing
+  billing exception — failed jobs show the not-started signature: 3s runtime, 0
+  steps, no runner; local gates green: bun test 3941 pass, tsc
+  core/web-next/baseline clean, procedures validate 0 errors). Design doc
+  docs/designs/2026-10-22-review-ticket-remediation-design.md.
+  https://github.com/5throck/co-newbiz/pull/696
 error: null
