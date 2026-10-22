@@ -2450,7 +2450,7 @@
       "status": "implemented",
       "source": "manual",
       "created": "2026-10-17",
-      "last_updated": "2026-10-17"
+      "last_updated": "2026-10-22"
     },
     {
       "id": "2026-10-17-registry-append-boundary-fix-design",
@@ -2478,6 +2478,15 @@
       "source": "manual",
       "created": "2026-10-18",
       "last_updated": "2026-10-18"
+    },
+    {
+      "id": "2026-10-22-pm-role-bootstrap-agents-md-design",
+      "title": "pm role bootstrap agents md design",
+      "file": "docs/designs/2026-10-22-pm-role-bootstrap-agents-md-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-22",
+      "last_updated": "2026-10-22"
     },
     {
       "id": "skillhygiene",

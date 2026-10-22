@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-10-22, drift repair — spec 2026-10-17-pm-dispatch-gate-design §7 Addendum):
+//           VARIANTS gains 'co-learning' (variant added in 89b39266 after the v1.1.0
+//           list was written, so its settings never received the managed sync; both
+//           its .claude PreToolUse and .gemini BeforeTool pm-dispatch-gate entries
+//           were missing). No logic changes.
 // v1.1.0 (2026-10-18, PM dispatch gate propagation — spec 2026-10-17-pm-dispatch-gate-design §7):
 //           MANAGED_SUBSTRINGS gains 'pm-dispatch-gate'; the managed-entry sync generalizes from
 //           SessionStart/.claude-only to all managed entries across events
@@ -28,7 +33,8 @@ const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
 
 const VARIANTS = [
   'co-abap', 'co-consult', 'co-deck', 'co-design', 'co-develop', 'co-export',
-  'co-game', 'co-hr', 'co-news', 'co-price', 'co-safety', 'co-security', 'co-work',
+  'co-game', 'co-hr', 'co-learning', 'co-news', 'co-price', 'co-safety',
+  'co-security', 'co-work',
 ] as const;
 
 type Platform = 'claude' | 'gemini';

@@ -110,3 +110,41 @@ Follow-up to §4-§6: the L0-only wiring is mirrored into the template fleet so 
 ### 7.3 Deliberately out of scope
 
 `agent-model-gate` (L0 PreToolUse `Agent`) is NOT propagated — it is workspace-root dispatch-tier governance, outside this propagation request. The gemini `.claude/commands → templates/common` zero-propagation line (Check G) is a separate, already-passing channel.
+
+## Addendum 2026-10-22: §7 drift repair (co-learning + co-newbiz)
+
+Post-deployment drift was found in the §7 propagation state and repaired.
+
+### Findings
+
+1. **`sync-variant-settings.ts` VARIANTS omitted `co-learning`** — the variant was
+   added in 89b39266 after the v1.1.0 list was written, so its settings never
+   received the managed sync: both `templates/co-learning/.claude/settings.json`
+   (PreToolUse) and `.gemini/settings.json` (BeforeTool) lacked the
+   `pm-dispatch-gate` entry, and `--check` reported "13 variants" as healthy.
+2. **`Projects/co-learning`** inherited the same gap (claude + gemini).
+3. **`Projects/co-newbiz/.claude/settings.json`** — the managed PreToolUse gate
+   entry existed in HEAD but was deleted by an uncommitted working-tree edit
+   (unrelated permission reordering rode along in the same edit).
+
+### Repair
+
+- `sync-variant-settings.ts` 1.1.0 → 1.1.1: VARIANTS gains `co-learning` (14 × 4
+  channels); no logic changes. `--check` then applied the two missing template
+  entries; re-check reports 14 variants in sync.
+- `Projects/co-newbiz/.claude/settings.json`: managed entry restored in the HEAD
+  form (`matcher: "Agent"`, first PreToolUse group).
+- `Projects/co-learning`: `.claude` PreToolUse gate entry added (same form);
+  `.gemini` BeforeTool gate group added (fleet form: matcher-less group,
+  timeout 5000).
+- Repair applier: `tests/repair-pm-dispatch-gate-wiring.ts` (idempotent, re-run
+  skips wired files).
+
+### Post-repair state
+
+- Gate coverage: `pm-dispatch-gate` present in `.claude` (PreToolUse) and
+  `.gemini` (BeforeTool) settings of `templates/common`, all 14 variant
+  templates, and all 16 projects — 31/31 directories, both platforms.
+- `bun test tests/unit/sync-variant-settings.test.ts tests/unit/pm-dispatch-gate.test.ts`
+  — 24 pass / 0 fail. `check-upgrade-coverage` strict clean, `validate-templates`
+  0 errors, `audit.ts` all checks passed.
