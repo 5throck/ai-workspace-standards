@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261022-045
+kind: manual
+title: >-
+  validator-hardening: scripts/design-lint.ts TOKEN_SOURCE_DIRS (project root +
+  docs/ top-level, /token/i name hint) never discovers an app stylesheet like
+  app/web-next/app/styles.css, so registry token bindings and semantic-token
+  checks run blind in every app project — extend discovery (or accept explicit
+  token-source paths from the schema designLint block). Evidence: co-newbiz
+  design commission 2026-10-22 (registry agent triage)
+priority: normal
+status: running
+attempts: 0
+created_at: '2026-10-22T14:44:15.951+09:00'
+history:
+  - at: '2026-10-22T14:44:15.951+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-23T07:13:19.951+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-23T07:13:19.974+09:00'
+    from: waiting
+    to: running
+result: null
+error: null

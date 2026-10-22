@@ -2,7 +2,7 @@
 /**
  * design-lint.ts — deterministic design-compliance lint (sub-check runner).
  * Runnable companion to the token-usage-lint and design-foundation specs.
- * @version 2.1.0
+ * @version 2.2.0
  *
  * v2.1.0 (2026-10-07, U-20261006-003): the fonts sub-check skips declarations
  * whose file matches `*.template.*` or whose value contains `<`/`>` — template
@@ -85,10 +85,10 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { load as loadYaml } from "js-yaml";
 
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 
 /** Sub-check execution order (canonical; --check selections are re-sorted to this). */
-const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts"] as const;
+const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts", "list-table"] as const;
 type CheckName = (typeof CHECK_ORDER)[number];
 
 /** Registry paths, relative to the project root (design §4.4). POSIX-style literals: the
@@ -266,12 +266,42 @@ function skipped(name: CheckName, reason: string): CheckResult {
   return { name, status: "skipped", findings: [], skipReason: reason };
 }
 
-/** Default UI source roots for a project (design §4.3/§6.1). */
-function uiSourceRoots(projectRoot: string): string[] {
-  return ["playground/src", "src"].map((r) => join(projectRoot, r)).filter((r) => existsSync(r));
+/** Parsed `docs/workspace-schema.json` `designLint` block (T-20261022-045/046): scanRoots
+ * feed every UI-source check (not just the audit gate's --dir token-usage leg), tokenSources
+ * are explicit token-source file paths, allowlist entries exempt documented raw literals. */
+interface DesignLintConfig {
+  scanRoots: string[];
+  tokenSources: string[];
+  allowlist: string[];
 }
 
-function rawFindingsToFindings(raw: RawFinding[], downgradeToInfo = false): Finding[] {
+const EMPTY_CONFIG: DesignLintConfig = { scanRoots: [], tokenSources: [], allowlist: [] };
+
+function loadDesignLintConfig(projectRoot: string): DesignLintConfig {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(join(projectRoot, "docs", "workspace-schema.json"), "utf8"))?.designLint;
+  } catch {
+    return EMPTY_CONFIG;
+  }
+  if (!raw || typeof raw !== "object") return EMPTY_CONFIG;
+  const block = raw as Record<string, unknown>;
+  const strArr = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+  return {
+    scanRoots: strArr(block.scanRoots),
+    tokenSources: strArr(block.tokenSources),
+    allowlist: strArr(block.allowlist),
+  };
+}
+
+/** UI source roots for a project (design §4.3/§6.1 + schema designLint.scanRoots). */
+function uiSourceRoots(projectRoot: string, cfg: DesignLintConfig): string[] {
+  const roots = ["playground/src", "src", ...cfg.scanRoots].map((r) => join(projectRoot, r));
+  return [...new Set(roots)].filter((r) => existsSync(r));
+}
+
+function rawFindingsToFindings(raw: RawFinding[], downgradeToInfo = false, allowlist: ReadonlySet<string> = new Set()): Finding[] {
+  if (allowlist.size > 0) raw = raw.filter((f) => !allowlist.has(f.match));
   return raw.map((f) => ({
     file: toPosix(f.file),
     line: f.line,
@@ -294,8 +324,27 @@ interface TokenDeclaration {
   line?: number;
 }
 
-function discoverTokenSourceFiles(projectRoot: string): string[] {
+function discoverTokenSourceFiles(projectRoot: string, cfg: DesignLintConfig): string[] {
   const found: string[] = [];
+  // Explicit token sources from the schema designLint block win first (T-20261022-045).
+  for (const src of cfg.tokenSources) {
+    const abs = join(projectRoot, src);
+    if (existsSync(abs) && statSync(abs).isFile()) found.push(toPosix(src));
+  }
+  // App stylesheets live under nested app dirs the shallow hint scan never reaches
+  // (e.g. <root>/app/web-next/app/styles.css). Walk only the conventional app/
+  // tree when it exists — vendored runtimes (services/, docker/ payloads) are not
+  // the project's token sources, and at workspace roots without an app/ dir the
+  // shallow scan above already covers the token SSOT files.
+  const appDir = join(projectRoot, "app");
+  if (existsSync(appDir)) {
+    for (const abs of walkFiles(appDir)) {
+      const name = abs.split(/[\\/]/).pop() ?? abs;
+      if (name === "styles.css" || TOKEN_SOURCE_NAME_HINT.test(name)) {
+        found.push(toPosix(relative(projectRoot, abs)));
+      }
+    }
+  }
   for (const dir of TOKEN_SOURCE_DIRS) {
     const abs = join(projectRoot, dir);
     if (!existsSync(abs)) continue;
@@ -313,7 +362,7 @@ function discoverTokenSourceFiles(projectRoot: string): string[] {
       found.push(toPosix(join(dir, entry.name)));
     }
   }
-  return found;
+  return [...new Set(found)].sort();
 }
 
 /** Quote-aware comma split (font stacks like `"Helvetica Neue", Arial, sans-serif`). */
@@ -372,9 +421,9 @@ function collectJsonProperties(node: unknown, path: string[], out: TokenDeclarat
 }
 
 /** Extract declared custom properties from the project's token source files. */
-function extractTokenDeclarations(projectRoot: string): TokenDeclaration[] {
+function extractTokenDeclarations(projectRoot: string, cfg: DesignLintConfig): TokenDeclaration[] {
   const declarations: TokenDeclaration[] = [];
-  for (const rel of discoverTokenSourceFiles(projectRoot)) {
+  for (const rel of discoverTokenSourceFiles(projectRoot, cfg)) {
     const abs = join(projectRoot, rel);
     let content: string;
     try {
@@ -634,6 +683,7 @@ interface CliOptions {
   json: boolean;
   legacyScanRoots: string[]; // --dir flags + bare positionals (v1.0.0 scan roots)
   hasLegacyScanScope: boolean; // true when --dir or positionals were given
+  config: DesignLintConfig; // docs/workspace-schema.json designLint block (T-20261022-045/046)
 }
 
 function runTokenUsage(opts: CliOptions): CheckResult {
@@ -642,7 +692,7 @@ function runTokenUsage(opts: CliOptions): CheckResult {
   if (opts.hasLegacyScanScope) {
     roots = opts.legacyScanRoots.slice();
   } else {
-    const defaults = uiSourceRoots(root);
+    const defaults = uiSourceRoots(root, opts.config);
     if (defaults.length === 0) {
       return skipped(
         "token-usage",
@@ -666,7 +716,7 @@ function runTokenUsage(opts: CliOptions): CheckResult {
   if (existingRoots === 0) {
     return skipped("token-usage", "no scan roots exist");
   }
-  return result("token-usage", rawFindingsToFindings(all));
+  return result("token-usage", rawFindingsToFindings(all, false, new Set(opts.config.allowlist)));
 }
 
 // ---------------------------------------------------------------------------
@@ -696,7 +746,7 @@ function runComponents(opts: CliOptions): CheckResult {
     }
   }
   if (boundRefs.length > 0) {
-    const declarations = extractTokenDeclarations(root);
+    const declarations = extractTokenDeclarations(root, opts.config);
     if (declarations.length === 0) {
       const refs = [...new Set(boundRefs.map((b) => b.ref))];
       findings.push({
@@ -722,14 +772,15 @@ function runComponents(opts: CliOptions): CheckResult {
   }
 
   // Raw-value scan over the governed UI source roots — v1.0.0 detector reused unchanged
-  const uiRoots = uiSourceRoots(root);
+  const uiRoots = uiSourceRoots(root, opts.config);
   const raw: RawFinding[] = [];
   for (const uiRoot of uiRoots) {
     for (const file of walkFiles(uiRoot)) {
       raw.push(...lintFile(file, root));
     }
   }
-  findings.push(...rawFindingsToFindings(raw));
+  const allow = new Set(opts.config.allowlist);
+  findings.push(...rawFindingsToFindings(raw, false, allow));
   return result("components", findings);
 }
 
@@ -992,7 +1043,7 @@ function runIcons(opts: CliOptions): CheckResult {
   const registered = new Set(icons.map((i) => i.id));
   const conventions = iconConventions(root);
 
-  for (const uiRoot of uiSourceRoots(root)) {
+  for (const uiRoot of uiSourceRoots(root, opts.config)) {
     for (const file of walkFiles(uiRoot)) {
       let content: string;
       try {
@@ -1024,12 +1075,78 @@ function runIcons(opts: CliOptions): CheckResult {
 }
 
 // ---------------------------------------------------------------------------
+// Sub-check: list-table (T-20261022-047 — docs/design-system/design-components.md
+// list-table standard): a .data-table that renders per-row actions
+// (sizing-actions-cell) must carry the list-table modifier and an sr-only
+// actions column header.
+// ---------------------------------------------------------------------------
+
+const LIST_TABLE_SRC_EXTENSIONS = new Set([".tsx", ".jsx", ".html", ".astro"]);
+
+function runListTable(opts: CliOptions): CheckResult {
+  const root = opts.projectRoot;
+  const findings: Finding[] = [];
+  let tablesSeen = 0;
+  for (const uiRoot of uiSourceRoots(root, opts.config)) {
+    for (const file of walkFiles(uiRoot)) {
+      const dot = file.lastIndexOf(".");
+      if (dot === -1 || !LIST_TABLE_SRC_EXTENSIONS.has(file.slice(dot))) continue;
+      let content: string;
+      try {
+        content = readFileSync(file, "utf8");
+      } catch {
+        continue;
+      }
+      const tableStarts = [...content.matchAll(/class(?:Name)?=["'`]([^"'`]*\bdata-table\b[^"'`]*)["'`]/g)].map((m) => ({
+        idx: m.index!,
+        cls: m[1],
+      }));
+      if (tableStarts.length === 0) continue;
+      const relFile = toPosix(relative(root, file) || file);
+      for (const cell of content.matchAll(/sizing-actions-cell/g)) {
+        const owner = [...tableStarts].reverse().find((t) => t.idx < cell.index!);
+        if (!owner) continue; // sizing-actions-cell without a data-table ancestor class — not this rule
+        tablesSeen++;
+        const line = matchIndexToLine(content, owner.idx);
+        const window = content.slice(owner.idx, cell.index!);
+        if (!/\blist-table\b/.test(owner.cls)) {
+          findings.push({
+            file: relFile,
+            line,
+            pattern: "list-table-missing",
+            match: owner.cls.trim().slice(0, 80),
+            severity: "fail",
+            note: "a .data-table rendering per-row actions (sizing-actions-cell) must also carry the list-table modifier (fixed columns capped at 64rem) — design-components.md list-table standard",
+          });
+        }
+        // sr-only may sit on the th itself or on an inline element inside it
+        // (<th><span class="sr-only">…), per the 2026-09-15 readability fix.
+        if (!/<th\b[^>]*>(?:(?!<\/th>)[\s\S])*?\bsr-only\b/.test(window)) {
+          findings.push({
+            file: relFile,
+            line,
+            pattern: "sr-only-actions-header-missing",
+            match: owner.cls.trim().slice(0, 80),
+            severity: "fail",
+            note: "the actions column of a row-action table must be headed by a visually hidden (<th class=\"sr-only\">) header so screen readers announce the column — design-components.md list-table standard",
+          });
+        }
+      }
+    }
+  }
+  if (tablesSeen === 0) {
+    return skipped("list-table", "no .data-table with per-row actions (sizing-actions-cell) found in the UI source roots");
+  }
+  return result("list-table", findings);
+}
+
+// ---------------------------------------------------------------------------
 // Sub-check: fonts (T-20260926-031)
 // ---------------------------------------------------------------------------
 
 function runFonts(opts: CliOptions): CheckResult {
   const root = opts.projectRoot;
-  const declarations = extractTokenDeclarations(root).filter((d) => /^--font-/i.test(d.name));
+  const declarations = extractTokenDeclarations(root, opts.config).filter((d) => /^--font-/i.test(d.name));
   if (declarations.length === 0) {
     return skipped("fonts", "no --font-* custom properties declared in the project token source");
   }
@@ -1038,6 +1155,10 @@ function runFonts(opts: CliOptions): CheckResult {
     // `*.template.*` token files carry `<value>` placeholders, not real font
     // stacks — the fallback contract is not evaluable there (U-20261006-003).
     if (/\.template\./.test(decl.file) || /[<>]/.test(decl.value)) continue;
+    // A pure var() indirection delegates the stack to the referenced token — the
+    // fallback contract is evaluated at that declaration, not here (vendored
+    // runtime stylesheets alias through design-token layers they do not own).
+    if (/^\s*var\(--/.test(decl.value)) continue;
     const families = splitFamilies(decl.value);
     if (families.length >= 2 && GENERIC_FONT_FAMILIES.has(families[families.length - 1].toLowerCase())) continue;
     const reasons: string[] = [];
@@ -1261,6 +1382,7 @@ export async function main(): Promise<void> {
     json: parsed.json,
     legacyScanRoots: [...parsed.dirs, ...parsed.positionals],
     hasLegacyScanScope: parsed.dirs.length > 0 || parsed.positionals.length > 0,
+    config: loadDesignLintConfig(projectRoot),
   };
 
   const runners: Record<CheckName, (o: CliOptions) => CheckResult> = {
@@ -1269,6 +1391,7 @@ export async function main(): Promise<void> {
     patterns: runPatterns,
     icons: runIcons,
     fonts: runFonts,
+    "list-table": runListTable,
   };
 
   const results = selected.map((name) => runners[name](opts));

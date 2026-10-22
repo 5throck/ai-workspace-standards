@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261022-046
+kind: manual
+title: >-
+  validator-hardening: scripts/design-lint.ts components/patterns/icons checks
+  hardcode uiSourceRoots to playground/src and src so app/web-next is only
+  reached via the legacy --dir token-usage path — let the schema
+  designLint.scanRoots feed ALL five checks, not just token-usage
+  (docs/workspace-schema.json allowlist is also unparsed/inert today). Evidence:
+  co-newbiz design commission 2026-10-22
+priority: normal
+status: running
+attempts: 0
+created_at: '2026-10-22T14:44:15.965+09:00'
+history:
+  - at: '2026-10-22T14:44:15.965+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-23T07:13:19.991+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-23T07:13:20.007+09:00'
+    from: waiting
+    to: running
+result: null
+error: null
