@@ -9,7 +9,7 @@ title: >-
   token-source paths from the schema designLint block). Evidence: co-newbiz
   design commission 2026-10-22 (registry agent triage)
 priority: normal
-status: running
+status: review
 attempts: 0
 created_at: '2026-10-22T14:44:15.951+09:00'
 history:
@@ -22,5 +22,8 @@ history:
   - at: '2026-10-23T07:13:19.974+09:00'
     from: waiting
     to: running
+  - at: '2026-10-23T07:26:50.944+09:00'
+    from: running
+    to: review
 result: null
 error: null

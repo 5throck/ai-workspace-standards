@@ -8,7 +8,7 @@ title: >-
   (docs/design-system/design-components.md rules; locks the 2026-10-22 S6
   LonglistSection fix). Evidence: co-newbiz table audit 2026-10-22 slot B #10
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-10-22T14:44:15.978+09:00'
 history:
@@ -21,5 +21,8 @@ history:
   - at: '2026-10-23T07:13:20.038+09:00'
     from: waiting
     to: running
+  - at: '2026-10-23T07:26:50.978+09:00'
+    from: running
+    to: review
 result: null
 error: null
