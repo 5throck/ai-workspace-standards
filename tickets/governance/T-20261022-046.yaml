@@ -9,7 +9,7 @@ title: >-
   (docs/workspace-schema.json allowlist is also unparsed/inert today). Evidence:
   co-newbiz design commission 2026-10-22
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-22T14:44:15.965+09:00'
 history:
@@ -25,5 +25,13 @@ history:
   - at: '2026-10-23T07:26:50.961+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-23T23:26:04.864+09:00'
+    from: review
+    to: done
+result: >-
+  design-lint 2.2.0 landed via PR #1584 (merged; CI green after the js-yaml
+  ^5.5.0 SSOT parity from PR #1585). Schema designLint wiring + app token
+  discovery + list-table check; known co-newbiz true positives (2
+  sr-only-actions-header, 4 unregistered-icon) left to the project loop.
+  https://github.com/5throck/ai-workspace-standards/pull/1584
 error: null
