@@ -2120,7 +2120,7 @@
       "name": "i18n-specialist",
       "scope": "common",
       "capability": "i18n-specialist",
-      "content_hash": "2cbfb77a9a3ca384",
+      "content_hash": "47abe012aceaa25c",
       "version": "1.1.0",
       "mirrors": [
         "templates/common/agents/i18n-specialist.md"
@@ -2133,7 +2133,7 @@
       "name": "pm",
       "scope": "common",
       "capability": "pm",
-      "content_hash": "62efc3e75a936a02",
+      "content_hash": "c324b9e5696dd999",
       "version": "1.3.0",
       "mirrors": [
         "templates/common/agents/pm.md"

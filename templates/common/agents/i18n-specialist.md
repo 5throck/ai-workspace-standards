@@ -9,6 +9,8 @@ tier:
   antigravity: medium
   gemini-cli: medium
   codex: medium
+  hermes: medium  # claude-sonnet-5-5
+  zai: medium  # glm-5.3-flash
 model: inherit
 lifecycle:
   phase: production
