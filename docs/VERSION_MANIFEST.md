@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-22T22:48:14.431Z
+**Generated**: 2026-10-23T10:14:50.239Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,15 +19,15 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | inherit | 2026-10-04 |
-| auditor | agents/auditor.md | medium | inherit | 2026-10-02 |
-| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-02 |
-| docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-04 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-11 |
-| pm | agents/pm.md | medium | inherit | 2026-10-04 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-02 |
-| security-expert | agents/security-expert.md | medium | inherit | 2026-10-02 |
-| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-10-02 |
+| architect | agents/architect.md | high | inherit | 2026-10-23 |
+| auditor | agents/auditor.md | medium | inherit | 2026-10-23 |
+| automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-23 |
+| docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-23 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-23 |
+| pm | agents/pm.md | medium | inherit | 2026-10-23 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-23 |
+| security-expert | agents/security-expert.md | medium | inherit | 2026-10-23 |
+| skill-graph-analyst | agents/skill-graph-analyst.md | low | inherit | 2026-10-23 |
 
 ---
 
@@ -176,7 +176,7 @@
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
-| sync-model-registry.ts | 1.0.0 | scripts/sync-model-registry.ts | N/A |
+| sync-model-registry.ts | 1.1.0 | scripts/sync-model-registry.ts | N/A |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
@@ -202,7 +202,7 @@
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.5.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.15.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 1.4.1 | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 1.5.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |

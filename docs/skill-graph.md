@@ -413,6 +413,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260930-01` | decision | `common/decision-record` | — | — |
 | `dec:DEC-20260930-02` | decision | `common/decision-record` | — | — |
 | `dec:DEC-20261003-01` | decision | — | — | — |
+| `dec:DEC-20261023-01` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -755,14 +756,14 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Capability | Type | Kind | Nodes (scope@version #hash) |
 |------------|------|------|-----------------------------|
-| `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #d2a74737 |
+| `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #18db1a57 |
 | `change-management-partner` | agent | version-drift | co-consult@1.0.0 #6df523f4; co-hr@1.0.0 #b048d889 |
 | `code-writer` | agent | divergence | co-abap@1.0.1 #9c30ecd9; co-develop@1.0.0 #d6f5ba14 |
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |
 | `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #2cbfb77a |
-| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #62efc3e7; root@1.2.2 #6da5972d |
+| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #62efc3e7; root@1.2.2 #8644bb42 |
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
@@ -786,7 +787,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 54 | (expected until docs `references` edges are mined) |
 | agent | 11 | co-abap/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 2 | (expected until docs `references` edges are mined) |
+| decision | 3 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/standup-synthesizer |
 
 ## Skills Without `used_by` (G6)

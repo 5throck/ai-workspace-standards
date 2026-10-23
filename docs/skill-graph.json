@@ -2146,7 +2146,7 @@
       "name": "architect",
       "scope": "root",
       "capability": "architect",
-      "content_hash": "d2a7473710d83839",
+      "content_hash": "18db1a57ff4b0558",
       "version": "1.0.0",
       "mirrors": [
         "agents/architect.md"
@@ -2159,7 +2159,7 @@
       "name": "auditor",
       "scope": "root",
       "capability": "auditor",
-      "content_hash": "cc96db614546a4cf",
+      "content_hash": "fb086f03b45af3b7",
       "version": "1.0.0",
       "mirrors": [
         "agents/auditor.md"
@@ -2172,7 +2172,7 @@
       "name": "automation-engineer",
       "scope": "root",
       "capability": "automation-engineer",
-      "content_hash": "9838ed2906228cb0",
+      "content_hash": "37794f3e327146d4",
       "version": "1.0.0",
       "mirrors": [
         "agents/automation-engineer.md"
@@ -2185,7 +2185,7 @@
       "name": "docs-writer",
       "scope": "root",
       "capability": "docs-writer",
-      "content_hash": "b65a858857ade2f7",
+      "content_hash": "ac4d29dca18a65f1",
       "version": "1.0.0",
       "mirrors": [
         "agents/docs-writer.md"
@@ -2198,7 +2198,7 @@
       "name": "lifecycle-manager",
       "scope": "root",
       "capability": "lifecycle-manager",
-      "content_hash": "f42c7a2c19852fd0",
+      "content_hash": "d4304aecf683c8f9",
       "version": "1.1.0",
       "mirrors": [
         "agents/lifecycle-manager.md"
@@ -2211,7 +2211,7 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "6da5972d3b199f1f",
+      "content_hash": "8644bb42abd4add9",
       "version": "1.2.2",
       "mirrors": [
         "agents/pm.md"
@@ -2224,7 +2224,7 @@
       "name": "scaffolding-expert",
       "scope": "root",
       "capability": "scaffolding-expert",
-      "content_hash": "c98bb3591cb5c429",
+      "content_hash": "5f097ec0a63988dd",
       "version": "1.0.0",
       "mirrors": [
         "agents/scaffolding-expert.md"
@@ -2237,7 +2237,7 @@
       "name": "security-expert",
       "scope": "root",
       "capability": "security-expert",
-      "content_hash": "720525428635a858",
+      "content_hash": "411dfb4aecee9400",
       "version": "1.0.0",
       "mirrors": [
         "agents/security-expert.md"
@@ -2250,7 +2250,7 @@
       "name": "skill-graph-analyst",
       "scope": "root",
       "capability": "skill-graph-analyst",
-      "content_hash": "43b29674b7478567",
+      "content_hash": "a5c9a0798589bc25",
       "version": "1.0.0",
       "mirrors": [
         "agents/skill-graph-analyst.md"
@@ -2288,6 +2288,11 @@
     },
     {
       "id": "dec:DEC-20261003-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261023-01",
       "type": "decision",
       "layer": "L0"
     },
@@ -6938,8 +6943,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-18"
+        "sessions": 3,
+        "last_used": "2026-10-23"
       }
     },
     {
@@ -7332,8 +7337,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-18"
+        "sessions": 3,
+        "last_used": "2026-10-23"
       }
     },
     {
@@ -7977,8 +7982,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-18"
+        "sessions": 3,
+        "last_used": "2026-10-23"
       }
     },
     {

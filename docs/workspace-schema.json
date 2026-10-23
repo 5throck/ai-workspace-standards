@@ -70,8 +70,8 @@
       "medium": "gpt-5.6-terra",
       "low": "gpt-5.6-luna"
     },
-    "hermes": {"high": "claude-opus-5-5", "medium": "claude-sonnet-5-5", "low": "claude-haiku-5-5"}
-
+    "hermes": {"high": "claude-opus-5-5", "medium": "claude-sonnet-5-5", "low": "claude-haiku-5-5"},
+    "zai": {"high": "glm-5.3", "medium": "glm-5.3-flash", "low": "glm-5.3-flash"}
   },
   "variant_lifecycle": {
     "description": "Governance rules for variant lifecycle transitions",
