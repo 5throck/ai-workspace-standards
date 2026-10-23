@@ -9,6 +9,8 @@ tier:
   antigravity: high
   gemini-cli: high
   codex: high
+  hermes: high  # claude-opus-5-5
+  zai: high  # glm-5.3
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

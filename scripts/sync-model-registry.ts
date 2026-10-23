@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-23, design 2026-10-23-zai-tier-floor-support): SURFACES gains
+//           the 9 root agents/*.md (tier frontmatter gained registry-checked
+//           model comments — hermes mirrors the claude tiers, zai carries the
+//           GLM mapping).
 // v1.0.0 (2026-10-11, T-20261011-015): initial release — curated-surface model-ID
 //           sweep for the model-migration skill (workspace directive 2026-10-11:
 //           model IDs live only in docs/workspace-schema.json `models.*` and the
@@ -71,6 +75,17 @@ export const SURFACES: readonly string[] = [
   'templates/co-news/docs/user-guide_ko.md',
   // Live test expectation over the AGENTS.md tier list
   'tests/unit/managed-block-parity.test.ts',
+  // agents/*.md tier frontmatter model comments must track registry renames
+  // (validate-model-registry.ts actively checks them against models.*)
+  'agents/architect.md',
+  'agents/auditor.md',
+  'agents/automation-engineer.md',
+  'agents/docs-writer.md',
+  'agents/lifecycle-manager.md',
+  'agents/pm.md',
+  'agents/scaffolding-expert.md',
+  'agents/security-expert.md',
+  'agents/skill-graph-analyst.md',
 ];
 
 /** Variant glob expanded at runtime: every templates/<variant>/AGENTS.md. */

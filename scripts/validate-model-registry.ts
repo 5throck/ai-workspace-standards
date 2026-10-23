@@ -4,7 +4,12 @@
  * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block,
  * and that the tier→model mapping prose in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md
  * names exactly the models the registry declares for each tier.
- * Level: L0 | Status: active | @version 1.4.1
+ * Level: L0 | Status: active | @version 1.5.0
+ *
+ * v1.5.0 (design 2026-10-23-zai-tier-floor-support): `hermes` and `zai` join
+ * PLATFORMS (5 → 7) so both platforms' registry entries and agent frontmatter
+ * model comments are validated; the AGENTS.md §3.6 "distinct" prose target
+ * now expects the GLM ids. No validation logic changes.
  *
  * v1.4.0 (T-20260916-011): the CODEX.md prose target is now platform-delivery
  * aware. Projects scaffolded without the codex platform carry neither
@@ -42,7 +47,7 @@ interface Mismatch {
   expectedModel: string;
 }
 
-const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex"] as const;
+const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
 type Platform = typeof PLATFORMS[number];
 
 /**

@@ -7,6 +7,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-10-23](2026-10-23.md) | feat(design-lint): schema designLint wiring, app token discovery, list-table check (T-20261022-045/046/047) |
+| [2026-10-23](2026-10-23.md) | chore(deps): js-yaml ^5.5.0 — root/template SSOT parity |
 | [2026-10-22](2026-10-22.md) | tickets: re-land 21 co-newbiz S1-S12 track review tickets on updated main (supersedes #1578) |
 | [2026-10-21](2026-10-21.md) | docs(memory): 2026-10-21 daily log — 01:30 skip note + 03:00 empty ticket run |
 | [2026-10-20](2026-10-20.md) | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |

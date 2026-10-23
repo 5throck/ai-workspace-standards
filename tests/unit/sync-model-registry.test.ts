@@ -51,16 +51,23 @@ describe('SURFACES completeness against the actual repo', () => {
     // fixtures, generated handbooks, and the orchestrator-owned dirs. Tests
     // are exempt as a class — the only test that is a sweep target is listed
     // in SURFACES (tests/unit/managed-block-parity.test.ts) and its presence
-    // is asserted by the existence test above.
+    // is asserted by the existence test above. docs/decisions/ holds
+    // historical decision records — same provenance class as docs/adr/ and
+    // docs/designs/ (they quote source material verbatim). docs/skill-graph
+    // .json/.md are generated projections regenerated from SSOTs — renames
+    // propagate via regeneration, not sweeping.
     const EXEMPT_PREFIXES = [
       'skills/',
       '.claude/', '.gemini/', '.agents/', '.codex/', '.hermes/',
       'scripts/',
       'templates/common/scripts/',
       'templates/common/docs/workspace-schema.json',
-      'docs/adr/', 'docs/designs/', 'docs/archive/', 'docs/lifecycle/', 'docs/specs/', 'docs/_examples/',
+      'docs/adr/', 'docs/designs/', 'docs/decisions/', 'docs/archive/', 'docs/lifecycle/', 'docs/specs/', 'docs/_examples/',
       'CHANGELOG.md',
       'docs/workspace-schema.json',
+      // Generated projections — regenerated from SSOTs; renames propagate via regeneration, not sweeping.
+      'docs/skill-graph.json',
+      'docs/skill-graph.md',
       'tests/',
       'Handbooks/',
       'Projects/', 'services/', 'memory/', 'tickets/', 'node_modules/',

@@ -9,6 +9,8 @@ tier:
   antigravity: low
   gemini-cli: low
   codex: low
+  hermes: low  # claude-haiku-5-5
+  zai: low  # glm-5.3-flash
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

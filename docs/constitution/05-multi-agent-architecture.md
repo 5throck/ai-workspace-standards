@@ -33,6 +33,9 @@ tier:
   gemini: high|medium|low       # gemini-3.1-pro | gemini-3.8-flash
   antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.8-flash
   gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.8-flash
+  codex: high|medium|low        # gpt-5.6-sol | gpt-5.6-terra | gpt-5.6-luna
+  hermes: high|medium|low       # claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5
+  zai: high|medium|low          # glm-5.3 | glm-5.3-flash
 model: inherit
 color: blue | green | purple | red | orange | yellow | cyan | gray
 description: >-
@@ -48,7 +51,7 @@ required_skills: [skill-slug]
 ---
 ```
 
-All four tier platforms must be declared. `normalizeAgentFrontmatter()` in
+Every platform key declared in `docs/workspace-schema.json` (`models` block, 7 platforms today) must appear in an agent's tier block for the model-registry validator to check it. `normalizeAgentFrontmatter()` in
 `generate-variant.ts` adds any missing platforms automatically during L2→variant conversion.
 
 The `description` field is how the AI tool selects the right agent - always write **when to use it** explicitly. The `tier` field enforces cost optimization across platforms.
@@ -183,7 +186,9 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 | **Medium** | claude-sonnet-5-5, gemini-3.8-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
 | **Low** | claude-haiku-5-5, gemini-3.8-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
-> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block). The table above reflects those values.
+> **Stale table**: The table above is a partial view (codex, hermes, and zai columns are omitted); `docs/workspace-schema.json` (`models` block) is the SSOT.
+
+> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above is a partial historical view.
 
 **Tier Enforcement Rules:**
 - All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)
