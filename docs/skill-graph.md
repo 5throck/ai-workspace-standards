@@ -762,8 +762,8 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |
-| `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #2cbfb77a |
-| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #62efc3e7; root@1.2.2 #8644bb42 |
+| `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #47abe012 |
+| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #c324b9e5; root@1.2.2 #8644bb42 |
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |

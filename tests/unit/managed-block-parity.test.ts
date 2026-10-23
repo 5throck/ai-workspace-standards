@@ -150,12 +150,14 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
     expect(commonBlocks.get('tier-model-mapping')).toHaveLength(2);
   });
 
-  test('the tier-model-mapping block lists 3 models per tier (the T-009 defect shape)', () => {
+  test('the tier-model-mapping block lists 4 model families per tier (T-009 defect shape + zai tier-floor spec)', () => {
     const [tierList] = commonBlocks.get('tier-model-mapping')!;
     expect((tierList.match(/gpt-5\.6-/g) ?? []).length).toBe(3);
     expect(tierList).toContain('claude-opus-5-5');
     expect(tierList).toContain('claude-sonnet-5-5');
     expect(tierList).toContain('claude-haiku-5-5');
+    expect(tierList).toContain('glm-5.3');
+    expect(tierList).toContain('glm-5.3-flash');
   });
 
   test('every templates/co-*/AGENTS.md is at parity with common', () => {
