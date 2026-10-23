@@ -11,6 +11,8 @@ tier:
   antigravity: low
   gemini-cli: low
   codex: low
+  hermes: low  # claude-haiku-5-5
+  zai: low  # glm-5.3-flash
 model: inherit
 color: cyan
 description: >
