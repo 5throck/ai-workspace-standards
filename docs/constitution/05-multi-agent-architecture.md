@@ -182,16 +182,14 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-5-5, gemini-3.1-pro | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-5-5, gemini-3.8-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
-| **Low** | claude-haiku-5-5, gemini-3.8-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
+| **High** | claude-opus-5-5, gemini-3.1-pro, gpt-5.6-sol, glm-5.3 | Complex reasoning, architecture, PM orchestration | PM, Architect |
+| **Medium** | claude-sonnet-5-5, gemini-3.8-flash, gpt-5.6-terra, glm-5.3-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **Low** | claude-haiku-5-5, gemini-3.8-flash, gpt-5.6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
-> **Stale table**: The table above is a partial view (codex, hermes, and zai columns are omitted); `docs/workspace-schema.json` (`models` block) is the SSOT.
-
-> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above is a partial historical view.
+> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max).
 
 **Tier Enforcement Rules:**
-- All agents must specify tier in frontmatter for all platforms (claude, antigravity, gemini-cli)
+- All agents must specify tier in frontmatter for all registry platforms (claude, gemini, antigravity, gemini-cli, codex, hermes, zai — the platforms declared in the `models` block)
 - PM agent MUST leverage platform-appropriate agent dispatch mechanisms for 3-tier enforcement
 - Audit scripts validate tier compliance on every run
 
