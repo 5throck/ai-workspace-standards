@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261022-047
+kind: manual
+title: >-
+  Extend design-lint with the list-table rule the doctrine already states — fail
+  any .data-table that renders sizing-actions-cell or row-action buttons without
+  the list-table class and the sr-only actions header
+  (docs/design-system/design-components.md rules; locks the 2026-10-22 S6
+  LonglistSection fix). Evidence: co-newbiz table audit 2026-10-22 slot B #10
+priority: low
+status: review
+attempts: 0
+created_at: '2026-10-22T14:44:15.978+09:00'
+history:
+  - at: '2026-10-22T14:44:15.978+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-23T07:13:20.023+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-23T07:13:20.038+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-23T07:26:50.978+09:00'
+    from: running
+    to: review
+result: null
+error: null
