@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-10-23, design 2026-10-23-zai-tier-floor-support follow-up):
+//           SURFACES gains templates/common/agents/pm.md + i18n-specialist.md —
+//           the L1 roster tier frontmatter carries registry-checked model
+//           comments (the completeness test caught them on PR #1587's CI).
 // v1.1.0 (2026-10-23, design 2026-10-23-zai-tier-floor-support): SURFACES gains
 //           the 9 root agents/*.md (tier frontmatter gained registry-checked
 //           model comments — hermes mirrors the claude tiers, zai carries the
@@ -58,6 +62,10 @@ export const SURFACES: readonly string[] = [
   'templates/common/CLAUDE.md',
   'templates/common/GEMINI.md',
   'templates/common/CODEX.md',
+  // L1 agent roster (tier frontmatter gained registry-checked model comments,
+  // same class as the root agents — zai tier-floor follow-up PR)
+  'templates/common/agents/pm.md',
+  'templates/common/agents/i18n-specialist.md',
   'templates/common/docs/context.md',
   'templates/common/docs/variants/pm-yaml-schema.md',
   'templates/common/docs/governance/agents/execution-plan-templates.md',
