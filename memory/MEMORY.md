@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-24](2026-10-24.md) | chore: regen manifest — force mergeability recompute for #1590 |
 | [2026-10-23](2026-10-23.md) | feat(design-lint): schema designLint wiring, app token discovery, list-table check (T-20261022-045/046/047) |
 | [2026-10-23](2026-10-23.md) | chore(deps): js-yaml ^5.5.0 — root/template SSOT parity |
 | [2026-10-22](2026-10-22.md) | tickets: re-land 21 co-newbiz S1-S12 track review tickets on updated main (supersedes #1578) |
