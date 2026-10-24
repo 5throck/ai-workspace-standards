@@ -281,9 +281,12 @@ const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
  * the TEMPLATE TREE SYNC pass wholesale-overwrote every project CODEX.md edit on
  * upgrade (CODEX.md carries no inline version footer, so the hash branch always
  * fired). MERGE membership makes the MERGE pass — which already lists CODEX.md —
- * the sole delivery channel. The merge is a no-op today (no COMMON-CODEX pattern
- * in managed-block-merge MANAGED_PATTERNS); when that pattern lands
- * (T-20260924-010) union-merge activates with no further claim change.
+ * the sole delivery channel. (History note, corrected 2026-10-25 per spec
+ * 2026-10-25-managed-platform-skeleton-design.md: an earlier revision of this
+ * comment said "the merge is a no-op today" — stale since
+ * lib/managed-block-merge v1.2.0/v1.3.0 added COMMON-CODEX and COMMON-HERMES
+ * to MANAGED_PATTERNS, so the CODEX/HERMES zone merges are ACTIVE. No claim
+ * change was needed, as predicted.)
  */
 export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', '.gitignore', 'AGENTS.md', 'agents/pm.md', '.github/workflows/ci.yml']);
 

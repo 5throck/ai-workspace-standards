@@ -418,6 +418,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0101",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
@@ -9611,6 +9616,12 @@
       "type": "references",
       "from": "adr:0100",
       "to": "skill:root/migrate-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "adr:0101",
+      "to": "skill:root/project-resync",
       "source": "prose"
     },
     {

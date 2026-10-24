@@ -36,7 +36,15 @@
  *         entry landed (house AC5a: the three tests failed pre-fix with
  *         "INFO: Template has no managed markers — skipping CODEX.md").
  *
- * @version 1.1.0
+ * v1.2.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
+ *         ADR-0101): MERGE-pass composition fixture — the
+ *         mergeManagedBlocks + mergeSkeletonSections (lib/
+ *         platform-skeleton-merge.ts) sequence mergeWorkspaceManaged runs for
+ *         CLAUDE.md/GEMINI.md: stale zones merged, registered skeleton
+ *         sections inserted in template-relative order, project-local EOF
+ *         tail byte-identical, second composition run a full no-op.
+ *
+ * @version 1.2.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
@@ -45,6 +53,7 @@ import {
   buildMergedTemplateBlocks,
   MANAGED_PATTERNS,
 } from '../../scripts/lib/managed-block-merge.ts';
+import { mergeSkeletonSections } from '../../scripts/lib/platform-skeleton-merge.ts';
 
 const REL = '.gitignore';
 
@@ -615,5 +624,131 @@ describe('repeated-key insert placement', () => {
     const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
     expect(r.content.indexOf('NEW-NOTE')).toBeGreaterThan(r.content.indexOf('NEW-LIST'));
     expect(r.content.indexOf('NEW-NOTE')).toBeLessThan(r.content.indexOf('## Next'));
+  });
+});
+
+// ── MERGE-pass integration: managed-block merge → skeleton section merge ─────
+// (spec docs/designs/2026-10-25-managed-platform-skeleton-design.md, ADR-0101):
+// mergeWorkspaceManaged composes mergeManagedBlocks + mergeSkeletonSections
+// (lib/platform-skeleton-merge.ts) for CLAUDE.md/GEMINI.md, the skeleton step
+// running strictly AFTER the zone merge. This fixture pins the composition
+// contract on a synthetic old-vintage CLAUDE.md: stale zones merged, the
+// project-local EOF tail intact, and the registered skeleton sections
+// inserted in template-relative order.
+
+describe('MERGE-pass composition: zones merged + skeleton sections restored + tail intact', () => {
+  const S4 = '### 4. Language Policy for Documentation';
+  const EPB = '## Execution Plan Boilerplate';
+  const OPEN = '<!-- COMMON-CLAUDE:START -->';
+  const END = '<!-- COMMON-CLAUDE:END -->';
+
+  // Synthetic template carrying the registered sections (bodies simplified —
+  // the skeleton lib extracts by exact heading line, guarded by the
+  // platform-skeleton-merge.test.ts real-tree pins).
+  const tpl = [
+    '# CLAUDE.md',
+    'head prose',
+    '',
+    '### 2. Native Slash Commands',
+    'slash body',
+    '',
+    '### 3. MCP Configurations & Absolute Resolving',
+    'mcp body',
+    '',
+    OPEN,
+    S4,
+    '',
+    'NEW policy body',
+    END,
+    '',
+    '### 4.5 Skill Resolution Priority',
+    'priority body',
+    '',
+    '### 5. Agent Dispatch Rules',
+    '**MANDATORY PM GATEWAY**',
+    '',
+    OPEN,
+    EPB,
+    '',
+    'NEW boilerplate body',
+    END,
+    '',
+    '### 6. Native Sub-agents (`Agent` Tool)',
+    OPEN,
+    'sub-agent body',
+    END,
+    '',
+  ].join('\n');
+
+  // Old-vintage project: zones stale, sections missing, local EOF tail.
+  const proj = [
+    '# CLAUDE.md',
+    'head prose',
+    '',
+    '### 2. Pre-Edit Quality Gate (All Platforms)',
+    'old local body',
+    '',
+    OPEN,
+    S4,
+    '',
+    'OLD policy body',
+    END,
+    '',
+    OPEN,
+    EPB,
+    '',
+    'OLD boilerplate body',
+    END,
+    '',
+    '## Project Local Context',
+    'local tail that must survive',
+    '',
+  ].join('\n');
+
+  // The exact MERGE-pass composition (upgrade-project mergeWorkspaceManaged).
+  const zonePass = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+  const skeletonPass = mergeSkeletonSections(zonePass.content, tpl, 'CLAUDE.md', false);
+
+  test('zone pass merged the stale zones from the template', () => {
+    expect(zonePass.merged).toBe(true);
+    expect(zonePass.content).toContain('NEW policy body');
+    expect(zonePass.content).toContain('NEW boilerplate body');
+    expect(zonePass.content).not.toContain('OLD policy body');
+  });
+
+  test('skeleton pass inserted §3/§4.5/§5/§6 in template-relative order (§2 collision-skipped)', () => {
+    const inserted = skeletonPass.log.filter((l) => l.includes('SKELETON INSERTED'));
+    expect(inserted.length).toBe(4);
+    expect(inserted.some((l) => l.includes('claude-s3'))).toBe(true);
+    expect(inserted.some((l) => l.includes('claude-s45'))).toBe(true);
+    expect(inserted.some((l) => l.includes('claude-s5'))).toBe(true);
+    expect(inserted.some((l) => l.includes('claude-s6'))).toBe(true);
+    expect(skeletonPass.log.some((l) => l.includes('SKELETON DRIFT (manual review)') && l.includes('claude-s2'))).toBe(true);
+    expect(skeletonPass.merged).toBe(true);
+  });
+
+  test('final content: sections in order, zones merged, local EOF tail byte-identical', () => {
+    const c = skeletonPass.content;
+    expect(c.indexOf('### 2. Pre-Edit Quality Gate')).toBeGreaterThan(-1);
+    expect(c.indexOf('### 2. Pre-Edit Quality Gate')).toBeLessThan(c.indexOf('### 4.5 Skill Resolution Priority'));
+    expect(c.indexOf('### 4.5 Skill Resolution Priority')).toBeLessThan(c.indexOf('### 5. Agent Dispatch Rules'));
+    expect(c.indexOf('### 5. Agent Dispatch Rules')).toBeLessThan(c.indexOf(OPEN + '\n' + EPB));
+    expect(c.indexOf('### 6. Native Sub-agents (`Agent` Tool)')).toBeGreaterThan(c.indexOf(END + '\n\n### 6.'));
+    expect(c).toContain('NEW policy body');
+    expect(c).toContain('NEW boilerplate body');
+    expect(c.endsWith('## Project Local Context\nlocal tail that must survive\n')).toBe(true);
+    expect(skeletonPass.snapshots).toEqual([]);
+  });
+
+  test('second composition run changes nothing on the merged content', () => {
+    const zonePass2 = mergeManagedBlocks(skeletonPass.content, tpl, null, 'CLAUDE.md', false);
+    const skeletonPass2 = mergeSkeletonSections(zonePass2.content, tpl, 'CLAUDE.md', false);
+    // The zone pass reports MERGED for byte-equal positional replacement
+    // (pre-existing managed-block semantics) — the pinned contract is that
+    // the CONTENT is unchanged and the skeleton pass inserts/replaces nothing.
+    expect(zonePass2.content).toBe(skeletonPass.content);
+    expect(skeletonPass2.merged).toBe(false);
+    expect(skeletonPass2.content).toBe(zonePass2.content);
+    expect(skeletonPass2.log.filter((l) => l.includes('SKELETON INSERTED') || l.includes('SKELETON REPLACED'))).toEqual([]);
   });
 });

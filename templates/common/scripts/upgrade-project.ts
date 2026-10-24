@@ -1,5 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.72.0
+// @version 1.73.0
+// v1.73.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
+//          ADR-0101): the MERGE pass now delivers the OUT-OF-ZONE skeleton of
+//          CLAUDE.md/GEMINI.md. mergeWorkspaceManaged runs the new pure
+//          lib/platform-skeleton-merge.ts (canonical-section registry v1:
+//          CLAUDE §2/§3/§4.5/§5/§6, GEMINI §5) strictly AFTER
+//          mergeManagedBlocks — missing registered sections are inserted at
+//          template-relative anchors, drifted bodies replaced only under
+//          guards G1 (no project-only heading/comment in the span) and G2
+//          (≤120-line span cap), with the number-collision guard keeping
+//          old-vintage renumbering (### 2. Pre-Edit Quality Gate) intact.
+//          Replaced spans are snapshotted to `<target>.pre-skeleton.bak`
+//          BEFORE the write, fail-closed (T-20260917-010 pattern); inserts
+//          delete nothing and a second run is a silent no-op. Section content
+//          is read from templates/common/<rel> at merge time — no template
+//          markers added, no project file edited directly (ADR-0031); the
+//          nightly project-resync wave normalizes the fleet.
 // v1.72.0 (2026-10-24, T-20261024-001): Upgrade Complete summary emits the
 //          copy-safe /sync landing command (git add + dev-sync with --body-file as
 //          a separate argument) so operators cannot swap the argument order.
@@ -656,6 +672,7 @@ import {
   buildMergedTemplateBlocks,
   mergeManagedBlocks,
 } from './lib/managed-block-merge.ts';
+import { mergeSkeletonSections } from './lib/platform-skeleton-merge.ts';
 import { applyCiWorkflowMerge } from './lib/ci-workflow-merge.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -1313,7 +1330,13 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
  *  and the merge core live in scripts/lib/managed-block-merge.ts (T-20260916-012
  *  extraction). This wrapper keeps only the filesystem concerns: template and
  *  common file loading, the not-yet-created project copy path, and writing the
- *  merged content back in apply mode. All log lines come verbatim from the lib. */
+ *  merged content back in apply mode. All log lines come verbatim from the lib.
+ *  For CLAUDE.md/GEMINI.md the wrapper additionally runs the OUT-OF-ZONE
+ *  skeleton step (lib/platform-skeleton-merge.ts, spec
+ *  2026-10-25-managed-platform-skeleton-design.md) strictly AFTER the
+ *  managed-block merge, with section content read from templates/common/<rel>
+ *  at merge time; replaced spans are snapshotted to `<target>.pre-skeleton.bak`
+ *  before the write (fail-closed). */
 function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
   const tplContent = readFileSync(templateFile, 'utf8');
   let commonContent: string | null = null;
@@ -1346,7 +1369,34 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   const projContent = readFileSync(projectFile, 'utf8');
   const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun);
   for (const line of result.log) console.log(line);
-  if (!dryRun && result.merged) {
+
+  // spec 2026-10-25-managed-platform-skeleton-design.md (ADR-0101): the
+  // skeleton step runs strictly AFTER mergeManagedBlocks so zone markers and
+  // anchors are guaranteed present before skeleton anchors resolve against
+  // them. Section content comes from templates/common/<rel> at merge time —
+  // never a hardcoded copy, never the variant shadow.
+  let finalContent = result.content;
+  let finalMerged = result.merged;
+  if (rel === 'CLAUDE.md' || rel === 'GEMINI.md') {
+    const skeleton = mergeSkeletonSections(result.content, commonContent ?? tplContent, rel, dryRun);
+    for (const line of skeleton.log) console.log(line);
+    finalContent = skeleton.content;
+    finalMerged = result.merged || skeleton.merged;
+    if (!dryRun && skeleton.snapshots.length > 0) {
+      // T-20260917-010 pattern: persist the replaced span(s) BEFORE the merged
+      // content lands — a recovery copy that cannot be written means the
+      // guarded skeleton replace must not proceed (fail-closed abort).
+      const bakPath = `${projectFile}.pre-skeleton.bak`;
+      try {
+        writeFileSync(bakPath, skeleton.snapshots.map((s) => s.content).join('\n\n'), 'utf8');
+      } catch (err) {
+        throw new Error(`[upgrade-project] cannot write the recovery snapshot ${bakPath} — aborting before the skeleton section replace of ${rel} (${(err as Error).message})`);
+      }
+      console.log(`    SNAPSHOT: replaced skeleton section(s) of ${rel} saved to ${rel}.pre-skeleton.bak (overwritten per run; gitignored via *.bak)`);
+    }
+  }
+
+  if (!dryRun && finalMerged) {
     // T-20260917-010: persist the replaced span(s) BEFORE the merged content
     // lands — a recovery copy that cannot be written means the destructive
     // unlabeled reconcile must not proceed (fail-closed abort; files merged
@@ -1361,7 +1411,7 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
       }
       console.log(`    SNAPSHOT: replaced unlabeled span(s) of ${rel} saved to ${rel}.pre-reconcile.bak (overwritten per run; gitignored via *.bak)`);
     }
-    writeFileSync(projectFile, result.content, 'utf8');
+    writeFileSync(projectFile, finalContent, 'utf8');
   }
 }
 

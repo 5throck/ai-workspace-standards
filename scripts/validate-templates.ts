@@ -1,7 +1,17 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.57.0
+ * @version 1.58.0
+ *
+ * v1.58.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
+ *          ADR-0101): new Error arm `skeleton-registry` (SK-01) — every
+ *          MANAGED_SKELETON_SECTIONS heading (lib/platform-skeleton-merge.ts)
+ *          must exist in templates/common/{CLAUDE,GEMINI}.md exactly once,
+ *          OUTSIDE all COMMON-* zones, in registry order, with unique section
+ *          numbers in the template's out-of-zone skeleton. Guards the
+ *          template-side SSOT of the upgrade MERGE pass's new out-of-zone
+ *          skeleton delivery (template rot must fail at L0 before any
+ *          release, not degrade the nightly wave into ANCHOR NOT FOUND skips).
  *
  * v1.57.0 (2026-10-14, T-20261014-001): P-02 root↔common commands parity is
  *          STEM-normalized and toml-aware — the .gemini/commands dirs were
@@ -347,6 +357,7 @@ import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
+import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
   SCAFFOLD_MARKER_SOURCES,
@@ -4831,6 +4842,41 @@ function checkManagedBlockParity(): void {
   }
 }
 
+// Check SK-01: platform skeleton section registry (spec
+// 2026-10-25-managed-platform-skeleton-design.md / ADR-0101). The
+// upgrade MERGE pass delivers OUT-OF-ZONE CLAUDE.md/GEMINI.md skeleton
+// sections from scripts/lib/platform-skeleton-merge.ts MANAGED_SKELETON_SECTIONS,
+// reading section content from templates/common/<rel> at merge time — so
+// template-side skeleton rot (a registered heading renamed/moved into a
+// COMMON-* zone, duplicated, or reordered) must fail HERE at L0 before any
+// release, not degrade the nightly wave into ANCHOR NOT FOUND skips.
+// Contract: every registry heading exists in templates/common/{CLAUDE,GEMINI}.md
+// exactly once, OUTSIDE all COMMON-* zones, in registry order; duplicate
+// numbers inside the template's out-of-zone skeleton fail. Severity: Error.
+// Primitives: lib/platform-skeleton-merge.ts validateSkeletonRegistry (unit-tested).
+function checkSkeletonRegistry(): void {
+  if (!JSON_MODE) console.log('\n=== Check SK-01: platform skeleton section registry (templates/common CLAUDE/GEMINI) ===');
+
+  const rels = [...new Set(MANAGED_SKELETON_SECTIONS.map((s) => s.rel))];
+  let issueCount = 0;
+  for (const rel of rels) {
+    const commonPath = join(TEMPLATES_DIR, 'common', rel);
+    if (!existsSync(commonPath)) {
+      fail('common', 'skeleton-registry', `templates/common/${rel} not found — the skeleton registry (${MANAGED_SKELETON_SECTIONS.filter((s) => s.rel === rel).length} registered section(s)) has no content source`, `Restore templates/common/${rel} or trim MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts`);
+      issueCount++;
+      continue;
+    }
+    const issues = validateSkeletonRegistry(readFileSync(commonPath, 'utf-8'), rel);
+    for (const issue of issues) {
+      fail('common', 'skeleton-registry', issue, 'Realign the registry (MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts) with the template heading, or fix the template heading — the MERGE pass reads section content from this file at merge time');
+      issueCount++;
+    }
+  }
+  if (issueCount === 0) {
+    pass(`skeleton-registry: ${MANAGED_SKELETON_SECTIONS.length} registered skeleton section(s) across ${rels.length} platform file(s) resolve out-of-zone in templates/common, in registry order, with unique section numbers`);
+  }
+}
+
 // Check PM-04b: COMMON-AGENTS block parity (ADR-0081 fleet sweep / T-20260919-001).
 // The COMMON-AGENTS:START/END marker-inject zone in AGENTS.md is delivered to
 // projects by upgrade MERGE from the VARIANT template copy (variant-first
@@ -5831,6 +5877,7 @@ function checkAgentsMdPointerIntegrity(): void {
   checkPropagationMapSchema();
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
   checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
+  checkSkeletonRegistry();                                       // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
   checkCommonAgentsBlockParity();                                // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
