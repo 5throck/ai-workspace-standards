@@ -27,7 +27,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
 
-> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md §5](../../../CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](../../../GEMINI.md#5-agent-dispatch-rules).
+> **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md — Execution Plan Boilerplate](../../../CLAUDE.md#execution-plan-boilerplate) or [GEMINI.md — Execution Plan Boilerplate](../../../GEMINI.md#execution-plan-boilerplate).
 
 ### §3.8 Permission Denial Protocol
 
