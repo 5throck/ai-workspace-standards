@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261022-050
+kind: manual
+title: >-
+  co-newbiz: add a visual/layout smoke CI job — Playwright over the 12 stage
+  paths with a real login and live-shaped data asserting head/strip/primary
+  geometry plus screenshot diffs, so layout regressions the code reviews miss
+  are caught before merge (S8 head push, strip slot drift, column widths were
+  all invisible to code reading). Evidence: co-design commission follow-up P2
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T20:57:57.487+09:00'
+history:
+  - at: '2026-10-22T20:57:57.487+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

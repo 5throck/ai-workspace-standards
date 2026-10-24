@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261022-042
+kind: manual
+title: >-
+  Demo ops: re-seed the live dev database with the hardened both-track seeds
+  (remediation design section-4 operator step is untracked; live DB still shows
+  0 s11_pmi_kickoff runs, 0 venture_transition_decision, 0 project_milestone, no
+  demo-gf projects) and extend the seed with S9 tool rows, PMI monitoring rows
+  and project_milestone rows so fresh-DB demo surfaces are not empty. Evidence:
+  review 2026-10-22 M5
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.787+09:00'
+history:
+  - at: '2026-10-22T09:40:43.787+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:19.199+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:19.214+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:19.229+09:00'
+    from: review
+    to: done
+result: >-
+  seed v1.11.0 adds S9 tools + PMI monitoring + milestones both tracks; live dev
+  DB reseeded and verified read-only
+error: null

@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261022-034
+kind: manual
+title: >-
+  Replicate the T-020 login pre-hydration hardening on /register and
+  /password-change — both forms still natively GET-submit userId and password
+  into the URL before hydration attaches (register/page.tsx:59,
+  password-change/page.tsx:47, buttons disabled={busy} only) while /login got
+  method=post action + disabled-until-hydrated in ebbac854; extend
+  login-form-hardening.test.ts to both pages. Evidence: review 2026-10-22 H1
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.684+09:00'
+history:
+  - at: '2026-10-22T09:40:43.684+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:18.920+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:18.939+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:18.955+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented per followup design item 1; login-form-hardening tests extended to
+  /register and /password-change (19 pass)
+error: null

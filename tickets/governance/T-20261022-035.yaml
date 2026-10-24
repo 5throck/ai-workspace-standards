@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261022-035
+kind: manual
+title: >-
+  Amend process/flow.spec.yaml S12 so the venture-scorecard artifact and
+  review-cycle criterion carry the T-001 greenfield-only qualifier — the SSOT
+  (flow.spec.yaml:809-823), engine STAGES string (process-flow.ts:51),
+  regenerated docs and the parity test (process-flow.test.ts:218) still demand
+  the venture scorecard for both tracks, so a future spec-to-engine conformance
+  audit reads the engine as non-compliant or resurrects C1; bump the version
+  annotation and regenerate projections. Evidence: review 2026-10-22 H2
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.698+09:00'
+history:
+  - at: '2026-10-22T09:40:43.698+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:18.971+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:18.986+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:19.002+09:00'
+    from: review
+    to: done
+result: >-
+  flow.spec v2.10.1 qualifies the S12 venture scorecard as greenfield-only
+  (T-001 SSOT alignment); engine STAGES + projections aligned; parity green
+error: null

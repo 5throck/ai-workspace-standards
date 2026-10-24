@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261022-049
+kind: manual
+title: >-
+  co-newbiz: add a DOM-order contract test per stage screen — h1 first,
+  input/output strip as the 4th/5th StageFrame child, StageTabs in the rail
+  slot, on a both-track seeded fixture (locks the 2026-10-22 head/strip
+  consistency fixes mechanically). Evidence: co-design commission follow-up P1
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-22T20:57:57.468+09:00'
+history:
+  - at: '2026-10-22T20:57:57.468+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

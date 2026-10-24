@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.71.0
+// @version 1.72.0
+// v1.72.0 (2026-10-24, T-20261024-001): Upgrade Complete summary emits the
+//          copy-safe /sync landing command (git add + dev-sync with --body-file as
+//          a separate argument) so operators cannot swap the argument order.
 // v1.71.0 (2026-10-17, T-20261017-001 canary): VARIANT SCRIPTS SYNC gains the
 //          variant OVERLAY top-level walk — templates/<variant>/scripts/*.ts deliver
 //          to project scripts/ root (new-project §6.6 parity; co-abap's
@@ -3848,6 +3851,19 @@ console.log(`  LOCAL-PATCH markers  : ${localPatchFindings.length}${localPatchFi
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');
+// T-20261024-001: emit the copy-safe /sync landing command so the operator's
+// next invocation cannot swap the argument order (the co-design PR #47
+// failure — "--body-file" reached the message slot and the delivered files
+// sat unstaged). The git-add list comes from the delivery manifest written
+// during the run.
+if (!dryRun) {
+  console.log('\n  ── Landing (copy-safe) ──');
+  console.log('  git add -A');
+  console.log('  cd <workspace-root> && bun scripts/dev-sync.ts \\');
+  console.log('    --body-file <project>/.claude/last-upgrade-pr-body.md \\');
+  console.log('    "chore: upgrade template to <version>"');
+  console.log('  (--body-file must be a SEPARATE argument from the message — never inside the quoted message.)');
+}
 // M1 (2026-09-15 project review): a failed security check must not read as a
 // green exit for scripted consumers (fleet runners, CI).
 if (import.meta.main && !securityPass) process.exit(1);
