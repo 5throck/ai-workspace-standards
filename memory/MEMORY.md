@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-25](2026-10-25.md) | docs(memory): follow-up completion — visual gate active, getDb migration analysis |
 | [2026-10-24](2026-10-24.md) | fix(pipeline): dev-sync flag-leak guard + copy-safe landing emission (T-20261024-001); land backlog tickets T-20261022-034..051, T-20261024-001 |
 | [2026-10-23](2026-10-23.md) | feat(design-lint): schema designLint wiring, app token discovery, list-table check (T-20261022-045/046/047) |
 | [2026-10-23](2026-10-23.md) | chore(deps): js-yaml ^5.5.0 — root/template SSOT parity |
@@ -14,7 +15,7 @@
 | [2026-10-20](2026-10-20.md) | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |
 | [2026-10-19](2026-10-19.md) | docs(review): daily fleet review 2026-10-19 — baseline-only, three green PRs merged |
 | [2026-10-18](2026-10-18.md) | chore(templates): workspace sync (52 files) |
-| [2026-10-17](2026-10-17.md) | fix(scaffold): registry-append v1.2.0 bound the append-index scan at the next section heading (T-20261017-001) |
+| 2026-10-17 | fix(scaffold): registry-append v1.2.0 bound the append-index scan at the next section heading (T-20261017-001) |
 | 2026-10-15 | docs(review): daily fleet review 2026-10-15 — baseline-only, adopted #1543 spec entry |
 | 2026-10-14 | fix(ci): test-runner v1.5.0 windows CI timing budgets (bun per-test ceiling + per-file overrides) |
 | 2026-10-13 | fix(templates): deliver upgrade-project helper imports to L1 (U-20261012-001 co-newbiz scaffold typecheck) |
