@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261022-041
+kind: manual
+title: >-
+  UX bundle: land the brownfield pre_fs deep link on the S4 committee tab via a
+  tab query param (gateStageTab routes to s4 but the page defaults to the
+  competitive tab, useRouteDecision.ts:22), derive the track-hardcoded copy at
+  PromotionPanel.tsx:191 (S7 closure text) and StageFrame.tsx:44 (S7-selection
+  text) from promotionHandoffLabel/finalStageOf, and de-rot the file:line
+  citations in generate-process-flow.ts ADDENDUM (cites :330/:353, actually
+  :877/:903). Evidence: review 2026-10-22 M3+L1+L4
+priority: low
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.774+09:00'
+history:
+  - at: '2026-10-22T09:40:43.774+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:19.154+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:19.169+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:19.184+09:00'
+    from: review
+    to: done
+result: >-
+  brownfield pre_fs hrefs carry ?tab=committee with S4 tab-param wiring;
+  PromotionPanel/StageFrame copy track-derived; ADDENDUM cites de-rotted + S12
+  row aligned
+error: null

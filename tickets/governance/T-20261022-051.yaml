@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261022-051
+kind: manual
+title: >-
+  co-design: revise the UI/UX panel (품평회) protocol so judges review the SAME
+  SLOT as a 12-screen matrix across stages instead of per-surface isolation —
+  cross-screen consistency (head position, strip slot, column widths, primary
+  placement) was not a review axis in the 2026-10-22 panel. Evidence: co-design
+  commission follow-up P4
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T20:57:57.501+09:00'
+history:
+  - at: '2026-10-22T20:57:57.501+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

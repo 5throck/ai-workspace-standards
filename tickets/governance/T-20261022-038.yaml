@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261022-038
+kind: manual
+title: >-
+  Mirror the server-side not_applicable_track guard on the remaining
+  track-scoped write APIs — capability-dd PUT, brownfield
+  eval-criteria/targets/universe-criteria-draft/target-proposals and greenfield
+  investment-simulation accept off-track writes today (T-007 pattern; no gate
+  effect, data hygiene). Evidence: review 2026-10-22 M1
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.736+09:00'
+history:
+  - at: '2026-10-22T09:40:43.736+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:19.063+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:19.078+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:19.093+09:00'
+    from: review
+    to: done
+result: >-
+  trackConflictResponse helper; 409 not_applicable_track on 6 write surfaces;
+  brownfield-route-track-guard 13 pass; wave0 fixture moved to a brownfield
+  carrier
+error: null

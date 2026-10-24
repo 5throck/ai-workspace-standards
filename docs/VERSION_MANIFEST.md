@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-23T11:25:32.148Z
+**Generated**: 2026-10-24T11:58:34.742Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -122,7 +122,7 @@
 | create-l3-scaffold.ts | 1.18.0 | scripts/create-l3-scaffold.ts | N/A |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-lint.ts | 2.2.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.28.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.29.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
@@ -196,7 +196,7 @@
 | ticket.ts | 1.10.0 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.71.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.72.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.3.2 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |

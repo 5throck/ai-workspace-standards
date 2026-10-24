@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261022-040
+kind: manual
+title: >-
+  validator-hardening: pin stage-meta applicableTracks and exact gateIds in the
+  spec mirror test (presence-only toContain today, process-flow.test.ts:180-198)
+  and assert the full 7-gate gateStatus ledger per track in s1-s12-demo-e2e so
+  deleting gate fixture rows fails a test. Evidence: review 2026-10-22 M4+M6
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-22T09:40:43.762+09:00'
+history:
+  - at: '2026-10-22T09:40:43.762+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-22T13:24:19.109+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-22T13:24:19.124+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-22T13:24:19.139+09:00'
+    from: review
+    to: done
+result: >-
+  stage-meta mirror pins applicableTracks + exact gateIds; e2e asserts
+  per-carrier gate ledgers; gate-aging test env-before-import + cleanup
+error: null

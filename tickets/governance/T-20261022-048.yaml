@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261022-048
+kind: manual
+title: >-
+  Design commission 2026-10-22 품평회 residuals (round-2 judges, all
+  PASS-with-notes): (1) LonglistSection 상태 필터 reset control (empty state now
+  names the cause; the control itself is missing), (2) LonglistSection
+  exclusion_reason truncation needs keyboard/touch-accessible full text beyond
+  title-only, (3) StageFrame blocked-stage reasons are title-hover-only —
+  surface visible text for touch/keyboard, (4) styles.css --lh-body 1.5 vs
+  design-guide line-height >= 1.55 (doc/code drift, decide the value), (5)
+  design-guide sub-label range 0.72-0.8rem sits below the 13px floor + JetBrains
+  Mono financial-figure rule vs sans rendering (reconcile), (6) handoff strip is
+  a collapsed details by default — make the S4 handoff contract opt-out reading,
+  (7) onboarding nested market-section + equal-weight CTAs need a start-here
+  cue, (8) radius-lg and radius-xl are both 1rem — differentiate or collapse the
+  scale, (9) group-card-name ellipsis without tooltip on all instances.
+  Evidence: docs/reports/2026-10-22-design-journey-review.md 품평회 section
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-22T18:48:23.562+09:00'
+history:
+  - at: '2026-10-22T18:48:23.562+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

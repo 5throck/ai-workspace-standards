@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261024-001
+kind: manual
+title: >-
+  upgrade-project.ts upgrade waves land mangled PRs with unstaged content — emit
+  copy-safe /sync instructions (a ready-to-paste one-liner with the --body-file
+  flag as a separate argument plus a git-add line derived from the delivery
+  manifest) and harden dev-sync to reject a message string that embeds a leading
+  --body-file token; evidence: co-design PR #47 (branch
+  pr/20261023-201858--body-file-claude-last-upgrade-pr-body-m) shipped only
+  pipeline scaffolding while the 16 delivered files sat unstaged and had to be
+  recovered from the working tree as PR #48
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-24T13:28:40.733+09:00'
+history:
+  - at: '2026-10-24T13:28:40.733+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,4 +1,7 @@
-// @version 1.28.0
+// @version 1.29.0
+// v1.29.0 (2026-10-24, T-20261024-001): hard-fail when a --body-file token reaches
+//          the message position (swapped argument order) — the co-design PR #47
+//          failure shipped a mangled PR with the delivered files unstaged.
 // v1.28.0 (2026-10-13, T-20261013-006 batch): REST fallback for the existing-PR
 //          check — cloud sessions get 403/GraphQL on `gh pr view`, which read as
 //          "no PR" and risked duplicate PR creation; resolve via `gh api repos/<slug>/pulls?head=`.
@@ -274,6 +277,18 @@ let msg = (msgArgs.join(' ') || "chore: update")
   .replace(/[\r\n\t]+/g, ' ')
   .replace(/\s+/g, ' ')
   .trim() || "chore: update";
+
+// T-20261024-001: a flag leaked into the message position (swapped argument
+// order, e.g. `dev-sync "--body-file <path>" <message>`) silently becomes the
+// commit message AND skips body-file handling — the co-design PR #47 failure.
+// Hard-fail with the copy-safe invocation instead of shipping a mangled PR.
+if (/^--/.test(msg) || msgArgs.some((a) => a.startsWith('--body-file'))) {
+  console.error(`\x1b[31m✗ dev-sync: the message position contains a flag: "${msg.slice(0, 60)}"\x1b[0m`);
+  console.error(`  A --body-file token reached the message slot — the argument order is swapped.`);
+  console.error(`  Copy-safe invocation:`);
+  console.error(`    bun scripts/dev-sync.ts --body-file <path> "chore: your message"`);
+  process.exit(1);
+}
 
 // Step 1 (U-20261008-001): weak messages — the no-arg fallback "chore: update" and
 // the bare "chore: upgrade template to X" shape — are replaced by a descriptive
