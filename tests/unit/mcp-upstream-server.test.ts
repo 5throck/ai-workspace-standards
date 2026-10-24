@@ -1681,7 +1681,7 @@ describe('M5 parallel intake (T-20261002-010)', () => {
     // (internal error, fail-open lock path, …) is the diagnosis.
     if (accepted !== 3 || rateLimited !== 3) {
       const shapes = results.map((r, i) => {
-        if (r.rpc.error !== undefined) return { i, kind: 'rpc-error', code: r.rpc.error.code };
+        if (r.rpc.error !== undefined) return { i, kind: 'rpc-error', code: r.rpc.error.code, message: String(r.rpc.error.message ?? '').slice(0, 160) };
         if (r.rpc.result?.isError === true) {
           const payload = JSON.parse(r.rpc.result.content[0].text);
           return { i, kind: 'tool-error', code: payload.error?.code, message: payload.error?.message?.slice(0, 120) };
