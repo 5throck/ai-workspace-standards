@@ -4,9 +4,9 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.72.0
+- **Version**: 1.73.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-14
+- **Last Updated**: 2026-10-25
 
 ## Description
 
@@ -18,6 +18,7 @@ post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-25 | production | production | v1.73.0 (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101): MERGE pass delivers the out-of-zone CLAUDE/GEMINI skeleton via lib/platform-skeleton-merge.ts (insert + guarded replace, .pre-skeleton.bak fail-closed). | automation-engineer |
 | 2026-10-17 | production | production | v1.71.0 (T-20261017-001 canary): VARIANT SCRIPTS SYNC gains the variant overlay top-level walk. | governance-runner |
 | 2026-10-14 | production | production | v1.70.6 (T-20261014-002): reconcileScriptRegistry's append arm delegates the boundary scan to helpers/registry-append.ts registryAppendIndex — retires the second inline registry-append implementation. | governance-runner |
 | 2026-10-24 | production | production | v1.72.0 (T-20261024-001): Upgrade Complete emits the copy-safe /sync landing command (--body-file as a separate argument). | governance-runner |

@@ -72,6 +72,8 @@ The filtering is automatic — `propagate-to-templates.ts` enforces it at publis
 
 **Excluded scripts** (workspace-management): `upgrade-project.ts` (layer `L0` per ADR-0073 Amendment 1 — the upgrade runs from the workspace root against the workspace-side template SSOT; a project-local copy could never source templates, and stale per-project copies are pruned by `upgrade-project --prune-removed`).
 
+**Platform-doc skeleton (ADR-0101)**: upgrades also reconcile the registered out-of-zone skeleton sections of `CLAUDE.md`/`GEMINI.md` (canonical-section registry in `scripts/lib/platform-skeleton-merge.ts`, run in the MERGE pass after the marker-zone merge): missing canonical sections are inserted, drifted ones are replaced only when the span holds no project-local heading or comment (guard G1, size cap G2, fail-closed `<file>.pre-skeleton.bak` snapshot before any write), and project-local sections are never removed — see [ADR-0101](../adr/0101-managed-platform-skeleton-delivery.md).
+
 #### 7.3.5 Target Country Selection (Country Profiles)
 
 If the chosen variant declares `country_config` in its `variant.json`, `new-project.ts`

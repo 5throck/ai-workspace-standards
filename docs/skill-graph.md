@@ -406,6 +406,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0098` | adr | — | — | — |
 | `adr:0099` | adr | — | — | — |
 | `adr:0100` | adr | — | root/adopt-project, root/migrate-project | — |
+| `adr:0101` | adr | — | root/project-resync | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |
