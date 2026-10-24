@@ -11,12 +11,31 @@ title: >-
   pipeline scaffolding while the 16 delivered files sat unstaged and had to be
   recovered from the working tree as PR #48
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-24T13:28:40.733+09:00'
 history:
   - at: '2026-10-24T13:28:40.733+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-24T22:18:01.301+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-24T22:18:01.316+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-24T22:19:06.385+09:00'
+    from: running
+    to: review
+  - at: '2026-10-24T22:19:06.399+09:00'
+    from: review
+    to: done
+result: >-
+  Verified landed on main: commit ee8ecc70 (dev-sync 1.29.0 hard-fails when a
+  --body-file token reaches the message slot; upgrade-project emits the
+  copy-safe landing command with the git-add line and the separate-argument
+  warning) + design doc
+  docs/designs/2026-10-24-devsync-guard-copy-safe-landing-design.md registered.
+  The 10-23 evening session implemented and committed it; only the store state
+  lagged. Sanity: audit + bun test green on this tree.
 error: null
