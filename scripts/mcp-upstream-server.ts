@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.10.1
+// v1.10.1 (2026-10-24, T-20261022-022 follow-through): transient-FS retry helper — the
+//           2026-10-23 M5 diag captured a 6-way burst losing request #1 as -32603 (the same
+//           uncounted class v1.9.2 fixed for linkSync EPERM): windows filter/AV pressure also
+//           hits the tmp writeFileSync, the O_EXCL fallback and appendAuditLog. Those three
+//           sites now retry EBUSY/EPERM/EACCES(only on the audit append) with a short backoff
+//           before rethrowing — fail-closed semantics unchanged.
 // v1.10.0 (2026-10-08, ticket KST unification): upstream request ids (U-YYYYMMDD-NNN),
 //          daily audit log file names and ticket created_at/history timestamps use
 //          Korea Standard Time via helpers/kst-time.ts. Audit line `ts` fields stay UTC ISO.
@@ -94,7 +100,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.10.0';
+export const SERVER_VERSION = '1.10.1';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -386,9 +392,31 @@ function nextSeqForToday(): number {
   return max + 1;
 }
 
+/** T-20261022-022 follow-through: windows filter/AV pressure surfaces as EBUSY/EPERM on
+ * files the previous request wrote milliseconds ago (ticket tmp, audit jsonl). Retry a
+ * few times with a short backoff before rethrowing — the caller's -32603 path stays the
+ * last resort, and cap semantics are unchanged (a still-failing write still throws). */
+const TRANSIENT_FS = new Set(["EBUSY", "EPERM", "EAGAIN"]);
+function withFsRetry<T>(fn: () => T, attempts = 3, what: string): T {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      return fn();
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException)?.code ?? "";
+      lastErr = err;
+      if (!TRANSIENT_FS.has(code)) throw err;
+      const waitMs = 25 * (attempt + 1);
+      console.error(`[mcp-upstream-server] transient fs ${code} on ${what} (attempt ${attempt + 1}/${attempts}) — retrying in ${waitMs}ms`);
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, waitMs);
+    }
+  }
+  throw lastErr;
+}
+
 function appendAuditLog(entry: Record<string, unknown>): void {
   mkdirSync(LOGS_DIR, { recursive: true });
-  appendFileSync(join(LOGS_DIR, `${kstDate()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8');
+  withFsRetry(() => appendFileSync(join(LOGS_DIR, `${kstDate()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8'), 3, 'audit append');
 }
 
 // M6 (T-20261002-010): reject-path audit lines are written OUTSIDE the intake lock by
@@ -927,7 +955,7 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
       };
       const ticketPath = join(TICKETS_DIR, `${id}.yaml`);
       const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
-      writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8');
+      withFsRetry(() => writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8'), 3, 'ticket tmp write');
       // T-20261005-001: hard-link publication is atomic on POSIX but fails EPERM on
       // Windows under file-system filter/AV pressure — the 2026-10-05 windows-latest
       // M5 flake lost 1 of 6 parallel intakes to exactly that (the throw surfaced as
@@ -943,18 +971,18 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
           // id taken — retry below with the next sequence number
         } else if (code === 'EPERM') {
           try {
-            const fd = openSync(ticketPath, 'wx');
+            const fd = withFsRetry(() => openSync(ticketPath, 'wx'), 3, 'ticket wx fallback');
             try { writeSync(fd, readFileSync(tmpPath)); } finally { closeSync(fd); }
             written = true;
           } catch (err2) {
-            if ((err2 as NodeJS.ErrnoException).code !== 'EEXIST') { unlinkSync(tmpPath); throw err2; }
+            if ((err2 as NodeJS.ErrnoException).code !== 'EEXIST') { withFsRetry(() => unlinkSync(tmpPath), 3, 'ticket tmp cleanup'); throw err2; }
           }
         } else {
-          unlinkSync(tmpPath);
+          withFsRetry(() => unlinkSync(tmpPath), 3, 'ticket tmp cleanup');
           throw err;
         }
       }
-      try { unlinkSync(tmpPath); } catch { /* consumed by a successful publish */ }
+      try { withFsRetry(() => unlinkSync(tmpPath), 2, 'ticket tmp consumed'); } catch { /* consumed by a successful publish */ }
     }
     if (!written) throw new Error('could not allocate a ticket id');
 

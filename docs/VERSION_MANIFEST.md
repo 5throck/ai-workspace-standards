@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-24T13:36:15.178Z
+**Generated**: 2026-10-24T13:48:28.295Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
-| mcp-upstream-server.ts | 1.10.0 | scripts/mcp-upstream-server.ts | js-yaml |
+| mcp-upstream-server.ts | 1.10.1 | scripts/mcp-upstream-server.ts | js-yaml |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
