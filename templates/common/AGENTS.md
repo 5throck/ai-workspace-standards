@@ -142,7 +142,7 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 - **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-5.6-luna / glm-5.3-flash)
 <!-- /WORKSPACE-MANAGED -->
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md §6](CLAUDE.md#6-native-sub-agents-agent-tool) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max).
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max).
 <!-- /WORKSPACE-MANAGED -->
 
 > **Tier semantics**: see [PM Tier Semantics](#pm-tier-semantics) in the shared policy section below.
