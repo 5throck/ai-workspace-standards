@@ -8,12 +8,30 @@ title: >-
   placement) was not a review axis in the 2026-10-22 panel. Evidence: co-design
   commission follow-up P4
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-22T20:57:57.501+09:00'
 history:
   - at: '2026-10-22T20:57:57.501+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-24T23:42:26.687+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-24T23:42:26.702+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-24T23:42:26.717+09:00'
+    from: running
+    to: review
+  - at: '2026-10-24T23:42:26.733+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in co-newbiz PR #714 (merged 2026-10-24 under the standing billing
+  exception — failed jobs show the not-started signature, 0 steps; local gates
+  green: 4,177 pass, tsc core/web-next clean, design-lint no violations, visual
+  smoke verified end-to-end). Design doc
+  docs/designs/2026-10-24-design-commission-followups-design.md.
+  https://github.com/5throck/co-newbiz/pull/714
 error: null
