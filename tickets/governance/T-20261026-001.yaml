@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261026-001
+kind: manual
+title: >-
+  Fix L1 platform-skeleton-merge import breakage and record the ADR-0073
+  L1-mirror policy before the next template release
+priority: urgent
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:12.505+09:00'
+history:
+  - at: '2026-10-26T00:20:12.505+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
