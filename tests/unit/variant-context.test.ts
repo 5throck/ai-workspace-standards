@@ -2,15 +2,19 @@
 // consumed by audit.ts — a scaffolded project must keep docs/<variant>.context.md
 // at the convention path; silent relocations strand the PM workflow-table reference.
 import { describe, expect, test } from 'bun:test';
+import { join } from 'node:path';
 import { variantContextPlacement } from '../../scripts/helpers/variant-context.ts';
 
 function fixture(files: Record<string, string>) {
-  // root '.' so join('.', rel) === rel and the fixture keys match resolved paths
+  // keys are rebuilt with join() so windows separators match the helper's lookups
+  // (join('.', 'docs/x') is 'docs\x' on win32 — raw forward-slash keys would miss)
+  const norm: Record<string, string> = {};
+  for (const [k, v] of Object.entries(files)) norm[join('.', k)] = v;
   const read = (p: string) => {
-    if (p in files) return files[p];
+    if (p in norm) return norm[p];
     throw new Error('ENOENT');
   };
-  const exists = (p: string) => p in files;
+  const exists = (p: string) => p in norm;
   return { read, exists };
 }
 
