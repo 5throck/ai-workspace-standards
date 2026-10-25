@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261026-011
+kind: manual
+title: >-
+  validator-hardening: check that L1-delivered scripts resolve their relative
+  imports within templates/common/scripts
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-26T00:20:41.770+09:00'
+history:
+  - at: '2026-10-26T00:20:41.770+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T01:15:02.114+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T01:15:02.130+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-26T01:56:54.185+09:00'
+    from: review
+    to: done
+result: >-
+  Landed as validate-templates.ts 1.59.0 Error arm IC-01 l1-import-closure:
+  every static relative import under templates/common/scripts/ must resolve
+  Bun-style within the delivered tree; exported collectL1ImportClosureIssues;
+  tests/unit/validate-templates-l1-import-closure.test.ts (4 tests). Green on
+  the current tree (157 files, 0 unresolved).
+error: null

@@ -3,10 +3,10 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
-- **Version**: 1.6.0
+- **Version**: 1.6.1
 - **Owner**: pm
 - **Created**: 2026-07-31
-- **Last Updated**: 2026-10-08 (Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
+- **Last Updated**: 2026-10-26 (Version 1.6.0 → 1.6.1: citation-only correction in the SKILL.md provenance text — spec docs/designs/2026-10-26-project-review-remediation-design.md R4; no behavior change. Previous: 2026-10-08 Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
 
 ## Description
 Upgrades an existing L2/L3 project to the current template version: syncs template improvements into a variant-based project's scripts, agents, skills, docs, and commands through the policy-driven TEMPLATE TREE SYNC engine (`scripts/upgrade-project.ts`, backed by `lib/upgrade-policy.ts`), with country-aware .env.sample delivery and conflict warnings for locally-modified files.
@@ -26,6 +26,7 @@ Upgrades an existing L2/L3 project to the current template version: syncs templa
 | 2026-09-16 | production | production | SKILL.md v1.5.0: behavior sections refreshed to the underlying script's v1.28.0 semantics (stash -u rollback, pre-scan conflict semantics, honest exit codes, CONTEXT_COMMONIZATION, GOVERNANCE FILES SYNC, COMMON-CONTEXT markers, root-target guard); T-20260915-008 | pm |
 | 2026-09-21 | production | production | SKILL.md v1.5.1: `--platform` values corrected to `claude\|antigravity\|codex\|all` (the documented `both` was renamed to `all` in script v1.34.0 and hard-errored), script pin refreshed v1.28.0 → v1.39.0 (2026-09-21 project review C-2/H-10) | pm |
 | 2026-09-27 | production | production | SKILL.md v1.5.2: marker table gains the missing COMMON-CODEX row and the new COMMON-HERMES row (managed-block-merge v1.3.0, spec 2026-09-27-hermes-merge-marker-design) — found during the post-v0.7.0 fleet upgrade where HERMES.md could not reach existing L2 projects | pm |
+| 2026-10-26 | production | production | SKILL.md v1.6.0 → v1.6.1: citation-only correction (SCRIPTS.md provenance citation; spec docs/designs/2026-10-26-project-review-remediation-design.md R4) — no behavior change | pm |
 
 ## Acceptance Criteria
 

@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20261026-010
+kind: manual
+title: Redact the personal email address committed in two September resync reports
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:41.757+09:00'
+history:
+  - at: '2026-10-26T00:20:41.757+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

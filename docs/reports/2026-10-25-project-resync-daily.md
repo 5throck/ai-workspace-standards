@@ -46,7 +46,7 @@ with the wall lifted, most carried real CI.
 
 ## Step 6 — final state
 
-- Fleet: **15/15 at v0.20.1** (co-abap at 0.19.2 by session-defer — its tier-model
+- Fleet: **15/16 at v0.20.1** (co-abap at 0.19.2 by session-defer — its tier-model
   sync PR #218 + local work ride with its session), audits PASS, trees clean,
   pr/* pruned, open PRs 0.
 - 2b: co-safety schema-typed plane PROMOTABLE — Step 2b promotion decision stays
