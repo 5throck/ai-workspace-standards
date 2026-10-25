@@ -3,7 +3,7 @@ id: U-20261026-003
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-26T02:05:26.899+09:00'
 history:
@@ -19,7 +19,16 @@ history:
   - at: '2026-10-26T03:18:14.556+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-26T07:46:06.618+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in workspace PR #1610 (merged, CI 8/8 CLEAN) with U-001: U-002
+  audit.ts 2.55.0 + helpers/variant-context.ts 1.0.0 variant-context placement
+  gate (variant.json projects must keep docs/<variant>.context.md at the
+  convention path; silent relocations fail with return-or-register); U-003 the
+  delivered Language Policy citation drops the L0-only (ADR-0090 W1b)
+  parenthetical across 15 template AGENTS.md files.
 error: null
 upstream:
   project: co-newbiz
@@ -50,3 +59,13 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-10-26T02:05:26.899+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1610
+    summary: >-
+      Implemented in workspace PR #1610 (merged, CI 8/8 CLEAN) with U-001: U-002
+      audit.ts 2.55.0 + helpers/variant-context.ts 1.0.0 variant-context
+      placement gate (variant.json projects must keep docs/<variant>.context.md
+      at the convention path; silent relocations fail with return-or-register);
+      U-003 the delivered Language Policy citation drops the L0-only (ADR-0090
+      W1b) parenthetical across 15 template AGENTS.md files.
