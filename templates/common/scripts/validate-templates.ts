@@ -1,7 +1,24 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.58.0
+ * @version 1.59.0
+ *
+ * v1.59.0 (2026-10-26, T-20261026-011, spec
+ *          docs/designs/2026-10-26-project-review-remediation-design.md D4):
+ *          new Error arm `l1-import-closure` (IC-01) — every static relative
+ *          import (import/export ... from './…'/'../…', plus side-effect
+ *          import './…') in every .ts under templates/common/scripts/
+ *          (recursive; `_`-prefixed fixture files/dirs and node_modules
+ *          excluded per registry convention) must resolve Bun-style (exact
+ *          path, then +.ts, then /index.ts) to an existing file WITHIN that
+ *          tree. Closes the A1 gap: every standing gate evaluates the L0
+ *          copy where the import resolves, so the 2026-10-25 broken pair
+ *          (L1-delivered scripts importing the L0-only
+ *          lib/platform-skeleton-merge.ts) shipped through every gate
+ *          unnoticed. Workspace-root-only — delivered copies self-skip via
+ *          existsSync (check-upgrade-coverage convention); fix policy per
+ *          ADR-0073 Amendment 4: deliver the module (leaf pure-module class)
+ *          or drop the import (engine class stays L0-only).
  *
  * v1.58.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
  *          ADR-0101): new Error arm `skeleton-registry` (SK-01) — every
@@ -337,7 +354,7 @@ function isCoVariantTracked(name: string): boolean {
   if (!_TRACKED_CO_VARIANTS) return true;
   return _TRACKED_CO_VARIANTS.has(name);
 }
-import { join, dirname, resolve, basename, relative } from 'node:path';
+import { join, dirname, resolve, basename, relative, isAbsolute } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
@@ -4877,6 +4894,119 @@ function checkSkeletonRegistry(): void {
   }
 }
 
+// Check IC-01: L1 import closure (T-20261026-011, spec
+// 2026-10-26-project-review-remediation-design.md D4). The A1 failure class:
+// an L1-delivered script statically imports a module that is not delivered
+// (the 2026-10-25 broken pair — L0+L1 validate-templates.ts/upgrade-project.ts
+// importing the then-L0-only lib/platform-skeleton-merge.ts). Every standing
+// gate evaluates the L0 copy where the import resolves, so nothing caught it.
+// This arm statically resolves the import closure of the DELIVERED tree:
+// every static relative import in every .ts under templates/common/scripts/
+// must resolve Bun-style (exact path, then +.ts, then /index.ts) to an
+// existing file within that tree. `_`-prefixed fixture files/dirs (registry
+// convention) and node_modules are excluded. Workspace-root-only: delivered
+// copies self-skip via existsSync (the check-upgrade-coverage convention —
+// their own ROOT carries no templates/common/scripts). Fix policy per
+// ADR-0073 Amendment 4: deliver the module (leaf pure-module class, the
+// lib/upgrade-policy.ts precedent) or drop the import (engine class stays
+// L0-only). Primitives: collectL1ImportClosureIssues (pure, unit-tested).
+export interface L1ImportClosureIssue {
+  /** Importing file, relative to the scanned scripts root. */
+  file: string;
+  /** The unresolvable relative specifier as written. */
+  specifier: string;
+}
+
+// Static relative import extraction. The clause class [A-Za-z0-9_$*{},\s]
+// admits every static import/export form (default, namespace, named, type,
+// export-from, multiline — digits included: import bindings like md5/sha256
+// are ordinary) while refusing to cross `=`/`(` — string literals like
+// `export const foo = "from './x'"` and dynamic import('…') calls cannot
+// false-positive. Side-effect imports (`import './x'`) get their own arm of
+// the alternation: they load the module at import time exactly like a
+// from-import, so a dangling one is the same failure.
+const L1_IMPORT_FROM_RE = /^[ \t]*(?:import|export)[ \t]+[A-Za-z0-9_$*{}, \t\r\n]*?from[ \t]*['"](\.[^'"]+)['"]/gm;
+const L1_IMPORT_SIDEEFFECT_RE = /^[ \t]*import[ \t]*['"](\.[^'"]+)['"]/gm;
+
+export function collectL1ImportClosureIssues(scriptsRoot: string): L1ImportClosureIssue[] {
+  const issues: L1ImportClosureIssue[] = [];
+  const walk = (dir: string): void => {
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      issues.push({ file: relative(scriptsRoot, dir), specifier: '<unreadable directory>' });
+      return;
+    }
+    for (const entry of entries) {
+      // `_`-prefixed fixture files/dirs per registry convention; dependency installs excluded.
+      if (entry.name.startsWith('_') || entry.name === 'node_modules') continue;
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(abs);
+        continue;
+      }
+      if (!entry.name.endsWith('.ts')) continue;
+      const content = readFileSync(abs, 'utf-8');
+      const relFile = relative(scriptsRoot, abs);
+      for (const re of [L1_IMPORT_FROM_RE, L1_IMPORT_SIDEEFFECT_RE]) {
+        for (const m of content.matchAll(re)) {
+          const spec = m[1]!;
+          if (!resolvesWithinTree(join(dirname(abs), spec), scriptsRoot)) {
+            issues.push({ file: relFile, specifier: spec });
+          }
+        }
+      }
+    }
+  };
+  if (!existsSync(scriptsRoot)) return issues;
+  walk(scriptsRoot);
+  return issues;
+}
+
+// Bun-style relative-specifier resolution, constrained to the delivered tree:
+// exact path, then +.ts, then /index.ts. A specifier whose only resolution
+// escapes the tree (e.g. ../../../scripts/x — exists at L0, absent in every
+// project) is exactly the A1 class and fails.
+function resolvesWithinTree(baseCandidate: string, scriptsRoot: string): boolean {
+  for (const candidate of [baseCandidate, `${baseCandidate}.ts`, join(baseCandidate, 'index.ts')]) {
+    if (!existsSync(candidate)) continue;
+    const rel = relative(scriptsRoot, candidate);
+    if (rel.length > 0 && !rel.startsWith('..') && !isAbsolute(rel)) return true;
+  }
+  return false;
+}
+
+function checkL1ImportClosure(): void {
+  if (!JSON_MODE) console.log('\n=== Check IC-01: l1-import-closure (templates/common/scripts static import resolution) ===');
+  const l1ScriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
+  // Workspace-root-only self-skip: the marker dir exists only where the L1
+  // tree is the workspace's own delivered tree (check-upgrade-coverage
+  // convention — outside the workspace there is nothing to validate).
+  if (!existsSync(l1ScriptsDir)) {
+    if (!JSON_MODE) console.log('  l1-import-closure: no templates/common/scripts — not a workspace root, skipping.');
+    return;
+  }
+  const issues = collectL1ImportClosureIssues(l1ScriptsDir);
+  for (const issue of issues) {
+    fail('common', 'l1-import-closure',
+      `templates/common/scripts/${issue.file} imports '${issue.specifier}' — target not found within the delivered tree (l1-import-closure IC-01)`,
+      'Deliver the module or drop the import — see ADR-0073 Amendment 4 (engine vs leaf-module classes)');
+  }
+  if (issues.length === 0) {
+    let fileCount = 0;
+    const count = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name.startsWith('_') || entry.name === 'node_modules') continue;
+        if (entry.isDirectory()) count(join(dir, entry.name));
+        else if (entry.name.endsWith('.ts')) fileCount++;
+      }
+    };
+    count(l1ScriptsDir);
+    pass(`l1-import-closure: all static relative import(s) in ${fileCount} .ts file(s) under templates/common/scripts resolve within the delivered tree`);
+  }
+}
+
 // Check PM-04b: COMMON-AGENTS block parity (ADR-0081 fleet sweep / T-20260919-001).
 // The COMMON-AGENTS:START/END marker-inject zone in AGENTS.md is delivered to
 // projects by upgrade MERGE from the VARIANT template copy (variant-first
@@ -5878,6 +6008,7 @@ function checkAgentsMdPointerIntegrity(): void {
   checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
   checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
   checkSkeletonRegistry();                                       // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
+  checkL1ImportClosure();                                        // IC-01: delivered-tree static import closure (T-20261026-011, spec 2026-10-26-project-review-remediation-design D4, ADR-0073 Amd. 4)
   checkCommonAgentsBlockParity();                                // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates

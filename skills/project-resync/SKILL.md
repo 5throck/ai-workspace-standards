@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.6.1
+version: 1.6.2
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
@@ -14,6 +14,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
+last_updated: 2026-10-26
 last_reviewed: 2026-10-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
@@ -212,10 +213,12 @@ review category plan → run with the same flags → verify
 `.claude/template-version.txt` and project `bun scripts/audit.ts`.
 
 `--prune-removed` is mandatory in this cycle: the upgrade engine is
-`L0`-only (ADR-0073 Amendments 1 and 3 — engine-only scope;
-`lib/upgrade-policy.ts` stays delivered as the shared data module project
-`dev-sync.ts`/`validate-templates.ts` import), so any project still holding
-an engine copy (`scripts/upgrade-project.ts`, `helpers/skills-registry.ts`)
+`L0`-only and the delivered tree carries no engine copy (ADR-0073
+Amendments 1, 3 and 4 — the delivered scripts are `validate-templates.ts`
+plus the `lib/` leaf modules `upgrade-policy.ts`, `skills-registry.ts` and
+`platform-skeleton-merge.ts` that project `dev-sync.ts`/`validate-templates.ts`
+import), so any project still holding a stray engine copy
+(`scripts/upgrade-project.ts`)
 gets it retired by this flag and drops the pruned script's registry row itself. A registered project-local script (SCRIPTS.md source
 cell = the variant name) is never pruned; if one still disappears, that is a
 pruner defect — file a ticket, do not hand-restore silently.

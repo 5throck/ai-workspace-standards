@@ -5,12 +5,26 @@ title: >-
   Fix L1 platform-skeleton-merge import breakage and record the ADR-0073
   L1-mirror policy before the next template release
 priority: urgent
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:12.505+09:00'
 history:
   - at: '2026-10-26T00:20:12.505+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T01:15:02.081+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T01:15:02.098+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-26T01:56:54.168+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented 2026-10-26 (DEC-20261026-02, Option b refined, landed with PR
+  #1609): lib/platform-skeleton-merge.ts delivered L0+L1; upgrade-project.ts
+  returned to L0 and L1 engine mirror deleted; ADR-0073 Amendment 4; co-develop
+  canary pruned live; validate-templates 1.59.0 with IC-01 ratchet. Release hold
+  on v0.20.2 lifts at merge; next cut is MINOR 0.21.0.
 error: null

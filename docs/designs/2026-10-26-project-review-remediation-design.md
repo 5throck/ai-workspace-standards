@@ -3,7 +3,7 @@
 - **Spec ID**: 2026-10-26-project-review-remediation-design
 - **Date**: 2026-10-26
 - **Source**: 2026-10-26 full project review findings A1 (Critical) and A2 (High); ticket **T-20261026-001** (urgent); decision record **DEC-20261026-01**
-- **Status**: proposed — awaiting user approval (Design Gate Row 0, DEC-20261026-01)
+- **Status**: implemented 2026-10-26 (DEC-20261026-02; Option (b) refined; landed with PR #1609)
 - **Owners**: pm (orchestration), automation-engineer (scripts/registry/ratchet), docs-writer (ADR/constitution/SKILL wording), lifecycle-manager (records + finalization)
 
 ## 0. Conclusion First
@@ -299,3 +299,9 @@ None blocking — Option (b) is recommended and self-contained. The user may pre
 Option (a) (accept the L1 engine mirror permanently) to avoid the prune wave; the design
 records why that is not recommended (ADR-0073's failure mode, ADR-0101's intent, no
 consumer for the mirror).
+
+## 11. Implementation Notes (2026-10-26)
+
+- AC-4 interpretation: the literal "`bun scripts/validate-templates.ts` exits 0 inside a project" is a pre-existing impossibility — projects have no `templates/` dir, so the validator's early guard exits 1 at 1.57.0 too (the project pre-commit only invokes it when `templates/` files are staged). The design's real requirement ("module loads") is proven; changing the CLI guard is a separate decision, not taken here.
+- AC-7 timing: `new-project.ts` scaffolds from the template release **tag**, so a fresh scaffold receives 1.59.0 + lib only after the next release (v0.21.0) is cut from this tree — verified by the first post-release nightly (`nightly-scaffold-e2e.yml`). The working-tree E2E harness (`test-new-project.ts --variant co-develop`) passed 41/41 in-session.
+- Rows 1–5 executed by automation-engineer / docs-writer / lifecycle-manager; verification per the report's Remediation verification subsection.
