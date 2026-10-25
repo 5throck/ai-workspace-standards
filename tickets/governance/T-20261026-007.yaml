@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261026-007
+kind: manual
+title: >-
+  Governance doc corrections: --no-verify clause wording across five sites,
+  Section 4.1 enforcement wording, PLATFORM_HARNESS Codex and Hermes coverage,
+  workflows Section 9 and 10 order
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:41.716+09:00'
+history:
+  - at: '2026-10-26T00:20:41.716+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

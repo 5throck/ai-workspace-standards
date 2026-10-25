@@ -197,7 +197,7 @@ Every project uses role-based agents defined in `agents/*.md` with YAML frontmat
 ---
 
 ### 5.5 PM Gateway Workflow
-Full details: [`AGENTS.md#5-execution-plan-templates`](AGENTS.md#5-execution-plan-templates) | [Platform dispatch: CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) / [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules)
+Full details: [`AGENTS.md#3-pm-gateway-workflow`](AGENTS.md#3-pm-gateway-workflow) | [Platform dispatch: CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) / [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules)
 
 All specialist agent dispatch MUST go through the PM orchestrator. The PM Gateway enforces governance consistency across multi-agent tasks through a mandatory execution plan display.
 
@@ -598,7 +598,7 @@ Operational procedures for maintaining workspace health and lifecycle hygiene. *
 The following terms have precise meanings across all workspace tools, agents, and documentation. Use these exact terms — do not substitute synonyms.
 
 #### Template Variant
-One of thirteen project archetypes. Stable: `co-abap`, `co-consult`, `co-deck`, `co-design`, `co-develop`, `co-game`, `co-security`, `co-work`. Beta: `co-export`, `co-hr`, `co-news`, `co-price`, `co-safety`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
+One of fourteen project archetypes. Stable: `co-abap`, `co-consult`, `co-deck`, `co-design`, `co-develop`, `co-game`, `co-security`, `co-work`. Beta: `co-export`, `co-hr`, `co-learning`, `co-news`, `co-price`, `co-safety`. Specifies which `templates/<variant>/` folder is used during project scaffolding. Recorded in `.claude/template-version.txt` as `variant=<value>`.
 
 #### Platform Profile
 Controls which AI-platform-specific configuration files are included in a project. Values:
@@ -846,4 +846,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-10-12*
+*Last Updated: 2026-10-26*

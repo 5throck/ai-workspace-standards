@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261026-009
+kind: manual
+title: >-
+  Automation hardening batch: cli-version-drift checkout SHA pin, ticket list
+  --archived filters, mcp-upstream id allocation, agent-model-gate full-ID
+  acceptance, 24h marker TTL refresh, dev-sync no-op early exit, gitleaks 64-hex
+  allowlist scoping
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:41.744+09:00'
+history:
+  - at: '2026-10-26T00:20:41.744+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

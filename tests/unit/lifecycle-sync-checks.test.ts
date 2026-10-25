@@ -110,10 +110,11 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
   });
 
   test('the refreshed records agree with their SKILL.md frontmatter', () => {
+    // Golden pins — bump alongside the skill's version (checked by step 4.85 of /sync).
     const cases: Array<[string, string, string]> = [
       ['sync', '1.8.0', 'pm'],
       ['security-scan', '1.2.0', 'pm'],
-      ['upgrade-project', '1.6.0', 'pm'],
+      ['upgrade-project', '1.6.1', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {
       const fm = parseSkillFrontmatter(

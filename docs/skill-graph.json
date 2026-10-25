@@ -2203,7 +2203,7 @@
       "name": "lifecycle-manager",
       "scope": "root",
       "capability": "lifecycle-manager",
-      "content_hash": "d4304aecf683c8f9",
+      "content_hash": "fc41a7d6888381c5",
       "version": "1.1.0",
       "mirrors": [
         "agents/lifecycle-manager.md"
@@ -2298,6 +2298,16 @@
     },
     {
       "id": "dec:DEC-20261023-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261026-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261026-02",
       "type": "decision",
       "layer": "L0"
     },
@@ -6948,7 +6958,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
+        "sessions": 1,
         "last_used": "2026-10-23"
       }
     },
@@ -7342,7 +7352,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
+        "sessions": 1,
         "last_used": "2026-10-23"
       }
     },
@@ -7715,8 +7725,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "d96dace151399e91",
-      "version": "1.6.1",
+      "content_hash": "3e4842fb6b019e17",
+      "version": "1.6.2",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",
@@ -7987,7 +7997,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
+        "sessions": 1,
         "last_used": "2026-10-23"
       }
     },
@@ -8110,8 +8120,8 @@
       "name": "upgrade-project",
       "scope": "root",
       "capability": "upgrade-project",
-      "content_hash": "3e58bb41ebd4b2b3",
-      "version": "1.6.0",
+      "content_hash": "553103591cbd780f",
+      "version": "1.6.1",
       "mirrors": [
         "skills/upgrade-project/SKILL.md",
         ".claude/skills/upgrade-project/SKILL.md",
@@ -10264,6 +10274,18 @@
       "type": "cites_skill",
       "from": "dec:DEC-20260930-02",
       "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261026-01",
+      "to": "skill:root/project-review",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261026-02",
+      "to": "skill:root/project-review",
       "source": "skills_used"
     },
     {

@@ -35,6 +35,15 @@ Invert the default. Classification for every project-relative path lives in one 
 
 ## References
 
+## Amendment 4 (2026-10-26): correction of record — engine `L0`-only restated; leaf-module class widened; the 2026-10-11 mirror restoration reversed
+
+The 2026-10-11 landing of T-20261011-014 (commit `3f9aba630`, continued by `9b6dcf361`) re-created the L1 mirror of `upgrade-project.ts` and flipped its registry row to `L0+L1` without a decision record — its design doc planned "+ scrub-canonical L1 mirror" as routine, unaware of Amendment 3. By 2026-10-26 all 16 projects again carried inert engine copies (1.71.0/1.72.0), the exact failure mode Amendment 3 removed. PM adjudication: re-execute Amendment 3 and record the drifted scope facts (spec `2026-10-26-project-review-remediation-design`, T-20261026-001).
+
+- **Amendment 3 re-executed** (this amendment's execution): engine row `L0`; the mirror `templates/common/scripts/upgrade-project.ts` is deleted; the inert project engine copies retire via the standing `--prune-removed` path.
+- **Scope facts the registry had already drifted into**: (1) `helpers/skills-registry.ts` is `L0+L1` — re-delivered 2026-09-25 (`71f04acfd`) because the delivered `validate-templates.ts` statically imports it; (2) `lib/platform-skeleton-merge.ts` (ADR-0101) joins `lib/upgrade-policy.ts` in the leaf-pure-module class `L0+L1` — imported by the delivered `validate-templates.ts`.
+- **The L0-only rule remains engine-only**: `upgrade-project.ts`, `check-upgrade-coverage.ts`.
+- **Going forward**: any change to the layer of a row in the engine set or the leaf-module class requires an amendment-level decision recorded before the row flips (enforced structurally by the `l1-import-closure` ratchet for the import half; registry-layer drift remains review-surface).
+
 ## Amendment 3 (2026-09-23): Amendment 1 completed — engine-only `L0`-only, `lib/upgrade-policy.ts` stays delivered
 
 The 2026-09-23 fleet resync found Amendment 1 never fully executed: the physical L1 mirrors (`templates/common/scripts/upgrade-project.ts`, `templates/common/scripts/helpers/skills-registry.ts`) had existed continuously since the 2026-09-06 post-resync hardening commit, with `L0+L1` registry rows, so TEMPLATE TREE SYNC shipped a fresh inert 165 KB engine copy into all 11 `Projects/co-*` on every upgrade. PM adjudication: complete Amendment 1 (spec `2026-09-23-upgrade-engine-l0-only-completion-design`, T-20260923-004).
@@ -44,7 +53,7 @@ The 2026-09-23 fleet resync found Amendment 1 never fully executed: the physical
 - **Correction of record**: Amendment 1's claim that `reconcileScriptRegistry` drops the stale registry row on prune was false — it only appends/syncs rows (the sync-agent-status ghost rows were hand-remediated in the 2026-09-16 resync). `upgrade-project` v1.44.0 implements registry-aware pruning: a scripts/ row sourced to the variant name survives the prune (KEEP), and a legitimately pruned script's row is dropped (`dropScriptRegistryRows`) — see T-20260923-003.
 
 - Design: `docs/designs/2026-09-11-upgrade-policy-coverage-design.md` (D1–D8, §10 Phase C addendum)
-- CONSTITUTION §6.5 Script Lifecycle (layer model — the upgrade trio is `L0`-only; see Amendment 1)
+- CONSTITUTION §6.5 Script Lifecycle (layer model — the upgrade engine set is `L0`-only; see Amendments 1, 3 and 4)
 - ADR-0060 (auto-activating audit gate precedent), ADR-0031 (L1/L2 fork model — upgrade philosophy), WS-07 (variant `docs/context.md` prohibition)
 - SSOT: `scripts/lib/upgrade-policy.ts`; gate: `scripts/check-upgrade-coverage.ts`; delivery: `scripts/upgrade-project.ts` v1.22.0
 - PRs #876 (Phases A+B), #877 (Phase C), #878 (ADR + docs)

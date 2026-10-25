@@ -6,7 +6,7 @@
 - **Status**: active
 - **Version**: 1.73.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-25
+- **Last Updated**: 2026-10-26 (delivery layer L0+L1 → L0, ADR-0073 Amendment 4; T-20261026-001)
 
 ## Description
 
@@ -18,6 +18,7 @@ post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-26 | production | production | Delivery layer L0+L1 → L0 (T-20261026-001, spec docs/designs/2026-10-26-project-review-remediation-design.md R1, ADR-0073 Amendments 3 and 4): L1 mirror templates/common/scripts/upgrade-project.ts removed and scripts/SCRIPTS.md row flipped back to L0-only — engine code unchanged at v1.73.0. Undocumented reversal of Amendment 3 corrected as Amendment 4; the delivered tree carries validate-templates.ts + lib/ leaf modules (upgrade-policy.ts, skills-registry.ts, platform-skeleton-merge.ts), no engine copy. | automation-engineer |
 | 2026-10-25 | production | production | v1.73.0 (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101): MERGE pass delivers the out-of-zone CLAUDE/GEMINI skeleton via lib/platform-skeleton-merge.ts (insert + guarded replace, .pre-skeleton.bak fail-closed). | automation-engineer |
 | 2026-10-17 | production | production | v1.71.0 (T-20261017-001 canary): VARIANT SCRIPTS SYNC gains the variant overlay top-level walk. | governance-runner |
 | 2026-10-14 | production | production | v1.70.6 (T-20261014-002): reconcileScriptRegistry's append arm delegates the boundary scan to helpers/registry-append.ts registryAppendIndex — retires the second inline registry-append implementation. | governance-runner |

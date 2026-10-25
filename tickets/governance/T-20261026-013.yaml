@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261026-013
+kind: manual
+title: >-
+  validator-hardening: extend lifecycle-sync-audit with cross-surface drift
+  checks (dispatch protocol fields, last_updated vs commit dates, tier claims vs
+  schema, registry status vs design-doc status, review_notes key pinning)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:41.796+09:00'
+history:
+  - at: '2026-10-26T00:20:41.796+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

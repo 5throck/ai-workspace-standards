@@ -1,0 +1,14 @@
+schemaVersion: 1
+id: T-20261026-005
+kind: manual
+title: Adjudicate four stale draft registry entries and normalize review_note keys
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-26T00:20:12.564+09:00'
+history:
+  - at: '2026-10-26T00:20:12.564+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
