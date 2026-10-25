@@ -1,4 +1,8 @@
-// @version 2.54.0
+// @version 2.55.0
+// v2.55.0 (2026-10-26, U-20261026-002): variant-context placement gate — a scaffolded
+//           project (variant.json present) must keep docs/<variant>.context.md at the
+//           convention path the PM workflow table references; relocations fail with the
+//           return-or-register remediation (pure helper helpers/variant-context.ts 1.0.0).
 // v2.54.0 (2026-10-13, T-20261013-009 phase 2): command parity expects rendered
 //  .gemini/commands/*.toml (Gemini CLI loads TOML only; renderer = render-commands.ts).
 // v2.53.0 (2026-10-11, U-20261009-001, spec
@@ -220,6 +224,7 @@ import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
 import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
+import { variantContextPlacement } from './helpers/variant-context.ts';
 import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -1757,6 +1762,17 @@ function checkDesignLint() {
     }
 }
 checkDesignLint();
+
+// T-20261026-002 (upstream U-20261026-002): the variant context file carries the PM
+// workflow table — a silent relocation (co-newbiz moved it to docs/meta/ for 9 days)
+// strands the reference. Gate the convention path.
+function checkVariantContextPlacement() {
+    const finding = variantContextPlacement(process.cwd(), readUTF8File, (p) => fs.existsSync(p));
+    if (finding.status === 'pass') Pass(`Variant context placement: ${finding.message}`);
+    else if (finding.status === 'skip') Skip(`Variant context placement: ${finding.message} — skipped`);
+    else Fail(`Variant context placement: ${finding.message}`);
+}
+checkVariantContextPlacement();
 
 // T-20261002-008 (review H1 doc-command lint): governance docs may only name
 // ticket.ts subcommands that exist — the CLI's usage line is the SSOT, so a doc
