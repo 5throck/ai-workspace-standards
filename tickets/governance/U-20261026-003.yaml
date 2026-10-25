@@ -1,0 +1,52 @@
+schemaVersion: 1
+id: U-20261026-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-26T02:05:26.899+09:00'
+history:
+  - at: '2026-10-26T02:05:26.899+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T03:03:48.255+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T03:03:48.312+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T03:18:14.556+09:00'
+    from: running
+    to: review
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.20.1
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The COMMON-AGENTS Language Policy section cites a dead ADR anchor. The
+    delivered AGENTS.md contains 'Canonical home: docs/context.md (ADR-0090
+    W1b)' for the Language Policy, but in the co-newbiz ADR set ADR-0090 is the
+    synergy-alignment refactor and contains no language-policy content and no
+    W1b marker; a repo-wide grep finds no ADR that matches the citation. Reader
+    impact: agents following the pointer land on an unrelated ADR. Discovered
+    2026-10-25 while fixing the same dead anchor that two rewritten agent files
+    had inherited from this section. The correct citation target in co-newbiz is
+    the Language Policy section of docs/context.md itself.
+  affected_paths:
+    - templates/common/AGENTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/common/AGENTS.md'
+    - info:in_last_delivery templates/common/AGENTS.md=false
+  dedupe_key: 804c601aaa98366b30284659c688397bf1f756f5b8fae0dd266b4d1f37e24911
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-26T02:05:26.899+09:00'

@@ -1,0 +1,71 @@
+schemaVersion: 1
+id: U-20261026-002
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-26T02:05:26.896+09:00'
+history:
+  - at: '2026-10-26T02:05:26.896+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T03:03:48.238+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T03:03:48.284+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T03:18:14.541+09:00'
+    from: running
+    to: review
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.20.1
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The variant context file has no placement guard, so it was silently
+    relocated. The workspace convention renders
+    templates/common/docs/variant.context.template.md as
+    docs/<variant>.context.md, and the workspace-managed PM body references that
+    path as the workflow-table location. No validator verifies the convention:
+    in co-newbiz the file was moved to docs/meta/co-newbiz.context.md on
+    2026-10-16 (local docs restructure, commit 48082d1c), which left 4 stale
+    references in docs/context.md pointing at the old path and orphaned the
+    pm.md reference, and no gate noticed for 9 days (found 2026-10-25 by a
+    manual check while writing agent definitions whose Output Destination
+    blockquote targets the file). The same silent-relocation risk applies to
+    every project scaffolded from the template. An audit gate asserting
+    docs/<variant>.context.md exists at the template-convention path - or that
+    any relocation carries a registered superseding record - would make the
+    convention enforceable. Co-newbiz fixed it locally on 2026-10-25 (PR #731:
+    file returned to the docs root, docs/meta/ dissolved, references
+    retargeted); the guard gap itself remains open.
+  affected_paths:
+    - templates/common/docs/variant.context.template.md
+    - templates/common/docs/context.md
+    - agents/pm.md
+    - scripts/audit.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - >-
+      path_not_template_managed:
+      templates/common/docs/variant.context.template.md
+    - 'path_not_template_managed: templates/common/docs/context.md'
+    - >-
+      info:in_last_delivery
+      templates/common/docs/variant.context.template.md=false
+    - info:in_last_delivery templates/common/docs/context.md=false
+    - info:in_last_delivery agents/pm.md=false
+    - info:in_last_delivery scripts/audit.ts=false
+  dedupe_key: 55276f0c705664ac931baeefb77a6e36efdc77fe8f96a48ed34858ae5953c9b5
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-26T02:05:26.896+09:00'

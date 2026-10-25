@@ -1,0 +1,63 @@
+schemaVersion: 1
+id: U-20261026-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-10-26T02:05:26.892+09:00'
+history:
+  - at: '2026-10-26T02:05:26.892+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-26T03:03:23.377+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T03:18:14.525+09:00'
+    from: running
+    to: review
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.20.1
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Agent definition stubs pass every shipped gate. In project co-newbiz, 39 of
+    41 agents/*.md files carried only frontmatter plus an 8-line body (a Role
+    heading copying the description's first sentence and one shared boilerplate
+    Scope line) from 2026-09-17 until 2026-10-25, undetected by
+    validate-agents.ts, agent-lifecycle-audit.ts, agent-verify.ts, and audit.ts
+    - all four passed while the bodies had no Responsibilities, Protocols,
+    Constraints, or Required Tools sections. The root cause is a
+    management-system gap rather than a one-off: no shipped validator enforces
+    minimum definition substance (required body sections or a minimum body
+    length) for agents/*.md, and no lifecycle audit flags stub-quality
+    definitions, so scaffolded stubs can sit in a production roster
+    indefinitely. Detection happened only via a manual cross-project comparison
+    on 2026-10-25 (15 sibling projects average 108-230 lines per agent file). A
+    body-completeness check in the shared validators - declared-section
+    presence, or a stub detector such as body-under-N-lines or
+    missing-Responsibilities - would have caught this in September. Co-newbiz
+    fixed it locally on 2026-10-25 (PR #731 rewrote all 39 files to the
+    canonical 9-section standard); the detection gap itself remains open.
+  affected_paths:
+    - scripts/validate-agents.ts
+    - scripts/agent-lifecycle-audit.ts
+    - scripts/agent-verify.ts
+    - scripts/audit.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-agents.ts=false
+    - info:in_last_delivery scripts/agent-lifecycle-audit.ts=false
+    - info:in_last_delivery scripts/agent-verify.ts=false
+    - info:in_last_delivery scripts/audit.ts=false
+  dedupe_key: 805e1fbba40df466b1c63d4cb3e1886f96f35cacfb5f0494c6f8a92de948d5b6
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-26T02:05:26.892+09:00'

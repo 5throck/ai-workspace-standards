@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-26](2026-10-26.md) | feat(governance): upstream hardening — agent stub detector, variant-context gate, citation fix (U-20261026-001..003) |
 | [2026-10-25](2026-10-25.md) | docs(memory): follow-up completion — visual gate active, getDb migration analysis |
 | [2026-10-24](2026-10-24.md) | fix(pipeline): dev-sync flag-leak guard + copy-safe landing emission (T-20261024-001); land backlog tickets T-20261022-034..051, T-20261024-001 |
 | [2026-10-23](2026-10-23.md) | feat(design-lint): schema designLint wiring, app token discovery, list-table check (T-20261022-045/046/047) |
@@ -14,7 +15,7 @@
 | [2026-10-21](2026-10-21.md) | docs(memory): 2026-10-21 daily log — 01:30 skip note + 03:00 empty ticket run |
 | [2026-10-20](2026-10-20.md) | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |
 | [2026-10-19](2026-10-19.md) | docs(review): daily fleet review 2026-10-19 — baseline-only, three green PRs merged |
-| [2026-10-18](2026-10-18.md) | chore(templates): workspace sync (52 files) |
+| 2026-10-18 | chore(templates): workspace sync (52 files) — archived (7-day retention) |
 | 2026-10-17 | fix(scaffold): registry-append v1.2.0 bound the append-index scan at the next section heading (T-20261017-001) |
 | 2026-10-15 | docs(review): daily fleet review 2026-10-15 — baseline-only, adopted #1543 spec entry |
 | 2026-10-14 | fix(ci): test-runner v1.5.0 windows CI timing budgets (bun per-test ceiling + per-file overrides) |

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.3.2
+ * @version 1.4.0
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -386,6 +386,39 @@ function validatePersonaIntegrity(): void {
   }
 }
 
+// T-20261026-001 (upstream U-20261026-001): stub-quality detector. 39 of co-newbiz's
+// 41 agent definitions sat as 8-line stubs for a month while every shipped gate passed —
+// no validator looked at BODY substance. A production agent definition carries the
+// canonical body sections (Role, Responsibilities, Protocols, Constraints, Required
+// Tools, ...); anything materially shorter is a stub, not a definition.
+export const MIN_AGENT_BODY_LINES = 40;
+export const MIN_AGENT_SECTIONS = 4;
+
+export function agentBodyCompletenessFinding(content: string): string | null {
+  const parts = content.split(/^---$/m);
+  const body = parts.length >= 3 ? parts.slice(2).join('---') : content;
+  // resolved stubs (hydrated at scaffold) carry the annotation persona-integrity tolerates
+  if (/^#\s*@resolved-from:/m.test(body)) return null;
+  const lines = body.split(/\r?\n/).filter((l) => l.trim() !== '');
+  const sections = body.split(/\r?\n/).filter((l) => /^##\s/.test(l));
+  if (lines.length >= MIN_AGENT_BODY_LINES && sections.length >= MIN_AGENT_SECTIONS) return null;
+  return `stub-quality definition: ${lines.length} non-empty body line(s), ${sections.length} '## ' section(s) (minimum ${MIN_AGENT_BODY_LINES} lines / ${MIN_AGENT_SECTIONS} sections) — a production definition carries the canonical body sections; rewrite to the section standard (co-newbiz PR #731 is the worked example)`;
+}
+
+function validateAgentBodyCompleteness(): void {
+  if (!existsSync(AGENTS_DIR)) return;
+  for (const entry of readdirSync(AGENTS_DIR)) {
+    if (!isAgentFile(entry)) continue;
+    const content = readFileSync(join(AGENTS_DIR, entry), 'utf-8');
+    if (parseFrontmatterYaml) {
+      const fm = parseFrontmatterYaml(content);
+      if (fm.extends) continue; // extends-pattern stubs hydrate at scaffold — same skip as the schema check
+    }
+    const finding = agentBodyCompletenessFinding(content);
+    if (finding) fail(entry, 'agent-body-completeness', finding, 'Rewrite the definition body to the canonical section standard.');
+  }
+}
+
 function main() {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}🔍 Validating agent lifecycle documentation...${colors.reset}`);
@@ -397,6 +430,7 @@ function main() {
   validateGovernanceRecords();
   validateAgentSchema();
   validatePersonaIntegrity();
+  validateAgentBodyCompleteness();
 
   const errors = issues.filter(i => i.level === 'error');
   const warnings = issues.filter(i => i.level === 'warning');
