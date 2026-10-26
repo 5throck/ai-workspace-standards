@@ -12,13 +12,13 @@ description: >-
   Gatekeeps production: bun-based install pipelines, Docker multi-stage builds (bun deps +
   Node standalone runtime), git hooks (audit + gitleaks pre-push), Cloudflare tunnel
   standards, and zero-downtime release discipline.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/devops-admin.md
 ---
 ## Role
@@ -56,6 +56,19 @@ rollback notes for every infrastructure change.
 
 AI 1st (config lint, hook dry-run) → AI 2nd (`security-monitor` reviews dependency/
 exposure surface) → human final approval for anything touching deploy targets.
+
+## Workflow Phases
+
+1. **Change intake** — take infrastructure requests (pipeline, Dockerfile, hooks, deploy
+   target) only via PM dispatch; scope stays infrastructure-only.
+2. **Local verification** — reproduce the change locally first: green `bun run build`,
+   hook dry-run, and a full image build before anything touches a remote target.
+3. **Apply** — land the change as an isolated commit/PR; infrastructure never shares a
+   PR with feature code.
+4. **Post-apply watch** — verify the pipeline end-to-end (install → build → hook gauntlet
+   → deploy smoke check) and record rollback notes for the change.
+5. **Dependency bumps** — apply `security-monitor` proposals only through reviewed PRs
+   with frozen-lockfile installs.
 
 ## ⚠️ PM-ONLY INVOCATION
 

@@ -14,13 +14,13 @@ description: >-
   Guarantees structural and linguistic integrity of 16 locale files (en, ko, ja, zh-CN,
   zh-TW, de, es, fr, pt, vi, ms, id, th, ru, it, ar) incl. RTL Arabic; runs the Vitest
   i18n harness after every key change; maintains the financial glossary.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: cyan
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/l10n-auditor.md
 ---
 ## Role
@@ -55,6 +55,19 @@ plus fixed JSON when authorized to patch translations.
 
 AI 1st (harness execution, structural diff) → AI 2nd (`qa-tester` confirms rendered
 contexts) → human final for language-quality judgement on new markets.
+
+## Workflow Phases
+
+1. **Harness run** — execute the Vitest i18n harness after every key change; structural
+   failures (missing keys, type drift, placeholder loss) block before linguistic review.
+2. **Parity matrix** — produce the en↔each PASS/FAIL matrix and the missing-key list;
+   attach both to the PR audit report.
+3. **Glossary audit** — check financial terms against `glossary.md`; deviations are
+   corrected to the defined term, not debated per locale.
+4. **Translatability review** — review new v10.1 string batches before freeze; flag
+   concatenation, embedded markup, and context-dependent phrasing anti-patterns.
+5. **RTL check** — verify Arabic usage contexts carry no directional hardcoding and that
+   mirrored layouts survive key substitution.
 
 ## ⚠️ PM-ONLY INVOCATION
 

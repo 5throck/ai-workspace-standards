@@ -12,13 +12,13 @@ description: >-
   Runs scheduled and pre-PR security scans (local vuln scan, web advisories, gitleaks),
   maintains the security/ findings register with 7-day cleanup and Dependabot resolution,
   and blocks merges on active CRITICAL advisories.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/security-monitor.md
 ---
 ## Role
@@ -58,6 +58,17 @@ severity, CVE, status, source) per the register template.
 
 AI 1st (dedupe correctness, severity mapping) → AI 2nd (`security-auditor` confirms no
 boundary implications) → human final on any CRITICAL acceptance/exception decision.
+
+## Workflow Phases
+
+1. **Scan** — run the profile matching the trigger (daily / pre-PR `--pr` /
+   post-scaffold baseline); detect the stack before choosing scanners.
+2. **Triage** — deduplicate against the existing register, map severities, and rank
+   findings exploitable in this stack ahead of theoretical ones.
+3. **Register** — write `security/YYYY-MM-DD-{slug}.md` with full frontmatter; open
+   CRITICAL items are listed in the report header, never buried mid-file.
+4. **Resolve** — match resolved findings to merged Dependabot bumps, delete files older
+   than 7 days, and keep the register auditable from finding to resolution.
 
 ## ⚠️ PM-ONLY INVOCATION
 

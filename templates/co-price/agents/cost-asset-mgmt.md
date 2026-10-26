@@ -12,13 +12,13 @@ description: >-
   Owns the cost side of biz_logic.md: labor scaling rules, BOM-based production cost,
   SG&A calculation methods, depreciation (straight-line/MACRS), inventory valuation, and
   raw-material cost shock inputs feeding sensitivity analysis.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/cost-asset-mgmt.md
 ---
 ## Role
@@ -54,6 +54,20 @@ guards, worked examples on the ACME baseline seed, and section anchors for `[Ref
 
 AI 1st (schedule sanity: life > 0, salvage < cost, method consistency) → AI 2nd
 (`finance-strategy-lead`, different domain) → human final approval.
+
+## Workflow Phases
+
+1. **Scope split** — take the cost-side domain list from the engagement plan and confirm
+   the section map with `finance-strategy-lead` before authoring; collisions surface at
+   planning, not mid-document.
+2. **Grounding** — research standard depreciation schedules and cost benchmarks via web
+   search; every non-obvious assumption carries a source or an explicit "assumption" label.
+3. **Specification** — author biz_logic.md sections with LaTeX formulas, boundary guards,
+   and worked examples on the ACME baseline seed, anchored for `[Ref:]` tests.
+4. **Cross-review** — hand the spec to `finance-strategy-lead` (different domain) and
+   `cpa-auditor`; a re-derivation failure is a spec defect, not a test defect.
+5. **Engine hand-off** — the spec is done when `core-engine-dev` can implement it without
+   an interpretation question.
 
 ## ⚠️ PM-ONLY INVOCATION
 
