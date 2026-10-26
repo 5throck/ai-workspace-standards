@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-25T22:46:27.686Z
+**Generated**: 2026-10-26T02:18:56.487Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -182,7 +182,7 @@
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | N/A |
-| sync-variant-settings.ts | 1.1.1 | scripts/sync-variant-settings.ts | N/A |
+| sync-variant-settings.ts | 1.2.0 | scripts/sync-variant-settings.ts | N/A |
 | tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.4.1 | scripts/team-builder.ts | N/A |
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
@@ -209,7 +209,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.59.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.59.1 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
