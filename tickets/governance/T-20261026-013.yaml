@@ -6,12 +6,29 @@ title: >-
   checks (dispatch protocol fields, last_updated vs commit dates, tier claims vs
   schema, registry status vs design-doc status, review_notes key pinning)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:41.796+09:00'
 history:
   - at: '2026-10-26T00:20:41.796+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T19:33:13.323+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T19:33:13.338+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T19:33:13.353+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T19:33:13.369+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in workspace PR #1615 (fleet-review hardening batch, merged
+  2026-10-26; CI 8/8 CLEAN; local gates: audit all-pass, unit 1,595/0, tsc
+  clean). Design doc
+  docs/designs/2026-10-26-fleet-review-hardening-batch-design.md.
+  https://github.com/5throck/ai-workspace-standards/pull/1615
 error: null
