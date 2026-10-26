@@ -124,10 +124,38 @@ function renderMissingOutput(container: HTMLElement): void {
   container.append(card);
 }
 
+function renderThemeSwitch(container: HTMLElement): void {
+  const THEMES = [
+    { name: "", label: "Light" },
+    { name: "dark", label: "Dark" },
+    { name: "high-contrast", label: "High contrast" },
+  ] as const;
+  const sec = section("Theme", "Theme presets re-map semantic tokens only ([DESIGN-R2]) — layout, spacing, and target size are theme-invariant.");
+  const bar = el("div", "pg-toolbar");
+  bar.setAttribute("role", "group");
+  bar.setAttribute("aria-label", "Color theme");
+  const buttons = THEMES.map(({ name, label }) => {
+    const btn = el("button", "pg-btn pg-btn--ghost pg-theme-btn", label);
+    btn.type = "button";
+    btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("click", () => {
+      if (name) document.documentElement.setAttribute("data-theme", name);
+      else document.documentElement.removeAttribute("data-theme");
+      for (const b of buttons) b.setAttribute("aria-pressed", String(b === btn));
+    });
+    bar.append(btn);
+    return btn;
+  });
+  buttons[0].setAttribute("aria-pressed", "true");
+  sec.append(bar);
+  container.append(sec);
+}
+
 async function boot(): Promise<void> {
   const app = document.getElementById("app");
   if (!app) return;
   app.append(el("h1", "pg-title", "co-design — Component Playground"), el("p", "pg-subtitle", "Live preview of every token group in tokens.json. Demos consume CSS_VARS, not hardcoded values."));
+  renderThemeSwitch(app);
 
   let tokens: TokenTree;
   let cssVars: TokenTree;

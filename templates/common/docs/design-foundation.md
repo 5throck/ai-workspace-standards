@@ -7,7 +7,7 @@
 > design system is its own `docs/design.md` (project SSOT). Design selection happens at the project level —
 > never at workspace or template level.
 
-> **v1.2 (2026-09-26)**: component inventory scaffold, icon vocabulary requirement, font fallback token contract, pattern field contract; project-specific example pointers genericized (§8).
+> **v1.3 (2026-10-24)**: §4b Instantiation Shapes — governed multi-doc suite recognized as an alternative instantiation shape to single-file `docs/design.md` (design-lead adjudication, DEC-20261024-01); §7 first [Required] item generalized to declared-shape wording; §9 migration note updated. Re-landed 2026-10-26 after accidental reversion (restoration spec 2026-10-26-reversion-restoration-design).
 
 - **Scope**: All projects scaffolded from this template
 - **Normative source**: `docs/designs/2026-08-30-design-foundation-design.md` (L0)
@@ -135,6 +135,38 @@ design_decisions:
 | Motion | policy | Shared easing curve; durations; `prefers-reduced-motion` behavior |
 | Iconography | library | Single library per project; consistent size/stroke defaults; icon-only controls require `aria-label` |
 
+### 4b. Instantiation Shapes (v1.2 — design-lead adjudication 2026-10-24)
+
+The decision record MAY be instantiated in either of two governed shapes:
+
+1. **Single-file (default)** — one `docs/design.md` containing the `design_decisions`
+   YAML block of §4.
+2. **Governed suite (alternative)** — a directory of focused design docs (e.g.
+   `docs/design-system/`) with one doc declared the **design policy of record**
+   (entry point carrying the principles and linking the rest), the §4 decision
+   content distributed across the suite.
+
+A governed suite is valid ONLY if all of the following hold:
+
+- Every §4 decision area carries its `rationale` in its home doc, and each doc
+  includes a **Source Mapping** (claim → basis) table so the provenance chain
+  (Domain Evidence → Principle → Decision → Token → Component) remains
+  reconstructable end-to-end.
+- Each suite doc carries governance frontmatter: owner agent, version,
+  effective/review dates — and, where the project's language policy requires,
+  a declared counterpart twin maintained in sync.
+- Machine-readable registries (components / screen patterns / icon vocabulary)
+  remain the design-phase-gate ledger; registry entries enter only via the gate
+  and cross-reference their doctrine docs.
+- Review outcomes fold back into the governing doc as dated decision-of-record
+  annotations (registered variants, deprecated aliases) — never only in reports.
+- The token implementation remains the runtime SSOT; suite docs record intent
+  and do not compete with it.
+
+This framework stays style- AND shape-neutral: it prescribes what a project must
+define and keep traceable — not how many files hold it. Any shape beyond these
+two requires a design-doc revision amending this section.
+
 ## 5. Token Architecture (normative)
 
 Three layers with a strict reference rule:
@@ -182,7 +214,7 @@ This contract is review-enforced today; automated linting is a tracked backlog i
 `token-usage-lint` available (co-design projects), run it — this contract extends, not replaces, it.
 
 ### [Required]
-- ✓ `docs/design.md` exists with a complete `design_decisions` record
+- ✓ Project SSOT exists in a declared shape — single-file `docs/design.md` with a complete `design_decisions` record, or a governed suite per §4b — and every §7 checklist item is locatable to its home artifact
 - ✓ Token implementation exists (CSS custom properties, or tokens.json + compiled forms)
 - ✓ Default theme + at least one alternate theme of semantic tokens exist
 - ✓ bg / fg / border semantic triplets exist for each status color
@@ -228,5 +260,6 @@ duty of §2b rule 6 / ADR-0070.
 
 - co-design's current flat single-layer `tokens.json` remains valid; migrating it to the 3-layer model is a
   tracked backlog item, not part of this Foundation's rollout.
-- Existing projects (co-price, co-newbiz) already satisfy this contract substantively; retrofitting the
-  `design_decisions` YAML block into their `docs/design.md` is optional and per-project.
+- Existing projects (co-price, co-newbiz) already satisfy this contract substantively; co-price/co-newbiz may
+  retain their existing shape — suite-shaped projects are validated under §4b, and retrofitting the
+  `design_decisions` YAML block into a single `docs/design.md` is optional and per-project.
