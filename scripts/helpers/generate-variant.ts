@@ -5,8 +5,17 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.19.0
+ * @version 1.20.0
  *
+ * v1.20.0 (2026-10-26, design
+ *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
+ *          normalizeAgentFrontmatter (fn v1.2.0) replaces the stale platform-
+ *          inheritance block (gemini/antigravity/gemini-cli only — never
+ *          codex/hermes/zai) with a scalar tier collapse: uniform map -> scalar
+ *          `tier: <value>`, mixed map -> left as-is with a loud WARN (the
+ *          one-shot tests/apply-tier-normalization.ts applier owns the D5
+ *          claude-value collapse), scalar -> unchanged. Stops the generator
+ *          from manufacturing partial-coverage tier blocks.
  * v1.19.0 (2026-09-25, variant hygiene batch — spec
  *          docs/designs/2026-09-25-variant-hygiene-batch-design.md R6/§5.2):
  *          the WS-05a adaptation moves INTO the delivery seam —
@@ -235,8 +244,19 @@ function createDirectory(dirPath: string): void {
  * Normalize agent frontmatter when copying from L3 source to variant template.
  *
  * Strips L3-only fields (formal_name, variant) that do not belong in standard
- * variant agent files, and ensures all four tier platforms are present
- * (claude, gemini, antigravity, gemini-cli) by inheriting the claude tier value.
+ * variant agent files, and normalizes the tier declaration to the scalar form.
+ *
+ * Tier handling (v1.2.0, design
+ * 2026-10-26-model-registry-platform-coverage §7): agent frontmatter declares
+ * ONE scalar `tier: high|medium|low`; the platform→model mapping is resolved at
+ * dispatch/validation time from docs/workspace-schema.json `models`. A
+ * per-platform map block collapses to a scalar when its values are uniform; a
+ * MIXED block is left as-is with a loud warning (the one-shot
+ * tests/apply-tier-normalization.ts applier owns the design-D5 claude-value
+ * collapse — this normalizer never guesses). A scalar passes through unchanged.
+ * This replaces the v1.1.0 platform-inheritance block (whose gemini /
+ * antigravity / gemini-cli list was stale anyway — no codex/hermes/zai), which
+ * manufactured the partial-coverage form the design retires.
  *
  * `lifecycle` is deliberately PRESERVED (v1.1.0): L2 variant agents carry
  * lifecycle frontmatter that their docs/lifecycle/agents/<name>.md governance
@@ -245,7 +265,7 @@ function createDirectory(dirPath: string): void {
  * must stay lifecycle-free (audit L0-only check), and that file is never
  * routed through this normalizer.
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 export function normalizeAgentFrontmatter(content: string): string {
   const fmMatch = content.match(/^(---\r?\n)([\s\S]*?)(\r?\n---)([\s\S]*)$/);
@@ -266,20 +286,24 @@ export function normalizeAgentFrontmatter(content: string): string {
     );
   }
 
-  // Add missing tier platforms — inherit from claude tier if absent
-  const claudeTierMatch = normalized.match(/^(\s+)claude:\s*(high|medium|low)/m);
-  if (claudeTierMatch) {
-    const indent = claudeTierMatch[1];
-    const tier = claudeTierMatch[2];
-    const platforms = ['gemini', 'antigravity', 'gemini-cli'] as const;
-    for (const platform of platforms) {
-      if (!new RegExp(`^${indent}${platform}:`, 'm').test(normalized)) {
-        // Insert after the claude: line
-        normalized = normalized.replace(
-          new RegExp(`(^${indent}claude:\\s*${tier})`, 'm'),
-          `$1\n${indent}${platform}: ${tier}`
-        );
-      }
+  // Collapse a per-platform map-form tier block to the scalar form (v1.2.0).
+  const tierBlockRe = /^tier:[ \t]*\r?\n(?:[ \t]+[A-Za-z][A-Za-z0-9-]*:[^\n]*\r?\n?)+/m;
+  const block = normalized.match(tierBlockRe);
+  if (block) {
+    const entryRe = /^[ \t]+([A-Za-z][A-Za-z0-9-]*):[ \t]*([^\r\n#]*?)[ \t]*(?:#[^\r\n]*)?\r?$/gm;
+    const values = [...block[0].matchAll(entryRe)]
+      .map((m) => m[2].trim().replace(/^['"]|['"]$/g, ''))
+      .filter((v) => v.length > 0);
+    const uniform = values.length > 0 && values.every((v) => v === values[0]);
+    if (uniform && ['high', 'medium', 'low'].includes(values[0])) {
+      normalized = normalized.replace(tierBlockRe, (m) =>
+        `tier: ${values[0]}${m.includes('\r\n') ? '\r\n' : '\n'}`);
+    } else {
+      console.warn(
+        '[generate-variant] WARN: mixed or non-uniform per-platform tier block left as-is — ' +
+        'run `bun tests/apply-tier-normalization.ts` to collapse it (design D5, ' +
+        'spec 2026-10-26-model-registry-platform-coverage)'
+      );
     }
   }
 

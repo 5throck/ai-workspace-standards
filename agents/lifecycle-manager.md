@@ -1,18 +1,11 @@
 ---
-last_updated: 2026-10-26
+last_updated: 2026-10-27
 name: Lifecycle Manager
 role: specialist
 status: active
 version: 1.1.0
 last_reviewed: 2026-07-31
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
-  codex: medium
-  hermes: medium  # claude-sonnet-5-5
-  zai: medium  # glm-5.3-flash
+tier: medium
 model: inherit
 color: teal
 description: >
@@ -107,7 +100,7 @@ If missing, `verify-platform-lifecycle.ts` (Check E) will FAIL and block the com
 1. **State Monitoring**: Run these tools to get current lifecycle state:
    - `bun run agent:verify` — agent domain
    - `bun scripts/skill-lifecycle-audit.ts` — skill domain
-   - `bun scripts/lifecycle-sync-audit.ts` — script domain (Check A/B/C/D) + agent tier drift (Check F: frontmatter, L1 templates, AGENTS.md rosters, lifecycle records vs `agent_tiers` SSOT)
+   - `bun scripts/lifecycle-sync-audit.ts` — script domain (Check A/B/C/D) + agent tier cross-surface parity (Check F: the agent file's scalar `tier:` frontmatter is the anchor; L1 stubs, AGENTS.md rosters, and lifecycle records must agree with it — ADR-0102; tier→model resolution comes from the schema `models` block)
    - `bun scripts/verify-platform-lifecycle.ts` — platform command/skill domain (Check E/F/G/H)
    - `bun scripts/validate-templates.ts` — variant and template domains
 
@@ -121,7 +114,7 @@ If missing, `verify-platform-lifecycle.ts` (Check E) will FAIL and block the com
    - `docs/templates/common.lifecycle.json` — L1 base layer version and propagation state
    - `docs/templates/VERSION_REGISTRY.json` — variant version and status registry
 
-4. **Drift Reporting**: Produce structured drift reports for PM when policy ≠ reality. Agent tier changes MUST surface here: run Check F (`bun scripts/lifecycle-sync-audit.ts`) and report any agent_tiers/frontmatter/roster/record disagreement — `docs/workspace-schema.json agent_tiers` is the SSOT, so fix the SSOT first and propagate outward.
+4. **Drift Reporting**: Produce structured drift reports for PM when policy ≠ reality. Agent tier changes MUST surface here: run Check F (`bun scripts/lifecycle-sync-audit.ts`) and report any frontmatter/roster/record disagreement — the agent file's scalar `tier:` frontmatter is the declaration (ADR-0102), so fix it first and propagate outward to rosters and records; the schema `models` block remains the only tier→model mapping.
 
 ## Dispatch Trigger
 

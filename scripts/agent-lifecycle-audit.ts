@@ -9,8 +9,17 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.7.0
- *          v1.7.0 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
+ * @version 1.8.0
+ *          v1.8.0 (2026-10-26, ADR-0102 scalar tier declaration, design
+ *          2026-10-26-model-registry-platform-coverage-design §7): Checks 8-10
+ *          parse the scalar `tier: high|medium|low` form as the canonical shape
+ *          via the shared parseTierDeclaration() (lifecycle-sync-audit 1.19.0);
+ *          a legacy uniform per-platform map block stays tolerated during the
+ *          transition (existing per-platform checks apply to blocks — uniform
+ *          passes, mixed/unknown hit the original Missing/Invalid error paths).
+ *          The scalar form previously tripped three false "Missing tier.*"
+ *          ERRORs per file. v1.7.0 (2026-10-03, design
+ *          2026-10-03-validator-warning-fixes-design):
  *          Check 11 skips metadata-only commits via isMetadataOnlyChange
  *          (amends DEC-20260930-01 ruling 2); v1.6.0 (T-20261001-004): Check 8-10
  *          resolve the tier through the extends chain for extends-stub agents
@@ -37,6 +46,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname, basename, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { cwd } from 'node:process';
+import { parseTierDeclaration, type TierDecl } from './lifecycle-sync-audit.ts';
 
 interface AgentFrontmatter {
   name: string;
@@ -47,11 +57,6 @@ interface AgentFrontmatter {
   responsibilities?: string[];
   /** Extends-stub pointer to the frontmatter source (delivered pm.md copies). */
   extends?: string;
-  tier?: {
-    claude?: 'high' | 'medium' | 'low';
-    antigravity?: 'high' | 'medium' | 'low';
-    'gemini-cli'?: 'high' | 'medium' | 'low';
-  };
 }
 
 interface AgentIssue {
@@ -182,29 +187,38 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
 }
 
 /**
- * T-20261001-004: resolve the effective tier for an agent file. Extends-stub agents
- * (delivered pm.md copies) inherit frontmatter from their target — a stub legitimately
- * carries no tier of its own. Follows the extends chain (bounded depth, cycle-safe via
- * file identity); returns undefined when the chain cannot be resolved at this location
- * (project-level stubs whose template-relative extends only resolves in the template
- * tree) — such stubs are EXEMPT from the tier checks rather than failed on inherited
- * metadata.
+ * T-20261001-004 / v1.8.0 (ADR-0102): resolve the effective tier DECLARATION for
+ * an agent file as a shared TierDecl (scalar | legacy block | absent |
+ * unparseable) via lifecycle-sync-audit's parseTierDeclaration — one parser for
+ * both consumers, no private reimplementation. Extends-stub agents (delivered
+ * pm.md copies) inherit frontmatter from their target — a stub legitimately
+ * carries no tier of its own. Follows the extends chain (bounded depth,
+ * cycle-safe via file identity); returns `absent` when the chain cannot be
+ * resolved at this location (project-level stubs whose template-relative
+ * extends only resolves in the template tree) — such stubs are EXEMPT from the
+ * tier checks rather than failed on inherited metadata.
  */
-function resolveEffectiveTier(
+function resolveEffectiveTierDecl(
   agentFile: string,
-  frontmatter: Record<string, unknown>,
+  content: string,
+  extendsHint: unknown,
   visited: Set<string> = new Set(),
-): AgentFrontmatter['tier'] | undefined {
-  const tier = frontmatter.tier as AgentFrontmatter['tier'] | undefined;
-  if (tier) return tier;
-  const extendsPath = typeof frontmatter.extends === 'string' ? frontmatter.extends.trim() : '';
-  if (!extendsPath) return undefined;
+): TierDecl {
+  const decl = parseTierDeclaration(content);
+  if (decl.kind === 'scalar' || decl.kind === 'legacy') return decl;
+  const extendsPath = typeof extendsHint === 'string' ? extendsHint.trim() : '';
+  if (!extendsPath) return { kind: 'absent' };
   const target = resolve(dirname(agentFile), extendsPath);
-  if (visited.has(target) || !existsSync(target)) return undefined;
+  if (visited.has(target) || !existsSync(target)) return { kind: 'absent' };
   visited.add(target);
-  const parent = parseAgentFrontmatter(target);
-  if (!parent) return undefined;
-  return resolveEffectiveTier(target, parent as unknown as Record<string, unknown>, visited);
+  let targetContent: string;
+  try {
+    targetContent = readFileSync(target, 'utf-8');
+  } catch {
+    return { kind: 'absent' };
+  }
+  const parentFm = parseAgentFrontmatter(target);
+  return resolveEffectiveTierDecl(target, targetContent, parentFm?.extends, visited);
 }
 
 // Recursively find all agent files
@@ -735,43 +749,56 @@ function auditAgents(jsonMode = false): AuditResult {
       }
     }
 
-    // Check 8: Tier validation — extends-stubs inherit tier from their target
-    // (T-20261001-004): a stub without its own tier is legitimate; follow the chain
-    // and exempt the stub when the chain cannot be resolved at this location.
-    const effectiveTier = resolveEffectiveTier(agentFile, frontmatter as unknown as Record<string, unknown>);
-    if (!effectiveTier) {
-      if (!frontmatter.extends) {
+    // Check 8 (v1.8.0, ADR-0102): tier validation against the scalar declaration
+    // form — the canonical shape is one scalar `tier: high|medium|low`; a legacy
+    // per-platform map block is tolerated during the transition (its per-platform
+    // checks keep the original semantics: uniform block passes, mixed/unknown hit
+    // the Missing/Invalid error paths). Extends-stubs inherit the tier from their
+    // target (T-20261001-004): a stub without its own tier is legitimate; follow
+    // the chain and exempt the stub when the chain cannot be resolved here.
+    const agentContent = readFileSync(agentFile, 'utf-8');
+    const tierDecl = resolveEffectiveTierDecl(agentFile, agentContent, frontmatter.extends);
+    const validTiers = ['high', 'medium', 'low'];
+    if (tierDecl.kind === 'scalar') {
+      // Check 10 (scalar): tier value must be one of high|medium|low.
+      if (!validTiers.includes(tierDecl.tier)) {
         errors.push({
           level: 'error',
           file: relPath,
-          message: 'Missing tier field in frontmatter',
-          fix: "Add tier field with claude, antigravity, and gemini-cli specifications",
+          message: `Invalid tier value: "${tierDecl.tier}"`,
+          fix: "Use the ADR-0102 scalar form: 'tier: high', 'tier: medium', or 'tier: low'",
         });
       }
-    } else {
-      // Check 9: Tier validation - missing platforms
+    } else if (tierDecl.kind === 'legacy') {
+      // Transition fallback: legacy per-platform blocks keep the original
+      // Check 9 (missing platforms) / Check 10 (invalid values) semantics.
       const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'] as const;
       for (const platform of requiredPlatforms) {
-        if (!effectiveTier[platform]) {
+        const value = tierDecl.block[platform];
+        if (!value) {
           errors.push({
             level: 'error',
             file: relPath,
             message: `Missing tier.${platform} specification`,
             fix: `Add tier.${platform}: high|medium|low to frontmatter`,
           });
-        } else {
-          // Check 10: Tier validation - invalid tier values
-          const validTiers = ['high', 'medium', 'low'];
-          if (!validTiers.includes(effectiveTier[platform])) {
-            errors.push({
-              level: 'error',
-              file: relPath,
-              message: `Invalid tier.${platform} value: "${effectiveTier[platform]}"`,
-              fix: `Use one of: ${validTiers.join(', ')}`,
-            });
-          }
+        } else if (!validTiers.includes(value)) {
+          errors.push({
+            level: 'error',
+            file: relPath,
+            message: `Invalid tier.${platform} value: "${value}"`,
+            fix: `Use one of: ${validTiers.join(', ')}`,
+          });
         }
       }
+    } else if (!frontmatter.extends) {
+      // Check 8: no tier anywhere on the chain (or unparseable frontmatter).
+      errors.push({
+        level: 'error',
+        file: relPath,
+        message: 'Missing tier field in frontmatter',
+        fix: "Add 'tier: high|medium|low' to frontmatter (ADR-0102 scalar form)",
+      });
     }
   }
 
@@ -895,7 +922,7 @@ Checks:
   ✓ Registered agents with missing files
   ✓ Deprecated agents with active skill references
   ✓ Archive location vs status consistency
-  ✓ Tier field validation (all platforms present, valid values)
+  ✓ Tier declaration validation (ADR-0102 scalar tier: high|medium|low; legacy uniform map blocks tolerated during transition)
   ✓ Stale frontmatter last_updated vs last git commit date (warn)
 
 Platform: ${PLATFORM}

@@ -207,6 +207,30 @@ describe('parseAgentFrontmatter', () => {
         expect(model).toBe('inherit');
     });
 
+    // v1.10.1 (spec 2026-10-26-model-registry-platform-coverage §7): the
+    // normalized scalar form must parse with the same value the nested block
+    // yields, so manifest regeneration is stable across the transition.
+    test('parses the scalar tier form from LF content', () => {
+        const { tier, model } = parseAgentFrontmatter(
+            '---\nname: pm\ntier: medium\nmodel: inherit\n---\n\n# Agent',
+        );
+        expect(tier).toBe('medium');
+        expect(model).toBe('inherit');
+    });
+
+    test('parses the scalar tier form from CRLF content', () => {
+        const { tier, model } = parseAgentFrontmatter(
+            '---\r\nname: pm\r\ntier: medium\r\nmodel: inherit\r\n---\r\n\r\n# Agent',
+        );
+        expect(tier).toBe('medium');
+        expect(model).toBe('inherit');
+    });
+
+    test('scalar tier drops an inline comment (same rule as the nested block)', () => {
+        const { tier } = parseAgentFrontmatter('---\nname: x\ntier: low  # glm-5.3-flash\n---\n');
+        expect(tier).toBe('low');
+    });
+
     test('returns N/A when no tier block exists', () => {
         const { tier } = parseAgentFrontmatter('---\nname: x\n---\n');
         expect(tier).toBe('N/A');

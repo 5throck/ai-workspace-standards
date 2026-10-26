@@ -1,16 +1,9 @@
 ---
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 name: Automation Engineer
 role: specialist
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
-  codex: low
-  hermes: low  # claude-haiku-5-5
-  zai: low  # glm-5.3-flash
+tier: low
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

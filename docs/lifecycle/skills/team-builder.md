@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-07-03 | - | production | Backfilled lifecycle record for existing production skill | pm |
+| 2026-10-26 | production | production | v1.1.0 → v1.2.0 (ADR-0102 / T-20261026-018, design docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7): proposal JSON schema documented with the scalar tier form (`"tier": "high|medium|low"` — the legacy per-platform map stays accepted by scripts/team-builder.ts v1.5.0 during transition); frontmatter last_reviewed refreshed; all mirrors, SKILLS.md registries, and the common-contract pin re-synced at 1.2.0 | pm |
 
 ## Acceptance Criteria
 
@@ -35,7 +36,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 - **Owner**: pm
-- **Last Updated**: 2026-07-03
+- **Last Updated**: 2026-10-26
 - **Last Reviewer**: pm

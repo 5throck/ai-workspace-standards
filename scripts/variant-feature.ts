@@ -1,4 +1,12 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-26, design
+//           docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
+//           new agent stubs emit ONE scalar `tier: medium` line — agent frontmatter
+//           declares a single tier; the platform→model mapping is resolved at
+//           dispatch/validation time from docs/workspace-schema.json `models`.
+//           The stub template is extracted to agentStubContent() (exported for unit
+//           tests) and the CLI flow is guarded with import.meta.main so tests can
+//           import the module without triggering argv handling.
 /**
  * variant-feature.ts
  *
@@ -41,50 +49,30 @@ function writeStub(filePath: string, content: string): void {
   console.log(`${GREEN}  Created: ${path.relative(WORKSPACE_ROOT, filePath)}${RESET}`);
 }
 
-const args = process.argv.slice(2);
-function getArg(flag: string): string | undefined {
+function getArg(args: string[], flag: string): string | undefined {
   const idx = args.indexOf(flag);
   return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : undefined;
 }
 
-const variant = getArg('--variant');
-const feature = getArg('--feature');
-const typeArg = getArg('--type') ?? 'all';
-
-if (!variant || !feature) {
-  fail('Usage: bun scripts/variant-feature.ts --variant <name> --feature <name> [--type agent|skill|script|docs|all]');
-}
-
-if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(variant)) fail(`Invalid variant name "${variant}".`);
-if (!/^[a-z][a-z0-9-]{0,50}$/.test(feature)) fail(`Invalid feature name "${feature}". Use lowercase kebab-case.`);
-
-const variantDir = path.join(WORKSPACE_ROOT, 'templates', variant);
-if (!fs.existsSync(variantDir)) fail(`Variant not found: templates/${variant}/`);
-
-const types = typeArg === 'all' ? ['agent', 'skill', 'script', 'docs'] : typeArg.split(',').map(t => t.trim());
-const validTypes = new Set(['agent', 'skill', 'script', 'docs']);
-for (const t of types) if (!validTypes.has(t)) fail(`Invalid type "${t}".`);
-
-console.log(`${CYAN}=== variant-feature.ts -- adding "${feature}" to ${variant} ===${RESET}`);
-console.log(`Types: ${types.join(', ')}\n`);
-
-const createdFiles: string[] = [];
-
-if (types.includes('agent')) {
-  const p = path.join(variantDir, 'agents', `${feature}.md`);
-  writeStub(p, `---
+/**
+ * Agent stub template (v1.1.0, design
+ * 2026-10-26-model-registry-platform-coverage §7): the frontmatter declares ONE
+ * scalar `tier: medium`. No per-platform lines, no model IDs — those live in
+ * docs/workspace-schema.json `models` and are resolved at dispatch time.
+ * Exported for unit tests.
+ */
+export function agentStubContent(variant: string, feature: string, today: string): string {
+  return `---
 name: ${feature}
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
+tier: medium
 phases: [3, 4]
 handoff_to: []
 handoff_from: [pm]
 required_skills: []
 version: "0.1.0"
-last_reviewed: "${TODAY}"
+last_reviewed: "${today}"
 description: 'TODO: describe what this agent does'
 ---
 
@@ -122,114 +110,149 @@ TODO: Define meeting persona.
 |------|---------|
 | Read, Glob, Grep | Analysis |
 | Write, Edit | Authoring |
-`);
-  createdFiles.push(p);
+`;
 }
 
-if (types.includes('skill')) {
-  const p = path.join(variantDir, 'skills', feature, 'SKILL.md');
-  writeStub(p, `---
-name: ${feature}
-status: active
-description: >
-  TODO: One-line description of what this skill does.
-owner: pm
-version: 0.1.0
-last_reviewed: ${TODAY}
-metadata:
-  type: process
-  triggers:
-    - ${feature}
----
+function main(): void {
 
-## Overview
+  const args = process.argv.slice(2);
+  const variant = getArg(args, '--variant');
+  const feature = getArg(args, '--feature');
+  const typeArg = getArg(args, '--type') ?? 'all';
 
-TODO: Describe the purpose of this skill.
+  if (!variant || !feature) {
+    fail('Usage: bun scripts/variant-feature.ts --variant <name> --feature <name> [--type agent|skill|script|docs|all]');
+  }
 
-## When to Use This Skill
+  if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(variant)) fail(`Invalid variant name "${variant}".`);
+  if (!/^[a-z][a-z0-9-]{0,50}$/.test(feature)) fail(`Invalid feature name "${feature}". Use lowercase kebab-case.`);
 
-TODO: Describe specific use cases and triggers.
+  const variantDir = path.join(WORKSPACE_ROOT, 'templates', variant);
+  if (!fs.existsSync(variantDir)) fail(`Variant not found: templates/${variant}/`);
 
-## Steps
+  const types = typeArg === 'all' ? ['agent', 'skill', 'script', 'docs'] : typeArg.split(',').map(t => t.trim());
+  const validTypes = new Set(['agent', 'skill', 'script', 'docs']);
+  for (const t of types) if (!validTypes.has(t)) fail(`Invalid type "${t}".`);
 
-### Step 1: TODO
+  console.log(`${CYAN}=== variant-feature.ts -- adding "${feature}" to ${variant} ===${RESET}`);
+  console.log(`Types: ${types.join(', ')}\n`);
 
-TODO: Define steps.
+  const createdFiles: string[] = [];
 
-## Expected Outputs
+  if (types.includes('agent')) {
+    const p = path.join(variantDir, 'agents', `${feature}.md`);
+    writeStub(p, agentStubContent(variant, feature, TODAY));
+    createdFiles.push(p);
+  }
 
-TODO: Describe outputs.
-`);
-  createdFiles.push(p);
-}
+  if (types.includes('skill')) {
+    const p = path.join(variantDir, 'skills', feature, 'SKILL.md');
+    writeStub(p, `---
+  name: ${feature}
+  status: active
+  description: >
+    TODO: One-line description of what this skill does.
+  owner: pm
+  version: 0.1.0
+  last_reviewed: ${TODAY}
+  metadata:
+    type: process
+    triggers:
+      - ${feature}
+  ---
 
-if (types.includes('script')) {
-  const scriptName = `${variant.replace('co-', '')}-${feature}.ts`;
-  const p = path.join(WORKSPACE_ROOT, 'scripts', scriptName);
-  writeStub(p, `// @version 0.1.0
-/**
- * ${scriptName}
- *
- * TODO: Describe what this script does.
- * Variant: ${variant} | Feature: ${feature}
- *
- * Usage:
- *   bun scripts/${scriptName} [args]
- */
+  ## Overview
 
-import * as fs from 'node:fs';
+  TODO: Describe the purpose of this skill.
 
-const GREEN = '\x1b[32m';
-const RESET = '\x1b[0m';
+  ## When to Use This Skill
 
-// TODO: Implement script logic
-console.log(\`\${GREEN}TODO: implement ${feature}\${RESET}\`);
-`);
-  createdFiles.push(p);
-}
+  TODO: Describe specific use cases and triggers.
 
-if (types.includes('docs')) {
-  const docPath = path.join(WORKSPACE_ROOT, 'docs', 'designs', `${TODAY}-${variant}-${feature}-design.md`);
-  writeStub(docPath, `# Design: ${feature} for ${variant}
+  ## Steps
 
-**Date**: ${TODAY}
-**Variant**: ${variant}
-**Status**: draft
+  ### Step 1: TODO
 
----
+  TODO: Define steps.
 
-## Context
+  ## Expected Outputs
 
-TODO: Why is this feature needed?
+  TODO: Describe outputs.
+  `);
+    createdFiles.push(p);
+  }
 
-## Goals
+  if (types.includes('script')) {
+    const scriptName = `${variant.replace('co-', '')}-${feature}.ts`;
+    const p = path.join(WORKSPACE_ROOT, 'scripts', scriptName);
+    writeStub(p, `// @version 0.1.0
+  /**
+   * ${scriptName}
+   *
+   * TODO: Describe what this script does.
+   * Variant: ${variant} | Feature: ${feature}
+   *
+   * Usage:
+   *   bun scripts/${scriptName} [args]
+   */
 
-- TODO: List primary goals
+  import * as fs from 'node:fs';
 
-## Architecture
+  const GREEN = '\x1b[32m';
+  const RESET = '\x1b[0m';
 
-TODO: Describe the high-level architecture.
+  // TODO: Implement script logic
+  console.log(\`\${GREEN}TODO: implement ${feature}\${RESET}\`);
+  `);
+    createdFiles.push(p);
+  }
 
-## Acceptance Criteria
+  if (types.includes('docs')) {
+    const docPath = path.join(WORKSPACE_ROOT, 'docs', 'designs', `${TODAY}-${variant}-${feature}-design.md`);
+    writeStub(docPath, `# Design: ${feature} for ${variant}
 
-| # | Criterion | Verification |
-|---|-----------|--------------|
-| 1 | TODO | TODO |
-`);
-  createdFiles.push(docPath);
+  **Date**: ${TODAY}
+  **Variant**: ${variant}
+  **Status**: draft
 
-  // Register spec
-  const specRegister = path.join(WORKSPACE_ROOT, 'scripts', 'spec-register.ts');
-  if (fs.existsSync(specRegister)) {
-    try {
-      execFileSync(process.execPath, [specRegister, '--file', path.relative(WORKSPACE_ROOT, docPath), '--source', 'manual', '--status', 'draft'], {
-        cwd: WORKSPACE_ROOT, stdio: 'inherit',
-      });
-    } catch {
-      console.log(`${YELLOW}  spec-register.ts failed -- register manually${RESET}`);
+  ---
+
+  ## Context
+
+  TODO: Why is this feature needed?
+
+  ## Goals
+
+  - TODO: List primary goals
+
+  ## Architecture
+
+  TODO: Describe the high-level architecture.
+
+  ## Acceptance Criteria
+
+  | # | Criterion | Verification |
+  |---|-----------|--------------|
+  | 1 | TODO | TODO |
+  `);
+    createdFiles.push(docPath);
+
+    // Register spec
+    const specRegister = path.join(WORKSPACE_ROOT, 'scripts', 'spec-register.ts');
+    if (fs.existsSync(specRegister)) {
+      try {
+        execFileSync(process.execPath, [specRegister, '--file', path.relative(WORKSPACE_ROOT, docPath), '--source', 'manual', '--status', 'draft'], {
+          cwd: WORKSPACE_ROOT, stdio: 'inherit',
+        });
+      } catch {
+        console.log(`${YELLOW}  spec-register.ts failed -- register manually${RESET}`);
+      }
     }
   }
+
+  console.log(`\n${CYAN}Done: created ${createdFiles.length} stub(s) for "${feature}" in ${variant}.${RESET}`);
+  console.log(`\nNext: fill in stubs, then run bun scripts/audit.ts`);
+
 }
 
-console.log(`\n${CYAN}Done: created ${createdFiles.length} stub(s) for "${feature}" in ${variant}.${RESET}`);
-console.log(`\nNext: fill in stubs, then run bun scripts/audit.ts`);
+if (import.meta.main) main();

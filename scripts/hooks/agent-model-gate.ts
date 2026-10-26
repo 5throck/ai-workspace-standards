@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-10-26, ADR-0102 / T-20261026-018, user ruling 2): the tier
+//           source moves from schema `agent_tiers` (REMOVED from
+//           docs/workspace-schema.json — a root-roster remnant meaningless in
+//           delivered projects) to each agents/<name>.md frontmatter: the
+//           scalar `tier: high|medium|low` declaration is the single source,
+//           with a uniform legacy per-platform block tolerated during the
+//           ADR-0102 transition. agents/*.md is the gate's roster now (one
+//           small frontmatter read per agent file); an agent with a
+//           missing/unparseable/mixed tier is WARN-and-skipped exactly like
+//           the old "missing agent_tiers" case. models.claude still comes
+//           from the schema (tier→alias derivation).
 // v1.2.0 (2026-10-26, T-20261026-009, finding #30): full model IDs are accepted
 //           alongside short aliases. 'provider/model' form (e.g. zai/glm-5.3-flash)
 //           and any full registry ID known to docs/workspace-schema.json models.*
@@ -23,29 +34,33 @@
  * missing or empty, telling the caller which alias to add.
  *
  * The tier registry is NOT hardcoded here: agent→tier is read at runtime
- * from docs/workspace-schema.json `agent_tiers` (the SSOT), and the Claude
- * Code alias is derived from the matching `models.claude` registry ID
- * (claude-<alias>-<ver> → alias). Tier changes therefore land in the schema
- * alone and this gate follows automatically.
+ * from each agents/<name>.md frontmatter (the ADR-0102 scalar `tier:`
+ * declaration — uniform legacy per-platform blocks tolerated during
+ * transition), and the Claude Code alias is derived from the matching
+ * `models.claude` registry ID (claude-<alias>-<ver> → alias). Tier changes
+ * land in the agent file alone and this gate follows automatically.
  *
- * Fail-open policy: if the schema is missing, unreadable, or structurally
- * incomplete, the gate skips (warns on stderr) instead of blocking Agent
- * dispatches — schema corruption is caught by validate-model-registry.ts
- * and the audit pipeline, not here.
+ * Fail-open policy: if the schema's models.claude is missing/unreadable or
+ * an agent file is missing/unparseable/lacks a usable tier, the gate skips
+ * (warns on stderr) instead of blocking Agent dispatches — corruption is
+ * caught by validate-model-registry.ts and the audit pipeline, not here.
  *
  * Triggered by PreToolUse (Claude Code), matcher: "Agent".
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 // fileURLToPath, not URL.pathname: on Windows the pathname keeps a leading slash and
 // percent-encoded spaces, producing an unusable root (T-20261002-013; same fix as
 // pm-role-bootstrap.ts, PR #1317).
 const WORKSPACE_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const SCHEMA_PATH = `${WORKSPACE_ROOT}docs/workspace-schema.json`;
+const AGENTS_DIR = `${WORKSPACE_ROOT}agents`;
 
 const VALID_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'fable']);
+const VALID_TIERS = new Set(['high', 'medium', 'low']);
 
 interface GateEntry {
   tier: string;
@@ -53,14 +68,47 @@ interface GateEntry {
 }
 
 interface WorkspaceSchema {
-  agent_tiers?: Record<string, string>;
   models?: Record<string, Record<string, string>>;
 }
 
 /**
- * Build agent→{tier, alias} from the schema SSOT. Returns null (fail-open)
- * when the schema cannot be read or lacks the required blocks; individual
- * agents with an unusable tier are skipped with a warning.
+ * Extract the agent's declared tier from an agents/<name>.md file (ADR-0102):
+ * the scalar `tier: <value>` form, falling back to a uniform legacy
+ * per-platform block during the transition. Returns null when no usable
+ * single tier exists (missing key, unparseable frontmatter, or mixed legacy
+ * values) — the caller WARN-and-skips.
+ */
+function extractAgentTier(content: string): string | null {
+  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+  if (!fm) return null;
+
+  // Scalar form first: `tier: medium`
+  const scalar = fm[1].match(/^tier\s*:\s*([\w-]+)\s*(?:#.*)?$/m);
+  if (scalar) {
+    const tier = scalar[1].trim().toLowerCase();
+    return VALID_TIERS.has(tier) ? tier : null;
+  }
+
+  // Legacy per-platform block: `tier:` + indented `<platform>: <tier>` lines.
+  const lines = fm[1].split('\n').map((l) => l.replace(/\r$/, ''));
+  const tierIdx = lines.findIndex((l) => /^tier\s*:\s*$/.test(l));
+  if (tierIdx === -1) return null;
+  const values = new Set<string>();
+  for (const line of lines.slice(tierIdx + 1)) {
+    if (line.trim() === '') continue;
+    if (!/^\s/.test(line)) break; // next top-level key — block ended
+    const entry = line.trim().match(/^([\w-]+)\s*:\s*([\w-]+)/);
+    if (entry) values.add(entry[2].trim().toLowerCase());
+  }
+  if (values.size !== 1) return null;
+  const tier = [...values][0];
+  return VALID_TIERS.has(tier) ? tier : null;
+}
+
+/**
+ * Build agent→{tier, alias} from the agents/*.md roster + schema models.claude.
+ * Returns null (fail-open) when the schema or the roster cannot be read;
+ * individual agents with an unusable tier are skipped with a warning.
  */
 function loadTierRegistry(): Record<string, GateEntry> | null {
   let schema: WorkspaceSchema;
@@ -71,15 +119,34 @@ function loadTierRegistry(): Record<string, GateEntry> | null {
     return null;
   }
 
-  const agentTiers = schema.agent_tiers;
   const claudeModels = schema.models?.claude;
-  if (!agentTiers || !claudeModels) {
-    console.error('[TIER-GATE] WARN: workspace-schema.json is missing agent_tiers or models.claude; skipping gate');
+  if (!claudeModels) {
+    console.error('[TIER-GATE] WARN: workspace-schema.json is missing models.claude; skipping gate');
+    return null;
+  }
+
+  let files: string[];
+  try {
+    files = readdirSync(AGENTS_DIR).filter((f) => f.endsWith('.md') && !f.startsWith('README'));
+  } catch (err) {
+    console.error(`[TIER-GATE] WARN: cannot read agents directory ${AGENTS_DIR} (${(err as Error).message}); skipping gate`);
     return null;
   }
 
   const registry: Record<string, GateEntry> = {};
-  for (const [agent, tier] of Object.entries(agentTiers)) {
+  for (const file of files) {
+    const agent = file.replace(/\.md$/, '');
+    let tier: string | null;
+    try {
+      tier = extractAgentTier(readFileSync(join(AGENTS_DIR, file), 'utf-8'));
+    } catch (err) {
+      console.error(`[TIER-GATE] WARN: cannot read agents/${file} (${(err as Error).message}); agent not gated`);
+      continue;
+    }
+    if (!tier) {
+      console.error(`[TIER-GATE] WARN: no usable tier declaration in agents/${file}; agent not gated`);
+      continue;
+    }
     const registryId = claudeModels[tier];
     const alias = registryId?.split('-')[1];
     if (!registryId || !alias || !VALID_ALIASES.has(alias)) {

@@ -1,5 +1,7 @@
 # L1 Agent Format Specification
 
+> (Amended 2026-10-27: tier declaration normalized to the scalar form per ADR-0102.)
+
 > **Status**: Active — Wave 2a
 > **Created**: 2026-06-19
 > **Authors**: architect (design), automation-engineer (TypeScript interface), auditor (governance)
@@ -33,11 +35,7 @@ An L2 agent that extends an L1 agent MUST follow this exact structure:
 name: <agent-name>
 role: "<Display Name>"
 status: active
-tier:
-  claude: high|medium|low
-  gemini: high|medium|low
-  antigravity: high|medium|low
-  gemini-cli: high|medium|low
+tier: high|medium|low    # one scalar line (ADR-0102); no per-platform sub-keys
 model: inherit
 color: "#XXXXXX"
 description: "<variant-specific description>"
@@ -311,11 +309,7 @@ source: L2
 version: "1.0.0"
 promoted-from: ~
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium    # scalar (ADR-0102)
 model: inherit
 color: "#E74C3C"
 description: "Variant-specific security data analyst with CVE tracking"

@@ -47,6 +47,70 @@ describe('normalizeAgentFrontmatter (v1.1.0 — lifecycle preserved)', () => {
   });
 });
 
+describe('normalizeAgentFrontmatter (v1.2.0 — scalar tier collapse, spec 2026-10-26-model-registry-platform-coverage §7)', () => {
+  const uniformMap = [
+    '---',
+    'name: qa-tester',
+    'status: active',
+    'tier:',
+    '  claude: high',
+    '  gemini: high',
+    '  antigravity: high',
+    '  gemini-cli: high',
+    '  hermes: high  # claude-opus-5-5',
+    '  zai: high  # glm-5.3',
+    'model: inherit',
+    '---',
+    '',
+    'Body.',
+  ].join('\n');
+
+  const mixedMap = uniformMap
+    .replace('  gemini: high', '  gemini: medium')
+    .replace('  antigravity: high', '  antigravity: medium');
+
+  it('collapses a uniform per-platform map block to one scalar line', () => {
+    const result = normalizeAgentFrontmatter(uniformMap);
+    expect(result).toContain('tier: high\n');
+    expect(result.match(/^tier:/gm)).toHaveLength(1);
+    expect(result).not.toMatch(/^  claude:/m);
+    expect(result).not.toContain('# glm-5.3');
+    expect(result).toContain('model: inherit');
+  });
+
+  it('leaves a MIXED map block as-is (the applier owns the D5 collapse)', () => {
+    const result = normalizeAgentFrontmatter(mixedMap);
+    expect(result).toContain('tier:\n  claude: high');
+    expect(result).toContain('  gemini: medium');
+  });
+
+  it('passes a scalar declaration through unchanged', () => {
+    const scalar = '---\nname: qa-tester\ntier: high\nmodel: inherit\n---\n\nBody.\n';
+    expect(normalizeAgentFrontmatter(scalar)).toBe(scalar);
+  });
+
+  it('preserves CRLF endings when collapsing (uniform CRLF template file)', () => {
+    const crlf = uniformMap.replace(/\n/g, '\r\n');
+    const result = normalizeAgentFrontmatter(crlf);
+    expect(result.includes('\r\n')).toBe(true);
+    expect(result).toContain('tier: high\r\n');
+    // no mixed endings introduced
+    expect(result.replace(/\r\n/g, '')).not.toContain('\n');
+  });
+
+  it('v1.1.0 lifecycle preservation still holds alongside the collapse', () => {
+    const withLifecycle = uniformMap.replace(
+      'name: qa-tester\n',
+      'name: qa-tester\nvariant: co-price\nlifecycle:\n  phase: production\n  created: 2026-08-22\n',
+    );
+    const result = normalizeAgentFrontmatter(withLifecycle);
+    expect(result).toContain('lifecycle:');
+    expect(result).toContain('  phase: production');
+    expect(result).toContain('tier: high');
+    expect(result).not.toMatch(/^variant:/m);
+  });
+});
+
 describe('ensureVariantInjectMarkers (v1.0.0 — context.md wrapper injection)', () => {
   const bareContext = [
     '# Co Test — test Configuration',

@@ -5,12 +5,12 @@ description: >
   Covers requirements interview, web benchmarking, current team diagnosis, proposal generation,
   and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute.
   Triggered by: "build new agent team".
-version: 1.1.0
+version: 1.2.0
 status: active
 scope: common
 owner: pm
 prerequisites: none
-last_reviewed: 2026-06-13
+last_reviewed: 2026-10-26
 metadata:
   type: process
   triggers:
@@ -173,7 +173,7 @@ The saved JSON must conform to this structure:
       {
         "name": "kebab-case-name",
         "formalName": "Display Name",
-        "tier": { "claude": "high|medium|low" },
+        "tier": "high|medium|low",
         "color": "color-name",
         "description": "one-line description",
         "phases": ["1", "2"],

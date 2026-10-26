@@ -14,7 +14,7 @@ Every project uses a role-based agent structure. Agents are defined as markdown 
 There are two distinct agent file types with different formats:
 
 **Workspace-root agents** (`agents/*.md`) — PM, architect, auditor, and workspace-level specialists.
-Use full YAML frontmatter with required fields: `name`, `role`, `status`, `tier` (all platforms declared in the models block), `model`, `description`, `examples`, `version`, `last_reviewed`, `lifecycle` (phase, created, last_updated, governance). Optional fields include `color`. Created by `scripts/agent-create.ts`.
+Use full YAML frontmatter with required fields: `name`, `role`, `status`, `tier` (one scalar `high|medium|low`, per [ADR-0102](../adr/0102-agent-tier-scalar-declaration.md)), `model`, `description`, `examples`, `version`, `last_reviewed`, `lifecycle` (phase, created, last_updated, governance). Optional fields include `color`. Created by `scripts/agent-create.ts`.
 
 **Variant specialist agents** (`templates/<variant>/agents/*.md`) — Domain specialists inside
 a project variant (e.g., co-develop, co-deck). Require full YAML frontmatter. See
@@ -28,14 +28,7 @@ for the canonical format and migration checklist.
 name: <agent-slug>              # kebab-case, matches filename
 role: <one-line role description>
 status: active
-tier:
-  claude: high|medium|low       # claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5
-  gemini: high|medium|low       # gemini-3.1-pro | gemini-3.8-flash
-  antigravity: high|medium|low  # gemini-3.1-pro | gemini-3.8-flash
-  gemini-cli: high|medium|low   # gemini-3.1-pro | gemini-3.8-flash
-  codex: high|medium|low        # gpt-5.6-sol | gpt-5.6-terra | gpt-5.6-luna
-  hermes: high|medium|low       # claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5
-  zai: high|medium|low          # glm-5.3 | glm-5.3-flash
+tier: medium                    # scalar, one of high|medium|low (ADR-0102)
 model: inherit
 color: blue | green | purple | red | orange | yellow | cyan | gray
 description: >-
@@ -51,8 +44,8 @@ required_skills: [skill-slug]
 ---
 ```
 
-Every platform key declared in `docs/workspace-schema.json` (`models` block, 7 platforms today) must appear in an agent's tier block for the model-registry validator to check it. `normalizeAgentFrontmatter()` in
-`generate-variant.ts` adds any missing platforms automatically during L2→variant conversion.
+The scalar `tier` value is the agent's entire declaration; which model a tier maps to on each platform is NOT declared in the agent file — the `models` block of `docs/workspace-schema.json` (the registry SSOT) resolves tier→model per platform at dispatch/validation time ([ADR-0102](../adr/0102-agent-tier-scalar-declaration.md)). `normalizeAgentFrontmatter()` in
+`generate-variant.ts` collapses legacy per-platform map blocks to the scalar form (map→scalar when uniform) during L2→variant conversion; mixed legacy blocks are left for the tier-normalization apply pass and WARNed by the validator.
 
 The `description` field is how the AI tool selects the right agent - always write **when to use it** explicitly. The `tier` field enforces cost optimization across platforms.
 
@@ -189,9 +182,11 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max).
 
 **Tier Enforcement Rules:**
-- All agents must specify tier in frontmatter for all registry platforms (claude, gemini, antigravity, gemini-cli, codex, hermes, zai — the platforms declared in the `models` block)
+- All agents declare one scalar `tier: high|medium|low` in frontmatter; the platform→model mapping lives only in `docs/workspace-schema.json` `models` — the schema's only tier-related block ([ADR-0102](../adr/0102-agent-tier-scalar-declaration.md)). The roster of workspace-root agents lives in `agents/*.md` and [AGENTS.md §1](../../AGENTS.md#1-agent-ecosystem-overview).
 - PM agent MUST leverage platform-appropriate agent dispatch mechanisms for 3-tier enforcement
 - Audit scripts validate tier compliance on every run
+
+> **Transition note (ADR-0102)**: legacy per-platform map blocks (`tier:` with `claude:`/`gemini:`/... lines) are WARNed by `validate-model-registry.ts` v2 ("legacy per-platform tier block — normalize to `tier: <value>`") until the fleet converges; they then FAIL. Schema `agent_tiers` was removed outright per the 2026-10-26 ruling (DEC-20261026-03) — there is no schema-side tier roster.
 
 ---
 

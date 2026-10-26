@@ -3,8 +3,10 @@
 > **Architect**: Canonical format specification for specialist agent files inside template variants
 > **Status**: Active — Implemented
 > **Created**: 2026-06-19
-> **Last Updated**: 2026-06-19
+> **Last Updated**: 2026-10-27
 > **Phase**: Reference Specification
+
+> (Amended 2026-10-27: tier declaration normalized to the scalar form per ADR-0102.)
 
 ---
 
@@ -32,11 +34,7 @@ This document defines the canonical format for specialist agent files located at
 name: <agent-slug>           # kebab-case, must match filename (without .md)
 role: <one-line role description>
 status: active               # or: inactive, deprecated
-tier:
-  claude: <high|medium|low>
-  gemini: <high|medium|low>
-  antigravity: <high|medium|low>
-  gemini-cli: <high|medium|low>
+tier: <high|medium|low>      # one scalar line (ADR-0102); no per-platform lines
 model: inherit               # or explicit model ID
 color: <css-color-name>      # used in UI display (blue, green, purple, red, etc.)
 description: >-
@@ -60,7 +58,7 @@ required_skills: [<skill-slug>, ...] # skills this agent depends on
 | `name` | Yes | Must match filename without `.md` |
 | `role` | Yes | One-line; used for logging and discovery |
 | `status` | Yes | `active` for all deployed agents |
-| `tier` | Yes | All four platforms required (claude, gemini, antigravity, gemini-cli) |
+| `tier` | Yes | One scalar line: `high`, `medium`, or `low` (ADR-0102). No per-platform sub-keys or `# model-id` comments |
 | `model` | Yes | Use `inherit` unless agent needs a specific model |
 | `color` | Yes | CSS color name; used in variant UI |
 | `description` | Yes | Block scalar (`>-`); two sentences minimum |
@@ -70,11 +68,14 @@ required_skills: [<skill-slug>, ...] # skills this agent depends on
 | `handoff_from` | Yes | Always include `pm` unless pm is not a sender |
 | `required_skills` | Yes | Empty list `[]` if agent uses no skills |
 
-### Why Four Tier Platforms
+### Why a Scalar Tier
 
-The four platforms (`claude`, `gemini`, `antigravity`, `gemini-cli`) correspond to the four
-deployment targets. All four must be declared so the `generate-variant.ts` pipeline and
-platform-dispatch logic can resolve the correct tier without falling back to defaults.
+The agent declares its cost ceiling as one scalar `tier: high|medium|low` line (ADR-0102).
+The platform→model mapping is NOT declared in the agent file: `docs/workspace-schema.json`
+`models` is the only tier→model registry, resolved at dispatch/validation time. No
+per-platform tier sub-keys (`claude:`, `gemini:`, ...) and no `# model-id` comments —
+a legacy per-platform map block is collapsed to the scalar form by `normalizeAgentFrontmatter()`
+during variant generation (uniform map) and WARNed by `validate-model-registry.ts` v2 otherwise.
 
 ---
 
@@ -144,8 +145,10 @@ agent file. This function:
 
 1. **Strips L3-only fields** — removes `formal_name:` and `variant:` which
    are internal to the L3 source and do not belong in variant templates.
-2. **Adds missing tier platforms** — if `gemini:`, `antigravity:`, or `gemini-cli:` are absent,
-   inherits the `claude:` tier value and inserts the missing platform lines.
+2. **Collapses map-form tier to the scalar form** — a uniform per-platform
+   tier map (`claude:`/`gemini:`/... with the same value) is replaced by one
+   scalar `tier: <value>` line (ADR-0102); a mixed-value map is left as-is
+   with a loud WARN, and a scalar tier passes through unchanged.
 3. **Cleans blank lines** — collapses 3+ consecutive blank lines to 2.
 
 L2 agent files carry their own lifecycle metadata; the normalization function preserves it when
@@ -169,7 +172,7 @@ lecture production domain). All seven co-deck agents conform to this specificati
 Use this checklist when migrating legacy agent files (pre-spec) or adding new agents:
 
 - [ ] Frontmatter has all 9 required fields
-- [ ] All four tier platforms declared under `tier:`
+- [ ] Scalar `tier: high|medium|low` declared (one line, no per-platform sub-keys — ADR-0102)
 - [ ] `model: inherit` unless specific model required
 - [ ] `description:` is a block scalar (`>-`) with 2+ sentences
 - [ ] At least one `examples:` entry
