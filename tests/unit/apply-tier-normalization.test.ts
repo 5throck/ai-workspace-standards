@@ -10,6 +10,7 @@
  * @version 1.0.0
  */
 import { describe, expect, test } from 'bun:test';
+import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import {
   collectTargets,
