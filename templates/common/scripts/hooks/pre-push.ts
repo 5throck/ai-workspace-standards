@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.5.0
+ * @version 1.6.0
+ * v1.6.0 (2026-10-26, U-20261026-011): lands the pr/* remote-branch deletion guard
+ *           that 1.5.0 described but never shipped. Pure ref-deletion pushes that
+ *           delete refs/heads/pr/* now require ALLOW_REMOTE_BRANCH_DELETE=1; other
+ *           branch deletions stay unrestricted.
  */
 
 import { $ } from "bun";
@@ -31,6 +35,23 @@ export function isZeroOid(oid: string | undefined): boolean {
 // no-ref-updates fallback (branch protection) still applies.
 export function isPureDeletionPush(refUpdates: PushRefUpdate[]): boolean {
   return refUpdates.length > 0 && refUpdates.every(r => isZeroOid(r.localOid));
+}
+
+// Refuses a pure deletion push that removes refs/heads/pr/* remote branches
+// unless the operator opts in with ALLOW_REMOTE_BRANCH_DELETE=1. Returns the
+// failure reason, or null to allow.
+export function branchDeletionGuardError(
+  deletedRemoteRefs: string[],
+  allowRemoteBranchDelete: boolean,
+): string | null {
+  const prBranches = deletedRemoteRefs.filter(r => /^refs\/heads\/pr\//.test(r));
+  if (prBranches.length === 0) return null;
+  if (allowRemoteBranchDelete) return null;
+  const names = prBranches.map(r => r.replace("refs/heads/", "")).join(", ");
+  return (
+    `refusing to delete pr/* remote branch(es): ${names}. ` +
+    `To confirm an intentional cleanup, re-run with ALLOW_REMOTE_BRANCH_DELETE=1.`
+  );
 }
 
 // Read stdin ONCE to determine what refs are actually being pushed.
@@ -121,6 +142,14 @@ async function main() {
   // nothing content-bearing to secret-scan or audit — exit early instead of
   // running the gate battery and blocking branch-cleanup pushes.
   if (isPureDeletionPush(refUpdates)) {
+    const guardError = branchDeletionGuardError(
+      refUpdates.map(r => r.remoteRef),
+      process.env.ALLOW_REMOTE_BRANCH_DELETE === "1",
+    );
+    if (guardError) {
+      console.error(`❌ pre-push: ${guardError}`);
+      process.exit(1);
+    }
     console.log("ℹ️  pre-push: ref-deletion push — no commits to audit, skipping");
     return;
   }

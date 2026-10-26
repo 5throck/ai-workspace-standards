@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: U-20261026-011
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-10-26T23:34:10.550+09:00'
+history:
+  - at: '2026-10-26T23:34:10.550+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T23:50:21.792+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.20.1
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Two template-managed scripts in the co-newbiz working tree carry the same
+    @version as templates/common but different content, so dev-sync's
+    equal-version content divergence gate blocks every project sync that
+    includes them. scripts/hooks/pre-push.ts: project copy @1.5.0 (300 lines,
+    adds an ALLOW_REMOTE_BRANCH_DELETE=1 guard for pr/* remote branch deletion,
+    comment cites "T-20261026 cwd-drift prevention" and a workspace session
+    parked in Projects/co-newbiz) vs templates/common @1.5.0 (267 lines, no such
+    guard). scripts/dev-sync.ts: project copy @1.30.0 (1695 lines, refuses sync
+    when the branch PR is MERGED, cites T-20261026-003) vs templates/common
+    @1.30.0 (1700 lines, different content). The edits appear to have been made
+    directly in the project tree by a workspace-root session whose cwd drifted.
+    Expected: the canonical versions land in templates/common with distinct
+    version numbers and reach the project via upgrade-project. The project left
+    both edits uncommitted in its working tree (not overwritten).
+  affected_paths:
+    - scripts/hooks/pre-push.ts
+    - scripts/dev-sync.ts
+    - scripts/SCRIPTS.md
+  identity_source: client_roots
+  repro: >-
+    1. In Projects/co-newbiz, keep the working-tree copies of
+    scripts/hooks/pre-push.ts and scripts/dev-sync.ts. 2. Run bun
+    scripts/dev-sync.ts with any staged change that includes them. 3. Observe
+    "Equal-version content divergence (2 script(s)) — BLOCKING" comparing
+    project @1.30.0/@1.5.0 with templates/common at the same versions.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/hooks/pre-push.ts=false
+    - info:in_last_delivery scripts/dev-sync.ts=true
+    - info:in_last_delivery scripts/SCRIPTS.md=true
+  dedupe_key: 318bab7bcb0ab83a8e5e49068d780145e8b42b6e757e848b72afc38f2138a6ec
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-26T23:34:10.550+09:00'

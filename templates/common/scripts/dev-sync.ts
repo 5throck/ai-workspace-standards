@@ -1,4 +1,8 @@
-// @version 1.30.0
+// @version 1.31.0
+// v1.31.0 (2026-10-26, U-20261026-011 / T-20261026-003): the non-main branch guard
+//          now refuses MERGED as well as CLOSED PRs. Landing a new sync onto a
+//          branch whose PR is already merged orphans the commits off main.
+//          MERGED refuses with the re-branch-from-main guidance.
 // v1.30.0 (2026-10-26, T-20261026-009, finding #33): no-op early exit — a re-run
 //          with nothing staged and no working-tree changes now exits 0 with a
 //          clear "nothing to sync" message BEFORE the pipeline runs. It used to
@@ -1243,8 +1247,18 @@ if (currentBranch === "main" || currentBranch === "master") {
     // (PR #1509 closed with 45 files; the content re-landed via a 1-file PR
     // #1510). Refuse before staging/commit.
     const closedPrRes = await $`gh pr view ${branch} --json state --jq .state`.quiet().nothrow();
-    if (closedPrRes.exitCode === 0 && closedPrRes.stdout.toString().trim() === 'CLOSED') {
+    const prState = closedPrRes.exitCode === 0 ? closedPrRes.stdout.toString().trim() : '';
+    if (prState === 'CLOSED') {
         console.error(`${RED}❌ Branch '${branch}' has a CLOSED (unmerged) PR — refusing to commit a new sync onto a dead branch.${RESET}`);
+        console.error(`${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    // U-20261026-011 / T-20261026-003: MERGED joins CLOSED — a follow-up sync
+    // landed on an already-merged branch is orphaned off main.
+    if (prState === 'MERGED') {
+        console.error(`${RED}❌ Branch '${branch}' has an already-MERGED PR — refusing to land a follow-up sync here; the commits would be orphaned off main.${RESET}`);
         console.error(`${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`);
         if (import.meta.main) {
           process.exit(1);
