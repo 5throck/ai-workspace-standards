@@ -12,6 +12,7 @@
 import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import {
   collectTargets,
   parseTierDeclaration,
@@ -279,7 +280,8 @@ describe('apply-tier-normalization — parseTierDeclaration / resolveTierFromCon
 });
 
 describe('apply-tier-normalization — collectTargets (real tree shape)', () => {
-  const REPO_ROOT = new URL('../..', import.meta.url).pathname;
+  // fileURLToPath: .pathname yields "/D:/a/..." on Windows — an unusable root (T-20261002-013 class).
+  const REPO_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
   test('default scope is root + L1 + variants (README/_partials excluded)', () => {
     const { all, rootCount, l1Count, variantCount, projectCount } = collectTargets(REPO_ROOT);
