@@ -1766,8 +1766,8 @@
       "name": "cost-asset-mgmt",
       "scope": "co-price",
       "capability": "cost-asset-mgmt",
-      "content_hash": "9b73c0e6e66c4ef5",
-      "version": "2.1.0",
+      "content_hash": "31c92fe78fbc2c42",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/cost-asset-mgmt.md"
       ]
@@ -1792,8 +1792,8 @@
       "name": "devops-admin",
       "scope": "co-price",
       "capability": "devops-admin",
-      "content_hash": "010f8c521ffa3326",
-      "version": "2.1.0",
+      "content_hash": "6da0ead8532375fb",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/devops-admin.md"
       ]
@@ -1818,8 +1818,8 @@
       "name": "finance-strategy-lead",
       "scope": "co-price",
       "capability": "finance-strategy-lead",
-      "content_hash": "3801ab8bbc4ca031",
-      "version": "2.1.0",
+      "content_hash": "2e2b752a70b33ba1",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/finance-strategy-lead.md"
       ]
@@ -1831,8 +1831,8 @@
       "name": "l10n-auditor",
       "scope": "co-price",
       "capability": "l10n-auditor",
-      "content_hash": "3caa32516b944b89",
-      "version": "2.1.0",
+      "content_hash": "5e0abfbf32722705",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/l10n-auditor.md"
       ]
@@ -1896,8 +1896,8 @@
       "name": "qa-tester",
       "scope": "co-price",
       "capability": "qa-tester",
-      "content_hash": "6e87db37777e3da8",
-      "version": "2.1.0",
+      "content_hash": "4ab85da8dd8c36b0",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/qa-tester.md"
       ]
@@ -1909,8 +1909,8 @@
       "name": "security-auditor",
       "scope": "co-price",
       "capability": "security-auditor",
-      "content_hash": "09f9227d38e158ab",
-      "version": "2.1.0",
+      "content_hash": "cbc8d3aaf645e22f",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/security-auditor.md"
       ]
@@ -1922,8 +1922,8 @@
       "name": "security-monitor",
       "scope": "co-price",
       "capability": "security-monitor",
-      "content_hash": "b96a5ec26096c174",
-      "version": "2.1.0",
+      "content_hash": "c5016ad9af7e6708",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/security-monitor.md"
       ]
@@ -1935,8 +1935,8 @@
       "name": "ux-specialist",
       "scope": "co-price",
       "capability": "ux-specialist",
-      "content_hash": "64b0771e35246b50",
-      "version": "2.1.0",
+      "content_hash": "00f29888832154eb",
+      "version": "2.2.0",
       "mirrors": [
         "templates/co-price/agents/ux-specialist.md"
       ]

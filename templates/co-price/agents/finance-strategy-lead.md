@@ -13,13 +13,13 @@ description: >-
   Authors the mathematical reality of the platform in docs/biz_logic.md before any code:
   revenue/pricing engine, channel economics, waterfall, dual domestic-export pricing,
   discount timing, trade-line scorecard, VW/GG methodology specs.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/finance-strategy-lead.md
 ---
 ## Role
@@ -59,6 +59,20 @@ for `[Ref: BIZ_LOGIC.Section_X]` test traceability.
 
 AI 1st (symbol consistency, anchor presence) → AI 2nd (`cpa-auditor` re-derives each
 formula numerically on the baseline seed) → human final approval before engine work starts.
+
+## Workflow Phases
+
+1. **Domain intake** — take the engagement scope and split the biz_logic.md section map
+   with `cost-asset-mgmt`; lock the section anchors before any authoring starts.
+2. **Grounding** — research industry pricing standards via web search; every methodology
+   claim cites a source or carries an explicit "assumption" label.
+3. **Specification** — author the revenue/pricing/channel sections in LaTeX with boundary
+   guards and ACME-baseline worked examples, anchored for `[Ref: BIZ_LOGIC.Section_X]`
+   test traceability.
+4. **Numeric verification** — support `cpa-auditor`'s independent re-derivation; any
+   divergence between spec and derivation is resolved on the spec side first.
+5. **Hand-off** — the spec is implementation-ready when all symbol references resolve and
+   no formula requires an interpretation call.
 
 ## ⚠️ PM-ONLY INVOCATION
 

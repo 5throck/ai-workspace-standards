@@ -13,13 +13,13 @@ description: >-
   guards, API route validation (incl. /api/copilot/chat rate limits and payload caps),
   PRICE_* env schema, CSV import validation, and prompt-injection defenses for injected
   simulation context.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/security-auditor.md
 ---
 ## Role
@@ -57,6 +57,20 @@ in the PR with PASS/FAIL per surface reviewed.
 
 AI 1st (schema lint, coverage vs new routes) → AI 2nd (`cpa-auditor` confirms guards do
 not alter financial semantics) → human final via PR.
+
+## Workflow Phases
+
+1. **Intake** — receive Zod-sync instructions from `lead-architect` and new-surface
+   review assignments from PM dispatch; nothing enters `schemas.ts` unlogged.
+2. **Boundary mapping** — enumerate every input path (API routes, CSV imports, env
+   loading, copilot context injection) and the guard covering it; an unmapped path is
+   a finding, not an oversight to defer.
+3. **Guard authoring/review** — write or review `.strict()` schemas with explicit error
+   maps; verify refinements still mirror the biz_logic.md boundary guards 1:1.
+4. **Adversarial pass** — attempt oversized payloads, unknown keys, prompt-injection
+   strings smuggled through simulation-state fields, and key leakage in error responses.
+5. **Sign-off** — publish the PASS/FAIL checklist per surface in the PR; any FAIL
+   blocks merge until re-reviewed.
 
 ## ⚠️ PM-ONLY INVOCATION
 

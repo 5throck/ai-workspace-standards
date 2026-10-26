@@ -13,13 +13,13 @@ description: >-
   views) with Onyx 2.0 tokens; owns v10.1 surfaces — Cost Shock tab, scenario comparison
   tri-view, trade-line scorecard, copilot panel with servedBy badge — plus the bilingual
   user-guide pair.
-version: "2.1.0"
+version: "2.2.0"
 last_reviewed: "2026-08-25"
 color: blue
 lifecycle:
   phase: production
   created: 2026-08-25
-  last_updated: 2026-08-25
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/ux-specialist.md
 ---
 ## Role
@@ -37,7 +37,6 @@ components — glassmorphism, micro-animations, complex data visualizations — 
 - Keep all user-facing strings as i18n keys across all 16 locales — zero hardcoded text.
 - Own the bilingual docs deliverable: `docs/user-guide.md` + `docs/user-guide_ko.md`
   maintained alongside feature changes (v10.1 gap-C assignment).
-- Build the **Governance tab / policy UI surfaces** surfacing `docs/channel-pricing-promotion-policy.md`, `docs/pricing-governance-rules.md`, `docs/commercial-operating-manual.md` (single Governance tab, structured en/ko data, no new deps).
 - Build the **Governance tab / policy UI surfaces** surfacing `docs/channel-pricing-promotion-policy.md`, `docs/pricing-governance-rules.md`, `docs/commercial-operating-manual.md` (single Governance tab, structured en/ko data, no new deps).
 - Honor Onyx 2.0 design tokens from `docs/design.md`; vanilla CSS with system variables.
 
@@ -58,6 +57,19 @@ when flows change. Components compile clean under `bun run dev`.
 
 AI 1st (build clean, key parity green) → AI 2nd (`qa-tester` mounts components;
 `l10n-auditor` audits parity) → human final via PR.
+
+## Workflow Phases
+
+1. **Surface intake** — take the engine module API from `core-engine-dev` and the data
+   contract from the Prisma/Zod layer; start only when both exist.
+2. **Token & key pass** — add Onyx 2.0 token usage and i18n keys (en master) before any
+   component code so copy never hardens into JSX.
+3. **Component build** — implement the surface with token CSS, RTL-safe layout, and the
+   specified states (streaming, fallback badge, error, empty).
+4. **Guide sync** — update `docs/user-guide.md` + `docs/user-guide_ko.md` in the same
+   change whenever a user flow changes.
+5. **Hand-off** — deliver to `qa-tester` for component mounting and `l10n-auditor` for
+   the parity audit; fix findings before PR review.
 
 ## ⚠️ PM-ONLY INVOCATION
 
