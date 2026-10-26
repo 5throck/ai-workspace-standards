@@ -1,8 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.61.0
+ * @version 1.62.0
  *
+ * v1.62.0 (2026-10-27, T-20261027-002): new ERROR check C-CM-06 — forward
+ *          path-existence for every declared common_commands/common_platform_skills
+ *          *_source path: a '.'-prefixed value must resolve under templates/common/
+ *          (13 of 154 declarations pointed at non-existent mirrors — .md vs .toml
+ *          gemini commands, .agents/commands without an L1 mirror — while carrying
+ *          propagated_to_common:true; the contract-path check makes that fail
+ *          mechanically next time). Non-'.' values are exclusion prose records
+ *          (gateguard precedent) and skip.
  * v1.61.0 (2026-10-27, T-20261027-001): new Error arm `agent-quality-recursive` —
  *          recursive scan of every templates/<common|co-*>/agents/ tree (covers
  *          co-safety's nested agents/domains/** and agents/_shared/** layout):
@@ -3697,6 +3705,39 @@ function checkCommonContract(): void {
     } else if (totalVariants > 0 && overrideCount / totalVariants >= 0.5) {
       warn('common', 'WS-02', `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`);
     }
+  }
+
+  // C-CM-06 (ERROR): forward path-existence for every declared contract source path
+  // (T-20261027-002, 2026-10-27 project-review slot D). common_commands and
+  // common_platform_skills entries declare repo-relative *_source paths
+  // (source/gemini_source/agents_source/codex_source/hermes_source; values starting
+  // with '.'). Each is a MIRROR path under templates/common/ — the L1 propagated copy
+  // of the L0 surface file. C-CM-03b resolves the SKILLS ones by convention and Check
+  // H (verify-platform-lifecycle) proves copies exist, but nothing verified the
+  // declared PATH strings themselves: 13 of the 154 declarations pointed at files
+  // that do not exist (.gemini/commands/<n>.md vs the actual .toml mirrors;
+  // .agents/commands/<n>.md vs the L0-resident surface with no L1 mirror) while the
+  // entries claimed propagated_to_common:true — drift was invisible to every gate.
+  // A value not starting with '.' is an exclusion prose record (gateguard precedent)
+  // and is skipped here.
+  const pathSections = ['common_commands', 'common_platform_skills'] as const;
+  let declaredPathCount = 0;
+  for (const section of pathSections) {
+    const entries = (contract[section] ?? {}) as Record<string, Record<string, unknown>>;
+    for (const [entryName, entry] of Object.entries(entries)) {
+      for (const [key, value] of Object.entries(entry)) {
+        const isSourceKey = key === 'source' || key.endsWith('_source');
+        if (!isSourceKey || typeof value !== 'string' || !value.startsWith('.')) continue;
+        declaredPathCount++;
+        const mirrorPath = join(TEMPLATES_DIR, 'common', value);
+        if (!existsSync(mirrorPath)) {
+          fail('common', 'C-CM-06', `common-contract.json ${section}.${entryName} declares ${key}="${value}" but templates/common/${value} does not exist (found in 2026-10-27 project-review slot D: 13 stale declarations)`, `Point ${key} at the actual templates/common mirror path (e.g. the rendered .gemini/commands/<n>.toml), or replace it with an exclusion prose record citing the governing ruling (gateguard precedent)`);
+        }
+      }
+    }
+  }
+  if (declaredPathCount > 0) {
+    pass(`C-CM-06: all ${declaredPathCount} declared contract source paths resolve under templates/common/`);
   }
 
   pass('WS-02: common-contract.json compliance check complete');

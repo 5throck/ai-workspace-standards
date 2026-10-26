@@ -1,4 +1,15 @@
-// @version 1.4.1
+// @version 1.5.0
+// v1.5.0 (2026-10-26, U-20261026-007): project-local user-guide pair seeding —
+//           variantDirs builds from a repo-root templates/ directory only, so in an
+//           instantiated project (no templates/) runUserGuideHashAudit iterated an
+//           empty list and the docs/user-guide.md ↔ docs/user-guide_ko.md
+//           translated_from_hash gate was a guaranteed no-op. When templates/ is
+//           absent the audit and --update-hashes now seed the project-local pair
+//           (cwd "."), mirroring how REQUIRED_DIRS already includes "." for the
+//           README leg; the existing pre-commit invocation exercises it unchanged.
+// v1.4.1 (T-20260926-026 batch hygiene): import.meta.main guard added — importing
+//           the module executed the full audit (same class as the agent-similarity-
+//           analyzer fix, T-20260926-020c).
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
@@ -12,6 +23,13 @@ const variantDirs = existsSync('templates')
   : [];
 
 const REQUIRED_DIRS = [".", "templates/common", ...variantDirs];
+
+// U-20261026-007: the user-guide hash audit (and --update-hashes) must also see the
+// project-local pair. variantDirs covers the workspace root's templates/co-*/ trees;
+// in an instantiated variant project templates/ does not exist, so seed the project's
+// own docs/user-guide.md ↔ docs/user-guide_ko.md pair via cwd "." — the same shape
+// REQUIRED_DIRS already uses for the README leg.
+const userGuideDirs = existsSync('templates') ? variantDirs : ["."];
 
 /** Strips the leading frontmatter block (--- ... ---) and returns the body. */
 function stripFrontmatter(content: string): string {
@@ -288,7 +306,7 @@ async function runUserGuideHashAudit(): Promise<number> {
     let failures = 0;
     let passed = 0;
 
-    for (const variantDir of variantDirs) {
+    for (const variantDir of userGuideDirs) {
         const enPath = join(variantDir, "docs/user-guide.md");
         const koPath = join(variantDir, "docs/user-guide_ko.md");
 
@@ -338,7 +356,7 @@ async function main() {
     if (isUpdateHashes) {
         await runUpdateHashes();
         console.log("\n=== Updating translated_from_hash in all user-guide_ko.md files ===");
-        for (const variantDir of variantDirs) {
+        for (const variantDir of userGuideDirs) {
             updateUserGuideHash(variantDir);
         }
         console.log("\nDone. User-guide hashes updated.");

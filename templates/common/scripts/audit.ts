@@ -1,4 +1,14 @@
-// @version 2.55.0
+// @version 2.56.0
+// v2.56.0 (2026-10-26, U-20261026-006): design-lint scan-root fallback — when no
+//           CONFIGURED designLint.scanRoots path exists in the checkout (the
+//           L1-delivered schema names templates/co-design/playground/src, which
+//           never exists in an instantiated project), the gate runs on
+//           design-lint.ts's conventional uiSourceRoots default (./playground/src,
+//           ./src) via the pure helper helpers/design-lint-roots.ts v1.0.0 instead
+//           of silently skipping; the Pass/Fail message annotates the fallback and
+//           the skip branch names both the configured roots and the conventional
+//           candidates. Ticket option (b): repairs already-instantiated projects,
+//           where a delivered-schema-only change would reach only new scaffolds.
 // v2.55.0 (2026-10-26, U-20261026-002): variant-context placement gate — a scaffolded
 //           project (variant.json present) must keep docs/<variant>.context.md at the
 //           convention path the PM workflow table references; relocations fail with the
@@ -225,6 +235,7 @@ import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 import { variantContextPlacement } from './helpers/variant-context.ts';
+import { resolveDesignLintRoots } from './helpers/design-lint-roots.ts';
 import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -1749,16 +1760,31 @@ function checkDesignLint() {
         Skip('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
         return;
     }
-    const roots = (config.scanRoots ?? []).filter((r) => fs.existsSync(r));
-    if (roots.length === 0) {
-        Skip('Design-lint gate: no configured scan roots present — skipped');
+    const resolved = resolveDesignLintRoots(config.scanRoots ?? [], (r) => fs.existsSync(r));
+    if (resolved.status === 'skip') {
+        // U-20261026-006: the skip names BOTH the configured scanRoots and the
+        // conventional candidates — a stale configured path can no longer
+        // masquerade as a sanctioned no-UI verdict without saying why.
+        Skip(`Design-lint gate: ${resolved.message}`);
         return;
     }
+    const roots = resolved.roots;
+    // U-20261026-006: when the fallback fires (configured roots absent, e.g. the
+    // L1-delivered schema names templates/co-design/playground/src — a
+    // workspace-root path that never exists in an instantiated project), the
+    // gate RUNS on design-lint.ts's conventional uiSourceRoots default instead
+    // of silently skipping. Option (b) of the ticket, chosen over rewriting the
+    // delivered schema because the fallback repairs already-instantiated
+    // projects too (a schema-only change reaches only new scaffolds/upgrades)
+    // and mirrors the no-schema defaults branch above — the two consumers of
+    // the same schema now agree on roots. The Pass/Fail messages below annotate
+    // the fallback so the run is visible, never silent.
+    const fallbackNote = resolved.source === 'conventional-fallback' ? ' (conventional fallback — configured scan roots absent)' : '';
     const result = spawnSync('bun', [lintScript, '--dir', ...roots], { encoding: 'utf-8' });
     if (result.status === 0) {
-        Pass(`Design-lint gate: token SSOT compliance CLEAN across ${roots.length} scan root(s)`);
+        Pass(`Design-lint gate: token SSOT compliance CLEAN across ${roots.length} scan root(s)${fallbackNote}`);
     } else {
-        Fail(`Design-lint gate: should-be-token finding(s) in UI source — run: bun scripts/design-lint.ts --dir ${roots.join(' --dir ')} (exempt literals with a "design-token-exempt: <reason>" comment or list them in workspace-schema.json designLint)`);
+        Fail(`Design-lint gate: should-be-token finding(s) in UI source${fallbackNote} — run: bun scripts/design-lint.ts --dir ${roots.join(' --dir ')} (exempt literals with a "design-token-exempt: <reason>" comment or list them in workspace-schema.json designLint)`);
     }
 }
 checkDesignLint();
