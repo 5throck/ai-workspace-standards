@@ -3,8 +3,8 @@ extends: ../../common/agents/pm.md
 name: pm
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-export
-version: "1.1.0"
-last_updated: "2026-08-24"
+version: "1.2.0"
+last_updated: "2026-10-27"
 status: active
 variant_overrides:
   governance_workflow: |
@@ -18,12 +18,7 @@ variant_overrides:
   dispatch_protocol: |
     ## Dispatch Protocol
     Dispatch by trade risk and deliverable type: classification/origin questions go to the relevant compliance specialist; logistics and landed-cost questions go to logistics/cost specialists; final packages require PM synthesis and compliance sign-off.
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
-  codex: medium
+tier: medium
 model: inherit
 ---
 

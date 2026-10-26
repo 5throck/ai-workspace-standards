@@ -2,11 +2,7 @@
 name: data-analyst
 role: "Workforce statistics, turnover/hiring-conversion/labor-cost analysis, HR dashboards/people analytics"
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: slate
 description: >
@@ -22,8 +18,8 @@ handoff_to: [pm]
 handoff_from: [pm, change-management-partner]
 capabilities: [analysis, reporting]
 required_skills: [hr-metrics-analysis]
-version: "1.0.0"
-last_updated: "2026-08-23"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-23"

@@ -2,17 +2,13 @@
 name: game-designer
 role: Universal game design agent — core loop, difficulty curves, reward systems, tutorial/onboarding across all genres
 status: active
-version: "1.0.1"
-last_updated: "2026-06-27"
+version: "1.1.0"
+last_updated: "2026-10-27"
 capabilities:
   - game-design
   - game-loop
   - level-design
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: orange
 description: >

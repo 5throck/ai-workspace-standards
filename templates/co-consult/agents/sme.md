@@ -3,11 +3,7 @@ name: sme
 role: Functional expertise and solution design specialist
 status: active
 formal_name: Subject Matter Expert & Functional Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: orange
 description: >
@@ -21,8 +17,8 @@ phases: [1, 2, 3]
 handoff_to: [pm, solutions-architect]
 handoff_from: [pm]
 required_skills: [technical-feasibility, company-intelligence]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

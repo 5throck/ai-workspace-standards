@@ -4,11 +4,7 @@ role: Article drafting lead — headline, lead, and body
 status: active
 capabilities:
   - documentation
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >
@@ -23,8 +19,8 @@ phases: [3]
 handoff_to: [style-editor]
 handoff_from: [fact-checker]
 required_skills: [financial-journalism-style]
-version: "1.0.0"
-last_updated: "2026-08-10"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-12"

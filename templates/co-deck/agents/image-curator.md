@@ -1,14 +1,10 @@
 ---
 name: image-curator
-version: "1.3.1"
-last_updated: "2026-06-23"
+version: "1.4.0"
+last_updated: "2026-10-27"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: purple
 description: >-

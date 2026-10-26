@@ -4,11 +4,7 @@ phases: [2, 3]
 formal_name: Lead Architect & Data Guard
 role: database design, Prisma schema modeling, API boundaries, and system architecture
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: medium
-  gemini-cli: high
+tier: high
 model: inherit
 domain: technical
 subdomain: architecture
@@ -16,7 +12,7 @@ description: >-
   Designs scalable strongly-typed Prisma models and API boundaries for the pricing
   platform; owns the v10.1 batch schema design (ScenarioSnapshot, SurveyResponse,
   CompetitorPrice, TradeLine, DiscountPolicy) and supply-rate migration safety.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: cyan
 lifecycle:

@@ -5,11 +5,7 @@ role: CO Module Analyst
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'CO Module Analyst — deep domain expert for Controlling business processes. Use when: "CO analyst", "cost center", "profit center", "internal orders", "controlling module", "cost accounting", "CO analysis".'
 examples:
   - user: "Analyze actual vs planned cost variances for cost center CC1000 this fiscal year"
@@ -21,7 +17,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/co-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # CO Analyst — Controlling

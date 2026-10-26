@@ -2,14 +2,10 @@
 name: analyst
 role: Systematic investigation, data synthesis, and evidence gathering specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Research & Data Analyst
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: magenta
 description: >

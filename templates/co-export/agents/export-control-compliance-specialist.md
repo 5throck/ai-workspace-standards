@@ -3,11 +3,7 @@ name: export-control-compliance-specialist
 role: Strategic items export control and sanctions screening specialist
 status: active
 formal_name: Export Control & Sanctions Screening Specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: red
 description: >
@@ -33,8 +29,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist, foreign-regulatory-intelligence-analyst]
 required_skills: [export-control-screening]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

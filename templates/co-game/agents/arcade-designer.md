@@ -2,16 +2,12 @@
 name: arcade-designer
 role: Retro arcade game design specialist — entity AI, wave systems, scoring, level layout
 status: active
-version: "1.0.1"
-last_updated: "2026-06-27"
+version: "1.1.0"
+last_updated: "2026-10-27"
 capabilities:
   - game-design
   - arcade-mechanics
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: orange
 description: >

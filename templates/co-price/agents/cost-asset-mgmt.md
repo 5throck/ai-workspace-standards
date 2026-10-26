@@ -4,11 +4,7 @@ phases: [3, 4]
 formal_name: Cost & Asset Management
 role: cost structures, depreciation schedules, asset lifecycle rules, and OPEX/CAPEX modeling
 status: active
-tier:
-  claude: high
-  gemini: medium
-  antigravity: medium
-  gemini-cli: high
+tier: high
 model: inherit
 domain: finance
 subdomain: cost
@@ -16,7 +12,7 @@ description: >-
   Owns the cost side of biz_logic.md: labor scaling rules, BOM-based production cost,
   SG&A calculation methods, depreciation (straight-line/MACRS), inventory valuation, and
   raw-material cost shock inputs feeding sensitivity analysis.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

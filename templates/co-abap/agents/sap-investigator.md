@@ -5,11 +5,7 @@ role: SAP Codebase Intelligence Scanner (read-only)
 model: inherit
 color: magenta
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Codebase Intelligence Scanner (read-only) — scans the codebase for patterns, finds existing objects, and discovers references using GrepPackages and SearchObject. Dispatch in Phase 1 parallel block. Use when: "find existing programs", "scan for pattern", "where is this used", "find all references to", "check if object exists", "search codebase for". Does NOT write or modify any SAP object.'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/sap-investigator.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

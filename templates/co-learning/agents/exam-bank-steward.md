@@ -2,13 +2,9 @@
 name: exam-bank-steward
 role: Question bank quality and exam operations stewardship for the harness-assessment deliverable
 status: active
-version: "1.0.0"
-last_updated: "2026-09-07"
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+version: "1.1.0"
+last_updated: "2026-10-27"
+tier: medium
 model: inherit
 color: blue
 lifecycle:

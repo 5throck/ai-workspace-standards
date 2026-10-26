@@ -5,11 +5,7 @@ role: MM Module Analyst
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'MM Module Analyst — deep domain expert for Materials Management business processes. Use when: "MM analyst", "purchase order analysis", "goods receipt", "inventory management", "procurement process", "MM module", "material master".'
 examples:
   - user: "Investigate why purchase orders for material M100 are stuck without goods receipt"
@@ -21,7 +17,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/mm-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # MM Analyst — Materials Management

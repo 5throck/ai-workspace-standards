@@ -2,13 +2,9 @@
 name: architect
 role: Implementation plans, ADRs, and system architecture design specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-08-25"
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+version: "1.1.0"
+last_updated: "2026-10-27"
+tier: high
 model: inherit
 color: blue
 description: >

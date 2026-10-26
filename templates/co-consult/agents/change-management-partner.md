@@ -3,11 +3,7 @@ name: change-management-partner
 role: Organizational transformation and stakeholder alignment specialist
 status: active
 formal_name: Change Management Partner & Culture Strategist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: purple
 description: >
@@ -21,8 +17,8 @@ phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [stakeholder-alignment, org-readiness-assessment, change-impact-assessment]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -4,11 +4,7 @@ phases: [3]
 formal_name: Core Engine Developer
 role: simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 domain: technical
 subdomain: engine
@@ -17,7 +13,7 @@ description: >-
   roll-forwards, diagnostics/sensitivity/partner-PnL/discount/VW-GG/export-pricing modules)
   and implements the on-rails AI transport layer (providers, circuit breaker, ledger,
   critic, SSE stream) per the approved architecture design.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: blue
 lifecycle:

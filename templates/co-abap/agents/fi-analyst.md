@@ -5,11 +5,7 @@ role: FI Module Analyst
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'FI Module Analyst — deep domain expert for Financial Accounting business processes. Use when: "FI analyst", "financial accounting", "general ledger", "accounts payable", "accounts receivable", "FI module", "posting analysis".'
 examples:
   - user: "Analyze open accounts payable items that are overdue in company code 1000"
@@ -21,7 +17,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/fi-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # FI Analyst — Financial Accounting

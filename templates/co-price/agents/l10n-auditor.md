@@ -6,11 +6,7 @@ role: translation key parity, i18n harness enforcement, glossary consistency acr
 status: active
 lang: ko
 lang_reason: proper-noun
-tier:
-  claude: medium
-  gemini: high
-  antigravity: low
-  gemini-cli: medium
+tier: medium
 model: inherit
 domain: ux
 subdomain: localization
@@ -18,7 +14,7 @@ description: >-
   Guarantees structural and linguistic integrity of 16 locale files (en, ko, ja, zh-CN,
   zh-TW, de, es, fr, pt, vi, ms, id, th, ru, it, ar) incl. RTL Arabic; runs the Vitest
   i18n harness after every key change; maintains the financial glossary.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: cyan
 lifecycle:

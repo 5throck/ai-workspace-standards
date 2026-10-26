@@ -1,14 +1,10 @@
 ---
 name: measure
-version: "2.0.1"
-last_updated: "2026-06-23"
+version: "2.1.0"
+last_updated: "2026-10-27"
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: yellow
 description: >-

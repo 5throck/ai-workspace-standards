@@ -3,11 +3,7 @@ name: delivery-manager
 role: Project delivery and operations coordination specialist
 status: active
 formal_name: Delivery Manager & Operations Lead
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: green
 description: >
@@ -21,8 +17,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [project-delivery, stakeholder-review-management]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

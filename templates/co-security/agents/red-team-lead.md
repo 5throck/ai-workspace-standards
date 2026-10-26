@@ -1,14 +1,10 @@
 ---
 name: red-team-lead
-version: "1.0.0"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Red Team Lead
 role: Attack methodology, MITRE ATT&CK TTPs, and PoC review specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: red
 description: >

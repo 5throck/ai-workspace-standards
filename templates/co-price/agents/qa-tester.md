@@ -4,11 +4,7 @@ phases: [4]
 formal_name: End-to-End QA Engineer
 role: E2E flows, React component mounting, browser assertions, and cross-feature regression
 status: active
-tier:
-  claude: high
-  gemini: medium
-  antigravity: medium
-  gemini-cli: high
+tier: high
 model: inherit
 domain: quality
 subdomain: testing
@@ -16,7 +12,7 @@ description: >-
   Verifies the user experience end-to-end after UX writes: dashboard tabs render without
   console errors, props flow correctly, new v10.1 surfaces (Cost Shock, comparison,
   scorecard, copilot panel incl. streaming and fallback badge) behave under real browsers.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: green
 lifecycle:

@@ -4,11 +4,7 @@ role: Citation ledger owner and newsroom gatekeeper
 status: active
 capabilities:
   - documentation
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: orange
 description: >
@@ -24,8 +20,8 @@ phases: [2]
 handoff_to: [reporter]
 handoff_from: [financial-analyst, legal-researcher]
 required_skills: [source-verification-ledger]
-version: "1.0.0"
-last_updated: "2026-08-10"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-12"

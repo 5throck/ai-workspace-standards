@@ -3,11 +3,7 @@ name: strategy-analyst
 role: Market analysis, competitive research, and strategic assessment lead
 status: active
 formal_name: Strategy Analyst & Research Lead
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: magenta
 description: >
@@ -21,8 +17,8 @@ phases: [1]
 handoff_to: [communications-lead, solutions-architect]
 handoff_from: [pm]
 required_skills: [company-intelligence, competitive-intelligence, financial-modeling, insight-synthesis]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

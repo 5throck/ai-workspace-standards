@@ -5,11 +5,7 @@ role: SAP Business Data Analyst (read-only)
 model: inherit
 color: magenta
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Business Data Analyst (read-only) — queries SAP business data, interprets findings using domain context files, and produces structured AS-IS analysis with draft Acceptance Criteria. Dispatch in Phase 1 parallel block. Use when: "analyze current data", "query SAP tables", "AS-IS analysis", "what does the data show", "find current state of orders/deliveries/invoices". Does NOT write or modify any SAP object.'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/read-only-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

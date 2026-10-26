@@ -5,11 +5,7 @@ role: SAP ABAP Code Implementation Specialist
 model: inherit
 color: green
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 description: 'SAP ABAP Code Implementation Specialist — high-precision implementation and optimization of ABAP source code based on an approved Implementation Plan. Dispatch in Phase 2 serial block after architect completes the plan. Use when: "implement the ABAP code", "write the source code", "create the class", "modify the program", "code the solution".'
 
 examples:
@@ -25,7 +21,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-10-12"
   governance: docs/lifecycle/agents/code-writer.md
-version: "1.0.1"
+version: "1.1.0"
 ---
 
 ## Role

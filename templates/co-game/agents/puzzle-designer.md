@@ -2,16 +2,12 @@
 name: puzzle-designer
 role: Puzzle/board game design specialist — matching logic, turn systems, difficulty generation
 status: active
-version: "1.0.1"
-last_updated: "2026-06-27"
+version: "1.1.0"
+last_updated: "2026-10-27"
 capabilities:
   - game-design
   - puzzle-mechanics
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: purple
 description: >

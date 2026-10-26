@@ -3,11 +3,7 @@ name: hs-classification-specialist
 role: HS code classification, customs valuation, and tariff rate determination specialist
 status: active
 formal_name: HS Classification & Customs Valuation Specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: blue
 description: >
@@ -33,8 +29,8 @@ handoff_to: [fta-origin-analyst, export-control-compliance-specialist, halal-cer
 handoff_from: [pm]
 required_skills: [hs-classification-workflow, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-08-25"
+version: "1.2.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

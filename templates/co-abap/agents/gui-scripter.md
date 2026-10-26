@@ -5,11 +5,7 @@ role: SAP GUI Scripting & Automation Specialist (LAST RESORT)
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 description: 'SAP GUI Scripting & Automation Specialist (LAST RESORT) — automation of manual SAP GUI workflows where standard APIs are unavailable. Use ONLY when no BAPI, OData service, or standard ADT API can accomplish the task. Trigger when: "automate the SAP GUI transaction", "create a BDC program", "record the transaction", "batch input for VA02". Always confirm with Interface Expert and BAPI Explorer first.'
 
 examples:
@@ -22,7 +18,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/gui-scripter.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

@@ -1,14 +1,10 @@
 ---
 name: threat-modeler
-version: "1.0.0"
-last_updated: "2026-06-01"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Threat Modeler
 role: STRIDE analysis, ATT&CK mapping, and risk scoring specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: purple
 description: >

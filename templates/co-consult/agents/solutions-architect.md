@@ -3,11 +3,7 @@ name: solutions-architect
 role: Technical solution design and implementation planning specialist
 status: active
 formal_name: Solutions Architect & Technical Designer
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >
@@ -21,8 +17,8 @@ phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
 required_skills: [solution-design, technical-feasibility]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -3,14 +3,9 @@ extends: ../../common/agents/i18n-specialist.md
 name: i18n-specialist
 description: 'Owns locale configuration, locale-specific formatting, and text layout guidance. Use when: "localization review", "locale config", "internationalization"'
 variant: co-security
-version: "1.0.0"
-last_updated: "2026-09-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
-  codex: medium
+tier: medium
 model: inherit
 ---

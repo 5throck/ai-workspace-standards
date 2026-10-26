@@ -1,14 +1,10 @@
 ---
 name: html-build
-version: "1.2.2"
-last_updated: "2026-06-24"
+version: "1.3.0"
+last_updated: "2026-10-27"
 role: HTML slide builder and image integration specialist
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: orange
 description: >-

@@ -1,14 +1,10 @@
 ---
 name: report-writer
-version: "1.0.0"
-last_updated: "2026-08-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Report Writer
 role: Pentest reports and executive summary documentation specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: green
 description: >

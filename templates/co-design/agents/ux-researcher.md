@@ -2,11 +2,7 @@
 name: ux-researcher
 status: active
 formal_name: User Research & Usability Testing Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 role: User research, needs analysis, and UX insights specialist
 color: teal
@@ -21,8 +17,8 @@ phases: [1]
 handoff_to: [design-lead]
 handoff_from: [pm]
 required_skills: []
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

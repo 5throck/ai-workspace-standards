@@ -4,12 +4,8 @@ phases: [3]
 alias: SWM
 role: orchestrator
 status: active
-version: "1.0.0"
-tier:
-  claude: high
-  gemini: high
-  gemini-cli: high
-  antigravity: high
+version: "1.1.0"
+tier: high
 model: opus
 color: green
 description: "Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordination."

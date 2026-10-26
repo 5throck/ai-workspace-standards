@@ -2,16 +2,12 @@
 name: game-developer
 role: Canvas rendering engine, game loop, collision detection, and entity implementation specialist
 status: active
-version: "1.0.1"
-last_updated: "2026-08-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 capabilities:
   - game-loop
   - engine-implementation
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: cyan
 description: >

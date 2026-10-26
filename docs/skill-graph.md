@@ -761,17 +761,17 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Capability | Type | Kind | Nodes (scope@version #hash) |
 |------------|------|------|-----------------------------|
-| `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #b6933a78 |
-| `change-management-partner` | agent | version-drift | co-consult@1.0.0 #6df523f4; co-hr@1.0.0 #b048d889 |
-| `code-writer` | agent | divergence | co-abap@1.0.1 #9c30ecd9; co-develop@1.0.0 #d6f5ba14 |
-| `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
-| `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
-| `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |
-| `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #47abe012 |
-| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #c324b9e5; root@1.2.2 #ccf8006c |
-| `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
-| `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
-| `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
+| `architect` | agent | version-drift | co-abap@1.1.0 #390580ce; co-develop@1.1.0 #4ba869db; co-game@1.1.0 #7d9e07a4; root@1.0.0 #b6933a78 |
+| `change-management-partner` | agent | version-drift | co-consult@1.1.0 #6a20c1f2; co-hr@1.1.0 #afd36e99 |
+| `code-writer` | agent | version-drift | co-abap@1.1.0 #1c190d21; co-develop@1.1.0 #b1a63870 |
+| `data-analyst` | agent | version-drift | co-consult@1.1.0 #34b01669; co-hr@1.1.0 #c3faaa3f |
+| `designer` | agent | version-drift | co-develop@1.1.0 #143df5d4; co-game@1.1.0 #7b2bf32c |
+| `devops-admin` | agent | divergence | co-abap@1.1.0 #345e06a4; co-price@2.1.0 #010f8c52 |
+| `i18n-specialist` | agent | version-drift | co-abap@1.1.0 #bab3f8c6; co-develop@1.1.0 #14245c58; co-hr@1.1.0 #767ba449; common@1.2.0 #14074686 |
+| `pm` | agent | version-drift | co-abap@1.1.0 #319f3f5d; co-export@1.2.0 #31b592cb; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.0 #92e19bb9; co-safety@1.1.0 #50c319ce; common@1.4.0 #745a8000; root@1.2.2 #ccf8006c |
+| `security-monitor` | agent | version-drift | co-abap@1.1.0 #86f8fda7; co-develop@1.1.0 #07eb05dd; co-game@1.1.0 #152cddb8; co-price@2.1.0 #b96a5ec2 |
+| `stack-setup` | agent | version-drift | co-develop@1.1.0 #b224c075; co-game@1.1.0 #9786e1fa |
+| `test-runner` | agent | version-drift | co-abap@1.1.0 #c651c469; co-develop@1.1.0 #567efd57; co-game@1.1.0 #428cc5d8 |
 | `agent-lifecycle-manager` | skill | version-drift | co-safety@1.3.1 #a5b6fdf8; root@1.3.1 #230ce8c0 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |

@@ -5,11 +5,7 @@ role: SAP DevOps / Admin
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP DevOps / Admin — manages environment setup, Transport Requests (CTS), abapGit integration, and VSP infrastructure installations. Dispatch for transport management and setup validation. Use when: "create transport", "release transport request", "install abapGit", "deploy infrastructure", "vsp admin checks".'
 
 examples:
@@ -22,7 +18,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/devops-admin.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

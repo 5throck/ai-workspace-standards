@@ -2,11 +2,7 @@
 name: prototype-engineer
 status: active
 formal_name: Interactive Prototyping Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 role: Interactive prototypes and design handoff artifacts builder
 color: orange
@@ -21,8 +17,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [service-designer, visual-designer, typography-expert]
 required_skills: [token-usage-lint]
-version: "1.0.0"
-last_updated: "2026-08-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"
