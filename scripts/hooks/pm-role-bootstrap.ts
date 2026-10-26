@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.1.2
+// v1.1.2 (2026-10-26, T-20261026-009, finding #32): doc-only — the marker TTL
+//           description now matches pm-dispatch-gate 1.1.0 (7-day TTL + sliding
+//           refresh on accepted gated dispatch; the "stale after 24h" wording was
+//           stale). No behavior change in this file.
 /**
  * pm-role-bootstrap.ts — SessionStart hook for PM role bootstrap.
  * Injects a reminder that the agent must read AGENTS.md and agents/pm.md
@@ -9,11 +13,13 @@
  * On every confirmed bootstrap it also records the PM-role session marker consumed
  * by hooks/pm-dispatch-gate.ts (identity gate, AGENTS.md §3.1): state dir
  * PM_GATE_STATE_DIR (override) or <os.tmpdir()>/ai-workspace-pm-gateway, sanitized
- * <session_id>.json holding { ts, source }, treated stale after 24h. Best-effort:
- * a marker write failure only warns (fail-open), never blocks bootstrap.
+ * <session_id>.json holding { ts, source }, treated stale after 7 days without an
+ * accepted gated dispatch (the dispatch gate slides the marker forward on each
+ * accepted dispatch; re-bootstrap rewrites it too). Best-effort: a marker write
+ * failure only warns (fail-open), never blocks bootstrap.
  * Fails open: any error exits 0 with no stdout, after writing a warning to stderr.
  *
- * @version 1.1.1
+ * @version 1.1.2
  * v1.1.1 (2026-10-26, T-20261026-002): the session-marker write moved into its own
  *           fail-open try/catch — a marker write failure (EPERM on the state dir) used to
  *           reach the outer catch and suppress the bootstrap injection entirely.
@@ -89,7 +95,8 @@ function main(): void {
 
     // v1.1.0: record the PM-role session marker for pm-dispatch-gate.
     // Sanitized <session_id>.json carrying { ts, source }; the dispatch gate
-    // treats a marker older than 24h as absent (re-bootstrap rewrites it).
+    // treats a marker older than 7 days (without an accepted gated dispatch,
+    // which slides it forward) as absent (re-bootstrap rewrites it).
     const sessionId = typeof data.session_id === 'string' && data.session_id.length > 0 ? data.session_id : '';
     if (sessionId) {
       // T-20261026-002: the marker is an optimization for the dispatch gate, not

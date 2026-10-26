@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.0
+// v1.2.0 (2026-10-26, T-20261026-009, finding #30): full model IDs are accepted
+//           alongside short aliases. 'provider/model' form (e.g. zai/glm-5.3-flash)
+//           and any full registry ID known to docs/workspace-schema.json models.*
+//           (e.g. claude-opus-5-5) name an explicit model just as precisely as an
+//           alias; the gate used to fall through and trip on them with a reason
+//           claiming the model param was omitted — factually wrong. A provided but
+//           UNRECOGNIZED value still trips, now with a reason that names the value
+//           (and calls out model: 'inherit' as the omit-equivalent it is).
 /**
  * agent-model-gate.ts — PreToolUse gate enforcing the 3-Tier Cost Optimization
  * strategy (CLAUDE.md §6 / AGENTS.md §3.6) on Agent tool dispatches.
@@ -46,7 +54,7 @@ interface GateEntry {
 
 interface WorkspaceSchema {
   agent_tiers?: Record<string, string>;
-  models?: { claude?: Record<string, string> };
+  models?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -83,6 +91,24 @@ function loadTierRegistry(): Record<string, GateEntry> | null {
   return registry;
 }
 
+/** T-20261026-009 (finding #30): does this value name a FULL model ID (as opposed
+ * to a short alias or garbage)? Two legal shapes: 'provider/model' (any platform's
+ * qualified form) and a full registry ID from the workspace model registry
+ * (docs/workspace-schema.json models.* values, e.g. 'claude-opus-5-5' or
+ * 'glm-5.3'). An unreadable schema returns false — the caller then falls through
+ * to the tier gate, which fails open when the schema is unavailable. */
+function isFullModelId(model: string): boolean {
+  if (model.includes('/')) return true;
+  try {
+    const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8')) as WorkspaceSchema;
+    const models = schema.models ?? {};
+    return Object.values(models).some((tierMap) =>
+      tierMap !== null && typeof tierMap === 'object' && Object.values(tierMap).includes(model));
+  } catch {
+    return false;
+  }
+}
+
 function main(): void {
   let stdinJson: string;
   try {
@@ -115,6 +141,13 @@ function main(): void {
     return;
   }
 
+  // A full model ID is equally explicit (T-20261026-009, finding #30): accept and
+  // skip the tier check entirely.
+  if (model && isFullModelId(model)) {
+    process.exit(0);
+    return;
+  }
+
   // Only gate the workspace's tiered agents — general-purpose subagents
   // (Explore, Plan, general-purpose, etc.) have no documented tier and are
   // fine to dispatch with model: inherit.
@@ -130,11 +163,23 @@ function main(): void {
   }
 
   const tierLabel = entry.tier.charAt(0).toUpperCase() + entry.tier.slice(1);
-  const reason =
-    `[TIER-GATE] Dispatching '${subagentType}' without an explicit model= param. ` +
-    `Its frontmatter is model: inherit, so omitting model here silently runs it on ` +
-    `the PARENT session's model instead of its documented ${tierLabel} tier. ` +
-    `Add model: "${entry.alias}" to this Agent() call (see CLAUDE.md §6 / AGENTS.md §3.6).`;
+  // T-20261026-009 (finding #30): the old single reason claimed the model param
+  // was omitted even when it was PRESENT-but-unrecognized (a full model ID used to
+  // land here) — factually wrong and misleading to the caller. Two accurate
+  // variants now: omitted vs provided-but-unrecognized.
+  const reason = model
+    ? `[TIER-GATE] Dispatching '${subagentType}' with model="${model}", which is ` +
+      `neither a tier alias (${[...VALID_ALIASES].join('/')}) nor a known full model ID. ` +
+      (model === 'inherit'
+        ? `model: "inherit" is the same as omitting model — the frontmatter's inherit ` +
+          `default silently runs this agent on the PARENT session's model instead of its `
+        : `An unrecognized model id runs the risk of silently falling back to the parent session's model instead of the `) +
+      `documented ${tierLabel} tier. Add model: "${entry.alias}" to this Agent() call ` +
+      `(see CLAUDE.md §6 / AGENTS.md §3.6).`
+    : `[TIER-GATE] Dispatching '${subagentType}' without an explicit model= param. ` +
+      `Its frontmatter is model: inherit, so omitting model here silently runs it on ` +
+      `the PARENT session's model instead of its documented ${tierLabel} tier. ` +
+      `Add model: "${entry.alias}" to this Agent() call (see CLAUDE.md §6 / AGENTS.md §3.6).`;
 
   const response = { decision: 'ask' as const, reason };
   process.stdout.write(JSON.stringify(response) + '\n');

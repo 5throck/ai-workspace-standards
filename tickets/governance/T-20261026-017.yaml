@@ -5,12 +5,27 @@ title: >-
   validator-hardening: hash-parity check for the L1 workspace-schema.json copy
   in validate-templates
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:41.848+09:00'
 history:
   - at: '2026-10-26T00:20:41.848+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T11:53:54.365+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T11:53:54.380+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T11:53:54.396+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T11:53:54.411+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via merged PR #1613 (bootstrap fail-open / nightly U-exclusion +
+  untrusted rules / SHA pin / pruned drift / schema-hash parity).
+  https://github.com/5throck/ai-workspace-standards/pull/1613
 error: null

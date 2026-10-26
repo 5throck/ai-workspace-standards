@@ -135,7 +135,9 @@ describe('pm-dispatch-gate (subprocess, stdin hook path)', () => {
 
   it('blocks again when the marker is stale beyond 24h', () => {
     const sessionId = freshSession('stale');
-    writeMarker(sessionId, Date.now() - 25 * 60 * 60 * 1000);
+    // T-20261026-009 #32: the marker TTL is now 7 days with a sliding refresh —
+    // stale means older than 7 days, not 24h.
+    writeMarker(sessionId, Date.now() - 8 * 24 * 60 * 60 * 1000);
     const res = runGate({
       tool_name: 'Agent',
       tool_input: { subagent_type: 'docs-writer' },

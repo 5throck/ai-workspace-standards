@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-05-29 | - | production | Initial security-expert agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/security-expert.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
+| 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/security-expert.md SSOT (lead [5], support [1], async); agents/security-expert.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -40,10 +41,10 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [6]
-**Can Support In**: [0, 2]
+**Can Lead Phases**: [5]
+**Can Support In**: [1]
 **Tier**: medium
-**Communication Style**: sync (security gates require validation)
+**Communication Style**: async (security checks can run independently)
 
 ## Security Scope
 
@@ -66,5 +67,5 @@
 
 - **Current Phase**: production
 - **Owner**: security-expert
-- **Last Updated**: 2026-09-29
+- **Last Updated**: 2026-10-26
 - **Last Reviewer**: lifecycle-manager

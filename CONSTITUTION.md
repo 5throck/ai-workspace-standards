@@ -172,8 +172,8 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 - Existing Korean documents are nativized incrementally: apply the preference to touched sections whenever a document is edited for other reasons; no bulk rewrites.
 
 ### Enforcement
-- Pre-commit audit checks for Korean content outside ko/ and locales/ko/
-- PR reviews reject non-English documentation outside translation zones
+- Pre-commit audit runs the machine language gate (`scripts/validate-md-language.ts`, audit step 3.7): Korean prose in the scanned official-document paths (`agents/`, root instruction files, `docs/constitution/`, `docs/governance/`, `docs/designs/`, `docs/adr/`, `docs/decisions/`, `docs/reports/`, `docs/guides/`, `docs/standards/`, `skills/`, platform skill/command mirrors, `templates/`) fails unless the file declares `lang: ko` with a valid `lang_reason` (protected governance/routing files allow no exception); locale directories (`<lang-code>/`, `locales/<lang-code>/`) are excluded from the scan
+- PR reviews reject non-English documentation outside the translation zones enumerated above (`<lang-code>/`, `locales/<lang-code>/`, locale-suffix files, declared `lang: ko` exception files)
 - Auditor validates compliance during Phase 6 QA gate
 
 ### Git/PR Artifacts Language Rule
@@ -192,7 +192,7 @@ Apply only to projects with user-facing UI (web app, desktop app, CLI with messa
 ### 5. Multi-Agent Architecture
 Full details: [`docs/constitution/05-multi-agent-architecture.md`](docs/constitution/05-multi-agent-architecture.md)
 
-Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-5-5, gemini-3.1-pro) for PM/Architect; Medium-tier (claude-sonnet-5-5, gemini-3.8-flash) for QA; Low-tier (claude-haiku-5-5, gemini-3.8-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
+Every project uses role-based agents defined in `agents/*.md` with YAML frontmatter (tier, model, color, description, examples). Three-tier cost optimization: High-tier models (claude-opus-5-5, gemini-3.1-pro) for the Architect; Medium-tier (claude-sonnet-5-5, gemini-3.8-flash) for PM and QA; Low-tier (claude-haiku-5-5, gemini-3.8-flash) for execution. PM orchestrator follows a 6-phase governance workflow (Phase 0: Project Initiation → Phase 1-2: Planning & Architecture → Phase 3: Design Handoff → Phase 4: Execution → Phase 5: Lifecycle Finalization → Phase 6: Quality Assurance & Finalization). See [`docs/workspace-schema.json`](docs/workspace-schema.json) for the canonical phase definitions. See [§5.6 Agent Lifecycle](docs/constitution/05.6-agent-lifecycle.md) for creation/modification procedures.
 
 ---
 

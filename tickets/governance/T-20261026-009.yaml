@@ -7,12 +7,15 @@ title: >-
   acceptance, 24h marker TTL refresh, dev-sync no-op early exit, gitleaks 64-hex
   allowlist scoping
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-26T00:20:41.744+09:00'
 history:
   - at: '2026-10-26T00:20:41.744+09:00'
     from: null
     to: backlog
+  - at: '2026-10-26T11:53:54.427+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

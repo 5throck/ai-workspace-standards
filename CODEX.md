@@ -164,7 +164,7 @@ The High/Medium/Low tier concept and its usage rules are the Single Source of Tr
 
 ### 8. Custom Command Error Recovery
 If a custom prompt or background script returns a non-zero exit code:
-* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system unless under explicit, written user instruction.
+* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system. **`--no-verify` is forbidden.**
 * **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
 * **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
   * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.

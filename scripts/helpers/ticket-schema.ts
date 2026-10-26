@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-10-26, T-20261026-015): PRIORITIES exported as the canonical
+//          priority enum — ticket.ts create validates --priority against the
+//          same list the schema validates with, closing the create → corrupt
+//          round trip on a bad priority. No behavior change to validateTicket.
 // v1.7.0 (2026-10-08, T-20261007-004): history shape validation — entries
 //          chronologically non-decreasing, first entry is the null→backlog
 //          creation, consecutive entries chain, and created_at does not
@@ -32,6 +36,10 @@ export const CURRENT_SCHEMA_VERSION = 1;
 export type Status = 'backlog' | 'waiting' | 'running' | 'review' | 'done' | 'failed';
 export type Kind = 'service' | 'manual';
 export type Priority = 'low' | 'normal' | 'high' | 'urgent';
+/** Canonical priority enum (T-20261026-015): single source for schema validation
+ * AND ticket.ts create input validation, so the CLI can never mint a priority
+ * the schema would reject at read time. */
+export const PRIORITIES: readonly Priority[] = ['low', 'normal', 'high', 'urgent'];
 export type RunType = 'skill' | 'script';
 export type UpstreamLayer = 'L1' | 'L2' | 'unsure';
 export type UpstreamTriage = 'inbox' | 'ready';
@@ -194,8 +202,7 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   if (t.kind === 'service' && (typeof t.service !== 'string' || t.service.length === 0)) {
     fail('service tickets must declare a non-empty service field referencing the catalog');
   }
-  const validPriorities: Priority[] = ['low', 'normal', 'high', 'urgent'];
-  if (!validPriorities.includes(t.priority as Priority)) fail(`ticket.priority invalid: ${JSON.stringify(t.priority)}`);
+  if (!PRIORITIES.includes(t.priority as Priority)) fail(`ticket.priority invalid: ${JSON.stringify(t.priority)}`);
   const validStatuses: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
   if (!validStatuses.includes(t.status as Status)) fail(`ticket.status invalid: ${JSON.stringify(t.status)}`);
   if (typeof t.attempts !== 'number' || t.attempts < 0) fail('ticket.attempts must be a non-negative number');

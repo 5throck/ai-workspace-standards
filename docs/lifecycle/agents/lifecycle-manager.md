@@ -12,6 +12,7 @@
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/lifecycle-manager.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-11 | production | production | model-migration skill attached to the agent (workspace directive 2026-10-11: registry model-ID migrations via sync-model-registry.ts); frontmatter last_updated refreshed (T-20261011-015) | lifecycle-manager |
 | 2026-10-26 | production | production | Body-text canon fix: Phase 6 (Finalization) references renumbered to Phase 5 (Lifecycle Finalization); last_updated bumped (project review 2026-10-26, DEC-20261026-01) | lifecycle-manager |
+| 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/lifecycle-manager.md SSOT (lead [6], support [5], async) (project review 2026-10-26 finding #4, T-20261026-004) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -43,10 +44,10 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [] (lifecycle oversight, not phase lead)
-**Can Support In**: [all phases]
+**Can Lead Phases**: [6]
+**Can Support In**: [5]
 **Tier**: medium
-**Communication Style**: sync (phase transitions require validation)
+**Communication Style**: async
 
 ## Phase Transition Rules
 

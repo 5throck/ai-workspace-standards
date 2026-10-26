@@ -182,8 +182,8 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-5-5, gemini-3.1-pro, gpt-5.6-sol, glm-5.3 | Complex reasoning, architecture, PM orchestration | PM, Architect |
-| **Medium** | claude-sonnet-5-5, gemini-3.8-flash, gpt-5.6-terra, glm-5.3-flash | Review, QA, analysis, supervision | Auditor, Security Expert |
+| **High** | claude-opus-5-5, gemini-3.1-pro, gpt-5.6-sol, glm-5.3 | Complex reasoning, architecture | Architect |
+| **Medium** | claude-sonnet-5-5, gemini-3.8-flash, gpt-5.6-terra, glm-5.3-flash | Review, QA, analysis, supervision, PM orchestration | PM, Auditor, Security Expert |
 | **Low** | claude-haiku-5-5, gemini-3.8-flash, gpt-5.6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max).

@@ -22,14 +22,21 @@ regexes = [
   '''YOUR_SECRET''',
   # gitleaks:allow inline marker (single-line suppression)
   '''gitleaks:allow''',
-  # sha256 hex digests written by scripts/mcp-upstream-server.ts into upstream
-  # tickets (dedupe_key, request_sha256) and the intake audit log — gitleaks'
-  # generic-api-key rule trips on 64-char hex (U-20261001-001, 2026-10-01)
-  '''^[a-f0-9]{64}$''',
 ]
 # Paths to skip entirely
 paths = [
   '''\.env\.sample''',
+  # T-20261026-009 (finding #35): machine-written upstream ticket records. The
+  # intake server (scripts/mcp-upstream-server.ts) writes 64-hex sha256 digests
+  # (dedupe_key, request_sha256) into tickets/governance/*.yaml (incl. archive/),
+  # which gitleaks' generic-api-key rule trips on (U-20261001-001, 2026-10-01).
+  # The old fix suppressed the 64-hex VALUE SHAPE repo-wide, hiding any 64-hex
+  # secret anywhere; scoping to the record files restores repo-wide detection
+  # (verified: gitleaks allowlist regexes/paths are OR-combined, so a value
+  # regex cannot be path-scoped within an entry — path exemption is the only
+  # narrowing mechanism). Keep additions here narrow: one path per
+  # machine-written digest surface, never a value-shape wildcard.
+  '''tickets/governance/.*\.yaml$''',
   # CHANGELOG entries describe changes by title only — no secret values expected
   # If a real secret is found here, remove this exclusion and fix the entry
   '''CHANGELOG\.(md|txt)$''',

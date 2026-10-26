@@ -15,6 +15,7 @@
 | 2026-09-18 | production | production | v1.2.0: Added Agent Hiring & Firing authority (PM-decided timing, deprecate-default exit, ADR-0061 decision records) and Skill Request Approval (agent-initiated, PM-approved) | pm |
 | 2026-09-29 | production | production | v1.2.1: PM tier defined as a capability floor for session-hosted agents (tier_semantics, session_hosted); spec 2026-09-29-pm-tier-capability-floor-design | pm |
 | 2026-10-04 | production | production | Instruction Duty reworded to the LLM Interaction Standard (ADR-0098); spec 2026-10-04-llm-interaction-standard-design | pm |
+| 2026-10-26 | production | production | agents/pm.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8, which predated the record (project review 2026-10-26 finding #9, T-20261026-004) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -68,6 +69,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-04 (Instruction Duty section reworded to the LLM Interaction Standard, ADR-0098; version stays 1.2.2 — reword-class edit)
+- **Last Updated**: 2026-10-26
 - **Last Reviewer**: lifecycle-manager
 

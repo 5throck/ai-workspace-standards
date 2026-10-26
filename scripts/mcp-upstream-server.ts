@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.10.1
+// @version 1.11.0
+// v1.11.0 (2026-10-26, T-20261026-009, finding #29): ticket-id allocation no longer
+//           double-increments on retry. The loop re-ran nextSeqForToday() on every
+//           attempt AND added the attempt counter, so a retry that followed a
+//           concurrent publication skipped an id (cosmetic gaps, no collision risk).
+//           publishTicketWithRetry() snapshots the sequence base once and advances
+//           the candidate by exactly one per taken candidate; retries only consume
+//           a sequence number when they actually move past a taken id. main() is
+//           now import.meta.main-guarded so unit tests can import the module
+//           (publishTicketWithRetry is exported with an injectable publish step).
 // v1.10.1 (2026-10-24, T-20261022-022 follow-through): transient-FS retry helper — the
 //           2026-10-23 M5 diag captured a 6-way burst losing request #1 as -32603 (the same
 //           uncounted class v1.9.2 fixed for linkSync EPERM): windows filter/AV pressure also
@@ -100,7 +109,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.10.1';
+export const SERVER_VERSION = '1.11.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -162,7 +171,12 @@ const ROOTS_TIMEOUT_MS = (() => {
 })();
 const MAX_ROOTS = 32;
 
-const TICKETS_DIR = join(WORKSPACE_ROOT, 'tickets', 'governance');
+// T-20261026-009: resolved per CALL (not per import) so a test process can
+// retarget UPSTREAM_WORKSPACE_ROOT after another test file has already loaded
+// this module — load-order no longer pins the tickets directory.
+function ticketsDir(): string {
+  return join(WORKSPACE_ROOT, 'tickets', 'governance');
+}
 const LOGS_DIR = join(WORKSPACE_ROOT, 'logs', 'upstream-intake');
 const KNOWN_PROJECTS_FILE = join(LOGS_DIR, 'known-projects.json');
 
@@ -380,16 +394,88 @@ function todayPrefix(): string {
 }
 
 function nextSeqForToday(): number {
-  if (!existsSync(TICKETS_DIR)) return 1;
+  if (!existsSync(ticketsDir())) return 1;
   const prefix = todayPrefix();
   let max = 0;
-  for (const f of readdirSync(TICKETS_DIR)) {
+  for (const f of readdirSync(ticketsDir())) {
     if (!f.startsWith(prefix)) continue;
     const m = /^U-\d{8}-(\d+)\.yaml$/.exec(f);
     const n = m ? parseInt(m[1], 10) : NaN;
     if (!isNaN(n) && n > max) max = n;
   }
   return max + 1;
+}
+
+// T-20261026-009: tmp-file uniqueness across rapid successive publishes in one
+// process (the old loop keyed on the attempt counter; the extracted publisher
+// may be called back-to-back within the same millisecond).
+let publishTmpCounter = 0;
+
+/** Publish a built ticket under an atomically-claimed id (default publication).
+ * Throws EEXIST when another writer took the id, anything else on real failures.
+ * The tmp file is always cleaned up: consumed on success, removed on failure. */
+function defaultPublish(ticket: Record<string, unknown>, id: string): void {
+  const ticketPath = join(ticketsDir(), `${id}.yaml`);
+  const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${publishTmpCounter++}`;
+  withFsRetry(() => writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8'), 3, 'ticket tmp write');
+  try {
+    // T-20261005-001: hard-link publication is atomic on POSIX but fails EPERM on
+    // Windows under file-system filter/AV pressure — the 2026-10-05 windows-latest
+    // M5 flake lost 1 of 6 parallel intakes to exactly that (the throw surfaced as
+    // a -32603 the cap test counts as neither accepted nor rate-limited). On EPERM,
+    // fall back to the O_EXCL exclusive create ('wx') — the cross-platform
+    // atomic-take primitive; EEXIST there means another process took the id.
+    try {
+      linkSync(tmpPath, ticketPath); // POSIX: atomic, EEXIST when the id is taken
+      return;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === 'EEXIST') throw err; // id taken — caller retries with the next candidate
+      if (code !== 'EPERM') throw err;
+      try {
+        const fd = withFsRetry(() => openSync(ticketPath, 'wx'), 3, 'ticket wx fallback');
+        try { writeSync(fd, readFileSync(tmpPath)); } finally { closeSync(fd); }
+        return;
+      } catch (err2) {
+        // EEXIST from the wx fallback is the same collision — surface it as such
+        throw err2;
+      }
+    }
+  } finally {
+    try { withFsRetry(() => unlinkSync(tmpPath), 2, 'ticket tmp consumed'); } catch { /* consumed by a successful publish */ }
+  }
+}
+
+/** Allocate and publish an intake ticket id. Exported for unit tests (the server
+ * itself only runs under `import.meta.main`): tests inject `publish` to simulate
+ * EEXIST collisions deterministically.
+ *
+ * T-20261026-009 (finding #29): the candidate sequence is snapshotted ONCE and the
+ * candidate advances by exactly one per taken candidate. The previous form re-ran
+ * nextSeqForToday() inside the loop AND added the attempt counter, so a retry that
+ * followed a concurrent publication double-counted the newcomer and skipped an id
+ * (sequence gaps only — no collision risk — but pointless noise in the audit trail).
+ * Retries now consume a sequence number only when they actually move past a taken
+ * id; genuine concurrent publications are still absorbed by the EEXIST retry. */
+export function publishTicketWithRetry(
+  buildTicket: (id: string) => Record<string, unknown>,
+  publish: (ticket: Record<string, unknown>, id: string) => void = defaultPublish,
+): string {
+  mkdirSync(ticketsDir(), { recursive: true });
+  const seqBase = nextSeqForToday();
+  const prefix = todayPrefix();
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const id = `${prefix}-${String(seqBase + attempt).padStart(3, '0')}`;
+    const ticket = buildTicket(id);
+    try {
+      publish(ticket, id);
+      return id;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException)?.code !== 'EEXIST') throw err;
+      // id taken — next attempt moves to exactly the next candidate
+    }
+  }
+  throw new Error('could not allocate a ticket id');
 }
 
 /** T-20261022-022 follow-through: windows filter/AV pressure surfaces as EBUSY/EPERM on
@@ -592,12 +678,12 @@ function writeYamlAtomic(path: string, obj: unknown): void {
 }
 
 function loadUpstreamTickets(): Array<{ file: string; ticket: any }> {
-  if (!existsSync(TICKETS_DIR)) return [];
+  if (!existsSync(ticketsDir())) return [];
   const out: Array<{ file: string; ticket: any }> = [];
-  for (const f of readdirSync(TICKETS_DIR).sort()) {
+  for (const f of readdirSync(ticketsDir()).sort()) {
     if (!/^U-\d{8}-\d{3,4}\.yaml$/.test(f)) continue;
     try {
-      const ticket = load(readFileSync(join(TICKETS_DIR, f), 'utf-8'), { schema: JSON_SCHEMA }) as any;
+      const ticket = load(readFileSync(join(ticketsDir(), f), 'utf-8'), { schema: JSON_SCHEMA }) as any;
       if (ticket && ticket.upstream) out.push({ file: f, ticket });
     } catch { /* unreadable ticket: skip */ }
   }
@@ -861,13 +947,13 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
     // SHARED ticket lock so a concurrent PM triage/resolve (ticket-store) cannot be
     // silently overwritten. Always nested INSIDE the intake lock (ordering
     // intake -> ticket is never inverted, so no deadlock).
-    const dup = withTicketLock(TICKETS_DIR, `merge:${dedupeHash.slice(0, 8)}`, () => {
+    const dup = withTicketLock(ticketsDir(), `merge:${dedupeHash.slice(0, 8)}`, () => {
       const found = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
       if (!found) return null;
       const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
       if (flagged) entry.flagged = true;
       found.ticket.upstream.duplicates = [...(found.ticket.upstream.duplicates ?? []), entry];
-      writeYamlAtomic(join(TICKETS_DIR, found.file), found.ticket);
+      writeYamlAtomic(join(ticketsDir(), found.file), found.ticket);
       return found;
     });
     if (dup) {
@@ -942,49 +1028,16 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
       duplicates: [{ project, at: now }],
     });
 
-    mkdirSync(TICKETS_DIR, { recursive: true });
-    let id = '';
-    let written = false;
-    for (let attempt = 0; attempt < 20 && !written; attempt++) {
-      id = `${todayPrefix()}-${String(nextSeqForToday() + attempt).padStart(3, '0')}`;
-      const ticket = {
-        schemaVersion: 1, id, kind: 'manual', title: `Upstream request from ${project}`, priority: 'normal',
-        status, attempts: 0, created_at: now,
-        history: [{ at: now, from: null, to: status }],
-        result: null, error: null, upstream: upstreamBlock,
-      };
-      const ticketPath = join(TICKETS_DIR, `${id}.yaml`);
-      const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
-      withFsRetry(() => writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8'), 3, 'ticket tmp write');
-      // T-20261005-001: hard-link publication is atomic on POSIX but fails EPERM on
-      // Windows under file-system filter/AV pressure — the 2026-10-05 windows-latest
-      // M5 flake lost 1 of 6 parallel intakes to exactly that (the throw surfaced as
-      // a -32603 the cap test counts as neither accepted nor rate-limited). On EPERM,
-      // fall back to the O_EXCL exclusive create ('wx') — the cross-platform
-      // atomic-take primitive; EEXIST there means another process took the id.
-      try {
-        linkSync(tmpPath, ticketPath); // POSIX: atomic, EEXIST when the id is taken
-        written = true;
-      } catch (err) {
-        const code = (err as NodeJS.ErrnoException).code;
-        if (code === 'EEXIST') {
-          // id taken — retry below with the next sequence number
-        } else if (code === 'EPERM') {
-          try {
-            const fd = withFsRetry(() => openSync(ticketPath, 'wx'), 3, 'ticket wx fallback');
-            try { writeSync(fd, readFileSync(tmpPath)); } finally { closeSync(fd); }
-            written = true;
-          } catch (err2) {
-            if ((err2 as NodeJS.ErrnoException).code !== 'EEXIST') { withFsRetry(() => unlinkSync(tmpPath), 3, 'ticket tmp cleanup'); throw err2; }
-          }
-        } else {
-          withFsRetry(() => unlinkSync(tmpPath), 3, 'ticket tmp cleanup');
-          throw err;
-        }
-      }
-      try { withFsRetry(() => unlinkSync(tmpPath), 2, 'ticket tmp consumed'); } catch { /* consumed by a successful publish */ }
-    }
-    if (!written) throw new Error('could not allocate a ticket id');
+    // T-20261026-009 (finding #29): allocation + publication moved into
+    // publishTicketWithRetry (exported for unit tests) — the retry loop used to
+    // re-read the directory sequence AND add the attempt counter, double-counting
+    // any concurrent publication and skipping an id.
+    const id = publishTicketWithRetry((allocatedId) => ({
+      schemaVersion: 1, id: allocatedId, kind: 'manual', title: `Upstream request from ${project}`, priority: 'normal',
+      status, attempts: 0, created_at: now,
+      history: [{ at: now, from: null, to: status }],
+      result: null, error: null, upstream: upstreamBlock,
+    }));
 
     // known-projects.json is updated only after the ticket write succeeded.
     if (isFirstRequest) {
@@ -1223,7 +1276,11 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error(`[mcp-upstream-server] fatal: ${(err as Error).message}`);
-  process.exit(1);
-});
+// T-20261026-009: guarded so unit tests can import this module (for
+// publishTicketWithRetry) without starting the stdio server loop.
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error(`[mcp-upstream-server] fatal: ${(err as Error).message}`);
+    process.exit(1);
+  });
+}

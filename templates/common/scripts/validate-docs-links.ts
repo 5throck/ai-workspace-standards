@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
 // @description Scans workspace Markdown files for broken relative file links.
 //              Invoked by dev-sync.ts as a pre-flight link validation gate and
 //              spawned by audit.ts as the docs relative-link gate.
@@ -52,6 +52,22 @@
 //              agents-md-pointer-integrity precedent). _examples/ is scaffold
 //              staging, not delivered docs, and is excluded from this scope.
 // @usage bun scripts/validate-docs-links.ts [--dir <path>] [--all] [--verbose]
+//
+//              v1.6.0 (ADR-0101 §Decision 6 arm, T-20261026-012): platform
+//              skeleton anchor check. Relative links from delivered governance
+//              docs (workspace docs/governance/** and templates/<name>/docs/
+//              governance/**) into the platform docs (CLAUDE.md / GEMINI.md)
+//              must resolve their anchor fragments against
+//              templates/common/{CLAUDE,GEMINI}.md heading slugs — the project
+//              delivery source — instead of the workspace-root copies (or not
+//              at all, which is what the v1.5.0 common-delivered allowance
+//              did for the exact CLAUDE/GEMINI link class that forced the
+//              #1604 stopgap retarget). File-existence semantics are
+//              unchanged: the platform docs themselves remain
+//              delivery-allowed in variant template docs. Severity follows
+//              the file's existing split: error in the default and --all
+//              workspace scopes, warning (never gating) in variant
+//              template-docs scope.
 
 import { existsSync, readdirSync, statSync, readFileSync } from "fs";
 import { join, resolve, dirname, extname, relative, sep, basename } from "path";
@@ -125,6 +141,32 @@ function templateDocsOwner(mdPath: string): string | null {
   const parts = rel.split(sep);
   if (parts.length < 3 || parts[1] !== "docs") return null; // <name>/docs/<file...>
   return join(WORKSPACE_ROOT, "templates", parts[0]);
+}
+
+/**
+ * v1.6.0 (ADR-0101 §Decision 6 arm): the platform skeleton delivery source for
+ * links into the platform docs — templates/common/CLAUDE.md or
+ * templates/common/GEMINI.md — when `mdPath` lives in a delivered governance
+ * docs tree (workspace docs/governance/** or a template docs governance
+ * subtree) and `hrefClean` names one of the two platform docs. Anchors of this
+ * link class must resolve against the delivery source's heading slugs because
+ * the delivered project copy is what readers click (the 09-12 / #1604
+ * incident invariant). Returns null for every other link — the arm does not
+ * change how non-platform or non-governance links are checked.
+ */
+function platformSkeletonSource(mdPath: string, mdDir: string, hrefClean: string): string | null {
+  const base = basename(hrefClean);
+  if (base !== "CLAUDE.md" && base !== "GEMINI.md") return null;
+  const source = join(WORKSPACE_ROOT, "templates", "common", base);
+  if (!existsSync(source)) return null;
+  const relGov = relative(join(WORKSPACE_ROOT, "docs", "governance"), mdPath);
+  if (!relGov.startsWith("..") && relGov !== "") return source;
+  const templateRoot = templateDocsOwner(mdPath);
+  if (templateRoot !== null) {
+    const relToTpl = relative(templateRoot, mdDir).split(sep).join("/");
+    if (relToTpl === "docs/governance" || relToTpl.startsWith("docs/governance/")) return source;
+  }
+  return null;
 }
 
 // Link pattern: [text](path#fragment) — captures relative paths plus their
@@ -316,7 +358,27 @@ function checkFile(mdPath: string): void {
       // v1.5.0: variant template docs — allowance-listed deliveries are skipped,
       // anything else is a warning (never an error).
       if (isVariantDocs && templateRoot !== null) {
-        if (isCommonDeliveredPath(templateRoot, mdDir, hrefClean)) continue;
+        if (isCommonDeliveredPath(templateRoot, mdDir, hrefClean)) {
+          // v1.6.0: the delivery allowance skips FILE existence only. The
+          // anchor of a platform-doc link (CLAUDE.md / GEMINI.md) from a
+          // delivered governance tree still resolves against the delivery
+          // source's slugs (ADR-0101 §Decision 6) — the exact skipped class
+          // that forced the #1604 stopgap retarget. Warning semantics, like
+          // every variant template-docs finding.
+          const skeletonSource = platformSkeletonSource(mdPath, mdDir, hrefClean);
+          if (
+            skeletonSource !== null &&
+            fragment !== null &&
+            !collectAnchorFragments(skeletonSource).has(fragment.toLowerCase())
+          ) {
+            const msg = `  WARN ${rel}: template-doc anchor → ${href} (no matching heading in the delivery source templates/common/${basename(
+              skeletonSource,
+            )})`;
+            templateDocWarnings.push(msg);
+            if (verbose) console.error(msg);
+          }
+          continue;
+        }
         const msg = `  WARN ${rel}: template-doc link does not resolve pre-scaffold → ${href} (post-scaffold delivery or stale — verify manually)`;
         templateDocWarnings.push(msg);
         if (verbose) console.error(msg);
@@ -346,7 +408,11 @@ function checkFile(mdPath: string): void {
         }
         continue;
       }
-      const fragments = collectAnchorFragments(target);
+      // v1.6.0: platform-doc links from delivered governance docs resolve
+      // against the delivery source's slugs (ADR-0101 §Decision 6), not the
+      // workspace-root copy's.
+      const skeletonSource = platformSkeletonSource(mdPath, mdDir, hrefClean);
+      const fragments = collectAnchorFragments(skeletonSource ?? target);
       if (fragments.size > 0 && !fragments.has(fragment.toLowerCase())) {
         const rel = mdPath.replace(WORKSPACE_ROOT + "\\", "").replace(WORKSPACE_ROOT + "/", "");
         const msg = `  ${rel}: broken anchor → ${hrefClean}#${fragment} (no matching heading in target)`;
