@@ -3,7 +3,7 @@ id: U-20261026-010
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-26T23:26:47.634+09:00'
 history:
@@ -13,7 +13,18 @@ history:
   - at: '2026-10-26T23:50:21.774+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-27T01:32:27.843+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T01:32:27.843+09:00'
+    from: review
+    to: done
+result: >-
+  verify-scripts.ts 1.13.0: in L2/L3 project contexts, equal-version divergence
+  against the workspace L1 is now a WARNING (exit 0) pointing to
+  upgrade-project; L0/L1 still block. Reaches projects with the next template
+  release via upgrade-project. Design:
+  2026-10-26-project-drift-check-scoping-design.
 error: null
 upstream:
   project: co-design
@@ -69,3 +80,12 @@ upstream:
   duplicates:
     - project: co-design
       at: '2026-10-26T23:26:47.634+09:00'
+  resolution:
+    outcome: fixed
+    template_version: unreleased
+    summary: >-
+      verify-scripts.ts 1.13.0: in L2/L3 project contexts, equal-version
+      divergence against the workspace L1 is now a WARNING (exit 0) pointing to
+      upgrade-project; L0/L1 still block. Reaches projects with the next
+      template release via upgrade-project. Design:
+      2026-10-26-project-drift-check-scoping-design.

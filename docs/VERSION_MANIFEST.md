@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-26T16:22:47.810Z
+**Generated**: 2026-10-26T16:32:43.956Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -221,7 +221,7 @@
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
 | verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | N/A |
 | verify-readme-sync.ts | 1.4.1 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.12.0 | scripts/verify-scripts.ts | fs, path |
+| verify-scripts.ts | 1.13.0 | scripts/verify-scripts.ts | fs, path |
 | verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | N/A |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | N/A |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
