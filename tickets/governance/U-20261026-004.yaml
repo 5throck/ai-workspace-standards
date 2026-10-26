@@ -3,14 +3,31 @@ id: U-20261026-004
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-26T13:01:17.519+09:00
+created_at: '2026-10-26T13:01:17.519+09:00'
 history:
-  - at: 2026-10-26T13:01:17.519+09:00
+  - at: '2026-10-26T13:01:17.519+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T19:40:43.331+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T19:40:43.331+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-26T19:40:43.331+09:00'
+    from: review
+    to: done
+result: >-
+  Workspace rule adopted in skills/agent-lifecycle-manager/SKILL.md Step 3: the
+  ## Legal Basis section is conditional — included only for agents whose mandate
+  rests on statutes, regulations, or certification/permit regimes; non-statutory
+  sibling-ownership Boundary content belongs in Role or Constraints.
+  agents/README.md is path-not-template-managed (co-newbiz project-local), so
+  the workspace-standard home is the lifecycle skill. No validator arm added —
+  the rule is authoring guidance first; a checker can follow if violations
+  recur.
 error: null
 upstream:
   project: co-newbiz
@@ -19,12 +36,31 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The workspace agent-definition standard has no rule for when an agent file should carry a `## Legal Basis` section. Observed: across the 16 co-* projects, only co-export (9 agents) and co-newbiz (41 agents) use a `## Legal Basis` body section; the other projects use different skeletons without it. co-newbiz adopted it for every agent (DEC-20261025-06, ruling 2) on the stated premise that sibling projects share one 9-section skeleton, which is inaccurate. As a result, non-regulatory agents (for example dba, frontend-engineer, sre) carry a "Legal Basis" section with no statutory or regulatory grounding. Expected: one workspace rule — `## Legal Basis` is included only for agents whose work rests on statutes, regulations, or certification/permit regimes, and omitted otherwise, with the sibling-ownership Boundary content placed in Role or Constraints instead. No validator currently checks this either way.'
+  symptom: >-
+    The workspace agent-definition standard has no rule for when an agent file
+    should carry a `## Legal Basis` section. Observed: across the 16 co-*
+    projects, only co-export (9 agents) and co-newbiz (41 agents) use a `##
+    Legal Basis` body section; the other projects use different skeletons
+    without it. co-newbiz adopted it for every agent (DEC-20261025-06, ruling 2)
+    on the stated premise that sibling projects share one 9-section skeleton,
+    which is inaccurate. As a result, non-regulatory agents (for example dba,
+    frontend-engineer, sre) carry a "Legal Basis" section with no statutory or
+    regulatory grounding. Expected: one workspace rule — `## Legal Basis` is
+    included only for agents whose work rests on statutes, regulations, or
+    certification/permit regimes, and omitted otherwise, with the
+    sibling-ownership Boundary content placed in Role or Constraints instead. No
+    validator currently checks this either way.
   affected_paths:
     - agents/README.md
     - skills/agent-lifecycle-manager/SKILL.md
   identity_source: client_roots
-  repro: '1. In each Projects/co-* directory, list agents/*.md files whose body has a line starting with "## Legal Basis". 2. Result: only co-export and co-newbiz match. 3. Open co-newbiz/agents/dba.md: its "## Legal Basis" section has no statute or regulation behind it. 4. Search the workspace agent template and the agent-lifecycle standards for a rule on when this section applies: none found.'
+  repro: >-
+    1. In each Projects/co-* directory, list agents/*.md files whose body has a
+    line starting with "## Legal Basis". 2. Result: only co-export and co-newbiz
+    match. 3. Open co-newbiz/agents/dba.md: its "## Legal Basis" section has no
+    statute or regulation behind it. 4. Search the workspace agent template and
+    the agent-lifecycle standards for a rule on when this section applies: none
+    found.
   triage: inbox
   flagged: false
   triage_reasons:
@@ -34,4 +70,16 @@ upstream:
   dedupe_key: 9a18ef4a080e654c857dbec02eefa492e66d79f2aed34d39a410807b63a6d764
   duplicates:
     - project: co-newbiz
-      at: 2026-10-26T13:01:17.519+09:00
+      at: '2026-10-26T13:01:17.519+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1617
+    summary: >-
+      Workspace rule adopted in skills/agent-lifecycle-manager/SKILL.md Step 3:
+      the ## Legal Basis section is conditional — included only for agents whose
+      mandate rests on statutes, regulations, or certification/permit regimes;
+      non-statutory sibling-ownership Boundary content belongs in Role or
+      Constraints. agents/README.md is path-not-template-managed (co-newbiz
+      project-local), so the workspace-standard home is the lifecycle skill. No
+      validator arm added — the rule is authoring guidance first; a checker can
+      follow if violations recur.

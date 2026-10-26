@@ -770,7 +770,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
-| `agent-lifecycle-manager` | skill | divergence | co-safety@1.3.1 #a5b6fdf8; root@1.3.0 #5f3763d3 |
+| `agent-lifecycle-manager` | skill | divergence | co-safety@1.3.1 #a5b6fdf8; root@1.3.0 #8f86b9ee |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |

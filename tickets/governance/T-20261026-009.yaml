@@ -7,7 +7,7 @@ title: >-
   acceptance, 24h marker TTL refresh, dev-sync no-op early exit, gitleaks 64-hex
   allowlist scoping
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:41.744+09:00'
 history:
@@ -20,5 +20,11 @@ history:
   - at: '2026-10-26T19:33:13.506+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-10-26T19:39:13.550+09:00'
+    from: review
+    to: done
+result: >-
+  All sub-items landed: (a) SHA pin via PR #1613; (b)-(g) via PR #1615 (both
+  merged, CI 8/8; local gates green).
+  https://github.com/5throck/ai-workspace-standards/pull/1615
 error: null
