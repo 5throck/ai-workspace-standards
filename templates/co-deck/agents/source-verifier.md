@@ -1,14 +1,10 @@
 ---
 name: source-verifier
-version: "1.0.0"
+version: "1.1.0"
 role: Research source credibility and URL existence verification specialist
 status: active
-last_updated: "2026-06-20"
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+last_updated: "2026-10-27"
+tier: medium
 model: inherit
 color: yellow
 description: >-

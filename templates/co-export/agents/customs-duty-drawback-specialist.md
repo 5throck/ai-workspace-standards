@@ -3,11 +3,7 @@ name: customs-duty-drawback-specialist
 role: Customs duty drawback (refund of duties on raw materials for export) determination and refund-method specialist
 status: active
 formal_name: Customs Duty Drawback Specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: teal
 description: >
@@ -37,8 +33,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [hs-classification-specialist, pm]
 required_skills: [customs-duty-drawback-workflow]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

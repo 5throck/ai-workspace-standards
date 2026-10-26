@@ -1,14 +1,10 @@
 ---
 name: diagram-specialist
-version: "1.1.0"
-last_updated: "2026-06-25"
+version: "1.2.0"
+last_updated: "2026-10-27"
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 language: ko
 color: teal

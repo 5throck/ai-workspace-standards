@@ -2,11 +2,7 @@
 name: typography-expert
 status: active
 formal_name: Typography Expert & Type System Designer
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 role: Font selection, type systems, and visual hierarchy specialist
 color: violet
@@ -21,8 +17,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: []
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

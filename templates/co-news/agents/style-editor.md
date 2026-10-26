@@ -4,11 +4,7 @@ role: AI-tell reduction and house-style conformance lead
 status: active
 capabilities:
   - documentation
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: purple
 description: >
@@ -23,8 +19,8 @@ phases: [4]
 handoff_to: [visual-editor]
 handoff_from: [reporter]
 required_skills: [financial-journalism-style, ai-tell-reduction]
-version: "1.0.0"
-last_updated: "2026-08-10"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-12"

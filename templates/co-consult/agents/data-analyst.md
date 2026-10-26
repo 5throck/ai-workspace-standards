@@ -3,11 +3,7 @@ name: data-analyst
 role: Statistical analysis, data modeling, and business insights specialist
 status: active
 formal_name: Data Analyst & Analytics Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >
@@ -21,8 +17,8 @@ phases: [1, 3]
 handoff_to: [strategy-analyst, communications-lead]
 handoff_from: [pm]
 required_skills: [company-intelligence, financial-modeling, financial-statement-analysis, insight-synthesis]
-version: "1.0.1"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

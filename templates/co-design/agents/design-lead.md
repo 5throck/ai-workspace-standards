@@ -2,11 +2,7 @@
 name: design-lead
 status: active
 formal_name: Design System & Visual Direction Lead
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 role: Design direction, design system architecture, and creative strategy owner
 color: indigo
@@ -21,8 +17,8 @@ phases: [2, 3]
 handoff_to: [visual-designer, service-designer, typography-expert]
 handoff_from: [ux-researcher]
 required_skills: [ui-ux-design-intelligence, service-design]
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

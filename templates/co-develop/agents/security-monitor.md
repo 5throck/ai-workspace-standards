@@ -2,13 +2,9 @@
 name: security-monitor
 role: Security policy enforcement and secrets leak prevention specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-08-25"
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+version: "1.1.0"
+last_updated: "2026-10-27"
+tier: medium
 model: inherit
 color: red
 description: >

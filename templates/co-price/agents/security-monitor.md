@@ -4,11 +4,7 @@ phases: [0, 5]
 formal_name: Security Monitor
 role: vulnerability scanning, advisory watch, secret-leak prevention, and dependency policy enforcement
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 domain: quality
 subdomain: monitoring
@@ -16,7 +12,7 @@ description: >-
   Runs scheduled and pre-PR security scans (local vuln scan, web advisories, gitleaks),
   maintains the security/ findings register with 7-day cleanup and Dependabot resolution,
   and blocks merges on active CRITICAL advisories.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:

@@ -2,11 +2,7 @@
 name: visual-designer
 status: active
 formal_name: UI Execution & Visual Design Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 role: Visual designs, design tokens, and component specifications producer
 color: purple
@@ -21,8 +17,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: [ui-ux-design-intelligence]
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

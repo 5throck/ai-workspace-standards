@@ -2,13 +2,9 @@
 name: designer
 role: UI/UX specs, wireframes, and component definition producer
 status: active
-version: "1.0.0"
-last_updated: "2026-08-25"
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+version: "1.1.0"
+last_updated: "2026-10-27"
+tier: medium
 model: inherit
 color: purple
 description: >

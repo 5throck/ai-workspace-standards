@@ -5,11 +5,7 @@ role: SAP Fiori & UI5 Implementation Specialist
 model: inherit
 color: cyan
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Fiori & UI5 Implementation Specialist — design and implementation of SAP Fiori / SAPUI5 applications following SAP Fiori Design Guidelines. Use when: "build a Fiori app", "create UI5 application", "modify OData service", "design the Fiori UI", "fix Fiori tile", "update CDS exposure for OData".'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/fiori-developer.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

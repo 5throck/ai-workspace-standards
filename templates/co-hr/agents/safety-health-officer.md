@@ -2,11 +2,7 @@
 name: safety-health-officer
 role: "occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation"
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: red
 description: >
@@ -23,8 +19,8 @@ phases: [1]
 handoff_to: [change-management-partner, org-design-consultant]
 handoff_from: [pm, labor-compliance-analyst]
 required_skills: [labor-compliance-audit]
-version: "1.0.0"
-last_updated: "2026-08-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-23"

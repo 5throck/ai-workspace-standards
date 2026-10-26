@@ -2,11 +2,7 @@
 name: learning-development-specialist
 role: "Training system design, competency model, training program operation (HRD)"
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >
@@ -20,8 +16,8 @@ phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
 required_skills: [learning-curriculum-design]
-version: "1.0.0"
-last_updated: "2026-08-23"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-23"

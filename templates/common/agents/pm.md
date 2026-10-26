@@ -3,16 +3,9 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
-version: "1.3.0"
-last_updated: "2026-10-04"
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
-  codex: medium
-  hermes: medium  # claude-sonnet-5-5
-  zai: medium  # glm-5.3-flash
+version: "1.4.0"
+last_updated: "2026-10-27"
+tier: medium
 model: inherit
 tier_semantics: floor
 session_hosted: true

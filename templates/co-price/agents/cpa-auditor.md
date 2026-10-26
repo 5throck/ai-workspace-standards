@@ -4,11 +4,7 @@ phases: [4]
 formal_name: P&L Engine Auditor (CPA)
 role: double-entry integrity verification, Vitest harness authorship, and BIZ_LOGIC traceability enforcement
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 domain: finance
 subdomain: audit
@@ -17,7 +13,7 @@ description: >-
   authors the [Ref: BIZ_LOGIC.Section_X]-tagged Vitest harness, issues Harness Pass
   Certificates, and re-derives new spec formulas (waterfall, VW/GG, dual pricing,
   discounts) numerically on the ACME baseline before implementation.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: green
 lifecycle:

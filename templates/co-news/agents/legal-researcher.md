@@ -4,11 +4,7 @@ role: Corporate law and regulatory context research lead
 status: active
 capabilities:
   - knowledge-sharing
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: blue
 description: >
@@ -24,8 +20,8 @@ phases: [1]
 handoff_to: [fact-checker]
 handoff_from: [pm, financial-analyst]
 required_skills: []
-version: "1.0.0"
-last_updated: "2026-08-10"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-12"

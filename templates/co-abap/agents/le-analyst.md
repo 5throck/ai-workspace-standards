@@ -5,11 +5,7 @@ role: LE Module Analyst
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'LE Module Analyst — deep domain expert for Logistics Execution business processes. Use when: "LE analyst", "warehouse management", "transfer order", "shipping", "logistics execution", "LE module", "WM analysis".'
 examples:
   - user: "Investigate why transfer orders in warehouse W001 are not being confirmed"
@@ -21,7 +17,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/le-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # LE Analyst — Logistics Execution

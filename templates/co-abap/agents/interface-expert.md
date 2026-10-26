@@ -5,11 +5,7 @@ role: SAP Interface Expert
 model: inherit
 color: cyan
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Interface Expert — specializes in OData services, RFCs, BAPIs, RESTful APIs, and IDoc integrations. Dispatch for API design and connectivity troubleshooting. Use when: "design API", "implement OData service", "RFC integration", "REST integration", "IDoc processing", "external system connection".'
 
 examples:
@@ -22,7 +18,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/interface-expert.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

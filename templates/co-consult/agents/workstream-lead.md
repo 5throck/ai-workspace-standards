@@ -3,11 +3,7 @@ name: workstream-lead
 role: Workstream management and delivery coordination lead
 status: active
 formal_name: Workstream Lead & Project Manager
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: blue
 description: >
@@ -22,8 +18,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [project-delivery, stakeholder-alignment]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

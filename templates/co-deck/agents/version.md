@@ -1,14 +1,10 @@
 ---
 name: version
-version: "1.0.0"
-last_updated: "2026-06-17"
+version: "1.1.0"
+last_updated: "2026-10-27"
 role: Version snapshot manager for all lecture production files
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: gray
 description: >-

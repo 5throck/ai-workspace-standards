@@ -4,11 +4,7 @@ role: Inline SVG financial infographic lead
 status: active
 capabilities:
   - documentation
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: teal
 description: >
@@ -23,8 +19,8 @@ phases: [5]
 handoff_to: [pm]
 handoff_from: [style-editor]
 required_skills: [financial-infographic-svg]
-version: "1.0.0"
-last_updated: "2026-08-10"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-12"

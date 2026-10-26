@@ -3,11 +3,7 @@ name: halal-certification-specialist
 role: Halal certification requirement analysis and certification process specialist
 status: active
 formal_name: Halal Certification Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: emerald
 description: >
@@ -33,8 +29,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist, foreign-regulatory-intelligence-analyst]
 required_skills: [halal-certification-workflow]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-16"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-16"

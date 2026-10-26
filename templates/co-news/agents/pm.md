@@ -1,10 +1,11 @@
 ---
 extends: ../../common/agents/pm.md
 name: pm
+tier: medium
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-news
-version: "1.1.0"
-last_updated: "2026-08-24"
+version: "1.2.0"
+last_updated: "2026-10-27"
 status: active
 owner: architect
 capabilities:

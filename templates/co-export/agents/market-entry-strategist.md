@@ -3,11 +3,7 @@ name: market-entry-strategist
 role: Overseas market entry strategy, buyer discovery, and market research lead
 status: active
 formal_name: Market Entry Strategist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: orange
 description: >
@@ -33,8 +29,8 @@ handoff_to: [trade-documentation-specialist, logistics-coordinator]
 handoff_from: [pm, foreign-regulatory-intelligence-analyst]
 required_skills: [market-entry-strategy]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, presentation]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

@@ -3,11 +3,7 @@ name: logistics-coordinator
 role: Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator
 status: active
 formal_name: Logistics & Freight Coordinator
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: teal
 description: >
@@ -32,8 +28,8 @@ handoff_to: [pm]
 handoff_from: [pm, market-entry-strategist, trade-documentation-specialist]
 required_skills: [logistics-coordination, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-08-25"
+version: "1.2.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

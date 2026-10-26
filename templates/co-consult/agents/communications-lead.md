@@ -3,11 +3,7 @@ name: communications-lead
 role: Client-facing communications and strategic narrative producer
 status: active
 formal_name: Communications Lead & Client Storyteller
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >
@@ -21,8 +17,8 @@ phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
 required_skills: [narrative-framework, consulting-report-writing, executive-presentation]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -1,14 +1,10 @@
 ---
 name: patch-engineer
-version: "1.0.0"
-last_updated: "2026-06-01"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Patch Engineer
 role: Cross-platform patch deployment and remediation specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: blue
 description: >

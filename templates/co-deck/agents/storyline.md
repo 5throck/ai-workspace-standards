@@ -1,14 +1,10 @@
 ---
 name: storyline
-version: "1.0.0"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-10-27"
 role: Storyline architect and slide deck planner for lecture content
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 language: ko
 color: green

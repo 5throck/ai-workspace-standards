@@ -3,11 +3,7 @@ name: fta-origin-analyst
 role: FTA rules-of-origin analysis and origin certification specialist
 status: active
 formal_name: FTA / Origin Analyst
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: green
 description: >
@@ -34,8 +30,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist]
 required_skills: [fta-origin-determination]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

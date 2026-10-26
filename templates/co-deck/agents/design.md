@@ -1,14 +1,10 @@
 ---
 name: design
-version: "1.0.0"
-last_updated: "2026-06-17"
+version: "1.1.0"
+last_updated: "2026-10-27"
 role: Visual design specialist for lecture slide aesthetics and brand alignment
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: purple
 description: >-

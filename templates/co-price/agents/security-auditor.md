@@ -4,11 +4,7 @@ phases: [2, 5]
 formal_name: Security Auditor
 role: Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: medium
-  gemini-cli: high
+tier: high
 model: inherit
 domain: technical
 subdomain: security
@@ -17,7 +13,7 @@ description: >-
   guards, API route validation (incl. /api/copilot/chat rate limits and payload caps),
   PRICE_* env schema, CSV import validation, and prompt-injection defenses for injected
   simulation context.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:

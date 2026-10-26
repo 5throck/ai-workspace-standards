@@ -1,14 +1,10 @@
 ---
 name: pdf-export
-version: "2.1.1"
-last_updated: "2026-06-23"
+version: "2.2.0"
+last_updated: "2026-10-27"
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: red
 description: >-

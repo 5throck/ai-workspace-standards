@@ -4,11 +4,7 @@ phases: [2, 3]
 formal_name: Dashboard & Visual Specialist
 role: Onyx 2.0 UI components, dashboard visualization, user guides, and copilot panel experience
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: medium
-  gemini-cli: high
+tier: high
 model: inherit
 domain: ux
 subdomain: interface
@@ -17,7 +13,7 @@ description: >-
   views) with Onyx 2.0 tokens; owns v10.1 surfaces — Cost Shock tab, scenario comparison
   tri-view, trade-line scorecard, copilot panel with servedBy badge — plus the bilingual
   user-guide pair.
-version: "2.0.0"
+version: "2.1.0"
 last_reviewed: "2026-08-25"
 color: blue
 lifecycle:

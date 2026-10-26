@@ -2,14 +2,10 @@
 name: content-writer
 role: Research-to-documentation transformation and communications specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Content Writer & Documentation Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >

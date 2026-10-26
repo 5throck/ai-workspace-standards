@@ -51,10 +51,12 @@ describe('variant agent sections: resolve-and-check (registry completeness R2.2)
     }
   });
 
-  test('the common body actually carries the added Output Format section and version 1.1.0', () => {
+  test('the common body actually carries the added Output Format section (version reflects the ADR-0102 minor bump)', () => {
     const content = readFileSync(COMMON_I18N, 'utf-8');
     expect(content).toContain('## Output Format');
-    expect(content).toMatch(/^version: "1\.1\.0"$/m);
+    // 1.1.0 delivered the Output Format section; ADR-0102 PR-2a minor-bumped
+    // it to 1.2.0 (scalar tier normalization + upgrade re-delivery).
+    expect(content).toMatch(/^version: "1\.2\.0"$/m);
   });
 
   test('induced common-body gap: the resolved body fails, naming the removed section', () => {

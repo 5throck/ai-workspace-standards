@@ -5,11 +5,7 @@ role: SD Module Analyst
 model: inherit
 color: yellow
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SD Module Analyst — deep domain expert for Sales & Distribution business processes. Dispatch for business analysis of SD module tasks. Use when: "SD analyst", "sales order analysis", "delivery analysis", "billing issue", "order-to-cash process", "SD module business requirements", "pricing analysis".'
 examples:
   - user: "Analyze why open sales orders for customer C1000 are not being delivered"
@@ -21,7 +17,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/sd-analyst.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # SD Analyst — Sales & Distribution

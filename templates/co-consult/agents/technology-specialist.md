@@ -3,11 +3,7 @@ name: technology-specialist
 role: Collaboration platforms and digital transformation support specialist
 status: active
 formal_name: Technology Specialist & Collaboration Platform Lead
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: blue
 description: >
@@ -21,8 +17,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [communications-lead, solutions-architect]
 required_skills: [technical-feasibility, solution-design]
-version: "1.0.0"
-last_updated: "2026-06-02"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -3,11 +3,7 @@ name: industry-expert
 role: Industry-specific insights and competitive dynamics specialist
 status: active
 formal_name: Industry Expert & Domain Specialist
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 model: inherit
 color: purple
 description: >
@@ -21,8 +17,8 @@ phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [company-intelligence, competitive-intelligence]
-version: "1.0.0"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

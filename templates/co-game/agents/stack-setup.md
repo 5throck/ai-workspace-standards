@@ -2,15 +2,11 @@
 name: stack-setup
 role: Unknown stack identification and secure setup procedure specialist
 status: active
-version: "1.0.1"
-last_updated: "2026-06-20"
+version: "1.1.0"
+last_updated: "2026-10-27"
 capabilities:
   - environment-setup
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: orange
 description: 'Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization"'

@@ -6,11 +6,7 @@ role: client-engagement lifecycle management, deliverable orchestration, and tra
 status: active
 lang: ko
 lang_reason: proper-noun
-tier:
-  claude: high
-  gemini: high
-  antigravity: medium
-  gemini-cli: medium
+tier: high
 model: inherit
 domain: finance
 subdomain: delivery
@@ -19,7 +15,7 @@ description: >-
   sequences agent workstreams per client question, gates client-facing deliverables behind
   human approval, governs trade-line scorecard reviews, and owns executive-readability of
   final outputs (PDF/PPTX) in partnership with ux-specialist.
-version: "1.0.0"
+version: "1.1.0"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

@@ -5,11 +5,7 @@ role: SAP Document Output & Form Specialist
 model: inherit
 color: cyan
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Document Output & Form Specialist — design, modification, and optimization of SAP document output solutions: SAPscript, Smart Forms, and Adobe Offline Forms (ADS), including ABAP print programs. Use when: "modify the print form", "fix the Smart Form", "create Adobe Form", "update print program", "fix output determination", "delivery note form", "invoice form layout".'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/form-expert.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

@@ -5,11 +5,7 @@ role: SAP Technical Architect
 model: inherit
 color: blue
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
+tier: high
 description: 'SAP Technical Architect — translates PRD and Governance findings into a concrete, executable implementation plan with pattern selection, risk classification, and a ready-to-run serial execution sequence. Dispatch after §1 Business Analysis and §1-A Governance Approval. Use when: "design the implementation plan", "create architecture plan", "select pattern A/B/C", "architect the solution", "technical design for SAP".'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/architect.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

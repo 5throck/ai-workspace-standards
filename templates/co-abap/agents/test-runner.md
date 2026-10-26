@@ -5,11 +5,7 @@ role: SAP Quality Assurance Specialist
 model: inherit
 color: red
 status: active
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 description: 'SAP Quality Assurance Specialist — stability verification and quality governance of ABAP objects using RunUnitTests, GetCodeCoverage, and RunATCCheck. Dispatch in Phase 3 validation block after code-writer completes. Use when: "run unit tests", "run ATC check", "quality gate", "verify the implementation", "test the changes", "check for ATC violations", "check code coverage".'
 
 examples:
@@ -25,7 +21,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/test-runner.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

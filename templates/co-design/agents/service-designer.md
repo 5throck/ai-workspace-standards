@@ -2,11 +2,7 @@
 name: service-designer
 status: active
 formal_name: Service Designer & Customer Experience Strategist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 role: End-to-end service experience and customer journey designer
 color: teal
@@ -21,8 +17,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: [service-design]
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-12"

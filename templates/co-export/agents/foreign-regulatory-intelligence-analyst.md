@@ -3,11 +3,7 @@ name: foreign-regulatory-intelligence-analyst
 role: Foreign import regulation and tariff-change monitoring specialist
 status: active
 formal_name: Foreign Regulatory Intelligence Analyst
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: purple
 description: >
@@ -33,8 +29,8 @@ handoff_to: [export-control-compliance-specialist, market-entry-strategist]
 handoff_from: [pm]
 required_skills: [foreign-regulation-monitoring]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.0.0"
-last_updated: "2026-08-08"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: beta
   created: "2026-08-08"

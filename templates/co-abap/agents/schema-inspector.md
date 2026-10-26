@@ -5,11 +5,7 @@ role: SAP Data Schema & Dependency Inspector (read-only)
 model: inherit
 color: magenta
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 description: 'SAP Data Schema & Dependency Inspector (read-only) — inspects SAP table structures, CDS view definitions, and produces dependency maps and field references for the Architect and DBA. Dispatch in Phase 1 parallel block. Use when: "inspect table structure", "show table fields", "CDS dependency tree", "what fields does this table have", "schema context for", "table relationships". Does NOT write or modify any SAP object.'
 
 examples:
@@ -24,7 +20,7 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/schema-inspector.md
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 ## Role

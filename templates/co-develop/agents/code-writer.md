@@ -2,13 +2,9 @@
 name: code-writer
 role: Approved plan implementation with surgical, minimal code changes
 status: active
-version: "1.0.0"
-last_updated: "2026-08-25"
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+version: "1.1.0"
+last_updated: "2026-10-27"
+tier: low
 model: inherit
 color: green
 description: >

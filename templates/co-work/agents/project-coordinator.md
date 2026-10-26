@@ -2,14 +2,10 @@
 name: project-coordinator
 role: Schedule management, stakeholder communication, and delivery logistics specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-08-25"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Project Coordinator
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
+tier: low
 model: inherit
 color: green
 description: >

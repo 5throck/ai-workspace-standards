@@ -2,14 +2,10 @@
 name: technical-writer
 role: API documentation, technical guides, and developer resources creator
 status: active
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.0"
+last_updated: "2026-10-27"
 formal_name: Technical Writer & Developer Documentation Specialist
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: cyan
 description: >

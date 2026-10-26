@@ -2,11 +2,7 @@
 name: change-management-partner
 role: "Change management for reorganizations/new-system rollouts, stakeholder alignment, resistance management, organizational culture diagnosis with DEI lens"
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
+tier: medium
 model: inherit
 color: brown
 description: >
@@ -23,8 +19,8 @@ handoff_to: [data-analyst]
 handoff_from: [pm, labor-relations-specialist, safety-health-officer, org-design-consultant]
 capabilities: [client-engagement, presentation]
 required_skills: [stakeholder-alignment, org-readiness-assessment]
-version: "1.0.0"
-last_updated: "2026-08-23"
+version: "1.1.0"
+last_updated: "2026-10-27"
 lifecycle:
   phase: production
   created: "2026-08-23"
