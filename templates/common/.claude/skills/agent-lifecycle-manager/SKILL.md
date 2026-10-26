@@ -102,6 +102,7 @@ tier:
 - Focus on specific behavioral guidelines and domain constraints.
 - Do NOT repeat global rules (like UTF-8 enforcement or standard PR procedures) that are already covered in workspace standards.
 - **If the agent role involves research, investigation, or presenting external information**: explicitly include the Source Attribution principle in the agent's constraints or behavioral guidelines — require source citation for factual claims and use `⚠️ Unverified` disclosure for unverifiable information.
+- **`## Legal Basis` section is conditional (U-20261026-004)**: include it ONLY for agents whose mandate rests on statutes, regulations, or certification/permit regimes (regulatory-dd, legal-counsel, compliance, licensing). Sibling-ownership Boundary content that does not cite a statute belongs in Role or Constraints instead. Do not propagate the section to non-regulatory agents by skeleton inertia — a `## Legal Basis` with no statutory grounding is noise, and no validator excuses it.
 
 ---
 
