@@ -1,11 +1,18 @@
-// @version 1.0.2
+// @version 1.1.0
 // scripts/helpers/upgrade-versions.ts
 // Pure version-extraction and frontmatter-merge helpers for upgrade-project.ts.
 // Extracted so the version-detection logic is unit-testable (the CLI script's
 // top-level imperative body cannot be imported safely).
 //
 // Usage (in upgrade-project.ts):
-//   import { extractScriptVersion, preserveLifecycleFrontmatter } from "./helpers/upgrade-versions.ts";
+//   import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated } from "./helpers/upgrade-versions.ts";
+//
+// v1.1.0 (2026-10-27, U-20261026-009): bumpFrontmatterLastUpdated — the pure
+//          re-stamp primitive behind upgrade-project's post-delivery re-stamp
+//          step. Template-upgrade deliveries mechanically rewrite agent bodies
+//          but never advanced the frontmatter last_updated date, so
+//          agent-lifecycle-audit reported stale-date warnings after every
+//          upgrade wave (8/9 agent files warned as of 2026-10-26).
 
 import { existsSync, readFileSync } from "node:fs";
 
@@ -71,4 +78,42 @@ export function preserveLifecycleFrontmatter(tplContent: string, projContent: st
   if (closingIdx === -1) return tplContent;
   tplLines.splice(closingIdx, 0, lifecycleBlock);
   return tplLines.join("\n");
+}
+
+/**
+ * Re-stamp the TOP-LEVEL `last_updated:` key in a markdown file's YAML
+ * frontmatter with the delivery date (U-20261026-009). Contract:
+ *  - No frontmatter block, or no column-0 `last_updated:` key → unchanged
+ *    (bump only where the frontmatter key exists — never inject one).
+ *  - Key already equals `date` → unchanged (idempotent).
+ *  - Nested keys (e.g. `  last_updated:` inside a `lifecycle:` block) are
+ *    NEVER touched — the L3 governance lifecycle block is preserved verbatim
+ *    (same scope as preserveLifecycleFrontmatter); only the top-level date
+ *    moves, per the ticket evidence (top-level `last_updated` disagrees with
+ *    the last delivery commit after every upgrade wave).
+ * Returns { text, bumped } — bumped is true only when the output differs.
+ */
+export function bumpFrontmatterLastUpdated(
+  text: string,
+  date: string,
+): { text: string; bumped: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { text, bumped: false };
+  const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!fm) return { text, bumped: false };
+  const lines = fm[1].split("\n");
+  let inLifecycle = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^lifecycle:\s*$/.test(line)) { inLifecycle = true; continue; }
+    if (inLifecycle) {
+      if (/^[^\s#]/.test(line)) inLifecycle = false;
+      else continue; // still inside the lifecycle block — leave nested dates alone
+    }
+    const m = line.match(/^last_updated:(\s*)(\S.*)?$/);
+    if (!m) continue;
+    if (m[2] === date) return { text, bumped: false };
+    lines[i] = `last_updated:${m[1]}${date}`;
+    return { text: text.replace(fm[0], `---\n${lines.join("\n")}\n---`), bumped: true };
+  }
+  return { text, bumped: false };
 }

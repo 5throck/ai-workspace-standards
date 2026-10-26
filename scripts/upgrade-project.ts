@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.73.0
+// @version 1.74.0
+// v1.74.0 (2026-10-27, U-20261026-009): POST-DELIVERY RE-STAMP — after every
+//          content pass and before the delivery manifest, the engine re-stamps
+//          the top-level frontmatter `last_updated` of every changed file
+//          (git status) to the delivery date via
+//          helpers/upgrade-versions.ts bumpFrontmatterLastUpdated. Upgrade
+//          deliveries mechanically rewrote agent bodies without advancing the
+//          date, so agent-lifecycle-audit emitted stale-date warnings after
+//          every wave (8/9 agent files warned 2026-10-26). Scope guardrails:
+//          version-touch-only writes leave the tree clean and are NOT
+//          re-stamped (content change required); lifecycle-block dates and
+//          files without a top-level `last_updated` key are untouched; the
+//          agents/ drift compare now ignores bump-only date differences
+//          (upgrade-policy lifecyclelessText, v1.23.0) so the re-stamp does
+//          not manufacture drift on the next upgrade.
 // v1.73.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
 //          ADR-0101): the MERGE pass now delivers the OUT-OF-ZONE skeleton of
 //          CLAUDE.md/GEMINI.md. mergeWorkspaceManaged runs the new pure
@@ -637,7 +651,7 @@ import {
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { extractScriptVersion, preserveLifecycleFrontmatter } from './helpers/upgrade-versions.ts';
+import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
@@ -3723,6 +3737,49 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
     console.log('  [DRY RUN] Would run: bun scripts/sync-skills.ts');
   }
   console.log('');
+}
+
+// ── Post-delivery re-stamp (U-20261026-009) ────────────────────────────────────
+// Every content delivery above can rewrite a frontmatter-carrying file (agents/
+// above all) without advancing its `last_updated` date, so
+// agent-lifecycle-audit reported stale-date warnings after every upgrade wave
+// (8/9 agent files warned 2026-10-26; commits 548ca96/5361921/2a48945 touched
+// agent bodies with zero date bumps). Re-stamp every changed file (git status,
+// i.e. CONTENT actually changed — a version-touch-only write leaves the tree
+// clean and is not re-stamped) to the delivery date. bumpFrontmatterLastUpdated
+// only moves the TOP-LEVEL frontmatter key; lifecycle-block dates and files
+// without the key are untouched. Runs BEFORE the delivery manifest so the
+// re-stamped files ride the recorded delivery (dev-sync step 3.9 attribution).
+// Non-fatal: a status/IO failure warns and leaves the dates as delivered.
+if (!dryRun) {
+  try {
+    const restampDate = new Date().toISOString().slice(0, 10);
+    const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
+    const changed = (por.stdout || '').split('\n')
+      .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
+      .filter(Boolean);
+    let restamped = 0;
+    for (const rel of changed) {
+      if (rel.endsWith('/')) continue;
+      const absPath = join(projectDir, rel);
+      let st;
+      try { st = statSync(absPath); } catch { continue; } // deleted since status
+      if (!st.isFile()) continue;
+      let text: string;
+      try { text = readFileSync(absPath, 'utf8'); } catch { continue; } // non-UTF8 / binary
+      const res = bumpFrontmatterLastUpdated(text, restampDate);
+      if (res.bumped) {
+        writeFileSync(absPath, res.text);
+        restamped++;
+        console.log(`  Re-stamped last_updated → ${restampDate}: ${rel}`);
+      }
+    }
+    if (restamped > 0) {
+      console.log(`  Delivery re-stamp: ${restamped} file(s) — top-level frontmatter last_updated advanced to ${restampDate}`);
+    }
+  } catch (err) {
+    console.log(`  ⚠️  re-stamp step failed (${String(err)}) — non-fatal, delivered dates stay as-is`);
+  }
 }
 
 // ── Delivery manifest (v1.38.0) ───────────────────────────────────────────────
