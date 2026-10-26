@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261027-004
+kind: manual
+title: >-
+  sync-overwrite-policy: workspace sync/upgrade commits overwrite project-owned
+  variant customizations (merge-or-preserve semantics needed) — U-20261026-005
+  root cause; co-design restoration re-clobbered by the 2026-10-27 upgrade wave
+  and re-landed (PR #56); also same class as the i18n-specialist domain-field
+  clobber seen in co-newbiz. Needs a design decision on preservation/merge
+  semantics + possibly porting the design-foundation 4b amendment into L1
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T06:47:04.908+09:00'
+history:
+  - at: '2026-10-27T06:47:04.908+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

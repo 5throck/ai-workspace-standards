@@ -3,14 +3,29 @@ id: U-20261026-005
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-26T22:11:52.296+09:00
+created_at: '2026-10-26T22:11:52.296+09:00'
 history:
-  - at: 2026-10-26T22:11:52.296+09:00
+  - at: '2026-10-26T22:11:52.296+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-27T06:47:04.893+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T06:47:04.893+09:00'
+    from: review
+    to: done
+result: >-
+  Project-side artifacts fully restored and verified at co-design main
+  (tokens/screen-patterns/playground sources, design-foundation section 4b
+  re-landed via PRs #54 then #56 after our 2026-10-27 upgrade delivery
+  re-clobbered them once — recurrence empirically confirmed). Requested content
+  outcome delivered; the L1 root cause (workspace sync/upgrade overwrite policy
+  for project-owned variant customizations) is NOT fixed and is tracked in a new
+  follow-up ticket. L1 source templates/common/docs/design-foundation.md still
+  lacks the 4b amendment (propagation is a design decision, noted in the
+  follow-up).
 error: null
 upstream:
   project: co-design
@@ -19,7 +34,29 @@ upstream:
   source: project/co-design
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Workspace sync/upgrade commits overwrite project-owned variant files with template copies instead of merging or preserving project customizations. Commit faf0798 (2026-09-28, "chore(upgrade): rename Hermes.md to HERMES.md and refresh template") reverted tokens.json, docs/screen-patterns.md, playground/src/main.ts, playground/src/patterns.ts (about 209 lines removed), playground/src/style.css (about 262 lines removed), and removed axe-core from playground/package.json — wiping a gated, registered 2026-09-27 design expansion (token status bg/fg/border triplets + 900 contrast steps, font-weight tokens, component token layer, screen patterns 7-9 feedback/tabs/report) while docs/design.md and two registered "implemented" specs still describe that expansion. Commit ded4749 (2026-10-25, "docs(docs): workspace sync (10 files)") reverted the 2026-10-24 section-4b amendment of docs/design-foundation.md (originally commit 4bcc0e7), leaving docs/decisions/DEC-20261024-01.md and docs/designs/2026-10-24-design-foundation-suite-shape-design.md describing a state that no longer exists; the L1 source templates/common/docs/design-foundation.md also never received the amendment. All machine gates stayed green because the corresponding unit tests are test.skip and the design-lint gate self-skips. Evidence: diff of templates/co-design/tokens.json vs project tokens.json is identical; git show 4bcc0e7:docs/design-foundation.md contains section 4b while HEAD does not.'
+  symptom: >-
+    Workspace sync/upgrade commits overwrite project-owned variant files with
+    template copies instead of merging or preserving project customizations.
+    Commit faf0798 (2026-09-28, "chore(upgrade): rename Hermes.md to HERMES.md
+    and refresh template") reverted tokens.json, docs/screen-patterns.md,
+    playground/src/main.ts, playground/src/patterns.ts (about 209 lines
+    removed), playground/src/style.css (about 262 lines removed), and removed
+    axe-core from playground/package.json — wiping a gated, registered
+    2026-09-27 design expansion (token status bg/fg/border triplets + 900
+    contrast steps, font-weight tokens, component token layer, screen patterns
+    7-9 feedback/tabs/report) while docs/design.md and two registered
+    "implemented" specs still describe that expansion. Commit ded4749
+    (2026-10-25, "docs(docs): workspace sync (10 files)") reverted the
+    2026-10-24 section-4b amendment of docs/design-foundation.md (originally
+    commit 4bcc0e7), leaving docs/decisions/DEC-20261024-01.md and
+    docs/designs/2026-10-24-design-foundation-suite-shape-design.md describing a
+    state that no longer exists; the L1 source
+    templates/common/docs/design-foundation.md also never received the
+    amendment. All machine gates stayed green because the corresponding unit
+    tests are test.skip and the design-lint gate self-skips. Evidence: diff of
+    templates/co-design/tokens.json vs project tokens.json is identical; git
+    show 4bcc0e7:docs/design-foundation.md contains section 4b while HEAD does
+    not.
   affected_paths:
     - tokens.json
     - docs/screen-patterns.md
@@ -28,7 +65,12 @@ upstream:
     - playground/src/patterns.ts
     - playground/package.json
   identity_source: cwd
-  repro: 'Run the workspace upgrade/sync flow against a variant project that holds post-scaffold design customizations, then compare: diff templates/co-design/tokens.json tokens.json returns identical after the faf0798-class commit, and git show 4bcc0e7:docs/design-foundation.md vs HEAD shows the section-4b amendment removed by ded4749.'
+  repro: >-
+    Run the workspace upgrade/sync flow against a variant project that holds
+    post-scaffold design customizations, then compare: diff
+    templates/co-design/tokens.json tokens.json returns identical after the
+    faf0798-class commit, and git show 4bcc0e7:docs/design-foundation.md vs HEAD
+    shows the section-4b amendment removed by ded4749.
   triage: ready
   flagged: false
   triage_reasons:
@@ -41,4 +83,17 @@ upstream:
   dedupe_key: 2b20ded73f6d3f225809fe319151f1c44bcaa2ad5b3385f7093d10f627edfaae
   duplicates:
     - project: co-design
-      at: 2026-10-26T22:11:52.296+09:00
+      at: '2026-10-26T22:11:52.296+09:00'
+  resolution:
+    outcome: local-only
+    pr_url: https://github.com/5throck/co-design/pull/56
+    summary: >-
+      Project-side artifacts fully restored and verified at co-design main
+      (tokens/screen-patterns/playground sources, design-foundation section 4b
+      re-landed via PRs #54 then #56 after our 2026-10-27 upgrade delivery
+      re-clobbered them once — recurrence empirically confirmed). Requested
+      content outcome delivered; the L1 root cause (workspace sync/upgrade
+      overwrite policy for project-owned variant customizations) is NOT fixed
+      and is tracked in a new follow-up ticket. L1 source
+      templates/common/docs/design-foundation.md still lacks the 4b amendment
+      (propagation is a design decision, noted in the follow-up).

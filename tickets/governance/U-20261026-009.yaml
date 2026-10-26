@@ -3,14 +3,29 @@ id: U-20261026-009
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-26T22:11:52.641+09:00
+created_at: '2026-10-26T22:11:52.641+09:00'
 history:
-  - at: 2026-10-26T22:11:52.641+09:00
+  - at: '2026-10-26T22:11:52.641+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T07:43:48.977+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T07:43:48.994+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T07:43:48.994+09:00'
+    from: review
+    to: done
+result: >-
+  Verified independently: upgrade-project.ts v1.74.0 re-stamps top-level
+  frontmatter last_updated on delivered content-changed files
+  (bumpFrontmatterLastUpdated helper; lifecyclelessText updated so re-stamped
+  files do not re-report DRIFT); the warning-escalation alternative was
+  intentionally not taken (owner's judgment call). Not the requester's diff;
+  shipped through the gateway.
 error: null
 upstream:
   project: co-design
@@ -19,15 +34,33 @@ upstream:
   source: project/co-design
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Template-upgrade and workspace-sync deliveries mechanically rewrite agents/*.md (placeholder substitution, section retitles, lifecycle-block cleanup) but never advance the frontmatter last_updated field, so scripts/agent-lifecycle-audit.ts reports stale-date warnings after every upgrade wave (observed: commits 548ca96 2026-09-29, 5361921 2026-10-05, 2a48945 2026-10-11 touching agent bodies with zero date bumps; 8 of 9 agent files warned as of 2026-10-26). The findings are level=warning and scripts/audit.ts gates only on errors==[], so the drift is never remediated; in several files the top-level last_updated and the lifecycle-block date disagree with each other. Fix direction: add a post-delivery re-stamp step to the upgrade engine for every file it touches with a content change (agent-lifecycle-audit already implements isMetadataOnlyChange to distinguish bump-only commits), or escalate the stale warning class to error level so the gate enforces it.'
+  symptom: >-
+    Template-upgrade and workspace-sync deliveries mechanically rewrite
+    agents/*.md (placeholder substitution, section retitles, lifecycle-block
+    cleanup) but never advance the frontmatter last_updated field, so
+    scripts/agent-lifecycle-audit.ts reports stale-date warnings after every
+    upgrade wave (observed: commits 548ca96 2026-09-29, 5361921 2026-10-05,
+    2a48945 2026-10-11 touching agent bodies with zero date bumps; 8 of 9 agent
+    files warned as of 2026-10-26). The findings are level=warning and
+    scripts/audit.ts gates only on errors==[], so the drift is never remediated;
+    in several files the top-level last_updated and the lifecycle-block date
+    disagree with each other. Fix direction: add a post-delivery re-stamp step
+    to the upgrade engine for every file it touches with a content change
+    (agent-lifecycle-audit already implements isMetadataOnlyChange to
+    distinguish bump-only commits), or escalate the stale warning class to error
+    level so the gate enforces it.
   affected_paths:
     - agents/pm.md
     - agents/design-lead.md
     - scripts/agent-lifecycle-audit.ts
     - scripts/audit.ts
   identity_source: cwd
-  repro: 'Run upgrade-project (or a workspace sync) on a variant project, then run bun run agent-lifecycle-audit: every agent file the delivery rewrote with content changes appears as a last_updated-older-than-last-commit warning, and this repeats after each subsequent upgrade.'
-  triage: inbox
+  repro: >-
+    Run upgrade-project (or a workspace sync) on a variant project, then run bun
+    run agent-lifecycle-audit: every agent file the delivery rewrote with
+    content changes appears as a last_updated-older-than-last-commit warning,
+    and this repeats after each subsequent upgrade.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -38,4 +71,15 @@ upstream:
   dedupe_key: fde903d3cec33369d46570dd9cc8ee8edd2990fca9198746d3b478b79a12aee1
   duplicates:
     - project: co-design
-      at: 2026-10-26T22:11:52.641+09:00
+      at: '2026-10-26T22:11:52.641+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1634
+    template_version: unreleased
+    summary: >-
+      Verified independently: upgrade-project.ts v1.74.0 re-stamps top-level
+      frontmatter last_updated on delivered content-changed files
+      (bumpFrontmatterLastUpdated helper; lifecyclelessText updated so
+      re-stamped files do not re-report DRIFT); the warning-escalation
+      alternative was intentionally not taken (owner's judgment call). Not the
+      requester's diff; shipped through the gateway.
