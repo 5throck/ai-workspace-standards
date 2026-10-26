@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261027-003
+kind: manual
+title: >-
+  post-soak severity flip: ADR-0102 validator v2 legacy-tier WARN to FAIL
+  (v2.1.0) — promised as follow-up in ADR-0102
+  (docs/adr/0102-agent-tier-scalar-declaration.md lines 59-64) and CHANGELOG
+  PR-2 note, referenced as 'tracked for post-merge' in T-20261026-018 result but
+  no tracking ticket existed; fleet has converged (0 map-form files top-level),
+  so the WARN transition path is ready to retire; note: co-safety nested trees
+  (templates/co-safety/agents/{domains,_shared}) still carry map-form and must
+  be remediated BEFORE this flip lands
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T05:33:53.889+09:00'
+history:
+  - at: '2026-10-27T05:33:53.889+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261027-002
+kind: manual
+title: >-
+  validator-hardening: common-contract.json command mirror paths do not resolve
+  — 13 of 154 declared source paths are misses (gemini_source entries declare
+  .gemini/commands/<name>.md but mirrors are .toml; .agents/commands/* paths
+  exist only at workspace root while templates/common/.agents has no commands
+  dir), yet entries carry propagated_to_common:true; found in 2026-10-27
+  project-review slot D; a contract-path existence check would have caught this
+  mechanically
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T05:33:53.861+09:00'
+history:
+  - at: '2026-10-27T05:33:53.861+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
