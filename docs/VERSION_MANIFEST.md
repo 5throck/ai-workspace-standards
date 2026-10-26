@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-26T15:45:20.525Z
+**Generated**: 2026-10-26T15:53:25.903Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -23,7 +23,7 @@
 | auditor | agents/auditor.md | medium | inherit | 2026-10-26 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-26 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-26 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-25 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-26 |
 | pm | agents/pm.md | medium | inherit | 2026-10-26 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-26 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-10-26 |
@@ -122,7 +122,7 @@
 | create-l3-scaffold.ts | 1.18.0 | scripts/create-l3-scaffold.ts | N/A |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-lint.ts | 2.2.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.31.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.30.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
