@@ -4,18 +4,14 @@ lang_reason: legal
 name: gcp-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: pink
 description: "Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP + ICH E6(R3)."
 lifecycle:
   phase: production
   created: 2026-06-17
-  last_updated: "2026-06-17"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/gcp-agent.md
 ---
 

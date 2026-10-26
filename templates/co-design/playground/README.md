@@ -18,7 +18,7 @@ bun run dev
 ../tokens.json              (SSOT — the only file you edit)
       │
       ▼
-../../scripts/compile-tokens.ts
+../scripts/compile-tokens.ts
       │
       ├──▶ src/generated/tokens.css   :root { --color-primary: ... }
       └──▶ src/generated/tokens.ts    export const tokens / CSS_VARS
@@ -34,7 +34,7 @@ src/main.ts  → renders every token group (colors, typography, spacing, radii, 
 
 ## Where it runs
 
-The script paths (`../tokens.json`, `../../scripts/compile-tokens.ts`) assume the **scaffolded project layout**, where this playground sits at `<project>/playground/`, the SSOT at `<project>/tokens.json`, and the compiler (inherited from `templates/common`) at `<project>/scripts/compile-tokens.ts`. Inside the template repository itself the relative depth differs — run the playground in a scaffolded co-design project.
+The `tokens` script resolves the compiler at `../scripts/compile-tokens.ts` first — that is `<project>/scripts/compile-tokens.ts` (inherited from `templates/common`) in the **scaffolded project layout**, where this playground sits at `<project>/playground/` and the SSOT at `<project>/tokens.json` (U-20261026-008: this is the primary path; the previous `../../scripts/` depth resolved to nothing in an instantiated project). The documented fallback `../../../scripts/compile-tokens.ts` covers running the playground **inside the template repository itself**, where the workspace-root compiler sits three levels up from `playground/`.
 
 ## Extending
 

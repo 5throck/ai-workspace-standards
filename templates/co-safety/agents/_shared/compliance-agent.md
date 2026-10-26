@@ -4,18 +4,14 @@ lang_reason: legal
 name: compliance-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: orange
 description: "Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against Korean EHS law."
 lifecycle:
   phase: production
   created: 2026-06-04
-  last_updated: 2026-07-11
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/compliance-agent.md
 ---
 
@@ -114,3 +110,9 @@ Activated by `agent_manager` from SWM or SGM.
 | Write | `write_file` |
 | Bash | `run_command` |
 
+## Workflow Phases
+
+1. **Phase 1 — Request Intake**: Receive the gap-analysis or regulatory-update request with its `legal_basis` field, industry profile, and current-state description.
+2. **Phase 2 — Regulation Loading**: Load applicable statutes from `regulations/KR/legal-glossary.yaml` and the matching domain file; re-verify anchors against live law (k-law primary, kr_safety fallback, `[UNVERIFIED]` otherwise) with MST + 시행일자 recorded.
+3. **Phase 3 — Gap Analysis**: Compare the current state against each verified requirement; categorize findings as Critical (Violation), Major (Improvement needed), or Minor (Recommendation).
+4. **Phase 4 — Report & Validation**: Write the gap report to `memory/findings/compliance-<date>-<id>.md` and run `bun scripts/co-safety/safety-audit.ts` to validate report schema before delivery.

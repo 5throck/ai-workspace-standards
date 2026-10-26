@@ -4,18 +4,14 @@ lang_reason: legal
 name: meddevice-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: teal
 description: "Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing."
 lifecycle:
   phase: production
   created: "2026-06-18"
-  last_updated: "2026-07-03"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/meddevice-agent.md
 ---
 

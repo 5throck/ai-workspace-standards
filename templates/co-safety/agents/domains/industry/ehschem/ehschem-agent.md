@@ -4,18 +4,14 @@ lang_reason: legal
 name: ehschem-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: darkgreen
 description: "Chemical Plant Safety specialist (화학공장 안전) — 정유/석유화학/정밀화학 plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services."
 lifecycle:
   phase: production
   created: "2026-06-18"
-  last_updated: "2026-06-18"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/ehschem-agent.md
 ---
 

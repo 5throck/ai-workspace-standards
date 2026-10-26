@@ -4,18 +4,14 @@ lang_reason: legal
 name: gmp-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: green
 description: "Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change control, deviation/CAPA per KP-GMP and PIC/S."
 lifecycle:
   phase: production
   created: 2026-06-17
-  last_updated: 2026-08-24
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/gmp-agent.md
 ---
 

@@ -4,18 +4,14 @@ lang_reason: legal
 name: emergency-agent
 role: specialist
 status: active
-tier:
-  claude: high
-  gemini: high
-  gemini-cli: high
-  antigravity: high
-model: opus
+version: "1.0.0"
+tier: high
 color: red
 description: "Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation for fire, chemical release, serious accidents, and natural disasters."
 lifecycle:
   phase: production
   created: 2026-06-04
-  last_updated: 2026-07-11
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/emergency-agent.md
 ---
 
@@ -146,3 +142,10 @@ Activated by `agent_manager` from PM directly (emergency override) or from SWM (
 | Write | `write_file` |
 | Agent | `agent_manager` |
 
+## Workflow Phases
+
+1. **Phase 1 — Detect & Classify**: Classify the emergency scenario (fire, chemical release, serious accident, natural disaster) against the Section B scenario table; speed is paramount.
+2. **Phase 2 — Protocol Activation**: Activate the matching response protocol directory and issue immediate protective actions (work stop, evacuation, isolation) per OSHA-KR Article 54.
+3. **Phase 3 — CSO Escalation**: Escalate to PM (CSO) with scenario code, status, and required decisions; direct PM dispatch is authorized under the Priority Override.
+4. **Phase 4 — Evidence Preservation**: Preserve scene evidence and witness records for the incident-investigation-agent handoff (`response_status` = `contained`/`resolved`).
+5. **Phase 5 — Reporting**: File the regulatory report per OSHA-KR Article 57 timeframes and hand recovery workflows to the appropriate specialist agents.

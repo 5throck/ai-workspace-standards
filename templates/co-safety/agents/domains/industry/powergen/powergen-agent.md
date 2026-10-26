@@ -4,18 +4,14 @@ lang_reason: legal
 name: powergen-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: yellow
 description: "Power Generation Safety specialist (발전설비 안전) — 화력/신재생 발전소 안전 관리 per 전기사업법 + 전기안전관리법 + 신재생에너지법. 원자력 제외."
 lifecycle:
   phase: production
   created: "2026-06-18"
-  last_updated: "2026-06-18"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/powergen-agent.md
 ---
 
