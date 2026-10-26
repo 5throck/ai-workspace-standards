@@ -10,6 +10,7 @@
  * @version 1.0.0
  */
 import { describe, expect, test } from 'bun:test';
+import { existsSync } from 'node:fs';
 import {
   collectTargets,
   parseTierDeclaration,
@@ -292,6 +293,14 @@ describe('apply-tier-normalization — collectTargets (real tree shape)', () => 
   });
 
   test('--projects adds the Projects/co-* agent files', () => {
+    // Projects/ is top-level-gitignored (/*/ in .gitignore) — fleet clones exist
+    // only on machines that host them; CI checkouts do not have the directory.
+    const projectsDir = join(REPO_ROOT, 'Projects');
+    if (!existsSync(projectsDir)) {
+      const { projectCount } = collectTargets(REPO_ROOT, { projects: true });
+      expect(projectCount).toBe(0);
+      return;
+    }
     const { projectCount, all } = collectTargets(REPO_ROOT, { projects: true });
     expect(projectCount).toBeGreaterThan(0);
     expect(all.some((rel) => rel.startsWith('Projects/co-'))).toBe(true);
