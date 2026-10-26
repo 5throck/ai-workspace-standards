@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 /**
  * pm-role-bootstrap.ts — SessionStart hook for PM role bootstrap.
  * Injects a reminder that the agent must read AGENTS.md and agents/pm.md
@@ -13,7 +13,10 @@
  * a marker write failure only warns (fail-open), never blocks bootstrap.
  * Fails open: any error exits 0 with no stdout, after writing a warning to stderr.
  *
- * @version 1.1.0
+ * @version 1.1.1
+ * v1.1.1 (2026-10-26, T-20261026-002): the session-marker write moved into its own
+ *           fail-open try/catch — a marker write failure (EPERM on the state dir) used to
+ *           reach the outer catch and suppress the bootstrap injection entirely.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -89,14 +92,22 @@ function main(): void {
     // treats a marker older than 24h as absent (re-bootstrap rewrites it).
     const sessionId = typeof data.session_id === 'string' && data.session_id.length > 0 ? data.session_id : '';
     if (sessionId) {
-      const safe = sessionId.replace(/[^A-Za-z0-9_-]/g, '_');
-      if (safe) {
-        mkdirSync(STATE_DIR, { recursive: true });
-        writeFileSync(
-          join(STATE_DIR, `${safe}.json`),
-          JSON.stringify({ ts: Date.now(), source: 'pm-role-bootstrap' }),
-          'utf-8',
-        );
+      // T-20261026-002: the marker is an optimization for the dispatch gate, not
+      // the contract — its write failure (EPERM/readonly state dir) used to
+      // propagate to the outer catch, which exits before the injection reaches
+      // stdout and silently dropped the bootstrap. Fail open: warn and continue.
+      try {
+        const safe = sessionId.replace(/[^A-Za-z0-9_-]/g, '_');
+        if (safe) {
+          mkdirSync(STATE_DIR, { recursive: true });
+          writeFileSync(
+            join(STATE_DIR, `${safe}.json`),
+            JSON.stringify({ ts: Date.now(), source: 'pm-role-bootstrap' }),
+            'utf-8',
+          );
+        }
+      } catch (err) {
+        console.error(`[PM-BOOTSTRAP] WARN: marker write failed (fail-open): ${(err as Error).message}`);
       }
     }
 
