@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.4.1
+ * @version 1.5.0
  */
 
 import { $ } from "bun";
