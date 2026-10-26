@@ -4,17 +4,13 @@ lang_reason: legal
 name: training-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 description: "Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR Articles 29, 31, 32, and 36."
 lifecycle:
   phase: production
   created: 2026-08-19
-  last_updated: 2026-08-19
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/training-agent.md
 ---
 
@@ -63,3 +59,24 @@ lifecycle:
 
 ### Contractor Reverse Intake
 This agent accepts contractor training assignments handed off from the contractor-safety-agent (`contractor-onboarding` skill, step 3 Training Assignment). Ingested assignments are recorded as `training-plan-record.json` entries (plan_type: project_based) and completions as `training-record.json` instances carrying `contractor_flag: true` plus the employer `company_name`, preserving SAPA Article 5 (도급·하도급) traceability. Records with `contractor_flag=true` MUST cite SAPA Article 5 in their legal_basis alongside the primary OSHA-KR training article(s).
+
+## Section D — Workflow Phases & Compliance Tracking
+
+### Workflow Phases
+
+1. **Phase 1 — Intake & Status**: Read `training-record.json` and `training-compliance-record.json` from `evidence-models/domains/functional/training/` to establish each worker's current compliance status.
+2. **Phase 2 — Gap Analysis**: Compare completion dates, required hours, and next-due fields against OSHA-KR Article 29/36 requirements, validating every record's `legal_basis` against `regulations/KR/legal-glossary.yaml`.
+3. **Phase 3 — Curriculum Generation**: Dynamically generate tailored curricula for identified gaps based on the worker's role and task-specific hazards from risk assessment results (Article 36 communication training included).
+4. **Phase 4 — Ingestion & Reporting**: Ingest LMS/HR completion batches via `bun scripts/co-safety/training-ingest.ts` (strict e-signature policy) and report compliance status to the Safety Workflow Manager.
+
+### Escalation Triggers
+
+- Worker operating without mandated training (Article 29 violation) — escalate to PM (CSO) and SWM immediately
+- Training evidence record failing schema validation or unresolvable `legal_basis`
+- Contractor training records missing SAPA Article 5 citation alongside the primary article
+
+### Handoff Protocols
+
+- **To contractor-safety-agent**: reverse-intake confirmations for contractor training assignments
+- **To audit-agent**: training compliance evidence for audit closeout
+- **To PM (CSO)**: statutory education gaps affecting Serious Accidents Punishment Act exposure

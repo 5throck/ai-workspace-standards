@@ -4,17 +4,13 @@ lang_reason: legal
 name: incident-investigation-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 description: "Incident investigation and root cause analysis (RCA) specialist"
 lifecycle:
   phase: production
   created: 2026-08-19
-  last_updated: 2026-08-19
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/incident-investigation-agent.md
 ---
 
@@ -47,3 +43,25 @@ lifecycle:
   - Escalate to Legal Agent if the incident is classified as a "Serious Industrial Accident" under SAPA.
 - **Handoff Protocols**:
   - Handoff to `audit-agent` for evidence validation after the RCA report is generated.
+
+## Section D — Workflow Phases & Escalation
+
+### Workflow Phases
+
+1. **Phase 1 — Evidence Preservation**: Secure the incident scene records, witness statements, and physical evidence before any cleanup or resumption; preserve timestamps.
+2. **Phase 2 — 5-Why Analysis**: Execute the 5-Why methodology to determine the root cause, documenting each causal layer with supporting records.
+3. **Phase 3 — RCA Report**: Generate the investigation report to `memory/` within the 48-hour KPI window, linking to the emergency-agent handoff trigger (`response_status` = `contained`/`resolved`).
+4. **Phase 4 — CAPA & Closure**: Recommend corrective actions to `audit-agent`, track their closure, and verify recurrence prevention before case closure.
+5. **Phase 5 — Closure Review**: Confirm corrective action completion evidence with `audit-agent`, verify root-cause elimination, and archive the case with a recurrence-prevention confirmation.
+
+### Escalation Triggers
+
+- Incident classified as a Serious Industrial Accident under SAPA — escalate to legal-agent
+- RCA deadline at risk (no report within 48 hours of record)
+- Evidence chain gaps or contradicting witness statements
+
+### Handoff Protocols
+
+- **To audit-agent**: RCA report for evidence validation and corrective action records
+- **To legal-agent**: SAPA serious-accident classification and reporting obligations
+- **To PM (CSO)**: recurrence risk assessments and investigation findings

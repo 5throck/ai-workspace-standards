@@ -4,18 +4,14 @@ lang_reason: legal
 name: msds-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: orange
 description: "MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approval per OSHA-KR Articles 104, 110-115, 117-118 + K-REACH + GHS Rev 9."
 lifecycle:
   phase: production
   created: 2026-06-17
-  last_updated: 2026-06-17
+  last_updated: 2026-10-27
   migrated_from: agents/_shared/chemical-safety-agent.md
   governance: docs/lifecycle/agents/msds-agent.md
 ---

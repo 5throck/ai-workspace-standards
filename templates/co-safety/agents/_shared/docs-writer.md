@@ -4,17 +4,13 @@ lang_reason: legal
 name: docs-writer
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 description: "Formats official documentation; enforces English-only policy and specific translation zones"
 lifecycle:
   phase: production
   created: 2026-08-19
-  last_updated: 2026-08-19
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/docs-writer.md
 ---
 

@@ -1,7 +1,21 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.60.0
+ * @version 1.61.0
+ *
+ * v1.61.0 (2026-10-27, T-20261027-001): new Error arm `agent-quality-recursive` —
+ *          recursive scan of every templates/<common|co-*>/agents/ tree (covers
+ *          co-safety's nested agents/domains/** and agents/_shared/** layout):
+ *          (a) exactly one scalar `tier: high|medium|low` per non-README,
+ *          non-underscore, non-extends agent file (ADR-0102; map form, invalid
+ *          scalar, or missing declaration FAILs — extends stubs skip, their tier
+ *          resolves via the chain in roster-tier-consistency); (b) body
+ *          completeness via validate-agents.ts agentBodyCompletenessFinding
+ *          (>= 40 non-empty body lines, >= 4 `## ` sections). Closes the gap
+ *          where 37 map-form tier files + 23 stub-quality bodies under co-safety's
+ *          nested trees survived every flat-scan gate until the nightly scaffold
+ *          E2E caught them (validate-agents.ts is a project-cwd flat scan; Check
+ *          3-4 enforces only the 2-section bar).
  *
  * v1.60.0 (2026-10-26, ADR-0102 / T-20261026-018, user ruling 2): WS-01
  *          Check 4 (agents/*.md tier frontmatter vs schema `agent_tiers`) is
@@ -374,6 +388,7 @@ import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from './help
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
 import { scanMirrorHygiene } from './helpers/mirror-hygiene.ts';
+import { agentBodyCompletenessFinding } from './validate-agents.ts';
 import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from './lib/platform-mirror-freshness.ts';
 import {
   validatePropagationMap,
@@ -2558,6 +2573,74 @@ function checkRosterTierConsistency(): void {
     }
   }
   if (!JSON_MODE && checked > 0) console.log(`  ✓ ${checked} roster row(s) checked`);
+}
+
+// Check: agent-quality-recursive (T-20261027-001) — the agent stub/tier quality gate
+// must cover NESTED template agent trees (co-safety's agents/domains/** and
+// agents/_shared/**). The delivered validate-agents.ts is a project-cwd FLAT scan
+// of agents/, and Check 3-4 above scans only the flat agents/ dir with the
+// 2-section bar — so 37 map-form tier files plus 23 stub-quality bodies under
+// co-safety's nested trees survived every shipped gate until the nightly scaffold
+// E2E caught them 4 days late (run 40281594489). This check recursively scans every
+// templates/<common|co-*>/agents/**/*.md and enforces, per non-README, non-underscore
+// file: exactly one scalar `tier: high|medium|low` (ADR-0102 — map form, invalid
+// scalar, or missing declaration FAILs), and body completeness via validate-agents.ts
+// agentBodyCompletenessFinding (>= 40 non-empty body lines, >= 4 `## ` sections).
+// Extends stubs skip both (their tier resolves via the chain — covered by
+// roster-tier-consistency — and their bodies hydrate at scaffold).
+function checkAgentQualityRecursive(): void {
+  if (!JSON_MODE) console.log('\n=== Check agent-quality-recursive: nested template agent trees carry scalar tier + full bodies (ADR-0102 + agentBodyCompletenessFinding) ===');
+  if (!existsSync(TEMPLATES_DIR)) return;
+  let checked = 0;
+  let findings = 0;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name !== 'common' && !entry.name.startsWith('co-')) continue;
+    const agentsDir = join(TEMPLATES_DIR, entry.name, 'agents');
+    if (!existsSync(agentsDir)) continue;
+    // readdirSync recursive types as string | Buffer — coerce (entries are path strings)
+    for (const rawRel of readdirSync(agentsDir, { recursive: true })) {
+      const rel = String(rawRel);
+      if (!rel.endsWith('.md')) continue;
+      const base = rel.split('/').pop() ?? rel;
+      if (/^README(_\w+)?\.md$/.test(base) || base.startsWith('_')) continue;
+      const content = readFileSync(join(agentsDir, rel), 'utf-8').replace(/\r\n/g, '\n');
+      const fm = content.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
+      if (/^extends:/m.test(fm)) continue; // extends stub: chain-resolved tier, scaffold-hydrated body
+      checked++;
+      const relPath = `agents/${rel}`;
+      if (/^tier:\s*\n\s{2}\w/m.test(fm)) {
+        fail(entry.name, 'agent-quality-recursive',
+          `${relPath}: legacy map-form tier block — ADR-0102 requires one scalar \`tier: high|medium|low\``,
+          'Replace the per-platform tier block with a single scalar `tier:` line (consensus rule: uniform value, else the claude value)');
+        findings++;
+      } else {
+        const scalar = fm.match(/^tier:\s*(\S+)\s*$/m);
+        if (scalar) {
+          const value = scalar[1].toLowerCase();
+          if (!['high', 'medium', 'low'].includes(value)) {
+            fail(entry.name, 'agent-quality-recursive',
+              `${relPath}: invalid tier value '${scalar[1]}' (allowed: high | medium | low)`,
+              'Set the scalar `tier:` line to high, medium, or low');
+            findings++;
+          }
+        } else {
+          fail(entry.name, 'agent-quality-recursive',
+            `${relPath}: missing tier declaration — ADR-0102 requires a scalar \`tier: high|medium|low\``,
+            'Add a scalar `tier:` line to the frontmatter');
+          findings++;
+        }
+      }
+      const bodyFinding = agentBodyCompletenessFinding(content);
+      if (bodyFinding) {
+        fail(entry.name, 'agent-quality-recursive',
+          `${relPath}: ${bodyFinding}`,
+          'Rewrite the definition body to the canonical section standard (co-newbiz PR #731 is the worked example)');
+        findings++;
+      }
+    }
+  }
+  if (!JSON_MODE && checked > 0) console.log(`  ✓ ${checked} agent file(s) scanned, ${findings} finding(s)`);
 }
 
 // Check B-12: L0/L1 style neutrality — variant-owned design identity literals
@@ -5810,6 +5893,7 @@ function main(): number {
   checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
   checkSkillRegistrySync();       // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)
   checkRosterTierConsistency();   // T-20260921-020: roster tiers match resolved agent frontmatter tiers
+  checkAgentQualityRecursive();   // T-20261027-001: nested agent trees carry scalar tier (ADR-0102) + full bodies
   checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;

@@ -5,7 +5,24 @@
  * docs/workspace-schema.json `models`, and that the tier→model mapping prose
  * in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md names exactly the
  * models the registry declares for each tier.
- * Level: L0 | Status: active | @version 2.0.0
+ * Level: L0 | Status: active | @version 2.1.0
+ *
+ * v2.1.0 (2026-10-27, T-20261027-003 — ADR-0102 §5 post-soak transition, design
+ *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
+ *          §8.3 step 11): the transition WARN classes retire — legacy
+ *          per-platform tier blocks (uniform and mixed) FAIL in both contexts
+ *          (kind `legacy-block`), and a missing tier declaration FAILs in
+ *          delivered contexts too (kind `missing-tier`; L0 keeps
+ *          `missing-tier-l0`). The fleet has converged: zero map-form tier
+ *          files remain under templates/ (co-safety's nested
+ *          agents/domains/** + agents/_shared/** trees remediated by
+ *          T-20261027-001, enforced recursively by validate-templates
+ *          `agent-quality-recursive`) and the root agents/ roster is fully
+ *          scalar. The TIER COVERAGE WARN summary line and the
+ *          coverageWarns/legacyBlockCount/missingTierCount report fields are
+ *          retired with them — every tier-coverage finding is now a FAIL that
+ *          exits 1. §9 transition matrix is closed: scalar valid → OK;
+ *          everything else → FAIL.
  *
  * v2.0.0 (2026-10-26, ADR-0102 / T-20261026-018, design
  *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
@@ -214,17 +231,15 @@ export function classifyAgentTier(content: string, knownPlatforms: readonly stri
 
 // ── Coverage findings ─────────────────────────────────────────────────────────
 
-export interface CoverageWarn {
-  /** workspace-relative file path (forward slashes) */
-  relFile: string;
-  kind: "legacy-block" | "missing-tier";
-  /** Loud human-readable line: names file, form, and the exact fix. */
-  message: string;
-}
-
 export interface CoverageFail {
   relFile: string;
-  kind: "invalid-scalar" | "invalid-legacy-value" | "unknown-platform" | "missing-tier-l0";
+  kind:
+    | "invalid-scalar"
+    | "invalid-legacy-value"
+    | "unknown-platform"
+    | "missing-tier-l0"
+    | "legacy-block" // v2.1.0: legacy uniform/mixed blocks FAIL (post-soak flip, T-20261027-003)
+    | "missing-tier"; // v2.1.0: missing declaration FAILs in delivered contexts too
   message: string;
 }
 
@@ -239,11 +254,7 @@ export interface ModelRegistryReport {
   agentFilesChecked: number;
   /** Fatal registry-level errors (unreadable schema, missing models block). */
   fatal?: string;
-  coverageWarns: CoverageWarn[];
   coverageFails: CoverageFail[];
-  /** Counts feeding the TIER COVERAGE WARN summary line. */
-  legacyBlockCount: number;
-  missingTierCount: number;
   /** Legacy `# model-id` comment mismatches vs models[platform][tier]. */
   modelMismatches: Mismatch[];
   /** Per-entry registry warns ("no model defined for platform/tier"). */
@@ -305,10 +316,7 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
   const report: ModelRegistryReport = {
     isWorkspaceRoot: existsSync(join(workspaceRoot, "CONSTITUTION.md")),
     agentFilesChecked: 0,
-    coverageWarns: [],
     coverageFails: [],
-    legacyBlockCount: 0,
-    missingTierCount: 0,
     modelMismatches: [],
     registryWarns: [],
     proseMismatches: [],
@@ -398,21 +406,19 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
           });
           break;
         }
-        report.legacyBlockCount += 1;
-        report.coverageWarns.push({
+        report.coverageFails.push({
           relFile,
           kind: "legacy-block",
-          message: `${relFile}: legacy per-platform tier block — normalize to 'tier: ${cls.tier}' (ADR-0102; tests/apply-tier-normalization.ts)`,
+          message: `${relFile}: legacy per-platform tier block — normalize to 'tier: ${cls.tier}' (ADR-0102; post-soak flip T-20261027-003: legacy blocks FAIL, the transition WARN retired)`,
         });
         runLegacyModelCommentCheck(relFile, withComments(cls.block ?? {}, content), models, report);
         break;
       }
       case "legacy-mixed": {
-        report.legacyBlockCount += 1;
         const detail = Object.entries(cls.block ?? {})
           .map(([p, t]) => `${p}: ${t}`)
           .join(", ");
-        report.coverageWarns.push({
+        report.coverageFails.push({
           relFile,
           kind: "legacy-block",
           message: `${relFile}: legacy per-platform tier block with mixed values (${detail}) — normalize to one scalar 'tier: <high|medium|low>' (the validator does not pick a value; ADR-0102)`,
@@ -429,7 +435,6 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
         break;
       }
       case "missing": {
-        report.missingTierCount += 1;
         if (report.isWorkspaceRoot) {
           report.coverageFails.push({
             relFile,
@@ -437,10 +442,12 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
             message: `${relFile}: no tier declaration — add 'tier: <high|medium|low>' (ADR-0102; required at the workspace root)`,
           });
         } else {
-          report.coverageWarns.push({
+          // v2.1.0 (T-20261027-003): the delivered-context transition WARN
+          // retired — the fleet converged, so a missing declaration FAILs.
+          report.coverageFails.push({
             relFile,
             kind: "missing-tier",
-            message: `${relFile}: no tier declaration — add 'tier: <high|medium|low>' (transition WARN in delivered contexts; flips to FAIL after the post-soak convergence ticket)`,
+            message: `${relFile}: no tier declaration — add 'tier: <high|medium|low>' (ADR-0102)`,
           });
         }
         break;
@@ -575,9 +582,6 @@ export function printReport(report: ModelRegistryReport): void {
   for (const w of report.registryWarns) {
     console.warn(`WARN: ${w.message}`);
   }
-  for (const w of report.coverageWarns) {
-    console.warn(`WARN: ${w.message}`);
-  }
   for (const f of report.coverageFails) {
     console.error(`ERROR: ${f.message}`);
   }
@@ -595,21 +599,9 @@ export function printReport(report: ModelRegistryReport): void {
     return;
   }
 
-  if (report.coverageWarns.length > 0) {
-    // §9 report shape: the bare ✓ PASS line is suppressed whenever any
-    // coverage WARN exists; a distinct summary prints instead.
-    const clauses: string[] = [];
-    if (report.legacyBlockCount > 0) {
-      clauses.push(`${report.legacyBlockCount} agent file(s) with legacy tier blocks`);
-    }
-    if (report.missingTierCount > 0) {
-      clauses.push(`${report.missingTierCount} agent file(s) missing a tier declaration`);
-    }
-    console.warn(
-      `⚠️ TIER COVERAGE WARN: ${clauses.join(", ")} — run the tier normalization; this is not a clean pass`,
-    );
-    return;
-  }
+  // v2.1.0 (T-20261027-003): the TIER COVERAGE WARN summary retired with the
+  // transition WARN classes — every tier-coverage finding is a coverageFail
+  // printed as ERROR above; a run either prints the bare ✓ PASS line or FAILs.
 
   if (
     report.coverageFails.length === 0 &&

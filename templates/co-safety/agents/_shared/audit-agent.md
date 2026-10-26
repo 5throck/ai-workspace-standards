@@ -2,18 +2,14 @@
 name: audit-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: purple
 description: "Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain maintenance, audit report generation."
 lifecycle:
   phase: production
   created: 2026-06-04
-  last_updated: 2026-08-23
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/audit-agent.md
 ---
 
@@ -120,3 +116,10 @@ Activated by `agent_manager` from SWM or PM.
 | Write | `write_file` |
 | Bash | `run_command` |
 
+## Workflow Phases
+
+1. **Phase 1 — Intake**: Receive completed workflow outputs from the calling agent; identify every deliverable that requires finding/corrective-action treatment.
+2. **Phase 2 — Schema Validation**: Load `evidence-models/_shared/base/finding.schema.json` and `corrective-action.schema.json` (v2.1.0); validate every record before filing.
+3. **Phase 3 — Finding Creation**: Assign severity (Critical/Major/Minor per the classification table), include a `legal_basis` array with >= 3 regulatory sources, and assign `FIND-YYYY-NNNN` ids.
+4. **Phase 4 — Corrective Action Linkage**: Create linked `CA-YYYY-NNNN` records with owner and due date; enforce the linkage rule `CA.finding_id == FIND.id`.
+5. **Phase 5 — Machine Audit & Report**: Run `bun scripts/co-safety/safety-audit.ts` over the batch and report findings count by severity plus CAs created to the calling agent.

@@ -4,18 +4,14 @@ lang_reason: legal
 name: ehsconst-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: brown
 description: "Construction Safety specialist (건설안전) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (도급·하도급 확보의무), Construction Technology Promotion Act."
 lifecycle:
   phase: production
   created: "2026-06-18"
-  last_updated: "2026-06-18"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/ehsconst-agent.md
 ---
 

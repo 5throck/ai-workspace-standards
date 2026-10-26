@@ -3038,9 +3038,14 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
                 }
 
                 // L2 YAML should NOT have L0-only fields, except `lifecycle:` for variants
-                // that ship their own recursive validate-agents.ts requiring
-                // lifecycle.phase/lifecycle.governance on every agents/**/*.md file
-                // (e.g. co-safety) — see docs/architecture/extends-pattern.md schema table.
+                // whose nested agents/domains/** and agents/_shared/** trees are full
+                // agent definitions carrying lifecycle frontmatter with
+                // docs/lifecycle/agents/ governance records (e.g. co-safety) — see
+                // docs/architecture/extends-pattern.md schema table. Note: co-safety
+                // does NOT ship a recursive validate-agents.ts (the delivered script is
+                // a project-cwd flat scan of agents/); template-side recursive
+                // enforcement of scalar tier + body completeness lives in
+                // validate-templates.ts `agent-quality-recursive` (T-20261027-001).
                 const variantsAllowingLifecycle = new Set(['co-safety']);
                 const l2OnlyFields = variantsAllowingLifecycle.has(variant)
                     ? l0OnlyFields.filter(f => f !== 'lifecycle:')

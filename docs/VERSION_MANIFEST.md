@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-26T21:19:59.903Z
+**Generated**: 2026-10-26T22:14:11.821Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -202,14 +202,14 @@
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.15.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 2.0.0 | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 2.1.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.60.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.61.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |

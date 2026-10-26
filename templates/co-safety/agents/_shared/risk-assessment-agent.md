@@ -4,18 +4,14 @@ lang_reason: legal
 name: risk-assessment-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: red
 description: "Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk register maintenance per Korean standards."
 lifecycle:
   phase: production
   created: 2026-06-04
-  last_updated: 2026-06-04
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/risk-assessment-agent.md
 ---
 
@@ -136,3 +132,9 @@ Activated by `agent_manager` from SWM.
 | Read | `read_file` |
 | Write | `write_file` |
 
+## Workflow Phases
+
+1. **Phase 1 — Scope Definition**: Define the assessment scope from the inbound dispatch (process, area, or task) and load the applicable regulation metadata.
+2. **Phase 2 — Hazard Identification**: Identify hazards systematically — energy sources, chemicals, machinery, confined spaces — against the Section B scope limitation (EHS risks only).
+3. **Phase 3 — Risk Scoring**: Score likelihood x severity using the Risk Scoring Reference table; assign the risk level and required control tier.
+4. **Phase 4 — Control Selection & Record**: Select controls (elimination > substitution > engineering > administrative > PPE), record the assessment evidence, and dispatch to the appropriate downstream agent.

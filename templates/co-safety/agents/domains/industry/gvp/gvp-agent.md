@@ -4,18 +4,14 @@ lang_reason: legal
 name: gvp-agent
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  gemini-cli: medium
-  antigravity: medium
-model: sonnet
+version: "1.0.0"
+tier: medium
 color: magenta
 description: "Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PBRER, RMP per KGVP + ICH E2 series."
 lifecycle:
   phase: production
   created: "2026-06-17"
-  last_updated: "2026-06-17"
+  last_updated: 2026-10-27
   governance: docs/lifecycle/agents/gvp-agent.md
 ---
 
