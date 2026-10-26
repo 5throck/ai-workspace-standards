@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261027-001
+kind: manual
+title: >-
+  validator-hardening: agent stub/tier quality gate has no template-side
+  recursive invocation — PR #1625 missed
+  templates/co-safety/agents/{domains,_shared}/** (37 map-form files, 23 latent
+  body failures) and no validator scans template trees at all
+  (validate-agents.ts is project-cwd flat-scan; validate-templates.ts enforces
+  only 2-section bar); nightly scaffold E2E is the only backstop (caught
+  co-price 4 days late, run 40281594489). Fix: (a) remediate co-safety nested
+  trees (scalar tier per ADR-0102, add version:, author bodies to 40 lines/4
+  sections, drop model: sonnet literals); (b) wire agentBodyCompletenessFinding
+  + tier validation into validate-templates.ts with recursive scan for
+  co-safety's domains/_shared layout; (c) fix stale audit.ts:3041-3043 comment
+  claiming co-safety ships recursive validate-agents.ts
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T05:33:53.832+09:00'
+history:
+  - at: '2026-10-27T05:33:53.832+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
