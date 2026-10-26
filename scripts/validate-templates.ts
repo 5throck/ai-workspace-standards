@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.59.0
+ * @version 1.59.1
  *
  * v1.59.0 (2026-10-26, T-20261026-011, spec
  *          docs/designs/2026-10-26-project-review-remediation-design.md D4):
@@ -335,6 +335,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -1087,6 +1088,18 @@ function checkVariantManifests(): Map<string, VariantManifest> {
           }
         } catch (e) {
           // Schema read error - silently skip registry check
+        }
+      }
+
+      // T-20261026-017: hash-parity — the L1 copy of workspace-schema.json (delivered
+      // by propagation) must byte-match the L0 root copy; silent divergence leaves the
+      // project-side gates reading a different contract than the workspace gate.
+      const l1SchemaPath = join(TEMPLATES_DIR, 'common', 'docs', 'workspace-schema.json');
+      if (existsSync(schemaPath) && existsSync(l1SchemaPath)) {
+        const rootHash = createHash('sha256').update(readFileSync(schemaPath)).digest('hex');
+        const l1Hash = createHash('sha256').update(readFileSync(l1SchemaPath)).digest('hex');
+        if (rootHash !== l1Hash) {
+          fail('root', 'schema-hash-parity', `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverged (sha256 ${rootHash.slice(0, 12)} != ${l1Hash.slice(0, 12)}) — re-run propagation-to-templates to re-deliver the L1 copy.`);
         }
       }
 

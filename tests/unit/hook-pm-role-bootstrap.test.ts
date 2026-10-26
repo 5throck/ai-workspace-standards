@@ -122,6 +122,28 @@ describe('PM Role Bootstrap hook script', () => {
     expect(result.stdout.trim()).toBe('');
   });
 
+  test('Case 5 (T-20261026-002): marker write failure fails open — injection still emitted', () => {
+    // PM_GATE_STATE_DIR points at a REGULAR FILE: mkdirSync fails with ENOTDIR,
+    // which used to reach the outer catch and suppress the injection entirely.
+    const proj = mkdtempSync(join(import.meta.dir, 'pmboot-'));
+    const stateFile = join(proj, 'state-blocker');
+    const { writeFileSync } = require('node:fs');
+    writeFileSync(stateFile, 'not a dir');
+    const env: Record<string, string> = { ...process.env, PM_GATE_STATE_DIR: stateFile };
+    delete env.CLAUDE_PROJECT_DIR;
+    const result = spawnSync('bun', [HOOK_PATH], {
+      input: JSON.stringify({ hook_event_name: 'SessionStart', session_id: 'sess-failopen' }),
+      encoding: 'utf-8',
+      timeout: 10000,
+      env,
+    });
+    expect(result.status).toBe(0);
+    const output = JSON.parse((result.stdout as string) || '{}');
+    expect(output.hookSpecificOutput.additionalContext).toContain('PM bootstrap');
+    expect((result.stderr as string) || '').toContain('fail-open');
+    rmSync(proj, { recursive: true, force: true });
+  });
+
   test('Case 7: no CLAUDE_PROJECT_DIR — root falls back to the script location and still emits the JSON', () => {
     const input = JSON.stringify({
       hook_event_name: 'SessionStart',

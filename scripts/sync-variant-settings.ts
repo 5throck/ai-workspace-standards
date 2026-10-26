@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.0
+// v1.2.0 (2026-10-26, T-20261026-016): SyncResult gains `pruned` — empty groups left by
+//           removals set changed=true without touching any entry counter, so --check read
+//           them as in-sync; drifts() now counts prunes and check mode reports them.
 // v1.1.1 (2026-10-22, drift repair — spec 2026-10-17-pm-dispatch-gate-design §7 Addendum):
 //           VARIANTS gains 'co-learning' (variant added in 89b39266 after the v1.1.0
 //           list was written, so its settings never received the managed sync; both
@@ -77,7 +80,17 @@ function managedEntries(settings: Settings, event: string): HookEntry[] {
   return out;
 }
 
-export interface SyncResult { changed: boolean; settings: Settings; added: number; updated: number; removed: number }
+export interface SyncResult {
+  changed: boolean;
+  settings: Settings;
+  added: number;
+  updated: number;
+  removed: number;
+  /** T-20261026-016: group-shaped entries emptied by removals and pruned — a
+   * prune changes the file without touching any entry counter, so check mode
+   * must count it as drift or an emptied group stays silently unpruned. */
+  pruned: number;
+}
 
 /** Stable-prefix family test kept identical to v1.0.0 (`command.slice(0, 30)`):
  * a stale managed entry is a "same family" when its command embeds the wanted
@@ -94,7 +107,7 @@ function sameFamily(wanted: string, seen: string): boolean {
  * byte-for-value; empty groups left by removals are pruned (flat entries never are). */
 export function syncManagedEntries(common: Settings, variant: Settings, event: string): SyncResult {
   const wanted = managedEntries(common, event);
-  const result: SyncResult = { changed: false, settings: variant, added: 0, updated: 0, removed: 0 };
+  const result: SyncResult = { changed: false, settings: variant, added: 0, updated: 0, removed: 0, pruned: 0 };
   const hooks = variant.hooks ?? (variant.hooks = {});
   const list: HookGroup[] = Array.isArray(hooks[event]) ? (hooks[event] as HookGroup[]) : (hooks[event] = []);
 
@@ -126,7 +139,11 @@ export function syncManagedEntries(common: Settings, variant: Settings, event: s
   }
   // drop group-shaped entries the removals may have emptied; flat entries are kept
   const isLiveGroup = (g: HookGroup): boolean => !Array.isArray(g.hooks) || g.hooks.length > 0;
-  if (list.some((g) => !isLiveGroup(g))) result.changed = true;
+  const dead = list.filter((g) => !isLiveGroup(g)).length;
+  if (dead > 0) {
+    result.pruned = dead;
+    result.changed = true;
+  }
   (variant.hooks as Record<string, unknown>)[event] = (list as HookGroup[]).filter(isLiveGroup);
   return result;
 }
@@ -149,14 +166,14 @@ export function drifts(rootDir: string): string[] {
     for (const v of VARIANTS) {
       const p = settingsPath(rootDir, v, platform);
       if (!existsSync(p)) { out.push(`templates/${v}/.${platform}/settings.json missing`); continue; }
-      let total = { added: 0, updated: 0, removed: 0 };
+      let total = { added: 0, updated: 0, removed: 0, pruned: 0 };
       const variant = JSON.parse(readFileSync(p, 'utf-8')) as Settings;
       for (const { event } of SYNC_TARGETS.filter((t) => t.platform === platform)) {
         const merged = syncManagedEntries(common, JSON.parse(JSON.stringify(variant)), event);
-        total = { added: total.added + merged.added, updated: total.updated + merged.updated, removed: total.removed + merged.removed };
+        total = { added: total.added + merged.added, updated: total.updated + merged.updated, removed: total.removed + merged.removed, pruned: total.pruned + merged.pruned };
       }
-      if (total.added + total.updated + total.removed > 0) {
-        out.push(`templates/${v}/.${platform}/settings.json drifts (added ${total.added}, updated ${total.updated}, removed ${total.removed})`);
+      if (total.added + total.updated + total.removed + total.pruned > 0) {
+        out.push(`templates/${v}/.${platform}/settings.json drifts (added ${total.added}, updated ${total.updated}, removed ${total.removed}, pruned ${total.pruned})`);
       }
     }
   }

@@ -226,3 +226,22 @@ describe('syncManagedEntries v1.1.0 (pm-dispatch-gate propagation)', () => {
     expect(res2.updated).toBe(0);
   });
 });
+
+// T-20261026-016: an emptied group must surface as pruned drift, not a silent
+// no-op — the check-mode totals previously ignored group prunes entirely.
+describe('pruned counter (T-20261026-016)', () => {
+  test('dropping a common entry that empties a variant group counts pruned=1', () => {
+    const common: Settings = { hooks: { SessionStart: [{ hooks: [{ command: BOOTSTRAP.command }] }] } };
+    const variant: Settings = JSON.parse(JSON.stringify(common));
+    const parity = syncManagedEntries(common, variant, 'SessionStart');
+    expect(parity.changed).toBe(false);
+
+    // The common source drops the entry entirely: the variant's group empties
+    // and must be pruned — counted, not silent.
+    const dropped: Settings = { hooks: { SessionStart: [] } };
+    const second = syncManagedEntries(dropped, variant, 'SessionStart');
+    expect(second.removed).toBe(1);
+    expect(second.pruned).toBe(1);
+    expect(second.changed).toBe(true);
+  });
+});
