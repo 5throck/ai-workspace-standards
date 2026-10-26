@@ -5,12 +5,27 @@ title: >-
   validator-hardening: validate ticket create inputs (priority enum and
   not-before date format) before writing
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-26T00:20:41.822+09:00'
 history:
   - at: '2026-10-26T00:20:41.822+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T11:24:12.088+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T11:24:12.103+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T11:24:12.118+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T11:24:22.339+09:00'
+    from: review
+    to: done
+  - at: '2026-10-26T12:03:35.611+09:00'
+    from: done
+    to: waiting
+result: "CORRECTION 2026-10-26: the earlier done closure was PREMATURE - the create input validation is NOT on main; it exists only as another session's uncommitted WIP (scripts/ticket.ts 1.11.0 + helpers/ticket-schema.ts 1.8.0, priority enum + not-before real-calendar round-trip). Reopened waiting; closes when that WIP lands via its owner PR."
 error: null

@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-26, T-20261026-009, finding #32): the PM marker TTL no longer
+//           expires inside long-running sessions. (1) MARKER_TTL_MS 24h -> 7 days.
+//           (2) The TTL now SLIDES: every accepted gated dispatch refreshes the
+//           marker's ts (best-effort, atomic tmp+rename), so an ACTIVE PM session
+//           never goes stale, while an abandoned marker still expires 7 days after
+//           its last dispatch. Previously a session past 24h degraded silently —
+//           Claude re-prompted the user, Gemini hard-denied with a reason claiming
+//           pm-role-bootstrap never ran (it had; the marker had merely aged out).
 /**
  * pm-dispatch-gate.ts — PreToolUse (Claude, tool `Agent`) / BeforeTool (Gemini,
  * tool `invoke_subagent`) identity gate enforcing the PM Gateway
@@ -34,7 +42,7 @@
  * Spec: docs/designs/2026-10-17-pm-dispatch-gate-design.md
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -45,7 +53,10 @@ const WORKSPACE_ROOT =
 const STATE_DIR =
   process.env.PM_GATE_STATE_DIR ?? join(tmpdir(), 'ai-workspace-pm-gateway');
 
-const MARKER_TTL_MS = 24 * 60 * 60 * 1000;
+// T-20261026-009 (finding #32): 24h expired inside real long-running PM sessions.
+// 7 days + the sliding refresh in evaluate() cover both active multi-day sessions
+// and the abandon case (an idle marker still ages out).
+const MARKER_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const SPECIALIST_DISPATCH_TOOLS = new Set(['Agent', 'invoke_subagent']);
 
@@ -87,16 +98,32 @@ function markerFilePath(sessionId: string | null): string | null {
   return join(STATE_DIR, `${safe}.json`);
 }
 
-/** Fresh marker check; any read/parse failure counts as absent (fail-open). */
-function markerIsFresh(markerPath: string | null): boolean {
-  if (!markerPath) return false;
-  if (!existsSync(markerPath)) return false;
+/** Fresh marker read; returns the parsed payload when fresh, null otherwise.
+ * Any read/parse failure counts as absent (fail-open). */
+function freshMarker(markerPath: string | null): MarkerPayload | null {
+  if (!markerPath) return null;
+  if (!existsSync(markerPath)) return null;
   try {
     const parsed = JSON.parse(readFileSync(markerPath, 'utf-8')) as MarkerPayload;
-    if (typeof parsed.ts !== 'number' || !Number.isFinite(parsed.ts)) return false;
-    return Date.now() - parsed.ts <= MARKER_TTL_MS;
+    if (typeof parsed.ts !== 'number' || !Number.isFinite(parsed.ts)) return null;
+    return Date.now() - parsed.ts <= MARKER_TTL_MS ? parsed : null;
   } catch {
-    return false;
+    return null;
+  }
+}
+
+/** T-20261026-009 (finding #32): slide the marker forward on every accepted gated
+ * dispatch, so an ACTIVE PM session never crosses the TTL mid-flight. Best-effort
+ * (fail-open) and atomic (tmp + rename): a torn or failed refresh only means the
+ * next dispatch re-checks the original age. */
+function refreshMarker(markerPath: string | null, payload: MarkerPayload): void {
+  if (!markerPath) return;
+  try {
+    const tmp = `${markerPath}.tmp-${process.pid}-${Date.now()}`;
+    writeFileSync(tmp, JSON.stringify({ ...payload, ts: Date.now() }), 'utf-8');
+    renameSync(tmp, markerPath);
+  } catch {
+    // fail-open: refresh is an optimization for the gate, not the contract
   }
 }
 
@@ -131,7 +158,12 @@ export function evaluate(payload: HookPayload): GateDecision | null {
   const sessionId = typeof payload.session_id === 'string' && payload.session_id.length > 0
     ? payload.session_id
     : null;
-  if (markerIsFresh(markerFilePath(sessionId))) return null;
+  const markerPath = markerFilePath(sessionId);
+  const marker = freshMarker(markerPath);
+  if (marker) {
+    refreshMarker(markerPath, marker);
+    return null;
+  }
 
   // No marker: dispatch blocked. Decision verb is platform-specific.
   const decision: 'ask' | 'deny' = payload.tool_name === 'invoke_subagent' ? 'deny' : 'ask';

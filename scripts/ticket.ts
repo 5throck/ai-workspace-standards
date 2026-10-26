@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
+// v1.11.0 (2026-10-26, T-20261026-015, finding #19): create input validation —
+//           --priority must be in the canonical PRIORITIES enum and --not-before
+//           must be a real ISO YYYY-MM-DD date; invalid input is a usage error
+//           with exit 1 BEFORE any write (a bad --priority used to reach the
+//           store's schema check only after the id file was wx-created, leaving
+//           a zero-byte CORRUPT ticket behind).
 // v1.10.0 (T-20261007-004): one-off legacy-history repair — `repair-history` subcommand (dry-run default) rewrites corrupt history[] chains into the canonical chronological shape; also documented in the usage text.
 // v1.9.1 (2026-10-04): provenance comment path updated — docs/superpowers/specs moved under docs/archive/superpowers (docs consolidation).
 // v1.9.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md): `archive`
@@ -39,6 +45,7 @@ import {
 } from './helpers/ticket-store.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
+import { PRIORITIES } from './helpers/ticket-schema.ts';
 
 // Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
 // subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
@@ -142,11 +149,35 @@ try {
   switch (cmd) {
     case 'create': {
       const { positional, flags } = parseFlags(rest);
-      const priority = (flags.priority as Priority) ?? 'normal';
+      // T-20261026-015 (finding #19): validate create inputs BEFORE any write.
+      // A bad --priority used to reach createTicket, whose schema check throws
+      // only after the id file was wx-created — leaving a zero-byte ticket that
+      // reads back as CORRUPT — and a shape-passing but impossible --not-before
+      // (2026-13-45) was written verbatim. Both are refused here: usage error,
+      // exit 1, nothing written.
+      const priorityFlag = flags.priority;
+      if (priorityFlag !== undefined && !(PRIORITIES as readonly string[]).includes(String(priorityFlag))) {
+        fail(`--priority must be one of ${PRIORITIES.join('|')} (got: ${priorityFlag})`);
+      }
+      const priority = (priorityFlag as Priority) ?? 'normal';
+      const notBeforeFlag = flags['not-before'];
+      if (notBeforeFlag !== undefined) {
+        const v = String(notBeforeFlag);
+        // Shape check + real-calendar round trip: Date.parse alone is not enough
+        // (JSC rolls 2026-02-30 over to March instead of returning NaN), so the
+        // components must survive an exact UTC reconstruction.
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+        const dt = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : null;
+        const realDate = m !== null && dt !== null
+          && dt.getUTCFullYear() === Number(m[1])
+          && dt.getUTCMonth() === Number(m[2]) - 1
+          && dt.getUTCDate() === Number(m[3]);
+        if (!realDate) fail(`--not-before must be a valid ISO date (YYYY-MM-DD), got: ${notBeforeFlag}`);
+      }
+      const notBefore = notBeforeFlag as string | undefined;
       if (flags.manual) {
         const title = positional[0];
         if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--not-before YYYY-MM-DD]');
-        const notBefore = flags['not-before'] as string | undefined;
         const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore });
         console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}`);
       } else {

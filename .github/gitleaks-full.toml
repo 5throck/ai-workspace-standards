@@ -74,10 +74,14 @@ regexes = [
   # gitleaks:allow inline suppression marker
   '''gitleaks:allow''',
   # 64-char lowercase hex sha256 digests written by scripts/mcp-upstream-server.ts
-  # into tickets/governance/*.yaml dedupe_key fields — parity with the root
-  # .gitleaks.toml (generic-api-key trips on 64-char hex; triaged 2026-10-01,
-  # U-20261001-001). Anchored to the exact shape; same accepted trade-off as the
-  # root config: a real 64-char-hex secret elsewhere is not flagged by this rule.
+  # into tickets/governance/*.yaml dedupe_key fields — generic-api-key trips on
+  # 64-char hex (triaged 2026-10-01, U-20261001-001). Anchored to the exact shape.
+  # Root-config parity note (T-20261026-009, finding #35): the ROOT .gitleaks.toml
+  # narrowed its equivalent on 2026-10-26 to a path exemption for
+  # tickets/governance/*.yaml only. This deep-audit config keeps the VALUE-shape
+  # exclusion instead because path-based blanket excludes are forbidden here by
+  # design (see header) — accepted trade-off unchanged: a real 64-char-hex secret
+  # elsewhere is not flagged by this rule.
   '''^[a-f0-9]{64}$''',
 ]
 

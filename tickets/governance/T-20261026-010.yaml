@@ -3,12 +3,30 @@ id: T-20261026-010
 kind: manual
 title: Redact the personal email address committed in two September resync reports
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:41.757+09:00'
 history:
   - at: '2026-10-26T00:20:41.757+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T11:24:12.145+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T11:24:12.160+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T11:24:12.175+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T11:24:22.354+09:00'
+    from: review
+    to: done
+result: >-
+  Verified already-landed on main (aa5d17e94, the #1609 E3 batch). T-010:
+  verified the personal email is absent from both September reports on main
+  (redacted in the #1609 E3 batch; GH007 push protection had blocked the
+  original). T-015: verified the ticket create input validation exists on main
+  (priority enum via PRIORITIES + not-before real-calendar round-trip, create
+  case) — both landed in aa5d17e94.
 error: null

@@ -11,6 +11,7 @@
 | 2026-05-29 | - | production | Initial architect agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/architect.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-04 | production | production | Instruction-standard pointer reworded to the LLM Interaction Standard (ADR-0098, docs/standards/llm-interaction-standard.md §2), replacing the ADR-0079/AGENTS.md §3.10 wording; record stamped (2026-10-05 daily review, Slot B) | pm |
+| 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/architect.md SSOT (Can Support In corrected); agents/architect.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -44,7 +45,8 @@
 ## Dispatch Protocol
 
 **Can Lead Phases**: [1, 2]
-**Can Support In**: [0, 6]
+**Can Support In**: []
+**Auto-Dispatch To**: scaffolding-expert (when project structure changes needed)
 **Tier**: high
 **Communication Style**: sync (requires user approval before implementation)
 
@@ -58,5 +60,5 @@
 
 - **Current Phase**: production
 - **Owner**: architect
-- **Last Updated**: 2026-10-04
+- **Last Updated**: 2026-10-26
 - **Last Reviewer**: lifecycle-manager

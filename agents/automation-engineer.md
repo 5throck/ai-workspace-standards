@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-29
+last_updated: 2026-10-23
 name: Automation Engineer
 role: specialist
 status: active

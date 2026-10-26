@@ -5,12 +5,27 @@ title: >-
   Exclude upstream U- tickets from the nightly ticket runner and add
   untrusted-content rules to its prompt
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:12.536+09:00'
 history:
   - at: '2026-10-26T00:20:12.536+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T11:53:54.244+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T11:53:54.259+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T11:53:54.274+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T11:53:54.289+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via merged PR #1613 (bootstrap fail-open / nightly U-exclusion +
+  untrusted rules / SHA pin / pruned drift / schema-hash parity).
+  https://github.com/5throck/ai-workspace-standards/pull/1613
 error: null

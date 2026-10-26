@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261026-004
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-26T13:01:17.519+09:00
+history:
+  - at: 2026-10-26T13:01:17.519+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.20.1
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The workspace agent-definition standard has no rule for when an agent file should carry a `## Legal Basis` section. Observed: across the 16 co-* projects, only co-export (9 agents) and co-newbiz (41 agents) use a `## Legal Basis` body section; the other projects use different skeletons without it. co-newbiz adopted it for every agent (DEC-20261025-06, ruling 2) on the stated premise that sibling projects share one 9-section skeleton, which is inaccurate. As a result, non-regulatory agents (for example dba, frontend-engineer, sre) carry a "Legal Basis" section with no statutory or regulatory grounding. Expected: one workspace rule — `## Legal Basis` is included only for agents whose work rests on statutes, regulations, or certification/permit regimes, and omitted otherwise, with the sibling-ownership Boundary content placed in Role or Constraints instead. No validator currently checks this either way.'
+  affected_paths:
+    - agents/README.md
+    - skills/agent-lifecycle-manager/SKILL.md
+  identity_source: client_roots
+  repro: '1. In each Projects/co-* directory, list agents/*.md files whose body has a line starting with "## Legal Basis". 2. Result: only co-export and co-newbiz match. 3. Open co-newbiz/agents/dba.md: its "## Legal Basis" section has no statute or regulation behind it. 4. Search the workspace agent template and the agent-lifecycle standards for a rule on when this section applies: none found.'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: agents/README.md'
+    - info:in_last_delivery agents/README.md=false
+    - info:in_last_delivery skills/agent-lifecycle-manager/SKILL.md=false
+  dedupe_key: 9a18ef4a080e654c857dbec02eefa492e66d79f2aed34d39a410807b63a6d764
+  duplicates:
+    - project: co-newbiz
+      at: 2026-10-26T13:01:17.519+09:00

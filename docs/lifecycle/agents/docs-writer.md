@@ -11,6 +11,7 @@
 | 2026-05-29 | - | production | Initial docs-writer agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/docs-writer.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-04 | production | production | Instruction-standard pointer reworded to the LLM Interaction Standard (ADR-0098, docs/standards/llm-interaction-standard.md §2), replacing the ADR-0079/AGENTS.md §3.10 wording; record stamped (2026-10-05 daily review, Slot B) | pm |
+| 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/docs-writer.md SSOT (lead phases [] — supporting agent, support [4]); agents/docs-writer.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -41,8 +42,8 @@
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [4]
-**Can Support In**: [0, 2, 6]
+**Can Lead Phases**: []
+**Can Support In**: [4]
 **Tier**: medium
 **Communication Style**: async (can work independently on documentation)
 
@@ -57,5 +58,5 @@
 
 - **Current Phase**: production
 - **Owner**: docs-writer
-- **Last Updated**: 2026-10-04
+- **Last Updated**: 2026-10-26
 - **Last Reviewer**: lifecycle-manager

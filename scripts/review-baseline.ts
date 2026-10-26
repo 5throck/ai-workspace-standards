@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-10-26, T-20261026-014): battery #8 hardening — ANY nightly conclusion
+//          other than 'success' (timed_out/cancelled/startup_failure/...) and an
+//          empty run list now surface as a visible WARN instead of a green
+//          "status: ..." note (finding #17: the 2026-10-26 review miss class).
+//          Battery #8 stays exit-0 by design (R10); only the verdict widens.
+//          Execution moved behind import.meta.main so unit tests can import the
+//          pure nightlyE2EVerdict classifier without spawning the battery.
 // v1.2.0 (2026-10-09, T-20261009-002): battery #8 — nightly scaffold E2E conclusion
 //          surfacing via gh run list; red nightly surfaces as a passed-with-WARN note
 //          that prints even under --quiet. Network-dependent, never fails the battery.
@@ -51,99 +58,130 @@ const validators: Array<{
   { name: "validate-variant-claims.ts (variant contract-truth: roster/theme/status/process claims)", cmd: ["bun", "scripts/validate-variant-claims.ts"] },
 ];
 
-const quiet = process.argv.includes("--quiet");
-// T-20261011-004: `warn` rides alongside ok — battery #8 (nightly E2E) can be
-// ok:true (exit 0 by design R10) while carrying a WARN the summary loop used
-// to drop, so --quiet consumers saw "8/8 green" against a failed nightly.
-const results: Array<{ name: string; ok: boolean; note: string; warn?: boolean }> = [];
+/** T-20261026-014 (finding #17): pure classifier for the battery #8 verdict over
+ * one `gh run list --json` payload. ANY conclusion other than 'success' warns —
+ * timed_out/cancelled/startup_failure previously fell through to a green
+ * "status: ..." note — and an empty run list warns too (no conclusion to surface
+ * is not a green nightly). Exported so unit tests pin the verdict table without
+ * spawning gh. */
+export function nightlyE2EVerdict(runs: unknown): { warn: boolean; note: string } {
+  const r = (Array.isArray(runs) ? runs[0] : undefined) as
+    | { conclusion?: string | null; status?: string | null; createdAt?: string; url?: string; databaseId?: number | string }
+    | undefined;
+  if (!r) {
+    return {
+      warn: true,
+      note: "WARN: nightly run list is empty — no E2E conclusion to surface (T-20261026-014); verify the workflow ran: gh run list --workflow=nightly-scaffold-e2e.yml",
+    };
+  }
+  if (r.conclusion === "success") {
+    return { warn: false, note: `nightly green as of ${r.createdAt}` };
+  }
+  if (r.conclusion === "failure") {
+    return {
+      warn: true,
+      note: `WARN: nightly scaffold E2E FAILED — run ${r.databaseId} (${r.createdAt}) ${r.url} — scaffold-contract regression class (T-20261009-002); run bun scripts/test-new-project.ts to reproduce`,
+    };
+  }
+  // Non-success, non-failure conclusion: timed_out, cancelled, startup_failure,
+  // or a still-running entry with a null conclusion — none of these is green.
+  return {
+    warn: true,
+    note: `WARN: nightly scaffold E2E did not conclude success — run ${r.databaseId ?? "?"} (${r.createdAt ?? "?"}) ${r.url ?? "(no url)"} — conclusion: ${r.conclusion ?? "none"}, status: ${r.status ?? "unknown"} — non-success conclusion class (T-20261026-014)`,
+  };
+}
 
-for (const v of validators) {
-  const proc = Bun.spawnSync(v.cmd, { stdout: "pipe", stderr: "pipe" });
-  const output = new TextDecoder().decode(proc.stdout) + new TextDecoder().decode(proc.stderr);
-  // T-20260922-030: for the drift validator, a tolerated exit 1 counts as pass
-  // ONLY when the output proves the machine contract (parseable JSON with
-  // unexpectedDrift === 0). A hard crash also exits 1 — mapping it to
-  // "tolerated" would green-light a drift check that never ran.
-  let ok = proc.exitCode === 0;
-  let note = `exit ${proc.exitCode}`;
-  if (!ok && v.tolerateExit1 && proc.exitCode === 1 && v.driftJsonContract) {
-    try {
-      // The drift script prints human-readable lines before the machine JSON;
-      // parse from the first `{` and read the nested summary — same contract
-      // as test.yml's drift step.
-      const start = output.indexOf("{");
-      const summary = JSON.parse(output.slice(start)).summary;
-      if (summary && typeof summary.unexpectedDrift === "number") {
-        if (summary.unexpectedDrift === 0) {
-          ok = true;
-          note = `exit 1 (documented tolerated drift class, JSON contract verified: tolerated ${summary.toleratedDrift}, unexpected 0)`;
+function main(): void {
+  const quiet = process.argv.includes("--quiet");
+  // T-20261011-004: `warn` rides alongside ok — battery #8 (nightly E2E) can be
+  // ok:true (exit 0 by design R10) while carrying a WARN the summary loop used
+  // to drop, so --quiet consumers saw "8/8 green" against a failed nightly.
+  const results: Array<{ name: string; ok: boolean; note: string; warn?: boolean }> = [];
+
+  for (const v of validators) {
+    const proc = Bun.spawnSync(v.cmd, { stdout: "pipe", stderr: "pipe" });
+    const output = new TextDecoder().decode(proc.stdout) + new TextDecoder().decode(proc.stderr);
+    // T-20260922-030: for the drift validator, a tolerated exit 1 counts as pass
+    // ONLY when the output proves the machine contract (parseable JSON with
+    // unexpectedDrift === 0). A hard crash also exits 1 — mapping it to
+    // "tolerated" would green-light a drift check that never ran.
+    let ok = proc.exitCode === 0;
+    let note = `exit ${proc.exitCode}`;
+    if (!ok && v.tolerateExit1 && proc.exitCode === 1 && v.driftJsonContract) {
+      try {
+        // The drift script prints human-readable lines before the machine JSON;
+        // parse from the first `{` and read the nested summary — same contract
+        // as test.yml's drift step.
+        const start = output.indexOf("{");
+        const summary = JSON.parse(output.slice(start)).summary;
+        if (summary && typeof summary.unexpectedDrift === "number") {
+          if (summary.unexpectedDrift === 0) {
+            ok = true;
+            note = `exit 1 (documented tolerated drift class, JSON contract verified: tolerated ${summary.toleratedDrift}, unexpected 0)`;
+          } else {
+            note = `exit 1 with unexpectedDrift=${summary.unexpectedDrift} — treated as failure`;
+          }
         } else {
-          note = `exit 1 with unexpectedDrift=${summary.unexpectedDrift} — treated as failure`;
+          note = `exit 1 without a machine contract summary — treated as failure`;
         }
-      } else {
-        note = `exit 1 without a machine contract summary — treated as failure`;
+      } catch {
+        note = `exit 1 with unparseable output — treated as failure`;
       }
-    } catch {
-      note = `exit 1 with unparseable output — treated as failure`;
+    }
+    const failed = !ok;
+    results.push({ name: v.name, ok, note });
+    if (failed) {
+      // Failure diagnostics are NEVER suppressed, not even under --quiet: the
+      // 01:30 fleet-review runner runs exactly --quiet (design R10), and an
+      // unattended log holding only an exit code is untriageable
+      // (T-20260926-013). Quiet silences passing chatter only.
+      console.error(`❌ ${v.name} — ${note}`);
+      const tail = output.trim().split("\n").slice(-8).join("\n");
+      console.error(tail);
+    } else if (!quiet) {
+      console.log(`✅ ${v.name} — ${note}`);
     }
   }
-  const failed = !ok;
-  results.push({ name: v.name, ok, note });
-  if (failed) {
-    // Failure diagnostics are NEVER suppressed, not even under --quiet: the
-    // 01:30 fleet-review runner runs exactly --quiet (design R10), and an
-    // unattended log holding only an exit code is untriageable
-    // (T-20260926-013). Quiet silences passing chatter only.
-    console.error(`❌ ${v.name} — ${note}`);
-    const tail = output.trim().split("\n").slice(-8).join("\n");
-    console.error(tail);
-  } else if (!quiet) {
-    console.log(`✅ ${v.name} — ${note}`);
-  }
-}
 
-// T-20261009-002 (design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D3):
-// battery #8 — surface the nightly scaffold E2E conclusion. The 2026-10-06..08 red
-// streak went unnoticed because no local battery looked at CI. Network-dependent:
-// gh unavailability must NOT fail the battery; a red nightly is surfaced as a
-// passed-with-WARN note that prints even under --quiet (the 01:30 runner runs
-// exactly --quiet, design R10).
-{
-  const name = "nightly E2E conclusion surfacing (nightly-scaffold-e2e.yml)";
-  let ok = true;
-  let warn = false;
-  let note = "skipped (gh unavailable or timed out)";
-  const gh = Bun.spawnSync(
-    ["gh", "run", "list", "--workflow=nightly-scaffold-e2e.yml", "--limit", "1", "--json", "conclusion,createdAt,url,databaseId"],
-    { stdout: "pipe", stderr: "pipe", timeout: 15_000 },
-  );
-  if (gh.exitCode === 0) {
-    try {
-      const runs = JSON.parse(new TextDecoder().decode(gh.stdout));
-      const r = Array.isArray(runs) ? runs[0] : undefined;
-      if (r?.conclusion === "success") {
-        note = `nightly green as of ${r.createdAt}`;
-      } else if (r?.conclusion === "failure") {
-        warn = true;
-        note = `WARN: nightly scaffold E2E FAILED — run ${r.databaseId} (${r.createdAt}) ${r.url} — scaffold-contract regression class (T-20261009-002); run bun scripts/test-new-project.ts to reproduce`;
-      } else {
-        note = `nightly status: ${r?.status ?? "unknown"}, conclusion: ${r?.conclusion ?? "none"}`;
+  // T-20261009-002 (design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D3):
+  // battery #8 — surface the nightly scaffold E2E conclusion. The 2026-10-06..08 red
+  // streak went unnoticed because no local battery looked at CI. Network-dependent:
+  // gh unavailability must NOT fail the battery; a non-green verdict is surfaced as
+  // a passed-with-WARN note that prints even under --quiet (the 01:30 runner runs
+  // exactly --quiet, design R10). T-20261026-014: the verdict table (including the
+  // non-success-conclusion and empty-run-list WARN arms) lives in the exported pure
+  // nightlyE2EVerdict and is pinned by unit tests.
+  {
+    const name = "nightly E2E conclusion surfacing (nightly-scaffold-e2e.yml)";
+    const ok = true;
+    let warn = false;
+    let note = "skipped (gh unavailable or timed out)";
+    const gh = Bun.spawnSync(
+      ["gh", "run", "list", "--workflow=nightly-scaffold-e2e.yml", "--limit", "1", "--json", "conclusion,createdAt,url,databaseId"],
+      { stdout: "pipe", stderr: "pipe", timeout: 15_000 },
+    );
+    if (gh.exitCode === 0) {
+      try {
+        const runs = JSON.parse(new TextDecoder().decode(gh.stdout));
+        ({ warn, note } = nightlyE2EVerdict(runs));
+      } catch {
+        note = "skipped (unparseable gh output)";
       }
-    } catch {
-      note = "skipped (unparseable gh output)";
     }
+    results.push({ name, ok, note, warn });
+    if (warn) console.error(`⚠️  ${name} — ${note}`);
+    else if (!quiet) console.log(`✅ ${name} — ${note}`);
   }
-  results.push({ name, ok, note, warn });
-  if (warn) console.error(`⚠️  ${name} — ${note}`);
-  else if (!quiet) console.log(`✅ ${name} — ${note}`);
+
+  const failures = results.filter((r) => !r.ok);
+  if (!quiet || failures.length > 0) {
+    const warned = results.filter((r) => r.warn && r.ok).length;
+    const green = results.length - failures.length - warned;
+    console.log(`\n=== Review baseline summary: ${green}/${results.length} green, ${warned} warn, ${failures.length} fail ===`);
+    for (const r of results) console.log(`  ${r.ok ? (r.warn ? "⚠️" : "✅") : "❌"} ${r.name}${r.warn ? " (warn)" : ""}`);
+  }
+
+  process.exit(failures.length > 0 ? 1 : 0);
 }
 
-const failures = results.filter((r) => !r.ok);
-if (!quiet || failures.length > 0) {
-  const warned = results.filter((r) => r.warn && r.ok).length;
-  const green = results.length - failures.length - warned;
-  console.log(`\n=== Review baseline summary: ${green}/${results.length} green, ${warned} warn, ${failures.length} fail ===`);
-  for (const r of results) console.log(`  ${r.ok ? (r.warn ? "⚠️" : "✅") : "❌"} ${r.name}${r.warn ? " (warn)" : ""}`);
-}
-
-process.exit(failures.length > 0 ? 1 : 0);
+if (import.meta.main) main();
