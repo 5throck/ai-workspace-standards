@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261027-006
+kind: manual
+title: >-
+  project-hygiene: Projects/co-safety agents/pm.md carries a duplicated
+  lifecycle: frontmatter block (last fleet residual of the class that broke
+  frontmatter parsing in co-consult/co-export/co-game/co-develop earlier today)
+  — remove the stale duplicate per the agent-lifecycle-audit fix instruction
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T08:47:37.101+09:00'
+history:
+  - at: '2026-10-27T08:47:37.101+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
