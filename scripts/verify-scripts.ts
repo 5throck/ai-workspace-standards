@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.12.0
+ * @version 1.13.0
+ *         v1.13.0 (2026-10-27, U-20261026-010): --check-drift equal-version divergence
+ *         blocks only in mirror contexts (L0/L1). In L2/L3 (variant templates and
+ *         Projects/*) it prints a WARNING with the upgrade-project remedy and exits 0,
+ *         because the L1 side there is the upstream delivery source, not a mirror.
+ *         equalVersionDivergenceBlocks exported for unit tests.
+ *
  *         v1.12.0 (2026-10-05, T-20261004-022): equal-version L0/L1 content gate —
  *         detectDrift now canonicalizes the L0 side with the SAME sanctioned
  *         scrub the propagator applies (scripts/lib/constitution-scrub.ts:
@@ -57,7 +63,7 @@
  *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
  *   bun scripts/verify-scripts.ts --generate    # Generate Registry draft from filesystem
  *   bun scripts/verify-scripts.ts --report      # Human-readable status report
- *   bun scripts/verify-scripts.ts --check-drift # L0/L1 drift report; exits 1 on equal-version content divergence (T-20261004-022)
+ *   bun scripts/verify-scripts.ts --check-drift # L0/L1 drift report; exits 1 on equal-version content divergence in L0/L1 (T-20261004-022); warn-only in L2/L3 (U-20261026-010)
  *
  * Exit codes:
  *   0 = all checks passed
@@ -187,7 +193,16 @@ const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
 // from an L3 Phase-A draft (create-l3-scaffold.ts writes variant.json into Projects/*/
 // too), so an unreachable-root context with variant.json is assumed L3 (the far more
 // common real-world case: a relocated project, not a relocated template).
-type ContextLayer = "L0" | "L1" | "L2" | "L3";
+export type ContextLayer = "L0" | "L1" | "L2" | "L3";
+
+/**
+ * U-20261026-010: equal-version L0/L1 divergence is a mirror violation only in
+ * the mirror contexts. In L2/L3 the L1 side is the upstream delivery source, so
+ * divergence is reconciled by upgrade-project and must not block the sync.
+ */
+export function equalVersionDivergenceBlocks(layer: ContextLayer): boolean {
+  return layer === "L0" || layer === "L1";
+}
 
 function detectContextLayer(): ContextLayer {
   if (trueWorkspaceRoot) {
@@ -475,17 +490,24 @@ function checkDriftReport(): void {
   const equalVersion = drifted.filter((d) => d.classification === "equal-version-divergence");
   const pending = drifted.filter((d) => d.classification === "pending-publish");
 
+  const blocking = equalVersion.length > 0 && equalVersionDivergenceBlocks(contextLayer);
+
   if (equalVersion.length === 0 && pending.length === 0) {
     console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
   } else {
     if (equalVersion.length > 0) {
-      console.log(`❌ Equal-version content divergence (${equalVersion.length} script(s)) — BLOCKING:`);
+      const label = blocking ? "❌ Equal-version content divergence" : "⚠️  Equal-version content divergence (warning, non-blocking in this context)";
+      console.log(`${label} (${equalVersion.length} script(s)) — ${blocking ? "BLOCKING" : "WARNING"}:`);
       for (const d of equalVersion) {
         console.log(`   ${d.script}  @${d.l0Version}  L0 ${d.l0Hash} (${d.l0Lines} lines)  vs  L1 ${d.l1Hash} (${d.l1Lines} lines)`);
       }
-      console.log("\n   Same-@version copies must be byte-identical modulo the sanctioned");
-      console.log("   CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts).");
-      console.log("   Fix: correct the diverged copy or re-publish: bun run propagate:apply\n");
+      if (blocking) {
+        console.log("\n   Same-@version copies must be byte-identical modulo the sanctioned");
+        console.log("   CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts).");
+        console.log("   Fix: correct the diverged copy or re-publish: bun run propagate:apply\n");
+      } else {
+        console.log("\n   Run upgrade-project to reconcile with the workspace template (project-vs-upstream divergence is not a mirror violation).\n");
+      }
     }
     if (pending.length > 0) {
       console.log(`⚠️  Unintentional drift — publish pending (${pending.length} script(s)):`);
@@ -506,9 +528,10 @@ function checkDriftReport(): void {
   console.log();
 
   // T-20261004-022: equal-version content divergence is a real corruption of
-  // the mirror, not a pending publish — it exits 1 so dev-sync Step 3.7 and
-  // CI block on it. Version-skew drift stays warn-only (exit 0).
-  if (equalVersion.length > 0) process.exit(1);
+  // the mirror, not a pending publish — it exits 1 in L0/L1 so dev-sync Step 3.7
+  // and CI block on it. In L2/L3 it is warn-only (U-20261026-010). Version-skew
+  // drift stays warn-only (exit 0).
+  if (blocking) process.exit(1);
   process.exit(0);
 }
 

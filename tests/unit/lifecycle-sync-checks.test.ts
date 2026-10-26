@@ -254,23 +254,19 @@ describe('lifecycle-sync-audit Check F frontmatter anchor (ADR-0102, v1.19.0)', 
     expect(parseTierDeclaration('no frontmatter').kind).toBe('absent');
   });
 
-  // Live-tree transition posture: Check F must stay error-free while the
-  // fleet still carries legacy per-platform blocks (they surface as warnings).
-  test('live state: runCheckF reports zero errors on the current (legacy) tree', () => {
+  // Live-tree posture (post-PR-2a, ADR-0102 converged): the fleet declares
+  // scalar tier everywhere, so Check F reports zero findings at all.
+  test('live state: runCheckF reports zero errors on the normalized tree', () => {
     const issues = runCheckF();
     const errors = issues.filter((i) => i.level === 'error');
     expect(errors).toEqual([]);
   });
 
-  test('live state: every Check F finding on the current tree is a legacy-block transition warning', () => {
-    const issues = runCheckF();
-    for (const issue of issues) {
-      expect(issue.level).toBe('warning');
-      expect(issue.message).toContain('legacy per-platform tier block');
-    }
-    // The root 9 are normalized to the ADR-0102 scalar form (PR-1d, apply-tier
-    // normalization) — the only remaining legacy blocks are the 2 L1 agents
-    // (templates/common/agents/pm.md + i18n-specialist.md), which PR-2 normalizes.
-    expect(issues.length).toBe(2);
+  test('live state: runCheckF reports zero findings on the converged tree (no legacy blocks remain)', () => {
+    // ADR-0102 PR-2a normalized the last 2 legacy blocks (the L1 agents
+    // templates/common/agents/pm.md + i18n-specialist.md) to the scalar form;
+    // a non-empty result here means a legacy or missing-tier declaration
+    // re-entered the tree and must be normalized again.
+    expect(runCheckF()).toEqual([]);
   });
 });
