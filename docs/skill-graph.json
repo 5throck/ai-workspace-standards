@@ -423,6 +423,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0102",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
@@ -2151,7 +2156,7 @@
       "name": "architect",
       "scope": "root",
       "capability": "architect",
-      "content_hash": "18db1a57ff4b0558",
+      "content_hash": "b6933a785d41de77",
       "version": "1.0.0",
       "mirrors": [
         "agents/architect.md"
@@ -2164,7 +2169,7 @@
       "name": "auditor",
       "scope": "root",
       "capability": "auditor",
-      "content_hash": "fb086f03b45af3b7",
+      "content_hash": "5f1d188626829525",
       "version": "1.0.0",
       "mirrors": [
         "agents/auditor.md"
@@ -2177,7 +2182,7 @@
       "name": "automation-engineer",
       "scope": "root",
       "capability": "automation-engineer",
-      "content_hash": "37794f3e327146d4",
+      "content_hash": "8fabb3af3bc9eb23",
       "version": "1.0.0",
       "mirrors": [
         "agents/automation-engineer.md"
@@ -2190,7 +2195,7 @@
       "name": "docs-writer",
       "scope": "root",
       "capability": "docs-writer",
-      "content_hash": "ac4d29dca18a65f1",
+      "content_hash": "4e2c4a57ddfdf433",
       "version": "1.0.0",
       "mirrors": [
         "agents/docs-writer.md"
@@ -2203,7 +2208,7 @@
       "name": "lifecycle-manager",
       "scope": "root",
       "capability": "lifecycle-manager",
-      "content_hash": "fc41a7d6888381c5",
+      "content_hash": "85226031bff7a843",
       "version": "1.1.0",
       "mirrors": [
         "agents/lifecycle-manager.md"
@@ -2216,7 +2221,7 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "8644bb42abd4add9",
+      "content_hash": "ccf8006cb418e62c",
       "version": "1.2.2",
       "mirrors": [
         "agents/pm.md"
@@ -2229,7 +2234,7 @@
       "name": "scaffolding-expert",
       "scope": "root",
       "capability": "scaffolding-expert",
-      "content_hash": "5f097ec0a63988dd",
+      "content_hash": "708c974ff992bb5d",
       "version": "1.0.0",
       "mirrors": [
         "agents/scaffolding-expert.md"
@@ -2242,7 +2247,7 @@
       "name": "security-expert",
       "scope": "root",
       "capability": "security-expert",
-      "content_hash": "411dfb4aecee9400",
+      "content_hash": "85c7ffe8d86fa491",
       "version": "1.0.0",
       "mirrors": [
         "agents/security-expert.md"
@@ -2255,7 +2260,7 @@
       "name": "skill-graph-analyst",
       "scope": "root",
       "capability": "skill-graph-analyst",
-      "content_hash": "a5c9a0798589bc25",
+      "content_hash": "8fa67ccf2c0404a9",
       "version": "1.0.0",
       "mirrors": [
         "agents/skill-graph-analyst.md"
@@ -2308,6 +2313,11 @@
     },
     {
       "id": "dec:DEC-20261026-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261026-03",
       "type": "decision",
       "layer": "L0"
     },
@@ -7414,8 +7424,8 @@
       "name": "agent-lifecycle-manager",
       "scope": "root",
       "capability": "agent-lifecycle-manager",
-      "content_hash": "8f86b9ee15cf0709",
-      "version": "1.3.0",
+      "content_hash": "230ce8c036a46601",
+      "version": "1.3.1",
       "mirrors": [
         "skills/agent-lifecycle-manager/SKILL.md",
         "templates/common/skills/agent-lifecycle-manager/SKILL.md",
@@ -8008,8 +8018,8 @@
       "name": "team-builder",
       "scope": "root",
       "capability": "team-builder",
-      "content_hash": "b2d442108c2f0c78",
-      "version": "1.1.0",
+      "content_hash": "c375e7fd2ba21e93",
+      "version": "1.2.0",
       "mirrors": [
         "skills/team-builder/SKILL.md",
         "templates/common/skills/team-builder/SKILL.md",
@@ -9635,6 +9645,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "adr:0102",
+      "to": "skill:root/model-migration",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-abap/architect",
       "to": "procedure.co-abap.solution-blueprint",
@@ -10285,6 +10301,12 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261026-02",
+      "to": "skill:root/project-review",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261026-03",
       "to": "skill:root/project-review",
       "source": "skills_used"
     },
