@@ -5,12 +5,13 @@ role: specialist
 status: active
 tier: medium
 model: inherit
+domain: _shared
 lifecycle:
   phase: production
   created: "2026-08-24"
-  last_updated: "2026-09-25"
+  last_updated: "2026-10-27"
   governance: docs/lifecycle/agents/i18n-specialist.md
-version: "1.2.0"
+version: "1.3.0"
 last_reviewed: "2026-08-24"
 color: cyan
 description: 'Owns locale configuration, locale-specific formatting, and text layout guidance. Use when: "localization review", "locale config", "internationalization"'

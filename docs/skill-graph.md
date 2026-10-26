@@ -767,7 +767,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `data-analyst` | agent | version-drift | co-consult@1.1.0 #34b01669; co-hr@1.1.0 #c3faaa3f |
 | `designer` | agent | version-drift | co-develop@1.1.0 #143df5d4; co-game@1.1.0 #7b2bf32c |
 | `devops-admin` | agent | divergence | co-abap@1.1.0 #345e06a4; co-price@2.2.0 #6da0ead8 |
-| `i18n-specialist` | agent | version-drift | co-abap@1.1.0 #bab3f8c6; co-develop@1.1.0 #14245c58; co-hr@1.1.0 #767ba449; common@1.2.0 #14074686 |
+| `i18n-specialist` | agent | version-drift | co-abap@1.1.0 #bab3f8c6; co-develop@1.1.0 #14245c58; co-hr@1.1.0 #767ba449; common@1.3.0 #1bd3f8dc |
 | `pm` | agent | version-drift | co-abap@1.1.0 #319f3f5d; co-export@1.2.0 #31b592cb; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.0 #92e19bb9; co-safety@1.1.0 #50c319ce; common@1.4.0 #745a8000; root@1.2.2 #ccf8006c |
 | `security-monitor` | agent | version-drift | co-abap@1.1.0 #86f8fda7; co-develop@1.1.0 #07eb05dd; co-game@1.1.0 #152cddb8; co-price@2.2.0 #c5016ad9 |
 | `stack-setup` | agent | version-drift | co-develop@1.1.0 #b224c075; co-game@1.1.0 #9786e1fa |
