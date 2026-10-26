@@ -1,0 +1,53 @@
+schemaVersion: 1
+id: U-20261027-001
+kind: manual
+title: Upstream request from co-consult
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-27T01:48:05.969+09:00
+history:
+  - at: 2026-10-27T01:48:05.969+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-consult
+  variant: co-consult
+  template_version: 0.20.1
+  source: project/co-consult
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'After running `bun scripts/upgrade-project.ts --prune-removed` (template 0.20.1 tree sync), the delivered scripts/agent-lifecycle-audit.ts enforces ADR-0102 scalar `tier: high|medium|low` frontmatter and reports errors ("Missing tier field in frontmatter (ADR-0102 scalar form)") against the project''s variant-delivered agents/*.md files, because the variant template still delivers those agent files with the legacy per-platform map form (`tier:` with claude:/gemini:/... sub-lines). The upgrade''s SYNC_IF_NEWER check reports the agent files as OK (upstream version 1.0.0 == project version), so no corrected copy is delivered. Result: dev-sync step 3.9 (spec-check, which runs the agent audit) fails, the upgrade cannot land as a PR, and the operator cannot hand-fix the files because they are template-delivered. Confirmed reproducible on co-consult (9 error files). Pre-screened the same legacy map form in ALL other variants'' agents/ dirs (co-deck 14 files, co-export 10, co-game 14, co-hr 13, co-news 8, co-safety 3, co-security 6, co-work 8) whose pre-upgrade audits pass with 0 errors — upgrading them will hit the same wall. co-abap is unaffected (its agents are already scalar, PR #221 landed clean). Expected: variant agent template files migrated to the ADR-0102 scalar tier form (with a version bump so SYNC_IF_NEWER delivers them), or the audit exempts/normalizes the legacy map form until migration completes.'
+  affected_paths:
+    - agents/strategy-analyst.md
+    - agents/sme.md
+    - agents/data-analyst.md
+    - agents/technology-specialist.md
+    - agents/change-management-partner.md
+    - agents/industry-expert.md
+    - agents/delivery-manager.md
+    - agents/communications-lead.md
+    - agents/i18n-specialist.md
+  identity_source: self_declared
+  repro: '1. In Projects/co-consult (clean, on main), run `bun scripts/upgrade-project.ts Projects/co-consult --prune-removed` from the workspace root — upgrade applies cleanly. 2. Run `bun scripts/dev-sync.ts --body-file <body> "chore: upgrade template delivery (0.20.1 tree sync)"` inside the project. 3. dev-sync step 3.9 fails: "[FAIL] Agent audit detected issues"; `bun scripts/agent-lifecycle-audit.ts` shows 9 "Missing tier field in frontmatter (ADR-0102 scalar form)" errors against variant-delivered agent files that still use the per-platform tier map. 4. Spec-check gate blocks the commit; no compliant path exists for the operator (files are template-delivered). Pre-upgrade audit (HEAD version of agent-lifecycle-audit.ts) passes with 0 errors, so the blockage is upgrade-introduced.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - first_request_from_project
+    - info:in_last_delivery agents/strategy-analyst.md=false
+    - info:in_last_delivery agents/sme.md=false
+    - info:in_last_delivery agents/data-analyst.md=false
+    - info:in_last_delivery agents/technology-specialist.md=false
+    - info:in_last_delivery agents/change-management-partner.md=false
+    - info:in_last_delivery agents/industry-expert.md=false
+    - info:in_last_delivery agents/delivery-manager.md=false
+    - info:in_last_delivery agents/communications-lead.md=false
+    - info:in_last_delivery agents/i18n-specialist.md=false
+  dedupe_key: d02ffc6363e1e62a3ef2dc5808fc914117e2d8fcfa46a56ea5e75941ca0a170a
+  duplicates:
+    - project: co-consult
+      at: 2026-10-27T01:48:05.969+09:00
