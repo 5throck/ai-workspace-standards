@@ -1,11 +1,13 @@
 /**
- * patterns.ts — the six declared screen patterns (docs/screen-patterns.md):
- * list, form, detail, dashboard, modal, table.
+ * patterns.ts — the nine declared screen patterns (docs/screen-patterns.md):
+ * list, form, detail, dashboard, modal, table, feedback, tabs, report.
  *
  * Each pattern demonstrates the accessibility baseline (ADR-0065/0068):
  * visible :focus-visible ring (style.css), aria-labels on icon-only controls,
- * keyboard operability (modal Esc + focus return), target size ≥ --target-size,
- * and status never conveyed by color alone (badges carry text).
+ * keyboard operability (modal Esc + focus return, tabs arrow-key roving
+ * tabindex, scrollable wide tables), target size ≥ --target-size, state
+ * announced via aria-busy / role=status / role=alert, and status never
+ * conveyed by color alone (badges carry text, charts carry summaries).
  * Styled only with token custom properties — design-lint clean.
  */
 
@@ -231,9 +233,202 @@ function patternTable(): El {
   return sec;
 }
 
-/** Render all six declared patterns (docs/screen-patterns.md). */
+/* ---- 7. feedback ------------------------------------------------------ */
+
+function patternFeedback(): El {
+  const sec = section("pattern-feedback", "Pattern: feedback", "PageState trio (loading / empty / error) + toast queue. State is announced via aria-busy and role=status / role=alert; focus is never stolen.");
+
+  const loading = el("div", "pg-pagestate");
+  loading.setAttribute("aria-busy", "true");
+  const skel = el("div", "pg-skeleton-stack");
+  skel.append(
+    el("div", "pg-skeleton pg-skeleton--title"),
+    el("div", "pg-skeleton"),
+    el("div", "pg-skeleton pg-skeleton--short"),
+  );
+  loading.append(skel, el("span", "pg-hint", "Loading report…"));
+
+  const empty = el("div", "pg-pagestate");
+  const firstLink = el("a", undefined, "Create your first report");
+  firstLink.href = "#pattern-feedback";
+  empty.append(el("p", "pg-muted", "No reports yet."), firstLink);
+
+  const error = el("div", "pg-pagestate pg-pagestate--error");
+  error.setAttribute("role", "alert");
+  const retry = el("button", "pg-btn pg-btn--ghost", "Retry");
+  retry.type = "button";
+  error.append(el("span", undefined, "Could not load the report."), retry);
+
+  const region = el("div", "pg-toast-region");
+  region.setAttribute("role", "region");
+  region.setAttribute("aria-label", "Notifications");
+  const toast = (kind: "status" | "alert", msg: string) => {
+    const t = el("div", `pg-toast pg-toast--${kind === "status" ? "success" : "danger"}`);
+    t.setAttribute("role", kind);
+    const close = el("button", "pg-toast-close", "×");
+    close.type = "button";
+    close.setAttribute("aria-label", "Dismiss notification");
+    t.append(el("span", undefined, msg), close);
+    region.append(t);
+    const dismiss = () => t.remove();
+    close.addEventListener("click", dismiss);
+    window.setTimeout(dismiss, 5000);
+  };
+  const ok = el("button", "pg-btn", "Save (success toast)");
+  ok.type = "button";
+  ok.addEventListener("click", () => toast("status", "Report saved."));
+  const fail = el("button", "pg-btn pg-btn--ghost", "Save (failure toast)");
+  fail.type = "button";
+  fail.addEventListener("click", () => toast("alert", "Save failed — check your connection and retry."));
+
+  const triggers = el("div", "pg-toolbar");
+  triggers.append(ok, fail);
+  sec.append(loading, empty, error, triggers, region);
+  return sec;
+}
+
+/* ---- 8. tabs ---------------------------------------------------------- */
+
+function patternTabs(): El {
+  const sec = section("pattern-tabs", "Pattern: tabs", "role=tablist / tab / tabpanel with aria-selected, arrow-key roving tabindex, and ?tab= URL state.");
+
+  const names = ["Summary", "Charts", "Sources"] as const;
+  const list = el("div", "pg-tabs");
+  list.setAttribute("role", "tablist");
+  list.setAttribute("aria-label", "Report sections");
+  const tabEls: HTMLButtonElement[] = [];
+  const panels: El[] = [];
+
+  const select = (idx: number, focus = false) => {
+    tabEls.forEach((tab, i) => {
+      const selected = i === idx;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      panels[i].hidden = !selected;
+    });
+    if (focus) tabEls[idx].focus();
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", names[idx].toLowerCase());
+      window.history.replaceState(null, "", url);
+    } catch {
+      /* file:// — URL state unavailable, selection still works */
+    }
+  };
+
+  names.forEach((name, idx) => {
+    const tab = el("button", "pg-tab", name);
+    tab.type = "button";
+    tab.id = `pg-tab-${idx}`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", "false");
+    tab.setAttribute("aria-controls", `pg-panel-${idx}`);
+    tab.tabIndex = -1;
+    tab.addEventListener("click", () => select(idx));
+    tab.addEventListener("keydown", (ev) => {
+      if (ev.key === "ArrowRight" || ev.key === "ArrowDown") {
+        ev.preventDefault();
+        select((idx + 1) % names.length, true);
+      } else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") {
+        ev.preventDefault();
+        select((idx + names.length - 1) % names.length, true);
+      }
+    });
+    tabEls.push(tab);
+    list.append(tab);
+
+    const panel = el("div", "pg-tabpanel");
+    panel.id = `pg-panel-${idx}`;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", `pg-tab-${idx}`);
+    panel.tabIndex = 0;
+    panel.append(el("p", undefined, `${name} panel content…`));
+    panels.push(panel);
+  });
+
+  sec.append(list);
+  for (const panel of panels) sec.append(panel);
+  select(0);
+  return sec;
+}
+
+/* ---- 9. report -------------------------------------------------------- */
+
+function patternReport(): El {
+  const sec = section("pattern-report", "Pattern: report", "Chart-first time series with text alternative + pivot-style table, bullet list for long text, wide table in a scroll container; units and provenance visible.");
+
+  const chart = el("div", "pg-chart");
+  chart.setAttribute("role", "img");
+  chart.setAttribute("aria-label", "Bar chart, revenue by year in billion won: 2023 — 4.2, 2024 — 5.1, 2025 — 6.8. Full figures in the table below.");
+  const bars = el("div", "pg-chart-bars");
+  const series = [["2023", 4.2], ["2024", 5.1], ["2025", 6.8]] as const;
+  const max = 6.8;
+  for (const [year, value] of series) {
+    const col = el("div", "pg-chart-col");
+    const bar = el("div", "pg-chart-bar");
+    bar.style.height = `${Math.round((value / max) * 100)}%`;
+    col.append(bar, el("span", "pg-caption pg-muted", year));
+    bars.append(col);
+  }
+  chart.append(el("strong", undefined, "Revenue by year (billion KRW)"), bars, el("span", "pg-caption pg-muted", "Source: audited financials (DART)"));
+
+  const bullets = el("ul", "pg-bullets");
+  bullets.setAttribute("role", "list");
+  bullets.append(
+    el("li", undefined, "Steady top-line growth across all three years."),
+    el("li", undefined, "Growth accelerated in 2025 (+33% year over year)."),
+  );
+
+  const scroll = el("div", "pg-table-scroll");
+  scroll.setAttribute("tabindex", "0");
+  scroll.setAttribute("aria-label", "Financial detail table, scrolls horizontally");
+  const table = el("table", "pg-table");
+  const caption = el("caption", "pg-hint", "Financial detail (billion KRW)");
+  const thead = el("thead");
+  const headRow = el("tr");
+  const numHead = (label: string) => {
+    const th = el("th", "col-num", label);
+    th.setAttribute("scope", "col");
+    return th;
+  };
+  headRow.append(el("th", undefined, "Account"), numHead("2023"), numHead("2024"), numHead("2025"), el("th", undefined, "Source"));
+  thead.append(headRow);
+  const tbody = el("tbody");
+  for (const [account, v23, v24, v25, source] of [
+    ["Revenue", "4.2", "5.1", "6.8", "DART audited"],
+    ["Operating profit", "0.6", "0.9", "1.4", "DART audited"],
+    ["R&D expense", "0.8", "1.0", "1.3", "DART audited"],
+  ] as const) {
+    const tr = el("tr");
+    tr.append(
+      el("td", undefined, account),
+      el("td", "col-num", v23),
+      el("td", "col-num", v24),
+      el("td", "col-num", v25),
+      el("td", undefined, source),
+    );
+    tbody.append(tr);
+  }
+  table.append(caption, thead, tbody);
+  scroll.append(table);
+
+  sec.append(chart, bullets, scroll);
+  return sec;
+}
+
+/** Render all nine declared patterns (docs/screen-patterns.md). */
 export function renderPatterns(container: El): void {
-  const intro = section("patterns", "Screen Patterns", "The six declared patterns of docs/screen-patterns.md, composed from component tokens with the accessibility baseline demonstrated.");
+  const intro = section("patterns", "Screen Patterns", "The nine declared patterns of docs/screen-patterns.md, composed from component tokens with the accessibility baseline demonstrated.");
   container.append(intro);
-  container.append(patternList(), patternForm(), patternDetail(), patternDashboard(), patternModal(), patternTable());
+  container.append(
+    patternList(),
+    patternForm(),
+    patternDetail(),
+    patternDashboard(),
+    patternModal(),
+    patternTable(),
+    patternFeedback(),
+    patternTabs(),
+    patternReport(),
+  );
 }
