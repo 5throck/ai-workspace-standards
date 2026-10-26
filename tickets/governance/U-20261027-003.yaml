@@ -1,0 +1,53 @@
+schemaVersion: 1
+id: U-20261027-003
+kind: manual
+title: Upstream request from co-price
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-27T03:08:16.644+09:00
+history:
+  - at: 2026-10-27T03:08:16.644+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-price
+  variant: co-price
+  template_version: 0.20.1
+  source: project/co-price
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Fleet-delivered validate-agents.ts stub-quality detector (T-20261026-001, from upstream U-20261026-001; MIN_AGENT_BODY_LINES=40, MIN_AGENT_SECTIONS=4) fails on 8 agent definitions in co-price that are byte-identical to the variant template: cost-asset-mgmt (34 non-empty body lines), devops-admin (36), finance-strategy-lead (38), l10n-auditor (33), qa-tester (32), security-auditor (36), security-monitor (38), ux-specialist (37). All carry 9 ''## '' sections (the section bar passes); only the 40-line body bar fails, by 2-8 lines. The variant template tree templates/co-price/agents/ therefore cannot pass its own delivered gate, so the 0.20.1 upgrade delivery for co-price is unlandable: the dev-sync agent-validation step blocks the upgrade commit. The co-newbiz worked example (PR #731) rewrote co-newbiz''s definitions to the section standard, but templates/co-price/agents/ received no equivalent rewrite. Expected: template co-price agent definitions meet the delivered stub-quality bar so the upgrade lands clean. The filing agent is dispatch-constrained from hand-patching template-managed files, so the upgrade delivery is left uncommitted and the project reverted to clean HEAD pending a template-side rewrite.'
+  affected_paths:
+    - scripts/validate-agents.ts
+    - agents/cost-asset-mgmt.md
+    - agents/devops-admin.md
+    - agents/finance-strategy-lead.md
+    - agents/l10n-auditor.md
+    - agents/qa-tester.md
+    - agents/security-auditor.md
+    - agents/security-monitor.md
+    - agents/ux-specialist.md
+  identity_source: self_declared
+  repro: cd Projects/co-price && bun scripts/validate-agents.ts  (8 stub-quality definition errors; each failing file is cmp-identical to templates/co-price/agents/<same>.md). The same failure surfaces as the dev-sync gate 'Agent validation detected issues' when landing the 0.20.1 upgrade delivery.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - first_request_from_project
+    - info:in_last_delivery scripts/validate-agents.ts=true
+    - info:in_last_delivery agents/cost-asset-mgmt.md=true
+    - info:in_last_delivery agents/devops-admin.md=true
+    - info:in_last_delivery agents/finance-strategy-lead.md=true
+    - info:in_last_delivery agents/l10n-auditor.md=true
+    - info:in_last_delivery agents/qa-tester.md=true
+    - info:in_last_delivery agents/security-auditor.md=true
+    - info:in_last_delivery agents/security-monitor.md=true
+    - info:in_last_delivery agents/ux-specialist.md=true
+  dedupe_key: ae1217f8be1db284152c5331a71f9e56bd1492c960fdff76156229d4cd499210
+  duplicates:
+    - project: co-price
+      at: 2026-10-27T03:08:16.644+09:00
