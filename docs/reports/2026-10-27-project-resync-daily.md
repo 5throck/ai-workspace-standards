@@ -57,10 +57,55 @@ Git-mode gitleaks over the window (`--log-opts='--since=2026-10-25T21:12:17'`, 3
 
 Report-only landing (no template content changes; Steps 0–2 produced zero backport candidates).
 
-## Steps 4–5 — v0.21.0 upgrade wave
+## Steps 4–5 — v0.21.0 upgrade wave (executed 05:55–06:15 KST)
 
-Per-project `upgrade-project.ts Projects/<p> --dry-run --prune-removed` → real run → project dev-sync PR (`SYNC_SCOPED_STAGING=0`, `SYNC_SPEC_EXEMPT=E5`), canary first (co-price — carries the U-20261027-003 fix; billing-wall exception applies to CI evidence per standing T-20261007-025 rule, recorded per merge). Results appended below after execution.
+Canary **co-price** first (carries the U-20261027-003 fix): dry-run clean → real run (5 files: delivery records, VERSION_MANIFEST, CLAUDE.md regen, template-version stamp) → PR #159 → billing-wall exception applied (all 4 checks fail-at-start, 0 steps, 3s — verified via `steps: []` on run 40400495885; local gates green, content derived from tagged `template-v0.21.0` whose root landing passed 8/8) → merged 21:02:06Z → post-merge `audit.ts` ALL PASS, `qa-tester.md` at v2.2.0 confirmed.
 
-## Step 6 — final state
+Remaining 15 projects: batch upgrade (dry-run → real run → project dev-sync PR, `SYNC_SCOPED_STAGING=0` + `SYNC_SPEC_EXEMPT=E5`).
 
-Appended after the wave completes.
+| Project | PR | Merge path |
+|---|---|---|
+| co-abap | #222 | CI green (4/4), normal merge |
+| co-safety | #212 | CI green (9/9), normal merge |
+| co-architect | #380 | billing exception (4× fail-at-start) |
+| co-consult | #104 | billing exception |
+| co-deck | #181 | billing exception |
+| co-design | #55 | billing exception |
+| co-develop | #190 | billing exception (8 LOCAL-PATCH markers — known, ledgered) |
+| co-export | #58 | billing exception |
+| co-game | #58 | billing exception |
+| co-hr | #14 | billing exception |
+| co-learning | #27 | billing exception |
+| co-newbiz | #745 | billing exception (11× fail-at-start, 0 steps — verified run 40402076679) |
+| co-news | #14 | billing exception |
+| co-security | #87 | billing exception |
+| co-work | #25 | billing exception |
+
+**Wave incident (resolved)**: co-newbiz dev-sync step 3.9 FAILED on first landing — the upgrade's agent bump staled `app/web-next/lib/agent-registry.generated.ts` and the variant audit caught it. Applied the audit's own remediation (`bun scripts/co-newbiz/generate-agent-registry.ts`, 41 agents), re-ran variant audit (✓) + `audit.ts` (ALL PASS), re-landed as PR #745. The delivered gate worked as designed — a template change flowed through and the project's pluggable hook enforced registry regeneration.
+
+Billing-wall exception applied to 13 private-repo merges (T-20261007-025 standing rule; each verified fail-at-start via 0-step jobs / 2–4s durations before merging).
+
+## Step 6 — final state (06:25 KST)
+
+| Project | Template ver | Dirty | Unpushed | Open PRs | Branch |
+|---|---|---|---|---|---|
+| co-abap | 0.21.0 | 0 | 0 | 0 | main |
+| co-architect | 0.21.0 | 0 | 0 | 0 | main |
+| co-consult | 0.21.0 | 0 | 0 | 0 | main |
+| co-deck | 0.21.0 | 0 | 0 | 0 | main |
+| co-design | 0.21.0 | 0 | 0 | 0 | main |
+| co-develop | 0.21.0 | 0 | 0 | 0 | main |
+| co-export | 0.21.0 | 0 | 0 | 0 | main |
+| co-game | 0.21.0 | 0 | 0 | 0 | main |
+| co-hr | 0.21.0 | 0 | 0 | 0 | main |
+| co-learning | 0.21.0 | 0 | 0 | 0 | main |
+| co-newbiz | 0.21.0 | 0 | 0 | 0 | main |
+| co-news | 0.21.0 | 0 | 0 | 0 | main |
+| co-price | 0.21.0 | 0 | 0 | 0 | main |
+| co-safety | 0.21.0 | 0 | 0 | 0 | main |
+| co-security | 0.21.0 | 0 | 0 | 0 | main |
+| co-work | 0.21.0 | 0 | 0 | 0 | main |
+
+**16/16 at 0.21.0, zero dirty, zero unpushed, zero open PRs.** Remote `pr/*` branches: 0 remaining across all 16 repos (auto-deleted on merge). Local pr/* branches pruned per project. Superseded co-price stash `co-price-unlandable-upgrade-delivery-U-20261027-003-20261027` dropped (Phase I finding M-8); engine `pre-upgrade-snapshot-*` stashes preserved.
+
+Marker `.pipeline-state/last-daily-review` updated to this run's closeout timestamp.
