@@ -3,7 +3,7 @@ id: U-20261026-011
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-26T23:34:10.550+09:00'
 history:
@@ -13,7 +13,16 @@ history:
   - at: '2026-10-26T23:50:21.792+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-27T01:23:27.569+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T01:23:27.569+09:00'
+    from: review
+    to: done
+result: >-
+  Guards landed in L0/L1 as pre-push.ts 1.6.0 and dev-sync.ts 1.31.0 with
+  distinct versions. After the next template release, discard the local
+  pre-push.ts/dev-sync.ts/SCRIPTS.md edits and run upgrade-project.
 error: null
 upstream:
   project: co-newbiz
@@ -59,3 +68,11 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-10-26T23:34:10.550+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1623
+    template_version: unreleased
+    summary: >-
+      Guards landed in L0/L1 as pre-push.ts 1.6.0 and dev-sync.ts 1.31.0 with
+      distinct versions. After the next template release, discard the local
+      pre-push.ts/dev-sync.ts/SCRIPTS.md edits and run upgrade-project.
