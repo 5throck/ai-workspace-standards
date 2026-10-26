@@ -1,10 +1,32 @@
 #!/usr/bin/env bun
 /**
  * validate-model-registry.ts
- * Validates that all agents/*.md frontmatter model comments match docs/workspace-schema.json models block,
- * and that the tier→model mapping prose in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md
- * names exactly the models the registry declares for each tier.
- * Level: L0 | Status: active | @version 1.5.0
+ * Validates agent tier declarations (agents/*.md frontmatter) against
+ * docs/workspace-schema.json `models`, and that the tier→model mapping prose
+ * in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md names exactly the
+ * models the registry declares for each tier.
+ * Level: L0 | Status: active | @version 2.0.0
+ *
+ * v2.0.0 (2026-10-26, ADR-0102 / T-20261026-018, design
+ *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
+ *          §9): scalar tier declaration + transition matrix. Agent frontmatter
+ *          declares ONE scalar `tier: high|medium|low`; the platform→model
+ *          mapping is resolved from `models` at dispatch/validation time — no
+ *          per-platform tier lines, no `# model-id` comments. Both the silent
+ *          skips (`tierBlock.size === 0` / `!entry`) are deleted and replaced
+ *          by the §9 matrix: scalar valid → OK; scalar invalid → FAIL; legacy
+ *          per-platform block → loud per-file WARN ("normalize to
+ *          `tier: <value>`"; mixed blocks WARN without the validator picking a
+ *          value); unknown platform key in a legacy block → FAIL; missing tier
+ *          → FAIL at L0, WARN in delivered contexts (transition — flips to
+ *          FAIL post-soak, design D4). Legacy `# model-id` comments are still
+ *          checked against `models[platform][tier]` so nothing regresses while
+ *          the fleet converges. The bare ✓ PASS line is suppressed whenever a
+ *          coverage WARN exists; a distinct TIER COVERAGE WARN summary prints
+ *          instead. Exit 1 only on FAIL conditions — delivered contexts stay
+ *          0 during transition (audits green while visibly not-clean).
+ *          Refactored into import-safe pure functions
+ *          (classifyAgentTier / runModelRegistryValidation) for unit tests.
  *
  * v1.5.0 (design 2026-10-23-zai-tier-floor-support): `hermes` and `zai` join
  * PLATFORMS (5 → 7) so both platforms' registry entries and agent frontmatter
@@ -21,15 +43,19 @@
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
-import { die } from "./lib/error-handling.ts";
+import { join, relative } from "node:path";
 import { partitionProseTargetsByDelivery } from "./lib/platform-delivery.ts";
 
 const WORKSPACE_ROOT = fileURLToPath(new URL("..", import.meta.url))
   .replace(/\/$/, "")
   .replace(/^\/([A-Z]:)/, "$1");
 
-interface ModelsBlock {
+const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
+type Platform = typeof PLATFORMS[number];
+
+export const VALID_TIERS = ["high", "medium", "low"] as const;
+
+export interface ModelsBlock {
   [platform: string]: {
     [tier: string]: string;
   };
@@ -39,7 +65,7 @@ interface WorkspaceSchema {
   models?: ModelsBlock;
 }
 
-interface Mismatch {
+export interface Mismatch {
   file: string;
   platform: string;
   tier: string;
@@ -47,13 +73,42 @@ interface Mismatch {
   expectedModel: string;
 }
 
-const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
-type Platform = typeof PLATFORMS[number];
+export interface ProseMismatch {
+  file: string;
+  message: string;
+}
+
+export interface SkippedTarget {
+  file: string;
+  label: string;
+  reason: string;
+}
+
+// ── Tier coverage classification (ADR-0102 §9 matrix) ────────────────────────
+
+export type TierForm =
+  | "scalar" // tier: <value> — the normalized ADR-0102 form
+  | "legacy-uniform" // per-platform map block, every platform the same value
+  | "legacy-mixed" // per-platform map block, values differ (no canonical value)
+  | "legacy-unknown-platform" // per-platform map block naming a non-registry platform
+  | "missing"; // no tier declaration at all
+
+export interface TierClassification {
+  form: TierForm;
+  /** The canonical declared tier, when one exists (scalar, or legacy uniform). */
+  tier?: string;
+  /** scalar form only: whether the declared value is one of high|medium|low. */
+  valid?: boolean;
+  /** legacy-unknown-platform: the offending platform key. */
+  platform?: string;
+  /** legacy forms: the raw platform→tier map as declared. */
+  block?: Record<string, string>;
+}
 
 /**
  * Extract frontmatter block (content between first --- markers).
  */
-function extractFrontmatter(content: string): string | null {
+export function extractFrontmatter(content: string): string | null {
   const lines = content.split("\n");
   if (lines[0].trim() !== "---") return null;
 
@@ -64,14 +119,16 @@ function extractFrontmatter(content: string): string | null {
 }
 
 /**
- * Parse the tier block from frontmatter.
+ * Parse a legacy per-platform tier block from frontmatter.
  * Looks for:
  *   tier:
  *     claude: high        # claude-opus-4-7
  *     antigravity: high   # gemini-3.1-pro (thinking_level="medium")
  *     gemini-cli: high    # gemini-3.1-pro
  */
-function parseTierBlock(frontmatter: string): Map<string, { tier: string; modelComment: string | null }> {
+export function parseTierBlock(
+  frontmatter: string,
+): Map<string, { tier: string; modelComment: string | null }> {
   const result = new Map<string, { tier: string; modelComment: string | null }>();
   const lines = frontmatter.split("\n");
 
@@ -112,109 +169,89 @@ function parseTierBlock(frontmatter: string): Map<string, { tier: string; modelC
   return result;
 }
 
-// --- Main ---
-
-// Step 1: Load and validate workspace-schema.json
-const schemaPath = join(WORKSPACE_ROOT, "docs", "workspace-schema.json");
-// Definite-assignment assertions: `die()` exits in main mode; in module mode the
-// else-branch only logs and falls through exactly as before (a later property
-// access throws, unchanged from the prior runtime behavior).
-let schema!: WorkspaceSchema;
-try {
-  schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
-} catch (err) {
-  if (import.meta.main) {
-    die(`Could not read docs/workspace-schema.json at ${schemaPath}`, 1);
-  } else {
-    console.error(`ERROR: Could not read docs/workspace-schema.json at ${schemaPath}`);
-  }
-}
-
-if (!schema.models) {
-  if (import.meta.main) {
-    die("docs/workspace-schema.json is missing the 'models' block.", 1);
-  } else {
-    console.error("ERROR: docs/workspace-schema.json is missing the 'models' block.");
-  }
-}
-
-const missingPlatforms = PLATFORMS.filter((p) => !schema.models![p]);
-if (missingPlatforms.length > 0) {
-  if (import.meta.main) {
-    die(`workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`, 1);
-  } else {
-    console.error(`ERROR: workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`);
-  }
-}
-
-const models = schema.models as ModelsBlock;
-
-// Step 2: Read all agents/*.md files
-const agentsDir = join(WORKSPACE_ROOT, "agents");
-let agentFiles!: string[]; // see note above on definite-assignment assertions
-try {
-  agentFiles = readdirSync(agentsDir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => join(agentsDir, f));
-} catch (err) {
-  if (import.meta.main) {
-    die(`Could not read agents directory at ${agentsDir}`, 1);
-  } else {
-    console.error(`ERROR: Could not read agents directory at ${agentsDir}`);
-  }
-}
-
-if (agentFiles.length === 0) {
-  console.log("✓ No agent files found. Nothing to validate.");
-  if (import.meta.main) {
-    process.exit(0);
-  }
-}
-
-// Step 3-7: Validate each agent
-const mismatches: Mismatch[] = [];
-
-for (const filePath of agentFiles) {
-  const content = readFileSync(filePath, "utf-8");
+/**
+ * Classify one agent file's tier declaration per the ADR-0102 §9 matrix.
+ * Pure — no I/O, CRLF-tolerant. The platform set comes from the registry's
+ * `models` block keys; a legacy block naming anything outside it is a
+ * legacy-unknown-platform FAIL.
+ */
+export function classifyAgentTier(content: string, knownPlatforms: readonly string[]): TierClassification {
   const frontmatter = extractFrontmatter(content);
+  if (!frontmatter) return { form: "missing" };
 
-  if (!frontmatter) continue;
+  const lines = frontmatter.split("\n").map((l) => l.replace(/\r$/, ""));
+  const tierIdx = lines.findIndex((l) => /^tier\s*:/.test(l));
+  if (tierIdx === -1) return { form: "missing" };
 
-  const tierBlock = parseTierBlock(frontmatter);
-  if (tierBlock.size === 0) continue;
+  const tierLine = lines[tierIdx];
+  const inlineValue = tierLine.replace(/^tier\s*:\s*/, "").trim();
 
-  for (const platform of PLATFORMS) {
-    const entry = tierBlock.get(platform);
-    if (!entry) continue;
-
-    const { tier, modelComment } = entry;
-
-    // Skip if no model comment or uses inherit keyword
-    if (!modelComment || modelComment.toLowerCase() === "inherit") continue;
-
-    const expectedModel = models[platform]?.[tier];
-    if (!expectedModel) {
-      console.warn(`WARN: No model defined in registry for platform=${platform} tier=${tier} (${filePath})`);
-      continue;
-    }
-
-    if (modelComment !== expectedModel) {
-      mismatches.push({
-        file: filePath,
-        platform,
-        tier,
-        declaredModel: modelComment,
-        expectedModel,
-      });
-    }
+  if (inlineValue !== "") {
+    // Scalar form. Tolerate an inline trailing comment (`tier: medium  # note`).
+    const value = inlineValue.split("#")[0].trim();
+    const valid = (VALID_TIERS as readonly string[]).includes(value);
+    return { form: "scalar", tier: value, valid };
   }
+
+  // Legacy per-platform block — reuse the v1 parser (keeps model comments).
+  const block = parseTierBlock(frontmatter);
+  if (block.size === 0) return { form: "missing" };
+
+  const entries: Record<string, string> = {};
+  for (const [platform, entry] of block) entries[platform] = entry.tier;
+
+  const unknown = Object.keys(entries).find((p) => !knownPlatforms.includes(p));
+  if (unknown !== undefined) {
+    return { form: "legacy-unknown-platform", platform: unknown, block: entries };
+  }
+
+  const distinct = new Set(Object.values(entries));
+  if (distinct.size > 1) return { form: "legacy-mixed", block: entries };
+
+  const tier = [...distinct][0];
+  return { form: "legacy-uniform", tier, block: entries };
 }
 
-// Step 8: Tier→model mapping prose blocks (AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md)
-// vs the registry. AGENTS.md lists the deduped model set per tier across all
-// platforms; the platform docs each list their own column. This closes the
-// drift class where a registry model rename leaves the prose behind — the
-// exact failure that made the PM tier change non-atomic.
+// ── Coverage findings ─────────────────────────────────────────────────────────
+
+export interface CoverageWarn {
+  /** workspace-relative file path (forward slashes) */
+  relFile: string;
+  kind: "legacy-block" | "missing-tier";
+  /** Loud human-readable line: names file, form, and the exact fix. */
+  message: string;
+}
+
+export interface CoverageFail {
+  relFile: string;
+  kind: "invalid-scalar" | "invalid-legacy-value" | "unknown-platform" | "missing-tier-l0";
+  message: string;
+}
+
+export interface RegistryWarn {
+  relFile: string;
+  message: string;
+}
+
+export interface ModelRegistryReport {
+  /** True when CONSTITUTION.md exists at the audited root (L0 context). */
+  isWorkspaceRoot: boolean;
+  agentFilesChecked: number;
+  /** Fatal registry-level errors (unreadable schema, missing models block). */
+  fatal?: string;
+  coverageWarns: CoverageWarn[];
+  coverageFails: CoverageFail[];
+  /** Counts feeding the TIER COVERAGE WARN summary line. */
+  legacyBlockCount: number;
+  missingTierCount: number;
+  /** Legacy `# model-id` comment mismatches vs models[platform][tier]. */
+  modelMismatches: Mismatch[];
+  /** Per-entry registry warns ("no model defined for platform/tier"). */
+  registryWarns: RegistryWarn[];
+  proseMismatches: ProseMismatch[];
+  skippedProseTargets: SkippedTarget[];
+}
+
 interface ProseTarget {
   file: string;
   label: string;
@@ -225,7 +262,14 @@ interface ProseTarget {
 
 const TIER_TO_KEY: Record<string, string> = { High: "high", Medium: "medium", Low: "low" };
 
-const proseTargets: ProseTarget[] = [
+// Step 8 targets: tier→model mapping prose blocks (AGENTS.md §3.6 / CLAUDE.md /
+// GEMINI.md / CODEX.md) vs the registry. AGENTS.md lists the deduped model set
+// per tier across all platforms; the platform docs each list their own column.
+// This closes the drift class where a registry model rename leaves the prose
+// behind — the exact failure that made the PM tier change non-atomic.
+// UNCHANGED in v2.0.0 (design D6 — the prose projects `models`, which is
+// untouched by the tier normalization).
+export const proseTargets: ProseTarget[] = [
   {
     file: "AGENTS.md",
     label: "§3.6 tier-model-mapping",
@@ -253,81 +297,341 @@ const proseTargets: ProseTarget[] = [
   },
 ];
 
-interface ProseMismatch {
-  file: string;
-  message: string;
-}
-const proseMismatches: ProseMismatch[] = [];
+/**
+ * Full validation run against a workspace root. Import-safe and exit-free:
+ * returns the structured report; main() owns printing and the exit code.
+ */
+export function runModelRegistryValidation(workspaceRoot: string): ModelRegistryReport {
+  const report: ModelRegistryReport = {
+    isWorkspaceRoot: existsSync(join(workspaceRoot, "CONSTITUTION.md")),
+    agentFilesChecked: 0,
+    coverageWarns: [],
+    coverageFails: [],
+    legacyBlockCount: 0,
+    missingTierCount: 0,
+    modelMismatches: [],
+    registryWarns: [],
+    proseMismatches: [],
+    skippedProseTargets: [],
+  };
 
-// T-20260916-011: skip targets whose platform/file was not delivered into this
-// context (a codex-opt-out project has neither CODEX.md nor .codex/). Skipped
-// targets are surfaced, never silent.
-const { active: deliveredTargets, skipped: skippedTargets } =
-  partitionProseTargetsByDelivery(proseTargets, (rel) => existsSync(join(WORKSPACE_ROOT, rel)));
-for (const s of skippedTargets) {
-  console.log(`ℹ️  ${s.file} ${s.label}: skipped (${s.reason})`);
-}
+  const rel = (abs: string) => relative(workspaceRoot, abs).replace(/\\/g, "/");
 
-for (const target of deliveredTargets) {
-  const filePath = join(WORKSPACE_ROOT, target.file);
-  let content: string;
+  // Step 1: Load and validate workspace-schema.json
+  const schemaPath = join(workspaceRoot, "docs", "workspace-schema.json");
+  let schema: WorkspaceSchema;
   try {
-    content = readFileSync(filePath, "utf-8");
-  } catch {
-    proseMismatches.push({ file: target.file, message: `could not read ${target.file}` });
-    continue;
+    schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as WorkspaceSchema;
+  } catch (err) {
+    report.fatal = `Could not read docs/workspace-schema.json at ${schemaPath} (${(err as Error).message})`;
+    return report;
   }
 
-  const declared: Record<string, string[]> = {};
-  for (const match of content.matchAll(target.pattern)) {
-    const tierKey = TIER_TO_KEY[match[1]];
-    const ids = target.extract
-      ? target.extract(match[2]).filter((t) => /^[\w.-]+$/.test(t))
-      : [match[2].replace(/`/g, "").trim()];
-    declared[tierKey] = ids;
+  if (!schema.models) {
+    report.fatal = "docs/workspace-schema.json is missing the 'models' block.";
+    return report;
   }
 
-  for (const tier of ["high", "medium", "low"]) {
-    const declaredIds = declared[tier];
-    if (!declaredIds || declaredIds.length === 0) {
-      proseMismatches.push({
-        file: target.file,
-        message: `no tier→model line found for ${tier} tier (${target.label})`,
+  const missingPlatforms = PLATFORMS.filter((p) => !schema.models![p]);
+  if (missingPlatforms.length > 0) {
+    report.fatal = `workspace-schema.json models block is missing platforms: ${missingPlatforms.join(", ")}`;
+    return report;
+  }
+
+  const models = schema.models as ModelsBlock;
+  const knownPlatforms = Object.keys(models);
+
+  // Step 2: Read all agents/*.md files (README excluded — not an agent).
+  const agentsDir = join(workspaceRoot, "agents");
+  let agentFiles: string[];
+  try {
+    agentFiles = readdirSync(agentsDir)
+      .filter((f) => f.endsWith(".md") && !f.startsWith("README"))
+      .map((f) => join(agentsDir, f));
+  } catch (err) {
+    report.fatal = `Could not read agents directory at ${agentsDir} (${(err as Error).message})`;
+    return report;
+  }
+
+  if (agentFiles.length === 0) {
+    // Nothing to classify; prose targets still validated below.
+  }
+  report.agentFilesChecked = agentFiles.length;
+
+  // Step 3: Classify each agent file per the §9 matrix.
+  for (const filePath of agentFiles) {
+    const relFile = rel(filePath);
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch (err) {
+      report.coverageFails.push({
+        relFile,
+        kind: "missing-tier-l0",
+        message: `${relFile}: could not be read (${(err as Error).message})`,
       });
       continue;
     }
-    const expectedIds =
-      target.platform === "distinct"
-        ? [...new Set(PLATFORMS.map((p) => models[p]?.[tier]).filter(Boolean))].sort()
-        : [models[target.platform]?.[tier]].filter((m): m is string => Boolean(m)).sort();
-    const declaredSorted = [...declaredIds].sort();
-    const matches =
-      declaredSorted.length === expectedIds.length &&
-      declaredSorted.every((id, i) => id === expectedIds[i]);
-    if (!matches) {
-      proseMismatches.push({
-        file: target.file,
-        message: `${tier} tier declares [${declaredIds.join(", ")}] but registry says [${expectedIds.join(", ")}] (${target.label})`,
+
+    const cls = classifyAgentTier(content, knownPlatforms);
+
+    switch (cls.form) {
+      case "scalar": {
+        if (!cls.valid) {
+          report.coverageFails.push({
+            relFile,
+            kind: "invalid-scalar",
+            message: `${relFile}: tier '${cls.tier}' is not one of high/medium/low — declare 'tier: <high|medium|low>' (ADR-0102)`,
+          });
+        }
+        // Valid scalar → OK. Ruling 2 (2026-10-26): the former L0 parity row
+        // against schema agent_tiers is RETIRED — the frontmatter scalar IS
+        // the declaration; agent_tiers is gone from the schema.
+        break;
+      }
+      case "legacy-uniform": {
+        if (!(VALID_TIERS as readonly string[]).includes(cls.tier ?? "")) {
+          report.coverageFails.push({
+            relFile,
+            kind: "invalid-legacy-value",
+            message: `${relFile}: legacy tier block declares '${cls.tier}', which is not one of high/medium/low — normalize to 'tier: <high|medium|low>' (ADR-0102)`,
+          });
+          break;
+        }
+        report.legacyBlockCount += 1;
+        report.coverageWarns.push({
+          relFile,
+          kind: "legacy-block",
+          message: `${relFile}: legacy per-platform tier block — normalize to 'tier: ${cls.tier}' (ADR-0102; tests/apply-tier-normalization.ts)`,
+        });
+        runLegacyModelCommentCheck(relFile, withComments(cls.block ?? {}, content), models, report);
+        break;
+      }
+      case "legacy-mixed": {
+        report.legacyBlockCount += 1;
+        const detail = Object.entries(cls.block ?? {})
+          .map(([p, t]) => `${p}: ${t}`)
+          .join(", ");
+        report.coverageWarns.push({
+          relFile,
+          kind: "legacy-block",
+          message: `${relFile}: legacy per-platform tier block with mixed values (${detail}) — normalize to one scalar 'tier: <high|medium|low>' (the validator does not pick a value; ADR-0102)`,
+        });
+        runLegacyModelCommentCheck(relFile, withComments(cls.block ?? {}, content), models, report);
+        break;
+      }
+      case "legacy-unknown-platform": {
+        report.coverageFails.push({
+          relFile,
+          kind: "unknown-platform",
+          message: `${relFile}: legacy tier block declares platform '${cls.platform}', which is not in the registry models block (platforms: ${knownPlatforms.join(", ")})`,
+        });
+        break;
+      }
+      case "missing": {
+        report.missingTierCount += 1;
+        if (report.isWorkspaceRoot) {
+          report.coverageFails.push({
+            relFile,
+            kind: "missing-tier-l0",
+            message: `${relFile}: no tier declaration — add 'tier: <high|medium|low>' (ADR-0102; required at the workspace root)`,
+          });
+        } else {
+          report.coverageWarns.push({
+            relFile,
+            kind: "missing-tier",
+            message: `${relFile}: no tier declaration — add 'tier: <high|medium|low>' (transition WARN in delivered contexts; flips to FAIL after the post-soak convergence ticket)`,
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  // Step 4: Tier→model mapping prose targets. T-20260916-011: skip targets
+  // whose platform/file was not delivered into this context (a codex-opt-out
+  // project has neither CODEX.md nor .codex/). Skipped targets are surfaced,
+  // never silent.
+  const { active: deliveredTargets, skipped: skippedTargets } = partitionProseTargetsByDelivery(
+    proseTargets,
+    (relPath) => existsSync(join(workspaceRoot, relPath)),
+  );
+  report.skippedProseTargets = skippedTargets;
+
+  for (const target of deliveredTargets) {
+    const filePath = join(workspaceRoot, target.file);
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch {
+      report.proseMismatches.push({ file: target.file, message: `could not read ${target.file}` });
+      continue;
+    }
+
+    const declared: Record<string, string[]> = {};
+    for (const match of content.matchAll(target.pattern)) {
+      const tierKey = TIER_TO_KEY[match[1]];
+      const ids = target.extract
+        ? target.extract(match[2]).filter((t) => /^[\w.-]+$/.test(t))
+        : [match[2].replace(/`/g, "").trim()];
+      declared[tierKey] = ids;
+    }
+
+    for (const tier of ["high", "medium", "low"]) {
+      const declaredIds = declared[tier];
+      if (!declaredIds || declaredIds.length === 0) {
+        report.proseMismatches.push({
+          file: target.file,
+          message: `no tier→model line found for ${tier} tier (${target.label})`,
+        });
+        continue;
+      }
+      const expectedIds =
+        target.platform === "distinct"
+          ? [...new Set(PLATFORMS.map((p) => models[p]?.[tier]).filter(Boolean))].sort()
+          : [models[target.platform]?.[tier]].filter((m): m is string => Boolean(m)).sort();
+      const declaredSorted = [...declaredIds].sort();
+      const matches =
+        declaredSorted.length === expectedIds.length &&
+        declaredSorted.every((id, i) => id === expectedIds[i]);
+      if (!matches) {
+        report.proseMismatches.push({
+          file: target.file,
+          message: `${tier} tier declares [${declaredIds.join(", ")}] but registry says [${expectedIds.join(", ")}] (${target.label})`,
+        });
+      }
+    }
+  }
+
+  return report;
+}
+
+/**
+ * Transition-period legacy check (v1.5.0 behavior, kept for legacy blocks):
+ * a `# model-id` comment must match models[platform][tier]. Scalar files have
+ * no comments — nothing to check (the model is the registry's, not the
+ * agent's, per ADR-0102).
+ */
+function runLegacyModelCommentCheck(
+  relFile: string,
+  block: Record<string, { tier: string; modelComment: string | null }>,
+  models: ModelsBlock,
+  report: ModelRegistryReport,
+): void {
+  for (const [platform, entry] of Object.entries(block)) {
+    const { tier, modelComment } = entry;
+
+    // Skip if no model comment or uses inherit keyword
+    if (!modelComment || modelComment.toLowerCase() === "inherit") continue;
+
+    const expectedModel = models[platform]?.[tier];
+    if (!expectedModel) {
+      report.registryWarns.push({
+        relFile,
+        message: `No model defined in registry for platform=${platform} tier=${tier} (${relFile})`,
+      });
+      continue;
+    }
+
+    if (modelComment !== expectedModel) {
+      report.modelMismatches.push({
+        file: relFile,
+        platform,
+        tier,
+        declaredModel: modelComment,
+        expectedModel,
       });
     }
   }
 }
 
-if (mismatches.length === 0 && proseMismatches.length === 0) {
-  console.log("✓ All agent model names + tier→model mapping prose match registry");
-  if (import.meta.main) {
-    process.exit(0);
+// Type-compat shim: classifyAgentTier hands the raw map through as
+// Record<string, string>; the comment check wants the v1 entry shape. Convert
+// by re-parsing the block once (comments only exist on legacy files).
+function withComments(
+  block: Record<string, string>,
+  frontmatter: string,
+): Record<string, { tier: string; modelComment: string | null }> {
+  const parsed = parseTierBlock(frontmatter);
+  const out: Record<string, { tier: string; modelComment: string | null }> = {};
+  for (const platform of Object.keys(block)) {
+    const entry = parsed.get(platform);
+    out[platform] = entry ?? { tier: block[platform], modelComment: null };
   }
-} else {
-  for (const m of mismatches) {
+  return out;
+}
+
+// ── Report printing + exit code ───────────────────────────────────────────────
+
+/**
+ * Print the §9 report shape. Exported for tests: the bare ✓ PASS line is
+ * printed ONLY when no coverage WARN exists — otherwise the distinct TIER
+ * COVERAGE WARN summary prints instead.
+ */
+export function printReport(report: ModelRegistryReport): void {
+  for (const s of report.skippedProseTargets) {
+    console.log(`ℹ️  ${s.file} ${s.label}: skipped (${s.reason})`);
+  }
+  for (const w of report.registryWarns) {
+    console.warn(`WARN: ${w.message}`);
+  }
+  for (const w of report.coverageWarns) {
+    console.warn(`WARN: ${w.message}`);
+  }
+  for (const f of report.coverageFails) {
+    console.error(`ERROR: ${f.message}`);
+  }
+  for (const m of report.modelMismatches) {
     console.error(
-      `ERROR: ${m.file}\n  platform=${m.platform} tier=${m.tier}: declared="${m.declaredModel}" expected="${m.expectedModel}"`
+      `ERROR: ${m.file}\n  platform=${m.platform} tier=${m.tier}: declared="${m.declaredModel}" expected="${m.expectedModel}"`,
     );
   }
-  for (const p of proseMismatches) {
+  for (const p of report.proseMismatches) {
     console.error(`ERROR: ${p.file}: ${p.message}`);
   }
-  if (import.meta.main) {
-    process.exit(1);
+
+  if (report.fatal) {
+    console.error(`ERROR: ${report.fatal}`);
+    return;
   }
+
+  if (report.coverageWarns.length > 0) {
+    // §9 report shape: the bare ✓ PASS line is suppressed whenever any
+    // coverage WARN exists; a distinct summary prints instead.
+    const clauses: string[] = [];
+    if (report.legacyBlockCount > 0) {
+      clauses.push(`${report.legacyBlockCount} agent file(s) with legacy tier blocks`);
+    }
+    if (report.missingTierCount > 0) {
+      clauses.push(`${report.missingTierCount} agent file(s) missing a tier declaration`);
+    }
+    console.warn(
+      `⚠️ TIER COVERAGE WARN: ${clauses.join(", ")} — run the tier normalization; this is not a clean pass`,
+    );
+    return;
+  }
+
+  if (
+    report.coverageFails.length === 0 &&
+    report.modelMismatches.length === 0 &&
+    report.proseMismatches.length === 0
+  ) {
+    console.log("✓ All agent model names + tier→model mapping prose match registry");
+  }
+}
+
+function main(): void {
+  const report = runModelRegistryValidation(WORKSPACE_ROOT);
+  printReport(report);
+
+  const failed =
+    report.fatal !== undefined ||
+    report.coverageFails.length > 0 ||
+    report.modelMismatches.length > 0 ||
+    report.proseMismatches.length > 0;
+  process.exit(failed ? 1 : 0);
+}
+
+if (import.meta.main) {
+  main();
 }

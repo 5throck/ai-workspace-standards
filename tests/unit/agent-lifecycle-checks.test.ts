@@ -156,3 +156,73 @@ describe('agent-lifecycle-audit v1.6.0 extends-stub tier resolution (T-20261001-
     }
   }, 120000);
 });
+
+describe('agent-lifecycle-audit v1.8.0 ADR-0102 scalar tier declaration', () => {
+  test('a scalar tier: <value> agent passes Checks 8-10 (no false Missing tier.* errors)', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\ntier: medium\n');
+      const { status, out } = runAudit(tmp);
+      expect(out).not.toContain('Missing tier field in frontmatter');
+      expect(out).not.toContain('Missing tier.');
+      expect(out).not.toContain('Invalid tier');
+      expect(status).toBe(0);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('a scalar tier with an invalid value FAILs', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\ntier: maximum\n');
+      const { status, out } = runAudit(tmp);
+      expect(status).toBe(1);
+      expect(out).toContain('Invalid tier value: "maximum"');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('an extends-stub whose chain target declares a scalar tier inherits it and passes', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\nextends: ./pm-base.md\n');
+      writeFileSync(
+        join(tmp, 'agents', 'pm-base.md'),
+        '---\nname: pm-base\ntier: high\n---\n\n# pm-base\n'
+      );
+      const { status, out } = runAudit(tmp);
+      expect(out).not.toContain('Missing tier field in frontmatter');
+      expect(out).not.toContain('Missing tier.');
+      expect(status).toBe(0);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('a legacy uniform per-platform block is still tolerated (transition fallback)', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\ntier:\n  claude: low\n  antigravity: low\n  gemini-cli: low\n');
+      const { status, out } = runAudit(tmp);
+      expect(out).not.toContain('Missing tier.');
+      expect(out).not.toContain('Invalid tier');
+      expect(status).toBe(0);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+
+  test('a legacy block missing a required platform keeps the per-platform error path', () => {
+    const tmp = makeTempWorkspace();
+    try {
+      writeAgent(tmp, 'pm', 'name: pm\nrole: orchestrator\nstatus: active\ntier:\n  claude: low\n  antigravity: low\n');
+      const { status, out } = runAudit(tmp);
+      expect(status).toBe(1);
+      expect(out).toContain('Missing tier.gemini-cli specification');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 120000);
+});

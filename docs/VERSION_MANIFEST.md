@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-26T12:12:26.623Z
+**Generated**: 2026-10-26T16:04:54.739Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -23,7 +23,7 @@
 | auditor | agents/auditor.md | medium | inherit | 2026-10-26 |
 | automation-engineer | agents/automation-engineer.md | low | inherit | 2026-10-26 |
 | docs-writer | agents/docs-writer.md | medium | inherit | 2026-10-26 |
-| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-25 |
+| lifecycle-manager | agents/lifecycle-manager.md | medium | inherit | 2026-10-26 |
 | pm | agents/pm.md | medium | inherit | 2026-10-26 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | inherit | 2026-10-26 |
 | security-expert | agents/security-expert.md | medium | inherit | 2026-10-26 |
@@ -38,7 +38,7 @@
 |------|---------|--------|----------|----------|----------|-------|
 | accessibility-audit | 1.1.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
 | adopt-project | 1.1.0 | active | skills/adopt-project/SKILL.md | workspace | adopt external project, adopt project to standard, convert external project to workspace standard, onboard existing project | scaffolding-expert |
-| agent-lifecycle-manager | 1.3.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
+| agent-lifecycle-manager | 1.3.1 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
 | api-documentation | 1.0.2 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
 | ci-triage | 0.2.0 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
@@ -84,7 +84,7 @@
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | sync | 1.8.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
-| team-builder | 1.1.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
+| team-builder | 1.2.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
 | translate | 1.0.3 | active | skills/translate/SKILL.md | workspace | translate, translation, Korean translation | pm |
@@ -105,7 +105,7 @@
 | adopt-project.ts | 1.3.0 | scripts/adopt-project.ts | N/A |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
-| agent-lifecycle-audit.ts | 1.7.0 | scripts/agent-lifecycle-audit.ts | N/A |
+| agent-lifecycle-audit.ts | 1.8.0 | scripts/agent-lifecycle-audit.ts | N/A |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | N/A |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
@@ -136,13 +136,13 @@
 | generate-scripts-mirror.ts | 1.0.0 | scripts/generate-scripts-mirror.ts | N/A |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
 | generate-skill-graph.ts | 2.0.0 | scripts/generate-skill-graph.ts | js-yaml |
-| generate-version-manifest.ts | 1.10.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
+| generate-version-manifest.ts | 1.10.1 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
 | l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
-| lifecycle-sync-audit.ts | 1.18.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.19.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
@@ -176,7 +176,7 @@
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
-| sync-model-registry.ts | 1.1.1 | scripts/sync-model-registry.ts | N/A |
+| sync-model-registry.ts | 1.2.0 | scripts/sync-model-registry.ts | N/A |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
@@ -184,7 +184,7 @@
 | sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | N/A |
 | sync-variant-settings.ts | 1.2.0 | scripts/sync-variant-settings.ts | N/A |
 | tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
-| team-builder.ts | 1.4.1 | scripts/team-builder.ts | N/A |
+| team-builder.ts | 1.5.0 | scripts/team-builder.ts | N/A |
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
@@ -202,18 +202,18 @@
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.15.0 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 1.5.0 | scripts/validate-model-registry.ts | N/A |
+| validate-model-registry.ts | 2.0.0 | scripts/validate-model-registry.ts | N/A |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.1 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.59.1 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.60.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
-| variant-feature.ts | 1.0.0 | scripts/variant-feature.ts | N/A |
+| variant-feature.ts | 1.1.0 | scripts/variant-feature.ts | N/A |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | N/A |

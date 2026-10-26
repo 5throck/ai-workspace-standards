@@ -203,7 +203,7 @@
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
 | `root/adopt-project` | L0 | 1.1.0 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
-| `root/agent-lifecycle-manager` | L0 | 1.3.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
+| `root/agent-lifecycle-manager` | L0 | 1.3.1 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-work/technical-writer | — | — | — | — |
 | `root/ci-triage` | L0 | 0.2.0 | — | — | — | — | — |
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
@@ -235,7 +235,7 @@
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/sync` | L0 | 1.8.0 | — | — | — | — | — |
-| `root/team-builder` | L0 | 1.1.0 | — | — | — | — | — |
+| `root/team-builder` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/ticket-run` | L0 | 1.0.0 | — | — | root/sync | — | — |
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
@@ -407,6 +407,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0099` | adr | — | — | — |
 | `adr:0100` | adr | — | root/adopt-project, root/migrate-project | — |
 | `adr:0101` | adr | — | root/project-resync | — |
+| `adr:0102` | adr | — | root/model-migration | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |
@@ -417,6 +418,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261023-01` | decision | — | — | — |
 | `dec:DEC-20261026-01` | decision | `root/project-review` | — | — |
 | `dec:DEC-20261026-02` | decision | `root/project-review` | — | — |
+| `dec:DEC-20261026-03` | decision | `root/project-review` | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -759,18 +761,18 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Capability | Type | Kind | Nodes (scope@version #hash) |
 |------------|------|------|-----------------------------|
-| `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #18db1a57 |
+| `architect` | agent | version-drift | co-abap@1.0.0 #00c1e67e; co-develop@1.0.0 #095fc0e7; co-game@1.0.1 #4edbb7e4; root@1.0.0 #b6933a78 |
 | `change-management-partner` | agent | version-drift | co-consult@1.0.0 #6df523f4; co-hr@1.0.0 #b048d889 |
 | `code-writer` | agent | divergence | co-abap@1.0.1 #9c30ecd9; co-develop@1.0.0 #d6f5ba14 |
 | `data-analyst` | agent | divergence | co-consult@1.0.1 #b006a2a9; co-hr@1.0.0 #c1641dbd |
 | `designer` | agent | divergence | co-develop@1.0.0 #129b1e7a; co-game@1.0.1 #0fce3595 |
 | `devops-admin` | agent | divergence | co-abap@1.0.0 #ca0dc0cf; co-price@2.0.0 #4301943d |
 | `i18n-specialist` | agent | version-drift | co-abap@1.0.0 #20bb654b; co-develop@1.0.0 #02317f2a; co-hr@1.0.0 #909b0ed3; common@1.1.0 #47abe012 |
-| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #c324b9e5; root@1.2.2 #8644bb42 |
+| `pm` | agent | version-drift | co-abap@1.0.0 #f79b19ce; co-export@1.1.0 #e8fec136; co-hr@0.1.0 #d82c3dad; co-news@1.1.0 #954d30fd; co-price@2.0.1 #82dc797a; co-safety@1.0.0 #04bb3d35; common@1.3.0 #c324b9e5; root@1.2.2 #ccf8006c |
 | `security-monitor` | agent | version-drift | co-abap@1.0.0 #afe471cb; co-develop@1.0.0 #7023189a; co-game@1.0.1 #75c34bcc; co-price@2.0.0 #d1254f43 |
 | `stack-setup` | agent | divergence | co-develop@1.0.0 #abcc52d7; co-game@1.0.1 #d4e609a9 |
 | `test-runner` | agent | version-drift | co-abap@1.0.0 #cf013b5f; co-develop@1.0.0 #1f9a93b2; co-game@1.0.1 #1d6cc80b |
-| `agent-lifecycle-manager` | skill | divergence | co-safety@1.3.1 #a5b6fdf8; root@1.3.0 #8f86b9ee |
+| `agent-lifecycle-manager` | skill | version-drift | co-safety@1.3.1 #a5b6fdf8; root@1.3.1 #230ce8c0 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
@@ -779,7 +781,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
 | `standup-synthesizer` | skill | divergence | co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #cf494776; root@1.8.0 #83013972 |
-| `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.1.0 #b2d44210 |
+| `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
 | `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
@@ -828,7 +830,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-26), window 90 days. Skill nodes with usage: 3.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-27), window 90 days. Skill nodes with usage: 3.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, common/sync, root/sync
 - **unused** (0 sessions in 90 days) (231): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 191 more

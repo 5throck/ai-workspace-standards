@@ -1,16 +1,9 @@
 ---
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 name: Template Architect
 role: specialist
 status: active
-tier:
-  claude: high
-  gemini: high
-  antigravity: high
-  gemini-cli: high
-  codex: high
-  hermes: high  # claude-opus-5-5
-  zai: high  # glm-5.3
+tier: high
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

@@ -3,8 +3,15 @@
  * @description Agent team builder script — execution layer for the team-builder skill.
  *   Receives an approved proposal JSON (from skills/team-builder/SKILL.md Step 5) and
  *   executes all agent/skill changes in a fixed, safe order with checkpoint logging.
- * @version 1.4.1
- * v1.4.0 (2026-09-12, ADR-0077 W2): tier blocks gain the codex platform (falls back to claude tier when absent).
+ * @version 1.5.0
+ * v1.5.0 (2026-10-26, design
+ *           docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
+ *           agent frontmatter declares ONE scalar `tier: high|medium|low` — generated
+ *           agent files emit the scalar form and the AGENTS.md roster row reads the
+ *           resolved tier. Proposal JSON may still carry the legacy per-platform map
+ *           block during transition; its `claude` value is used (design D5) via
+ *           resolveAgentTier(). v1.4.0 (ADR-0077 W2): tier blocks gained the codex
+ *           platform — now relevant only when parsing legacy map-block proposals.
  * @usage bun scripts/team-builder.ts <proposal-json-path> [--dry-run]
  */
 
@@ -24,7 +31,8 @@ const Z = "\x1b[0m";  // reset
 interface AgentToCreate {
   name: string;
   formalName: string;
-  tier: { claude: string; gemini?: string; antigravity?: string; "gemini-cli"?: string; codex?: string };
+  /** Scalar `tier` (normalized form, v1.5.0) or a legacy per-platform map block. */
+  tier: string | { claude: string; gemini?: string; antigravity?: string; "gemini-cli"?: string; codex?: string };
   color: string;
   description: string;
   phases: string[];
@@ -32,6 +40,18 @@ interface AgentToCreate {
   handoffFrom: string[];
   requiredSkills: string[];
   rationale: string;
+}
+
+/**
+ * Resolve an agent's single tier value (v1.5.0, design
+ * 2026-10-26-model-registry-platform-coverage §7): the scalar form is read
+ * directly; a legacy per-platform map block falls back to its `claude` value
+ * (design D5), then the historical v1.4.x platform fallbacks. Exported for
+ * unit tests.
+ */
+export function resolveAgentTier(tier: AgentToCreate["tier"]): string {
+  if (typeof tier === "string") return tier;
+  return tier.claude ?? tier.gemini ?? tier.antigravity ?? tier["gemini-cli"] ?? tier.codex ?? "medium";
 }
 
 interface AgentToConvert {
@@ -221,12 +241,10 @@ function deleteFile(filePath: string): void {
 
 // ─── Template generators ──────────────────────────────────────────────────────
 
-function generateAgentMd(a: AgentToCreate): string {
-  const claudeTier      = a.tier.claude;
-  const geminiTier      = a.tier.gemini        ?? a.tier.claude;
-  const antigravityTier = a.tier.antigravity   ?? a.tier.claude;
-  const geminiCliTier   = a.tier["gemini-cli"] ?? a.tier.claude;
-  const codexTier       = a.tier.codex         ?? a.tier.claude;
+export function generateAgentMd(a: AgentToCreate): string {
+  // v1.5.0: one scalar tier line — the platform→model mapping is resolved at
+  // dispatch time from docs/workspace-schema.json `models`, never emitted here.
+  const tier = resolveAgentTier(a.tier);
   const phasesYaml = a.phases.map((p) => `  - "${p}"`).join("\n");
   const handoffToYaml = a.handoffTo.length
     ? a.handoffTo.map((h) => `  - ${h}`).join("\n")
@@ -243,12 +261,7 @@ function generateAgentMd(a: AgentToCreate): string {
 name: ${a.name}
 status: active
 formal_name: ${a.formalName}
-tier:
-  claude: ${claudeTier}
-  gemini: ${geminiTier}
-  antigravity: ${antigravityTier}
-  gemini-cli: ${geminiCliTier}
-  codex: ${codexTier}
+tier: ${tier}
 model: inherit
 color: ${a.color}
 description: >
@@ -284,7 +297,7 @@ In a meeting-facilitation session, Claude role-plays you inline.
 **Can Lead Phases**: ${phasesInline}
 **Can Support In**: []
 **Auto-Dispatch To**: N/A
-**Tier**: ${claudeTier}
+**Tier**: ${tier}
 **Communication Style**: async
 `;
 }
@@ -529,7 +542,7 @@ async function updateAgentsMd(proposal: TeamBuilderProposal): Promise<void> {
 
   // Add rows for new agents
   for (const agent of proposal.changes.agentsToCreate) {
-    const tierLabel = agent.tier.claude;
+    const tierLabel = resolveAgentTier(agent.tier);
     const newRow = `| [${agent.name}](agents/${agent.name}.md) | ${agent.formalName} | ${agent.phases.join(", ")} | ${tierLabel} | ${agent.description.slice(0, 60)} |`;
 
     // Try to append to a relevant tier section or end of roster table
@@ -1066,9 +1079,11 @@ ${G}Examples:${Z}
   console.log(`\n${G}All steps complete. Run /sync to commit changes.${Z}\n`);
 }
 
-main().catch((e) => {
-  console.error(`${R}[FATAL] Unhandled error: ${e}${Z}`);
-  if (import.meta.main) {
+// v1.5.0: main() is guarded so unit tests can import the exported helpers
+// (resolveAgentTier / generateAgentMd) without triggering the CLI flow.
+if (import.meta.main) {
+  main().catch((e) => {
+    console.error(`${R}[FATAL] Unhandled error: ${e}${Z}`);
     process.exit(1);
-  }
-});
+  });
+}

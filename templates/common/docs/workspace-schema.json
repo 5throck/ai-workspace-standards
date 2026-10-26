@@ -33,17 +33,6 @@
       }
     }
   },
-  "agent_tiers": {
-    "pm": "medium",
-    "architect": "high",
-    "auditor": "medium",
-    "docs-writer": "medium",
-    "automation-engineer": "low",
-    "scaffolding-expert": "low",
-    "lifecycle-manager": "medium",
-    "security-expert": "medium",
-    "skill-graph-analyst": "low"
-  },
   "models": {
     "claude": {
       "high": "claude-opus-5-5",

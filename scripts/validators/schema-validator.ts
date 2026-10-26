@@ -1,13 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Schema Validator — Validates agent, skill, and command frontmatter against JSON Schemas
- * @version 1.4.0
+ * @version 1.5.0
+ *
+ * v1.5.0 (2026-10-26, ADR-0102 scalar tier declaration, design
+ *          2026-10-26-model-registry-platform-coverage-design §7): agent
+ *          `tier:` accepts the scalar `high|medium|low` form as the canonical
+ *          shape (an invalid scalar value errors); the legacy per-platform map
+ *          branch stays as transition tolerance (templates normalize in PR-2).
  *
  * Reads each agent, skill, and command file, parses YAML frontmatter, and manually
  * validates the declared fields against schema requirements.
  *
  * Checks performed:
- *   1. Agent frontmatter: required fields, status enum, tier object,
+ *   1. Agent frontmatter: required fields, status enum, tier (ADR-0102 scalar
+ *      form; legacy map tolerated),
  *      tier value enums, version semver pattern, description min-length,
  *      lifecycle required fields and phase enum
  *   2. Skill frontmatter: required fields, status enum, metadata.type shape (error)
@@ -150,8 +157,21 @@ export function validateAgentFrontmatter(
     });
   }
 
-  // ── tier object ───────────────────────────────────────────────────────
-  if (typeof fm.tier === 'object' && fm.tier !== null && !Array.isArray(fm.tier)) {
+  // ── tier declaration (ADR-0102, v1.5.0) ────────────────────────────────
+  // Canonical shape: one scalar `tier: high|medium|low`. A legacy per-platform
+  // map object is tolerated during the transition (uniform-complete maps with
+  // valid values pass exactly as before). Anything else errors.
+  if (typeof fm.tier === 'string') {
+    if (!VALID_TIER_VALUES.includes(fm.tier as any)) {
+      issues.push({
+        severity: 'error',
+        category: 'invalid-enum',
+        message: `Agent "${agentName}" tier has invalid value "${fm.tier}" — must be one of: ${VALID_TIER_VALUES.join(', ')} (ADR-0102 scalar form)`,
+        file: agentFile,
+        agentName,
+      });
+    }
+  } else if (typeof fm.tier === 'object' && fm.tier !== null && !Array.isArray(fm.tier)) {
     // Check required keys
     for (const key of REQUIRED_TIER_KEYS) {
       if (!(key in fm.tier)) {
@@ -176,7 +196,7 @@ export function validateAgentFrontmatter(
     issues.push({
       severity: 'error',
       category: 'invalid-type',
-      message: `Agent "${agentName}" tier must be an object`,
+      message: `Agent "${agentName}" tier must be a scalar (high|medium|low) or a legacy per-platform map`,
       file: agentFile,
       agentName,
     });

@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.59.1
+ * @version 1.60.0
+ *
+ * v1.60.0 (2026-10-26, ADR-0102 / T-20261026-018, user ruling 2): WS-01
+ *          Check 4 (agents/*.md tier frontmatter vs schema `agent_tiers`) is
+ *          RETIRED — `agent_tiers` is removed from docs/workspace-schema.json
+ *          and the agent file's scalar `tier:` declaration is the single
+ *          source (tier-declaration validity moved to
+ *          validate-model-registry v2 per design
+ *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
+ *          §7). The ws-schema-missing hint no longer names agent_tiers.
+ *          WS-01 Checks 0–3 (L1 parity, pm_owned, phase definitions,
+ *          constitution phase count) are unchanged.
  *
  * v1.59.0 (2026-10-26, T-20261026-011, spec
  *          docs/designs/2026-10-26-project-review-remediation-design.md D4):
@@ -2855,7 +2866,7 @@ function checkWorkspaceSchema(): void {
 
   const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
   if (!existsSync(schemaPath)) {
-    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at docs/', 'Create docs/workspace-schema.json with workflow.phases and agent_tiers');
+    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at docs/', 'Create docs/workspace-schema.json with workflow.phases and models');
     return;
   }
 
@@ -2910,7 +2921,6 @@ function checkWorkspaceSchema(): void {
 
   const workflow = schema.workflow as Record<string, unknown> | undefined;
   const phases = workflow?.phases as Record<string, unknown> | undefined;
-  const agentTiers = schema.agent_tiers as Record<string, string> | undefined;
 
   if (!phases) {
     fail('root', 'ws-schema-structure', 'workspace-schema.json missing workflow.phases');
@@ -2995,88 +3005,12 @@ function checkWorkspaceSchema(): void {
     }
   }
 
-  // --- WS-01 Check 4: agents/*.md tier frontmatter vs schema agent_tiers ---
-  if (!agentTiers) {
-    warn('root', 'ws-01-agent-tiers-missing', 'workspace-schema.json missing agent_tiers — skipping tier check');
-  } else {
-    const agentsDir = join(ROOT, 'agents');
-    if (!existsSync(agentsDir)) {
-      warn('root', 'ws-01-agents-dir', 'agents/ directory not found at workspace root — skipping tier check');
-    } else {
-      const agentFiles = readdirSync(agentsDir).filter(f =>
-        f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
-      );
-
-      const tierToModelKeyword: Record<string, string> = {
-        high: 'opus',
-        medium: 'sonnet',
-        low: 'haiku',
-      };
-
-      for (const file of agentFiles) {
-        const agentName = file.replace(/\.md$/, '');
-        const filePath = join(agentsDir, file);
-        const rawContent = readFileSync(filePath, 'utf-8');
-        const content = normalizeContent(rawContent);
-
-        // Extract frontmatter block
-        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!fmMatch) continue;
-        const fm = fmMatch[1];
-
-        // Check if this agent is in schema
-        if (!(agentName in agentTiers)) {
-          // Not in schema — skip without warning (variant-specific agents are not in schema)
-          continue;
-        }
-
-        const expectedTier = agentTiers[agentName];
-
-        // Try simple tier: high/medium/low
-        const simpleTierMatch = fm.match(/^tier:\s*(high|medium|low)\s*$/m);
-        if (simpleTierMatch) {
-          const actualTier = simpleTierMatch[1];
-          if (actualTier === expectedTier) {
-            pass(`agents/${file}: tier "${actualTier}" matches schema`);
-          } else {
-            fail('root', 'ws-01-agent-tier',
-              `[FAIL] agents/${file}: tier "${actualTier}" does not match schema "${expectedTier}" for agent "${agentName}"`,
-              `Update tier in agents/${file} or agent_tiers in workspace-schema.json`
-            );
-          }
-          continue;
-        }
-
-        // Complex tier object — check claude: and gemini: sub-fields
-        const claudeTierMatch = fm.match(/^\s+claude:\s*(high|medium|low)/m);
-        const geminiTierMatch = fm.match(/^\s+gemini:\s*(high|medium|low)/m);
-        
-        if (claudeTierMatch || geminiTierMatch) {
-          if (claudeTierMatch) {
-            const claudeTier = claudeTierMatch[1];
-            if (claudeTier === expectedTier) {
-              pass(`agents/${file}: claude tier "${claudeTier}" matches schema`);
-            } else {
-              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: claude tier "${claudeTier}" != schema "${expectedTier}"`);
-            }
-          }
-          if (geminiTierMatch) {
-            const geminiTier = geminiTierMatch[1];
-            if (geminiTier === expectedTier) {
-              pass(`agents/${file}: gemini tier "${geminiTier}" matches schema`);
-            } else {
-              warn('root', 'ws-01-agent-tier-complex', `agents/${file}: gemini tier "${geminiTier}" != schema "${expectedTier}"`);
-            }
-          }
-        } else {
-          // Can't reliably parse tier
-          warn('root', 'ws-01-agent-tier-unreadable',
-            `agents/${file}: tier block too complex to parse reliably — manual review recommended`
-          );
-        }
-      }
-    }
-  }
+  // --- WS-01 Check 4: RETIRED (v1.60.0, ADR-0102 / user ruling 2) ---
+  // agents/*.md tier frontmatter vs schema `agent_tiers` no longer applies:
+  // agent_tiers is removed from the schema and the agent file's scalar
+  // `tier:` declaration is the single source. Tier-declaration validity is
+  // validate-model-registry v2's job (L0 missing-tier = FAIL there);
+  // cross-surface parity is lifecycle-sync-audit Check F.
 }
 
 // Check WS-02: common-contract.json compliance (C-CM-01, C-CM-02, C-SK-01, C-AG-01, C-AG-02, WS-02)

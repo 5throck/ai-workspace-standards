@@ -1,4 +1,11 @@
-// @version 1.10.0
+// @version 1.10.1
+// v1.10.1 (2026-10-26, spec
+//           docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
+//           parseAgentFrontmatter resolves the normalized scalar form
+//           `tier: high|medium|low` (with the legacy per-platform block still
+//           supported during the transition) so the VERSION_MANIFEST Agents
+//           table keeps real tier values after the fleet normalizes instead of
+//           drifting to 'N/A'. CRLF normalization (v1.6.1) runs before both.
 // v1.10.0 (2026-10-01 project review H1): the repo root is resolved ONCE at
 //           startup (`git rev-parse --show-toplevel` anchored at the caller's
 //           process.cwd() — the walked tree — with a graceful cwd fallback) and
@@ -199,7 +206,13 @@ export function parseAgentFrontmatter(content: string): { tier?: string; model?:
     // nested `tier:` block is `tier:\r\n  claude: ...` and a bare `\n` in the
     // regex silently parsed tier as 'N/A', regenerating a drifting manifest.
     const normalized = content.replace(/\r\n/g, '\n');
-    const tierMatch = /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(normalized);
+    // v1.10.1 (spec 2026-10-26-model-registry-platform-coverage §7): agent
+    // frontmatter normalizes to ONE scalar `tier: high|medium|low` line; the
+    // legacy per-platform block stays supported during the transition. The two
+    // forms are mutually exclusive (the scalar requires inline content, the
+    // block requires a bare `tier:` line), so the parse order is irrelevant.
+    const tierMatch = /^tier:[ \t]+(.+)$/m.exec(normalized)
+        ?? /^tier:[ \t]*\n[ \t]+claude:[ \t]+(.+)$/m.exec(normalized);
     const modelMatch = /^model:[ \t]+(.+)$/m.exec(normalized);
     return {
         tier: tierMatch ? scalarValue(tierMatch[1]) : 'N/A',

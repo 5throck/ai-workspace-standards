@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: T-20261026-018
+kind: manual
+title: >-
+  validate-model-registry.ts must not silently pass agents missing a
+  registry-registered platform's tier line — harden the per-agent skip clause
+  (if (!entry) continue, v1.5.0 line ~188) into a per-platform coverage FAIL (or
+  loud WARN on a distinct report line) so stale-template fleet projects are
+  flagged for upgrade instead of falsely passing; evidence: co-design at
+  template 0.20.1 has 9/9 agents missing the zai/hermes tier lines of design
+  2026-10-23-zai-tier-floor-support (D4 explicitly rejected this half-state as
+  'legal but rejected') yet validate-model-registry.ts exits PASS because the
+  skip clause tolerates it — a fleet-wide masking of coverage gaps that only a
+  template-delivered validator fix can close for all variants at once
+priority: high
+status: done
+attempts: 0
+created_at: '2026-10-26T22:00:01.284+09:00'
+history:
+  - at: '2026-10-26T22:00:01.284+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T22:24:07.966+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T22:24:07.990+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T00:25:36.607+09:00'
+    from: review
+    to: done
+result: >-
+  PR-1 landed (PR #1622): scalar tier + models SSOT resolution + agent_tiers
+  removal per user rulings (DEC-20261026-03, ADR-0102). Root 9 normalized;
+  validator 2.0.0 transition matrix; consumers migrated; battery green (unit
+  1636/0, audit 0). PR-2 (variants 148 + fleet wave) tracked for post-merge.
+error: null

@@ -1,16 +1,9 @@
 ---
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 name: Security & Git Expert
 role: specialist
 status: active
-tier:
-  claude: medium
-  gemini: medium
-  antigravity: medium
-  gemini-cli: medium
-  codex: medium
-  hermes: medium  # claude-sonnet-5-5
-  zai: medium  # glm-5.3-flash
+tier: medium
 model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31

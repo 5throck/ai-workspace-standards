@@ -42,12 +42,14 @@ import { scrubConstitutionRefs } from '../../scripts/lib/constitution-scrub.ts';
 import {
   runCheckC,
   runCheckE,
+  runCheckF,
   runCheckH,
   runCheckBProjection,
   compareMirrorProjection,
   compareScriptRecordVersion,
   extractRecordField,
   parseSkillFrontmatter,
+  parseTierDeclaration,
 } from '../../scripts/lifecycle-sync-audit.ts';
 import { buildMirrorRegistrySpan, extractRegistrySpan } from '../../scripts/generate-scripts-mirror.ts';
 
@@ -216,5 +218,59 @@ describe('lifecycle-sync-audit Check B projection arm (T-20260924-001, AC-12)', 
     const mirrorContent = readFileSync(join(workspaceRoot, 'templates', 'common', 'scripts', 'SCRIPTS.md'), 'utf-8');
     const expected = buildMirrorRegistrySpan(rootContent, join(workspaceRoot, 'templates', 'common', 'scripts'));
     expect(extractRegistrySpan(mirrorContent)).toBe(expected);
+  });
+});
+
+describe('lifecycle-sync-audit Check F frontmatter anchor (ADR-0102, v1.19.0)', () => {
+  // parseTierDeclaration — pure surface behind the frontmatter comparison.
+  test('scalar form parses (normalized to lowercase)', () => {
+    expect(parseTierDeclaration('---\nname: x\ntier: medium\n---\n')).toEqual({
+      kind: 'scalar',
+      tier: 'medium',
+    });
+  });
+
+  test('CRLF scalar form parses', () => {
+    expect(parseTierDeclaration('---\r\nname: x\r\ntier: low\r\n---\r\n')).toEqual({
+      kind: 'scalar',
+      tier: 'low',
+    });
+  });
+
+  test('legacy uniform block is recognized with its uniform value', () => {
+    const decl = parseTierDeclaration('---\ntier:\n  claude: high\n  gemini: high\n  zai: high\n---\n');
+    expect(decl).toEqual({ kind: 'legacy', block: { claude: 'high', gemini: 'high', zai: 'high' }, uniform: true, value: 'high' });
+  });
+
+  test('legacy mixed block is recognized (uniform: false, no value picked)', () => {
+    const decl = parseTierDeclaration('---\ntier:\n  claude: high\n  gemini: medium\n---\n');
+    expect(decl.kind).toBe('legacy');
+    expect(decl.uniform).toBe(false);
+    expect(decl.value).toBeUndefined();
+  });
+
+  test('no tier key is absent (extends-only skeleton — shape validators own that)', () => {
+    expect(parseTierDeclaration('---\nname: x\nmodel: inherit\n---\n').kind).toBe('absent');
+    expect(parseTierDeclaration('no frontmatter').kind).toBe('absent');
+  });
+
+  // Live-tree transition posture: Check F must stay error-free while the
+  // fleet still carries legacy per-platform blocks (they surface as warnings).
+  test('live state: runCheckF reports zero errors on the current (legacy) tree', () => {
+    const issues = runCheckF();
+    const errors = issues.filter((i) => i.level === 'error');
+    expect(errors).toEqual([]);
+  });
+
+  test('live state: every Check F finding on the current tree is a legacy-block transition warning', () => {
+    const issues = runCheckF();
+    for (const issue of issues) {
+      expect(issue.level).toBe('warning');
+      expect(issue.message).toContain('legacy per-platform tier block');
+    }
+    // The root 9 are normalized to the ADR-0102 scalar form (PR-1d, apply-tier
+    // normalization) — the only remaining legacy blocks are the 2 L1 agents
+    // (templates/common/agents/pm.md + i18n-specialist.md), which PR-2 normalizes.
+    expect(issues.length).toBe(2);
   });
 });

@@ -13,6 +13,7 @@
 | 2026-10-11 | production | production | model-migration skill attached to the agent (workspace directive 2026-10-11: registry model-ID migrations via sync-model-registry.ts); frontmatter last_updated refreshed (T-20261011-015) | lifecycle-manager |
 | 2026-10-26 | production | production | Body-text canon fix: Phase 6 (Finalization) references renumbered to Phase 5 (Lifecycle Finalization); last_updated bumped (project review 2026-10-26, DEC-20261026-01) | lifecycle-manager |
 | 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/lifecycle-manager.md SSOT (lead [6], support [5], async) (project review 2026-10-26 finding #4, T-20261026-004) | lifecycle-manager |
+| 2026-10-27 | production | production | Check F wording updated to the ADR-0102 scalar form (frontmatter anchor, schema `agent_tiers` removed); last_updated bumped (T-20261026-018 PR-1) | lifecycle-manager |
 
 ## Acceptance Criteria
 
@@ -67,5 +68,5 @@
 
 - **Current Phase**: production
 - **Owner**: lifecycle-manager
-- **Last Updated**: 2026-10-26
+- **Last Updated**: 2026-10-27
 - **Last Reviewer**: lifecycle-manager

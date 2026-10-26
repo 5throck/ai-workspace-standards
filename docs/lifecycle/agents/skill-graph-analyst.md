@@ -20,7 +20,7 @@
 - [x] Tier assignment: Low-tier — lightweight read-only analyst + ticket filing
 - [x] Lifecycle responsibilities specified: weekly report run, convergence/delivery-gap triage, ticket filing, four-section reporting
 - [x] Explicit non-goals documented: no skill modification, no promotion execution, tickets only
-- [x] Registered in docs/workspace-schema.json `agent_tiers` (SSOT) and AGENTS.md rosters
+- [x] Tier declared in agents/skill-graph-analyst.md frontmatter (scalar `tier:`, ADR-0102) and reflected in AGENTS.md rosters
 - [x] `bun scripts/validate-agents.ts` passes
 
 ## Dependencies
@@ -57,5 +57,5 @@ No skill modification, no promotion execution, no graph regeneration, no snapsho
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-26
+- **Last Updated**: 2026-10-27
 - **Last Reviewer**: pm
