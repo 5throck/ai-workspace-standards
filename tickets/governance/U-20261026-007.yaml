@@ -1,0 +1,41 @@
+schemaVersion: 1
+id: U-20261026-007
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-26T22:11:52.625+09:00
+history:
+  - at: 2026-10-26T22:11:52.625+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.20.1
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/verify-readme-sync.ts builds variantDirs exclusively from a repo-root templates/ directory (existsSync(''templates'')). Instantiated variant projects have no templates/ directory, so runUserGuideHashAudit() iterates an empty list and always prints "[SKIP] No user-guide pairs found." The docs/user-guide.md vs docs/user-guide_ko.md translated_from_hash gate therefore cannot fail at project level: scripts/audit.ts does not invoke verify-readme-sync at all, and the only invocation (scripts/hooks/pre-commit.ts) runs the no-op leg. A project could edit the English user guide without retranslating the Korean twin and no gate fails. Fix direction: seed the user-guide audit with the project-local pair (cwd ".") when templates/ is absent, mirroring how REQUIRED_DIRS already includes "." for the README leg.'
+  affected_paths:
+    - scripts/verify-readme-sync.ts
+    - scripts/hooks/pre-commit.ts
+    - docs/user-guide.md
+    - docs/user-guide_ko.md
+  identity_source: cwd
+  repro: 'In a variant project, edit docs/user-guide.md body text without updating docs/user-guide_ko.md, then run bun scripts/hooks/pre-commit.ts: the user-guide hash audit reports SKIP and the pipeline proceeds despite hash divergence.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/verify-readme-sync.ts=false
+    - info:in_last_delivery scripts/hooks/pre-commit.ts=false
+    - info:in_last_delivery docs/user-guide.md=false
+    - info:in_last_delivery docs/user-guide_ko.md=false
+  dedupe_key: 5c47c9dc7d14fa39148e53cd104e23d06261b365a5920f7823dab712e85dbed8
+  duplicates:
+    - project: co-design
+      at: 2026-10-26T22:11:52.625+09:00
