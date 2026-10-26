@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
 // v1.1.0 (2026-10-26, T-20261026-009, finding #32): the PM marker TTL no longer
 //           expires inside long-running sessions. (1) MARKER_TTL_MS 24h -> 7 days.
 //           (2) The TTL now SLIDES: every accepted gated dispatch refreshes the
