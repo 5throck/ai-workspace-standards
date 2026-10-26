@@ -1,0 +1,71 @@
+schemaVersion: 1
+id: U-20261026-010
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-10-26T23:26:47.634+09:00'
+history:
+  - at: '2026-10-26T23:26:47.634+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-26T23:50:21.774+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.20.1
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    A variant project's /sync is blocked at dev-sync step 3.7 (verify-scripts
+    --check-drift) by workspace-side template activity unrelated to the
+    project's change set. Observed 2026-10-26 in the co-design project: after
+    the workspace root auto-released template v0.21.0 (51 delivered paths), the
+    project's /sync aborted at step 3.7 with an L0/L1 drift table (1
+    equal-version content divergence + 4 version-skewed pairs) even though the
+    project's own audit.ts passes 470 PASS / 0 FAIL and the staged change set
+    touches no scripts. Running the same --check-drift from the workspace root
+    itself reports all pairs in sync, so the divergence only exists between the
+    project's scripts and the workspace L1 copies — a state that the sanctioned
+    resolution (receive the new delivery, or propagate:apply at the workspace
+    root) cannot be executed by the project session: propagate:apply at the
+    workspace root would overwrite the newer L1 content (3 of the 4 skewed pairs
+    have L1 ahead), and receiving the delivery is gated on a separate open
+    upstream issue about sync clobbering project-owned files. The check resolves
+    the parent workspace from the project directory, so any workspace-side
+    release can stall every project's sync until that project receives a
+    delivery; there is no bypass or downgrade env for step 3.7 (T-20260912-009
+    made it blocking by design; dev-sync documents "no generic skip pattern").
+    Requested consideration: scope the project-context drift comparison to
+    change-set-relevant scripts, distinguish L1-ahead version skew (delivery
+    pending) from L0-ahead drift with a WARN instead of a block, or provide a
+    documented escape for project contexts whose divergence is explained by a
+    workspace release newer than the project's last received delivery.
+  affected_paths:
+    - scripts/dev-sync.ts
+    - scripts/verify-scripts.ts
+  identity_source: cwd
+  repro: >-
+    In an instantiated variant project nested under the workspace root, confirm
+    the project sync is green, then release a new template version at the
+    workspace root (e.g. templates auto-release bumping
+    templates/common/scripts), and run bun scripts/dev-sync.ts in the project
+    with a change set that touches no scripts: step 3.7 exits 1 with the L0/L1
+    drift table and the pipeline aborts before branch creation, even though bun
+    scripts/audit.ts passes in the project.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/dev-sync.ts=true
+    - info:in_last_delivery scripts/verify-scripts.ts=false
+  dedupe_key: 3155a1343953584b7378f3fc0c4b8e94a685243bf1904c23af41eef049e890e1
+  duplicates:
+    - project: co-design
+      at: '2026-10-26T23:26:47.634+09:00'
