@@ -10,12 +10,28 @@ title: >-
   project-review slot D; a contract-path existence check would have caught this
   mechanically
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T05:33:53.861+09:00'
 history:
   - at: '2026-10-27T05:33:53.861+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T07:44:03.496+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T07:44:03.515+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T07:44:03.534+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T07:44:03.630+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1635 (merged): common-contract.json v1.10.0 — 13 mirror path
+  declarations corrected (7 gemini_source .toml, 6 agents_source exclusion per
+  2026-09-25-propagation-engine-batch §D8); new C-CM-06 validator check; 114/114
+  paths resolve.
 error: null

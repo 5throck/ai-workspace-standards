@@ -3,14 +3,29 @@ id: U-20261026-006
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-26T22:11:52.617+09:00
+created_at: '2026-10-26T22:11:52.617+09:00'
 history:
-  - at: 2026-10-26T22:11:52.617+09:00
+  - at: '2026-10-26T22:11:52.617+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T07:43:48.872+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T07:43:48.890+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T07:43:48.890+09:00'
+    from: review
+    to: done
+result: >-
+  Verified independently: audit.ts v2.56.0 falls back to design-lint's
+  conventional roots (./playground/src, ./src) via
+  scripts/helpers/design-lint-roots.ts when configured scanRoots do not exist,
+  and the skip branch now names both sets (option b — also repairs
+  already-instantiated projects; unit-tested with fs fixtures). Not the
+  requester's diff; shipped through the gateway.
 error: null
 upstream:
   project: co-design
@@ -19,14 +34,33 @@ upstream:
   source: project/co-design
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Template-delivered docs/workspace-schema.json configures designLint.scanRoots as ["templates/co-design/playground/src"]. Instantiated variant projects have no templates/ directory, so scripts/audit.ts (checkDesignLint, about lines 1726-1756) takes roots only from the schema when the schema file exists, filters by fs.existsSync, gets an empty list, and emits Skip("Design-lint gate: no configured scan roots present"). The skip is reported as a sanctioned verdict, so the variant''s declared operative verification gate number 2 never runs in audit or in CI (the CI audit job runs the same script). A standalone bun scripts/design-lint.ts would scan playground/src because design-lint.ts''s own uiSourceRoots default includes it — the two consumers of the same schema disagree on roots. Fix direction: default scanRoots to the project-relative playground/src in the delivered schema, or make audit.ts fall back to design-lint''s conventional roots (or fail loudly) when configured roots do not exist, instead of silently skipping.'
+  symptom: >-
+    Template-delivered docs/workspace-schema.json configures
+    designLint.scanRoots as ["templates/co-design/playground/src"]. Instantiated
+    variant projects have no templates/ directory, so scripts/audit.ts
+    (checkDesignLint, about lines 1726-1756) takes roots only from the schema
+    when the schema file exists, filters by fs.existsSync, gets an empty list,
+    and emits Skip("Design-lint gate: no configured scan roots present"). The
+    skip is reported as a sanctioned verdict, so the variant's declared
+    operative verification gate number 2 never runs in audit or in CI (the CI
+    audit job runs the same script). A standalone bun scripts/design-lint.ts
+    would scan playground/src because design-lint.ts's own uiSourceRoots default
+    includes it — the two consumers of the same schema disagree on roots. Fix
+    direction: default scanRoots to the project-relative playground/src in the
+    delivered schema, or make audit.ts fall back to design-lint's conventional
+    roots (or fail loudly) when configured roots do not exist, instead of
+    silently skipping.
   affected_paths:
     - docs/workspace-schema.json
     - scripts/audit.ts
     - scripts/design-lint.ts
   identity_source: cwd
-  repro: 'In an instantiated variant project (no templates/ directory), run bun scripts/audit.ts and observe the line "[SKIP] Design-lint gate: no configured scan roots present — skipped"; run bun scripts/design-lint.ts directly and observe that it does scan playground/src.'
-  triage: inbox
+  repro: >-
+    In an instantiated variant project (no templates/ directory), run bun
+    scripts/audit.ts and observe the line "[SKIP] Design-lint gate: no
+    configured scan roots present — skipped"; run bun scripts/design-lint.ts
+    directly and observe that it does scan playground/src.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -36,4 +70,15 @@ upstream:
   dedupe_key: c4a50e79df8bb3026035641a00d123d348a2c5b167ba331efb03f9af4663fb49
   duplicates:
     - project: co-design
-      at: 2026-10-26T22:11:52.617+09:00
+      at: '2026-10-26T22:11:52.617+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1635
+    template_version: unreleased
+    summary: >-
+      Verified independently: audit.ts v2.56.0 falls back to design-lint's
+      conventional roots (./playground/src, ./src) via
+      scripts/helpers/design-lint-roots.ts when configured scanRoots do not
+      exist, and the skip branch now names both sets (option b — also repairs
+      already-instantiated projects; unit-tested with fs fixtures). Not the
+      requester's diff; shipped through the gateway.

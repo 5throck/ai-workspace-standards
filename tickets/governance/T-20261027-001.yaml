@@ -15,12 +15,28 @@ title: >-
   co-safety's domains/_shared layout; (c) fix stale audit.ts:3041-3043 comment
   claiming co-safety ships recursive validate-agents.ts
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T05:33:53.832+09:00'
 history:
   - at: '2026-10-27T05:33:53.832+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T07:44:03.437+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T07:44:03.456+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T07:44:03.476+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T07:44:03.612+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1635 (merged): 37 co-safety nested-tree agent files remediated
+  (scalar tier, version, bodies 24-34 -> 41-105 lines/4-5 sections);
+  validate-templates.ts v1.61.0 agent-quality-recursive check (158 files, 0
+  findings); stale audit.ts comment fixed.
 error: null
