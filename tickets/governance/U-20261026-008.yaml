@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: U-20261026-008
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-26T22:11:52.633+09:00
+history:
+  - at: 2026-10-26T22:11:52.633+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.20.1
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'playground/package.json token-compile scripts invoke "bun ../../scripts/compile-tokens.ts ... || bun ../../../scripts/compile-tokens.ts ...". In an instantiated co-design project neither path is the project''s own compiler at ../scripts/compile-tokens.ts: ../../scripts/ does not exist, and ../../../scripts/compile-tokens.ts resolves OUTSIDE the repository (it only works on machines where the checkout happens to be nested under a workspace root that has scripts/compile-tokens.ts — an unversioned, out-of-repo dependency for the token SSOT pipeline). On any other clone layout both paths miss and bun run dev / bun run build die at the predev/prebuild hook. playground/README.md states the paths assume the compiler at <project>/scripts/compile-tokens.ts, which does not match the script as written. Fix direction: make ../scripts/compile-tokens.ts the primary path (keep the workspace path as documented fallback) and correct the README.'
+  affected_paths:
+    - playground/package.json
+    - playground/README.md
+    - scripts/compile-tokens.ts
+  identity_source: cwd
+  repro: 'Clone the variant project to a directory not nested under a workspace root containing scripts/compile-tokens.ts, then run bun run dev inside playground/: the predev hook cannot find the compiler and the command fails.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery playground/package.json=false
+    - info:in_last_delivery playground/README.md=false
+    - info:in_last_delivery scripts/compile-tokens.ts=false
+  dedupe_key: 4c4fce65d27292abadf5307ebf1f7b18f5a6b08aab1d62ada0edc316799951cc
+  duplicates:
+    - project: co-design
+      at: 2026-10-26T22:11:52.633+09:00
