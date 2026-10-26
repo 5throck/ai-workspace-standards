@@ -1,18 +1,11 @@
 ---
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 name: Skill-Graph Analyst
 role: specialist
 status: active
 version: 1.0.0
 last_reviewed: 2026-09-22
-tier:
-  claude: low
-  gemini: low
-  antigravity: low
-  gemini-cli: low
-  codex: low
-  hermes: low  # claude-haiku-5-5
-  zai: low  # glm-5.3-flash
+tier: low
 model: inherit
 color: cyan
 description: >
