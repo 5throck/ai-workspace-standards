@@ -3,12 +3,29 @@ id: T-20261026-005
 kind: manual
 title: Adjudicate four stale draft registry entries and normalize review_note keys
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-26T00:20:12.564+09:00'
 history:
   - at: '2026-10-26T00:20:12.564+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-26T19:33:13.021+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-26T19:33:13.037+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-26T19:33:13.052+09:00'
+    from: running
+    to: review
+  - at: '2026-10-26T19:33:13.067+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in workspace PR #1615 (fleet-review hardening batch, merged
+  2026-10-26; CI 8/8 CLEAN; local gates: audit all-pass, unit 1,595/0, tsc
+  clean). Design doc
+  docs/designs/2026-10-26-fleet-review-hardening-batch-design.md.
+  https://github.com/5throck/ai-workspace-standards/pull/1615
 error: null
