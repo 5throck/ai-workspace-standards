@@ -6,12 +6,18 @@ title: >-
   surface (root PR #1669 12 files, co-design PR #65 17 files) — compose count
   from the post-staging set per design 2026-10-28-dev-sync-staged-count-design
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-28T07:05:25.513+09:00'
 history:
   - at: '2026-10-28T07:05:25.513+09:00'
     from: null
     to: backlog
+  - at: '2026-10-28T07:22:14.716+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T07:22:14.732+09:00'
+    from: waiting
+    to: running
 result: null
 error: null

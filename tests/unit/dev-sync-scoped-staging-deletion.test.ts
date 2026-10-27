@@ -40,7 +40,10 @@ const libPath = path.join(workspaceRoot, 'scripts', 'lib', 'git-status.ts');
 const scratchRoot = path.join(workspaceRoot, 'tests', '.temp', 'scoped-staging-deletion-test');
 
 const BLOCK_START = '// 6.5 Scoped staging';
-const BLOCK_END = 'const syncContext = crypto.randomUUID();';
+// T-20261028-012: step 6.9 (final message composition) now sits between the
+// staging block and the sync-context tmp write, so the block slice ends where
+// step 6.9 begins — the extracted driver only defines step 6.5's variables.
+const BLOCK_END = '// ── Step 6.9 — final message composition';
 
 /** Extract the verbatim step 6.5 block from the dev-sync source. */
 function extractStep65Block(): string {

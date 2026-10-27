@@ -57,4 +57,28 @@ describe('dev-sync pipeline step ordering', () => {
     const verify = devSyncSource.indexOf('propagate-to-templates.ts --governance-l1 --docs`', invocation);
     expect(verify).toBeGreaterThan(invocation);
   });
+
+  // T-20261028-012, spec docs/designs/2026-10-28-dev-sync-staged-count-design.md
+  // (D4: step 6.9 is a pure insertion between the step-6.5 staging block and the
+  // sync-context tmp-file write / commit).
+  test('step 6.9 final-message composition sits after step 6.5 staging and before the commit (T-20261028-012)', () => {
+    const step69 = devSyncSource.indexOf('Step 6.9 — final message composition');
+    const stagingEnd = devSyncSource.indexOf('git add -A`.nothrow()'); // WARN-soak branch closes step 6.5
+    const commit = devSyncSource.indexOf('git commit -m ${msg}');
+    expect(step69).toBeGreaterThan(-1);
+    expect(stagingEnd).toBeGreaterThan(-1);
+    expect(commit).toBeGreaterThan(-1);
+    expect(step69).toBeGreaterThan(stagingEnd);
+    expect(step69).toBeLessThan(commit);
+    // D2: the re-derivation consumes the retained caller message (originalMsg),
+    // not the early-composed msg — weak-message replacement semantics preserved.
+    expect(devSyncSource).toContain('composeCommitMessage(originalMsg, finalStagedPaths)');
+    // The no-op early exit stays first and unchanged: it precedes the step-1
+    // composition block.
+    const noopExit = devSyncSource.indexOf('nothing to sync');
+    const step1Composition = devSyncSource.indexOf('composeCommitMessage(msg, stagedPaths)');
+    expect(noopExit).toBeGreaterThan(-1);
+    expect(step1Composition).toBeGreaterThan(-1);
+    expect(noopExit).toBeLessThan(step1Composition);
+  });
 });
