@@ -2,8 +2,16 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.10.0
+ * @version 1.11.0
  *
+ * v1.11.0 (2026-10-27, T-20261027-010): check 6c's content gate was DEAD — it
+ *  parsed `parsed.results` from `lifecycle-sync-audit.ts --json`, but the
+ *  AuditResult wire shape is {passed, errors, warnings, registry}: `results`
+ *  never existed, checkAErrors was always empty, and version mismatches never
+ *  blocked. Rewired to the real wire shape via the shared extractor
+ *  parseCheckAErrorsDetailed (helpers/pre-commit-script-gate.ts v1.1.0, same
+ *  module as the T-20261027-009 merge gate) so the extraction cannot drift
+ *  between the two call sites; the fixData-driven "→ Fix:" output is kept.
  * v1.10.0 (2026-10-27, T-20261027-009): check 6 becomes merge-aware. The
  *  "scripts/*.ts staged AND scripts/SCRIPTS.md not staged → FAIL" rule is a
  *  staged-file-set proxy and false-positives on merge commits where the
@@ -36,6 +44,7 @@ import { localDateISO } from "../lib/local-date.ts";
 import {
   evaluateScriptsMdGate,
   MERGE_GATE_NOTICE,
+  parseCheckAErrorsDetailed,
   runScriptsMdContentGate,
 } from "../helpers/pre-commit-script-gate.ts";
 
@@ -292,6 +301,9 @@ async function main() {
   }
 
   // 6c. Check A version blocking: @version in scripts/*.ts must match SCRIPTS.md
+  // (T-20261027-010: this gate was dead until v1.11.0 — it read `parsed.results`,
+  // a key that never exists on the AuditResult wire shape, so Check A mismatches
+  // never blocked. Extraction now goes through the shared, tested helper.)
   const scriptOrMdStaged = staged.some(f => {
     const normalized = f.replace(/\\/g, '/');
     return /^scripts\/.*\.ts$/.test(normalized) || normalized === 'scripts/SCRIPTS.md';
@@ -301,12 +313,11 @@ async function main() {
     console.log("\n=== Script Version Sync Check (Check A) ===");
     try {
       const auditResult = await $`bun scripts/lifecycle-sync-audit.ts --json`.quiet().nothrow();
-      const raw = auditResult.stdout.toString().trim();
-      let checkAErrors: Array<{ file: string; message: string; fixData?: { scriptName: string; fileVersion: string; registryVersion: string } }> = [];
+      let checkAErrors: Awaited<ReturnType<typeof parseCheckAErrorsDetailed>> = [];
       try {
-        const parsed = JSON.parse(raw);
-        const results: Array<{ level: string; file: string; message: string; fix?: string; fixData?: { scriptName: string; fileVersion: string; registryVersion: string } }> = parsed.results ?? [];
-        checkAErrors = results.filter(r => r.level === 'error' && r.message.includes('Check A:'));
+        // AuditResult wire shape: {passed, errors, warnings, registry} — Check A
+        // errors live in `errors` (level === 'error', message includes 'Check A:').
+        checkAErrors = parseCheckAErrorsDetailed(auditResult.stdout.toString().trim());
       } catch {
         console.error("\x1b[33m[WARN]\x1b[0m lifecycle-sync-audit.ts returned non-JSON output — skipping Check A version block");
       }

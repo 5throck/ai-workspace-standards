@@ -2,7 +2,18 @@
 /**
  * design-lint.ts — deterministic design-compliance lint (sub-check runner).
  * Runnable companion to the token-usage-lint and design-foundation specs.
- * @version 2.2.0
+ * @version 2.3.0
+ *
+ * v2.3.0 (2026-10-27, U-20261027-005, DESIGN-R2 theme invariance): new `themes`
+ * sub-check — the documented rule that theme presets in tokens.json may override
+ * ONLY color and shadow tokens (typography/spacing/borderRadius/target-size are
+ * theme-invariant; see design-tokens.template.css and the variant design docs)
+ * gains machine enforcement alongside the compiler's hard error (compile-tokens
+ * v1.3.0; the shared classification lives in helpers/theme-token-policy.ts so
+ * the two enforcement points cannot drift). "themes" is removed from
+ * TOKEN_SKIPPED_KEYS — the walker no longer treats the branch as invisible. A
+ * violation is a fail-level finding naming preset + key path; no theme presets
+ * declared → SKIP per the project-opt-in convention.
  *
  * v2.1.0 (2026-10-07, U-20261006-003): the fonts sub-check skips declarations
  * whose file matches `*.template.*` or whose value contains `<`/`>` — template
@@ -35,7 +46,7 @@
  *     parse only — no font loading or metrics.
  * CLI additions: `[project-root]` positional (default cwd; base for registry
  * lookup, token-source lookup, and default UI source roots), `--check <name>`
- * (repeatable: token-usage|components|patterns|icons|fonts; default all five),
+ * (repeatable: token-usage|components|patterns|icons|fonts|themes|list-table; default all),
  * `--json` (machine-readable report; per-check status pass|fail|skipped), and
  * `--schema` (prints the three shape-only registry YAML skeletons, exit 0).
  * Registry absence is a SKIP (exit-0 contribution), never an error: invoking the
@@ -84,11 +95,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { load as loadYaml } from "js-yaml";
+import { isThemeOverridableGroup } from "./helpers/theme-token-policy.ts";
 
-const VERSION = "2.2.0";
+const VERSION = "2.3.0";
 
 /** Sub-check execution order (canonical; --check selections are re-sorted to this). */
-const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts", "list-table"] as const;
+const CHECK_ORDER = ["token-usage", "components", "patterns", "icons", "fonts", "themes", "list-table"] as const;
 type CheckName = (typeof CHECK_ORDER)[number];
 
 /** Registry paths, relative to the project root (design §4.4). POSIX-style literals: the
@@ -126,8 +138,11 @@ const TOKEN_SOURCE_DIRS = [".", join("docs")];
 
 /** Token-layer keys stripped from JSON token paths (compile-tokens 3-layer model). */
 const TOKEN_LAYER_KEYS = new Set(["primitive", "semantic", "component"]);
-/** Reserved non-token JSON branches never walked. */
-const TOKEN_SKIPPED_KEYS = new Set(["themes"]);
+/** Reserved non-token JSON branches never walked. v2.3.0 (U-20261027-005):
+ * "themes" was REMOVED — the theme-invariance rule is now ENFORCED (themes
+ * sub-check), not silently skipped; theme presets carry only color/shadow
+ * overrides, so their re-declarations join the declaration set harmlessly. */
+const TOKEN_SKIPPED_KEYS = new Set<string>([]);
 
 // ---------------------------------------------------------------------------
 // v1.0.0 raw-value detector (unchanged — reused by token-usage and components)
@@ -395,7 +410,9 @@ function normalizePropertyName(raw: string): string {
   return raw.startsWith("--") ? raw : `--${raw}`;
 }
 
-/** Walk a tokens.json-style tree; layer keys are transparent, "themes" is skipped. */
+/** Walk a tokens.json-style tree; layer keys are transparent (reserved branches:
+ * see TOKEN_SKIPPED_KEYS — "themes" is enforced by the themes sub-check since
+ * v2.3.0, no longer skipped). */
 function collectJsonProperties(node: unknown, path: string[], out: TokenDeclaration[], file: string): void {
   if (node === null || typeof node !== "object" || Array.isArray(node)) return;
   const obj = node as Record<string, unknown>;
@@ -1180,18 +1197,73 @@ function runFonts(opts: CliOptions): CheckResult {
 }
 
 // ---------------------------------------------------------------------------
+// Sub-check: themes (U-20261027-005 — DESIGN-R2 theme invariance)
+// ---------------------------------------------------------------------------
+
+/**
+ * DESIGN-R2: theme presets in tokens.json may override ONLY color and shadow
+ * tokens — typography/spacing/borderRadius/target-size are theme-invariant
+ * (documented in design-tokens.template.css and the variant design docs).
+ * compile-tokens.ts v1.3.0 hard-fails such input; this sub-check is the lint
+ * counterpart over the same token source, sharing the key classification via
+ * helpers/theme-token-policy.ts so the two enforcement points cannot drift.
+ */
+function runThemes(opts: CliOptions): CheckResult {
+  const root = opts.projectRoot;
+  const jsonSources = discoverTokenSourceFiles(root, opts.config).filter((rel) => rel.endsWith(".json"));
+  if (jsonSources.length === 0) {
+    return skipped("themes", "no JSON token source found (looked for *token*.{json} in project root and docs/)");
+  }
+  const findings: Finding[] = [];
+  let presetsSeen = 0;
+  for (const rel of jsonSources) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(readFileSync(join(root, rel), "utf8"));
+    } catch {
+      continue; // malformed JSON token source: not this lint's remediation scope
+    }
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) continue;
+    const themesNode = (parsed as Record<string, unknown>)["themes"];
+    if (themesNode === undefined || themesNode === null || typeof themesNode !== "object" || Array.isArray(themesNode)) {
+      continue;
+    }
+    for (const [preset, node] of Object.entries(themesNode as Record<string, unknown>)) {
+      if (node === null || typeof node !== "object" || Array.isArray(node)) continue;
+      presetsSeen++;
+      for (const key of Object.keys(node as Record<string, unknown>)) {
+        if (isThemeOverridableGroup(key)) continue;
+        findings.push({
+          file: toPosix(rel),
+          pattern: "theme-invariance",
+          match: `themes.${preset}.${key}`,
+          severity: "fail",
+          note: `theme preset '${preset}' overrides non-theme-invariant group '${key}' — theme presets may override ONLY color and shadow tokens; typography/spacing/borderRadius/target-size are theme-invariant (DESIGN-R2)`,
+        });
+      }
+    }
+  }
+  if (presetsSeen === 0) {
+    return skipped("themes", "no theme presets declared in the project token source");
+  }
+  return result("themes", findings);
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
 function printHelp(): void {
   console.log(`design-lint.ts v${VERSION} — deterministic design-compliance lint (sub-check runner)
 
-Sub-checks (default: all five):
+Sub-checks (default: all):
   token-usage   raw hex / rgb() / hsl() / raw px detection (v1.0.0 behavior, unchanged)
   components    docs/design/components.registry.yaml shape + token bindings + governed raw-value scan
   patterns      docs/design/patterns.registry.yaml shape + composes_from cross-refs + docs/*.md usage
   icons         docs/design/icon-vocabulary.yaml shape + UI-source icon reference set membership
   fonts         --font-* token stack contract (>= 1 fallback + terminating generic family)
+  themes        DESIGN-R2 theme invariance — presets override only color/shadow (U-20261027-005)
+  list-table    .data-table with per-row actions carries the list-table modifier + sr-only header
 
 Usage:
   bun scripts/design-lint.ts [project-root]       base dir for registries/tokens (default: cwd)
@@ -1391,6 +1463,7 @@ export async function main(): Promise<void> {
     patterns: runPatterns,
     icons: runIcons,
     fonts: runFonts,
+    themes: runThemes,
     "list-table": runListTable,
   };
 

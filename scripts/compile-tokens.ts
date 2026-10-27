@@ -1,7 +1,25 @@
 #!/usr/bin/env bun
 /**
  * compile-tokens.ts — Design Tokens Compiler (tokens.json → CSS & TypeScript)
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (2026-10-27, U-20261027-006 + U-20261027-005): every provenance banner
+ *  (help header, CSS header, TS header) derives from the single VERSION constant
+ *  — the v1.2.0 @version header, the v1.1.0 help banner, and the v1.1.0 TS
+ *  banner used to disagree, so generated artifacts carried mismatched
+ *  provenance. Default input precedence inverts: ./tokens.json (project-local)
+ *  wins, templates/co-design/tokens.json is only the workspace-repo fallback —
+ *  in an instantiated project the template copy no longer silently beats the
+ *  project's own tokens.json. Theme invariance (U-20261027-005, DESIGN-R2):
+ *  a theme preset overriding any top-level group other than color/shadow is a
+ *  HARD compile error naming the preset and the offending key path (shared rule
+ *  with design-lint via helpers/theme-token-policy.ts) — the SSOT must not
+ *  compile rule violations.
+ *
+ * Canonical regeneration of the committed template artifacts (from the repo root):
+ *   bun scripts/compile-tokens.ts --input templates/co-design/tokens.json \
+ *     --output-css templates/co-design/playground/src/generated/tokens.css \
+ *     --output-ts templates/co-design/playground/src/generated/tokens.ts
  *
  * Compiles visual design tokens (colors, typography, spacing, radii, shadows) from tokens.json
  * into CSS Custom Properties (:root { --color-primary: ... }) and strongly-typed TypeScript constant files (tokens.ts).
@@ -43,6 +61,10 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { isThemeOverridableGroup } from "./helpers/theme-token-policy.ts";
+
+/** Single source of truth for every version banner this compiler emits. */
+const VERSION = "1.3.0";
 
 interface CliOptions {
   input?: string;
@@ -85,17 +107,20 @@ function parseArgs(): CliOptions {
  */
 function printHelp(): void {
   console.log(`
-Visual Design Tokens Compiler v1.1.0
+Visual Design Tokens Compiler v${VERSION}
 
 Compiles tokens.json to CSS Custom Properties (:root { --color-primary: ... })
 and strongly-typed TypeScript constant files (tokens.ts). A reserved top-level
 "themes" object compiles to [data-theme="<name>"] CSS blocks and a TS themes export.
+Theme presets may override ONLY color and shadow tokens (DESIGN-R2 theme
+invariance) — a preset overriding typography/spacing/borderRadius/target-size
+is a hard compile error.
 
 Usage:
   bun scripts/compile-tokens.ts [options]
 
 Options:
-  --input <file>, -i <file>       Path to input design tokens JSON file (default: tokens.json or templates/co-design/tokens.json)
+  --input <file>, -i <file>       Path to input design tokens JSON file (default: ./tokens.json — project-local wins; templates/co-design/tokens.json is only the workspace-repo fallback)
   --output-css <file>, -c <file>   Path to output CSS custom properties file (default: tokens.css)
   --output-ts <file>, -t <file>     Path to output TypeScript constants file (default: tokens.ts)
   --check                          Verify if generated files match source without writing
@@ -189,6 +214,15 @@ interface ExtractedTheme {
 }
 
 /**
+ * A DESIGN-R2 theme-invariance violation (U-20261027-005): a preset overrides
+ * a top-level group outside the color/shadow allowlist.
+ */
+interface ThemeInvarianceViolation {
+  preset: string;
+  key: string;
+}
+
+/**
  * Reserved top-level token-layer keys (ADR-0064 3-layer model). Their names are
  * stripped from CSS variable paths; extraction order below preserves layer order.
  */
@@ -203,27 +237,35 @@ const LAYER_KEYS = ["primitive", "semantic", "component"] as const;
  * v1.2.0: reserved layer keys ("primitive"/"semantic"/"component") are ALSO split off —
  * their tokens join the default :root set with the layer key stripped from the variable
  * path, emitted in layer order so semantic var() references to primitives resolve.
+ *
+ * v1.3.0 (U-20261027-005, DESIGN-R2): each preset's TOP-LEVEL keys are checked
+ * against the shared color/shadow allowlist (helpers/theme-token-policy.ts).
+ * Any other group — typography, spacing, borderRadius, target-size, ... — is a
+ * hard error: the violations are returned to main(), which exits 1 BEFORE any
+ * output is written. Only color and shadow may vary per theme.
  */
 function extractThemes(root: unknown): {
   defaultNode: Record<string, unknown>;
   themes: ExtractedTheme[];
+  violations: ThemeInvarianceViolation[];
 } {
   const themes: ExtractedTheme[] = [];
+  const violations: ThemeInvarianceViolation[] = [];
 
   if (typeof root !== "object" || root === null || Array.isArray(root)) {
-    return { defaultNode: {}, themes };
+    return { defaultNode: {}, themes, violations };
   }
   const record = root as Record<string, unknown>;
   const themesNode = record["themes"];
 
   if (themesNode === undefined) {
-    return { defaultNode: record, themes };
+    return { defaultNode: record, themes, violations };
   }
 
   if (typeof themesNode !== "object" || themesNode === null || Array.isArray(themesNode)) {
     console.warn(`⚠️ Warning: top-level "themes" is not an object — ignoring theme presets.`);
     const { themes: _ignored, ...rest } = record;
-    return { defaultNode: rest, themes };
+    return { defaultNode: rest, themes, violations };
   }
 
   const { themes: _stripped, ...rest } = record;
@@ -232,11 +274,19 @@ function extractThemes(root: unknown): {
       console.warn(`⚠️ Warning: theme "${name}" is not an object — skipping.`);
       continue;
     }
+    // DESIGN-R2 theme invariance: every top-level key of a preset must name an
+    // overridable group (color/shadow). A bare leaf directly under the preset
+    // is equally a non-overridable group position and is reported too.
+    for (const key of Object.keys(node as Record<string, unknown>)) {
+      if (!isThemeOverridableGroup(key)) {
+        violations.push({ preset: name, key });
+      }
+    }
     const sub = extractTokens(node, []);
     themes.push({ name, tokens: sub.tokens, valueTree: sub.valueTree });
   }
 
-  return { defaultNode: rest, themes };
+  return { defaultNode: rest, themes, violations };
 }
 
 /**
@@ -293,7 +343,7 @@ function generateCss(
   const lines: string[] = [
     "/**",
     " * Visual Design Tokens — CSS Custom Properties",
-    " * Generated by compile-tokens.ts v1.2.0",
+    ` * Generated by compile-tokens.ts v${VERSION}`,
     ` * Source: ${inputRelativePath}`,
     " * Do not edit directly.",
     " */",
@@ -373,7 +423,7 @@ function generateTs(
   const lines: string[] = [
     "/**",
     " * Visual Design Tokens — TypeScript Constants",
-    " * Generated by compile-tokens.ts v1.1.0",
+    ` * Generated by compile-tokens.ts v${VERSION}`,
     ` * Source: ${inputRelativePath}`,
     " * Do not edit directly.",
     " */",
@@ -407,11 +457,15 @@ export async function main(): Promise<void> {
 
   let inputPath = options.input;
 
+  // U-20261027-006: project-local tokens.json wins; the template copy is only
+  // the workspace-repo fallback. The old order (template first) silently beat
+  // a project's own tokens.json in an instantiated project — the precedence
+  // class that produced the reversion incidents (upstream U-20261026-005).
   if (!inputPath) {
-    if (existsSync("templates/co-design/tokens.json")) {
-      inputPath = "templates/co-design/tokens.json";
-    } else if (existsSync("tokens.json")) {
+    if (existsSync("tokens.json")) {
       inputPath = "tokens.json";
+    } else if (existsSync("templates/co-design/tokens.json")) {
+      inputPath = "templates/co-design/tokens.json";
     } else {
       inputPath = "tokens.json";
     }
@@ -436,7 +490,21 @@ export async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const { defaultNode, themes } = extractThemes(parsedJson);
+  const { defaultNode, themes, violations } = extractThemes(parsedJson);
+
+  // U-20261027-005 (DESIGN-R2): theme-invariance violations are a hard compile
+  // error — the SSOT must not compile rule violations. Fails BEFORE any output
+  // is written.
+  if (violations.length > 0) {
+    console.error(`❌ Theme invariance violation(s) (DESIGN-R2) in "${inputPath}":`);
+    for (const v of violations) {
+      console.error(
+        `  - theme "${v.preset}" overrides non-theme-invariant group "${v.key}" (themes.${v.preset}.${v.key}) — theme presets may override ONLY color and shadow tokens; typography/spacing/borderRadius/target-size are theme-invariant`,
+      );
+    }
+    process.exit(1);
+  }
+
   const { tokens, valueTree, cssVarTree } = extractDefaultWithLayers(defaultNode);
 
   if (tokens.length === 0) {

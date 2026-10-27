@@ -1,4 +1,12 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-27, T-20261027-010): parseCheckAErrorsDetailed — Check A
+// extraction that PRESERVES the fixData payload ({scriptName, fileVersion,
+// registryVersion}) so pre-commit check 6c keeps its actionable "→ Fix:"
+// output while finally reading the real AuditResult wire shape. History: 6c
+// parsed `parsed.results`, a key that never existed on AuditResult
+// ({passed, errors, warnings, registry}) — the content gate was silently dead
+// (it never blocked anything). parseCheckAErrors now delegates to the detailed
+// variant, so both share one extraction.
 // v1.0.0 (T-20261027-009): merge-aware SCRIPTS.md gate for pre-commit check 6.
 // Import-safe (pure functions + an injectable audit-runner seam) — pre-commit.ts
 // itself runs main() at import and is not importable, so unit tests target this
@@ -8,8 +16,9 @@
 //     comparison (merge in progress).
 //   - MERGE_GATE_NOTICE: the one-line exemption notice (shared string so the
 //     hook's output and the tests cannot drift).
-//   - parseCheckAErrors(json): extracts Check A errors from
-//     `lifecycle-sync-audit.ts --json` output (AuditResult.errors).
+//   - parseCheckAErrors(json) / parseCheckAErrorsDetailed(json): extracts
+//     Check A errors from `lifecycle-sync-audit.ts --json` output
+//     (AuditResult.errors); the detailed variant keeps fixData.
 //   - runScriptsMdContentGate(runAudit): gates on the audit exit code and
 //     surfaces Check A details; the runner is injectable for tests.
 
@@ -47,16 +56,49 @@ interface RawAuditIssue {
   level?: unknown;
   file?: unknown;
   message?: unknown;
+  fixData?: unknown;
+}
+
+/** fixData payload lifecycle-sync-audit attaches to Check A mismatch rows. */
+export interface CheckAFixData {
+  scriptName: string;
+  fileVersion: string;
+  registryVersion: string;
+}
+
+/** One Check A error as surfaced to pre-commit check 6c. */
+export interface CheckAIssue {
+  file: string;
+  message: string;
+  fixData?: CheckAFixData;
+}
+
+function toFixData(raw: unknown): CheckAFixData | undefined {
+  if (raw === null || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  if (
+    typeof r.scriptName === 'string' &&
+    typeof r.fileVersion === 'string' &&
+    typeof r.registryVersion === 'string'
+  ) {
+    return { scriptName: r.scriptName, fileVersion: r.fileVersion, registryVersion: r.registryVersion };
+  }
+  return undefined;
 }
 
 /**
  * Extract Check A errors from `bun scripts/lifecycle-sync-audit.ts --json`
- * output. The JSON shape is AuditResult — `{ passed, errors, warnings,
- * registry }` where each issue carries `{ level, file, message }` and Check A
+ * output, preserving the fixData payload for actionable output (T-20261027-010).
+ * The JSON shape is AuditResult — `{ passed, errors, warnings, registry }`
+ * where each issue carries `{ level, file, message, fixData? }` and Check A
  * errors are the ones whose message includes 'Check A:'. Non-Check-A errors
- * are ignored here (the exit code gate below covers them).
+ * are ignored here (the exit code gate in runScriptsMdContentGate covers them).
+ *
+ * THIS is the extraction pre-commit check 6c must use: its pre-T-20261027-010
+ * implementation read `parsed.results`, a key that never exists on AuditResult,
+ * so the version-mismatch gate never fired (silent dead gate).
  */
-export function parseCheckAErrors(jsonRaw: string): Array<{ file: string; message: string }> {
+export function parseCheckAErrorsDetailed(jsonRaw: string): CheckAIssue[] {
   const parsed = JSON.parse(jsonRaw) as { errors?: RawAuditIssue[] } | null;
   const errors = Array.isArray(parsed?.errors) ? parsed.errors : [];
   return errors
@@ -67,7 +109,17 @@ export function parseCheckAErrors(jsonRaw: string): Array<{ file: string; messag
     .map((e) => ({
       file: typeof e.file === 'string' ? e.file : '',
       message: e.message,
+      fixData: toFixData(e.fixData),
     }));
+}
+
+/**
+ * Extract Check A errors from `bun scripts/lifecycle-sync-audit.ts --json`
+ * output (AuditResult.errors) — the file/message subset without fixData.
+ * Delegates to parseCheckAErrorsDetailed so the two cannot drift.
+ */
+export function parseCheckAErrors(jsonRaw: string): Array<{ file: string; message: string }> {
+  return parseCheckAErrorsDetailed(jsonRaw).map(({ file, message }) => ({ file, message }));
 }
 
 /** Result of one `lifecycle-sync-audit.ts --json` invocation. */
