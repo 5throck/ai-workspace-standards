@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261027-013
+kind: manual
+title: >-
+  learning: co-design playground smoke test bundle-coverage leg soft-skips
+  (tests/unit/playground-smoke.test.ts:61-64) — when playground/dist is absent
+  the test console.warns and returns, so all bundle a11y assertions (roles,
+  compiled theme blocks, token vars) are environment-dependent and a CI run
+  without a prior playground build passes with zero bundle coverage; harden by
+  building in-test or failing when dist is absent in CI context. Class:
+  script-gap (test hardening). Evidence: co-design PR #60 (fe90eb9), cycle
+  2026-10-27 Step 2f review
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-27T22:54:39.937+09:00'
+history:
+  - at: '2026-10-27T22:54:39.937+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

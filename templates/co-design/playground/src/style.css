@@ -16,6 +16,7 @@ body {
   margin: 0;
   font-family: var(--typography-font-family-sans);
   font-size: var(--typography-font-size-base);
+  line-height: var(--typography-line-height-body);
   color: var(--color-text);
   background: var(--color-background);
 }
@@ -33,6 +34,7 @@ a {
 
 .pg-title {
   font-size: var(--typography-font-size-xl);
+  line-height: var(--typography-line-height-heading);
   margin-bottom: var(--spacing-xs);
 }
 
@@ -49,6 +51,7 @@ a {
 
 .pg-section-title {
   font-size: var(--typography-font-size-lg);
+  line-height: var(--typography-line-height-heading);
   margin-bottom: var(--spacing-xs);
 }
 
@@ -198,6 +201,7 @@ a {
 .pg-table th,
 .pg-table td {
   text-align: left;
+  line-height: var(--typography-line-height-tight);
   padding: var(--table-padding);
   border-bottom: var(--focus-ring-offset) solid var(--table-border);
 }
@@ -420,7 +424,7 @@ a {
 
 .pg-table-scroll .col-num {
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--typography-numeric-variant);
 }
 
 /* Theme switcher — themes re-map semantic tokens only ([DESIGN-R2]) */
