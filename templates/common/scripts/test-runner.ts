@@ -1,6 +1,19 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.5.0
+ * @version 1.6.0
+ *
+ * v1.6.0 (2026-10-28, Windows CI timing budgets — PR #1677 CI run
+ * 40603661108): `upgrade-decision-log.test.ts` joins FILE_TIME_BUDGETS
+ * (suite 300s / test 60s). The U-20261028-001 tombstone engine suites added
+ * 17 full `upgrade-project.ts` integration runs to the file; on
+ * windows-latest its first 25 tests alone cost 119.7s, so the LAST test was
+ * killed by the 120s suite wall with "Test timed out after 120000ms" while
+ * every individual test PASSED (macOS total: 8.4s) — the same
+ * every-test-passes-file-killed-at-the-suite-wall shape that put
+ * mcp-upstream-server and upgrade-tree-sync on the override list in v1.5.0.
+ * Observed win32 per-test max 25.2s → test 60s keeps ≥2x headroom; projected
+ * win32 file total ~126s → suite 300s keeps ~2.4x. Not a hang: all 25
+ * printed passes are finite and the CI log shows no blocking test.
  *
  * v1.5.0 (2026-10-14, Windows CI timing budgets — CI run 38412124373):
  * (1) Bun per-test ceiling — the runner now passes `--timeout` to `bun test`
@@ -84,6 +97,7 @@ const DEFAULT_TEST_TIMEOUT_MS = 15000;
 const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
   'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
+  'upgrade-decision-log.test.ts': { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {

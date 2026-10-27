@@ -52,9 +52,9 @@ const phaseDefsTemplate = existsSync(join(workspaceRoot, 'templates', VARIANT, P
 
 function makeTempProject(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'upgrade-decision-log-'));
-  spawnSync('git', ['init', '-q'], { cwd: tmp });
-  spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp });
-  spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp });
+  spawnSync('git', ['init', '-q'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
   mkdirSync(join(tmp, '.claude'), { recursive: true });
   writeFileSync(
     join(tmp, '.claude', 'template-version.txt'),
@@ -64,15 +64,23 @@ function makeTempProject(): string {
 }
 
 function commitAll(tmp: string, message: string): void {
-  spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-  spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', message], { cwd: tmp });
+  spawnSync('git', ['-C', tmp, 'add', '-A'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', message], { stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 function runUpgrade(tmp: string, extraArgs: string[] = []): { status: number; out: string } {
+  // Windows handle hygiene (PR #1677 CI, run 40603661108): the engine spawns
+  // its own bun grandchildren (skill-graph / VERSION_MANIFEST / snapshot /
+  // provenance regenerations). Pin the child's stdin closed ('ignore') so no
+  // git or bun subprocess can ever block on an inherited stdin handle, and
+  // keep stdout/stderr as fully consumed pipes. spawnSync reaps the direct
+  // child before returning; the engine's own grandchildren exit before it.
+  // The file-level CI wall is handled by the test-runner per-file budget
+  // override (scripts/test-runner.ts v1.6.0).
   const result = spawnSync(
     'bun',
     [upgradeScript, tmp, '--variant', VARIANT, '--yes', ...extraArgs],
-    { encoding: 'utf-8', timeout: 300000 }
+    { encoding: 'utf-8', timeout: 300000, stdio: ['ignore', 'pipe', 'pipe'] }
   );
   return { status: result.status ?? -1, out: `${result.stdout ?? ''}\n${result.stderr ?? ''}` };
 }
