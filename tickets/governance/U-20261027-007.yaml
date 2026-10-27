@@ -3,14 +3,29 @@ id: U-20261027-007
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-27T19:13:50.384+09:00
+created_at: '2026-10-27T19:13:50.384+09:00'
 history:
-  - at: 2026-10-27T19:13:50.384+09:00
+  - at: '2026-10-27T19:13:50.384+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T21:36:59.018+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T21:36:59.069+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-27T21:36:59.069+09:00'
+    from: review
+    to: done
+result: >-
+  Verified independently (no officialPatterns matched README/user-guide EN
+  originals): /Hermes/i regex fixed; officialPatterns += README.md,
+  docs/README.md, docs/user-guide.md + _ko twins; declaration gate exported and
+  extended — root README_ko.md lacked a lang declaration and was stamped lang:
+  ko per the policy rather than weakening the gate; validate-md-language
+  v1.16.0, 18 new tests, validator 2229 files exit 0.
 error: null
 upstream:
   project: co-design
@@ -19,12 +34,33 @@ upstream:
   source: project/co-design
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/validate-md-language.ts has three perimeter gaps in the language policy enforcement. (a) Dead protected-path entry: the protected-paths list (~line 236) matches /^Hermes\.md$/ case-sensitively, which never matches the actual root file HERMES.md — currently harmless (no Hangul in that file) but the protection intent is dead code. (b) English originals of the bilingual twins are unscanned: no pattern in officialPatterns (~lines 206-242) matches root README.md, docs/README.md, or docs/user-guide.md, so a stray Korean sentence introduced into the EN originals never fails validation (the KO twins are guarded only for the user-guide pair via the hash sync, and the README pair''s hash check does not scan language). (c) Unenforceable declarations: the suffix-locale declaration gate (~lines 470-486) runs only on files passing isOfficialDocument, so lang: ko declarations in README_ko.md, docs/user-guide_ko.md, and docs/README_ko.md are convention-only, whereas agents/ and skills/ README twins ARE gated. Requested: fix the HERMES.md regex to case-insensitive, add officialPatterns entries for the EN originals, and extend (or explicitly accept) the declaration-gate perimeter.'
+  symptom: >-
+    scripts/validate-md-language.ts has three perimeter gaps in the language
+    policy enforcement. (a) Dead protected-path entry: the protected-paths list
+    (~line 236) matches /^Hermes\.md$/ case-sensitively, which never matches the
+    actual root file HERMES.md — currently harmless (no Hangul in that file) but
+    the protection intent is dead code. (b) English originals of the bilingual
+    twins are unscanned: no pattern in officialPatterns (~lines 206-242) matches
+    root README.md, docs/README.md, or docs/user-guide.md, so a stray Korean
+    sentence introduced into the EN originals never fails validation (the KO
+    twins are guarded only for the user-guide pair via the hash sync, and the
+    README pair's hash check does not scan language). (c) Unenforceable
+    declarations: the suffix-locale declaration gate (~lines 470-486) runs only
+    on files passing isOfficialDocument, so lang: ko declarations in
+    README_ko.md, docs/user-guide_ko.md, and docs/README_ko.md are
+    convention-only, whereas agents/ and skills/ README twins ARE gated.
+    Requested: fix the HERMES.md regex to case-insensitive, add officialPatterns
+    entries for the EN originals, and extend (or explicitly accept) the
+    declaration-gate perimeter.
   affected_paths:
     - scripts/validate-md-language.ts
   identity_source: cwd
-  repro: 'Add a Korean sentence to README.md (English original) and run bun scripts/validate-md-language.ts: no violation is reported. Rename test: a file named HERMES.md with Hangul outside code fences is not protected by the /^Hermes\.md$/ pattern (case-sensitive).'
-  triage: inbox
+  repro: >-
+    Add a Korean sentence to README.md (English original) and run bun
+    scripts/validate-md-language.ts: no violation is reported. Rename test: a
+    file named HERMES.md with Hangul outside code fences is not protected by the
+    /^Hermes\.md$/ pattern (case-sensitive).
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -32,4 +68,15 @@ upstream:
   dedupe_key: 43df4069b035c17dca9feab6ef96a0c1a1b7eb1781949e732e786715e0e113c3
   duplicates:
     - project: co-design
-      at: 2026-10-27T19:13:50.384+09:00
+      at: '2026-10-27T19:13:50.384+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1653
+    template_version: unreleased
+    summary: >-
+      Verified independently (no officialPatterns matched README/user-guide EN
+      originals): /Hermes/i regex fixed; officialPatterns += README.md,
+      docs/README.md, docs/user-guide.md + _ko twins; declaration gate exported
+      and extended — root README_ko.md lacked a lang declaration and was stamped
+      lang: ko per the policy rather than weakening the gate;
+      validate-md-language v1.16.0, 18 new tests, validator 2229 files exit 0.

@@ -12,12 +12,28 @@ title: >-
   (inconsistent rows MUST fail the hook), version bump + cascade. T-20261027-009
   deliberately did not touch non-merge behavior.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T11:33:40.086+09:00'
 history:
   - at: '2026-10-27T11:33:40.086+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T21:36:59.085+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T21:36:59.102+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T21:36:59.118+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T21:36:59.135+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1653 (merged, CI green): 6c rewired to the real AuditResult
+  wire shape via helpers/pre-commit-script-gate.ts v1.1.0
+  parseCheckAErrorsDetailed (preserves fixData); phantom 'results' key
+  regression-tested; pre-commit.ts v1.11.0.
 error: null
