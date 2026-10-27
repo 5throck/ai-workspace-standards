@@ -13,12 +13,30 @@ title: >-
   version bump + SCRIPTS.md row + L1 mirror per house convention. Workaround
   used: supersede the PR with a re-branched single commit (option C).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T10:13:19.633+09:00'
 history:
   - at: '2026-10-27T10:13:19.633+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T11:33:40.102+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T11:33:40.117+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T11:33:40.132+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T11:33:40.148+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1647 (merged, CI green): check 6 is MERGE_HEAD-aware — during
+  merges it verifies rows==headers via lifecycle-sync-audit Check A content
+  comparison (fail-closed, observable notice) instead of the staged-file-set
+  proxy; non-merge behavior byte-identical; 13 unit tests + 3/3 e2e simulation
+  (one-sided merge PASS, inconsistent rows FAIL, non-merge regression intact).
+  Latent 6c dead-gate bug found and filed as a follow-up ticket.
 error: null
