@@ -12,7 +12,7 @@ title: >-
   reason; earlier wave PRs (14) merged before the wall hit with green checks.
   After billing is fixed: re-run failed checks on open PRs, then merge
 priority: urgent
-status: waiting
+status: done
 attempts: 1
 created_at: '2026-10-07T17:44:24.801Z'
 history:
@@ -31,7 +31,22 @@ history:
   - at: '2026-10-14T10:27:59.223+09:00'
     from: failed
     to: waiting
-result: null
+  - at: '2026-10-27T10:15:32.258+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T10:15:32.274+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T10:15:32.289+09:00'
+    from: review
+    to: done
+result: >-
+  Billing wall lifted (verified 2026-10-27 ~00:18 UTC): co-safety CI run
+  executes real steps — Documentation Audit 8 steps, Unit Tests 9, Dependency
+  Audit 8, Secret Scan 6, all SUCCESS; co-abap/co-design workflows running.
+  co-newbiz #458 already MERGED; fleet-wide open PRs = 0, so the 'rerun failed
+  checks then merge' follow-up is moot. BILLING-WALL EXCEPTION merges made
+  2026-10-26/27 were all re-validated by local gates at landing.
 error: >-
   Rerun of co-newbiz failed checks (run 37661047471) completed/failure
   2026-10-14T00:53Z — GitHub Actions billing wall persists; PR #458 itself is

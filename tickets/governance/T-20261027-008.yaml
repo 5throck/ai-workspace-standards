@@ -8,12 +8,34 @@ title: >-
   heading collisions WARN instead of silently skipping (same genus as
   U-20261026-005 silent-skip class)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T08:47:37.130+09:00'
 history:
   - at: '2026-10-27T08:47:37.130+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T10:27:02.963+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T10:27:02.983+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T10:27:03.000+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T10:27:03.016+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1645 (merged, CI 8/8 green; supersedes #1643 which could not
+  conclude a one-sided merge — pre-commit check 6 false positive tracked as
+  T-20261027-009). Template: templates/common/CLAUDE.md + root CLAUDE.md — '###
+  Pre-Edit Quality Gate' → '### 2. Pre-Edit Quality Gate', claude-s2 → '### 2.5
+  Native Slash Commands' so the insert lands between the five projects' local §2
+  and §3 (co-develop/co-consult/co-export/co-game/co-newbiz
+  CLAUDE.md:70/70/74/74/70 collided on number 2). Detector:
+  platform-skeleton-merge.ts v1.1.0 emits a named 'WARN: SKELETON HEADING
+  COLLISION — insert skipped' instead of silently skipping; 60/60 tests. Project
+  inserts ride the next MERGE wave.
 error: null
