@@ -87,7 +87,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 In Git Bash on Windows, writing to `> nul` or `2> nul` creates a physical file named `nul` in the working directory because Bash interprets `nul` as a relative path rather than the Win32 OS NUL device. Node.js / Bun `fs` APIs cannot delete physical `nul` files on Windows.
 - **Rule**: NEVER use `> nul` or `2> nul` in shell commands or scripts. Use `> /dev/null 2>&1` in Bash, or `$null` / `Out-Null` in PowerShell. All `.gitignore` templates MUST include `nul` and `NUL`.
 
-### Pre-Edit Quality Gate (All Platforms)
+### 2. Pre-Edit Quality Gate (All Platforms)
 
 Before editing any file for the **FIRST time in a session**, the agent MUST:
 
@@ -170,7 +170,7 @@ Spawn a teammate using the automation-engineer agent type to implement the scrip
 **Relationship to execution plan table**: teammateMode controls parallel execution mode. The execution plan table defines the multi-agent task dispatch.
 <!-- COMMON-CLAUDE:END -->
 
-### 2. Native Slash Commands
+### 2.5 Native Slash Commands
 Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
 
 | Command | Purpose | Underlying Trigger |
@@ -363,7 +363,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-26 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+*Last Updated: 2026-10-27 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
 
 

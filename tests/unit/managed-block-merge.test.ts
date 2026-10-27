@@ -649,7 +649,7 @@ describe('MERGE-pass composition: zones merged + skeleton sections restored + ta
     '# CLAUDE.md',
     'head prose',
     '',
-    '### 2. Native Slash Commands',
+    '### 2.5 Native Slash Commands',
     'slash body',
     '',
     '### 3. MCP Configurations & Absolute Resolving',
@@ -716,21 +716,23 @@ describe('MERGE-pass composition: zones merged + skeleton sections restored + ta
     expect(zonePass.content).not.toContain('OLD policy body');
   });
 
-  test('skeleton pass inserted §3/§4.5/§5/§6 in template-relative order (§2 collision-skipped)', () => {
+  test('skeleton pass inserted §2.5/§3/§4.5/§5/§6 in template-relative order (no collision — T-20261027-008 resolved §2)', () => {
     const inserted = skeletonPass.log.filter((l) => l.includes('SKELETON INSERTED'));
-    expect(inserted.length).toBe(4);
+    expect(inserted.length).toBe(5);
+    expect(inserted.some((l) => l.includes('claude-s2'))).toBe(true);
     expect(inserted.some((l) => l.includes('claude-s3'))).toBe(true);
     expect(inserted.some((l) => l.includes('claude-s45'))).toBe(true);
     expect(inserted.some((l) => l.includes('claude-s5'))).toBe(true);
     expect(inserted.some((l) => l.includes('claude-s6'))).toBe(true);
-    expect(skeletonPass.log.some((l) => l.includes('SKELETON DRIFT (manual review)') && l.includes('claude-s2'))).toBe(true);
+    expect(skeletonPass.log.some((l) => l.includes('SKELETON HEADING COLLISION'))).toBe(false);
     expect(skeletonPass.merged).toBe(true);
   });
 
   test('final content: sections in order, zones merged, local EOF tail byte-identical', () => {
     const c = skeletonPass.content;
     expect(c.indexOf('### 2. Pre-Edit Quality Gate')).toBeGreaterThan(-1);
-    expect(c.indexOf('### 2. Pre-Edit Quality Gate')).toBeLessThan(c.indexOf('### 4.5 Skill Resolution Priority'));
+    expect(c.indexOf('### 2. Pre-Edit Quality Gate')).toBeLessThan(c.indexOf('### 2.5 Native Slash Commands'));
+    expect(c.indexOf('### 2.5 Native Slash Commands')).toBeLessThan(c.indexOf('### 4.5 Skill Resolution Priority'));
     expect(c.indexOf('### 4.5 Skill Resolution Priority')).toBeLessThan(c.indexOf('### 5. Agent Dispatch Rules'));
     expect(c.indexOf('### 5. Agent Dispatch Rules')).toBeLessThan(c.indexOf(OPEN + '\n' + EPB));
     expect(c.indexOf('### 6. Native Sub-agents (`Agent` Tool)')).toBeGreaterThan(c.indexOf(END + '\n\n### 6.'));
