@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261028-006
+kind: manual
+title: >-
+  co-design content drift: feedback pattern composition mismatch — registry
+  composes_from lists badge but screen-patterns.md row 7 omits it
+  (patterns.registry.yaml:42 vs screen-patterns.md:34, Phase 1b CD-1);
+  optionally annotate implementation-only tokens (CD-3) and soften style.css
+  token-only header claim (CD-4) — ride the next co-design delivery
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-28T02:39:53.739+09:00'
+history:
+  - at: '2026-10-28T02:39:53.739+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
