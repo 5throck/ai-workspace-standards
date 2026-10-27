@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261028-008
+kind: manual
+title: >-
+  learning: distill co-newbiz ADR-0186 gate-integrity (PR #743, merge d06e25b8)
+  into a fleet-level process skill 'decision-write-integrity' — HARD
+  BLOCK/ACK/DISPLAY enforcement taxonomy for human decision writes,
+  off|shadow|enforce staged rollout, server-recomputed snapshot_hash
+  propose-then-confirm (409 on stale), deterministic script-aware rationale
+  substance check, maker/checker countersign with deny-by-default grants,
+  AI-recommendation divergence recording. Domain-neutral; verified absent from
+  templates/common and .agents/skills. Evidence:
+  Projects/co-newbiz/docs/adr/0186-gate-integrity.md:33-115,158-167 +
+  docs/designs/2026-10-26-gate-integrity-design.md. Pollination lead:
+  Projects/co-architect src/cad_intelligence/closed_loop/model.py:127,44
+  (requires_human_approval / APPROVED). Extracted by Step 2f 2026-10-28
+  (co-newbiz #533/#534 reviewed, nothing to extract)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-28T03:08:25.334+09:00'
+history:
+  - at: '2026-10-28T03:08:25.334+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

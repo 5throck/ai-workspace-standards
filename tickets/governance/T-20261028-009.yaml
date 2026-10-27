@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261028-009
+kind: manual
+title: >-
+  URGENT secrets-gate finding (hard-fail recorded): gitleaks full-config flagged
+  4× generic-api-key in Projects/co-newbiz window range f2477a69..HEAD —
+  tests/unit/gate-integrity-p1.test.ts and gate-proposal-confirm-p2.test.ts
+  (commits 46d46bac P0/P1, d1df3814 P2). FP assessment: flagged lines are
+  gate-acknowledgement identifier fixtures (key: "k", key: "rag:absent",
+  snapshot_hash: "abc") not credentials; values structural, no bearer/API
+  material in range. Disposition pending human adjudication: confirm FP class
+  and either allowlist test-fixture acknowledgement keys in
+  .github/gitleaks-full.toml (validator-hardening route) or scrub fixtures.
+  Until cleared: T-20261028-008 (learning: decision-write-integrity from
+  ADR-0186) must not port any co-newbiz gate code into templates/skills
+  surfaces. No project content entered root/templates this cycle; wave
+  unaffected (template→project direction, content derives from tagged
+  template-v0.22.0)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-28T03:19:52.283+09:00'
+history:
+  - at: '2026-10-28T03:19:52.283+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
