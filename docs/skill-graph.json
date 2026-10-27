@@ -7740,8 +7740,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "3e4842fb6b019e17",
-      "version": "1.6.2",
+      "content_hash": "9b1a1e01f57eb296",
+      "version": "1.7.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",
@@ -29289,6 +29289,18 @@
       "from": "skill:root/new-project",
       "to": "skill:root/upgrade-project",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/project-resync",
+      "to": "skill:root/project-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/project-resync/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
     },
     {
       "type": "relates_to",

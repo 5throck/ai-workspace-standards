@@ -1,21 +1,21 @@
 ---
 name: project-resync
-version: 1.6.2
+version: 1.7.0
 description: >
   Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
-  promote reusable work back into templates/L0, run the root /sync, upgrade
-  projects from their variant templates, and land upgrade PRs. Use when:
-  user says "project-resync", "resync projects", "resync the project fleet",
-  "sync project cycle", or asks to sync/backport/upgrade the Projects/* fleet.
-  Distinct from the `sync` skill (single-repo commit→PR pipeline): this is the
-  whole-fleet, bidirectional cycle.
+  promote reusable work back into templates/L0, review each project (cadenced),
+  run the root /sync, upgrade projects from their variant templates, and land
+  upgrade PRs. Use when: user says "project-resync", "resync projects", "resync
+  the project fleet", "sync project cycle", or asks to sync/backport/upgrade
+  the Projects/* fleet. Distinct from the `sync` skill (single-repo commit→PR
+  pipeline): this is the whole-fleet, bidirectional cycle.
 status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_updated: 2026-10-26
-last_reviewed: 2026-10-08
+last_updated: 2026-10-27
+last_reviewed: 2026-10-27
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync
@@ -24,6 +24,8 @@ relates_to:
     type: follows
   - skill: project-to-variant
     type: relates_to
+  - skill: project-review
+    type: composes_with
 metadata:
   type: orchestration
   triggers:
@@ -88,20 +90,38 @@ Per project (clean of STALE-RESIDUE now):
 
 ## Step 2 — Selective backport review
 
-Diff each project's committed LOCAL-WORK against its variant surface
+Diff each project's **landed delta for this cycle** against its variant surface
 (`templates/co-<x>/`) using the 5-surface method
-(docs/designs/2026-08-28-project-template-backport-design.md):
+(docs/designs/2026-08-28-project-template-backport-design.md). The delta source
+is the union of:
+
+- **(a) Step-1 LOCAL-WORK landings** (as before); and
+- **(b) merged PRs in the review window** that are **non-mechanical** —
+  mechanical = the PR is a template-delivery/workspace-sync landing whose
+  changed files are limited to `template-version.txt`, `.claude/last-upgrade-*`,
+  `docs/VERSION_MANIFEST.md`, `memory/`, and generated registries
+  (`chore: upgrade template…` / `chore: workspace sync…` shapes). Session work
+  a project landed through its own dev-sync PRs (feature/fix/docs PRs) is NOT
+  mechanical and MUST enter the judgment. For (b), run
+  `bun scripts/backport-diff.ts --project <p> --base <pre-window-rev>` where
+  pre-window-rev is the project revision before the window's first
+  non-mechanical merge (fall back to the mechanical wave's merge if the exact
+  rev is unclear; state the base used in the report).
+
+Session-landed work previously bypassed this step entirely (only Step 2e saw
+it, requests-only) — since 1.7.0 every landed delta gets a promote /
+stays-project / discarded-stale verdict:
 
 - **Promote** template-grade, reusable assets into `templates/co-<x>/` (or L0
   for cross-variant assets) — after measuring that the project copy is
   genuinely newer/richer, not just divergent.
 - **Stays-project**: engagement output, domain content, VARIANT-INJECT blocks.
-- Optional aid: per-file candidate table over the committed range — run the
-  5-surface comparison manually (`git -C Projects/<co-name> diff --stat --cached <base>..`
-  plus surface-by-surface reads); a `scripts/backport-diff.ts` helper has been
-  referenced here historically but was never implemented (T-20261009-003).
+- 5-surface candidate table aid: `bun scripts/backport-diff.ts --project
+  <co-name> --base <rev>` (v1.0.2, standard aid since T-20261009-003) plus
+  surface-by-surface reads over the named range.
 - Produce the per-variant judgment report (promoted / stays-project /
-  discarded-stale) — it feeds Step 3's PR body and the root CHANGELOG.
+  discarded-stale, per source (a)/(b)) — it feeds Step 3's PR body and the
+  root CHANGELOG.
 - Validate: `bun scripts/validate-templates.ts`, `bun test` (root).
 
 ## Step 2b — Evidence plane review
@@ -200,6 +220,39 @@ landings, small and fresh):
    redefined to seed from these extracted assets, not only from backport
    diffs. The Friday FULL sweep reviews the cumulative week as the safety
    net for anything a nightly pass missed or degraded.
+6. **Skill-graph learning cross-reference** (since 1.7.0): after Phase-I's
+   `skill-graph-fleet-report.ts` snapshot exists, diff per-project skill sets
+   and node counts against the prior snapshot. Project-side **new skills this
+   window** join the extraction pass as candidates; a new/similar skill
+   converging across ≥3 projects, or a fleet-report delivery gap (root skill
+   missing from projects), files a `skill-graph:`-prefixed ticket row.
+   Report-only — this never edits `skills/`, `templates/`, or projects.
+
+## Step 2f — Per-project review (cadence; since 1.7.0)
+
+The fleet's project reviews previously happened only in ad-hoc sessions — the
+nightly cycle now carries a per-project review leg (design
+2026-10-27-project-resync-coverage-design):
+
+1. **Battery ALWAYS** (no agents): run each project's own `bun scripts/audit.ts`
+   and record PASS/FAIL per project in the cycle report. Any FAIL → same-day
+   ticket with the mandatory Class column.
+2. **SCOPED review** for every project with a non-mechanical window landing
+   (same set as Step 2 source (b)): one window-scoped read-only reviewer per
+   project — Critical / High / Moderate / Strengths with file:line evidence,
+   Class column (one-time / systemic / script-gap), in the cycle report's
+   per-project section. Script-gap findings become validator-hardening tickets
+   like any project-review run.
+3. **ROTATION safety net**: when the scoped set is empty (or the night is
+   heavy), review exactly one project per night by deterministic rotation —
+   `day-of-year mod N` over the sorted `Projects/co-*` glob — so every project
+   is reviewed at least once per N nights even when quiet. State the rotated
+   project in the report.
+4. **Budget binding**: Step 2f reviewers share the nightly ≤4-agent cap with
+   Phase 1b variant reviews and Step 2e extraction passes; on cap exhaustion,
+   remaining projects degrade to battery-only with an explicit note and carry
+   FIFO to the next night. Degraded cycle (Phase I ≥3 ERRORs) → battery-only,
+   no reviewers.
 
 ## Step 3 — Root PR
 
@@ -262,8 +315,9 @@ After Step 5's merges:
 - Step 2b: evidence-backport-scan verdict table per project + human-triage rows.
 - Step 2c: fleet echo-check verdict table per backport candidate.
 - Step 2d: upstream request ledger (read-only upward-carrier report).
-- Step 2e: learning-extraction outputs.
-- Cycle summary: one table — project → synced? / promoted? / upgraded? / final state.
+- Step 2e: learning-extraction outputs (including skill-graph cross-reference rows).
+- Step 2f: per-project review section — battery table (all projects) + scoped/rotation findings.
+- Cycle summary: one table — project → synced? / promoted? / reviewed? / upgraded? / final state.
 
 ## Related Skills
 
