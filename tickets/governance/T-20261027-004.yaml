@@ -9,7 +9,7 @@ title: >-
   clobber seen in co-newbiz. Needs a design decision on preservation/merge
   semantics + possibly porting the design-foundation 4b amendment into L1
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-27T06:47:04.908+09:00'
 history:
@@ -25,5 +25,18 @@ history:
   - at: '2026-10-27T10:15:32.509+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-27T12:52:09.874+09:00'
+    from: review
+    to: done
+result: >-
+  Design approved (user directive 2026-10-27, DEC-20261027-01) and implemented
+  via PR #1649 (merged, CI green): upgrade-policy v1.25.0 (sha256 baselines,
+  classifyProjectState, resolveDisposition) + upgrade-project v1.76.0
+  (schemaVersion-2 manifest with baselines+decisions keeping files[]
+  byte-compatible, ERROR-grade CONFLICT default-SKIP with --disposition
+  adopt-template, unified decision log, non-zero exit on ERROR) + dev-sync
+  v1.32.0 step 3.9 auto-E5 block on unresolved ERRORs; 15 new tests, 0
+  regressions in 87 engine tests; real dry-runs: co-work behavior-identical (0
+  ERROR), co-design protected set 0 CONFLICT. Design spec flipped to
+  implemented.
 error: null
