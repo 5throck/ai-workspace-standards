@@ -20,12 +20,15 @@ import {
   evaluateScriptsMdGate,
   MERGE_GATE_NOTICE,
   parseCheckAErrors,
+  parseCheckAErrorsDetailed,
   runScriptsMdContentGate,
 } from '../../scripts/helpers/pre-commit-script-gate.ts';
 import type { LifecycleAuditRun } from '../../scripts/helpers/pre-commit-script-gate.ts';
 
 /** Real AuditResult wire shape (lifecycle-sync-audit.ts --json). */
-function auditJson(errors: Array<{ level: string; file: string; message: string }>): string {
+function auditJson(
+  errors: Array<{ level: string; file: string; message: string; fixData?: unknown }>,
+): string {
   return JSON.stringify({
     checksRun: ['A', 'B', 'C', 'E', 'F', 'G', 'H'],
     errors,
@@ -147,6 +150,84 @@ describe('runScriptsMdContentGate (merge-path content invariant)', () => {
         throw new Error('spawn failed');
       }),
     ).rejects.toThrow('spawn failed');
+  });
+});
+
+describe('parseCheckAErrorsDetailed (check 6c extraction — T-20261027-010 dead-gate regression)', () => {
+  test('REGRESSION: inconsistent rows under the REAL wire shape are extracted (the gate blocks)', () => {
+    // Before T-20261027-010, check 6c read `parsed.results` — a key that never
+    // exists on AuditResult — so this exact payload produced zero errors and
+    // the version-mismatch gate never blocked anything.
+    const raw = auditJson([
+      {
+        level: 'error',
+        file: 'scripts/hooks/pre-commit.ts',
+        message: 'Check A: scripts/hooks/pre-commit.ts @version 1.10.0 does not match SCRIPTS.md entry 1.11.0',
+        fixData: { scriptName: 'pre-commit.ts', fileVersion: '1.10.0', registryVersion: '1.11.0' },
+      },
+    ]);
+    const issues = parseCheckAErrorsDetailed(raw);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].file).toBe('scripts/hooks/pre-commit.ts');
+    expect(issues[0].message).toContain('does not match SCRIPTS.md entry 1.11.0');
+    expect(issues[0].fixData).toEqual({
+      scriptName: 'pre-commit.ts',
+      fileVersion: '1.10.0',
+      registryVersion: '1.11.0',
+    });
+  });
+
+  test('THE OLD BUG: a payload carrying only the phantom `results` key yields no Check A findings from `errors`', () => {
+    // Pins the root cause: anything 6c could have read from `results` is not
+    // part of the wire shape — `errors` is the only source of Check A rows.
+    const phantomShape = JSON.stringify({
+      passed: false,
+      results: [
+        {
+          level: 'error',
+          file: 'scripts/hooks/pre-commit.ts',
+          message: 'Check A: scripts/hooks/pre-commit.ts @version 1.10.0 does not match SCRIPTS.md entry 1.11.0',
+        },
+      ],
+      warnings: [],
+      registry: [],
+    });
+    expect(parseCheckAErrorsDetailed(phantomShape)).toEqual([]);
+  });
+
+  test('fixData with an unexpected shape degrades to undefined (message-only output)', () => {
+    const raw = auditJson([
+      {
+        level: 'error',
+        file: 'scripts/x.ts',
+        message: 'Check A: scripts/x.ts @version 1.0.0 does not match SCRIPTS.md entry 2.0.0',
+        fixData: { scriptName: 42 },
+      },
+    ]);
+    const issues = parseCheckAErrorsDetailed(raw);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].fixData).toBeUndefined();
+  });
+
+  test('parseCheckAErrors delegates to the detailed extractor (one extraction, two shapes)', () => {
+    const raw = auditJson([
+      {
+        level: 'error',
+        file: 'scripts/x.ts',
+        message: 'Check A: scripts/x.ts @version 1.0.0 does not match SCRIPTS.md entry 2.0.0',
+        fixData: { scriptName: 'x.ts', fileVersion: '1.0.0', registryVersion: '2.0.0' },
+      },
+    ]);
+    expect(parseCheckAErrors(raw)).toEqual([
+      {
+        file: 'scripts/x.ts',
+        message: 'Check A: scripts/x.ts @version 1.0.0 does not match SCRIPTS.md entry 2.0.0',
+      },
+    ]);
+  });
+
+  test('unparseable output throws (6c warns and skips; the merge gate fails closed)', () => {
+    expect(() => parseCheckAErrorsDetailed('not json')).toThrow();
   });
 });
 

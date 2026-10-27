@@ -1,6 +1,8 @@
 ---
 translated_from_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
 sync_version: 4
+lang: ko
+lang_reason: source-material
 ---
 
 **언어**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -403,4 +405,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-27*

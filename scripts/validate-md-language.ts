@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0 (2026-10-27, U-20261027-007): perimeter hardening — (a) the
+//           `/^Hermes\.md$/` official-pattern was case-SENSITIVE and never
+//           matched the actual root file HERMES.md: dead protection, now /i.
+//           (b) The EN originals of the bilingual twins (README.md,
+//           docs/README.md, docs/user-guide.md) join officialPatterns, so
+//           stray Korean in an English original FAILS (same detector the KO
+//           side uses; README.md's language-link line survives via the link
+//           stripper). (c) The suffix-locale declaration gate extends to the
+//           KO twins (README_ko.md, docs/README_ko.md, docs/user-guide_ko.md)
+//           — their `lang: ko` declarations were convention-only before; root
+//           README_ko.md lacked the declaration and now carries
+//           `lang: ko` + `lang_reason: source-material` (the
+//           templates/*/README_ko.md precedent). The gate is extracted to the
+//           exported pure evaluateSuffixLocaleGate() (import-safety guard added
+//           — the module-level scan ran unguarded and process.exit'ed importers).
 // v1.15.0 (2026-10-08, T-20261006-004): suffix-style locale files inside the
 //           official perimeter (README_ko.md, guide-ja.yaml — the [._-]locale.\ext
 //           form) must DECLARE their language (any legal locale value) instead of
@@ -36,7 +51,11 @@
  * CONSTITUTION.md, CHANGELOG.md, docs/constitution/, docs/governance/, docs/designs/,
  * docs/adr/, docs/decisions/, docs/reports/, docs/guides/, docs/standards/, docs/VERSION_MANIFEST.md, skills/,
  * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
- * templates/, and SECURITY.md. Both `.md` and `.yaml`/`.yml` files under these
+ * templates/, and SECURITY.md — plus, since v1.16.0, the bilingual twins'
+ * EN originals (README.md, docs/README.md, docs/user-guide.md — stray Korean
+ * there FAILS) and their KO twins (README_ko.md, docs/README_ko.md,
+ * docs/user-guide_ko.md — gated on a `lang: ko` DECLARATION via the
+ * suffix-locale gate). Both `.md` and `.yaml`/`.yml` files under these
  * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
  * `---` frontmatter for Markdown, or as a top-level `lang:`/`lang_reason:` key
  * for plain YAML files that have no frontmatter fence. `language: ko` is
@@ -189,6 +208,9 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  * - docs/adr/, docs/decisions/ (decision records; same exception mechanism)
  * - docs/VERSION_MANIFEST.md (generated; Korean allowed only inside the
  *   generator-emitted allowlist markers — see header comment)
+ * - README.md / docs/README.md / docs/user-guide.md (EN originals of the
+ *   bilingual twins — English scanned, v1.16.0) and their _ko twins
+ *   (declaration-gated via the suffix-locale gate, v1.16.0)
  * - skills/ (subdirectories)
  * - .claude/skills/, .claude/commands/ (subdirectories)
  * - .gemini/skills/, .gemini/commands/ (subdirectories)
@@ -199,8 +221,7 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  * Directory-prefixed patterns match both `.md` and `.yaml`/`.yml` files; the
  * fixed root filenames (AGENTS.md, CLAUDE.md, ...) are Markdown-only by name.
  */
-function isOfficialDocument(filePath: string): boolean {
-  const normalizedPath = filePath.replace(/\\/g, "/");
+export function isOfficialDocument(filePath: string): boolean {  const normalizedPath = filePath.replace(/\\/g, "/");
 
   // Allowlisted official paths
   const officialPatterns = [
@@ -233,12 +254,29 @@ function isOfficialDocument(filePath: string): boolean {
     // is included despite having no producer yet (Finding D): the check is
     // read-only and the files are English today.
     /^CODEX\.md$/,
-    /^Hermes\.md$/,
+    // U-20261027-007(a): /i — the case-sensitive /^Hermes\.md$/ form never
+    // matched the actual root file HERMES.md (dead protection since the
+    // pattern landed). Both spellings are official documents.
+    /^Hermes\.md$/i,
     /^\.agents\/skills\/.*\.(md|ya?ml)$/,
     /^\.agents\/commands\/.*\.(md|ya?ml)$/,
     /^\.codex\/skills\/.*\.(md|ya?ml)$/,
     /^\.codex\/prompts\/.*\.(md|ya?ml)$/,
     /^templates\/.*\.(md|ya?ml)$/,
+    // U-20261027-007(b): the EN originals of the bilingual twins join the
+    // perimeter so stray Korean in an English original FAILS (same detector
+    // the KO side uses). docs/user-guide.md may not exist in every checkout —
+    // the pattern is dormant until the documented path is created.
+    /^README\.md$/,
+    /^docs\/README\.md$/,
+    /^docs\/user-guide\.md$/,
+    // U-20261027-007(c): the KO twins join so the suffix-locale DECLARATION
+    // gate covers them — their `lang: ko` frontmatter was convention-only
+    // before. The suffix gate (evaluateSuffixLocaleGate) checks the
+    // declaration; the Korean prose scan stays skipped for locale files.
+    /^README_ko\.md$/,
+    /^docs\/README_ko\.md$/,
+    /^docs\/user-guide_ko\.md$/,
   ];
 
   return officialPatterns.some(pattern => pattern.test(normalizedPath));
@@ -273,6 +311,32 @@ function suffixLocaleOfFile(filePath: string): string | null {
   const m = normalized.match(new RegExp(`[._-](${SUPPORTED_LOCALES.join('|')})\\.(md|ya?ml)$`));
   if (!m || m[1] === 'en') return null;
   return m[1];
+}
+
+/**
+ * The suffix-locale DECLARATION gate (T-20261006-004, extended U-20261027-007):
+ * a suffix-style locale file inside the official perimeter (README_ko.md,
+ * docs/user-guide_ko.md, ...) must DECLARE its language (any supported locale)
+ * — missing/unknown declarations are violations. Exported pure for regression
+ * tests (content = raw file text, or null when the file is unreadable, which
+ * is treated as undeclared).
+ */
+export function evaluateSuffixLocaleGate(filePath: string, content: string | null): Violation | null {
+  const suffixLocale = suffixLocaleOfFile(filePath);
+  if (!suffixLocale) return null;
+  let declared: string | null | undefined = undefined;
+  if (content !== null) {
+    declared = parseLangDeclaration(content, /\.ya?ml$/.test(filePath)).lang;
+  }
+  if (declared === undefined || declared === null || !SUPPORTED_LOCALES.includes(declared)) {
+    return {
+      file: filePath,
+      reason: declared
+        ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(', ')}`
+        : `${suffixLocale}-suffixed file carries locale content without a lang declaration — add 'lang: ${suffixLocale}' (markdown: frontmatter; yaml: top-level key)`,
+    };
+  }
+  return null;
 }
 
 /**
@@ -466,22 +530,17 @@ async function validateMarkdownLanguage(): Promise<void> {
     // filter (runtime state and service data are out of scope like every other
     // check here), BEFORE isExcludedPath — whose suffix-locale arm would
     // otherwise swallow exactly these files. Wholesale locale directories
-    // (ko/, locales/ko/) stay excluded.
-    const suffixLocale = suffixLocaleOfFile(file);
-    if (suffixLocale) {
-      let declared: string | null | undefined;
+    // (ko/, locales/ko/) stay excluded. U-20261027-007: gate logic extracted
+    // to the exported pure evaluateSuffixLocaleGate() for regression coverage.
+    const suffixViolation = (() => {
+      let content: string | null = null;
       try {
-        const content = readFileSync(file, "utf-8");
-        declared = parseLangDeclaration(content, /\.ya?ml$/.test(file)).lang;
-      } catch { declared = undefined; }
-      if (declared === undefined || declared === null || !SUPPORTED_LOCALES.includes(declared)) {
-        violations.push({
-          file,
-          reason: declared
-            ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(', ')}`
-            : `${suffixLocale}-suffixed file carries locale content without a lang declaration — add 'lang: ${suffixLocale}' (markdown: frontmatter; yaml: top-level key)`,
-        });
-      }
+        content = readFileSync(file, "utf-8");
+      } catch { content = null; }
+      return evaluateSuffixLocaleGate(file, content);
+    })();
+    if (suffixViolation) {
+      violations.push(suffixViolation);
       continue;
     }
 
@@ -533,11 +592,12 @@ async function validateMarkdownLanguage(): Promise<void> {
   }
 }
 
-// Run validation
-validateMarkdownLanguage().catch((error) => {
-  if (import.meta.main) {
+// Run validation — guarded by import.meta.main (U-20261027-007): the module
+// is now imported by unit tests for the exported pure gates, and the unguarded
+// module-level scan + process.exit raced every importer (it only survived
+// because the glob scan's await yielded long enough for tests to register).
+if (import.meta.main) {
+  validateMarkdownLanguage().catch((error) => {
     die(`Validation error: ${error instanceof Error ? error.message : String(error)}`, 1);
-  } else {
-    console.error("Validation error:", error);
-  }
-});
+  });
+}
