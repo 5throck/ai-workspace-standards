@@ -10,12 +10,18 @@ title: >-
   from v1.7.0 frontmatter; reflow two-statement line at isOfficialDocument
   (validate-md-language.ts:224, both copies)
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-28T02:21:57.377+09:00'
 history:
   - at: '2026-10-28T02:21:57.377+09:00'
     from: null
     to: backlog
+  - at: '2026-10-28T04:22:20.278+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T04:22:20.293+09:00'
+    from: waiting
+    to: running
 result: null
 error: null

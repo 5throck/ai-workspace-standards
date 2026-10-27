@@ -172,7 +172,7 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 - Existing Korean documents are nativized incrementally: apply the preference to touched sections whenever a document is edited for other reasons; no bulk rewrites.
 
 ### Enforcement
-- Pre-commit audit runs the machine language gate (`scripts/validate-md-language.ts`, audit step 3.7): Korean prose in the scanned official-document paths (`agents/`, root instruction files, `docs/constitution/`, `docs/governance/`, `docs/designs/`, `docs/adr/`, `docs/decisions/`, `docs/reports/`, `docs/guides/`, `docs/standards/`, `skills/`, platform skill/command mirrors, `templates/`) fails unless the file declares `lang: ko` with a valid `lang_reason` (protected governance/routing files allow no exception); locale directories (`<lang-code>/`, `locales/<lang-code>/`) are excluded from the scan
+- Pre-commit audit runs the machine language gate (`scripts/validate-md-language.ts`, audit step 3.7): Korean prose in the scanned official-document paths (`agents/`, root instruction files, `docs/constitution/`, `docs/governance/`, `docs/designs/`, `docs/adr/`, `docs/decisions/`, `docs/reports/`, `docs/guides/`, `docs/standards/`, `skills/`, platform skill/command mirrors, `templates/`) fails unless the file declares `lang: ko` with a valid `lang_reason` (protected governance/routing files allow no exception); locale directories (`<lang-code>/`, `locales/<lang-code>/`) are excluded from the scan; since v1.16.0 (U-20261027-007) the bilingual twins' EN originals (`README.md`, `docs/README.md`, `docs/user-guide.md`) join the scan so stray Korean in an English original fails, and the `_ko` suffix twins (`README_ko.md`, `docs/README_ko.md`, `docs/user-guide_ko.md`) must declare `lang:` — the suffix-locale declaration gate is enforced, not convention
 - PR reviews reject non-English documentation outside the translation zones enumerated above (`<lang-code>/`, `locales/<lang-code>/`, locale-suffix files, declared `lang: ko` exception files)
 - Auditor validates compliance during Phase 6 QA gate
 
@@ -846,4 +846,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-10-26*
+*Last Updated: 2026-10-28*

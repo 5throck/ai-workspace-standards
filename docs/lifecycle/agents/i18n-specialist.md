@@ -9,6 +9,7 @@
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
 | 2026-08-24 | - | production | Common agent established — locale documentation, translation zones, language-policy enforcement | pm |
+| 2026-10-27 | production | production | v1.3.0 (U-20261027-004): `domain: _shared` restored to the template-managed frontmatter — the 0.20.1 upgrade delivery had dropped the key from delivered projects, failing the ADR-0153 review-runtime agent-schema check; version bump drives SYNC_IF_NEWER re-delivery | pm |
 | 2026-09-21 | production | production | Governance record backfilled during the lifecycle modernization wave (T-20260921-005): the agent shipped in every scaffold via templates/common/agents/ but carried no workspace record, and variant AGENTS.md rosters now register it | pm |
 
 ## Acceptance Criteria
@@ -31,5 +32,5 @@
 - **Current Phase**: production
 - **Owner**: pm
 - **Tier**: Medium
-- **Last Updated**: 2026-09-21
+- **Last Updated**: 2026-10-27
 - **Last Reviewer**: pm

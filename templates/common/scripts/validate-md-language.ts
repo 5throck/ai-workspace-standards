@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.16.0
+// @version 1.16.1
+// v1.16.1 (2026-10-28, T-20261028-003): whitespace-only — the two-statement line at isOfficialDocument reflowed (dev-sync script-registry gate requires a version bump for any modified script; no behavior change).
 // v1.16.0 (2026-10-27, U-20261027-007): perimeter hardening — (a) the
 //           `/^Hermes\.md$/` official-pattern was case-SENSITIVE and never
 //           matched the actual root file HERMES.md: dead protection, now /i.
@@ -221,7 +222,8 @@ function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: s
  * Directory-prefixed patterns match both `.md` and `.yaml`/`.yml` files; the
  * fixed root filenames (AGENTS.md, CLAUDE.md, ...) are Markdown-only by name.
  */
-export function isOfficialDocument(filePath: string): boolean {  const normalizedPath = filePath.replace(/\\/g, "/");
+export function isOfficialDocument(filePath: string): boolean {
+  const normalizedPath = filePath.replace(/\\/g, "/");
 
   // Allowlisted official paths
   const officialPatterns = [
