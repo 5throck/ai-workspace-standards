@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Skill Lifecycle Validation Script
- * @version 1.5.1
+ * @version 1.5.2
  */
 // Validates skills/*/SKILL.md files for required frontmatter
 // and checks governance records in docs/lifecycle/skills/*.md
@@ -15,8 +15,9 @@ import { join } from 'node:path';
 // v1.5.1: ./validators/ is L0-only; the L1/L3 project copies of this script must not crash
 // at import time — the schema sweep degrades to a skip when the validators are absent
 // (the workspace-side sweep covers those checks).
-const schemaValidatorAvailable = existsSync(join(import.meta.dir, 'validators', 'schema-validator.ts'));
-const schemaValidator = schemaValidatorAvailable ? await import('./validators/schema-validator.ts') : null;
+const SCHEMA_VALIDATOR_SPEC = join(import.meta.dir, 'validators', 'schema-validator.ts');
+const schemaValidatorAvailable = existsSync(SCHEMA_VALIDATOR_SPEC);
+const schemaValidator = schemaValidatorAvailable ? await import(SCHEMA_VALIDATOR_SPEC) : null;
 const parseFrontmatterYaml = schemaValidator?.parseFrontmatter;
 const validateSkillFrontmatter = schemaValidator?.validateSkillFrontmatter;
 import { cwd } from 'node:process';

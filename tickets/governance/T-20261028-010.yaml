@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261028-010
+kind: manual
+title: >-
+  delivery pass should backfill scalar tier into managed extends-stub
+  frontmatter (agents/pm.md) when the template counterpart declares it — the
+  validate-model-registry v2.1.0 missing-tier FAIL flip (T-20261027-003, landed
+  in template-v0.22.0) turned stale project stubs red:
+  co-price/co-export/co-security agents/pm.md lacked tier (frontmatter predates
+  the field; delivery never touches MERGE_MANAGED pm.md and
+  normalizeAgentTierFrontmatter never adds a missing tier). Hand-mirrored tier:
+  medium into the 3 project stubs during the v0.22.0 wave (2026-10-28). Fix: in
+  the delivery agents pass, for extends-stub agents whose frontmatter is
+  template-mirrored, refresh missing scalar tier/version/last_updated fields
+  from the template counterpart with a decision-log INFO row — frontmatter
+  ownership for stubs is template-side; body stays project-owned (cf.
+  U-20261028-001)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-28T03:28:34.667+09:00'
+history:
+  - at: '2026-10-28T03:28:34.667+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

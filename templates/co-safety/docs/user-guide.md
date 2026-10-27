@@ -44,7 +44,7 @@ Use this table to guess which specialist(s) the PM will bring in — useful for 
 | Equipment maintenance / aging asset plan | asset-integrity-agent | `asset-integrity-check` |
 | Contractor onboarding + training packages | contractor-safety-agent, training-agent | `contractor-onboarding` |
 | Chemical plant / refinery / petrochemical work | ehschem-agent | `tar-planning`, `process-hazard-screening` |
-| LNG/LPG/수소 terminal storage, KGS inspections | gasterm-agent | `tank-integrity-validator`, `construction-permit-overview` |
+| LNG/LPG/hydrogen terminal storage, KGS inspections | gasterm-agent | `tank-integrity-validator`, `construction-permit-overview` |
 | Power plant boiler/turbine, ESS fire, arc flash | powergen-agent | `ess-fire-risk-assessor`, `arc-flash-analyzer` |
 | Pharma GMP/GxP (batch records, deviation/CAPA, QRM) | gmp/glp/gdp/gcp/gvp-agents | `gmp-qrm`, `gmp-deviation-capa`, ... |
 | Industry-specific EHS (semicon, battery, shipbuilding, steel, food, cosmetics, waste, defense, biotech, datacenter, logistics, railway) | corresponding domain agent | domain skills under `skills/` |
