@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261027-005
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-27T19:13:50.354+09:00
+history:
+  - at: 2026-10-27T19:13:50.354+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.21.0
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The DESIGN-R2 theme-invariance rule (theme presets in tokens.json may override only color and shadow tokens; typography/spacing/borderRadius/target-size are theme-invariant — documented in design-tokens.template.css and variant design docs) has zero machine enforcement in the L1 tooling. scripts/compile-tokens.ts extractThemes (about lines 207-240) accepts any key tree under "themes" and compiles it silently into [data-theme] blocks — a theme preset adding a typography or spacing override would ship without a diagnostic. Simultaneously scripts/design-lint.ts skips the themes branch entirely (TOKEN_SKIPPED_KEYS includes "themes", line ~130; walker ~398-404), so the linter can never see a violation either. The rule lives only in prose; nothing fails when a preset breaks it. Requested consideration: fail compilation (or emit an error-level lint finding) when a theme preset contains any top-level group other than color/shadow, or add a deliberate themes-reading sub-check to design-lint.'
+  affected_paths:
+    - scripts/compile-tokens.ts
+    - scripts/design-lint.ts
+  identity_source: cwd
+  repro: 'Add a "typography" key under themes in a project tokens.json (violating the documented theme-invariance rule that presets override only color/shadow), run the token compiler and design-lint: both succeed without any diagnostic; the compiled output silently carries the layout override inside the theme block.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/compile-tokens.ts=false
+    - info:in_last_delivery scripts/design-lint.ts=false
+  dedupe_key: ad30e3ea2b6ef48dc81425f9f5744060c9d0fe2c42146a9d916770f57f14f4d2
+  duplicates:
+    - project: co-design
+      at: 2026-10-27T19:13:50.354+09:00
