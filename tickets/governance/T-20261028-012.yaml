@@ -6,7 +6,7 @@ title: >-
   surface (root PR #1669 12 files, co-design PR #65 17 files) — compose count
   from the post-staging set per design 2026-10-28-dev-sync-staged-count-design
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-28T07:05:25.513+09:00'
 history:
@@ -19,5 +19,15 @@ history:
   - at: '2026-10-28T07:22:14.732+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-28T07:35:32.721+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T07:35:32.736+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1675 (merge 37d4f57a6): dev-sync 1.33.0 step 6.9 re-derives the
+  commit message from the final staged set; commit-message 1.1.1 caller-contract
+  note; generate-version-manifest 1.10.2 Generated-header dedupe; 7 new unit
+  tests; scratch-repo proof (0 files -> 3 files)
 error: null
