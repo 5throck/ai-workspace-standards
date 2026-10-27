@@ -7,7 +7,7 @@ title: >-
   restrict post-delivery last_updated re-stamp to the delivery manifest file set
   instead of every dirty worktree file (upgrade-project.ts:4397-4415)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-28T02:21:57.364+09:00'
 history:
@@ -23,5 +23,11 @@ history:
   - at: '2026-10-28T04:22:06.091+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-28T07:05:25.450+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1672 (merge 95a463e93): globToRegExp zero-segment semantics
+  (upgrade-policy 1.26.0) + post-delivery re-stamp scoped to delivered files
+  (upgrade-project 1.77.0); CI 8/8 green
 error: null

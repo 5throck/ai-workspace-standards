@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261028-012
+kind: manual
+title: >-
+  dev-sync file-count residual: '(0 files)' PR titles under-represent delivery
+  surface (root PR #1669 12 files, co-design PR #65 17 files) — compose count
+  from the post-staging set per design 2026-10-28-dev-sync-staged-count-design
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-28T07:05:25.513+09:00'
+history:
+  - at: '2026-10-28T07:05:25.513+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

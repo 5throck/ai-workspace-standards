@@ -8,7 +8,7 @@ title: >-
   agents/README_ko.md i18n row, project-ahead in backport-diff) — add the KO row
   on the next co-design delivery (Phase II Step 2 backport triage)
 priority: low
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-28T03:02:49.583+09:00'
 history:
@@ -21,5 +21,13 @@ history:
   - at: '2026-10-28T04:22:20.321+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-28T07:05:11.410+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T07:05:25.498+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1673 (merge 946bb42b5): co-design KO I18N Specialist roster row
+  backported to templates/co-design/agents/README_ko.md
 error: null
