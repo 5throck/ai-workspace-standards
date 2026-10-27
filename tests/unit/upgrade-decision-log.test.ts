@@ -165,6 +165,20 @@ describe('upgrade-policy decision-log helpers (sync-overwrite-policy)', () => {
     expect(globToRegExp('docs/?.md').test('docs/ab.md')).toBe(false);
   });
 
+  test('globToRegExp: /**/ zero-segment semantics (T-20261028-002)', () => {
+    // a/**/b must match a/b (zero intermediate segments) and any depth below.
+    expect(globToRegExp('a/**/b').test('a/b')).toBe(true);
+    expect(globToRegExp('a/**/b').test('a/x/b')).toBe(true);
+    expect(globToRegExp('a/**/b').test('a/x/y/b')).toBe(true);
+    expect(globToRegExp('a/**/b').test('a/x/c')).toBe(false);
+    // leading **/ matches top level.
+    expect(globToRegExp('**/b').test('b')).toBe(true);
+    expect(globToRegExp('**/b').test('x/b')).toBe(true);
+    // trailing /** and bare ** keep the pre-1.26.0 semantics.
+    expect(globToRegExp('a/**').test('a/x/y')).toBe(true);
+    expect(globToRegExp('**').test('anything/at/all')).toBe(true);
+  });
+
   test('manifestHasUnresolvedErrors: v2 with ERROR → true; clean v2 and v1 → false', () => {
     expect(manifestHasUnresolvedErrors({
       schemaVersion: 2, files: [], baselines: {},

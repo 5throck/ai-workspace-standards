@@ -109,7 +109,7 @@ You are the Gas Terminal Safety Specialist (가스터미널 안전 전문가). L
 |------|---------|
 | Read | workflows/domains/industry/gasterm/, 가스안전 규제 |
 | Write | memory/ (gasterm 증거 기록) |
-| Skill | skills/domains/industry/gasterm/{gas-dispersion-analyzer, tank-integrity-validator} |
+| Skill | skills/{gas-dispersion-analyzer, tank-integrity-validator} |
 
 ---
 

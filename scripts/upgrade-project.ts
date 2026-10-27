@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.76.0
+// @version 1.77.0
+// v1.77.0 (2026-10-28, T-20261028-002 — spec
+//          docs/designs/2026-10-28-ticket-runner-mechanical-batch-design.md
+//          §3): POST-DELIVERY RE-STAMP scope — the last_updated re-stamp walks
+//          deliveredRels (expanded to files, same recursion as the manifest
+//          baseline expansion) intersected with git status, instead of every
+//          dirty worktree file. Pre-existing user changes open during an
+//          upgrade no longer receive the delivery date; directory-delivered
+//          skill roots keep full re-stamp coverage via the expansion.
 // v1.76.0 (2026-10-27, T-20261027-004 — spec
 //          docs/designs/2026-10-27-sync-overwrite-policy-design.md): sync/
 //          overwrite policy — merge-or-preserve delivery decisions (design
@@ -4385,9 +4393,12 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
 // above all) without advancing its `last_updated` date, so
 // agent-lifecycle-audit reported stale-date warnings after every upgrade wave
 // (8/9 agent files warned 2026-10-26; commits 548ca96/5361921/2a48945 touched
-// agent bodies with zero date bumps). Re-stamp every changed file (git status,
-// i.e. CONTENT actually changed — a version-touch-only write leaves the tree
-// clean and is not re-stamped) to the delivery date. bumpFrontmatterLastUpdated
+// agent bodies with zero date bumps). Re-stamp the files THIS RUN delivered
+// (deliveredRels ∩ git status — the git-status leg still restricts to content
+// that actually changed on disk, so a version-touch-only write leaves the tree
+// clean and is not re-stamped; T-20261028-002 narrowed the set from every
+// dirty worktree file so pre-existing user changes keep their dates) to the
+// delivery date. bumpFrontmatterLastUpdated
 // only moves the TOP-LEVEL frontmatter key; lifecycle-block dates and files
 // without the key are untouched. Runs BEFORE the delivery manifest so the
 // re-stamped files ride the recorded delivery (dev-sync step 3.9 attribution).
@@ -4395,10 +4406,31 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
 if (!dryRun) {
   try {
     const restampDate = new Date().toISOString().slice(0, 10);
+    // T-20261028-002: re-stamp only files THIS run delivered. The original
+    // walk re-stamped every dirty worktree file, so pre-existing user changes
+    // (unrelated WIP open during the upgrade) silently received the delivery
+    // date. Directory rels (skills/<name>) expand recursively — same
+    // semantics as the manifest's baseline expansion below.
+    const deliveredFiles = new Set<string>();
+    const expandDelivered = (rel: string): void => {
+      const abs = join(projectDir, rel);
+      let st;
+      try { st = statSync(abs); } catch { return; }
+      if (st.isDirectory()) {
+        for (const entry of readdirSync(abs, { withFileTypes: true })) {
+          if (entry.name === '.git' || entry.name === 'node_modules') continue;
+          expandDelivered(rel.endsWith('/') ? `${rel}${entry.name}` : `${rel}/${entry.name}`);
+        }
+        return;
+      }
+      if (st.isFile()) deliveredFiles.add(rel);
+    };
+    for (const rel of deliveredRels) expandDelivered(rel);
     const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
     const changed = (por.stdout || '').split('\n')
       .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(rel => deliveredFiles.has(rel));
     let restamped = 0;
     for (const rel of changed) {
       if (rel.endsWith('/')) continue;

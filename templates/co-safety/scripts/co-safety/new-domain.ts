@@ -11,7 +11,12 @@
  * Example:
  *   bun scripts/co-safety/new-domain.ts cosmetics industry cosmetics
  *
- * @version 1.0.1
+ * @version 1.0.2
+ * v1.0.2 (2026-10-28, T-20261028-005): the emitted agent frontmatter meets the
+ *   current gate standard — scalar `tier: medium` (ADR-0102; the agent-quality-
+ *   recursive gate FAILs the legacy per-platform map) and the schema-required
+ *   `version: "1.0.0"`; `model: inherit` dropped. Block-form lifecycle with
+ *   last_updated. Body stays an onboarding stub (authored in SOP step 3).
  * v1.0.1 (2026-07-11): Fixed stale agent-template comment claiming "min 2 for
  *   functional" legal_basis sources — policy has required min 3 for all domains
  *   since 2026-07-05 (see domain-config.ts DEFAULT_MIN_LEGAL_BASIS).
@@ -69,10 +74,13 @@ fs.writeFileSync(agentFile, `---
 name: ${name}-agent
 role: specialist
 status: active
-tier: {claude: medium, gemini-cli: medium, antigravity: medium}
-model: inherit
+version: "1.0.0"
+tier: medium
 description: "${name} domain specialist"
-lifecycle: {phase: production, created: "${new Date().toISOString().split('T')[0]}"}
+lifecycle:
+  phase: production
+  created: "${new Date().toISOString().split('T')[0]}"
+  last_updated: "${new Date().toISOString().split('T')[0]}"
 ---
 
 ## Section A — Legal Basis

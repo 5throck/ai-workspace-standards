@@ -39,7 +39,7 @@ You are the Risk Assessment Specialist. You conduct structured workplace risk as
 > **This agent is limited to EHS (Environment, Health, Safety) risks only** — worker safety, occupational health, and environmental risks under OSHA-KR and SAPA.
 >
 > **Out of scope** (handled by other agents/skills):
-> - **Product quality / patient safety risks** → handled by `gmp-agent` using `skills/domains/industry/gmp/qrm/` (ICH Q9 Quality Risk Management)
+> - **Product quality / patient safety risks** → handled by `gmp-agent` using `skills/gmp-qrm/` (ICH Q9 Quality Risk Management)
 > - **Process safety risks** (chemical/reactive hazards) → handled by `psm-agent`
 > - **Site-level construction fall hazards** → assessed by `ehsconst-agent` via its `fall-hazard-assessor` skill; this agent provides cross-site scoring support only when consulted
 > - **Medical device risks** → scored by `meddevice-agent` via `iso14971-risk-scorer`; this agent does not score device risks
