@@ -4,20 +4,21 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.77.0
+- **Version**: 1.78.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-27 (T-20261027-004 sync-overwrite-policy: provenance baselines, disposition matrix, unified decision log)
+- **Last Updated**: 2026-10-28 (U-20261028-001 delivery tombstones + agents/ project-ownership escalation)
 
 ## Description
 
 Fleet upgrade engine: template sync passes (LOCKED/MERGE/SYNC_IF_NEWER/TREE
-SYNC/PRUNE...), readiness gate, delivery manifest (v2: baselines + decisions),
-preflight, and post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
+SYNC/PRUNE...), readiness gate, delivery manifest (v2: baselines + decisions +
+tombstones), preflight, and post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry row.
 
 ## Phase History
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-28 | production | production | v1.78.0 (U-20261028-001, spec docs/designs/2026-10-28-delivery-tombstone-ownership-design.md; PR-1a + PR-1b as one engine change set, decision DEC-20261028-02): delivery tombstones + agents/ project-ownership escalation. (D1) the delivery manifest v2 gains the additive optional `tombstones` key ({rel → hash, templateVersion, recordedAt, reason}; schemaVersion stays 2) with the carry-forward rule `tombstones = (prior ∪ newly recorded) − paths delivered this run`. (D2/D3) tombstoneSkip() consults lib/upgrade-policy.ts tombstoneGuard before the copy in every absent-copy delivery branch (TEMPLATE TREE SYNC SYNC-absent / WORKSPACE / ADD_IF_MISSING / JSON_MERGE seeds, DOCS_OVERWRITE, COMMANDS_SYNC, agents/ NEW, skills/ whole-directory NEW common + variant, VARIANT ASSET DIRS, ENV_SAMPLE): first observation (baseline without tombstone) = TOMBSTONED (ERROR), delivery refused, non-zero exit with a dedicated resolution menu; recorded tombstones = TOMBSTONED_SKIP (INFO). New flags --tombstone <glob> (repeatable, apply-mode only, records the entry with --tombstone-reason) and --clear-tombstone <glob> (drops entries; the next run delivers as NEW); --disposition adopt-template never overrides a tombstone (D3b). (D4) agents/ version-gt delivery over an evolved body reclassified EVOLVED (WARN) → CONFLICT (ERROR) regardless of templateChanged (--disposition adopt-template still grants), and the NO_BASELINE equal-version restore's detail names the migration window. Dry-run reports candidates and persists nothing. lib/upgrade-policy.ts v1.27.0 (TombstoneEntry type, TOMBSTONED/TOMBSTONED_SKIP verdicts + contract rows, tombstoneGuard predicate — D6: no resolver/classifier change); resync-audit.ts v1.6.0 tombstone census. | automation-engineer |
 | 2026-10-28 | production | production | v1.77.0 (T-20261028-002, spec docs/designs/2026-10-28-ticket-runner-mechanical-batch-design.md §3): POST-DELIVERY RE-STAMP scope — the last_updated re-stamp walks deliveredRels (expanded to files, same recursion as the manifest baseline expansion) intersected with git status instead of every dirty worktree file, so pre-existing user changes open during an upgrade keep their dates; directory-delivered skill roots keep full coverage via the expansion. | automation-engineer |
 | 2026-10-27 | production | production | v1.76.0 (T-20261027-004, spec docs/designs/2026-10-27-sync-overwrite-policy-design.md §4–§7): sync/overwrite policy — (D1) delivery manifest v2 gains per-file delivered baselines (hash keyed by baselineKeyFor: raw bytes for plain files, lifecycleless bytes for agents/) so committed project divergence is classified mechanically (UNTOUCHED / IN_SYNC / PROJECT_EVOLVED / NO_BASELINE degrade) instead of via git-dirty state; (D2) disposition matrix — PROJECT_EVOLVED + template-changed under the version-gated whole-content passes escalates to CONFLICT severity ERROR with default SKIP (project copy preserved, decision recorded, non-zero exit naming the §6 adjudicated-port procedure), `--disposition adopt-template[=glob]` delivers + re-baselines, template-unchanged evolution delivers as EVOLVED (WARN); (D3) unified decision log persisted in the manifest (SEED_SKIP / STUB_SKIP / SKELETON_COLLISION / CONTEXT_PRESERVE / DRIFT_PRESERVE / DRIFT_RESTORED / MERGE / SKIP + delivery verdicts), PR body Decisions section, agents/ equal-version evolution reclassified to ERROR. Dry-run classifies + logs without writing. lib/upgrade-policy.ts v1.25.0 (types + pure helpers, no classification change); dev-sync 1.32.0 D3.1 ERROR block. | automation-engineer |
 | 2026-10-27 | production | production | v1.75.0 (T-20261027-005): ADR-0102 legacy agent tier normalization in two delivery passes — (a) MERGE pass normalizes the project agents/pm.md legacy per-platform tier frontmatter block to the template's scalar tier (tier block ONLY; scalar-differs = deliberate divergence, logged and untouched); (b) agents/ pass processes a variant extends-stub's `extends:` target instead of dead-ending (MERGE_MANAGED files excluded — v1.49.0 clobber class) and the equal-version drift reconcile emits a focused TIER DRIFT verdict for tier-block-only drift before delivering the template copy. Normalizer: lib/upgrade-policy.ts v1.24.0. | automation-engineer |
@@ -37,6 +38,6 @@ preflight, and post-upgrade regenerations. SSOT: `scripts/SCRIPTS.md` registry r
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.70.6
+- **Version**: 1.78.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-14
+- **Last Updated**: 2026-10-28

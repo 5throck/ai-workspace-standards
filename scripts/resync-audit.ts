@@ -2,7 +2,24 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.5.0
+ * @version 1.6.0
+ *
+ * v1.6.0 (2026-10-28, U-20261028-001 — spec
+ *          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md
+ *          §4.3): tombstone census. The delivery manifest
+ *          (.claude/last-upgrade-delivery.json) is read per project (its
+ *          `tombstones` + `baselines` keys; both optional — v1-shaped or
+ *          missing manifests degrade to a zero census). Deleted-in-working-
+ *          tree rows of previously delivered paths align with the v1.3.0
+ *          "deleted in working tree" row type:
+ *          - a tombstoned path → KEEP "tombstoned deletion honored …"
+ *            (the deletion intent was confirmed with --tombstone);
+ *          - a delivered-baseline path without a tombstone → new verdict
+ *            TOMBSTONE-UNCONFIRMED — the next wave re-delivers it
+ *            (TOMBSTONED, ERROR); confirm with --tombstone or restore.
+ *          Every project's report gains a `tombstone census` line (honored /
+ *          unconfirmed counts, zero-inclusive) so the daily fleet report
+ *          shows the census row for every project.
  *
  * v1.5.0 (2026-10-08, T-20261007-027): --final-state mode — a read-only fleet
  *          state table (project/branch/dirty/unpushed/open-PR/template-version)
@@ -85,14 +102,41 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.5.0";
+const VERSION = "1.6.0";
 
 interface FileRow {
   file: string;
   state: "modified" | "untracked";
   mtime: string;
-  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP";
+  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP" | "TOMBSTONE-UNCONFIRMED";
   basis: string;
+}
+
+/** Tombstone + baseline state read from one project's delivery manifest
+ *  (U-20261028-001 D1). Both keys optional: v1-shaped manifests and missing
+ *  manifests degrade to empty maps (a zero census, no guard rows). */
+interface DeliveryTombstoneState {
+  tombstones: Record<string, { recordedAt?: string; reason?: string }>;
+  baselines: Record<string, unknown>;
+}
+
+/** Exported for unit tests (tombstone census, U-20261028-001). */
+export function loadDeliveryTombstoneState(projectPath: string): DeliveryTombstoneState {
+  const empty: DeliveryTombstoneState = { tombstones: {}, baselines: {} };
+  const manifestPath = join(projectPath, ".claude", "last-upgrade-delivery.json");
+  if (!existsSync(manifestPath)) return empty;
+  try {
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
+      tombstones?: Record<string, { recordedAt?: string; reason?: string }>;
+      baselines?: Record<string, unknown>;
+    };
+    return {
+      tombstones: manifest.tombstones ?? {},
+      baselines: manifest.baselines ?? {},
+    };
+  } catch {
+    return empty; // unparseable manifest — zero census, never a false violation
+  }
 }
 
 interface ProjectReport {
@@ -102,6 +146,7 @@ interface ProjectReport {
   dirtyCount: number;
   rows: FileRow[];
   groups: Array<{ group: string; verdict: string; files: string[]; note: string }>;
+  tombstoneCensus: { honored: number; unconfirmed: number };
 }
 
 function parseArgs(): { projects: string[]; json: boolean; snapshotDir?: string; help: boolean } {
@@ -313,7 +358,7 @@ export function corroboratedStale(
   };
 }
 
-function classify(projectPath: string, relFile: string, state: "modified" | "untracked"): FileRow {
+function classify(projectPath: string, relFile: string, state: "modified" | "untracked", delivery: DeliveryTombstoneState): FileRow {
   const abs = join(projectPath, relFile);
   let mtime = "";
   try {
@@ -339,9 +384,22 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
     // T-20260912-030: a ` D` porcelain row means the file is deleted in the
     // working tree — readFileSync would throw ENOENT and zero out the whole
     // audit. Report it as a KEEP row (nothing on disk to classify).
+    // U-20261028-001 (§4.3): when the delivery manifest proves the path was
+    // previously delivered, the deletion becomes a tombstone-census row —
+    // honored (KEEP) when a tombstone records the intent, otherwise an
+    // unconfirmed candidate the next wave will refuse (TOMBSTONED, ERROR).
     if (!existsSync(abs)) {
-      row.verdict = "KEEP";
-      row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
+      if (delivery.tombstones[relFile]) {
+        const t = delivery.tombstones[relFile];
+        row.verdict = "KEEP";
+        row.basis = `tombstoned deletion honored (recorded ${t.recordedAt ?? "?"}${t.reason ? ` — ${t.reason}` : ""})`;
+      } else if (delivery.baselines[relFile]) {
+        row.verdict = "TOMBSTONE-UNCONFIRMED";
+        row.basis = "deleted in working tree but previously delivered (no tombstone) — the next wave re-delivers (TOMBSTONED, ERROR); confirm with --tombstone or restore";
+      } else {
+        row.verdict = "KEEP";
+        row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
+      }
       return row;
     }
     const dirty = readFileSync(abs, "utf-8").replace(/\r\n/g, "\n");
@@ -450,12 +508,15 @@ function markdownReport(reports: ProjectReport[]): string {
   const lines: string[] = [
     `# resync-audit report — ${new Date().toISOString().slice(0, 10)}`,
     "",
-    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe.`,
+    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR).`,
     "",
   ];
   for (const p of reports) {
     lines.push(`## ${p.project}`, "");
     lines.push(`- branch: \`${p.branch}\` · remote: \`${p.remote || "(none)"}\` · dirty files: ${p.dirtyCount}`, "");
+    // U-20261028-001 (§4.3): the tombstone census row — present for EVERY
+    // project, zero-inclusive, so the daily fleet report always carries it.
+    lines.push(`- tombstone census: ${p.tombstoneCensus.honored} honored deletion(s) · ${p.tombstoneCensus.unconfirmed} unconfirmed candidate(s)`, "");
     lines.push("| group | verdict | note |", "|---|---|---|");
     for (const g of p.groups) {
       lines.push(`| ${g.group} | ${g.verdict} | ${g.note} |`);
@@ -535,6 +596,7 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     const branch = git(project, ["rev-parse", "--abbrev-ref", "HEAD"]) || "?";
     const remoteRaw = git(project, ["remote", "get-url", "origin"]);
     const porcelain = git(project, ["status", "--porcelain"]);
+    const delivery = loadDeliveryTombstoneState(project);
     const rows: FileRow[] = [];
     for (const line of porcelain.split("\n").filter(Boolean)) {
       const state = line.startsWith("??") ? "untracked" : "modified";
@@ -543,11 +605,11 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
       if (state === "untracked" && relFile.endsWith("/")) {
         // untracked directory: expand to its files
         for (const f of walkProjectDir(join(project, relFile))) {
-          rows.push(classify(project, relative(project, f).split("\\").join("/"), "untracked"));
+          rows.push(classify(project, relative(project, f).split("\\").join("/"), "untracked", delivery));
         }
         continue;
       }
-      rows.push(classify(project, relFile, state));
+      rows.push(classify(project, relFile, state, delivery));
     }
     const report: ProjectReport = {
       project,
@@ -556,6 +618,10 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
       dirtyCount: rows.length,
       rows,
       groups: groupRows(rows),
+      tombstoneCensus: {
+        honored: rows.filter((r) => r.verdict === "KEEP" && r.basis.startsWith("tombstoned deletion honored")).length,
+        unconfirmed: rows.filter((r) => r.verdict === "TOMBSTONE-UNCONFIRMED").length,
+      },
     };
     if (snapshotDir) {
       const tarball = snapshotDiscardables(project, rows, snapshotDir);
