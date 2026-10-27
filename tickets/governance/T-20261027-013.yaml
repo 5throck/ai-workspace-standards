@@ -11,12 +11,29 @@ title: >-
   script-gap (test hardening). Evidence: co-design PR #60 (fe90eb9), cycle
   2026-10-27 Step 2f review
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T22:54:39.937+09:00'
 history:
   - at: '2026-10-27T22:54:39.937+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T23:48:00.122+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T23:48:00.142+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T23:48:00.160+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T23:48:00.177+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via co-design PR #62 (merged): bundle leg now uses bun-native
+  test.skipIf(!distPresent) — skip is loud (registration-time console.warn
+  naming reason+remedy, distinct (skip) summary count, can no longer masquerade
+  as pass); dist-present branch 5 pass/314 asserts, skip branch proven 4 pass/1
+  skip; no template copy exists (project-added test).
 error: null

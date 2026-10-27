@@ -19,12 +19,30 @@ title: >-
   cycle 2026-10-27 Step 2 judgment report. Class: validator-hardening +
   doc-convention candidate
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T22:52:41.665+09:00'
 history:
   - at: '2026-10-27T22:52:41.665+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-28T00:18:30.744+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T00:18:30.760+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-28T00:18:30.777+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T00:18:30.810+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated + promoted via PR #1659 (merged): user-guide EN+KO twins promoted
+  together verbatim (7-phase Phase 0-6 incl. substantive QA&Finalization phase;
+  KO translated_from_hash verified == sha256(promoted EN)); citation-qualifier
+  convention established per Ruling 5 of the review-backlog-remediation design.
+  The i18n frontmatter/validator leg routed out to a separate automation
+  dispatch (verify-readme-sync v1.5.0 already covers template pairs).
 error: null

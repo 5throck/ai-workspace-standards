@@ -17,12 +17,32 @@ title: >-
   backport-diff a4a3574..HEAD, cycle 2026-10-27 Step 2 judgment report. Class:
   templates/co-design enhancement bundle (human-triage)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T22:52:31.234+09:00'
 history:
   - at: '2026-10-27T22:52:31.234+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-28T00:18:30.685+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T00:18:30.707+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-28T00:18:30.726+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T00:18:30.794+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated + promoted via PR #1659 (merged): component-primitives.md
+  (fe90eb9, 329 ln strictly richer), screen-patterns field-contract,
+  docs/design/{patterns,components}.registry.yaml (new),
+  playground-smoke.test.ts (post-PR-#62 loud-skip HEAD) — citations resolved via
+  the citation-qualifier convention ((project instantiation) / (L1 common));
+  design.md §2/§10 stays-project (engagement decision-of-record). Dry-run proof:
+  next upgrade heals the PR #61 regression. Spec-registered:
+  2026-10-28-co-design-suite-promotion-design.
 error: null

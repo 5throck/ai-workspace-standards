@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261027-016
+kind: manual
+title: >-
+  governance-doc-delivery (design decision needed): retire/redesign the L1
+  delivery of templates/common/docs/governance/agents/workflows.md — the file is
+  a verbatim L0 relocation describing the nine-agent root roster, contradicting
+  variant phase rules and duplicating AGENTS.md §4/§8/§9/§10; co-design deleted
+  it deliberately (PR #59 R3) yet every upgrade resurrects it (T-20261027-015
+  findings). Removing it fleet-wide dangles 5 co-design AGENTS.md skeleton
+  references (L208/265/291/295/299) + 4 common AGENTS.md references
+  (L193/277/281/285) + root CLAUDE/GEMINI prose pointing at the L0 sibling
+  (which stays). Needs: Design Gate — either restructure the thin-dispatcher
+  references to point at the L0 file (fleet-wide AGENTS.md skeleton edit +
+  propagate) or introduce a sanctioned per-variant delivery exclusion (interacts
+  with sync-overwrite-policy design D4 which rejected deny-list claims —
+  reconcile). Evidence: T-20261027-015, co-design PR #59, resync 2026-10-27 Step
+  4.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T23:48:00.231+09:00'
+history:
+  - at: '2026-10-27T23:48:00.231+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

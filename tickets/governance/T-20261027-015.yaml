@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20261027-015
+kind: manual
+title: >-
+  upgrade-exclusion: templates/co-design/docs/workflows.md resurrects on every
+  upgrade wave — co-design deleted it deliberately (PR #59, design Risks-1 R3)
+  but the template copy re-delivers it; the 2026-10-27 resync upgrade
+  resurrected it again as predicted. Verify the template copy is obsolete
+  (superseded by docs elsewhere), then remove it from templates/co-design/docs/
+  so re-delivery stops (template-side removal is the sanctioned fix — no engine
+  change); document in the U-20261026-005 exclusion chain.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-27T23:35:21.641+09:00'
+history:
+  - at: '2026-10-27T23:35:21.641+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-27T23:48:08.895+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T23:48:08.914+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T23:48:08.934+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T23:48:08.949+09:00'
+    from: review
+    to: done
+result: >-
+  Stopped at verification — premise corrected: NO
+  templates/co-design/docs/workflows.md exists (git history empty); the
+  re-delivery source is the L1 fleet-common asset
+  templates/common/docs/governance/agents/workflows.md (confirmed in
+  last-upgrade-delivery.json + 9 sibling projects). Removal is a fleet-wide
+  governance redesign (5 load-bearing AGENTS.md references in co-design skeleton
+  + 4 in common + root prose) requiring its own Design Gate — re-scoped to
+  T-20261027-016. Interim posture (ii) stands: co-design re-deletes per wave,
+  recorded in resync judgment (PR #59 Risk-1 posture).
+error: null
