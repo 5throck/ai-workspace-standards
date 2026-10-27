@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261027-012
+kind: manual
+title: >-
+  learning: co-design review-backlog remediation pattern (PR #59, ba53ecc) — two
+  reusable kernels for the validator/docs toolchain: (1) bilingual-parity
+  pre-commit leg, EN/KO structural-identity verification of user-guide/README
+  pairs executed as an explicit gate with per-section comparison (candidate
+  checklist row for validate-md-language v1.16.0 or a verify-readme-sync-style
+  check); (2) citation-qualifier convention (design
+  2026-10-27-review-backlog-remediation section 6 table): every cross-tier
+  reference carries its scope qualifier (workspace root / L0 / template-only) so
+  project checkouts can resolve citations without template-tree context —
+  candidate rule for docs validators. Also flagged: phase-definitions.md
+  i18n-specialist row requires the agent frontmatter phases: field (template
+  i18n-specialist.md 1.1.0 carries none) — agent frontmatter + phase table must
+  land together. Evidence: co-design PR #59,
+  docs/designs/2026-10-27-review-backlog-remediation-design.md sections 4-6,
+  cycle 2026-10-27 Step 2 judgment report. Class: validator-hardening +
+  doc-convention candidate
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T22:52:41.665+09:00'
+history:
+  - at: '2026-10-27T22:52:41.665+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
