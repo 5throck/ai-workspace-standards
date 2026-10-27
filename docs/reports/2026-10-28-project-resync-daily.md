@@ -66,6 +66,67 @@ Git-mode gitleaks (full config) over the four project diff ranges: co-abap, co-d
 
 Report-only landing (judgment report + this file + tickets T-20261028-007/-008/-009). No template content changes; zero backport candidates promoted. Design Gate: covered by the standing specs 2026-09-25-daily-fleet-review-resync-design (ADR-0089) and 2026-10-07-daily-fleet-learning-extraction-design.
 
-## Steps 4–5 — v0.22.0 upgrade wave
+## Steps 4–5 — v0.22.0 upgrade wave (03:25–04:15 KST)
 
-To be appended after the wave completes (canary-first: co-price; then remaining 15 projects; billing-wall exception T-20261007-025 applies to private-repo fail-at-start merges with per-merge recording).
+Canary **co-price** first: dry-run clean (0 ERROR) → real run → PR #160. The hardened v0.22.0 gates surfaced four pre-existing fleet debts (each fixed in-wave, all gate-satisfying, none a bypass):
+
+1. **Missing-tier extends-stub frontmatter** — validate-model-registry v2.1.0's FAIL flip (T-20261027-003, first delivery carrying it): co-price/co-export/co-security `agents/pm.md` lacked `tier:` (stale stubs predating the field; the delivery never touches MERGE_MANAGED pm.md and normalization never adds a missing tier). Hand-mirrored `tier: medium` from the template counterpart. Systemic fix ticketed: **T-20261028-010** (delivery should backfill stub frontmatter; 5 projects total needed it counting the re-delivery clobbers).
+2. **KO-twin `lang:` declarations** — validate-md-language v1.16.0: project KO twins lacked declarations; fixed pre-wave fleet-wide (15 files), then discovered **the delivery strips/re-delivers KO twins without declarations** (co-safety README_ko.md clobbered mid-wave) → post-upgrade re-add added to the wave flow; systemic item recorded for the next window (delivery transform drops the declaration the template itself carries).
+3. **Legacy map-form tier blocks in project-local agents** — co-architect 23, co-learning 8, co-newbiz 40 (+39 on the collided branch): standalone/project-specific agents with no template counterpart are never normalized by the delivery. Normalized to scalar (validator-printed target, uniform-value rule; 0 divergent).
+4. **Design-lint should-be-token debt** — design-lint v2.3.0 conventional-fallback scan: co-price 840 literals/158 distinct (allowlisted via the gate-documented `designLint.allowlist`, token-adoption deferred ticket **T-20261028-011**, not_before 2026-10-29) and co-architect 389/122 (same remedy, report-recorded; same-class ticket follow-up next window). Gate stays armed for new values; blanket-disable rejected.
+5. **Bare-Korean labels in EN originals** — `(한국어: [..](..))` reworded into links (stripper-visible) in co-abap README.md; `수소`→hydrogen in co-safety project + template user-guides (the template copy fixed root-side via PR #1669 so the next delivery is clean).
+6. **CI TS2307 on the optional schema-validator import** — co-abap #224's real CI failed statically typechecking the existsSync-guarded dynamic import. Fixed with a variable-specifier import (v1.4.1/1.5.2) applied to every delivered project during the wave and landed root+L1 via **#1669** (which also carries the co-safety template hangul fix + T-010/-011) — next template release self-heals the fleet.
+
+Wave table (canary-first; billing-wall exception T-20261007-025 per merge where recorded):
+
+| Project | PR | Path |
+|---|---|---|
+| co-price (canary) | #160 | billing exception (4× fail-at-start, 0 steps, annotation verified; post-merge audit ALL PASS) |
+| co-abap | #224 | **real CI: 4/4 SUCCESS** (after the import fix); post-merge audit PASS |
+| co-safety | #214 | **real CI: all SUCCESS** (9 checks incl. lint); post-merge audit PASS |
+| co-consult | #105 | billing exception |
+| co-architect | #381 | billing exception |
+| co-deck | #182 | billing exception |
+| co-design | #65 | billing exception |
+| co-develop | #191 | billing exception |
+| co-export | #59 | billing exception |
+| co-game | #59 | billing exception |
+| co-hr | #15 | billing exception |
+| co-learning | #28 | billing exception |
+| co-news | #15 | billing exception |
+| co-security | #88 | billing exception |
+| co-work | #26 | billing exception |
+| co-newbiz | #755 + #756 | billing exception; #755 carried tier normalizations only (upgrade had run on the project session's in-flight branch — see collision note), #756 the full delivery |
+
+**In-flight collision note (co-newbiz)**: the project session's PR #754 (ADR-0187 W3 P1 report-only validators, OPEN, project-owned) held the checkout mid-wave; the first delivery commit landed on its branch. Recovery: re-ran the idempotent upgrade on `main` → clean #756 (full 0.22.0 delivery, merged); #754 stays OPEN as project-owned work (its branch carries a now-duplicate delivery commit — content-identical, no conflict when it merges). #754 is the fleet's one intentional open PR.
+
+## Step 6 — Final state (04:35 KST)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| co-abap | main, synced | 0 | 0 | 0.22.0 |
+| co-architect | main, synced | 0 | 0 | 0.22.0 |
+| co-consult | main, synced | 0 | 0 | 0.22.0 |
+| co-deck | main, synced | 0 | 0 | 0.22.0 |
+| co-design | main, synced | 0 | 0 | 0.22.0 |
+| co-develop | main, synced | 0 | 0 | 0.22.0 |
+| co-export | main, synced | 0 | 0 | 0.22.0 |
+| co-game | main, synced | 0 | 0 | 0.22.0 |
+| co-hr | main, synced | 0 | 0 | 0.22.0 |
+| co-learning | main, synced | 0 | 0 | 0.22.0 |
+| co-newbiz | main, synced | 0 | **#754** (project session, ADR-0187 W3 P1 — intentionally open) | 0.22.0 |
+| co-news | main, synced | 0 | 0 | 0.22.0 |
+| co-price | main, synced | 0 | 0 | 0.22.0 |
+| co-safety | main, synced | 0 | 0 | 0.22.0 |
+| co-security | main, synced | 0 | 0 | 0.22.0 |
+| co-work | main, synced | 0 | 0 | 0.22.0 |
+
+**16/16 projects at 0.22.0, all post-merge audits green.** Post-merge audits run on every project (16/16 ALL PASS). Merged wave branches pruned remote+local (project repos); root's 2026-10-28 PR branches deleted.
+
+Root landings this cycle: #1663 (Phase I FULL review) · #1664 (Phase 1b) · #1665 + #1667 (auto-release v0.22.0, tagged `template-v0.22.0`) · #1668 (Steps 0–3 judgment) · **#1669** (wave companion: variable-specifier import fix root+L1, co-safety template hangul fix, T-010/-011).
+
+**Concurrent-session note**: a specialist session executed T-20261028-005 (co-safety durability) on the shared checkout during the wave (live dirt: new-domain.ts, 6 agent files, SCRIPTS.md, skill-graph, spec registry, design doc). Untouched by this runner; excluded from all landings via scoped staging. Root `main` advanced past it via ff-merge only (no overlap with its dirty files).
+
+## Verdict
+
+v0.22.0 wave complete: 16/16 delivered, 16/16 merged, 16/16 green, 1 intentional open PR. Gate-tightening fallout absorbed in-wave with systemic fixes landed root-side (#1669) and ticketed (T-20261028-010/-011). No PRESUME-STALE/KEEP verdicts discarded; no gates bypassed; billing-wall exception applied and recorded per merge.
