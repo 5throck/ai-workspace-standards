@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 9caedcbefc1b637e5da996c68cf8644e84be75fb8fdbc143a8f4f93a1645223e
+translated_from_hash: 6f6ae35304032f1d18b54a1ad55820192e6fc066b7930bd420074bfb1233f50e
 ---
 # Safety OS 사용자 가이드
 

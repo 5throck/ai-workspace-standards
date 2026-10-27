@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261028-011
+kind: manual
+title: >-
+  co-price design-token adoption: 840 raw px/color literals (158 distinct,
+  dominated by 10px/9px/11px/8px) across app UI — allowlisted 2026-10-28 in
+  docs/workspace-schema.json designLint.allowlist (gate-documented exemption)
+  after design-lint v2.3.0 conventional-fallback scan surfaced legacy debt
+  during the v0.22.0 delivery; adopt a token layer (or co-design-style
+  tokens.json + registries) and shrink the allowlist
+priority: low
+not_before: '2026-10-29'
+status: backlog
+attempts: 0
+created_at: '2026-10-28T03:31:38.543+09:00'
+history:
+  - at: '2026-10-28T03:31:38.543+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

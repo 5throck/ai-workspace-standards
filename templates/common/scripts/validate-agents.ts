@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.4.0
+ * @version 1.4.1
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -19,8 +19,9 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 // v1.2.1: ./validators/ is L0-only; L1/L3 project copies must not crash at import time —
 // the frontmatter schema sweep degrades to a skip when the validators are absent.
-const schemaValidatorAvailable = existsSync(join(import.meta.dir, 'validators', 'schema-validator.ts'));
-const schemaValidator = schemaValidatorAvailable ? await import('./validators/schema-validator.ts') : null;
+const SCHEMA_VALIDATOR_SPEC = join(import.meta.dir, 'validators', 'schema-validator.ts');
+const schemaValidatorAvailable = existsSync(SCHEMA_VALIDATOR_SPEC);
+const schemaValidator = schemaValidatorAvailable ? await import(SCHEMA_VALIDATOR_SPEC) : null;
 const parseFrontmatterYaml = schemaValidator?.parseFrontmatter;
 const validateAgentFrontmatter = schemaValidator?.validateAgentFrontmatter;
 import { cwd } from 'node:process';
