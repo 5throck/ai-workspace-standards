@@ -1,4 +1,12 @@
-// @version 1.25.0
+// @version 1.26.0
+// v1.26.0 (2026-10-28, T-20261028-002 — spec
+//          docs/designs/2026-10-28-ticket-runner-mechanical-batch-design.md §3):
+//          globToRegExp zero-segment semantics — `/**/` also matches zero
+//          intermediate segments (a/**/b matches a/b) and a leading `**/`
+//          matches top level (**/b matches b). The old `.*`-substitution
+//          demanded literal slashes around the wildcard, so narrowed
+//          --disposition adopt-template globs silently skipped exactly those
+//          paths. Trailing `/**` and bare `**` semantics unchanged.
 // v1.25.0 (2026-10-27, T-20261027-004 — spec
 //          docs/designs/2026-10-27-sync-overwrite-policy-design.md): delivery-
 //          decision observability data + pure helpers (design D1/D2/D3). New
@@ -970,14 +978,18 @@ export function resolveDisposition(
   };
 }
 
-/** Translate a glob (`**`, `*`, `?`) into an anchored RegExp for
- *  --disposition adopt-template=<glob> path narrowing. */
+// Translate a glob (`**`, `*`, `?`) into an anchored RegExp for
+// --disposition adopt-template=<glob> path narrowing. An interior doublestar
+// between slashes also matches zero intermediate segments (a/**/b matches
+// a/b) and a leading doublestar slash matches top level (**/b matches b).
 export function globToRegExp(glob: string): RegExp {
   const src = glob
     .replace(/[.+^${}()|[\]\\]/g, '\\$&')
     .replace(/\*\*/g, '\u0000')
     .replace(/\*/g, '[^/]*')
     .replace(/\?/g, '[^/]')
+    .replace(/\/\u0000\//g, '(?:/.*)?/')
+    .replace(/^\u0000\//, '(?:.*/)?')
     .replace(/\u0000/g, '.*');
   return new RegExp(`^${src}$`);
 }
