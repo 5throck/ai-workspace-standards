@@ -14,7 +14,7 @@
 | `check-pm-approval.ts` | 1.0.1 | PM approval gate check |
 | `domain-config.ts` | 1.5.0 | Domain registry + DEFAULT_MIN_LEGAL_BASIS config |
 | `migrate-registry-to-coordinates.ts` | 1.0.2 | Coordinate-registry migration utility |
-| `new-domain.ts` | 1.0.1 | Scaffold a new industry/functional domain |
+| `new-domain.ts` | 1.0.2 | Scaffold a new industry/functional domain (v1.0.2: scalar tier + version field in emitted frontmatter, T-20261028-005) |
 | `risk-register-rollup.ts` | 1.0.0 | Roll up RA instances into facility risk registers |
 | `safety-audit.ts` | 4.10.1 | co-safety full compliance audit (legal_basis, schemas, evidence) |
 | `scaffold-industry.ts` | 0.1.1 | Scaffold an industry workflow/skill/evidence set |

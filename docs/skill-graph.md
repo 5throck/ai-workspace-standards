@@ -530,12 +530,10 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-safety/agents/ehsconst-agent.md` | doc | `co-safety/fall-hazard-assessor`, `co-safety/safety-inspection-validator` | — | — |
 | `doc:co-safety/agents/emergency-agent.md` | doc | `co-safety/emergency-response` | — | — |
 | `doc:co-safety/agents/food-agent.md` | doc | `co-safety/psm-loto` | — | — |
-| `doc:co-safety/agents/gasterm-agent.md` | doc | `co-safety/construction-permit-overview`, `co-safety/gas-dispersion-analyzer`, `co-safety/tank-integrity-validator` | — | — |
-| `doc:co-safety/agents/gcp-agent.md` | doc | `co-safety/protocol-deviation-analyzer`, `co-safety/sae-causality-assessor` | — | — |
-| `doc:co-safety/agents/gdp-agent.md` | doc | `co-safety/dts-verification`, `co-safety/temperature-excursion-analyzer` | — | — |
+| `doc:co-safety/agents/gasterm-agent.md` | doc | `co-safety/construction-permit-overview` | — | — |
+| `doc:co-safety/agents/gdp-agent.md` | doc | `co-safety/temperature-excursion-analyzer` | — | — |
 | `doc:co-safety/agents/glp-agent.md` | doc | `co-safety/glp-data-integrity-checker`, `co-safety/glp-study-protocol-validator` | — | — |
-| `doc:co-safety/agents/gmp-agent.md` | doc | `co-safety/gmp-qrm` | — | — |
-| `doc:co-safety/agents/gvp-agent.md` | doc | `co-safety/benefit-risk-assessor`, `co-safety/signal-detector` | — | — |
+| `doc:co-safety/agents/gmp-agent.md` | doc | `co-safety/gmp-change-control`, `co-safety/gmp-deviation-capa`, `co-safety/gmp-qrm` | — | — |
 | `doc:co-safety/agents/legal-agent.md` | doc | `common/k-law` | — | — |
 | `doc:co-safety/agents/meddevice-agent.md` | doc | `co-safety/iso14971-risk-scorer` | — | — |
 | `doc:co-safety/agents/msds-agent.md` | doc | `co-safety/chemical-risk-assessment`, `co-safety/ghs-classifier`, `co-safety/msds-parser` | — | — |

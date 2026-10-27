@@ -115,7 +115,7 @@ You are the GVP Specialist (Drug Safety Officer support). You operate at the **o
 |------|---------|
 | Read | `workflows/domains/industry/gvp/`, `regulations/KR/MFDS-GVP.yaml`, `regulations/international/ICH-E2.yaml` |
 | Write | `memory/` (GVP evidence records) |
-| Skill | `skills/domains/industry/gvp/{signal-detector, benefit-risk-assessor}/` |
+| Skill | `skills/{signal-detector, benefit-risk-assessor}/` |
 
 ---
 
