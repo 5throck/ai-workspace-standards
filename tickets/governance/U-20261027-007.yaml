@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: U-20261027-007
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-27T19:13:50.384+09:00
+history:
+  - at: 2026-10-27T19:13:50.384+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.21.0
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/validate-md-language.ts has three perimeter gaps in the language policy enforcement. (a) Dead protected-path entry: the protected-paths list (~line 236) matches /^Hermes\.md$/ case-sensitively, which never matches the actual root file HERMES.md — currently harmless (no Hangul in that file) but the protection intent is dead code. (b) English originals of the bilingual twins are unscanned: no pattern in officialPatterns (~lines 206-242) matches root README.md, docs/README.md, or docs/user-guide.md, so a stray Korean sentence introduced into the EN originals never fails validation (the KO twins are guarded only for the user-guide pair via the hash sync, and the README pair''s hash check does not scan language). (c) Unenforceable declarations: the suffix-locale declaration gate (~lines 470-486) runs only on files passing isOfficialDocument, so lang: ko declarations in README_ko.md, docs/user-guide_ko.md, and docs/README_ko.md are convention-only, whereas agents/ and skills/ README twins ARE gated. Requested: fix the HERMES.md regex to case-insensitive, add officialPatterns entries for the EN originals, and extend (or explicitly accept) the declaration-gate perimeter.'
+  affected_paths:
+    - scripts/validate-md-language.ts
+  identity_source: cwd
+  repro: 'Add a Korean sentence to README.md (English original) and run bun scripts/validate-md-language.ts: no violation is reported. Rename test: a file named HERMES.md with Hangul outside code fences is not protected by the /^Hermes\.md$/ pattern (case-sensitive).'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/validate-md-language.ts=false
+  dedupe_key: 43df4069b035c17dca9feab6ef96a0c1a1b7eb1781949e732e786715e0e113c3
+  duplicates:
+    - project: co-design
+      at: 2026-10-27T19:13:50.384+09:00
