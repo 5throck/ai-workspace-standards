@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261028-001
+kind: manual
+title: >-
+  validator-hardening: design-gate coverage check — template-touching commits
+  require docs/designs + docs/specs/entries (Phase I F-1: 8 window commits/9
+  tickets uncovered; batch-backfill retro records and add a windowed review
+  check)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-28T02:21:45.293+09:00'
+history:
+  - at: '2026-10-28T02:21:45.293+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
