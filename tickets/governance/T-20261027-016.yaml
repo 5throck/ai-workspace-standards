@@ -17,12 +17,37 @@ title: >-
   reconcile). Evidence: T-20261027-015, co-design PR #59, resync 2026-10-27 Step
   4.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T23:48:00.231+09:00'
 history:
   - at: '2026-10-27T23:48:00.231+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-28T01:03:09.408+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T01:03:09.429+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-28T01:03:09.446+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T01:03:09.463+09:00'
+    from: review
+    to: done
+result: >-
+  Design Gate + implementation landed via PR #1661 (merged, CI green):
+  DEC-20261028-01 records option (a) selection under the user's 2026-10-28
+  ticket-processing directive; design
+  2026-10-28-governance-workflows-variant-delivery-design (spec registered
+  implemented). templates/common/docs/governance/agents/workflows.md rewritten
+  as roster-agnostic variant lifecycle guidance (nine-agent L0 specifics
+  removed, citation-qualifier convention applied, all 16 AGENTS.md/CLAUDE/GEMINI
+  reference mandates verified covered, 104 pointer-integrity checks pass); the
+  L1 copy joined the agents-governance-docs domain exclude list (D4-sanctioned
+  hand-maintained classification) so hash-compare drift can't revert it. Root L0
+  file untouched. co-design now receives truthful variant-context content at
+  next wave — its re-adoption vs continued deletion is the project's own
+  disposition.
 error: null
