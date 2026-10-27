@@ -18,15 +18,17 @@
  * 6. Guard G2: a drifted span over the 120-line cap is skipped.
  * 7. Snapshot data on replace + the caller's fail-closed `.pre-skeleton.bak`
  *    contract (bak write failure → project file untouched).
- * 8. Number-collision guard: old-vintage `### 2. Pre-Edit Quality Gate (All
- *    Platforms)` blocks the claude-s2 insert (SKELETON DRIFT log, no
- *    duplicate §2) while §3/§4.5/§5/§6 still insert; a foreign `### 5.`
- *    title blocks claude-s5 the same way.
+ * 8. Number-collision guard: a project-local heading occupying a registered
+ *    number (foreign `### 5. Project-Local Custom Rules`, `### 4.5 Project-Local
+ *    Skill Overrides`) blocks the insert with a loud + named
+ *    `WARN: SKELETON HEADING COLLISION` log (T-20261027-008). The historical
+ *    old-vintage `### 2. Pre-Edit Quality Gate (All Platforms)` collision is
+ *    RESOLVED template-side: claude-s2 is now `### 2.5 Native Slash Commands`
+ *    and inserts cleanly between the project's §2 and §3.
  * 9. Idempotent second run: content identical, zero INSERTED/REPLACED lines.
- *    (Known standing signal, by design: on a project that keeps an
- *    unregistered old-vintage `### 2.` heading, the claude-s2 collision skip
- *    re-logs `SKELETON DRIFT (manual review)` on every run — inserts delete
- *    nothing, so that conflict stays visible until resolved manually.)
+ *    (A standing number collision — e.g. a foreign `### 5.` title — re-logs
+ *    the WARN on every run; inserts delete nothing, so the conflict stays
+ *    visible until resolved manually.)
  * 10. Unresolved anchor → SKELETON ANCHOR NOT FOUND, no write; dryRun purity.
  * 11. Real-tree invariants: the registry validates clean against
  *     templates/common/{CLAUDE,GEMINI}.md and both templates self-merge as a
@@ -69,6 +71,7 @@ function templateSection(content: string, heading: string, stopPrefixes: string[
   return lines.slice(start, end < 0 ? lines.length : end).filter((l, i, a) => !(i === a.length - 1 && l.trim() === ''));
 }
 
+const S25 = '### 2.5 Native Slash Commands';
 const S3 = '### 3. MCP Configurations & Absolute Resolving';
 const S4 = '### 4. Language Policy for Documentation';
 const S45 = '### 4.5 Skill Resolution Priority';
@@ -76,6 +79,7 @@ const S5 = '### 5. Agent Dispatch Rules';
 const S6 = '### 6. Native Sub-agents (`Agent` Tool)';
 const EPB = '## Execution Plan Boilerplate';
 
+const s25Lines = templateSection(claudeTemplate, S25, [S3]);
 const s3Lines = templateSection(claudeTemplate, S3, [S4, C_OPEN]);
 const s45Lines = templateSection(claudeTemplate, S45, [S5]);
 const s5Lines = templateSection(claudeTemplate, S5, [C_OPEN]);
@@ -182,7 +186,7 @@ describe('old-vintage CLAUDE.md restore (co-architect shape, no local §2)', () 
     expect(result.snapshots).toEqual([]); // inserts delete nothing
   });
 
-  test('continuous out-of-zone numbering in section order 1,2,3,4.5,5,6 (§7+ are zone-delivered)', () => {
+  test('continuous out-of-zone numbering in section order 1,2.5,3,4.5,5,6 (§7+ are zone-delivered)', () => {
     const lines = result.content.split('\n');
     const zoneLine = new Set<string>();
     // mark lines inside COMMON-CLAUDE zones
@@ -196,7 +200,7 @@ describe('old-vintage CLAUDE.md restore (co-architect shape, no local §2)', () 
     const numbered = lines
       .filter((l) => !zoneLine.has(l) && /^###\s/.test(l.trim()))
       .map((l) => headingNumber(l) ?? l.trim());
-    expect(numbered).toEqual(['1', '2', '3', '4.5', '5', '6']);
+    expect(numbered).toEqual(['1', '2.5', '3', '4.5', '5', '6']);
   });
 
   test('project-local tail preserved byte-identical', () => {
@@ -213,6 +217,7 @@ describe('old-vintage CLAUDE.md restore (co-architect shape, no local §2)', () 
   });
 
   test('inserted section bodies are byte-equal to the template sections', () => {
+    expect(result.content).toContain(s25Lines.join('\n'));
     expect(result.content).toContain(s3Lines.join('\n'));
     expect(result.content).toContain(s45Lines.join('\n'));
     expect(result.content).toContain(s5Lines.join('\n'));
@@ -343,19 +348,23 @@ describe('snapshot persistence: the caller contract (upgrade-project mergeWorksp
 // ── 8: number-collision guard ─────────────────────────────────────────────────
 
 describe('number-collision guard', () => {
-  test('old-vintage `### 2. Pre-Edit Quality Gate` blocks claude-s2 with a DRIFT log; §3/§4.5/§5/§6 still insert (co-newbiz shape)', () => {
+  test('old-vintage `### 2. Pre-Edit Quality Gate` no longer collides: claude-s2 (§2.5) inserts (T-20261027-008 resolution)', () => {
     const proj = oldVintageClaude({ oldS2: true });
     const r = mergeSkeletonSections(proj, claudeTemplate, 'CLAUDE.md', false);
-    expect(r.log.some((l) => l.includes('SKELETON DRIFT (manual review)') && l.includes('claude-s2'))).toBe(true);
-    expect(r.content).not.toContain('### 2. Native Slash Commands');
+    // The §2.5 insert lands cleanly between the project's §2 and §3.
+    expect(r.log.some((l) => l.includes('SKELETON INSERTED claude-s2') && l.includes(S25))).toBe(true);
+    expect(r.log.some((l) => l.includes('SKELETON HEADING COLLISION'))).toBe(false);
     expect(r.content).toContain('### 2. Pre-Edit Quality Gate (All Platforms)');
-    for (const id of ['claude-s3', 'claude-s45', 'claude-s5', 'claude-s6']) {
+    expect(r.content).toContain(S25);
+    expect(r.content.indexOf('### 2. Pre-Edit Quality Gate (All Platforms)')).toBeLessThan(r.content.indexOf(S25));
+    expect(r.content.indexOf(S25)).toBeLessThan(r.content.indexOf(S3));
+    for (const id of ['claude-s2', 'claude-s3', 'claude-s45', 'claude-s5', 'claude-s6']) {
       expect(r.log.some((l) => l.includes(`SKELETON INSERTED ${id}`))).toBe(true);
     }
     expect(r.merged).toBe(true);
   });
 
-  test('a foreign `### 5.` title blocks claude-s5 the same way', () => {
+  test('a foreign `### 5.` title blocks claude-s5 with a loud named WARN', () => {
     const proj = [
       '# CLAUDE.md',
       '',
@@ -369,14 +378,15 @@ describe('number-collision guard', () => {
       '',
     ].join('\n');
     const r = mergeSkeletonSections(proj, claudeTemplate, 'CLAUDE.md', false);
-    expect(r.log.some((l) => l.includes('SKELETON DRIFT (manual review)') && l.includes('claude-s5'))).toBe(true);
+    expect(r.log.some((l) => l.includes('WARN: SKELETON HEADING COLLISION') && l.includes('claude-s5'))).toBe(true);
+    expect(r.log.some((l) => l.includes('"### 5. Project-Local Custom Rules"'))).toBe(true);
     expect(r.content).not.toContain(S5);
     expect(r.content).toContain('### 5. Project-Local Custom Rules');
   });
 
   test('4.5 collision detection handles the dotless N.M heading form', () => {
     expect(headingNumber('### 4.5 Skill Resolution Priority')).toBe('4.5');
-    expect(headingNumber('### 2. Native Slash Commands')).toBe('2');
+    expect(headingNumber('### 2.5 Native Slash Commands')).toBe('2.5');
     expect(headingLevel('### 4.5 Skill Resolution Priority')).toBe(3);
     const proj = [
       '# CLAUDE.md',
@@ -391,7 +401,7 @@ describe('number-collision guard', () => {
       '',
     ].join('\n');
     const r = mergeSkeletonSections(proj, claudeTemplate, 'CLAUDE.md', false);
-    expect(r.log.some((l) => l.includes('SKELETON DRIFT (manual review)') && l.includes('claude-s45'))).toBe(true);
+    expect(r.log.some((l) => l.includes('WARN: SKELETON HEADING COLLISION') && l.includes('claude-s45'))).toBe(true);
   });
 });
 
@@ -405,10 +415,26 @@ describe('idempotent second run', () => {
     expect(second.content).toBe(first.content);
     expect(second.merged).toBe(false);
     expect(second.snapshots).toEqual([]);
-    expect(second.log.some((l) => l.includes('SKELETON INSERTED') || l.includes('SKELETON REPLACED'))).toBe(false);
-    // By design, the standing unregistered `### 2.` keeps re-logging the
-    // collision skip — the conflict stays visible until resolved manually.
-    expect(second.log.some((l) => l.includes('SKELETON DRIFT (manual review)'))).toBe(true);
+    expect(second.log).toEqual([]);
+  });
+
+  test('a standing number collision re-logs the WARN on every run (conflict stays visible)', () => {
+    const proj = [
+      '# CLAUDE.md',
+      '',
+      '### 5. Project-Local Custom Rules',
+      'local body',
+      '',
+      C_OPEN,
+      EPB,
+      'boilerplate body',
+      C_END,
+      '',
+    ].join('\n');
+    const first = mergeSkeletonSections(proj, claudeTemplate, 'CLAUDE.md', false);
+    const second = mergeSkeletonSections(first.content, claudeTemplate, 'CLAUDE.md', false);
+    expect(second.content).toBe(first.content);
+    expect(second.log.some((l) => l.includes('WARN: SKELETON HEADING COLLISION') && l.includes('claude-s5'))).toBe(true);
   });
 
   test('second run on a normalized file (no standing collision) is fully silent', () => {
