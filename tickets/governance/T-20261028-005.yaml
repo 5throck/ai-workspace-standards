@@ -11,12 +11,21 @@ title: >-
   gdp-agent.md:92/120, gasterm-agent.md:112, gcp-agent.md:116, gvp-agent.md:118
   — Phase 1b CS-2)
 priority: high
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-10-28T02:39:53.725+09:00'
 history:
   - at: '2026-10-28T02:39:53.725+09:00'
     from: null
     to: backlog
+  - at: '2026-10-28T04:22:06.105+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T04:22:06.120+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-28T04:22:06.134+09:00'
+    from: running
+    to: review
 result: null
 error: null
