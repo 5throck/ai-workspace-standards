@@ -150,6 +150,25 @@ describe('normalizeManifestForCompare (--check, T-20260915-004)', () => {
         expect(normalized).toContain('- **Scripts**: 92');
         expect(normalized).toContain('**Generated**: <timestamp>');
     });
+
+    // D6, T-20261028-012 (spec docs/designs/2026-10-28-dev-sync-staged-count-design.md):
+    // a conflicted merge can land two `**Generated**:` header lines (both sides of
+    // the resolution carry their own timestamp — root PR #1672/#1673 class). The
+    // comparison collapses them to one placeholder so the next --check passes and
+    // the regeneration self-heals the duplicate.
+    test('collapses duplicate Generated header lines to exactly one (D6 merge-conflict class)', () => {
+        const conflicted = MANIFEST('2026-10-28T01:00:00.000Z', '92')
+            .replace('**Manifest Version**: 1.0\n', '**Manifest Version**: 1.0\n**Generated**: 2026-10-28T09:00:00.000Z\n');
+        expect(conflicted.match(/^\*\*Generated\*\*: .*$/gm)!.length).toBe(2); // precondition: the merge really landed two
+        const normalized = normalizeManifestForCompare(conflicted);
+        expect(normalized.match(/\*\*Generated\*\*: <timestamp>/g)!.length).toBe(1);
+    });
+
+    test('a two-header on-disk manifest diffs clean against the single-header regeneration (D6)', () => {
+        const conflicted = MANIFEST('2026-10-28T01:00:00.000Z', '92')
+            .replace('**Manifest Version**: 1.0\n', '**Manifest Version**: 1.0\n**Generated**: 2026-10-28T09:00:00.000Z\n');
+        expect(diffManifests(conflicted, MANIFEST('2026-10-28T12:00:00.000Z', '92'))).toEqual([]);
+    });
 });
 
 describe('diffManifests (--check, T-20260915-004)', () => {

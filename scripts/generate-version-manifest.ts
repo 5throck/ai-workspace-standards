@@ -1,4 +1,11 @@
-// @version 1.10.1
+// @version 1.10.2
+// v1.10.2 (2026-10-28, T-20261028-012 — spec
+//           docs/designs/2026-10-28-dev-sync-staged-count-design.md D6):
+//           normalizeManifestForCompare collapses any number of pre-existing
+//           `**Generated**:` header lines to one placeholder, so a conflicted
+//           merge that lands two headers (root PR #1672/#1673 class, commits
+//           44532c325 / 44d801b5f) compares clean under --check and self-heals
+//           at the next sync's regeneration instead of flagging a phantom line.
 // v1.10.1 (2026-10-26, spec
 //           docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
 //           parseAgentFrontmatter resolves the normalized scalar form
@@ -642,12 +649,30 @@ export async function collectManifestData(): Promise<ManifestData> {
 // is deterministic (T-20260915-004). In shallow mode the volatile "Last
 // Modified" date cells are masked on BOTH sides too (T-20260916-013).
 const GENERATED_LINE_RE = /^\*\*Generated\*\*: .*$/;
+const GENERATED_PLACEHOLDER = '**Generated**: <timestamp>';
 
 export function normalizeManifestForCompare(content: string): string {
-    return content
+    const normalized = content
         .split('\n')
-        .map(line => (GENERATED_LINE_RE.test(line) ? '**Generated**: <timestamp>' : line))
-        .join('\n');
+        .map(line => (GENERATED_LINE_RE.test(line) ? GENERATED_PLACEHOLDER : line));
+    // Input-collapsing (D6, T-20261028-012): a conflicted merge can land two
+    // `**Generated**:` header lines — both sides of the resolution carry their
+    // own timestamp line (root PR #1672/#1673 merge class, commits 44532c325 /
+    // 44d801b5f). Collapse any number of them to one placeholder so the
+    // --check comparison matches the single-header regenerated output and the
+    // next sync's regeneration self-heals the duplicate instead of flagging a
+    // phantom extra line. A well-formed manifest has exactly one header, so
+    // keeping the first occurrence and dropping the rest is lossless.
+    const collapsed: string[] = [];
+    let seenHeader = false;
+    for (const line of normalized) {
+        if (line === GENERATED_PLACEHOLDER) {
+            if (seenHeader) continue;
+            seenHeader = true;
+        }
+        collapsed.push(line);
+    }
+    return collapsed.join('\n');
 }
 
 // ── Date-column masking (T-20260916-013) ─────────────────────────────────────

@@ -1,4 +1,18 @@
-// @version 1.32.0
+// @version 1.33.0
+// v1.33.0 (2026-10-28, T-20261028-012 — spec
+//          docs/designs/2026-10-28-dev-sync-staged-count-design.md): new step 6.9 —
+//          the commit-time message is re-derived from the FINAL staged set, read
+//          after step 6.5 staging completes and before git commit. The early step-1
+//          composition stays (the language gate, main-drift pre-flight, memory
+//          summary, and branch slug depend on it), but caller classes that present
+//          an empty index at step 1 and stage via step 6.5 (upgrade delivery,
+//          multi-commit closeout) got "(0 files)" subjects and PR titles that
+//          under-represented the surface (root PR #1669: 12 files; co-design
+//          PR #65: 17 files). The re-derivation consumes the retained caller
+//          message (originalMsg), so descriptive subjects stay verbatim and weak
+//          ones derive from the set the commit actually contains; when the message
+//          changes, the memory session-summary header is rewritten, the MEMORY.md
+//          index is refreshed, and the corrected memory bytes are re-staged.
 // v1.32.0 (2026-10-27, T-20261027-004 — spec
 //          docs/designs/2026-10-27-sync-overwrite-policy-design.md D3.1):
 //          step 3.9 auto-E5 attribution refuses a delivery manifest carrying
@@ -331,10 +345,16 @@ if (import.meta.main && !concludeMerge) {
 // Step 1 (U-20261008-001): weak messages — the no-arg fallback "chore: update" and
 // the bare "chore: upgrade template to X" shape — are replaced by a descriptive
 // conventional-commit summary derived from the task-staged change set. Snapshot the
-// staged set here (nothing stages between this point and the step 6.5 snapshot, so
-// this IS the task-staged set). Composition is pure (helpers/commit-message.ts) and
-// its output is English by construction, so the language gate below still applies
-// unchanged to caller-supplied text.
+// staged set here: within this process nothing stages between this point and the
+// step 6.5 snapshot, so this IS the task-staged set *for the early composition* —
+// the language gate, the memory-log summary, and the branch slug. It is NOT
+// guaranteed to equal the commit contents: delivery/closeout caller classes present
+// an empty index here and stage via step 6.5, so step 6.9 re-derives the
+// commit-time message from the final staged set (T-20261028-012, spec
+// docs/designs/2026-10-28-dev-sync-staged-count-design.md). Composition is pure
+// (helpers/commit-message.ts) and its output is English by construction, so the
+// language gate below still applies unchanged to caller-supplied text.
+const originalMsg = msg; // T-20261028-012: caller message retained for the step-6.9 re-derivation.
 if (import.meta.main) {
   try {
     const earlyStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
@@ -1462,6 +1482,65 @@ if (scopedStaging) {
         if (import.meta.main) {
           process.exit(1);
         }
+    }
+}
+
+// ── Step 6.9 — final message composition (T-20261028-012, spec
+// docs/designs/2026-10-28-dev-sync-staged-count-design.md) ────────────────────
+// The step-1 composition is authoritative for the language gate, the memory
+// summary, and the branch slug — but not for the commit: caller classes that
+// stage via step 6.5 present an empty index at step 1. Immediately after
+// staging completes the index holds exactly what the commit below will
+// contain, so the message is re-derived from it here.
+// Invariant: nothing stages after this point (mirrors the step-1 snapshot
+// comment this step corrects).
+try {
+    const finalStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+    if (finalStagedRes.exitCode !== 0) throw new Error(finalStagedRes.stderr.toString());
+    const finalStagedPaths = finalStagedRes.stdout.toString().split('\0').filter(Boolean);
+    const finalMsg = composeCommitMessage(originalMsg, finalStagedPaths);
+    if (finalMsg !== msg) {
+        // Fail-closed language re-check — same gate wording as step 1 (derived
+        // messages are English by construction; caller-supplied ones already
+        // passed, so this only fires on a corrupted re-derivation).
+        if (hasNonEnglish(finalMsg)) {
+            console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+            console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
+            if (import.meta.main) {
+              process.exit(1);
+            }
+        }
+        // (a) Rewrite today's session-summary header — anchor + escape pattern
+        // identical to the idempotency check in the memory-append block above.
+        const escapedEarlyMsg = msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const summaryHeaderRe = new RegExp(
+            `(^## Session Summary\\s*\\n)${escapedEarlyMsg}(?=\\n|$)`,
+            'm'
+        );
+        if (fs.existsSync(memoryFile)) {
+            const memoryBefore = fs.readFileSync(memoryFile, 'utf-8');
+            const memoryAfter = memoryBefore.replace(
+                summaryHeaderRe,
+                (_match: string, header: string) => `${header}${finalMsg}`
+            );
+            if (memoryAfter !== memoryBefore) {
+                fs.writeFileSync(memoryFile, memoryAfter, 'utf8');
+                console.log(`${CYAN}ℹ️  step 6.9: commit message re-derived from the final staged set — memory session-summary header updated ("${msg}" → "${finalMsg}")${RESET}`);
+            }
+        }
+        // (b) Refresh the MEMORY.md index with the final message.
+        await $`bun run scripts/sync-md.ts ${date} "${finalMsg}"`;
+        // (c) Re-stage the corrected memory bytes (step 6.5 staged them as
+        // pipeline outputs; the index must carry the corrected content).
+        const restageRes = await $`git add -- ${memoryFile} memory/MEMORY.md`.nothrow();
+        if (restageRes.exitCode !== 0) throw new Error(restageRes.stderr.toString());
+        // (d) The commit and the PR title below proceed with the final message.
+        msg = finalMsg;
+    }
+} catch (e) {
+    console.log(`${RED}❌ step 6.9 (final message composition) failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
 }
 

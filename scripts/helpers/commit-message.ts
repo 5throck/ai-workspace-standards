@@ -1,4 +1,10 @@
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-10-28, T-20261028-012 — spec
+//           docs/designs/2026-10-28-dev-sync-staged-count-design.md): comment-only —
+//           documents the two-phase caller contract (dev-sync step 1 composes from
+//           the early staged set; step 6.9 re-composes from the FINAL staged set
+//           with the retained caller message). No behavior change: the functions
+//           were already pure and path-set-agnostic.
 // v1.1.0 (2026-10-12, T-20261012-011): the count is always present — even the
 //           zero-classifiable / empty-set fallback carries "(N files)" so a PR
 //           title never under-represents the surface it stands for.
@@ -113,6 +119,15 @@ export function deriveCommitMessage(paths: string[]): string {
 /**
  * Keep a caller-supplied descriptive message; replace only weak fallback shapes
  * with a summary derived from the task-staged change set.
+ *
+ * Two-phase caller contract (T-20261028-012, spec
+ * docs/designs/2026-10-28-dev-sync-staged-count-design.md): dev-sync calls this
+ * TWICE with the same retained caller message — step 1 with the early staged
+ * set (feeds the language gate, memory summary, and branch slug) and step 6.9
+ * with the FINAL staged set (feeds the commit subject and PR title, which must
+ * equal the commit contents). The function is pure and path-set-agnostic, so
+ * the second call alone carries the corrected count; no helper change was
+ * needed for that (this note is the only 1.1.1 delta).
  */
 export function composeCommitMessage(rawMsg: string, changedPaths: string[]): string {
   if (!isWeakCommitMessage(rawMsg)) return rawMsg.trim();

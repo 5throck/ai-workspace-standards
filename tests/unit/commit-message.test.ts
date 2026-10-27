@@ -119,3 +119,55 @@ describe('composeCommitMessage', () => {
     expect(composeCommitMessage('', [])).toBe('chore: workspace sync (0 files)'); // T-20261012-011
   });
 });
+
+// T-20261028-012, spec docs/designs/2026-10-28-dev-sync-staged-count-design.md
+// (D7): pin the empty-index-at-composition-then-staged case. dev-sync step 1
+// composes from the early staged set — empty for the delivery/closeout caller
+// classes — and new step 6.9 re-composes from the FINAL staged set with the
+// same retained caller message. These cases pin both calls' shapes.
+describe('composeCommitMessage — re-derivation from the final staged set (T-20261028-012)', () => {
+  // 17-path delivery-shaped set (co-design PR #65 evidence shape): agents/,
+  // docs/, scripts/ mix — scripts is the primary group (8 of 17).
+  const deliveryPaths = [
+    'agents/architect.md',
+    'agents/pm.md',
+    'agents/auditor.md',
+    'agents/docs-writer.md',
+    'docs/guides/delivery-guide.md',
+    'docs/guides/upgrade-guide.md',
+    'docs/standards/naming.md',
+    'docs/VERSION_MANIFEST.md',
+    'docs/designs/2026-10-28-dev-sync-staged-count-design.md',
+    'scripts/dev-sync.ts',
+    'scripts/helpers/commit-message.ts',
+    'scripts/generate-version-manifest.ts',
+    'scripts/SCRIPTS.md',
+    'scripts/audit.ts',
+    'scripts/validate-templates.ts',
+    'scripts/verify-scripts.ts',
+    'scripts/ticket.ts',
+  ];
+
+  test('the trap: weak original against an EMPTY early set composes "(0 files)" (the bug shape)', () => {
+    // This is exactly what dev-sync step 1 produced for PR #1669 / co-design
+    // PR #65 — an empty index at composition time. The helper contract is
+    // honest about the set it is given; the fix lives in the caller (step 6.9
+    // re-derives from the final set), not in a fake count here.
+    expect(composeCommitMessage('chore: upgrade template to 0.22.0', [])).toBe('chore: workspace sync (0 files)');
+  });
+
+  test('the fix: same weak original against the 17-path final set carries the real count and type(scope)', () => {
+    const msg = composeCommitMessage('chore: upgrade template to 0.22.0', deliveryPaths);
+    expect(msg).toBe('chore(scripts): workspace sync (17 files)');
+    expect(msg.length).toBeLessThanOrEqual(72);
+  });
+
+  test('descriptive originals stay verbatim against the final set too (D2 replacement semantics)', () => {
+    const raw = 'fix(pipeline): derive sync file count from the final staged set';
+    expect(composeCommitMessage(raw, deliveryPaths)).toBe(raw);
+  });
+
+  test('an empty FINAL set still yields the honest "(0 files)" fallback (unreachable for real syncs — no-op exit)', () => {
+    expect(composeCommitMessage('chore: resync template', [])).toBe('chore: workspace sync (0 files)');
+  });
+});

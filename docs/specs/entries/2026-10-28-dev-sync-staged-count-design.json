@@ -2,7 +2,7 @@
   "id": "2026-10-28-dev-sync-staged-count-design",
   "title": "dev sync staged count design",
   "file": "docs/designs/2026-10-28-dev-sync-staged-count-design.md",
-  "status": "draft",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-10-27",
   "last_updated": "2026-10-27"
