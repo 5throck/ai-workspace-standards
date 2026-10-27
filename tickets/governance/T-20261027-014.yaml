@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261027-014
+kind: manual
+title: >-
+  infra-incident: co-design repo GitHub Actions storage corruption — every
+  CI/Delete-Merged-Branches run since 2026-10-27 09:02 KST fails at job START (0
+  steps, ~3-5s) with Azure BlobNotFound on log retrieval (jobs log API returns
+  the XML BlobNotFound error); affects push+pull_request events on main and PR
+  branches alike; rerun, cache clear (none existed), and Actions permissions
+  disable/re-enable toggle all failed to recover. NOT the billing wall
+  (T-20261007-025 — different error class) and NOT code. Evidence: runs
+  40520271606/40519591764/40493810257/40477824643. Impact: no CI gate evidence
+  for co-design merges — merges proceed on the repo's local-gates standard
+  (audit+verify-scripts+gitleaks green) per precedent until GitHub-side storage
+  recovers (support contact or self-heal). Re-verify CI health before trusting
+  co-design CI evidence again.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T23:35:21.627+09:00'
+history:
+  - at: '2026-10-27T23:35:21.627+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
