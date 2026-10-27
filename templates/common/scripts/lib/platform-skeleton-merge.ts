@@ -1,4 +1,15 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-27, T-20261027-008): claude-s2 heading collision resolved —
+//         the registry heading is now `### 2.5 Native Slash Commands`
+//         (house-style N.M numbering, §4.5 precedent) so the insert no longer
+//         collides with the old-vintage `### 2. Pre-Edit Quality Gate (All
+//         Platforms)` still carried by co-develop/co-consult/co-export/co-game/
+//         co-newbiz (templates/common/CLAUDE.md Pre-Edit Quality Gate was
+//         renumbered to `### 2.` in lockstep, restoring continuous numbering
+//         for fresh scaffolds). Heading collisions on the insert path now WARN
+//         loud + named (`WARN: SKELETON HEADING COLLISION ...`) instead of the
+//         quiet SKELETON DRIFT log — same genus as the U-20261026-005
+//         silent-skip class.
 // v1.0.0 (spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
 //         ADR-0101): canonical-section registry delivery for the OUT-OF-ZONE
 //         skeleton of CLAUDE.md / GEMINI.md. The upgrade MERGE pass
@@ -17,9 +28,10 @@
 //        skip + manual-review log).
 //   Number-collision guard — never insert a numbered section when the project
 //        already carries a heading with the same number and a different title
-//        (the old-vintage `### 2. Pre-Edit Quality Gate (All Platforms)` must
-//        not gain a duplicate `### 2. Native Slash Commands`) — skip +
-//        `SKELETON DRIFT (manual review)`.
+//        (a project-local `### 5. Project-Local Custom Rules` must not gain a
+//        duplicate `### 5. Agent Dispatch Rules`) — skip + WARN
+//        `SKELETON HEADING COLLISION` (loud + named, T-20261027-008; the
+//        quiet-skip genus of U-20261026-005).
 //
 //   Every insert deletes nothing; every replace pushes a `snapshots[]` entry
 //   (T-20260917-010 shape) that the caller must persist to
@@ -73,7 +85,13 @@ export const MANAGED_SKELETON_SECTIONS: SkeletonSectionEntry[] = [
   {
     id: 'claude-s2',
     rel: 'CLAUDE.md',
-    heading: '### 2. Native Slash Commands',
+    // T-20261027-008: §2.5 (house-style N.M numbering, §4.5 precedent) — the
+    // old `### 2. Native Slash Commands` collided with the old-vintage
+    // `### 2. Pre-Edit Quality Gate (All Platforms)` still carried by
+    // co-develop/co-consult/co-export/co-game/co-newbiz, silently skipping the
+    // insert every wave. The template's Pre-Edit Quality Gate section was
+    // renumbered to `### 2.` in lockstep.
+    heading: '### 2.5 Native Slash Commands',
     // Before §3's heading when §3 exists (it may have been inserted earlier in
     // this same run), else before the §4 zone-start marker.
     anchor: {
@@ -159,7 +177,7 @@ function zoneSpans(content: string): Array<{ start: number; end: number }> {
 }
 
 const ATX_HEADING_RE = /^\s*#{1,6}\s+/;
-// Numbered-section heading: `### 2. Native Slash Commands` (integer + trailing
+// Numbered-section heading: `### 2.5 Native Slash Commands` (integer + trailing
 // dot) and `### 4.5 Skill Resolution Priority` (N.M, NO trailing dot — the
 // template's canonical forms, design §Registry "N. / N.M"). The dot is
 // optional in the pattern; the greedy group takes "4.5" before the optional
@@ -380,7 +398,10 @@ export function mergeSkeletonSections(
     if (num !== null) {
       const clash = findNumberCollision(lines, num, headingTitle(entry.heading) ?? '');
       if (clash) {
-        log.push(`    ${dryTag}SKELETON DRIFT (manual review): ${entry.id} — number ${num} is already used by "${clash.trim()}" in ${rel}; insert skipped`);
+        // T-20261027-008: loud + named WARN (existing `WARN: ` log pattern)
+        // instead of the quiet SKELETON DRIFT skip — a heading collision must
+        // be visible in every wave summary until it is resolved.
+        log.push(`    ${dryTag}WARN: SKELETON HEADING COLLISION — insert skipped: ${entry.id} (${entry.heading}) in ${rel} — number ${num} is already used by "${clash.trim()}"; resolve on the template side or rename the project heading (T-20261027-008)`);
         continue;
       }
     }
