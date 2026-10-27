@@ -1,5 +1,39 @@
 #!/usr/bin/env bun
-// @version 1.77.0
+// @version 1.78.0
+// v1.78.0 (2026-10-28, U-20261028-001 — spec
+//          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md):
+//          delivery tombstones + agents/*.md project-ownership escalation
+//          (PR-1a + PR-1b as ONE engine change set, design §7 rows 1–2).
+//          (D1) TOMBSTONE MANIFEST KEY: the delivery manifest v2 gains the
+//          additive optional `tombstones` key (schemaVersion stays 2) —
+//          `{ [rel]: { hash, templateVersion, recordedAt, reason } }` — with
+//          the carry-forward rule `tombstones = (prior ∪ newly recorded) −
+//          paths delivered this run` (delivering a path is the natural clear
+//          event). (D2/D3) TOMBSTONE GUARD: tombstoneSkip() consults
+//          lib/upgrade-policy.ts tombstoneGuard in EVERY absent-copy delivery
+//          branch BEFORE the copy — TEMPLATE TREE SYNC SYNC-absent / WORKSPACE
+//          seed / ADD_IF_MISSING seed / JSON_MERGE seed, DOCS_OVERWRITE,
+//          COMMANDS_SYNC, agents/ NEW, skills/ whole-directory NEW (common +
+//          variant passes), VARIANT ASSET DIRS, ENV_SAMPLE. First observation
+//          (baseline without a tombstone) logs `TOMBSTONED` (ERROR) — delivery
+//          refused, run exits non-zero (design §4.4 acceptance shape);
+//          recorded tombstones log `TOMBSTONED_SKIP` (INFO). Resolution flags:
+//          `--tombstone <glob>` (repeatable, apply-mode only — records the
+//          deletion as intended with a reason; the confirmed run honors it
+//          immediately) and `--clear-tombstone <glob>` (drops entries so the
+//          next run delivers the path as NEW). Per D3b `--disposition
+//          adopt-template` does NOT override a tombstone — the guard never
+//          reads the disposition flag. (D4) AGENTS OWNERSHIP: the agents/
+//          version-gt delivery arm's EVOLVED (WARN) + deliver row is
+//          reclassified to CONFLICT (ERROR) regardless of templateChanged
+//          (body is template-canonical; project evolution is an explicit
+//          disposition via --disposition adopt-template or the adjudicated
+//          port), and the NO_BASELINE equal-version restore's decision detail
+//          names the migration window ("baseline absent — verify this restore
+//          against project intent"). (D6) NO resolver/classifier change —
+//          resolveClaim, the baseline classifier shapes, and the severity
+//          contract's existing rows are untouched. Dry-run reports candidates
+//          and persists nothing (the manifest stays apply-mode-only).
 // v1.77.0 (2026-10-28, T-20261028-002 — spec
 //          docs/designs/2026-10-28-ticket-runner-mechanical-batch-design.md
 //          §3): POST-DELIVERY RE-STAMP scope — the last_updated re-stamp walks
@@ -751,11 +785,14 @@ import {
   normalizeAgentTierFrontmatter,
   resolveClaim,
   resolveDisposition,
+  tombstoneGuard,
   type DecisionBaseline,
   type DecisionVerdict,
   type DeliveryDecision,
   type DispositionFlag,
+  type PriorDeliveryState,
   type ProjectStateVerdict,
+  type TombstoneEntry,
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
@@ -783,6 +820,16 @@ let acceptCiPermDiff = false;
 // (ERROR) default SKIP to deliver-and-adopt, optionally narrowed to paths
 // matching the glob. Accepts `--disposition <value>` and `--disposition=<value>`.
 let disposition: DispositionFlag = { mode: 'default' };
+// U-20261028-001 (D3): tombstone grants (--tombstone, repeatable) record the
+// project-side deletion of a delivered path as intended; clear grants
+// (--clear-tombstone, repeatable) drop entries so the next run delivers the
+// path as NEW. Both are apply-mode only (validated after the parse loop).
+const tombstoneGrants: Array<{ re: RegExp; source: string }> = [];
+const clearTombstoneGrants: RegExp[] = [];
+let tombstoneReason = 'confirmed deletion intent via --tombstone (delivery-tombstone-ownership design D3)';
+/** Tombstone entries recorded THIS run (grant-matched first observations) —
+ *  merged into the manifest at write time (D1 carry-forward). */
+const newlyTombstoned = new Map<string, string>();
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -802,6 +849,22 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
   if (args[i] === '--accept-ci-perm-diff') { acceptCiPermDiff = true; continue; }
+  // U-20261028-001 (D3): --tombstone <glob> (repeatable) confirms the deletion
+  // intent of a previously delivered path; --clear-tombstone <glob> (repeatable)
+  // drops entries so the next run delivers the path as NEW. Both apply-mode
+  // only; --tombstone-reason labels the recorded entries.
+  if (args[i] === '--tombstone') {
+    const raw = args[i + 1]?.startsWith('--') ? '' : args[++i] ?? '';
+    applyTombstoneArg(raw); continue;
+  }
+  if (args[i]?.startsWith('--tombstone=')) { applyTombstoneArg(args[i].slice('--tombstone='.length)); continue; }
+  if (args[i] === '--tombstone-reason' && args[i + 1]) { tombstoneReason = args[++i].trim() || tombstoneReason; continue; }
+  if (args[i]?.startsWith('--tombstone-reason=')) { tombstoneReason = args[i].slice('--tombstone-reason='.length).trim() || tombstoneReason; continue; }
+  if (args[i] === '--clear-tombstone') {
+    const raw = args[i + 1]?.startsWith('--') ? '' : args[++i] ?? '';
+    applyClearTombstoneArg(raw); continue;
+  }
+  if (args[i]?.startsWith('--clear-tombstone=')) { applyClearTombstoneArg(args[i].slice('--clear-tombstone='.length)); continue; }
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
@@ -821,8 +884,37 @@ function applyDispositionArg(raw: string): void {
   process.exit(1);
 }
 
+// U-20261028-001 (D3/D1): tombstone confirmation and clearing are apply-mode
+// operations — they mutate the persisted manifest. A dry-run reports
+// candidates and persists nothing, so a grant there would be silently lost;
+// fail loudly instead.
+if (dryRun && (tombstoneGrants.length > 0 || clearTombstoneGrants.length > 0)) {
+  console.error('ERROR: --tombstone / --clear-tombstone are apply-mode only — re-run without --dry-run to confirm or clear the deletion intent.');
+  process.exit(1);
+}
+
+/** Parse one --tombstone value: a required path glob (repeatable). */
+function applyTombstoneArg(raw: string): void {
+  const glob = (raw ?? '').trim();
+  if (!glob) {
+    console.error('ERROR: --tombstone requires a path glob (e.g. --tombstone docs/governance/agents/workflows.md).');
+    process.exit(1);
+  }
+  tombstoneGrants.push({ re: globToRegExp(glob), source: glob });
+}
+
+/** Parse one --clear-tombstone value: a required path glob (repeatable). */
+function applyClearTombstoneArg(raw: string): void {
+  const glob = (raw ?? '').trim();
+  if (!glob) {
+    console.error('ERROR: --clear-tombstone requires a path glob (e.g. --clear-tombstone docs/governance/**).');
+    process.exit(1);
+  }
+  clearTombstoneGrants.push(globToRegExp(glob));
+}
+
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]...');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -1599,8 +1691,11 @@ const deliveredRels = new Set<string>(); // content deliveries this run (apply m
 
 /** Prior manifest baselines (D1): classified against on this run, replaced at
  *  the next apply delivery. A v1-shaped manifest (no baselines key) degrades
- *  gracefully — NO_BASELINE classification, today's behavior (design §8). */
-const priorManifest: { baselines?: Record<string, DecisionBaseline>; decisions?: unknown } | null = (() => {
+ *  gracefully — NO_BASELINE classification, today's behavior (design §8).
+ *  Tombstones (U-20261028-001 D1) ride the same parse: an additive optional
+ *  key, absent on v1/v2-without-tombstones manifests (no entries → no guard
+ *  fire). */
+const priorManifest: (PriorDeliveryState & { decisions?: unknown }) | null = (() => {
   try {
     return JSON.parse(readFileSync(join(projectDir, '.claude', 'last-upgrade-delivery.json'), 'utf8'));
   } catch { return null; }
@@ -1637,11 +1732,18 @@ function classifyCandidate(rel: string, projectFile: string, deliverableContent:
  * SYNC/OVERWRITE rows). Returns true when delivery may proceed; on the
  * CONFLICT (ERROR) row it logs the decision, calls `onConflictSkip` (the
  * pass's skip output) and returns false — the project copy is preserved.
- * `policy`/`pass` label the decision entry.
+ * `policy`/`pass` label the decision entry. `agentsOwnership` (U-20261028-001
+ * D4): agents/ bodies are template-canonical with project evolution as a
+ * first-class disposition — the matrix's EVOLVED (WARN) + deliver row is
+ * reclassified to CONFLICT (ERROR) regardless of templateChanged, matching
+ * the equal-version arm's existing rationale ("restoring canonical over
+ * evolved content is not self-evidently right"); `--disposition
+ * adopt-template[=glob]` still grants the delivery.
  */
 function evolvedDeliveryGuard(input: {
   rel: string; policy: string; pass: string;
   projectFile: string; deliverableContent: string;
+  agentsOwnership?: boolean;
   onConflictSkip: () => void;
 }): boolean {
   const cls = classifyCandidate(input.rel, input.projectFile, input.deliverableContent);
@@ -1650,6 +1752,21 @@ function evolvedDeliveryGuard(input: {
   const outcome = resolveDisposition(cls, input.rel, disposition);
   const baseline = priorBaselines[input.rel];
   if (outcome.deliver) {
+    if (outcome.verdict === 'EVOLVED' && input.agentsOwnership) {
+      // D4 (tombstone-ownership design): agents/ version-gt delivery over an
+      // evolved body is the last silent-overwrite channel for exactly the
+      // content U-20261028-001 names — escalate to the CONFLICT row. The
+      // explicit --disposition adopt-template grant IS the disposition (§5:
+      // "grants delivery + re-baseline"), so a granted path delivers as ADOPT.
+      if (dispositionAdopts(input.rel)) {
+        recordDecision(input.rel, input.policy, input.pass, 'ADOPT', 'project-evolved since the last delivery — version-gated agents/ delivery granted via explicit --disposition adopt-template (D4 disposition; baseline refreshed at manifest write)', baseline);
+        console.log(`  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`);
+        return true;
+      }
+      recordDecision(input.rel, input.policy, input.pass, 'CONFLICT', 'project-evolved since the last delivery — version-gated agents/ delivery reclassified to CONFLICT (ERROR) regardless of templateChanged (D4: the body is template-canonical; project evolution is an explicit disposition)', baseline);
+      input.onConflictSkip();
+      return false;
+    }
     recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
     if (outcome.verdict === 'ADOPT') {
       console.log(`  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`);
@@ -1673,6 +1790,64 @@ const errorDecisions = (): DeliveryDecision[] => decisions.filter((d) => d.sever
 function dispositionAdopts(rel: string): boolean {
   const flag: DispositionFlag = disposition;
   return flag.mode === 'adopt-template' && flag.matches(rel);
+}
+
+/** True when a --tombstone grant covers `rel` (D3, U-20261028-001). */
+function tombstoneGranted(rel: string): boolean {
+  return tombstoneGrants.some((g) => g.re.test(rel));
+}
+
+/**
+ * D2/D3 tombstone guard for an absent-copy delivery (tombstone-ownership
+ * design §4, spec 2026-10-28-delivery-tombstone-ownership). Consult BEFORE the
+ * copy in every absent-copy delivery branch. Returns true when delivery must
+ * be SKIPPED (a decision is recorded and the skip logged); false when the copy
+ * proceeds. Firing is keyed on the prior delivery manifest only:
+ *  - recorded tombstone   → TOMBSTONED_SKIP (INFO): deletion intent was
+ *    confirmed in an earlier run; the path stays absent;
+ *  - delivered baseline without a tombstone → TOMBSTONED (ERROR): first
+ *    observation — delivery REFUSED, the run exits non-zero; resolved by
+ *    `--tombstone <glob>` (apply mode; the entry is recorded THIS run and the
+ *    skip is honored immediately) or by restoring the project copy.
+ * The predicate never reads the disposition flag — per D3b
+ * `--disposition adopt-template` cannot override a tombstone; taking template
+ * content back onto a tombstoned path requires `--clear-tombstone`.
+ */
+function tombstoneSkip(rel: string, policy: string, pass: string): boolean {
+  if (existsSync(join(projectDir, rel))) return false; // present — not an absent-copy delivery
+  const outcome = tombstoneGuard(rel, priorManifest, true);
+  if (!outcome.fires || !outcome.verdict || !outcome.severity) return false;
+  if (outcome.verdict === 'TOMBSTONED' && tombstoneGranted(rel)) {
+    newlyTombstoned.set(rel, tombstoneReason);
+    recordDecision(rel, policy, pass, 'TOMBSTONED_SKIP', `tombstone recorded via --tombstone (reason: ${tombstoneReason}) — deletion honored from this run on`, priorBaselines[rel]);
+    console.log(`  🪦 TOMBSTONE (recorded): ${rel} — deletion intent confirmed; delivery skipped (entry persists in the manifest)`);
+    return true;
+  }
+  recordDecision(rel, policy, pass, outcome.verdict, outcome.detail, outcome.verdict === 'TOMBSTONED' ? priorBaselines[rel] : undefined);
+  if (outcome.verdict === 'TOMBSTONED') {
+    console.log(`  ⏭️  TOMBSTONE (SKIP): ${rel} — project deleted a previously delivered file; delivery refused (severity ERROR)`);
+    console.log(`      confirm with --tombstone ${rel}, or restore the project copy and re-run`);
+  } else {
+    console.log(`  🪦 TOMBSTONE (SKIP): ${rel} — tombstoned deletion honored; delivery skipped`);
+  }
+  return true;
+}
+
+/**
+ * The tombstone entry hash for a newly recorded entry (D1: the last delivered
+ * baseline, baselineKeyFor form). Falls back to today's template deliverable's
+ * key when the path was never baseline-tracked; '' when neither exists (an
+ * entry with no provenance never fires TOMBSTONED_SKIP's detail richer form —
+ * the entry still honors the deletion).
+ */
+function tombstoneEntryHash(rel: string): string {
+  const priorHash = priorBaselines[rel]?.hash;
+  if (priorHash) return priorHash;
+  const tplAbs = existsSync(join(templatesDir, rel)) ? join(templatesDir, rel) : join(commonDir, rel);
+  if (existsSync(tplAbs)) {
+    try { return baselineKeyFor(rel, readFileSync(tplAbs, 'utf8')); } catch { /* unreadable */ }
+  }
+  return '';
 }
 
 // ── T-20261002-015: LOCAL-PATCH report ────────────────────────────────────────
@@ -1927,6 +2102,9 @@ for (const rel of DOCS_OVERWRITE_FILES) {
   const dest = join(projectDir, rel);
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   if (!existsSync(dest)) {
+    // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
+    // previously delivered overwrite-policy doc is not silently re-delivered.
+    if (tombstoneSkip(rel, 'OVERWRITE', 'DOCS_OVERWRITE')) continue;
     console.log(`  NEW    ${rel}`);
     recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'NEW', 'delivered — project copy did not exist');
   } else {
@@ -2086,6 +2264,9 @@ for (const cmdDir of COMMANDS_DIRS) {
     const src = join(tplCmdDir, fname);
     const dest = join(projectDir, rel);
     if (!existsSync(dest)) {
+      // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
+      // previously delivered command file is not silently re-delivered.
+      if (tombstoneSkip(rel, 'HASH_SYNC', 'COMMANDS_SYNC')) continue;
       console.log(`  NEW    ${rel}`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
       recordDecision(rel, 'HASH_SYNC', 'COMMANDS_SYNC', 'NEW', 'command file delivered (project copy absent)');
@@ -2692,6 +2873,9 @@ for (const agentsDir of tplAgentsDirs) {
     if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
     const projVer = extractFrontmatterVersion(projFile);
     if (!existsSync(projFile)) {
+      // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
+      // previously delivered agent is not silently re-delivered.
+      if (tombstoneSkip(rel, 'SYNC', 'SYNC_IF_NEWER: agents/')) continue;
       if (assetGate && !assetGate.agents.has(fname)) {
         console.log(`  SKIP (not in variant.json agent registry): ${rel}`);
         recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'SKIP', 'not in the variant.json agent registry — new-asset injection withheld');
@@ -2713,13 +2897,17 @@ for (const agentsDir of tplAgentsDirs) {
     } else if (semverGt(tplVer, projVer)) {
       // D2 matrix: version-gated agents/ delivery over committed project
       // evolution (PROJECT_EVOLVED + template changed) escalates to CONFLICT
-      // (ERROR) — default SKIP.
+      // (ERROR) — default SKIP. D4 (U-20261028-001): agents/ bodies are
+      // template-canonical, so the EVOLVED (WARN) + deliver row is also
+      // reclassified to CONFLICT (ERROR) regardless of templateChanged —
+      // equal-version and version-gated arms behave identically for agents/.
       const deliverable = renderAgentTemplate(tplSource);
       const proceeded = evolvedDeliveryGuard({
         rel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: agents/',
         projectFile: projFile, deliverableContent: deliverable,
+        agentsOwnership: true,
         onConflictSkip: () => {
-          console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+          console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${projVer} → ${tplVer}  — project-evolved since the last delivery (agents/ version-gated delivery is CONFLICT (ERROR) regardless of templateChanged — D4); project copy PRESERVED (non-zero exit at completion)`);
           console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
         },
       });
@@ -2772,6 +2960,12 @@ for (const agentsDir of tplAgentsDirs) {
           proceed = false; verdict = 'CONFLICT'; severity = 'ERROR';
           detail = 'equal-version drift on project-evolved content — CONFLICT disposition: restore-to-canonical SKIPPED, project copy preserved';
         }
+      } else if (cls.state === 'NO_BASELINE') {
+        // D4 (U-20261028-001): the NO_BASELINE equal-version restore keeps its
+        // WARN degrade (the documented overwrite-policy §8 migration window),
+        // but the decision detail must name it — the restore ran without
+        // delivered-baseline proof that the project had not evolved the body.
+        detail = `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3); baseline absent — verify this restore against project intent (NO_BASELINE migration window, overwrite-policy design §8)`;
       } else if (tierOnlyDrift) {
         verdict = 'ADOPT'; severity = 'INFO';
         detail = 'tier-block-only drift normalized to the template scalar (ADR-0102, T-20261027-005 delivery)';
@@ -2863,6 +3057,9 @@ if (existsSync(tplSkillsDir)) {
     if (tplVer) {
       const projVer = extractFrontmatterVersion(projSkillFile);
       if (!existsSync(projSkillFile)) {
+        // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
+        // a deleted, previously delivered skill is not silently re-delivered.
+        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/')) continue;
         const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
         if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
@@ -2924,6 +3121,9 @@ if (existsSync(tplSkillsDir)) {
       const tplHash = fileHash(tplSkillFile);
       const projHash = fileHash(projSkillFile);
       if (!existsSync(projSkillFile)) {
+        // D2 (U-20261028-001): tombstone guard before the whole-directory copy
+        // (hash-based arm) — same refusal as the version-based NEW above.
+        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/')) continue;
         const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
         if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
@@ -3011,6 +3211,9 @@ if (existsSync(variantSkillsSrc)) {
     };
     if (tplVer) {
       if (!existsSync(projSkillFile)) {
+        // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
+        // variant skills follow the common skills pass's refusal semantics.
+        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS')) continue;
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
         if (!dryRun) copySkillDir();
         recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS', 'NEW', `variant skill directory delivered (none) → ${tplVer}`);
@@ -3060,6 +3263,9 @@ if (existsSync(variantSkillsSrc)) {
       const tplHash = fileHash(tplSkillFile);
       const projHash = existsSync(projSkillFile) ? fileHash(projSkillFile) : '';
       if (!existsSync(projSkillFile)) {
+        // D2 (U-20261028-001): tombstone guard before the whole-directory copy
+        // (variant, hash-based arm).
+        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS')) continue;
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash)`);
         if (!dryRun) copySkillDir();
         recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS', 'NEW', 'variant skill directory delivered (hash-based, project copy absent)');
@@ -3156,6 +3362,9 @@ if (variantAssetDirs.length > 0) {
       const claim = resolveClaim(relPath, variant);
       if (claim.pass !== VARIANT_ASSET_DIRS_PASS) { skippedForeignClaim++; continue; }
       if (!existsSync(dstPath)) {
+        // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
+        // previously delivered variant asset is not silently re-delivered.
+        if (tombstoneSkip(relPath, 'SYNC', 'VARIANT ASSET DIRS')) continue;
         console.log(`  NEW    ${relPath}`);
         if (!dryRun) { mkdirSync(dirname(dstPath), { recursive: true }); copyFileSync(srcPath, dstPath); }
         recordDecision(relPath, 'SYNC', 'VARIANT ASSET DIRS', 'NEW', 'delivered — project copy absent');
@@ -3386,6 +3595,9 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
 
     if (claim.policy === 'JSON_MERGE') {
       if (!existsSync(dest)) {
+        // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
+        // previously delivered settings file is not silently re-seeded.
+        if (tombstoneSkip(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS)) continue;
         console.log(`  NEW    ${rel}`);
         if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
         recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'seeded (project copy absent)');
@@ -3417,6 +3629,9 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
         recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SEED_SKIP', 'project workspace file exists — seed-only claim withheld (never overwritten, never pruned)');
         continue;
       }
+      // D2 (U-20261028-001): tombstone guard before the seed — a deleted,
+      // previously delivered workspace seed is not silently re-delivered.
+      if (tombstoneSkip(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS)) continue;
       console.log(`  NEW    ${rel}  (workspace seed)`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
       recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'workspace seed delivered (absent from the project)');
@@ -3435,6 +3650,9 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
         recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SEED_SKIP', 'project copy exists — add-if-missing seed withheld (project-owned config)');
         continue;
       }
+      // D2 (U-20261028-001): tombstone guard before the seed — a deleted,
+      // previously delivered add-if-missing file is not silently re-seeded.
+      if (tombstoneSkip(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS)) continue;
       console.log(`  NEW    ${rel}  (add-if-missing seed)`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
       recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'add-if-missing seed delivered (absent from the project)');
@@ -3446,6 +3664,10 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
 
     // claim.policy === 'SYNC'
     if (!existsSync(dest)) {
+      // D2 (U-20261028-001): tombstone guard before the copy — the U-001
+      // resurrection vector (docs/governance/agents/workflows.md re-delivered
+      // as NEW while the manifest proved the deletion) is refused here.
+      if (tombstoneSkip(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS)) continue;
       console.log(`  NEW    ${rel}`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
       recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'delivered — project copy absent');
@@ -3638,12 +3860,16 @@ console.log('--- ENV_SAMPLE SYNC: .env.sample (country-aware) ---');
     if (envPrune.unbalanced) {
       console.log('  ⚠️  SKIP   .env.sample  (unbalanced country-scoped markers in template — not delivered)');
     } else if (!existsSync(envDestPath)) {
-      console.log('  NEW    .env.sample');
-      if (!dryRun) writeFileSync(envDestPath, envPrune.output, 'utf8');
-      recordDecision('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC', 'NEW', `delivered (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
-      noteDelivered('.env.sample');
-      console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
-      treeChanged++;
+      if (tombstoneSkip('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC')) {
+        // D2 (U-20261028-001): tombstoned — delivery refused, nothing written.
+      } else {
+        console.log('  NEW    .env.sample');
+        if (!dryRun) writeFileSync(envDestPath, envPrune.output, 'utf8');
+        recordDecision('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC', 'NEW', `delivered (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+        noteDelivered('.env.sample');
+        console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+        treeChanged++;
+      }
     } else {
       const currentEnv = readFileSync(envDestPath, 'utf8');
       const envMerge = mergeEnvSample(envPrune.output, currentEnv);
@@ -4494,6 +4720,48 @@ if (!dryRun) {
       } catch { /* unreadable — no baseline for this file */ }
     };
     for (const rel of [...deliveredRels].sort()) expand(rel);
+    // D1 carry-forward (U-20261028-001): tombstones = (prior ∪ newly recorded)
+    // − paths delivered this run. Delivering a path is the natural clear event
+    // (no separate cleanup pass); --clear-tombstone grants drop entries so the
+    // next run delivers the path as NEW. Directory rels (skills/<name>) expand
+    // recursively so a whole-skill delivery clears the skill's sub-file
+    // tombstones too. Tombstones whose path leaves the template tree stop
+    // firing on their own (the path is no longer a candidate); opportunistic
+    // pruning of those entries is deliberately not attempted here.
+    const deliveredFileSet = new Set<string>(deliveredRels);
+    const expandTombstoneClear = (rel: string): void => {
+      const abs = join(projectDir, rel);
+      let st;
+      try { st = statSync(abs); } catch { return; }
+      if (st.isDirectory()) {
+        for (const entry of readdirSync(abs, { withFileTypes: true })) {
+          if (entry.name === '.git' || entry.name === 'node_modules') continue;
+          expandTombstoneClear(rel.endsWith('/') ? `${rel}${entry.name}` : `${rel}/${entry.name}`);
+        }
+        return;
+      }
+      if (st.isFile()) deliveredFileSet.add(rel);
+    };
+    for (const rel of deliveredRels) expandTombstoneClear(rel);
+    const tombstones: Record<string, TombstoneEntry> = {};
+    for (const [rel, entry] of Object.entries(priorManifest?.tombstones ?? {})) {
+      if (deliveredFileSet.has(rel)) continue; // delivered this run — the clear event
+      tombstones[rel] = entry;
+    }
+    for (const [rel, reason] of newlyTombstoned) {
+      if (deliveredFileSet.has(rel)) continue;
+      tombstones[rel] = {
+        hash: tombstoneEntryHash(rel),
+        templateVersion: currentVersion,
+        recordedAt: new Date().toISOString().slice(0, 10),
+        reason,
+      };
+    }
+    for (const re of clearTombstoneGrants) {
+      for (const rel of Object.keys(tombstones)) {
+        if (re.test(rel)) delete tombstones[rel];
+      }
+    }
     // D3 unified decision log, persisted with the delivery.
     const manifestV2 = {
       schemaVersion: 2 as const,
@@ -4505,6 +4773,7 @@ if (!dryRun) {
       files,
       baselines,
       decisions,
+      tombstones,
     };
     mkdirSync(join(projectDir, '.claude'), { recursive: true });
     writeFileSync(
@@ -4513,7 +4782,7 @@ if (!dryRun) {
     );
     const errors = errorDecisions().length;
     const warns = decisions.filter((d) => d.severity === 'WARN').length;
-    console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s), ${Object.keys(baselines).length} baseline(s), ${decisions.length} decision(s): ${errors} ERROR / ${warns} WARN / ${decisions.length - errors - warns} INFO)`);
+    console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s), ${Object.keys(baselines).length} baseline(s), ${Object.keys(tombstones).length} tombstone(s), ${decisions.length} decision(s): ${errors} ERROR / ${warns} WARN / ${decisions.length - errors - warns} INFO)`);
     // T-20261007-018: compose the upgrade PR body from THIS delivery at
     // delivery time — the co-deck PR #166 class shipped a body carried over
     // from a prior attempt describing a different wave. The project session
@@ -4715,24 +4984,47 @@ if (import.meta.main && !securityPass) process.exit(1);
 {
   const errors = errorDecisions();
   if (import.meta.main && errors.length > 0) {
+    // U-20261028-001 (§4.3): TOMBSTONED entries get their own resolution menu —
+    // --disposition adopt-template does NOT resolve a tombstone (D3b).
+    const tombstoneErrors = errors.filter((d) => d.verdict === 'TOMBSTONED');
+    const conflictErrors = errors.filter((d) => d.verdict !== 'TOMBSTONED');
     console.log('\n========================================================');
     console.log(`  DELIVERY CONFLICTS — ${errors.length} file(s) PRESERVED, delivery SKIPPED (severity ERROR)`);
     console.log('========================================================');
-    for (const d of errors) {
+    for (const d of tombstoneErrors) {
       console.log(`  ${d.path}`);
       console.log(`    pass: ${d.pass}   baseline: ${d.baseline ? `${d.baseline.hash.slice(0, 12)}… (template ${d.baseline.templateVersion})` : 'none'}`);
       console.log(`    ${d.detail}`);
     }
-    console.log('\n  How to proceed:');
-    console.log('   1. Re-run with --disposition adopt-template (optionally =<glob>) to take the');
-    console.log('      template copy for the listed paths — project-side changes are lost; the');
-    console.log('      pre-upgrade stash (--rollback) covers the reversal.');
-    console.log('   2. If the project side is canonical, port it into the template side per the');
-    console.log('      adjudicated-port procedure (docs/designs/2026-10-27-sync-overwrite-policy-');
-    console.log('      design.md §6 — bidirectional superset diff, dry-run no-op proof, protected-');
-    console.log('      file hash table, post-wave verification), then re-run this upgrade.');
-    console.log('   3. Or merge manually, land the project copy, and re-run the upgrade so the');
-    console.log('      fresh delivery re-baselines the merged state.');
+    for (const d of conflictErrors) {
+      console.log(`  ${d.path}`);
+      console.log(`    pass: ${d.pass}   baseline: ${d.baseline ? `${d.baseline.hash.slice(0, 12)}… (template ${d.baseline.templateVersion})` : 'none'}`);
+      console.log(`    ${d.detail}`);
+    }
+    if (tombstoneErrors.length > 0) {
+      console.log('\n  Tombstoned paths — how to proceed:');
+      console.log('   1. Confirm the deletion intent (apply mode): re-run with');
+      console.log('      --tombstone <path> to record the tombstone; later waves skip the');
+      console.log('      path silently-but-visibly (TOMBSTONED_SKIP, INFO).');
+      console.log('      Optionally label the entries: --tombstone-reason "<why>".');
+      console.log('   2. Or restore the project copy and re-run — the baseline matches and');
+      console.log('      no tombstone entry is written.');
+      console.log('      (--clear-tombstone <glob> drops entries so the next run delivers');
+      console.log('       the path as NEW again; --disposition adopt-template NEVER');
+      console.log('       overrides a tombstone.)');
+    }
+    if (conflictErrors.length > 0) {
+      console.log('\n  How to proceed:');
+      console.log('   1. Re-run with --disposition adopt-template (optionally =<glob>) to take the');
+      console.log('      template copy for the listed paths — project-side changes are lost; the');
+      console.log('      pre-upgrade stash (--rollback) covers the reversal.');
+      console.log('   2. If the project side is canonical, port it into the template side per the');
+      console.log('      adjudicated-port procedure (docs/designs/2026-10-27-sync-overwrite-policy-');
+      console.log('      design.md §6 — bidirectional superset diff, dry-run no-op proof, protected-');
+      console.log('      file hash table, post-wave verification), then re-run this upgrade.');
+      console.log('   3. Or merge manually, land the project copy, and re-run the upgrade so the');
+      console.log('      fresh delivery re-baselines the merged state.');
+    }
     console.log('========================================================');
     process.exit(1);
   }

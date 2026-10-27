@@ -1,4 +1,30 @@
-// @version 1.26.0
+// @version 1.27.0
+// v1.27.0 (2026-10-28, U-20261028-001 — spec
+//          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md,
+//          D1–D3 + D6): delivery tombstones. Additive data + one pure guard
+//          predicate — NO resolver/classifier change (D6 keeps the
+//          overwrite-policy boundary). (a) `TombstoneEntry` +
+//          `DeliveryManifestV2.tombstones` (optional additive key,
+//          schemaVersion stays 2 — the same grace pattern as the v1→v2
+//          migration): `{ [rel]: { hash, templateVersion, recordedAt,
+//          reason } }`, `hash` the last delivered baseline (baselineKeyFor
+//          form) at recording time. (b) `TOMBSTONED` (ERROR — first
+//          observation of a project-side deletion of a previously delivered
+//          file; delivery refused until an explicit `--tombstone <glob>`
+//          confirms the deletion intent) and `TOMBSTONED_SKIP` (INFO — the
+//          recorded deletion is honored; the path stays absent) join
+//          DecisionVerdict + DECISION_SEVERITY_CONTRACT. (c)
+//          `tombstoneGuard(rel, prior, absent)` — the D2 fire condition
+//          `absent(project, rel) && (prior.tombstones[rel] ||
+//          prior.baselines[rel])` as a pure predicate; consulted by every
+//          absent-copy delivery branch BEFORE the copy. The guard never
+//          reads the disposition flag — per D3b `--disposition
+//          adopt-template` cannot override a tombstone (taking template
+//          content back onto a tombstoned path requires
+//          `--clear-tombstone`). Firing only for paths a pass actually
+//          walks (template-shipped candidates) makes template-side renames
+//          false-positive-free — a renamed-away path is no longer a
+//          candidate, so nothing fires.
 // v1.26.0 (2026-10-28, T-20261028-002 — spec
 //          docs/designs/2026-10-28-ticket-runner-mechanical-batch-design.md §3):
 //          globToRegExp zero-segment semantics — `/**/` also matches zero
@@ -787,7 +813,8 @@ export function isDeliveredDiff(changedFiles: string[], deliveredFiles: string[]
  *  overrides to WARN when a destructive in-zone replace wrote a snapshot. */
 export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
 
-/** Verdicts of the unified decision log (design D3/D2 matrix). */
+/** Verdicts of the unified decision log (design D3/D2 matrix). TOMBSTONED /
+ *  TOMBSTONED_SKIP joined in v1.27.0 (tombstone-ownership design D3). */
 export type DecisionVerdict =
   | 'NEW'
   | 'UPDATE'
@@ -801,6 +828,8 @@ export type DecisionVerdict =
   | 'SEED_SKIP'
   | 'SKELETON_COLLISION'
   | 'EVOLVED'
+  | 'TOMBSTONED'
+  | 'TOMBSTONED_SKIP'
   | 'CONFLICT';
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
@@ -816,6 +845,8 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   DRIFT_RESTORED: 'WARN',
   SKELETON_COLLISION: 'WARN',
   EVOLVED: 'WARN',
+  TOMBSTONED: 'ERROR',
+  TOMBSTONED_SKIP: 'INFO',
   CONFLICT: 'ERROR',
 };
 
@@ -838,9 +869,26 @@ export interface DecisionBaseline {
   templateVersion: string;
 }
 
+/** One recorded delivery tombstone (tombstone-ownership design D1): the
+ *  project deliberately deleted a previously delivered file and the deletion
+ *  intent was confirmed with `--tombstone <glob>` (apply mode only — there is
+ *  no auto-record path). `hash` is the last delivered baseline (baselineKeyFor
+ *  form) at detection time; `recordedAt` is the ISO date of the confirming
+ *  run; `reason` is the operator-supplied or decision-referenced rationale. */
+export interface TombstoneEntry {
+  hash: string;
+  templateVersion: string;
+  recordedAt: string;
+  reason: string;
+}
+
 /** Delivery manifest v2 (design §7). The top-level `files` array is preserved
  *  verbatim so every v1 consumer (dev-sync step 3.9 isDeliveredDiff, PR-body
- *  compose) keeps working unchanged. */
+ *  compose) keeps working unchanged. `tombstones` (tombstone-ownership design
+ *  D1) is an ADDITIVE OPTIONAL key — schemaVersion stays 2; manifests without
+ *  the key stay valid (the same tolerance as the v1→v2 migration), and the
+ *  writer rule is `tombstones = (prior ∪ newly recorded) − paths delivered
+ *  this run` (delivering a path is the natural clear event). */
 export interface DeliveryManifestV2 {
   schemaVersion: 2;
   timestamp: string;
@@ -853,6 +901,7 @@ export interface DeliveryManifestV2 {
   files: string[];
   baselines: Record<string, DecisionBaseline>;
   decisions: DeliveryDecision[];
+  tombstones?: Record<string, TombstoneEntry>;
 }
 
 /** How a project file relates to its delivered baseline and today's deliverable (design D1). */
@@ -1011,4 +1060,82 @@ export function manifestHasUnresolvedErrors(manifest: unknown): boolean {
   return decisions.some(
     (d) => !!d && typeof d === 'object' && (d as { severity?: unknown }).severity === 'ERROR',
   );
+}
+
+// ── Delivery tombstones (tombstone-ownership design, spec 2026-10-28-delivery-tombstone-ownership) ─
+// Design D2/D3: a project-side deletion of a previously delivered file must
+// never be re-delivered silently. The guard is a PURE predicate — the deny-list
+// resolver, the baseline classifier, and the severity contract's existing rows
+// keep their shapes (design D6).
+
+/** The prior-manifest state the guard reads (a parsed
+ *  `.claude/last-upgrade-delivery.json`). Both keys optional: v1-shaped
+ *  manifests carry no baselines, manifests without tombstones carry no
+ *  tombstones — both parse and degrade to not-firing. */
+export interface PriorDeliveryState {
+  baselines?: Record<string, DecisionBaseline>;
+  tombstones?: Record<string, TombstoneEntry>;
+}
+
+export interface TombstoneGuardOutcome {
+  /** True when the guard fires and the absent-copy delivery must be skipped. */
+  fires: boolean;
+  /** The verdict for the decision entry when the guard fires; null otherwise. */
+  verdict: DecisionVerdict | null;
+  /** Severity from the §7 contract when the guard fires; null otherwise. */
+  severity: DecisionSeverity | null;
+  /** Detail for the decision entry (names the resolution path on TOMBSTONED). */
+  detail: string;
+}
+
+const TOMBSTONE_NOT_FIRING: TombstoneGuardOutcome = {
+  fires: false, verdict: null, severity: null, detail: '',
+};
+
+/**
+ * D2/D3 tombstone guard for an absent-copy delivery candidate (tombstone
+ * -ownership design §4). Fire condition: `absent(project, rel) &&
+ * (prior.tombstones[rel] || prior.baselines[rel])` —
+ *  - recorded tombstone → `TOMBSTONED_SKIP` (INFO): the deletion intent was
+ *    confirmed in an earlier run; delivery skipped, the path stays absent;
+ *  - delivered baseline without a tombstone → `TOMBSTONED` (ERROR): first
+ *    observation of the deletion; delivery REFUSED until the operator either
+ *    confirms with `--tombstone <glob>` (apply mode) or restores the project
+ *    copy and re-runs.
+ * Not firing when the project copy exists (the version-gated passes' own
+ * evolvedDeliveryGuard owns those rows), when the path was never delivered
+ * (scaffold-time absent files, REGENERATED/PROJECT_STATE classes — no
+ * baseline, no fire), or when no prior manifest exists (first run after
+ * landing). The guard never reads the disposition flag: per D3b
+ * `--disposition adopt-template` cannot override a tombstone — taking
+ * template content back onto a tombstoned path requires `--clear-tombstone`.
+ * The caller structure provides the template-ships-this-path bound: the guard
+ * is consulted only from absent-copy branches of passes walking template-side
+ * files, so a template-side rename (old path no longer a candidate) never
+ * fires (design §4.5).
+ */
+export function tombstoneGuard(
+  rel: string,
+  prior: PriorDeliveryState | null | undefined,
+  absent: boolean,
+): TombstoneGuardOutcome {
+  if (!absent || !prior) return TOMBSTONE_NOT_FIRING;
+  const entry = prior.tombstones?.[rel];
+  if (entry) {
+    return {
+      fires: true,
+      verdict: 'TOMBSTONED_SKIP',
+      severity: 'INFO',
+      detail: `tombstoned deletion honored (recorded ${entry.recordedAt}${entry.reason ? ` — ${entry.reason}` : ''}) — delivery skipped, project copy stays absent`,
+    };
+  }
+  if (prior.baselines?.[rel]) {
+    return {
+      fires: true,
+      verdict: 'TOMBSTONED',
+      severity: 'ERROR',
+      detail: 'project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run',
+    };
+  }
+  return TOMBSTONE_NOT_FIRING;
 }

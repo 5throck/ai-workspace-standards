@@ -46,10 +46,12 @@ import {
   JSON_MERGE_FILES,
   PLACEHOLDER_ALLOWLIST,
   SCAFFOLD_COMMON_OWNED_FILES,
+  DECISION_SEVERITY_CONTRACT,
   isExtendsStub,
   mergeSettingsData,
   mergeSettingsJson,
   resolveClaim,
+  tombstoneGuard,
 } from '../../scripts/lib/upgrade-policy.ts';
 import { readFileSync } from 'node:fs';
 
@@ -461,5 +463,66 @@ describe('isExtendsStub (T-20260924-003 R2.4)', () => {
     expect(isExtendsStub('---\nname: pm\nrole: resolved\n---\n# PM\n')).toBe(false);
     // Prose mentions of "extends:" outside frontmatter do not count.
     expect(isExtendsStub('---\nname: pm\n---\nThe pattern extends: something.\n')).toBe(false);
+  });
+});
+
+// ── Delivery tombstones (U-20261028-001 D1–D3, spec
+//    docs/designs/2026-10-28-delivery-tombstone-ownership-design.md) ──────────
+describe('upgrade-policy tombstoneGuard (U-20261028-001 D2/D3)', () => {
+  const REL = 'docs/governance/agents/workflows.md';
+  const baseline = { hash: 'a'.repeat(64), templateVersion: '0.22.0' };
+  const tombstone = { hash: 'a'.repeat(64), templateVersion: '0.22.0', recordedAt: '2026-10-29', reason: 'Ruling 3 — un-adapted L0 copy' };
+
+  test('absent + delivered baseline (no tombstone) → TOMBSTONED (ERROR) with the two resolution paths', () => {
+    const out = tombstoneGuard(REL, { baselines: { [REL]: baseline } }, true);
+    expect(out.fires).toBe(true);
+    expect(out.verdict).toBe('TOMBSTONED');
+    expect(out.severity).toBe('ERROR');
+    expect(out.detail).toContain('--tombstone');
+    expect(out.detail).toContain('restore');
+  });
+
+  test('absent + recorded tombstone → TOMBSTONED_SKIP (INFO) naming the recording', () => {
+    const out = tombstoneGuard(REL, { baselines: { [REL]: baseline }, tombstones: { [REL]: tombstone } }, true);
+    expect(out.fires).toBe(true);
+    expect(out.verdict).toBe('TOMBSTONED_SKIP');
+    expect(out.severity).toBe('INFO');
+    expect(out.detail).toContain('2026-10-29');
+    expect(out.detail).toContain('Ruling 3');
+  });
+
+  test('absent + no provenance (never delivered) → no fire', () => {
+    expect(tombstoneGuard(REL, { baselines: {}, tombstones: {} }, true).fires).toBe(false);
+    expect(tombstoneGuard(REL, null, true).fires).toBe(false);
+    expect(tombstoneGuard(REL, undefined, true).fires).toBe(false);
+  });
+
+  test('project copy present (absent=false) → no fire, even with full provenance', () => {
+    const out = tombstoneGuard(REL, { baselines: { [REL]: baseline }, tombstones: { [REL]: tombstone } }, false);
+    expect(out.fires).toBe(false);
+    expect(out.verdict).toBeNull();
+    expect(out.severity).toBeNull();
+  });
+
+  test('tombstone wins over baseline when both are present', () => {
+    const out = tombstoneGuard(REL, { baselines: { [REL]: baseline }, tombstones: { [REL]: tombstone } }, true);
+    expect(out.verdict).toBe('TOMBSTONED_SKIP');
+  });
+
+  test('v2 manifest WITHOUT the tombstones key still parses (baselines-only → TOMBSTONED)', () => {
+    const out = tombstoneGuard(REL, { baselines: { [REL]: baseline } }, true);
+    expect(out.fires).toBe(true);
+    expect(out.verdict).toBe('TOMBSTONED');
+  });
+
+  test('v1-shaped manifest (no baselines, no tombstones) parses and does not fire', () => {
+    expect(tombstoneGuard(REL, {}, true).fires).toBe(false);
+    // A v1 manifest parsed as unknown/loose shape also must not fire.
+    expect(tombstoneGuard(REL, { tombstones: undefined, baselines: undefined }, true).fires).toBe(false);
+  });
+
+  test('severity contract rows (D3): TOMBSTONED=ERROR, TOMBSTONED_SKIP=INFO', () => {
+    expect(DECISION_SEVERITY_CONTRACT.TOMBSTONED).toBe('ERROR');
+    expect(DECISION_SEVERITY_CONTRACT.TOMBSTONED_SKIP).toBe('INFO');
   });
 });
