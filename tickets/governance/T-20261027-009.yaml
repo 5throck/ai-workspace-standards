@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261027-009
+kind: manual
+title: >-
+  validator-hardening: pre-commit hook check 6 (scripts/hooks/pre-commit.ts
+  ~L218, 'scripts/*.ts staged but scripts/SCRIPTS.md not staged → FAIL') is a
+  pure file-set heuristic and false-positives on merge commits where scripts
+  arrive from the merged side while SCRIPTS.md has zero delta (rows pre-existed
+  on the branch) — hit 2026-10-27 concluding main→PR #1643 after #1644 landed;
+  content-based lifecycle-sync-audit Check A passed. Fix: when MERGE_HEAD
+  exists, satisfy check 6 via Check A's content comparison instead of the
+  staged-file-set proxy; add a unit test fixture for the one-sided-merge case;
+  version bump + SCRIPTS.md row + L1 mirror per house convention. Workaround
+  used: supersede the PR with a re-branched single commit (option C).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-27T10:13:19.633+09:00'
+history:
+  - at: '2026-10-27T10:13:19.633+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

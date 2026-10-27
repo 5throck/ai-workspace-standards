@@ -23,12 +23,29 @@ title: >-
   pass deliver same-version drift when the drift is exactly a
   legacy-to-normalized tier block.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T08:44:36.751+09:00'
 history:
   - at: '2026-10-27T08:44:36.751+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-27T10:15:32.304+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-27T10:15:32.318+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-27T10:15:32.333+09:00'
+    from: running
+    to: review
+  - at: '2026-10-27T10:15:32.435+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1644 (merged, CI green): normalizeAgentTierFrontmatter() in
+  upgrade-policy.ts v1.24.0 wired into MERGE (agents/pm.md) and agents/ delivery
+  passes (upgrade-project.ts v1.75.0); same-version tier-only drift now
+  delivered; extends-stub targets processed; 13 unit tests. Unblocks the next
+  upgrade wave for the 15 projects still holding legacy tier stubs.
 error: null
