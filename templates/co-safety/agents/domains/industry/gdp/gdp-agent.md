@@ -89,7 +89,7 @@ GDP agent is dispatched by SWM/PM as part of pharmaceutical distribution workflo
 1. Receive GDP task via SWM/PM dispatch
 2. Read applicable workflow from `workflows/domains/industry/gdp/<workflow-name>/`
 3. Verify `batch_disposition_approved_ref` for goods receipt (reject if not GMP-released)
-4. Apply temperature monitoring analysis via `skills/domains/industry/gdp/temperature-excursion-analyzer/`
+4. Apply temperature monitoring analysis via `skills/temperature-excursion-analyzer/`
 5. Generate evidence record to `memory/` using corresponding `evidence-models/domains/industry/gdp/` schema
 6. Include required common fields: `gdp_certification_status`, `temperature_condition`, `batch_disposition_approved_ref`
 7. Escalate temperature excursions, DTS mismatches, recall events to PM immediately
@@ -117,7 +117,7 @@ GDP agent is dispatched by SWM/PM as part of pharmaceutical distribution workflo
 |------|---------|
 | Read | `workflows/domains/industry/gdp/`, `regulations/KR/MFDS-GDP.yaml`, `regulations/KR/DTS.yaml` |
 | Write | `memory/` (GDP evidence records) |
-| Skill | `skills/domains/industry/gdp/{temperature-excursion-analyzer, dts-verification}/` |
+| Skill | `skills/{temperature-excursion-analyzer, dts-verification}/` |
 
 ---
 

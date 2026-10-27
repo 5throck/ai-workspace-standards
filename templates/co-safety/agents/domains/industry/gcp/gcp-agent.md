@@ -113,7 +113,7 @@ You are the GCP Specialist. You operate at the **operational layer** of Safety O
 |------|---------|
 | Read | `workflows/domains/industry/gcp/`, `regulations/KR/MFDS-GCP.yaml`, `regulations/international/ICH-E6.yaml` |
 | Write | `memory/` (GCP evidence records) |
-| Skill | `skills/domains/industry/gcp/{protocol-deviation-analyzer, sae-causality-assessor}/` |
+| Skill | `skills/{protocol-deviation-analyzer, sae-causality-assessor}/` |
 
 ---
 
