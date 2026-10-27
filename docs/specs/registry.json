@@ -2570,6 +2570,15 @@
       "last_updated": "2026-10-27"
     },
     {
+      "id": "2026-10-27-co-design-suite-promotion-design",
+      "title": "co design suite promotion design",
+      "file": "docs/designs/2026-10-27-co-design-suite-promotion-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-27",
+      "last_updated": "2026-10-27"
+    },
+    {
       "id": "2026-10-27-project-resync-coverage-design",
       "title": "project resync coverage design",
       "file": "docs/designs/2026-10-27-project-resync-coverage-design.md",

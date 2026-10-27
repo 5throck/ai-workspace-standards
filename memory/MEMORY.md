@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-28](2026-10-28.md) | docs(governance): promote co-design design-system suite assets + bilingual user-guide parity to variant template (T-20261027-011, T-20261027-012) |
 | [2026-10-27](2026-10-27.md) | feat(governance): tier normalization — scalar agent tier, models SSOT resolution, agent_tiers removal (T-20261026-018, ADR-0102) |
 | [2026-10-26](2026-10-26.md) | feat(governance): upstream hardening — agent stub detector, variant-context gate, citation fix (U-20261026-001..003) |
 | [2026-10-25](2026-10-25.md) | docs(memory): follow-up completion — visual gate active, getDb migration analysis |
@@ -14,7 +15,7 @@
 | [2026-10-23](2026-10-23.md) | chore(deps): js-yaml ^5.5.0 — root/template SSOT parity |
 | [2026-10-22](2026-10-22.md) | tickets: re-land 21 co-newbiz S1-S12 track review tickets on updated main (supersedes #1578) |
 | [2026-10-21](2026-10-21.md) | docs(memory): 2026-10-21 daily log — 01:30 skip note + 03:00 empty ticket run |
-| [2026-10-20](2026-10-20.md) | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |
+| 2026-10-20 | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |
 | 2026-10-19 | docs(review): daily fleet review 2026-10-19 — baseline-only, three green PRs merged |
 | 2026-10-18 | chore(templates): workspace sync (52 files) — archived (7-day retention) |
 | 2026-10-17 | fix(scaffold): registry-append v1.2.0 bound the append-index scan at the next section heading (T-20261017-001) |

@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 93b93e4566a8202fff5c3b00f1fa3d7fd6c34645a34d9b175923c3f8ef790862
+translated_from_hash: 56f60d6e12b8cfe1dbbf747a60e19ac47ff29a24685ca2ccdb81f43b8a736101
 ---
 # Co-Design 사용자 가이드
 
@@ -48,7 +48,7 @@ translated_from_hash: 93b93e4566a8202fff5c3b00f1fa3d7fd6c34645a34d9b175923c3f8ef
 | "특정 터치포인트를 최적화하거나 프론트스테이지/백스테이지 운영을 정렬해달라" | `service-designer` | `service-design` | 3 |
 | "테스트나 이해관계자 데모용 인터랙티브 프로토타입을 만들어달라" | `prototype-engineer` | — | 4 |
 | "실제 사용자로 이 디자인을 검증 / 사용성 테스트를 진행해달라" | `ux-researcher` | — | 4 (루프) |
-| "엔지니어링팀에 넘길 최종 핸드오프 자료를 준비해달라" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 5 |
+| "엔지니어링팀에 넘길 최종 핸드오프 자료를 준비해달라" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 4 |
 | "팀 간 디자인 의사결정을 조율해달라" | PM (via `/meeting`) | — | 모든 단계 |
 
 **참고:**
@@ -58,47 +58,45 @@ translated_from_hash: 93b93e4566a8202fff5c3b00f1fa3d7fd6c34645a34d9b175923c3f8ef
 
 ---
 
-## 3. 디자인 파이프라인 walkthrough
+## 3. 디자인 파이프라인 둘러보기
 
-Co-design은 6단계 파이프라인(Phase 0–5)을 따릅니다. Phase 3과 4는 엄격한 선형 핸드오프가 아니라 지속적인 빌드/테스트 루프를 형성합니다.
+Co-design은 7단계 파이프라인(Phase 0–6)을 따릅니다. 프로토타이핑(Phase 4)은 엄격한 선형 핸드오프가 아니라 필요할 때 검증 루프로 되돌아갑니다.
 
 ```
 디자인 브리프 접수
   │
   ▼
-Phase 0 — 팀 구성           (PM)
-  PM이 이 프로젝트에 필요한 전문 에이전트 및 스킬 구성을 생성/확인합니다.
+Phase 0 — 프로젝트 시작     (PM)
+  PM이 디자인 목표를 명확히 하고, 범위를 확정하고, 팀을 구성합니다.
   │
   ▼
-Phase 1 — 내러티브 및 생태계 매핑     (storyteller, ux-researcher)
-  핵심 사용자 스토리, 서비스 터치포인트, 문제 공간을 정의합니다.
+Phase 1 — 사용자 리서치 및 내러티브 기반     (ux-researcher, storyteller)
+  리서치 결과, 페르소나, 디자인 철학 선언문.
   │
   ▼
-Phase 2 — 기초 탐색          (typography-expert, visual-designer, design-lead)
-  타이포그래피 계층 구조, 비주얼 무드보드, 레이아웃 프레임워크, 디자인 토큰.
+Phase 2 — 디자인 방향 확정 및 승인     (design-lead, storyteller; PM 게이트)
+  디자인 방향 + 토큰 아키텍처를 종합 — 명시적인 사용자 승인 필요.
   │
   ▼
-Phase 3 ⇄ Phase 4 — 신속한 프로토타이핑 및 지속적 검증   (루프)
-  prototype-engineer + design-lead가 로우파이 → 하이파이 프로토타입을 구축하고;
-  ux-researcher + design-lead가 병렬로 사용자 테스트 및 접근성 검증을 수행합니다.
-  디자인이 테스트를 통과할 때까지 반복합니다.
+Phase 3 — 디자인 시스템 및 실행     (design-lead, visual-designer, service-designer, typography-expert)
+  승인된 방향에 따라 고해상도 디자인, 사양, 타입 시스템을 산출합니다.
   │
   ▼
-Phase 5 — 시스템 정제 및 핸드오프       (visual-designer, prototype-engineer)
-  마무리 다듬기, 디자인 시스템 최종화, 개발 핸드오프 패키지 생성.
+Phase 4 — 프로토타이핑 및 핸드오프     (prototype-engineer; i18n-specialist 지원)
+  인터랙티브 프로토타입, 인터랙션 사양, 개발자 핸드오프 문서;
+  필요 시 ux-researcher가 검증 루프로 다시 투입됩니다.
   │
   ▼
-/sync "feat: description"
-  1. bun scripts/audit.ts      — 실패 시 중단
-  2. memory/YYYY-MM-DD.md      — 세션 로그 작성
-  3. MEMORY.md 인덱스 갱신
-  4. CHANGELOG.md [Unreleased] 항목 추가
-  5. git commit (pr/<date>-<slug> 브랜치에서)
-  6. git push + gh pr create
+Phase 5 — 라이프사이클 최종화     (PM)
+  거버넌스 레코드를 갱신하고, 결정을 memory/에 기록합니다.
+  │
+  ▼
+Phase 6 — 품질 보증 및 최종화     (PM)
+  bun scripts/audit.ts 게이트 통과 후 /sync "feat: description" → PR 생성.
 ```
 
 **관련된 주요 명령어/스크립트:**
-- `bun scripts/audit.ts` — QA 게이트. CLI에서는 Write/Edit 이후 PostToolUse 훅으로 자동 실행됩니다 (Desktop App에서는 수동 실행 필요).
+- `bun scripts/audit.ts` — QA 게이트. Write/Edit 이후 자동으로 실행되는 것이 아니라, pre-push(`scripts/hooks/pre-push.ts`)와 `/sync` 파이프라인의 audit 게이트 단계에서 실행됩니다.
 - `/sync "type(scope): message"` — 커밋, 푸시, PR 생성을 위한 유일하게 승인된 방법입니다. 직접적인 `git commit`/`git push` 호출은 pre-commit 훅에 의해 차단됩니다.
 - `/meeting` — 파이프라인 중간에 단계를 벗어나지 않고 이견을 해결하거나 결정을 검토할 때 사용합니다.
 
@@ -108,14 +106,15 @@ Phase 5 — 시스템 정제 및 핸드오프       (visual-designer, prototype-
 
 | 단계 | 이름 | 진행 내용 | 리드 에이전트 |
 |------|------|-----------|----------------|
-| 0 | 팀 구성 | PM이 전문 디자인 에이전트/스킬을 생성 | Design PM |
-| 1 | 내러티브 및 생태계 매핑 | 핵심 사용자 스토리, 서비스 터치포인트, 문제 공간 | Storyteller, UX Researcher |
-| 2 | 기초 탐색 | 타이포그래피 계층 구조, 비주얼 무드보드, 레이아웃 프레임워크 | Typography Expert, Visual Designer, Design Lead |
-| 3 | 신속한 프로토타이핑 루프 | 지속적인 로우파이 → 하이파이 프로토타입 빌드/테스트 | Prototype Engineer, Design Lead |
-| 4 | 지속적 검증 | 병렬 사용자 테스트 및 접근성 검증 | UX Researcher, Design Lead |
-| 5 | 시스템 정제 및 핸드오프 | 마무리, 디자인 시스템 최종화, 개발 핸드오프 | Visual Designer, Prototype Engineer |
+| 0 | 프로젝트 시작 | PM이 디자인 목표를 명확히 하고, 범위를 확정하고, 팀을 구성 | PM |
+| 1 | 사용자 리서치 및 내러티브 기반 | 사용자 리서치, 페르소나, 디자인 철학 선언문 | `ux-researcher`, `storyteller` |
+| 2 | 디자인 방향 확정 및 승인 | 방향 + 토큰 아키텍처 종합; 명시적 사용자 승인 게이트 | PM + `design-lead`, `storyteller` |
+| 3 | 디자인 시스템 및 실행 | 승인된 방향에 따른 고해상도 디자인, 사양, 타입 시스템 | `design-lead`, `visual-designer`, `service-designer`, `typography-expert` |
+| 4 | 프로토타이핑 및 핸드오프 | 인터랙티브 프로토타입, 인터랙션 사양, 개발자 핸드오프 문서 | `prototype-engineer` (선택 지원: `i18n-specialist`) |
+| 5 | 라이프사이클 최종화 | 거버넌스 레코드 갱신, 결정 기록 | PM |
+| 6 | 품질 보증 및 최종화 | 감사 게이트, `/sync`, PR | PM |
 
-> 전체 단계 및 디스패치 트리거 정의는 [AGENTS.md](../AGENTS.md)에 있습니다. 프로젝트별 디자인 스택 및 워크플로 커스터마이징은 [docs/co-design.context.md](co-design.context.md)에 있습니다.
+> 전체 단계 정의는 [docs/phase-definitions.md](phase-definitions.md)에 있습니다. 프로젝트별 디자인 스택 및 워크플로 커스터마이징은 [docs/co-design.context.md](co-design.context.md)에 있습니다.
 
 ---
 
@@ -125,9 +124,10 @@ Phase 5 — 시스템 정제 및 핸드오프       (visual-designer, prototype-
 |------|------|
 | `docs/designs/` | 디자인 결정과 근거 (디자인 방향성 작성, ADR 스타일 노트) |
 | `docs/specs/` | UI/UX 사양 (컴포넌트 스펙, 디자인 토큰 문서, 접근성 보고서) |
-| `docs/prototypes/` | 프로토타입 문서 및 핸드오프 노트 |
 | `memory/YYYY-MM-DD.md` | 세션 로그, 디자인 검토 트랜스크립트, 미팅 결과 |
 | `CHANGELOG.md` | 출시된 디자인 변경 사항의 사용자 대상 요약. 릴리스 전까지 `[Unreleased]`에 위치 |
+
+인터랙티브 프로토타입은 `playground/` 데모 앱에 있으며, 프로토타입 및 핸드오프 디자인 문서는 `docs/designs/`에 있습니다.
 
 새 컴포넌트를 만들기 전에 기존 컴포넌트와 토큰을 재사용하세요 — 새 컴포넌트는 `docs/specs/`에 문서화하고 디자인 시스템 검토를 위해 `design-lead`에 등록하세요.
 

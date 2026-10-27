@@ -1,0 +1,95 @@
+# components.registry.yaml — co-design component registry (design.md §6,
+# project instantiation; entries mirror docs/component-primitives.md, the
+# binding contract).
+# Last reconciled: 2026-10-27 (spec 2026-10-27-deferred-items-design — project
+# instantiation record, not present in the template tree).
+# New components enter only via the design-phase gate ([DESIGN-R1] —
+# instantiation rule register, co-design.context.md / design.md).
+version: 1
+components:
+  - id: button
+    tokens:
+      default: [--color-primary, --color-background, --border-radius-md, --spacing-md, --spacing-lg, --target-size, --motion-duration-fast]
+      hover: [--color-primary]
+      focus: [--focus-ring, --focus-ring-offset]
+    layout_primitives: [flex]
+    status: active
+  - id: input
+    tokens:
+      default: [--color-background, --color-text, --color-secondary, --border-radius-md, --spacing-sm, --spacing-md, --target-size]
+      focus: [--color-primary, --focus-ring]
+    layout_primitives: [block]
+    status: active
+  - id: label
+    tokens:
+      default: [--color-text, --typography-font-family-sans, --typography-font-size-sm, --spacing-xs]
+    layout_primitives: [block]
+    status: active
+  - id: checkbox
+    tokens:
+      default: [--color-primary, --color-background, --color-text, --border-radius-sm, --border-radius-lg, --target-size]
+      focus: [--focus-ring, --focus-ring-offset]
+    layout_primitives: [flex]
+    status: active
+  - id: select
+    tokens:
+      default: [--color-background, --color-text, --color-secondary, --border-radius-md, --shadow-md, --target-size]
+      focus: [--color-primary, --focus-ring]
+    layout_primitives: [block]
+    status: active
+  - id: card
+    tokens:
+      default: [--color-background, --color-secondary, --border-radius-lg, --spacing-md, --spacing-lg, --shadow-sm, --shadow-md]
+    layout_primitives: [block, flex]
+    status: active
+  - id: separator
+    tokens:
+      default: [--color-secondary, --spacing-md]
+    layout_primitives: [block]
+    status: active
+  - id: alert
+    tokens:
+      default: [--color-primary, --color-background, --color-success-bg, --color-success-fg, --color-success-border, --color-warning-bg, --color-warning-fg, --color-warning-border, --color-danger-bg, --color-danger-fg, --color-danger-border, --border-radius-md, --spacing-md, --shadow-sm]
+    layout_primitives: [block, flex]
+    status: active
+  - id: badge
+    tokens:
+      default: [--color-background, --color-secondary, --color-text, --color-success-bg, --color-success-fg, --color-warning-bg, --color-warning-fg, --color-danger-bg, --color-danger-fg, --typography-font-size-sm, --border-radius-sm, --spacing-sm, --spacing-xs]
+    layout_primitives: [inline]
+    status: active
+  - id: progress
+    tokens:
+      default: [--color-primary, --color-secondary, --border-radius-lg]
+    layout_primitives: [block]
+    status: active
+  - id: skeleton
+    tokens:
+      default: [--color-secondary, --color-background, --border-radius-sm, --motion-duration-normal]
+    layout_primitives: [grid]
+    status: active
+  - id: modal
+    tokens:
+      default: [--color-background, --color-text, --border-radius-lg, --spacing-xl, --shadow-lg, --focus-ring, --focus-ring-offset]
+    layout_primitives: [fixed, flex]
+    status: active
+  - id: tooltip
+    tokens:
+      default: [--color-text, --color-background, --border-radius-sm, --spacing-xs, --spacing-sm, --shadow-md]
+    layout_primitives: [absolute]
+    status: active
+  - id: table
+    tokens:
+      default: [--color-text, --color-secondary, --spacing-md, --typography-font-size-base]
+    layout_primitives: [block]
+    status: active
+  - id: tabs
+    tokens:
+      default: [--color-text, --color-primary, --color-background, --border-radius-md, --target-size, --spacing-md, --spacing-lg]
+      focus: [--focus-ring, --focus-ring-offset]
+    layout_primitives: [flex]
+    status: active
+  - id: text-scale
+    tokens:
+      default: [--typography-font-family-sans, --typography-font-family-mono, --typography-font-size-xs, --typography-font-size-sm, --typography-font-size-base, --typography-font-size-lg, --typography-font-size-xl, --typography-font-weight-heading, --typography-font-weight-regular, --color-text]
+    layout_primitives: [block]
+    status: active

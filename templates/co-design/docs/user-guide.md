@@ -43,7 +43,7 @@ Use this table to figure out who (or what skill) to ask the PM to bring in. You 
 | "Optimize a specific touchpoint or align frontstage/backstage ops" | `service-designer` | `service-design` | 3 |
 | "Build an interactive prototype for testing or stakeholder demo" | `prototype-engineer` | — | 4 |
 | "Validate this design with real users / run usability tests" | `ux-researcher` | — | 4 (loop) |
-| "Prepare final handoff materials for engineering" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 5 |
+| "Prepare final handoff materials for engineering" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 4 |
 | "Facilitate a cross-team design decision" | PM via `/meeting` | — | any |
 
 **Notes:**
@@ -55,45 +55,43 @@ Use this table to figure out who (or what skill) to ask the PM to bring in. You 
 
 ## 3. The Design Pipeline Walkthrough
 
-Co-design follows a six-phase pipeline (Phase 0–5). Phases 3 and 4 form a continuous build/test loop rather than a strict linear handoff.
+Co-design follows a seven-phase pipeline (Phase 0–6). Prototyping (Phase 4) feeds back into validation loops rather than running as a strict linear handoff.
 
 ```
 Design brief received
   │
   ▼
-Phase 0 — Team Assembly           (PM)
-  PM creates/confirms the specialized agent & skill roster for this project.
+Phase 0 — Project Initiation     (PM)
+  PM clarifies the design objective, confirms scope, and assembles the team.
   │
   ▼
-Phase 1 — Narrative & Ecosystem Mapping     (storyteller, ux-researcher)
-  Core user story, service touchpoints, and problem space defined.
+Phase 1 — User Research & Narrative Foundation     (ux-researcher, storyteller)
+  Research findings, personas, and the design philosophy statement.
   │
   ▼
-Phase 2 — Foundational Exploration          (typography-expert, visual-designer, design-lead)
-  Typographic hierarchy, visual mood boards, layout frameworks, design tokens.
+Phase 2 — Design Direction & Approval     (design-lead, storyteller; PM gate)
+  Design direction + token architecture synthesized — explicit user approval required.
   │
   ▼
-Phase 3 ⇄ Phase 4 — Rapid Prototyping & Continuous Validation   (loop)
-  prototype-engineer + design-lead build low-fi → high-fi prototypes;
-  ux-researcher + design-lead run parallel user testing and a11y validation.
-  Repeat until the design holds up under test.
+Phase 3 — Design System & Execution     (design-lead, visual-designer, service-designer, typography-expert)
+  High-fidelity designs, specs, and the type system per the approved direction.
   │
   ▼
-Phase 5 — System Refinement & Handoff       (visual-designer, prototype-engineer)
-  Polish, finalize the design system, produce dev handoff package.
+Phase 4 — Prototyping & Handoff     (prototype-engineer; i18n-specialist support)
+  Interactive prototypes, interaction specs, developer handoff docs;
+  ux-researcher re-enters for validation loops when required.
   │
   ▼
-/sync "feat: description"
-  1. bun scripts/audit.ts      — abort on failure
-  2. memory/YYYY-MM-DD.md      — session log written
-  3. MEMORY.md index updated
-  4. CHANGELOG.md [Unreleased] entry added
-  5. git commit (on pr/<date>-<slug> branch)
-  6. git push + gh pr create
+Phase 5 — Lifecycle Finalization     (PM)
+  Governance records updated, decisions logged to memory/.
+  │
+  ▼
+Phase 6 — Quality Assurance & Finalization     (PM)
+  bun scripts/audit.ts gate, then /sync "feat: description" → PR opened.
 ```
 
 **Key commands/scripts involved:**
-- `bun scripts/audit.ts` — the QA gate; also runs automatically via the PostToolUse hook after Write/Edit on the CLI (run manually on the Desktop App).
+- `bun scripts/audit.ts` — the QA gate; runs at pre-push (`scripts/hooks/pre-push.ts`) and inside the `/sync` pipeline (audit gate step) — it does not run automatically after Write/Edit.
 - `/sync "type(scope): message"` — the only sanctioned way to commit, push, and open a PR; direct `git commit`/`git push` calls are blocked by the pre-commit hook.
 - `/meeting` — for resolving disagreements or reviewing decisions mid-pipeline without leaving the phase.
 
@@ -103,14 +101,15 @@ Phase 5 — System Refinement & Handoff       (visual-designer, prototype-engine
 
 | Phase | Name | What Happens | Lead Agent(s) |
 |-------|------|--------------|----------------|
-| 0 | Team Assembly | PM creates specialized design agents/skills | Design PM |
-| 1 | Narrative & Ecosystem Mapping | Core user story, service touchpoints, problem space | Storyteller, UX Researcher |
-| 2 | Foundational Exploration | Typographic hierarchy, visual mood boards, layout frameworks | Typography Expert, Visual Designer, Design Lead |
-| 3 | Rapid Prototyping Loops | Continuous build/test low-fi → high-fi prototypes | Prototype Engineer, Design Lead |
-| 4 | Continuous Validation | Parallel user testing and a11y validation | UX Researcher, Design Lead |
-| 5 | System Refinement & Handoff | Polish, finalize design system, dev handoff | Visual Designer, Prototype Engineer |
+| 0 | Project Initiation | PM clarifies the design objective, confirms scope, assembles the team | PM |
+| 1 | User Research & Narrative Foundation | User research, personas, design philosophy statement | `ux-researcher`, `storyteller` |
+| 2 | Design Direction & Approval | Direction + token architecture synthesized; explicit user-approval gate | PM + `design-lead`, `storyteller` |
+| 3 | Design System & Execution | High-fidelity designs, specifications, type system per approved direction | `design-lead`, `visual-designer`, `service-designer`, `typography-expert` |
+| 4 | Prototyping & Handoff | Interactive prototypes, interaction specs, developer handoff docs | `prototype-engineer` (optional support: `i18n-specialist`) |
+| 5 | Lifecycle Finalization | Governance records updated, decisions logged | PM |
+| 6 | Quality Assurance & Finalization | Audit gate, `/sync`, PR | PM |
 
-> Full phase and dispatch-trigger definitions live in [AGENTS.md](../AGENTS.md); project-specific customization of the design stack and workflow lives in [docs/co-design.context.md](co-design.context.md).
+> Full phase definitions live in [docs/phase-definitions.md](phase-definitions.md); project-specific customization of the design stack and workflow lives in [docs/co-design.context.md](co-design.context.md).
 
 ---
 
@@ -120,9 +119,10 @@ Phase 5 — System Refinement & Handoff       (visual-designer, prototype-engine
 |----------|----------|
 | `docs/designs/` | Design decisions and rationale (design direction write-ups, ADR-style notes) |
 | `docs/specs/` | UI/UX specifications (component specs, design token docs, accessibility reports) |
-| `docs/prototypes/` | Prototype documentation and handoff notes |
 | `memory/YYYY-MM-DD.md` | Session logs, design review transcripts, meeting outcomes |
 | `CHANGELOG.md` | User-facing summary of shipped design changes, under `[Unreleased]` until released |
+
+Interactive prototypes live in the `playground/` demo app; prototype and handoff design docs live in `docs/designs/`.
 
 Reuse existing components and tokens before creating new ones — document any new component in `docs/specs/` and register it with `design-lead` for design-system review.
 
