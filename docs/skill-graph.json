@@ -2552,6 +2552,11 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "doc:co-design/docs/component-primitives.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "doc:co-design/docs/phase-definitions.md",
       "type": "doc",
       "layer": "variant:co-design"
@@ -12101,6 +12106,18 @@
       "type": "cites_skill",
       "from": "doc:co-design/docs/co-design.context.md",
       "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/component-primitives.md",
+      "to": "skill:co-design/token-usage-lint",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/component-primitives.md",
+      "to": "skill:root/accessibility-audit",
       "source": "workflow-doc"
     },
     {

@@ -465,6 +465,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/README.md` | doc | `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/prep-pdf`, `co-deck/presenter-mode`, `co-deck/slide-layout-gate`, `co-deck/theme-authoring`, `root/meeting-facilitation` | — | — |
 | `doc:co-design/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/co-design.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-design/docs/component-primitives.md` | doc | `co-design/token-usage-lint`, `root/accessibility-audit` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
 | `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
 | `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
@@ -831,7 +832,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-27), window 90 days. Skill nodes with usage: 3.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-28), window 90 days. Skill nodes with usage: 3.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, common/sync, root/sync
 - **unused** (0 sessions in 90 days) (231): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 191 more

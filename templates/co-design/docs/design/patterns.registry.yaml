@@ -1,0 +1,52 @@
+# patterns.registry.yaml — co-design screen-pattern registry (design.md §6,
+# project instantiation; mirrors docs/screen-patterns.md, the declared inventory).
+# Last reconciled: 2026-10-27 (spec 2026-10-27-deferred-items-design — project
+# instantiation record, not present in the template tree).
+# New patterns enter only via a revision of that document (design-phase gate).
+version: 1
+patterns:
+  - id: list
+    trigger: "Indexed collections with row-level navigation and actions"
+    entry_tokens: [--spacing-md, --spacing-sm, --target-size]
+    layout_primitives: [flex, grid]
+    composes_from: [card, badge, button]
+  - id: form
+    trigger: "Create/edit data entry with inline validation and recovery"
+    entry_tokens: [--spacing-sm, --spacing-md, --target-size]
+    layout_primitives: [flex, grid]
+    composes_from: [input, label, button, alert]
+  - id: detail
+    trigger: "Single-entity view with metadata and safe actions"
+    entry_tokens: [--spacing-md, --typography-font-size-lg]
+    layout_primitives: [flex, block]
+    composes_from: [card, text-scale, button]
+  - id: dashboard
+    trigger: "At-a-glance summary of statuses and metrics (text-first)"
+    entry_tokens: [--spacing-md, --typography-font-size-lg]
+    layout_primitives: [grid]
+    composes_from: [card, text-scale]
+  - id: modal
+    trigger: "Focused confirmation, destructive actions gated behind intent"
+    entry_tokens: [--spacing-lg, --shadow-lg, --focus-ring]
+    layout_primitives: [fixed, flex]
+    composes_from: [button, text-scale]
+  - id: table
+    trigger: "Structured rows with sortable columns and stable captions"
+    entry_tokens: [--spacing-sm, --typography-font-size-sm]
+    layout_primitives: [block]
+    composes_from: [table, text-scale]
+  - id: feedback
+    trigger: "Async state surfaces: loading, empty, error, and mutation toasts"
+    entry_tokens: [--color-danger-bg, --color-success-bg, --motion-duration-normal, --target-size]
+    layout_primitives: [grid, fixed]
+    composes_from: [alert, skeleton, button, badge]
+  - id: tabs
+    trigger: "In-page section switching with keyboard roving tabindex and URL state"
+    entry_tokens: [--target-size, --color-primary, --focus-ring]
+    layout_primitives: [flex]
+    composes_from: [tabs, text-scale]
+  - id: report
+    trigger: "Data presentation: chart-first series, bullet lists, wide tables"
+    entry_tokens: [--spacing-sm, --typography-font-family-mono, --color-primary]
+    layout_primitives: [block, flex]
+    composes_from: [table, text-scale, badge]
