@@ -2882,11 +2882,6 @@
       "layer": "variant:co-safety"
     },
     {
-      "id": "doc:co-safety/agents/gcp-agent.md",
-      "type": "doc",
-      "layer": "variant:co-safety"
-    },
-    {
       "id": "doc:co-safety/agents/gdp-agent.md",
       "type": "doc",
       "layer": "variant:co-safety"
@@ -2898,11 +2893,6 @@
     },
     {
       "id": "doc:co-safety/agents/gmp-agent.md",
-      "type": "doc",
-      "layer": "variant:co-safety"
-    },
-    {
-      "id": "doc:co-safety/agents/gvp-agent.md",
       "type": "doc",
       "layer": "variant:co-safety"
     },
@@ -14083,36 +14073,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-safety/agents/gasterm-agent.md",
-      "to": "skill:co-safety/gas-dispersion-analyzer",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gasterm-agent.md",
-      "to": "skill:co-safety/tank-integrity-validator",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gcp-agent.md",
-      "to": "skill:co-safety/protocol-deviation-analyzer",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gcp-agent.md",
-      "to": "skill:co-safety/sae-causality-assessor",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gdp-agent.md",
-      "to": "skill:co-safety/dts-verification",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-safety/agents/gdp-agent.md",
       "to": "skill:co-safety/temperature-excursion-analyzer",
       "source": "workflow-doc"
@@ -14132,19 +14092,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/agents/gmp-agent.md",
+      "to": "skill:co-safety/gmp-change-control",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gmp-agent.md",
+      "to": "skill:co-safety/gmp-deviation-capa",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/agents/gmp-agent.md",
       "to": "skill:co-safety/gmp-qrm",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gvp-agent.md",
-      "to": "skill:co-safety/benefit-risk-assessor",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/agents/gvp-agent.md",
-      "to": "skill:co-safety/signal-detector",
       "source": "workflow-doc"
     },
     {
