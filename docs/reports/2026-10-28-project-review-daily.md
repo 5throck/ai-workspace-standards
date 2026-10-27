@@ -90,3 +90,46 @@ Window items: sync-overwrite policy engine (2123da173, T-004), recursive agent-q
 ## Mode note
 
 Phase I green (no ≥3 ERRORs, no Critical) → Phase 1b and Phase II run in **normal mode**.
+
+---
+
+# Phase 1b — Per-variant project-review (templates/co-*)
+
+## Batteries (14/14 PASS)
+
+All 14 variants (`templates/co-*` glob; co-architect and co-newbiz projects are standalone-track — no template): `validate-variant-claims.ts --template <v>` exit 0 ×14; `validate-variant-readiness.ts --variant <v>` — 7 "All checks passed", 7 "READY (warnings only)" (warning class sampled: `country-config-default` not set — known cosmetic class). **0 FAIL.**
+
+## Scope triage
+
+Window template-side changes: co-design (13 files), co-safety (37 files), common (27 — covered by Phase I slot C). 12 variants baseline-only rows. SCOPED delta review dispatched for co-design + co-safety (one batched agent).
+
+## co-design — FINDINGS (Minor/Info; no Critical/Major)
+
+Verified clean: registry↔doc cross-references both ways (all 16 component ids resolve); patterns ids/triggers/entry-tokens 1:1; 9-sample tokens.json↔style.css resolution incl. the new line-height/numeric-variant tokens; smoke test statically consistent with patterns.ts/tokens.json/registries; bilingual parity hash-pair verified; no `Projects/`-path leaks (project-instantiation refs are explicitly annotated); package.json scaffold deps intact (axe-core satisfies the accessibility-audit skill prereq).
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| CD-1 | Minor | `feedback` pattern: registry `composes_from` lists `badge`, doc row 7 omits it | patterns.registry.yaml:42 vs screen-patterns.md:34 | T-20261028-006 |
+| CD-2 | Info | New `tests/unit/` surface runs only post-instantiation (workspace test-runner scans root tests/unit only); template-side drift unnoticed until instantiation | scripts/test-runner.ts:64 | Recorded |
+| CD-3 | Info | Registry supersets doc tables (button `--motion-duration-fast`, checkbox `--color-color-text` rows) | components.registry.yaml:12,30 | T-20261028-006 (optional) |
+| CD-4 | Info | style.css "token-only" header vs raw rem geometry (catalog-consistent) | playground/src/style.css:2-3 | T-20261028-006 (optional) |
+
+## co-safety — FINDINGS (1 Major durability item)
+
+Verified clean: all 37 remediated agents carry scalar `tier:` + complete frontmatter; 37/37 have the README-declared Section A/B/C structure above validator bars; zero unresolved placeholders (XXX hits are citation-format examples); no dangling `extends:`; all coverage refs (lifecycle records, evidence-models, workflows, docs, scripts) resolve on disk.
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| CS-1 | **Major** | Remediation not durable: the tree's own scaffolder `new-domain.ts` still emits map-form `tier:` + `model: inherit` — exactly what the new recursive gate FAILs; every future scaffolded domain agent fails validation | templates/co-safety/scripts/co-safety/new-domain.ts:55-75 vs scripts/validate-templates.ts:14-26 | **T-20261028-005 (high)** |
+| CS-2 | Minor | Stale `skills/domains/industry/...` references (flat `skills/<name>/` is the real layout) — pre-existing, left by the remediation pass | risk-assessment-agent.md:42, gmp-agent.md:48/84/111, gdp-agent.md:92/120, gasterm-agent.md:112, gcp-agent.md:116, gvp-agent.md:118 | T-20261028-005 |
+| CS-3 | Info | `color:` frontmatter in 28/37, missing in 9 — no schema requirement, cosmetic | frontmatter sweep | Recorded |
+| CS-4 | Info | Intentional non-uniform `## Workflow Phases` appendix (4 stub-quality `_shared/` bodies only) | agents/README.md:20-26 | None |
+
+## Structural-trigger updates for the next Phase 1b
+
+- **co-design: becomes a FULL-trigger variant** — the window introduced the `docs/design/*.registry.yaml` registry-schema file class and the `tests/unit/` layout (both firsts among variants). Future reviews check registry↔doc↔tokens↔test four-way consistency.
+- **co-safety: remains SCOPED** — nested tree pre-dates the window; caveat: fix CS-1 (T-20261028-005) before any new domain is scaffolded, or the gate goes red.
+
+## Dedupe note
+
+No common-wave defect across multiple variants tonight (deltas were variant-specific); the one systemic item (CS-1) is co-safety-local. Phase 1b ticket spend: 2 (T-20261028-005/-006). Daily shared cap: 6/10 used.

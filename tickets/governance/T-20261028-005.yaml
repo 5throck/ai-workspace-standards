@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261028-005
+kind: manual
+title: >-
+  co-safety variant durability: new-domain.ts scaffolder still emits legacy
+  map-form tier + model: inherit (scripts/co-safety/new-domain.ts:55-75) which
+  the new agent-quality-recursive gate FAILs — every future scaffolded domain
+  agent fails validation (Phase 1b CS-1, Major); same pass: normalize stale
+  skills/domains/industry/... path references to the flat skills/<name>/ layout
+  (8 files: risk-assessment-agent.md:42, gmp-agent.md:48/84/111,
+  gdp-agent.md:92/120, gasterm-agent.md:112, gcp-agent.md:116, gvp-agent.md:118
+  — Phase 1b CS-2)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-28T02:39:53.725+09:00'
+history:
+  - at: '2026-10-28T02:39:53.725+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
