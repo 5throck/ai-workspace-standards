@@ -1,5 +1,43 @@
 #!/usr/bin/env bun
-// @version 1.75.0
+// @version 1.76.0
+// v1.76.0 (2026-10-27, T-20261027-004 — spec
+//          docs/designs/2026-10-27-sync-overwrite-policy-design.md): sync/
+//          overwrite policy — merge-or-preserve delivery decisions (design
+//          §4–§7). (D1) PROVENANCE BASELINES: the delivery manifest gains
+//          per-file baselines {hash, templateVersion} keyed by
+//          baselineKeyFor (raw bytes for plain files, lifecycleless bytes for
+//          agents/ so the re-stamp never reads as evolution); schemaVersion 2
+//          keeps the top-level `files` array verbatim (isDeliveredDiff and the
+//          PR-body compose are untouched). (D1/D2) NEXT-RUN CLASSIFICATION +
+//          DISPOSITION MATRIX: every version-gated whole-content delivery
+//          candidate (TEMPLATE TREE SYNC SYNC branch, DOCS_OVERWRITE both
+//          sites, VARIANT ASSET DIRS, ENV_SAMPLE, scripts/ + variant-scripts +
+//          overlay version-gt, agents/ + skills/ version-gt) classifies
+//          against the baseline via classifyProjectState; PROJECT_EVOLVED +
+//          template-changed escalates to a CONFLICT disposition (severity
+//          ERROR): default SKIP — project copy preserved, delivery skipped,
+//          decision recorded, run exits non-zero with an actionable summary
+//          naming the §6 adjudicated-port procedure; --disposition
+//          adopt-template[=glob] flips the default to adopt (deliver +
+//          re-baseline). PROJECT_EVOLVED with template content unchanged
+//          delivers as today, logged EVOLVED (WARN). NO_BASELINE (first run
+//          after landing) degrades to today's behavior with an INFO decision.
+//          (D3) UNIFIED DECISION LOG: every pass writes {path, policy, pass,
+//          verdict, severity, baseline?, detail} entries — SEED_SKIP /
+//          STUB_SKIP / SKELETON_COLLISION / CONTEXT_PRESERVE / DRIFT_PRESERVE
+//          / DRIFT_RESTORED / MERGE / SKIP joins the delivery verdicts; the
+//          manifest records decisions[] and the composed PR body gains a
+//          Decisions section (counts by severity, ERROR items verbatim).
+//          T-20261027-005 integration: TIER NORMALIZED / TIER DRIFT deliveries
+//          log ADOPT (INFO); the MERGE-pass TIER CONFLICT keep logs EVOLVED
+//          (WARN) — no duplicate or changed verdicts. agents/ equal-version
+//          drift on a PROJECT_EVOLVED file reclassifies to CONFLICT (ERROR)
+//          per the design's dedicated matrix row (restoring "canonical" over
+//          evolved content is not self-evidently right); skills/ DRIFT
+//          (preserved) keeps semantics as DRIFT_PRESERVE (WARN); scripts/
+//          equal-version + CORE-SCRIPT FORK keep the ADR-0085 D3 canonical
+//          restore, logged DRIFT_RESTORED (WARN). Dry-run classifies and logs
+//          without writing, and previews the non-zero exit on ERROR.
 // v1.75.0 (2026-10-27, T-20261027-005): ADR-0102 legacy agent tier normalization
 //          in two delivery passes. (a) The MERGE pass (agents/pm.md) now
 //          normalizes the project copy's legacy per-platform tier frontmatter
@@ -691,15 +729,25 @@ import {
   W2_REVIEW_FLOOR,
 } from './helpers/context-sections.ts';
 import {
+  DECISION_SEVERITY_CONTRACT,
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
   MERGE_MANAGED_FILES,
+  baselineKeyFor,
+  classifyProjectState,
+  globToRegExp,
   isExtendsStub,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
   mergeSettingsJson,
   normalizeAgentTierFrontmatter,
   resolveClaim,
+  resolveDisposition,
+  type DecisionBaseline,
+  type DecisionVerdict,
+  type DeliveryDecision,
+  type DispositionFlag,
+  type ProjectStateVerdict,
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
@@ -723,11 +771,21 @@ let yesFlag = false;
 let skipContextCommonization = false;
 let forceContextSync = false;
 let acceptCiPermDiff = false;
+// T-20261027-004 (D2): --disposition adopt-template[=glob] flips the CONFLICT
+// (ERROR) default SKIP to deliver-and-adopt, optionally narrowed to paths
+// matching the glob. Accepts `--disposition <value>` and `--disposition=<value>`.
+let disposition: DispositionFlag = { mode: 'default' };
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
+  if (args[i] === '--disposition') {
+    const raw = args[i + 1]?.startsWith('--') ? '' : args[++i] ?? '';
+    applyDispositionArg(raw);
+    continue;
+  }
+  if (args[i]?.startsWith('--disposition=')) { applyDispositionArg(args[i].slice('--disposition='.length)); continue; }
   if (args[i] === '--dry-run') { dryRun = true; continue; }
   if (args[i] === '--preflight') { preflight = true; continue; }
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
@@ -739,8 +797,24 @@ for (let i = 0; i < args.length; i++) {
   if (!projectPath && !args[i].startsWith('--')) { projectPath = args[i]; continue; }
 }
 
+/** Parse one --disposition value: '' | 'adopt-template' | 'adopt-template=<glob>'. */
+function applyDispositionArg(raw: string): void {
+  const value = (raw ?? '').trim();
+  if (value === '') return; // flag with no value — keep the default disposition
+  if (value === 'adopt-template') { disposition = { mode: 'adopt-template', matches: () => true }; return; }
+  if (value.startsWith('adopt-template=')) {
+    const glob = value.slice('adopt-template='.length).trim();
+    if (!glob) { console.error('ERROR: --disposition adopt-template=<glob>: the glob after "=" is empty.'); process.exit(1); }
+    const re = globToRegExp(glob);
+    disposition = { mode: 'adopt-template', matches: (rel: string) => re.test(rel) };
+    return;
+  }
+  console.error(`ERROR: unknown --disposition value '${value}' (supported: adopt-template, adopt-template=<glob>).`);
+  process.exit(1);
+}
+
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]]');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -1373,7 +1447,7 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
  *  managed-block merge, with section content read from templates/common/<rel>
  *  at merge time; replaced spans are snapshotted to `<target>.pre-skeleton.bak`
  *  before the write (fail-closed). */
-function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): void {
+function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): { merged: boolean; snapshotCount: number; skeletonLog: string[] } {
   const tplContent = readFileSync(templateFile, 'utf8');
   let commonContent: string | null = null;
 
@@ -1389,7 +1463,7 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   const mergedTplBlocks = buildMergedTemplateBlocks(tplContent, commonContent);
   if (mergedTplBlocks.length === 0) {
     console.log(`    INFO: Template has no managed markers — skipping ${rel}`);
-    return;
+    return { merged: false, snapshotCount: 0, skeletonLog: [] };
   }
 
   if (!existsSync(projectFile)) {
@@ -1397,9 +1471,10 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
     if (!dryRun) {
       mkdirSync(dirname(projectFile), { recursive: true });
       copyFileSync(templateFile, projectFile);
+      noteDelivered(rel);
     }
     console.log(`    ${dryTag}CREATED: ${rel}`);
-    return;
+    return { merged: true, snapshotCount: 0, skeletonLog: [] };
   }
 
   const projContent = readFileSync(projectFile, 'utf8');
@@ -1413,9 +1488,12 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   // never a hardcoded copy, never the variant shadow.
   let finalContent = result.content;
   let finalMerged = result.merged;
+  let snapshotCount = result.snapshots.length;
+  const skeletonLog: string[] = [];
   if (rel === 'CLAUDE.md' || rel === 'GEMINI.md') {
     const skeleton = mergeSkeletonSections(result.content, commonContent ?? tplContent, rel, dryRun);
     for (const line of skeleton.log) console.log(line);
+    skeletonLog.push(...skeleton.log);
     finalContent = skeleton.content;
     finalMerged = result.merged || skeleton.merged;
     if (!dryRun && skeleton.snapshots.length > 0) {
@@ -1429,6 +1507,7 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
         throw new Error(`[upgrade-project] cannot write the recovery snapshot ${bakPath} — aborting before the skeleton section replace of ${rel} (${(err as Error).message})`);
       }
       console.log(`    SNAPSHOT: replaced skeleton section(s) of ${rel} saved to ${rel}.pre-skeleton.bak (overwritten per run; gitignored via *.bak)`);
+      snapshotCount += skeleton.snapshots.length;
     }
   }
 
@@ -1448,6 +1527,20 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
       console.log(`    SNAPSHOT: replaced unlabeled span(s) of ${rel} saved to ${rel}.pre-reconcile.bak (overwritten per run; gitignored via *.bak)`);
     }
     writeFileSync(projectFile, finalContent, 'utf8');
+    noteDelivered(rel);
+  }
+  return { merged: finalMerged, snapshotCount, skeletonLog };
+}
+
+/** SKELETON_COLLISION decisions (design D6b): the skeleton lib reports guarded
+ *  skips as log lines — surface them as persistent WARN entries here so a
+ *  heading-collision skip survives the stdout scroll (the claude-s2 drift
+ *  class). Line formats are the lib's stable outputs. */
+function recordSkeletonCollisions(rel: string, skeletonLog: string[]): void {
+  for (const line of skeletonLog) {
+    if (line.includes('SKELETON HEADING COLLISION') || line.includes('SKELETON REPLACE SKIPPED')) {
+      recordDecision(rel, 'MERGE_MANAGED', 'MERGE', 'SKELETON_COLLISION', `skeleton insert/replace skipped by guard — ${line.trim()}`);
+    }
   }
 }
 
@@ -1474,6 +1567,7 @@ function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: str
     default: {
       const migrated = r && r.migrated.length > 0 ? ` — MIGRATED PROJECT-JOBS: ${r.migrated.join(', ')}` : '';
       console.log(`    ${dryTag}${outcome.status === 'would-update' ? 'WOULD UPDATE' : 'UPDATED'}: ${rel}${migrated}`);
+      recordDecision(rel, 'MERGE_MANAGED', 'MERGE', 'MERGE', `ci.yml merge delivered — template-owned jobs authoritative, PROJECT-JOBS region preserved${migrated}`);
     }
   }
   return true;
@@ -1486,6 +1580,91 @@ function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: str
 function isLocallyModified(filePath: string): boolean {
   const rel = relative(projectDir, filePath).replace(/\\/g, '/');
   return preUpgradeDirty.has(rel);
+}
+
+// ── Delivery-decision collector + provenance baselines (T-20261027-004, D1/D2/D3) ──
+// Every pass records its verdicts here; apply mode persists them in the
+// delivery manifest (v2) together with per-file delivered baselines. Spec:
+// docs/designs/2026-10-27-sync-overwrite-policy-design.md.
+const decisions: DeliveryDecision[] = [];
+const deliveredRels = new Set<string>(); // content deliveries this run (apply mode) — baseline source
+
+/** Prior manifest baselines (D1): classified against on this run, replaced at
+ *  the next apply delivery. A v1-shaped manifest (no baselines key) degrades
+ *  gracefully — NO_BASELINE classification, today's behavior (design §8). */
+const priorManifest: { baselines?: Record<string, DecisionBaseline>; decisions?: unknown } | null = (() => {
+  try {
+    return JSON.parse(readFileSync(join(projectDir, '.claude', 'last-upgrade-delivery.json'), 'utf8'));
+  } catch { return null; }
+})();
+const priorBaselines: Record<string, DecisionBaseline> = priorManifest?.baselines ?? {};
+
+/** Record one decision entry, defaulting severity from the §7 contract. */
+function recordDecision(
+  path: string, policy: string, pass: string, verdict: DecisionVerdict, detail: string,
+  baseline?: DecisionBaseline, severityOverride?: DeliveryDecision['severity'],
+): void {
+  decisions.push({
+    path, policy, pass, verdict, detail,
+    ...(baseline ? { baseline } : {}),
+    severity: severityOverride ?? DECISION_SEVERITY_CONTRACT[verdict],
+  });
+}
+
+/** Mark a delivered path (apply mode only) — baselines are hashed from disk at manifest time. */
+function noteDelivered(rel: string): void {
+  if (!dryRun) deliveredRels.add(rel);
+}
+
+/** Classify a delivery candidate (D1) — null when the project copy does not exist (NEW). */
+function classifyCandidate(rel: string, projectFile: string, deliverableContent: string): ProjectStateVerdict | null {
+  if (!existsSync(projectFile)) return null;
+  let projectContent = '';
+  try { projectContent = readFileSync(projectFile, 'utf8'); } catch { return null; }
+  return classifyProjectState(rel, projectContent, deliverableContent, priorBaselines[rel]);
+}
+
+/**
+ * D2 disposition guard for a version-gated whole-content delivery (design §4
+ * SYNC/OVERWRITE rows). Returns true when delivery may proceed; on the
+ * CONFLICT (ERROR) row it logs the decision, calls `onConflictSkip` (the
+ * pass's skip output) and returns false — the project copy is preserved.
+ * `policy`/`pass` label the decision entry.
+ */
+function evolvedDeliveryGuard(input: {
+  rel: string; policy: string; pass: string;
+  projectFile: string; deliverableContent: string;
+  onConflictSkip: () => void;
+}): boolean {
+  const cls = classifyCandidate(input.rel, input.projectFile, input.deliverableContent);
+  if (!cls) return true; // NEW — nothing evolved
+  if (cls.state !== 'PROJECT_EVOLVED') return true;
+  const outcome = resolveDisposition(cls, input.rel, disposition);
+  const baseline = priorBaselines[input.rel];
+  if (outcome.deliver) {
+    recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
+    if (outcome.verdict === 'ADOPT') {
+      console.log(`  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`);
+    } else if (outcome.verdict === 'EVOLVED') {
+      console.log(`  ℹ️  EVOLVED: ${input.rel} — project-evolved since the last delivery; template content unchanged — version-gated delivery proceeds (decision recorded)`);
+    }
+    return true;
+  }
+  recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
+  input.onConflictSkip();
+  return false;
+}
+
+/** The ERROR-severity decisions of this run (D3.1 — they force the non-zero exit). */
+const errorDecisions = (): DeliveryDecision[] => decisions.filter((d) => d.severity === 'ERROR');
+
+/** Adopt-template grant for `rel` (D2). Reads the disposition flag through a
+ *  locally annotated binding — tsc's control-flow analysis keeps the
+ *  initializer's {mode:'default'} narrowing on the module-level let across the
+ *  parser's callback mutation, so a direct `.mode` comparison mis-narrows. */
+function dispositionAdopts(rel: string): boolean {
+  const flag: DispositionFlag = disposition;
+  return flag.mode === 'adopt-template' && flag.matches(rel);
 }
 
 // ── T-20261002-015: LOCAL-PATCH report ────────────────────────────────────────
@@ -1557,6 +1736,7 @@ for (const rel of LOCKED_FILES) {
   if (!dryRun) {
     mkdirSync(dirname(dest), { recursive: true });
     copyFileSync(src, dest);
+    noteDelivered(rel);
   }
   console.log(`  ${dryTag}WROTE: ${rel}`);
   lockedChanged++;
@@ -1633,26 +1813,44 @@ for (const rel of MERGE_FILES) {
     if (!mergeCiWorkflowFile(dest, src, rel)) ciMergeFailed = true;
     continue;
   }
-  mergeWorkspaceManaged(dest, src, rel);
+  const mergeResult = mergeWorkspaceManaged(dest, src, rel);
+  recordSkeletonCollisions(rel, mergeResult.skeletonLog);
+  if (mergeResult.merged) {
+    // D3 decision log: an in-zone replace (snapshot written) is WARN — divergence
+    // worth reading; a non-destructive union/insert stays INFO.
+    recordDecision(
+      rel, 'MERGE_MANAGED', 'MERGE', 'MERGE',
+      mergeResult.snapshotCount > 0
+        ? `managed-zone merge delivered (in-zone replace — ${mergeResult.snapshotCount} recovery snapshot(s) written)`
+        : 'managed-zone merge delivered (non-destructive union/insert)',
+      undefined,
+      mergeResult.snapshotCount > 0 ? 'WARN' : undefined,
+    );
+  }
   // v1.75.0 (T-20261027-005 a): agents/pm.md is MERGE_MANAGED — the managed-block
   // merge above never touches frontmatter, so a legacy per-platform tier map
   // survived every upgrade and the post-soak ADR-0102 recursive agent-quality
-  // check (validate-model-registry, T-20261027-003) hard-FAILed the project's
-  // next dev-sync. The template is authoritative for the managed `tier` key:
-  // when the template side is already scalar, normalize the project copy's tier
-  // block to the template scalar (tier block ONLY — no other frontmatter; a
-  // project scalar that differs from the template scalar is deliberate
-  // divergence → untouched, logged as a conflict). Idempotent via
+  // check (validate-model-registry, T-20261027-003) hard-FAILed every
+  // project still holding a map-form tier. The template is authoritative for
+  // the managed `tier` key: when the template side is already scalar, normalize
+  // the project copy's tier block to the template scalar (tier block ONLY — no
+  // other frontmatter; a project scalar that differs from the template scalar
+  // is deliberate divergence → untouched, logged as a conflict). Idempotent via
   // normalizeAgentTierFrontmatter (lib/upgrade-policy v1.24.0).
   if (rel.startsWith('agents/') && existsSync(dest)) {
     const tierNorm = normalizeAgentTierFrontmatter(readFileSync(dest, 'utf8'), readFileSync(src, 'utf8'));
     if (tierNorm.conflict) {
       console.log(`  ⚠️ TIER CONFLICT: ${rel} project tier '${tierNorm.projectTier}' differs from template scalar '${tierNorm.templateTier}' — left untouched (deliberate divergence)`);
+      // T-20261027-004 decision log: a deliberate scalar divergence kept is an
+      // EVOLVED (WARN) entry — visible in the manifest, not just stdout.
+      recordDecision(rel, 'MERGE_MANAGED', 'MERGE', 'EVOLVED', `tier scalar divergence kept (project '${tierNorm.projectTier}' vs template '${tierNorm.templateTier}') — deliberate divergence, untouched`);
     } else if (tierNorm.changed) {
       console.log(`  ${dryTag}TIER NORMALIZED: ${rel} → tier: ${tierNorm.templateTier} (legacy per-platform block replaced — template authoritative, ADR-0102)`);
       if (!dryRun) {
         writeFileSync(dest, tierNorm.content, 'utf8');
+        noteDelivered(rel);
       }
+      recordDecision(rel, 'MERGE_MANAGED', 'MERGE', 'ADOPT', `tier frontmatter normalized to template scalar '${tierNorm.templateTier}' (ADR-0102, T-20261027-005 delivery)`);
     }
   }
   mergeChanged++;
@@ -1702,7 +1900,18 @@ for (const rel of DOCS_MERGE_FILES) {
   const dest = join(projectDir, rel);
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   console.log(`  MERGE: ${rel}`);
-  mergeWorkspaceManaged(dest, src, rel);
+  const mergeResult = mergeWorkspaceManaged(dest, src, rel);
+  recordSkeletonCollisions(rel, mergeResult.skeletonLog);
+  if (mergeResult.merged) {
+    recordDecision(
+      rel, 'MERGE_MANAGED', 'DOCS_MERGE', 'MERGE',
+      mergeResult.snapshotCount > 0
+        ? `managed-zone merge delivered (in-zone replace — ${mergeResult.snapshotCount} recovery snapshot(s) written)`
+        : 'managed-zone merge delivered (non-destructive union/insert)',
+      undefined,
+      mergeResult.snapshotCount > 0 ? 'WARN' : undefined,
+    );
+  }
   mergeChanged++;
 }
 for (const rel of DOCS_OVERWRITE_FILES) {
@@ -1711,10 +1920,32 @@ for (const rel of DOCS_OVERWRITE_FILES) {
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   if (!existsSync(dest)) {
     console.log(`  NEW    ${rel}`);
+    recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'NEW', 'delivered — project copy did not exist');
   } else {
+    // D2 matrix (OVERWRITE row): a whole-content overwrite under a template
+    // change escalates committed project evolution to a CONFLICT (ERROR)
+    // disposition — default SKIP preserves the project copy.
     diffSummary(dest, src);
+    const deliverable = readFileSync(src, 'utf8');
+    const proceeded = evolvedDeliveryGuard({
+      rel, policy: 'OVERWRITE', pass: 'DOCS_OVERWRITE', projectFile: dest,
+      deliverableContent: deliverable,
+      onConflictSkip: () => {
+        console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel} — project-evolved since the last delivery AND template changed; project copy PRESERVED (run exited non-zero at completion — see the delivery-conflicts summary)`);
+        console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+      },
+    });
+    if (!proceeded) continue;
+    if (fileHash(dest) === fileHash(src)) {
+      recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'ADOPT', 'project copy already matches the template (in sync)', priorBaselines[rel]);
+    } else if (isLocallyModified(dest)) {
+      console.log(`  ⚠️  CONFLICT ${rel}  (local modifications exist — template will overwrite)`);
+      recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'CONFLICT', 'uncommitted local modifications overwritten by the template copy (pre-upgrade stash covers rollback)', priorBaselines[rel], 'WARN');
+    } else {
+      recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'ADOPT', 'template copy delivered over the delivered baseline (version-gated)', priorBaselines[rel]);
+    }
   }
-  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); noteDelivered(rel); }
   console.log(`  ${dryTag}WROTE: ${rel}`);
   mergeChanged++;
 }
@@ -1849,6 +2080,8 @@ for (const cmdDir of COMMANDS_DIRS) {
     if (!existsSync(dest)) {
       console.log(`  NEW    ${rel}`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
+      recordDecision(rel, 'HASH_SYNC', 'COMMANDS_SYNC', 'NEW', 'command file delivered (project copy absent)');
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
@@ -1857,6 +2090,8 @@ for (const cmdDir of COMMANDS_DIRS) {
       if (tplHash !== projHash) {
         diffSummary(dest, src);
         if (!dryRun) copyFileSync(src, dest);
+        recordDecision(rel, 'HASH_SYNC', 'COMMANDS_SYNC', 'UPDATE', 'hash-gated command delivery over the delivered baseline', priorBaselines[rel]);
+        noteDelivered(rel);
         console.log(`  ${dryTag}COPIED: ${rel}`);
         syncChanged++;
       } else {
@@ -1871,9 +2106,17 @@ console.log('');
 console.log('--- PRESERVE files (listed only, not modified) ---');
 const PRESERVE_FILES = ['README.md', 'README_ko.md'];
 for (const rel of PRESERVE_FILES) {
-  if (existsSync(join(projectDir, rel))) { console.log(`  PRESERVE: ${rel}`); preserveListed++; }
+  if (existsSync(join(projectDir, rel))) {
+    console.log(`  PRESERVE: ${rel}`);
+    recordDecision(rel, 'PRESERVE', 'PRESERVE', 'SKIP', 'preserve-listed — never modified by the upgrade');
+    preserveListed++;
+  }
 }
-if (existsSync(join(projectDir, 'src'))) { console.log('  PRESERVE: src/ (directory — not touched)'); preserveListed++; }
+if (existsSync(join(projectDir, 'src'))) {
+  console.log('  PRESERVE: src/ (directory — not touched)');
+  recordDecision('src/', 'PRESERVE', 'PRESERVE', 'SKIP', 'preserve-listed directory — never touched');
+  preserveListed++;
+}
 console.log('');
 
 // ── SKILLS.md schema migration (layer column removal) ─────────────────────────
@@ -2011,16 +2254,34 @@ for (const rel of collectScriptFiles(tplScriptsRoot, dryTag)) {
   if (!existsSync(projFile)) {
     console.log(`  NEW   ${relPath}  (none) → ${tplVer}`);
     if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(tplFile, projFile); reconcileScriptRegistry(relPath); }
+    recordDecision(relPath, 'SYNC', 'SYNC_IF_NEWER: scripts/', 'NEW', `delivered (none) → ${tplVer}`);
+    noteDelivered(relPath);
     console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
   } else if (semverGt(tplVer, projVer)) {
+    // D2 matrix: a version-gated whole-content overwrite escalates committed
+    // project evolution (PROJECT_EVOLVED vs the delivered baseline + template
+    // changed) to a CONFLICT (ERROR) disposition — default SKIP.
+    const deliverable = readFileSync(tplFile, 'utf8');
+    const proceeded = evolvedDeliveryGuard({
+      rel: relPath, policy: 'SYNC', pass: 'SYNC_IF_NEWER: scripts/',
+      projectFile: projFile, deliverableContent: deliverable,
+      onConflictSkip: () => {
+        console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${relPath}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+        console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+      },
+    });
+    if (!proceeded) continue;
     // G05: Warn if project file has local modifications.
-    if (existsSync(projFile) && isLocallyModified(projFile)) {
+    if (isLocallyModified(projFile)) {
       console.log(`  ⚠️  CONFLICT ${relPath}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+      recordDecision(relPath, 'SYNC', 'SYNC_IF_NEWER: scripts/', 'CONFLICT', `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`, priorBaselines[relPath], 'WARN');
     } else {
       console.log(`  UPDATE ${relPath}  ${projVer} → ${tplVer}`);
+      recordDecision(relPath, 'SYNC', 'SYNC_IF_NEWER: scripts/', 'ADOPT', `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`, priorBaselines[relPath]);
     }
     if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(relPath); }
+    noteDelivered(relPath);
     console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
     } else if (tplVer === projVer && fileHash(tplFile) !== fileHash(projFile)) {
@@ -2031,7 +2292,10 @@ for (const rel of collectScriptFiles(tplScriptsRoot, dryTag)) {
       // template copy wins, unconditionally (the integrity rule "core scripts
       // must not be modified" already forbids the local fork).
       console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`);
-      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
+      // D3 decision log: the canonical restore is sanctioned (ADR-0085 D3) but
+      // always worth reading — DRIFT_RESTORED (WARN).
+      recordDecision(relPath, 'SYNC', 'SYNC_IF_NEWER: scripts/', 'DRIFT_RESTORED', `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3 integrity rule)`, priorBaselines[relPath]);
+      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); noteDelivered(relPath); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (CORE_LOCKED_SCRIPTS.includes(rel) && projVer !== tplVer) {
@@ -2042,7 +2306,8 @@ for (const rel of collectScriptFiles(tplScriptsRoot, dryTag)) {
       // modifying dev-sync.ts / audit.ts in L2 projects: the canonical template
       // copy wins, loudly.
       console.log(`  ⚠️  CORE-SCRIPT FORK ${rel}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`);
-      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); }
+      recordDecision(relPath, 'SYNC', 'SYNC_IF_NEWER: scripts/', 'DRIFT_RESTORED', `locked core script fork (project ${projVer} vs template ${tplVer}) — restored to canonical`, priorBaselines[relPath]);
+      if (!dryRun) { copyFileSync(tplFile, projFile); reconcileScriptRegistry(rel); noteDelivered(relPath); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
@@ -2083,15 +2348,29 @@ if (existsSync(variantScriptsSrc)) {
           if (!existsSync(projFile)) {
             console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
             if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(abs, projFile); reconcileScriptRegistry(rel2); }
+            recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'NEW', `delivered (none) → ${tplVer}`);
+            noteDelivered(rel2);
             console.log(`  ${dryTag}COPIED: ${rel2}`);
             syncChanged++;
           } else if (semverGt(tplVer, projVer)) {
+            const deliverable = readFileSync(abs, 'utf8');
+            const proceeded = evolvedDeliveryGuard({
+              rel: rel2, policy: 'SYNC', pass: 'VARIANT SCRIPTS',
+              projectFile: projFile, deliverableContent: deliverable,
+              onConflictSkip: () => {
+                console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+                console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+              },
+            });
+            if (!proceeded) return;
             if (isLocallyModified(projFile)) {
               console.log(`  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+              recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'CONFLICT', `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`, priorBaselines[rel2], 'WARN');
             } else {
               console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+              recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'ADOPT', `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`, priorBaselines[rel2]);
             }
-            if (!dryRun) { copyFileSync(abs, projFile); reconcileScriptRegistry(rel2); }
+            if (!dryRun) { copyFileSync(abs, projFile); reconcileScriptRegistry(rel2); noteDelivered(rel2); }
             console.log(`  ${dryTag}COPIED: ${rel2}`);
             syncChanged++;
           } else {
@@ -2102,15 +2381,30 @@ if (existsSync(variantScriptsSrc)) {
           if (!existsSync(projFile)) {
             console.log(`  NEW   ${rel2}  (hash)`);
             if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(abs, projFile); }
+            recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'NEW', 'delivered (hash-based, project copy absent)');
+            noteDelivered(rel2);
             console.log(`  ${dryTag}COPIED: ${rel2}`);
             syncChanged++;
           } else if (fileHash(abs) !== fileHash(projFile)) {
+            const deliverable = readFileSync(abs, 'utf8');
+            const proceeded = evolvedDeliveryGuard({
+              rel: rel2, policy: 'SYNC', pass: 'VARIANT SCRIPTS',
+              projectFile: projFile, deliverableContent: deliverable,
+              onConflictSkip: () => {
+                console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  (unversioned, content changed) — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+                console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+              },
+            });
+            if (!proceeded) return;
             if (isLocallyModified(projFile)) {
               console.log(`  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`);
+              recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'CONFLICT', 'unversioned hash change over uncommitted local modifications (pre-upgrade stash covers rollback)', priorBaselines[rel2], 'WARN');
             } else {
               console.log(`  UPDATE ${rel2}  (hash changed)`);
+              recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'ADOPT', 'unversioned hash-gated delivery over the delivered baseline', priorBaselines[rel2]);
             }
             if (!dryRun) copyFileSync(abs, projFile);
+            noteDelivered(rel2);
             console.log(`  ${dryTag}COPIED: ${rel2}`);
             syncChanged++;
           } else {
@@ -2156,14 +2450,30 @@ if (existsSync(variantScriptsSrc)) {
       if (!existsSync(projFile)) {
         console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
         if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); copyFileSync(src, projFile); }
+        recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'NEW', `delivered overlay script (none) → ${tplVer}`);
+        noteDelivered(rel2);
         console.log(`  ${dryTag}COPIED: ${rel2}`);
         syncChanged++;
       } else if (semverGt(tplVer, projVer)) {
-        if (isLocallyModified(projFile)) {
-          console.log(`  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
-        } else {
-          console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+        const deliverable = readFileSync(src, 'utf8');
+        const proceeded = evolvedDeliveryGuard({
+          rel: rel2, policy: 'SYNC', pass: 'VARIANT SCRIPTS',
+          projectFile: projFile, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (proceeded) {
+          if (isLocallyModified(projFile)) {
+            console.log(`  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+            recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'CONFLICT', `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`, priorBaselines[rel2], 'WARN');
+          } else {
+            console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+            recordDecision(rel2, 'SYNC', 'VARIANT SCRIPTS', 'ADOPT', `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`, priorBaselines[rel2]);
+          }
           if (!dryRun) copyFileSync(src, projFile);
+          noteDelivered(rel2);
           console.log(`  ${dryTag}COPIED: ${rel2}`);
         }
         syncChanged++;
@@ -2362,6 +2672,9 @@ for (const agentsDir of tplAgentsDirs) {
       const resolvedTarget = extendsPath ? resolve(dirname(tplFile), extendsPath) : '';
       if (!resolvedTarget || !existsSync(resolvedTarget) || MERGE_MANAGED_FILES.has(rel)) {
         console.log(`  STUB (resolved at scaffold): ${rel}`);
+        // D3 decision log (STUB_SKIP, INFO): the stub never delivers — the
+        // resolved project body is the content (the v1.49.0 clobber lesson).
+        recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_SKIP', 'template extends-stub never delivers through this pass — resolved at scaffold' + (MERGE_MANAGED_FILES.has(rel) ? ' (MERGE pass owns the body)' : ''));
         continue;
       }
       console.log(`  STUB → delivers extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')}`);
@@ -2373,25 +2686,46 @@ for (const agentsDir of tplAgentsDirs) {
     if (!existsSync(projFile)) {
       if (assetGate && !assetGate.agents.has(fname)) {
         console.log(`  SKIP (not in variant.json agent registry): ${rel}`);
+        recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'SKIP', 'not in the variant.json agent registry — new-asset injection withheld');
         continue;
       }
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
       if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentWithLifecycle(tplSource, projFile); }
+      recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'NEW', `delivered (none) → ${tplVer}`);
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (!projVer) {
       console.log(`  UPDATE ${rel}  (no version) → ${tplVer}`);
       if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'UPDATE', 'project copy carried no frontmatter version — template copy delivered', priorBaselines[rel]);
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
+      // D2 matrix: version-gated agents/ delivery over committed project
+      // evolution (PROJECT_EVOLVED + template changed) escalates to CONFLICT
+      // (ERROR) — default SKIP.
+      const deliverable = renderAgentTemplate(tplSource);
+      const proceeded = evolvedDeliveryGuard({
+        rel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: agents/',
+        projectFile: projFile, deliverableContent: deliverable,
+        onConflictSkip: () => {
+          console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+          console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+        },
+      });
+      if (!proceeded) continue;
       // G05: Warn if project file has local modifications.
       if (isLocallyModified(projFile)) {
         console.log(`  ⚠️  CONFLICT ${rel}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+        recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'CONFLICT', `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`, priorBaselines[rel], 'WARN');
       } else {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
+        recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'ADOPT', `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline (lifecycle block preserved)`, priorBaselines[rel]);
       }
       if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (lifecyclelessText(renderAgentTemplate(tplSource)) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
@@ -2407,15 +2741,46 @@ for (const agentsDir of tplAgentsDirs) {
       // dedicated TIER DRIFT verdict (deliver, never skip: ADR-0085 D3 leaves
       // genuine same-version content drift to the canonical restore above).
       const projRaw = readFileSync(projFile, 'utf8');
-      const tierNorm = normalizeAgentTierFrontmatter(projRaw, renderAgentTemplate(tplSource));
+      const rendered = renderAgentTemplate(tplSource);
+      const tierNorm = normalizeAgentTierFrontmatter(projRaw, rendered);
       const tierOnlyDrift = tierNorm.legacy
-        && lifecyclelessText(tierNorm.content) === lifecyclelessText(renderAgentTemplate(tplSource));
+        && lifecyclelessText(tierNorm.content) === lifecyclelessText(rendered);
+      // D2 matrix (agents/ equal-version row): a PROJECT_EVOLVED file — content
+      // differing from BOTH the delivered baseline and today's template — is a
+      // CONFLICT (ERROR) disposition regardless of which side moved (restoring
+      // "canonical" over evolved content is not self-evidently right). Baseline-
+      // clean files keep the DRIFT_RESTORED canonical heal (WARN).
+      const cls = classifyCandidate(rel, projFile, rendered)!;
+      let proceed = true;
+      let verdict: DecisionVerdict = 'DRIFT_RESTORED';
+      let severity: DeliveryDecision['severity'] = 'WARN';
+      let detail = `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3)`;
+      if (cls.state === 'PROJECT_EVOLVED') {
+        const granted = dispositionAdopts(rel);
+        if (granted) {
+          verdict = 'ADOPT'; severity = 'INFO';
+          detail = 'equal-version drift on project-evolved content — template copy delivered via explicit --disposition adopt-template (decision recorded)';
+        } else {
+          proceed = false; verdict = 'CONFLICT'; severity = 'ERROR';
+          detail = 'equal-version drift on project-evolved content — CONFLICT disposition: restore-to-canonical SKIPPED, project copy preserved';
+        }
+      } else if (tierOnlyDrift) {
+        verdict = 'ADOPT'; severity = 'INFO';
+        detail = 'tier-block-only drift normalized to the template scalar (ADR-0102, T-20261027-005 delivery)';
+      }
+      recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', verdict, detail, priorBaselines[rel], severity);
+      if (!proceed) {
+        console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${projVer}  — project-evolved since the last delivery (equal-version drift); project copy PRESERVED (non-zero exit at completion)`);
+        console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+        continue;
+      }
       if (tierOnlyDrift) {
         console.log(`  ⚠️  TIER DRIFT (normalized to template scalar) ${rel}  ${projVer}  (only difference is the legacy per-platform tier block — ADR-0102; template copy delivers)`);
       } else {
         console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from template at same version — ADR-0085 D3)`);
       }
       if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
@@ -2429,6 +2794,7 @@ if (existsSync(projAgentsDir)) {
   for (const fname of readdirSync(projAgentsDir)) {
     if (fname.endsWith('.md') && !seenAgents.has(fname)) {
       console.log(`  PRESERVE (project-only): agents/${fname}`);
+      recordDecision(`agents/${fname}`, 'PRESERVE', 'SYNC_IF_NEWER: agents/', 'SKIP', 'project-only agent — no template counterpart, preserved');
     }
   }
 }
@@ -2492,6 +2858,7 @@ if (existsSync(tplSkillsDir)) {
         const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
         if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+          recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'SKIP', 'not in the variant.json skill allowlist — new-asset injection withheld');
           continue;
         }
         if (contractCommonDelivery) {
@@ -2499,28 +2866,49 @@ if (existsSync(tplSkillsDir)) {
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
         copyWholeSkillDir();
+        recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'NEW', `whole skill directory delivered (none) → ${tplVer}${contractCommonDelivery ? ' (contract common_skill bypassed the allowlist)' : ''}`);
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else if (semverGt(tplVer, projVer)) {
+        // D2 matrix: version-gated whole-directory delivery over committed
+        // project evolution escalates to CONFLICT (ERROR) — default SKIP.
+        const deliverable = readFileSync(tplSkillFile, 'utf8');
+        const skillRel = `skills/${skillName}/SKILL.md`;
+        const proceeded = evolvedDeliveryGuard({
+          rel: skillRel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: skills/',
+          projectFile: projSkillFile, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer || '(none)'} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (!proceeded) continue;
         // G05: Warn if project file has local modifications.
         if (isLocallyModified(projSkillFile)) {
           console.log(`  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}  (local modifications exist)`);
+          recordDecision(skillRel, 'SYNC', 'SYNC_IF_NEWER: skills/', 'CONFLICT', `${projVer || '(none)'} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`, priorBaselines[skillRel], 'WARN');
         } else {
           console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || '(none)'} → ${tplVer}`);
+          recordDecision(skillRel, 'SYNC', 'SYNC_IF_NEWER: skills/', 'ADOPT', `${projVer || '(none)'} → ${tplVer} — version-gated whole-directory delivery over the delivered baseline`, priorBaselines[skillRel]);
         }
         copyWholeSkillDir();
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else {
         const { copied, drifted } = catchUpSkillDir(skillName);
         if (copied > 0) {
           console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
+          recordDecision(`skills/${skillName}/`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'NEW', `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`);
+          noteDelivered(`skills/${skillName}`);
           syncChanged++;
         } else if (drifted.length === 0) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
           console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
+          recordDecision(`skills/${skillName}/${d}`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'DRIFT_PRESERVE', 'same-version content drift — project copy PRESERVED (ADR-0085 D3)', priorBaselines[`skills/${skillName}/${d}`]);
         }
       }
     } else {
@@ -2531,6 +2919,7 @@ if (existsSync(tplSkillsDir)) {
         const contractCommonDelivery = assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
         if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
           console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+          recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'SKIP', 'not in the variant.json skill allowlist — new-asset injection withheld (hash-based)');
           continue;
         }
         if (contractCommonDelivery) {
@@ -2538,23 +2927,41 @@ if (existsSync(tplSkillsDir)) {
         }
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
         copyWholeSkillDir();
+        recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'NEW', 'whole skill directory delivered (hash-based, project copy absent)');
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else if (tplHash !== projHash) {
+        const deliverable = readFileSync(tplSkillFile, 'utf8');
+        const skillRel = `skills/${skillName}/SKILL.md`;
+        const proceeded = evolvedDeliveryGuard({
+          rel: skillRel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: skills/',
+          projectFile: projSkillFile, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (!proceeded) continue;
         console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
+        recordDecision(skillRel, 'SYNC', 'SYNC_IF_NEWER: skills/', 'ADOPT', 'hash-gated whole-directory delivery over the delivered baseline', priorBaselines[skillRel]);
         copyWholeSkillDir();
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
       } else {
         const { copied, drifted } = catchUpSkillDir(skillName);
         if (copied > 0) {
           console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+          recordDecision(`skills/${skillName}/`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'NEW', `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`);
+          noteDelivered(`skills/${skillName}`);
           syncChanged++;
         } else if (drifted.length === 0) {
           console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
         }
         for (const d of drifted) {
           console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
+          recordDecision(`skills/${skillName}/${d}`, 'SYNC', 'SYNC_IF_NEWER: skills/', 'DRIFT_PRESERVE', 'same-version content drift — project copy PRESERVED (ADR-0085 D3)', priorBaselines[`skills/${skillName}/${d}`]);
         }
       }
     }
@@ -2566,6 +2973,7 @@ if (existsSync(projSkillsDir)) {
   for (const skillName of readdirSync(projSkillsDir)) {
     if (!seenSkills.has(skillName) && existsSync(join(projSkillsDir, skillName, 'SKILL.md'))) {
       console.log(`  PRESERVE (project-only): skills/${skillName}/`);
+      recordDecision(`skills/${skillName}/`, 'PRESERVE', 'SYNC_IF_NEWER: skills/', 'SKIP', 'project-only skill — no template counterpart, preserved');
     }
   }
 }
@@ -2597,15 +3005,31 @@ if (existsSync(variantSkillsSrc)) {
       if (!existsSync(projSkillFile)) {
         console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
         if (!dryRun) copySkillDir();
+        recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS', 'NEW', `variant skill directory delivered (none) → ${tplVer}`);
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else if (semverGt(tplVer, projVer)) {
+        const deliverable = readFileSync(tplSkillFile, 'utf8');
+        const skillRel = `skills/${skillName}/SKILL.md`;
+        const proceeded = evolvedDeliveryGuard({
+          rel: skillRel, policy: 'SYNC', pass: 'VARIANT SKILLS',
+          projectFile: projSkillFile, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (!proceeded) continue;
         if (isLocallyModified(projSkillFile)) {
           console.log(`  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`);
+          recordDecision(skillRel, 'SYNC', 'VARIANT SKILLS', 'CONFLICT', `${projVer} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`, priorBaselines[skillRel], 'WARN');
         } else {
           console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}`);
+          recordDecision(skillRel, 'SYNC', 'VARIANT SKILLS', 'ADOPT', `${projVer} → ${tplVer} — version-gated variant-skill delivery over the delivered baseline`, priorBaselines[skillRel]);
         }
         if (!dryRun) copySkillDir();
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else {
@@ -2613,12 +3037,15 @@ if (existsSync(variantSkillsSrc)) {
         const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
         if (copied > 0) {
           console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
+          recordDecision(`skills/${skillName}/`, 'SYNC', 'VARIANT SKILLS', 'NEW', `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`);
+          noteDelivered(`skills/${skillName}`);
           syncChanged++;
         } else if (drifted.length === 0) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
           console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
+          recordDecision(`skills/${skillName}/${d}`, 'SYNC', 'VARIANT SKILLS', 'DRIFT_PRESERVE', 'same-version content drift — project copy PRESERVED (ADR-0085 D3)', priorBaselines[`skills/${skillName}/${d}`]);
         }
       }
     } else {
@@ -2627,23 +3054,41 @@ if (existsSync(variantSkillsSrc)) {
       if (!existsSync(projSkillFile)) {
         console.log(`  NEW   skills/${skillName}/SKILL.md  (hash)`);
         if (!dryRun) copySkillDir();
+        recordDecision(`skills/${skillName}/SKILL.md`, 'SYNC', 'VARIANT SKILLS', 'NEW', 'variant skill directory delivered (hash-based, project copy absent)');
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else if (tplHash !== projHash) {
+        const deliverable = readFileSync(tplSkillFile, 'utf8');
+        const skillRel = `skills/${skillName}/SKILL.md`;
+        const proceeded = evolvedDeliveryGuard({
+          rel: skillRel, policy: 'SYNC', pass: 'VARIANT SKILLS',
+          projectFile: projSkillFile, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (!proceeded) continue;
         console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
+        recordDecision(skillRel, 'SYNC', 'VARIANT SKILLS', 'ADOPT', 'hash-gated variant-skill delivery over the delivered baseline', priorBaselines[skillRel]);
         if (!dryRun) copySkillDir();
+        noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
       } else {
         const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
         if (copied > 0) {
           console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+          recordDecision(`skills/${skillName}/`, 'SYNC', 'VARIANT SKILLS', 'NEW', `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`);
+          noteDelivered(`skills/${skillName}`);
           syncChanged++;
         } else if (drifted.length === 0) {
           console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
         }
         for (const d of drifted) {
           console.log(`  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`);
+          recordDecision(`skills/${skillName}/${d}`, 'SYNC', 'VARIANT SKILLS', 'DRIFT_PRESERVE', 'same-version content drift — project copy PRESERVED (ADR-0085 D3)', priorBaselines[`skills/${skillName}/${d}`]);
         }
       }
     }
@@ -2705,15 +3150,32 @@ if (variantAssetDirs.length > 0) {
       if (!existsSync(dstPath)) {
         console.log(`  NEW    ${relPath}`);
         if (!dryRun) { mkdirSync(dirname(dstPath), { recursive: true }); copyFileSync(srcPath, dstPath); }
+        recordDecision(relPath, 'SYNC', 'VARIANT ASSET DIRS', 'NEW', 'delivered — project copy absent');
+        noteDelivered(relPath);
         console.log(`  ${dryTag}COPIED: ${relPath}`);
         syncChanged++;
       } else if (fileHash(srcPath) !== fileHash(dstPath)) {
+        // D2 matrix (SYNC / VARIANT ASSET DIRS row): hash-gated whole-content
+        // overwrite over committed project evolution escalates to CONFLICT (ERROR).
+        const deliverable = readFileSync(srcPath, 'utf8');
+        const proceeded = evolvedDeliveryGuard({
+          rel: relPath, policy: 'SYNC', pass: 'VARIANT ASSET DIRS',
+          projectFile: dstPath, deliverableContent: deliverable,
+          onConflictSkip: () => {
+            console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${relPath}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (!proceeded) continue;
         if (isLocallyModified(dstPath)) {
           console.log(`  ⚠️  CONFLICT ${relPath}  (content changed, local modifications exist — template will overwrite)`);
+          recordDecision(relPath, 'SYNC', 'VARIANT ASSET DIRS', 'CONFLICT', 'hash change over uncommitted local modifications (pre-upgrade stash covers rollback)', priorBaselines[relPath], 'WARN');
         } else {
           console.log(`  UPDATE ${relPath}  (content changed)`);
+          recordDecision(relPath, 'SYNC', 'VARIANT ASSET DIRS', 'ADOPT', 'hash-gated delivery over the delivered baseline', priorBaselines[relPath]);
         }
         if (!dryRun) copyFileSync(srcPath, dstPath);
+        noteDelivered(relPath);
         console.log(`  ${dryTag}COPIED: ${relPath}`);
         syncChanged++;
       }
@@ -2783,10 +3245,13 @@ for (const fileName of GOVERNANCE_FILES) {
   if (!existsSync(src)) continue;
   if (existsSync(dst)) {
     console.log(`  OK     ${fileName}  (project-owned — preserved)`);
+    recordDecision(fileName, 'ADD_IF_MISSING', 'GOVERNANCE FILES', 'SEED_SKIP', 'project copy exists — add-if-missing seed withheld (licenses are intentionally forkable)');
     continue;
   }
   console.log(`  NEW    ${fileName}  (from ${existsSync(join(templatesDir, fileName)) ? 'variant template' : 'templates/common'})`);
   if (!dryRun) copyFileSync(src, dst);
+  recordDecision(fileName, 'ADD_IF_MISSING', 'GOVERNANCE FILES', 'NEW', 'seeded (project copy absent)');
+  noteDelivered(fileName);
   console.log(`  ${dryTag}COPIED: ${fileName}`);
   govFilesCopied++;
   syncChanged++;
@@ -2833,10 +3298,13 @@ let proceduresCopied = 0;
       const dst = join(projProcDir, entry.name);
       if (existsSync(dst)) {
         console.log(`  OK     procedures/${entry.name}/  (project-owned — preserved)`);
+        recordDecision(`procedures/${entry.name}/`, 'ADD_IF_MISSING', 'PROCEDURES', 'SEED_SKIP', 'project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)');
         continue;
       }
       console.log(`  NEW    procedures/${entry.name}/  (from ${srcDir === variantProcDir ? 'variant template' : 'templates/common'})`);
       if (!dryRun) cpSync(join(srcDir, entry.name), dst, { recursive: true });
+      recordDecision(`procedures/${entry.name}/`, 'ADD_IF_MISSING', 'PROCEDURES', 'NEW', 'procedure entry seeded (absent from the project)');
+      noteDelivered(`procedures/${entry.name}`);
       proceduresCopied++;
       syncChanged++;
     }
@@ -2866,10 +3334,13 @@ let regionProfilesCopied = 0;
       const rel = `region-profiles/${entry.name}`;
       if (existsSync(join(dstDir, entry.name))) {
         console.log(`  OK     ${rel}  (project-owned — preserved)`);
+        recordDecision(rel, 'ADD_IF_MISSING', 'REGION PROFILES', 'SEED_SKIP', 'delivered profile exists — add-if-missing withheld (project deltas are intentional, ADR-0091 R2)');
         continue;
       }
       console.log(`  NEW    ${rel}`);
       if (!dryRun) { mkdirSync(dstDir, { recursive: true }); copyFileSync(join(srcDir, entry.name), join(dstDir, entry.name)); }
+      recordDecision(rel, 'ADD_IF_MISSING', 'REGION PROFILES', 'NEW', 'region profile seeded (absent from the project)');
+      noteDelivered(rel);
       regionProfilesCopied++;
       syncChanged++;
     }
@@ -2909,6 +3380,8 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       if (!existsSync(dest)) {
         console.log(`  NEW    ${rel}`);
         if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'seeded (project copy absent)');
+        noteDelivered(rel);
         console.log(`  ${dryTag}COPIED: ${rel}`);
       } else {
         try {
@@ -2916,6 +3389,10 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           if (!result.changed) { console.log(`  OK     ${rel}  (json merge — in sync)`); continue; }
           console.log(`  MERGE  ${rel}${result.preserved.length > 0 ? `  (preserved project-only: ${result.preserved.join(', ')})` : ''}`);
           if (!dryRun) writeFileSync(dest, result.merged, 'utf8');
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', result.preserved.length > 0
+            ? `settings deep-merged — project-only entries preserved: ${result.preserved.join(', ')}`
+            : 'settings deep-merged (template keys arrived, no project-only entries to preserve)');
+          noteDelivered(rel);
           console.log(`  ${dryTag}WROTE: ${rel}`);
         } catch (err) {
           console.log(`  ⚠️  SKIP   ${rel}  (json merge failed: ${(err as Error).message})`);
@@ -2927,9 +3404,15 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     }
 
     if (claim.policy === 'WORKSPACE') {
-      if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
+      if (existsSync(dest)) {
+        // D3 decision log: the seed-skip is recorded, not silent (SEED_SKIP, INFO).
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SEED_SKIP', 'project workspace file exists — seed-only claim withheld (never overwritten, never pruned)');
+        continue;
+      }
       console.log(`  NEW    ${rel}  (workspace seed)`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'workspace seed delivered (absent from the project)');
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;
       continue;
@@ -2939,9 +3422,15 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       // ADR-0076 (upgrade-policy v1.2.0): .codex/** seeds — projects owning their Codex
       // config (co-abap, co-safety) are never touched; the graft section there is a
       // one-time manual TOML edit, not a file overwrite.
-      if (existsSync(dest)) continue; // project-owned — seed only, silent like PROCEDURES
+      if (existsSync(dest)) {
+        // D3 decision log: SEED_SKIP (INFO) — project-owned, seed withheld.
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SEED_SKIP', 'project copy exists — add-if-missing seed withheld (project-owned config)');
+        continue;
+      }
       console.log(`  NEW    ${rel}  (add-if-missing seed)`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'add-if-missing seed delivered (absent from the project)');
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;
       continue;
@@ -2951,6 +3440,8 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     if (!existsSync(dest)) {
       console.log(`  NEW    ${rel}`);
       if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+      recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'delivered — project copy absent');
+      noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;
       continue;
@@ -2986,6 +3477,9 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
             console.log(`      project-only: ${section.heading}`);
           }
           console.log('      preserved — re-run with --force-context-sync to take the template version, or merge manually');
+          // D3 decision log: the preserve verdict becomes a persistent WARN entry
+          // (divergence worth reading — the template wanted to deliver and was refused).
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'CONTEXT_PRESERVE', `${reason} — preserved: ${ownership.wholeFileOwned ? 'entire file project-owned (no version footer)' : `${ownership.sections.length} project-only section(s): ${ownership.sections.map((s) => s.heading).join(', ')}`}`, priorBaselines[rel]);
           // ADR-0081 / T-20260919-003: managed-zone policy content still delivers
           // under PRESERVE — splice the template's COMMON-CONTEXT block into the
           // preserved copy so project-only sections are protected AND policy
@@ -3002,6 +3496,7 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
                 variantName: variant,
                 countryDisplayName: '',
               }));
+              noteDelivered(rel);
             }
             console.log(`      ${dryTag}MERGED COMMON-CONTEXT block in: ${rel} (managed-zone policy content delivers under PRESERVE)`);
             treeChanged++;
@@ -3012,10 +3507,34 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           console.log(`  FORCED OVERWRITE ${rel}  ${reason}  (--force-context-sync — ${ownership.sections.length} project-only section(s) discarded)`);
         }
       }
+      // D2 matrix (SYNC / TEMPLATE TREE SYNC row): a version-gated whole-content
+      // overwrite escalates committed project evolution to CONFLICT (ERROR).
+      // The deliverable is the exact bytes a delivery would write (context.md is
+      // rendered through the scaffold placeholder map first).
+      const deliverable = rel === 'docs/context.md'
+        ? applySubstitutions(readFileSync(abs, 'utf8'), {
+            projectName: basename(projectDir),
+            description: '',
+            characteristics: '',
+            variantName: variant,
+            countryDisplayName: '',
+          })
+        : readFileSync(abs, 'utf8');
+      const proceeded = evolvedDeliveryGuard({
+        rel, policy: claim.policy, pass: TEMPLATE_TREE_SYNC_PASS,
+        projectFile: dest, deliverableContent: deliverable,
+        onConflictSkip: () => {
+          console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${reason}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`);
+          console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+        },
+      });
+      if (!proceeded) continue;
       if (isLocallyModified(dest)) {
         console.log(`  ⚠️  CONFLICT ${rel}  ${reason}  (local modifications exist)`);
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'CONFLICT', `${reason} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`, priorBaselines[rel], 'WARN');
       } else {
         console.log(`  UPDATE ${rel}  ${reason}`);
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'ADOPT', `${reason} — version-gated delivery over the delivered baseline`, priorBaselines[rel]);
       }
       if (!dryRun) {
         if (rel === 'docs/context.md') {
@@ -3035,6 +3554,7 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
         } else {
           copyFileSync(abs, dest);
         }
+        noteDelivered(rel);
       }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       treeChanged++;
@@ -3077,7 +3597,9 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       });
       mkdirSync(dirname(identityDestPath), { recursive: true });
       writeFileSync(identityDestPath, identityRendered, 'utf8');
+      noteDelivered('docs/project.md');
     }
+    recordDecision('docs/project.md', 'ADD_IF_MISSING', 'IDENTITY SEED', 'NEW', 'identity seed rendered (absent from the project — AC4: existing files are never overwritten)');
     console.log(`  ${dryTag}COPIED: docs/project.md`);
     treeChanged++;
   }
@@ -3110,6 +3632,8 @@ console.log('--- ENV_SAMPLE SYNC: .env.sample (country-aware) ---');
     } else if (!existsSync(envDestPath)) {
       console.log('  NEW    .env.sample');
       if (!dryRun) writeFileSync(envDestPath, envPrune.output, 'utf8');
+      recordDecision('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC', 'NEW', `delivered (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+      noteDelivered('.env.sample');
       console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
       treeChanged++;
     } else {
@@ -3118,24 +3642,39 @@ console.log('--- ENV_SAMPLE SYNC: .env.sample (country-aware) ---');
       if (envMerge.output === currentEnv) {
         console.log('  OK     .env.sample  (in sync)');
       } else {
-        if (isLocallyModified(envDestPath)) {
-          console.log('  ⚠️  CONFLICT .env.sample  (content changed — local modifications exist; the pre-upgrade stash covers rollback)');
-        } else {
-          console.log('  UPDATE .env.sample');
+        // D2 matrix (ENV_SAMPLE row): the country-aware merge delivery over
+        // committed project evolution escalates to CONFLICT (ERROR) — default SKIP.
+        const proceeded = evolvedDeliveryGuard({
+          rel: '.env.sample', policy: 'SYNC', pass: 'ENV_SAMPLE SYNC',
+          projectFile: envDestPath, deliverableContent: envMerge.output,
+          onConflictSkip: () => {
+            console.log('  ⏭️  CONFLICT DISPOSITION (SKIP): .env.sample  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)');
+            console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+          },
+        });
+        if (proceeded) {
+          if (isLocallyModified(envDestPath)) {
+            console.log('  ⚠️  CONFLICT .env.sample  (content changed — local modifications exist; the pre-upgrade stash covers rollback)');
+            recordDecision('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC', 'CONFLICT', 'merge delivery over uncommitted local modifications (pre-upgrade stash covers rollback)', priorBaselines['.env.sample'], 'WARN');
+          } else {
+            console.log('  UPDATE .env.sample');
+            recordDecision('.env.sample', 'SYNC', 'ENV_SAMPLE SYNC', 'MERGE', 'country-aware merge delivered — template keys re-delivered, project-only keys preserved', priorBaselines['.env.sample']);
+          }
+          const { added, removed } = lineDiffCounts(currentEnv.split('\n'), envMerge.output.split('\n'));
+          console.log(`    Lines: ${currentEnv.split('\n').length} -> ${envMerge.output.split('\n').length}  (+${added}/-${removed})`);
+          if (envMerge.overriddenKeys.length > 0) {
+            console.log(`    Template-superseded keys: ${envMerge.overriddenKeys.join(', ')}`);
+          }
+          if (envMerge.preservedKeys.length > 0) {
+            const shown = envMerge.preservedKeys.slice(0, 8).join(', ');
+            const rest = envMerge.preservedKeys.length - Math.min(8, envMerge.preservedKeys.length);
+            console.log(`    Preserved project-only keys: ${shown}${rest > 0 ? ` +${rest} more` : ''}`);
+          }
+          if (!dryRun) writeFileSync(envDestPath, envMerge.output, 'utf8');
+          noteDelivered('.env.sample');
+          console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
+          treeChanged++;
         }
-        const { added, removed } = lineDiffCounts(currentEnv.split('\n'), envMerge.output.split('\n'));
-        console.log(`    Lines: ${currentEnv.split('\n').length} -> ${envMerge.output.split('\n').length}  (+${added}/-${removed})`);
-        if (envMerge.overriddenKeys.length > 0) {
-          console.log(`    Template-superseded keys: ${envMerge.overriddenKeys.join(', ')}`);
-        }
-        if (envMerge.preservedKeys.length > 0) {
-          const shown = envMerge.preservedKeys.slice(0, 8).join(', ');
-          const rest = envMerge.preservedKeys.length - Math.min(8, envMerge.preservedKeys.length);
-          console.log(`    Preserved project-only keys: ${shown}${rest > 0 ? ` +${rest} more` : ''}`);
-        }
-        if (!dryRun) writeFileSync(envDestPath, envMerge.output, 'utf8');
-        console.log(`  ${dryTag}WROTE: .env.sample  (country profile: ${detectedCountry === 'none' ? 'region-neutral' : detectedCountry})`);
-        treeChanged++;
       }
     }
   }
@@ -3374,17 +3913,44 @@ for (const fname of DOCS_OVERWRITE) {
   const src = join(commonDir, 'docs', '_common', fname);
   const dest = join(projectDir, 'docs', fname);
   if (!existsSync(src)) { console.log(`  SKIP (no template): docs/${fname}`); continue; }
+  const rel = `docs/${fname}`;
   if (!existsSync(dest)) {
     console.log(`  NEW   docs/${fname}`);
+    recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'NEW', 'delivered — project copy did not exist');
   } else {
+    // D2 matrix (OVERWRITE row): the docs/security.md whole-content overwrite
+    // (upgrade-policy OVERWRITE claim, DOCS_OVERWRITE pass) escalates committed
+    // project evolution to a CONFLICT (ERROR) disposition — default SKIP.
     diffSummary(dest, src);
+    const deliverable = readFileSync(src, 'utf8');
+    const proceeded = evolvedDeliveryGuard({
+      rel, policy: 'OVERWRITE', pass: 'DOCS_OVERWRITE',
+      projectFile: dest, deliverableContent: deliverable,
+      onConflictSkip: () => {
+        console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel} — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion — see the delivery-conflicts summary)`);
+        console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
+      },
+    });
+    if (proceeded) {
+      if (isLocallyModified(dest)) {
+        console.log(`  ⚠️  CONFLICT ${rel}  (local modifications exist — template will overwrite)`);
+        recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'CONFLICT', 'uncommitted local modifications overwritten by the template copy (pre-upgrade stash covers rollback)', priorBaselines[rel], 'WARN');
+      } else {
+        recordDecision(rel, 'OVERWRITE', 'DOCS_OVERWRITE', 'ADOPT', 'template copy delivered over the delivered baseline (version-gated)', priorBaselines[rel]);
+      }
+    } else {
+      continue; // conflict-skip — do NOT overwrite, do not count
+    }
   }
-  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); }
-  console.log(`  ${dryTag}WROTE: docs/${fname}`);
+  if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(src, dest); noteDelivered(rel); }
+  console.log(`  ${dryTag}WROTE: ${rel}`);
   syncChanged++;
 }
 for (const fname of DOCS_PRESERVE) {
-  if (existsSync(join(projectDir, 'docs', fname))) console.log(`  PRESERVE: docs/${fname}`);
+  if (existsSync(join(projectDir, 'docs', fname))) {
+    console.log(`  PRESERVE: docs/${fname}`);
+    recordDecision(`docs/${fname}`, 'PRESERVE', 'OVERWRITE', 'SKIP', 'preserve-listed — never modified by the upgrade');
+  }
 }
 console.log('');
 
@@ -3857,10 +4423,17 @@ if (!dryRun) {
   }
 }
 
-// ── Delivery manifest (v1.38.0) ───────────────────────────────────────────────
+// ── Delivery manifest (v1.38.0; v2 schema since v1.76.0 / T-20261027-004) ─────
 // Record the delivered diff so the project's /sync can recognize an
 // upgrade-explained change set (dev-sync step 3.9 auto-E5, R4 of the rollout
 // hardening design). Written in apply mode only, before sync-skills runs.
+// v2 (design §7, spec 2026-10-27-sync-overwrite-policy): schemaVersion 2 adds
+// per-file delivered baselines (D1 provenance — the next run classifies each
+// candidate as UNTOUCHED / PROJECT_EVOLVED / IN_SYNC against them) and the
+// unified decisions[] log (D3). The top-level `files` array is preserved
+// verbatim so every v1 consumer (isDeliveredDiff, PR-body compose) keeps
+// working; v1-shaped manifests stay valid until the next delivery rewrites
+// them (graceful migration, design §8).
 if (!dryRun) {
   try {
     const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
@@ -3869,12 +4442,46 @@ if (!dryRun) {
       // changes, so strip by position. -uall lists new files, not their directories.
       .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
       .filter(Boolean);
+    // D1 baselines: hash the exact bytes on disk for every content this run
+    // delivered (post re-stamp), keyed by the pass-comparable content key.
+    const baselines: Record<string, DecisionBaseline> = {};
+    const expand = (rel: string): void => {
+      const abs = join(projectDir, rel);
+      let st;
+      try { st = statSync(abs); } catch { return; }
+      if (st.isDirectory()) {
+        for (const entry of readdirSync(abs, { withFileTypes: true })) {
+          if (entry.name === '.git' || entry.name === 'node_modules') continue;
+          expand(rel.endsWith('/') ? `${rel}${entry.name}` : `${rel}/${entry.name}`);
+        }
+        return;
+      }
+      if (!st.isFile()) return;
+      try {
+        baselines[rel] = { hash: baselineKeyFor(rel, readFileSync(abs, 'utf8')), templateVersion: currentVersion };
+      } catch { /* unreadable — no baseline for this file */ }
+    };
+    for (const rel of [...deliveredRels].sort()) expand(rel);
+    // D3 unified decision log, persisted with the delivery.
+    const manifestV2 = {
+      schemaVersion: 2 as const,
+      timestamp: new Date().toISOString(),
+      project: basename(projectDir),
+      templateVersion: currentVersion,
+      templateSha: (spawnSync('git', ['-C', workspaceRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout || '').trim(),
+      baseSha: (spawnSync('git', ['-C', projectDir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout || '').trim(),
+      files,
+      baselines,
+      decisions,
+    };
     mkdirSync(join(projectDir, '.claude'), { recursive: true });
     writeFileSync(
       join(projectDir, '.claude', 'last-upgrade-delivery.json'),
-      JSON.stringify({ timestamp: new Date().toISOString(), files }, null, 2) + '\n'
+      JSON.stringify(manifestV2, null, 2) + '\n'
     );
-    console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s))`);
+    const errors = errorDecisions().length;
+    const warns = decisions.filter((d) => d.severity === 'WARN').length;
+    console.log(`  Delivery manifest written: .claude/last-upgrade-delivery.json (${files.length} path(s), ${Object.keys(baselines).length} baseline(s), ${decisions.length} decision(s): ${errors} ERROR / ${warns} WARN / ${decisions.length - errors - warns} INFO)`);
     // T-20261007-018: compose the upgrade PR body from THIS delivery at
     // delivery time — the co-deck PR #166 class shipped a body carried over
     // from a prior attempt describing a different wave. The project session
@@ -3888,6 +4495,20 @@ if (!dryRun) {
       }
       const groups = [...byDir.entries()].sort((a, b) => b[1] - a[1])
         .map(([dir, n]) => `- ${dir} — ${n} file(s)`).join('\n');
+      // Design §7 consumer: the PR body gains a Decisions section — counts by
+      // severity, ERROR items listed verbatim.
+      const bySeverity = (s: DeliveryDecision['severity']) => decisions.filter((d) => d.severity === s).length;
+      const errorList = errorDecisions()
+        .map((d) => `- \`${d.path}\` (${d.pass}) — ${d.detail}`)
+        .join('\n');
+      const decisionsSection = [
+        '',
+        '### Decisions',
+        '',
+        `- INFO: ${bySeverity('INFO')} / WARN: ${bySeverity('WARN')} / ERROR: ${bySeverity('ERROR')}`,
+        ...(errorList ? ['', '**Unresolved ERROR dispositions** (delivery skipped, project copies preserved):', errorList] : []),
+        '',
+      ].join('\n');
       const body = [
         '## Upgrade delivery',
         '',
@@ -3900,8 +4521,8 @@ if (!dryRun) {
         '### Delivery footprint',
         '',
         groups,
-        '',
-        '_Full inventory: `.claude/last-upgrade-delivery.json` (dev-sync Step 3.9 auto-E5 diff attribution)._',
+        decisionsSection,
+        '_Full inventory: `.claude/last-upgrade-delivery.json` (dev-sync Step 3.9 auto-E5 diff attribution; ERROR dispositions block auto-E5 until resolved)._',
         '',
       ].join('\n');
       writeFileSync(join(projectDir, '.claude', 'last-upgrade-pr-body.md'), body);
@@ -4032,6 +4653,12 @@ console.log(`  Country skills pruned: ${countryPrunedSkills}${dryRun ? ' (dry-ru
 console.log(`  LOCAL-PATCH markers  : ${localPatchFindings.length}${localPatchFindings.length > 0 ? ' (see report above)' : ''}`);
 if (pruneRemoved) console.log(`  Files pruned         : ${prunedCount}`);
 console.log(`  Security checks      : ${securityPass ? 'PASSED' : 'FAILED (see above)'}`);
+{
+  const info = decisions.filter((d) => d.severity === 'INFO').length;
+  const warn = decisions.filter((d) => d.severity === 'WARN').length;
+  const err = errorDecisions().length;
+  console.log(`  Decision log         : ${decisions.length} entr${decisions.length === 1 ? 'y' : 'ies'} (INFO ${info} / WARN ${warn} / ERROR ${err})${dryRun ? ' (dry-run — not persisted; the manifest is written by apply mode)' : ' — recorded in .claude/last-upgrade-delivery.json'}`);
+}
 if (dryRun) console.log('\n  [DRY RUN] No files were modified.');
 // T-20261024-001: emit the copy-safe /sync landing command so the operator's
 // next invocation cannot swap the argument order (the co-design PR #47
@@ -4049,3 +4676,32 @@ if (!dryRun) {
 // M1 (2026-09-15 project review): a failed security check must not read as a
 // green exit for scripted consumers (fleet runners, CI).
 if (import.meta.main && !securityPass) process.exit(1);
+// D3.1 (T-20261027-004): a run whose decision log carries ERROR-severity
+// entries cannot land silently — non-zero exit with an actionable summary.
+// Earlier passes' deliveries stand; the dispositions are resumable via
+// --disposition adopt-template or the adjudicated-port procedure.
+{
+  const errors = errorDecisions();
+  if (import.meta.main && errors.length > 0) {
+    console.log('\n========================================================');
+    console.log(`  DELIVERY CONFLICTS — ${errors.length} file(s) PRESERVED, delivery SKIPPED (severity ERROR)`);
+    console.log('========================================================');
+    for (const d of errors) {
+      console.log(`  ${d.path}`);
+      console.log(`    pass: ${d.pass}   baseline: ${d.baseline ? `${d.baseline.hash.slice(0, 12)}… (template ${d.baseline.templateVersion})` : 'none'}`);
+      console.log(`    ${d.detail}`);
+    }
+    console.log('\n  How to proceed:');
+    console.log('   1. Re-run with --disposition adopt-template (optionally =<glob>) to take the');
+    console.log('      template copy for the listed paths — project-side changes are lost; the');
+    console.log('      pre-upgrade stash (--rollback) covers the reversal.');
+    console.log('   2. If the project side is canonical, port it into the template side per the');
+    console.log('      adjudicated-port procedure (docs/designs/2026-10-27-sync-overwrite-policy-');
+    console.log('      design.md §6 — bidirectional superset diff, dry-run no-op proof, protected-');
+    console.log('      file hash table, post-wave verification), then re-run this upgrade.');
+    console.log('   3. Or merge manually, land the project copy, and re-run the upgrade so the');
+    console.log('      fresh delivery re-baselines the merged state.');
+    console.log('========================================================');
+    process.exit(1);
+  }
+}

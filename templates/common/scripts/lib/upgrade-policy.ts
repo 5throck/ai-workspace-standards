@@ -1,4 +1,24 @@
-// @version 1.24.0
+// @version 1.25.0
+// v1.25.0 (2026-10-27, T-20261027-004 — spec
+//          docs/designs/2026-10-27-sync-overwrite-policy-design.md): delivery-
+//          decision observability data + pure helpers (design D1/D2/D3). New
+//          exports, NO classification change (the deny-list resolver above is
+//          untouched): DeliveryDecision/DeliveryManifestV2 types (manifest v2
+//          schema §7 — `files` array preserved verbatim for isDeliveredDiff and
+//          the PR-body compose), DECISION_SEVERITY_CONTRACT (§7 severity
+//          contract: INFO mechanics / WARN divergence / ERROR needs explicit
+//          disposition), sha256Hex + baselineKeyFor (D1 delivered-baseline
+//          provenance keys — raw bytes for plain files, lifecycleless bytes for
+//          agents/ so the re-stamp and lifecycle-block preservation never read
+//          as project evolution), classifyProjectState (UNTOUCHED == baseline /
+//          IN_SYNC == today's deliverable / PROJECT_EVOLVED == both differ /
+//          NO_BASELINE = pre-baseline degrade), resolveDisposition (D2 matrix:
+//          project-evolved + template-changed under a version-gated overwrite
+//          pass escalates to CONFLICT severity ERROR, default SKIP, explicit
+//          adopt-template disposition delivers; template-unchanged evolution
+//          delivers as EVOLVED WARN), globToRegExp for
+//          --disposition adopt-template[=glob], and
+//          manifestHasUnresolvedErrors for the dev-sync step 3.9 D3.1 gate.
 // v1.24.0 (2026-10-27, T-20261027-005): exports normalizeAgentTierFrontmatter()
 //          — the ADR-0102 scalar-tier frontmatter normalizer for the upgrade
 //          MERGE (agents/pm.md) and agents/ delivery passes. The post-soak
@@ -154,6 +174,7 @@
 //     effective template tree and gates on the strict checks (placeholders, WS-07, JSON health).
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 /** Delivery policies. `SYNC` is the default fallback (deliver with conflict warning). */
@@ -744,4 +765,238 @@ export function isDeliveredDiff(changedFiles: string[], deliveredFiles: string[]
   // diff is not an upgrade delivery.
   return changedFiles.some(f => delivered.has(f))
     && changedFiles.every(f => delivered.has(f) || isPipelineArtifact(f));
+}
+
+// ── Delivery-decision log (sync-overwrite-policy design, spec 2026-10-27-sync-overwrite-policy) ─
+// Design D1/D2/D3: provenance baselines in the delivery manifest, a disposition
+// matrix for project-evolved files under version-gated overwrite passes, and a
+// unified per-run decision log. DATA + pure helpers only — the deny-list
+// resolver above is untouched (design §8: "No classification change").
+
+/** Severity contract (design §7): INFO = expected mechanics; WARN = divergence
+ *  worth reading; ERROR = requires explicit disposition before the delivery can
+ *  be considered clean. MERGE defaults INFO (uncontested union); the engine
+ *  overrides to WARN when a destructive in-zone replace wrote a snapshot. */
+export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
+
+/** Verdicts of the unified decision log (design D3/D2 matrix). */
+export type DecisionVerdict =
+  | 'NEW'
+  | 'UPDATE'
+  | 'ADOPT'
+  | 'SKIP'
+  | 'MERGE'
+  | 'CONTEXT_PRESERVE'
+  | 'DRIFT_PRESERVE'
+  | 'DRIFT_RESTORED'
+  | 'STUB_SKIP'
+  | 'SEED_SKIP'
+  | 'SKELETON_COLLISION'
+  | 'EVOLVED'
+  | 'CONFLICT';
+
+export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
+  NEW: 'INFO',
+  UPDATE: 'INFO',
+  ADOPT: 'INFO',
+  SKIP: 'INFO',
+  MERGE: 'INFO',
+  SEED_SKIP: 'INFO',
+  STUB_SKIP: 'INFO',
+  CONTEXT_PRESERVE: 'WARN',
+  DRIFT_PRESERVE: 'WARN',
+  DRIFT_RESTORED: 'WARN',
+  SKELETON_COLLISION: 'WARN',
+  EVOLVED: 'WARN',
+  CONFLICT: 'ERROR',
+};
+
+/** One decision entry of the unified decision log (design §7 schema). */
+export interface DeliveryDecision {
+  path: string;
+  policy: string;
+  pass: string;
+  verdict: DecisionVerdict;
+  severity: DecisionSeverity;
+  /** The delivered-baseline provenance this decision was judged against (when one exists). */
+  baseline?: DecisionBaseline;
+  detail: string;
+}
+
+/** Per-file delivered-baseline provenance (design D1): SHA-256 of the delivered
+ *  content key (see baselineKeyFor) + the template revision it came from. */
+export interface DecisionBaseline {
+  hash: string;
+  templateVersion: string;
+}
+
+/** Delivery manifest v2 (design §7). The top-level `files` array is preserved
+ *  verbatim so every v1 consumer (dev-sync step 3.9 isDeliveredDiff, PR-body
+ *  compose) keeps working unchanged. */
+export interface DeliveryManifestV2 {
+  schemaVersion: 2;
+  timestamp: string;
+  project: string;
+  templateVersion: string;
+  /** git SHA of the workspace templates at delivery time (workspace HEAD). */
+  templateSha: string;
+  /** project git HEAD at delivery ('' for fresh scaffolds with no commits). */
+  baseSha: string;
+  files: string[];
+  baselines: Record<string, DecisionBaseline>;
+  decisions: DeliveryDecision[];
+}
+
+/** How a project file relates to its delivered baseline and today's deliverable (design D1). */
+export type ProjectStateClassification = 'UNTOUCHED' | 'IN_SYNC' | 'PROJECT_EVOLVED' | 'NO_BASELINE';
+
+export interface ProjectStateVerdict {
+  state: ProjectStateClassification;
+  /** True when the project content already equals what the pass would deliver today. */
+  matchesDeliverable: boolean;
+  /** True when today's deliverable differs from the recorded baseline — i.e. the
+   *  template content changed since this file was last delivered. False without
+   *  a baseline (unknown). */
+  templateChanged: boolean;
+}
+
+/** SHA-256 of UTF-8 content (baseline keys, decision-log fingerprints). */
+export function sha256Hex(content: string): string {
+  return createHash('sha256').update(content, 'utf8').digest('hex');
+}
+
+/**
+ * The delivered-baseline content key for a project-relative path (design D1).
+ * Plain files: the raw written bytes. agents/ (frontmatter-carrying files the
+ * pass delivers through lifecycle-block preservation + the post-delivery
+ * `last_updated` re-stamp): the lifecycleless bytes — otherwise the project's
+ * own lifecycle block and the mechanical date bump would read as project
+ * evolution on the very next run (the same tolerance the agents/ drift compare
+ * implements via lifecyclelessText). The key form is deterministic from the
+ * path, so writer and classifier always agree.
+ */
+export function baselineKeyFor(rel: string, content: string): string {
+  return rel.startsWith('agents/')
+    ? sha256Hex(lifecyclelessText(content))
+    : sha256Hex(content);
+}
+
+/**
+ * Classify a delivery candidate against its delivered baseline (design D1/D2).
+ * `projectContent` is the project's current bytes; `deliverableContent` is the
+ * exact bytes the pass would deliver today (rendered/merged/pruned form — the
+ * same content a delivery would write); `baseline` is the recorded provenance
+ * or undefined (first run after the policy lands — degrade, design §8).
+ */
+export function classifyProjectState(
+  rel: string,
+  projectContent: string,
+  deliverableContent: string,
+  baseline: DecisionBaseline | undefined,
+): ProjectStateVerdict {
+  const projectKey = baselineKeyFor(rel, projectContent);
+  const deliverableKey = baselineKeyFor(rel, deliverableContent);
+  const matchesDeliverable = projectKey === deliverableKey;
+  if (!baseline) {
+    return { state: 'NO_BASELINE', matchesDeliverable, templateChanged: false };
+  }
+  if (projectKey === baseline.hash) {
+    return { state: 'UNTOUCHED', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+  }
+  if (matchesDeliverable) {
+    return { state: 'IN_SYNC', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+  }
+  return { state: 'PROJECT_EVOLVED', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+}
+
+/** The CLI disposition flag state (design D2): default (CONFLICT → SKIP) or an
+ *  explicit adopt-template grant, optionally narrowed by a glob. */
+export type DispositionFlag =
+  | { mode: 'default' }
+  | { mode: 'adopt-template'; matches: (rel: string) => boolean };
+
+export interface DispositionOutcome {
+  /** True when the pass may deliver (per the disposition matrix). */
+  deliver: boolean;
+  /** Verdict for the decision entry when the matrix fired (PROJECT_EVOLVED). */
+  verdict: DecisionVerdict;
+  severity: DecisionSeverity;
+  /** Detail suffix describing the fired matrix row. */
+  detail: string;
+}
+
+/**
+ * D2 disposition resolution for a PROJECT_EVOLVED candidate under a
+ * version-gated content-delivering pass:
+ *  - template content unchanged since delivery → deliver as today, log
+ *    EVOLVED (WARN) — "deliver only on explicit version gate as today";
+ *  - template content ALSO changed → CONFLICT (ERROR): default SKIP (project
+ *    copy preserved, delivery skipped, decision recorded), or deliver as ADOPT
+ *    (INFO) under an explicit --disposition adopt-template[=glob] grant.
+ * Callers use this ONLY when state === 'PROJECT_EVOLVED' (other states keep the
+ * pass's normal verdict; the agents/ equal-version drift arm forces the
+ * CONFLICT row unconditionally per the design's dedicated matrix row).
+ */
+export function resolveDisposition(
+  classification: ProjectStateVerdict,
+  rel: string,
+  disposition: DispositionFlag,
+): DispositionOutcome {
+  if (classification.state !== 'PROJECT_EVOLVED') {
+    return { deliver: true, verdict: 'UPDATE', severity: 'INFO', detail: '' };
+  }
+  if (!classification.templateChanged) {
+    return {
+      deliver: true,
+      verdict: 'EVOLVED',
+      severity: 'WARN',
+      detail: 'project-evolved since delivery; template content unchanged — version-gated delivery proceeds (EVOLVED, WARN)',
+    };
+  }
+  const granted = disposition.mode === 'adopt-template' && disposition.matches(rel);
+  if (granted) {
+    return {
+      deliver: true,
+      verdict: 'ADOPT',
+      severity: 'INFO',
+      detail: 'project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded)',
+    };
+  }
+  return {
+    deliver: false,
+    verdict: 'CONFLICT',
+    severity: 'ERROR',
+    detail: 'project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved',
+  };
+}
+
+/** Translate a glob (`**`, `*`, `?`) into an anchored RegExp for
+ *  --disposition adopt-template=<glob> path narrowing. */
+export function globToRegExp(glob: string): RegExp {
+  const src = glob
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, '\u0000')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\?/g, '[^/]')
+    .replace(/\u0000/g, '.*');
+  return new RegExp(`^${src}$`);
+}
+
+/** ERROR-severity decisions of a run (design D3.1 — these block silent landing). */
+export function unresolvedErrorDecisions(decisions: DeliveryDecision[]): DeliveryDecision[] {
+  return decisions.filter((d) => d.severity === 'ERROR');
+}
+
+/**
+ * D3.1 gate predicate for dev-sync step 3.9: true when a parsed delivery
+ * manifest carries unresolved ERROR-severity decisions (its auto-E5 attribution
+ * must be refused). Tolerates v1-shaped manifests (no decisions key → false).
+ */
+export function manifestHasUnresolvedErrors(manifest: unknown): boolean {
+  if (!manifest || typeof manifest !== 'object') return false;
+  const decisions = (manifest as { decisions?: unknown }).decisions;
+  if (!Array.isArray(decisions)) return false;
+  return decisions.some(
+    (d) => !!d && typeof d === 'object' && (d as { severity?: unknown }).severity === 'ERROR',
+  );
 }

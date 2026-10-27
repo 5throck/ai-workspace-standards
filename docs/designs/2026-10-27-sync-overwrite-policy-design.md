@@ -4,7 +4,8 @@
 - **Date**: 2026-10-27
 - **Author**: Template Architect (Design Gate Row 0)
 - **Ticket**: T-20261027-004 (manual) — provenance: U-20261026-005 (co-design restoration clobbered by upgrade/sync commits; reconciled via root PR #1640)
-- **Status**: draft — design-only, for user review. No engine code is changed by this ticket; the implementation plan (§9) is a proposal pending PM dispatch.
+- **Status**: implemented — landed 2026-10-27 per DEC-20261027-01 (user approval 2026-10-27; the Korean directive "proceed with the remaining work" is quoted verbatim, with its source-language exception, in DEC-20261027-01; protective defaults upheld — ERROR→SKIP, adopt-template opt-in, green-by-construction rollout). Engine: upgrade-project.ts 1.76.0 + lib/upgrade-policy.ts 1.25.0 + dev-sync 1.32.0 (D3.1); §9 rows 1–4 landed as PR-1 (engine + gate + tests + L0→L1 publish in one PR); §9 row 5 follow-up tickets (D6a lint, D6c forensic baseline) remain open. §11 acceptance evidence lives in the landing PR description and tests/unit/upgrade-decision-log.test.ts.
+- **Original status**: draft — design-only, for user review. No engine code was changed by the design ticket; §9 was the proposal pending PM dispatch.
 
 ## 0. Conclusion
 

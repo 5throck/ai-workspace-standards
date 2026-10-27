@@ -1,4 +1,16 @@
-// @version 1.31.0
+// @version 1.32.0
+// v1.32.0 (2026-10-27, T-20261027-004 — spec
+//          docs/designs/2026-10-27-sync-overwrite-policy-design.md D3.1):
+//          step 3.9 auto-E5 attribution refuses a delivery manifest carrying
+//          unresolved ERROR-severity decisions. A delivery whose decision log
+//          still lists CONFLICT dispositions (project-evolved + template-changed
+//          files the run preserved instead of overwriting) is NOT a clean sync:
+//          attributing it would let "delivered but wrong" land behind a green
+//          gate. The refusal lists the ERROR entries and names the resolution
+//          paths (--disposition adopt-template, the §6 adjudicated port,
+//          manual merge + re-run); the v1.25.0 early L0→L1 publish heal is
+//          untouched (it targets publish-pending drift, a different failure
+//          mode). v1-shaped manifests (no decisions key) are unaffected.
 // v1.31.0 (2026-10-26, U-20261026-011 / T-20261026-003): the non-main branch guard
 //          now refuses MERGED as well as CLOSED PRs. Landing a new sync onto a
 //          branch whose PR is already merged orphans the commits off main.
@@ -211,7 +223,7 @@ import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
 import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts';
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
-import { isDeliveredDiff } from './lib/upgrade-policy.ts';
+import { isDeliveredDiff, manifestHasUnresolvedErrors } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
 import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
 
@@ -660,13 +672,30 @@ if (fs.existsSync(specRegPath)) {
                     .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
                     .filter(Boolean);
                 if (isDeliveredDiff(changedFiles, manifest.files ?? [])) {
-                    console.log(`${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`);
-                    const retryRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
-                        .env({ ...process.env, SYNC_SPEC_EXEMPT: 'E5' })
-                        .nothrow();
-                    if (retryRes.exitCode === 0) {
-                        console.log(`${GREEN}✓ Spec registry check passed (upgrade-delivered diff)${RESET}`);
-                        handled = true;
+                    // D3.1 (T-20261027-004, sync-overwrite-policy): a delivery whose
+                    // decision log still carries ERROR-severity CONFLICT dispositions
+                    // cannot be attributed as a clean sync — refuse auto-E5 until the
+                    // conflicts are resolved (deliver via --disposition adopt-template,
+                    // adjudicated port, or manual merge + re-baseline).
+                    const unresolvedErrors = manifestHasUnresolvedErrors(manifest)
+                      ? ((manifest as { decisions: Array<{ path?: string; detail?: string; severity?: string }> }).decisions)
+                          .filter((d) => d.severity === 'ERROR')
+                      : [];
+                    if (unresolvedErrors.length > 0) {
+                        console.log(`${YELLOW}ℹ️  Step 3.9: upgrade delivery carries ${unresolvedErrors.length} unresolved ERROR disposition(s) — auto-E5 REFUSED (D3.1, sync-overwrite-policy).${RESET}`);
+                        for (const d of unresolvedErrors.slice(0, 20)) {
+                            console.log(`${YELLOW}    ${d.path ?? '?'} — ${d.detail ?? 'CONFLICT disposition unresolved'}${RESET}`);
+                        }
+                        console.log(`${YELLOW}    Resolve in the project first (--disposition adopt-template, the §6 adjudicated port, or manual merge + re-run), then re-sync.${RESET}`);
+                    } else {
+                        console.log(`${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`);
+                        const retryRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+                            .env({ ...process.env, SYNC_SPEC_EXEMPT: 'E5' })
+                            .nothrow();
+                        if (retryRes.exitCode === 0) {
+                            console.log(`${GREEN}✓ Spec registry check passed (upgrade-delivered diff)${RESET}`);
+                            handled = true;
+                        }
                     }
                 }
             } catch (err) {
