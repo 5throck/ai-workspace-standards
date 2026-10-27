@@ -1,4 +1,16 @@
-// @version 1.23.0
+// @version 1.24.0
+// v1.24.0 (2026-10-27, T-20261027-005): exports normalizeAgentTierFrontmatter()
+//          — the ADR-0102 scalar-tier frontmatter normalizer for the upgrade
+//          MERGE (agents/pm.md) and agents/ delivery passes. The post-soak
+//          validate-model-registry flip (T-20261027-003) hard-FAILs any project
+//          agent whose frontmatter still carries a legacy per-platform tier map,
+//          and neither pass touched frontmatter before (MERGE unions managed
+//          blocks only; the agents/ pass dead-ended on variant extends-stubs).
+//          Pure function: replaces ONLY the legacy tier block with the
+//          template's scalar value when the template side is already scalar
+//          (template authoritative for the managed key); a project scalar that
+//          differs from the template scalar is deliberate divergence — returned
+//          as conflict:true, untouched. Idempotent; CRLF-preserving.
 // v1.23.0 (2026-10-27, U-20261027-002 + U-20261026-009): two fixes.
 //          (U-20261027-002) `scripts-snapshot.json` and
 //          `.claude/last-upgrade-pr-body.md` join PIPELINE_ARTIFACT_PATHS —
@@ -606,6 +618,98 @@ export function lifecyclelessText(text: string): string {
 export function isExtendsStub(content: string): boolean {
   const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   return !!fm && /^extends:\s*\S/m.test(fm[1]);
+}
+
+// ── ADR-0102 agent tier frontmatter normalization (T-20261027-005) ────────────
+
+export interface AgentTierNormalization {
+  /** Project content after normalization (identical to the input when nothing changed). */
+  content: string;
+  /** True when the legacy per-platform tier map was replaced by the template scalar. */
+  changed: boolean;
+  /** True when the project tier is already scalar and differs from the template scalar —
+   *  deliberate project divergence, left untouched (the caller logs a conflict line). */
+  conflict: boolean;
+  /** True when the project frontmatter carried a legacy per-platform tier map. */
+  legacy: boolean;
+  /** The template's scalar tier value ('' when the template side is not scalar). */
+  templateTier: string;
+  /** The project's scalar tier value when conflict:true ('' otherwise). */
+  projectTier: string;
+}
+
+/** Extract the YAML frontmatter body of a markdown file (must start at byte 0). */
+function frontmatterBody(content: string): { body: string; start: number; end: number; eol: string } | null {
+  const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m || m.index === undefined) return null;
+  return {
+    body: m[1],
+    start: m.index,
+    end: m.index + m[0].length,
+    eol: m[0].includes('\r\n') ? '\r\n' : '\n',
+  };
+}
+
+/** Strip a trailing YAML comment from a scalar tier value (`medium # claude:sonnet` → `medium`). */
+function stripTierComment(value: string): string {
+  return value.replace(/\s+#.*$/, '').trim();
+}
+
+/**
+ * Normalize a project agent's legacy per-platform tier frontmatter block to the
+ * template's scalar tier (T-20261027-005, ADR-0102). The template is authoritative
+ * for the managed `tier` key — but ONLY the tier block is ever rewritten:
+ *
+ *  - template side not scalar (map-form or absent)  → no-op (never invent a value);
+ *  - project tier is a legacy map (`tier:` line with indented per-platform keys)
+ *    → the whole block is replaced by `tier: <template scalar>`;
+ *  - project tier is scalar and EQUAL               → no-op (idempotent);
+ *  - project tier is scalar and DIFFERENT           → conflict:true, untouched
+ *    (deliberate divergence is never silently overwritten);
+ *  - project has no `tier` key                      → no-op (normalization never
+ *    adds frontmatter that was never there).
+ *
+ * Body text and all other frontmatter keys are byte-preserved; CRLF line endings
+ * are detected and preserved. Stale model-ID trailing comments on a scalar tier
+ * value are ignored for the comparison (the v1.57.0 tier-comment migration
+ * precedent) and dropped when a map block is rewritten.
+ */
+export function normalizeAgentTierFrontmatter(projectContent: string, templateContent: string): AgentTierNormalization {
+  const untouched: AgentTierNormalization = {
+    content: projectContent, changed: false, conflict: false, legacy: false, templateTier: '', projectTier: '',
+  };
+  const tplFm = frontmatterBody(templateContent);
+  if (!tplFm) return untouched;
+  const tplScalar = tplFm.body.match(/^tier:[ \t]*(\S[^\r\n]*)$/m);
+  if (!tplScalar) return untouched; // template side is map-form or absent — nothing to normalize TO
+  const templateTier = stripTierComment(tplScalar[1]);
+  const projFm = frontmatterBody(projectContent);
+  if (!projFm) return untouched;
+  const lines = projFm.body.split(/\r?\n/);
+  const tierIdx = lines.findIndex((l) => /^tier:[ \t]*(\S.*)?$/.test(l));
+  if (tierIdx === -1) return { ...untouched, templateTier };
+  const scalarMatch = lines[tierIdx].match(/^tier:[ \t]*(\S.*)$/);
+  if (scalarMatch) {
+    const projectTier = stripTierComment(scalarMatch[1]);
+    if (projectTier === templateTier) return { ...untouched, templateTier };
+    return { ...untouched, templateTier, conflict: true, projectTier };
+  }
+  // `tier:` with no inline value — legacy per-platform map iff at least one
+  // indented continuation line follows (until the next column-0 key or the
+  // closing delimiter, both of which fail the indented test).
+  let blockEnd = tierIdx + 1;
+  while (blockEnd < lines.length && /^[ \t]+\S/.test(lines[blockEnd])) blockEnd++;
+  if (blockEnd === tierIdx + 1) return { ...untouched, templateTier }; // empty tier key — never invent structure
+  const rebuilt = [...lines.slice(0, tierIdx), `tier: ${templateTier}`, ...lines.slice(blockEnd)];
+  const fmText = `---${projFm.eol}${rebuilt.join(projFm.eol)}${projFm.eol}---`;
+  return {
+    content: projectContent.slice(0, projFm.start) + fmText + projectContent.slice(projFm.end),
+    changed: true,
+    conflict: false,
+    legacy: true,
+    templateTier,
+    projectTier: '',
+  };
 }
 
 /** Pipeline-generated paths that never count as hand-authored code in a diff.

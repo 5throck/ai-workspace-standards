@@ -1,5 +1,25 @@
 #!/usr/bin/env bun
-// @version 1.74.0
+// @version 1.75.0
+// v1.75.0 (2026-10-27, T-20261027-005): ADR-0102 legacy agent tier normalization
+//          in two delivery passes. (a) The MERGE pass (agents/pm.md) now
+//          normalizes the project copy's legacy per-platform tier frontmatter
+//          block to the template's scalar tier after the managed-block merge —
+//          the merge never touches frontmatter, so the post-soak
+//          validate-model-registry flip (T-20261027-003) hard-FAILed every
+//          project still holding a map-form tier. Tier block ONLY; a project
+//          scalar that differs from the template scalar is deliberate
+//          divergence → left untouched with a TIER CONFLICT line. (b) The
+//          agents/ pass no longer dead-ends on variant extends-stubs: the
+//          stub's `extends:` target (the resolved template-side counterpart the
+//          scaffold wrote into the project) is processed instead, so common-side
+//          agent updates reach stub-shielded agents (the 13 variant
+//          i18n-specialist.md files). MERGE_MANAGED files stay excluded from
+//          the fall-through (their body delivery is the MERGE pass's contract —
+//          the v1.49.0 stub-over-resolved-body clobber class). And the
+//          equal-version drift reconcile now recognizes the tier-block-only
+//          drift with a focused TIER DRIFT verdict before delivering the
+//          template copy. Normalizer: lib/upgrade-policy.ts
+//          normalizeAgentTierFrontmatter (v1.24.0, pure + idempotent).
 // v1.74.0 (2026-10-27, U-20261026-009): POST-DELIVERY RE-STAMP — after every
 //          content pass and before the delivery manifest, the engine re-stamps
 //          the top-level frontmatter `last_updated` of every changed file
@@ -673,10 +693,12 @@ import {
 import {
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
+  MERGE_MANAGED_FILES,
   isExtendsStub,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
   mergeSettingsJson,
+  normalizeAgentTierFrontmatter,
   resolveClaim,
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
@@ -1612,6 +1634,27 @@ for (const rel of MERGE_FILES) {
     continue;
   }
   mergeWorkspaceManaged(dest, src, rel);
+  // v1.75.0 (T-20261027-005 a): agents/pm.md is MERGE_MANAGED — the managed-block
+  // merge above never touches frontmatter, so a legacy per-platform tier map
+  // survived every upgrade and the post-soak ADR-0102 recursive agent-quality
+  // check (validate-model-registry, T-20261027-003) hard-FAILed the project's
+  // next dev-sync. The template is authoritative for the managed `tier` key:
+  // when the template side is already scalar, normalize the project copy's tier
+  // block to the template scalar (tier block ONLY — no other frontmatter; a
+  // project scalar that differs from the template scalar is deliberate
+  // divergence → untouched, logged as a conflict). Idempotent via
+  // normalizeAgentTierFrontmatter (lib/upgrade-policy v1.24.0).
+  if (rel.startsWith('agents/') && existsSync(dest)) {
+    const tierNorm = normalizeAgentTierFrontmatter(readFileSync(dest, 'utf8'), readFileSync(src, 'utf8'));
+    if (tierNorm.conflict) {
+      console.log(`  ⚠️ TIER CONFLICT: ${rel} project tier '${tierNorm.projectTier}' differs from template scalar '${tierNorm.templateTier}' — left untouched (deliberate divergence)`);
+    } else if (tierNorm.changed) {
+      console.log(`  ${dryTag}TIER NORMALIZED: ${rel} → tier: ${tierNorm.templateTier} (legacy per-platform block replaced — template authoritative, ADR-0102)`);
+      if (!dryRun) {
+        writeFileSync(dest, tierNorm.content, 'utf8');
+      }
+    }
+  }
   mergeChanged++;
 }
 if (ciMergeFailed) {
@@ -2300,12 +2343,31 @@ for (const agentsDir of tplAgentsDirs) {
     // template stub against the project's resolved full body and reported
     // `DRIFT (restored to canonical)` — an apply-mode upgrade clobbered the
     // project's 349-line resolved PM agent with the stub (proven by dry-run on
-    // Projects/co-work). Stubs never deliver through this pass.
-    if (isExtendsStub(readFileSync(tplFile, 'utf8'))) {
-      console.log(`  STUB (resolved at scaffold): ${rel}`);
-      continue;
+    // Projects/co-work). The stub itself never delivers through this pass.
+    //
+    // v1.75.0 (T-20261027-005 b): a stub dead-end also shielded the RESOLVED
+    // counterpart from every delivery — the variant i18n-specialist.md stubs
+    // left project copies frozen at their scaffold version, legacy per-platform
+    // tier blocks included, which the post-soak ADR-0102 recursive
+    // agent-quality check hard-FAILs. A stub's `extends:` target IS the
+    // resolved template-side counterpart the scaffold wrote into the project,
+    // so the pass now processes that target instead of skipping. MERGE_MANAGED
+    // files (agents/pm.md) stay excluded: their body delivery is the MERGE
+    // pass's contract, and a whole-file agents/ write would clobber
+    // out-of-zone project content (the v1.49.0 clobber class).
+    const rawTpl = readFileSync(tplFile, 'utf8');
+    let tplSource = tplFile;
+    if (isExtendsStub(rawTpl)) {
+      const extendsPath = rawTpl.match(/^extends:[ \t]*(\S+)/m)?.[1] ?? '';
+      const resolvedTarget = extendsPath ? resolve(dirname(tplFile), extendsPath) : '';
+      if (!resolvedTarget || !existsSync(resolvedTarget) || MERGE_MANAGED_FILES.has(rel)) {
+        console.log(`  STUB (resolved at scaffold): ${rel}`);
+        continue;
+      }
+      console.log(`  STUB → delivers extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')}`);
+      tplSource = resolvedTarget;
     }
-    const tplVer = extractFrontmatterVersion(tplFile);
+    const tplVer = extractFrontmatterVersion(tplSource);
     if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
     const projVer = extractFrontmatterVersion(projFile);
     if (!existsSync(projFile)) {
@@ -2314,12 +2376,12 @@ for (const agentsDir of tplAgentsDirs) {
         continue;
       }
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
-      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentWithLifecycle(tplFile, projFile); }
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentWithLifecycle(tplSource, projFile); }
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (!projVer) {
       console.log(`  UPDATE ${rel}  (no version) → ${tplVer}`);
-      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
+      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (semverGt(tplVer, projVer)) {
@@ -2329,18 +2391,31 @@ for (const agentsDir of tplAgentsDirs) {
       } else {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
       }
-      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
+      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
-    } else if (lifecyclelessText(renderAgentTemplate(tplFile)) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
+    } else if (lifecyclelessText(renderAgentTemplate(tplSource)) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
       // v1.35.0 drift reconciliation (T-20260920-002): equal frontmatter version
       // but lifecycle-stripped content differs — the same version-gated skip that
       // v1.17.2 fixed for scripts/ (i18n-specialist's 2026-09-15 codex-tier update
       // shipped without a version bump and never reached six projects). Agents are
       // canonical like core scripts; the project lifecycle block stays preserved
       // by writeAgentWithLifecycle, so the comparison strips it on both sides.
-      console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from template at same version — ADR-0085 D3)`);
-      if (!dryRun) writeAgentWithLifecycle(tplFile, projFile);
+      // v1.75.0 (T-20261027-005 b): focused comparison first — when the ONLY
+      // content difference is a legacy-to-scalar tier block, the drift is pure
+      // ADR-0102 normalization debt and the template copy delivers with a
+      // dedicated TIER DRIFT verdict (deliver, never skip: ADR-0085 D3 leaves
+      // genuine same-version content drift to the canonical restore above).
+      const projRaw = readFileSync(projFile, 'utf8');
+      const tierNorm = normalizeAgentTierFrontmatter(projRaw, renderAgentTemplate(tplSource));
+      const tierOnlyDrift = tierNorm.legacy
+        && lifecyclelessText(tierNorm.content) === lifecyclelessText(renderAgentTemplate(tplSource));
+      if (tierOnlyDrift) {
+        console.log(`  ⚠️  TIER DRIFT (normalized to template scalar) ${rel}  ${projVer}  (only difference is the legacy per-platform tier block — ADR-0102; template copy delivers)`);
+      } else {
+        console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from template at same version — ADR-0085 D3)`);
+      }
+      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else {
