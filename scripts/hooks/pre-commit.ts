@@ -2,8 +2,20 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.9.0
+ * @version 1.10.0
  *
+ * v1.10.0 (2026-10-27, T-20261027-009): check 6 becomes merge-aware. The
+ *  "scripts/*.ts staged AND scripts/SCRIPTS.md not staged → FAIL" rule is a
+ *  staged-file-set proxy and false-positives on merge commits where the
+ *  merged-in side carries script changes whose SCRIPTS.md rows pre-exist on
+ *  the receiving branch (zero delta) — observed 2026-10-27 concluding
+ *  main→PR #1643 after #1644 landed while content-based lifecycle-sync-audit
+ *  Check A passed. When a merge is in progress (MERGE_HEAD present, resolved
+ *  via `git rev-parse --git-path MERGE_HEAD` so worktrees are covered), check
+ *  6 delegates to the content invariant the proxy stands for — the Check A
+ *  rows==@version-headers comparison (scripts/helpers/pre-commit-script-gate.ts)
+ *  — instead of failing, and logs a one-line notice. Non-merge commits keep
+ *  the exact prior behavior.
  * v1.9.0 (2026-10-02): check 6b command counterpart check becomes L0-only —
  *  skipped when templates/common does not exist (recorded exclusion, D8 style
  *  like .agents/commands): L2 projects and scaffold commits have no mapping
@@ -21,6 +33,11 @@ import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { hasNonEnglish } from "../lib/language-guard.ts";
 import { localDateISO } from "../lib/local-date.ts";
+import {
+  evaluateScriptsMdGate,
+  MERGE_GATE_NOTICE,
+  runScriptsMdContentGate,
+} from "../helpers/pre-commit-script-gate.ts";
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
@@ -213,7 +230,26 @@ async function main() {
   const scriptStaged = staged.filter(f => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, '/')));
   const scriptsMdStaged = staged.includes('scripts/SCRIPTS.md');
 
+  // T-20261027-009: merge-in-progress detection — resolved via --git-path so
+  // linked worktrees (MERGE_HEAD under .git/worktrees/<name>/) are covered.
+  // Probed lazily, only when the staged-file-set proxy would otherwise arm.
+  let mergeInProgress = false;
   if (scriptStaged.length > 0 && !scriptsMdStaged) {
+    try {
+      const mergeHeadPath = (await $`git rev-parse --git-path MERGE_HEAD`.text()).trim();
+      mergeInProgress = mergeHeadPath.length > 0 && existsSync(mergeHeadPath);
+    } catch {
+      mergeInProgress = false; // outside a repo cannot happen here; treat as non-merge
+    }
+  }
+
+  const scriptsGate = evaluateScriptsMdGate({
+    scriptsStagedCount: scriptStaged.length,
+    scriptsMdStaged,
+    mergeInProgress,
+  });
+
+  if (scriptsGate === 'proxy-fail') {
     console.log("\n=== Lifecycle Compliance Check ===");
     console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts files were modified but scripts/SCRIPTS.md was not updated.");
     console.error("");
@@ -229,6 +265,30 @@ async function main() {
     console.error("     git add scripts/SCRIPTS.md");
     console.error("");
     process.exit(1);
+  }
+
+  if (scriptsGate === 'merge-verify') {
+    // T-20261027-009: the merged-in side may carry script changes whose
+    // SCRIPTS.md rows pre-exist on this branch (zero delta), so the
+    // staged-file-set proxy does not apply. Verify the content invariant the
+    // proxy stands for instead — the Check A rows == @version-headers
+    // comparison run by lifecycle-sync-audit.ts (exit code is the gate).
+    console.log(`\n=== Lifecycle Compliance Check ===\n${MERGE_GATE_NOTICE}`);
+    const { pass, checkAErrors } = await runScriptsMdContentGate(async () => {
+      const result = await $`bun scripts/lifecycle-sync-audit.ts --json`.quiet().nothrow();
+      return { exitCode: result.exitCode, stdout: result.stdout.toString() };
+    });
+    if (!pass) {
+      console.error("\x1b[31m[FAIL]\x1b[0m Merge commit fails the SCRIPTS.md content check (lifecycle-sync-audit Check A):");
+      for (const err of checkAErrors) {
+        console.error(`  - ${err.file}: ${err.message}`);
+      }
+      if (checkAErrors.length === 0) {
+        console.error("  (lifecycle-sync-audit.ts exited non-zero without parseable Check A detail — run 'bun scripts/lifecycle-sync-audit.ts' to see the failure)");
+      }
+      console.error("");
+      process.exit(1);
+    }
   }
 
   // 6c. Check A version blocking: @version in scripts/*.ts must match SCRIPTS.md
