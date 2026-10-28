@@ -2,7 +2,7 @@
 
 - **Spec ID**: 2026-10-25-managed-platform-skeleton-design
 - **Date**: 2026-10-25
-- **Status**: approved
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Tickets**: Design Gate (Row 0); follow-on to T-20261025-anchor-repair (PR #1604) and the 2026-09-12 upgrade-wave incident
 
 ## Summary

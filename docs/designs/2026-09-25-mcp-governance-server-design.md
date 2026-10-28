@@ -1,7 +1,7 @@
 # MCP Governance Server Design — Harness-Neutral Access to Workspace Governance Tools
 
 - **Date**: 2026-09-25
-- **Status**: Approved (Row 0 design; implementation lands in the same PR per T-20260925-009)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0088 (Hermes Agent platform support — origin ticket), ADR-0074 (Universal Design Gate), ADR-0080 (PM team-management authority), AGENTS.md §3.1 (PM Gateway), AGENTS.md §3.7.5 (governance backlog)
 - **Scope**: Design + implementation of `scripts/mcp-governance-server.ts` (stdio MCP server exposing four governance scripts) with unit tests and registry updates. No change to any governance rule itself.
 

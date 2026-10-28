@@ -1,7 +1,7 @@
 # Z.AI (GLM) Tier-Floor Support — Design
 
 - **Date**: 2026-10-23
-- **Status**: approved (Design Gate, user approval with scope amendment, 2026-10-23)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Spec id**: `2026-10-23-zai-tier-floor-support`
 - **Owner**: architect (dispatched by PM)
 - **Related**: ADR-0074 (Universal Design Gate), design `2026-09-29-pm-tier-capability-floor-design`, `AGENTS.md` §3.6 (3-Tier Strategy), `docs/workspace-schema.json` (`models` block), `scripts/validate-model-registry.ts` v1.4.1, DEC-20261023-01

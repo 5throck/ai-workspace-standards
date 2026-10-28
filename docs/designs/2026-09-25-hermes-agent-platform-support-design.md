@@ -1,7 +1,7 @@
 # Hermes Agent Platform Support Design — Extending the Workspace to NousResearch Hermes Agent
 
 - **Date**: 2026-09-25
-- **Status**: Approved (Row 0 design; implementation in a single PR per approved plan)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0088 (decision record), ADR-0077 (Codex platform support — the delivery pattern this follows), ADR-0074 (Universal Design Gate), ADR-0035/ADR-0048 (AGENTS.md structure & SSOT)
 - **Scope**: Confirmed design for the implementation PR: `.hermes` becomes the fifth platform directory. No MCP-server work, no fleet rollout PR, no model-registry entry (all scoped out — see Non-Goals).
 

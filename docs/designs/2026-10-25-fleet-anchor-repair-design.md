@@ -2,7 +2,7 @@
 
 - **Spec ID**: 2026-10-25-fleet-anchor-repair
 - **Date**: 2026-10-25
-- **Status**: approved
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Tickets**: CI evidence co-abap PR #218 run 39945617179 (Documentation Audit FAIL, 2 broken anchors)
 
 ## Summary

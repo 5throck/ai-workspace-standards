@@ -634,10 +634,10 @@
       "id": "2026-09-01-accessibility-standard-design",
       "title": "accessibility standard design",
       "file": "docs/designs/2026-09-01-accessibility-standard-design.md",
-      "status": "draft",
+      "status": "approved",
       "source": "manual",
       "created": "2026-09-01",
-      "last_updated": "2026-09-01"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-06-resync-hardening-design",
@@ -742,10 +742,10 @@
       "id": "2026-09-12-codex-platform-support-design",
       "title": "codex platform support design",
       "file": "docs/designs/2026-09-12-codex-platform-support-design.md",
-      "status": "draft",
+      "status": "approved",
       "source": "manual",
       "created": "2026-09-12",
-      "last_updated": "2026-09-12"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-12-dev-sync-scoped-staging-design",
@@ -1205,10 +1205,10 @@
       "id": "2026-09-23-adopt-project-conversion-design",
       "title": "adopt project conversion design",
       "file": "docs/designs/2026-09-23-adopt-project-conversion-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-23",
-      "last_updated": "2026-09-23"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-23-codex-twin-parity-automation-design",
@@ -1223,19 +1223,19 @@
       "id": "2026-09-23-migrate-project-design",
       "title": "migrate project design",
       "file": "docs/designs/2026-09-23-migrate-project-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-23",
-      "last_updated": "2026-09-23"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-23-pre-adoption-github-repo-design",
       "title": "pre adoption github repo design",
       "file": "docs/designs/2026-09-23-pre-adoption-github-repo-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-09-23",
-      "last_updated": "2026-09-23"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-23-promotion-skill-asset-parity-design",
@@ -1349,10 +1349,10 @@
       "id": "2026-09-25-agents-md-size-reduction-design",
       "title": "agents md size reduction design",
       "file": "docs/designs/2026-09-25-agents-md-size-reduction-design.md",
-      "status": "proposed",
+      "status": "approved",
       "source": "architect",
       "created": "2026-09-25",
-      "last_updated": "2026-09-25"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-09-25-codex-merge-claim-routing-design",
@@ -2222,10 +2222,10 @@
       "id": "2026-10-06-pre-rebase-hook-scan-fix-design",
       "title": "pre rebase hook scan fix design",
       "file": "docs/designs/2026-10-06-pre-rebase-hook-scan-fix-design.md",
-      "status": "draft",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-10-06",
-      "last_updated": "2026-10-06"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-10-07-daily-fleet-learning-extraction-design",
@@ -2537,10 +2537,10 @@
       "id": "2026-10-26-model-registry-platform-coverage-design",
       "title": "model registry platform coverage design",
       "file": "docs/designs/2026-10-26-model-registry-platform-coverage-design.md",
-      "status": "planned",
+      "status": "approved",
       "source": "manual",
       "created": "2026-10-26",
-      "last_updated": "2026-10-26"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-10-26-project-drift-check-scoping-design",
@@ -2555,10 +2555,10 @@
       "id": "2026-10-26-project-review-remediation-design",
       "title": "project review remediation design",
       "file": "docs/designs/2026-10-26-project-review-remediation-design.md",
-      "status": "planned",
+      "status": "implemented",
       "source": "manual",
       "created": "2026-10-25",
-      "last_updated": "2026-10-25"
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-10-27-claude-s2-heading-collision-resolution-design",
@@ -2685,6 +2685,15 @@
       "source": "manual",
       "created": "2026-10-27",
       "last_updated": "2026-10-27"
+    },
+    {
+      "id": "2026-10-29-retro-records-registration-design",
+      "title": "retro records registration design",
+      "file": "docs/designs/2026-10-29-retro-records-registration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-28",
+      "last_updated": "2026-10-28"
     },
     {
       "id": "2026-10-29-upstream-adjudication-mechanical-batch-design",

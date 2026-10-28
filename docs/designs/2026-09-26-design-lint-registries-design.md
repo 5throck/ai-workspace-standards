@@ -4,7 +4,7 @@
 
 - **Spec ID**: 2026-09-26-design-lint-registries-design
 - **Date**: 2026-09-26
-- **Status**: Draft (registry status at registration; flip to `implemented` via `spec-register.ts --update` once the wave lands)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Owner**: architect
 - **Tickets**: T-20260926-028 (components registry + check), T-20260926-029 (patterns registry + design-phase-gate validation), T-20260926-030 (icon-vocabulary registration + check), T-20260926-031 (font fallback token contract check)
 - **Sources**: `docs/designs/2026-09-26-design-foundation-v1.2-design.md` (deferring design; constraints (a)–(e) origin), `templates/common/docs/design-foundation.md` v1.2 (§2b rule 5, §7 backlog note), `memory/meeting-2026-09-26-design-foundation-improvements.md` (automation-engineer implementation intents), `scripts/design-lint.ts` v1.0.0 (existing token-usage-lint companion — see §4 discovery note), `skills/token-usage-lint/SKILL.md`, `skills/zod-contract-gate/SKILL.md`

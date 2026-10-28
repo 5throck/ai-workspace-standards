@@ -1,4 +1,15 @@
-// @version 2.58.0
+// @version 2.59.0
+// v2.59.0 (2026-10-29, T-20261029-002 — spec
+//          docs/designs/2026-10-29-retro-records-registration-design.md §6):
+//          spec-check Check 6 — registry-vs-design-header status consistency.
+//          For every docs/specs/registry.json entry whose file exists, the
+//          design doc's own Status header must agree with the registry status;
+//          mismatch FAILs naming the file (the class where spec-register flips
+//          the registry but the doc header stays draft/proposed — 4 instances
+//          found by T-20261029-002, repaired in d8d55f8a0). A doc without a
+//          parseable Status header line is a WARN (legacy), never a FAIL.
+//          Parsing lives in helpers/spec-header-consistency.ts (pure, unit-
+//          pinned by tests/unit/spec-header-consistency.test.ts).
 // v2.58.0 (2026-10-28, T-20261029-008): agent-mirror parity gate — on the green
 //          path, the sync-agent-mirrors --check stdout is logged when it carries the
 //          out-of-root WARN degrade, so a CI checkout's unverifiable-parity state is
@@ -241,6 +252,7 @@ import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
 import { splitIntoSections, getContentLines, stripMarkerZones } from './helpers/context-sections.ts';
 import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
+import { classifySpecHeader } from './helpers/spec-header-consistency.ts';
 import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
@@ -3432,6 +3444,44 @@ if (SPEC_CHECK) {
                 Fail(`Spec check: docs/specs/registry.json is stale vs docs/specs/entries/ (${entryIds.length} entry file(s) vs ${projectionIds.length} projected) — run: bun scripts/spec-register.ts --regenerate`);
             } else {
                 Pass(`Spec check: registry projection matches ${entryIds.length} entry file(s)`);
+            }
+        }
+
+        // Check 6 (T-20261029-002): registry-vs-design-header status consistency —
+        // the registry SSOT and the design doc's own Status header must agree.
+        // The failure class: spec-register flips the registry but the doc header
+        // stays draft/proposed (4 instances repaired in d8d55f8a0). Docs without
+        // a parseable Status header line are legacy — aggregated WARN, never FAIL.
+        const headerMismatches: string[] = [];
+        const headerLegacy: string[] = [];
+        let headerCompared = 0;
+        for (const s of registry.specs) {
+            if (!fs.existsSync(s.file)) continue; // missing file already warned by Check 3
+            let docText: string | null = null;
+            try {
+                docText = readUTF8File(s.file);
+            } catch {
+                docText = null;
+            }
+            const v = classifySpecHeader(s.status, docText);
+            if (v.verdict === 'match') {
+                headerCompared++;
+            } else if (v.verdict === 'mismatch') {
+                headerCompared++;
+                headerMismatches.push(s.file);
+                Fail(`Spec check: design doc Status header disagrees with registry — ${s.file} doc says "${v.docStatus}", registry says "${v.registryStatus}" (id: ${s.id}) — update the doc's Status header via the spec-register flip (T-20261029-002)`);
+            } else {
+                headerLegacy.push(s.file);
+            }
+        }
+        if (headerMismatches.length === 0) {
+            if (headerLegacy.length > 0) {
+                const shown = headerLegacy.slice(0, 5).join(', ');
+                const more = headerLegacy.length > 5 ? ` (+${headerLegacy.length - 5} more)` : '';
+                Warn(`Spec check: ${headerLegacy.length} registered design doc(s) have no parseable Status header line (legacy — add a "- **Status**: ..." header on next edit): ${shown}${more}`);
+            }
+            if (headerCompared > 0) {
+                Pass(`Spec check: all ${headerCompared} spec doc Status header(s) agree with the registry${headerLegacy.length > 0 ? `; ${headerLegacy.length} legacy doc(s) without a header (WARN)` : ''}`);
             }
         }
         }

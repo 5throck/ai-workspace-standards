@@ -1,7 +1,7 @@
 # KR Profile & LLM Config Standardization Design — co-newbiz Model Fleet-Wide
 
 - **Date**: 2026-09-26
-- **Status**: Approved (user decisions: LLM naming unified to `<PROJ>_LLM_*`; region-profiles full 12-section adoption)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0091 (decision record), ADR-0057 (country-profile mechanism), ADR-0069 (L1 docs independence), ADR-0118/0074 (co-newbiz LLM architecture)
 - **Scope**: Align all Projects/co-* to the co-newbiz configuration model per ADR-0091. Reference implementation is NOT modified except verification.
 

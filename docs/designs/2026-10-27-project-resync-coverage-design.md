@@ -2,7 +2,7 @@
 
 - **Date**: 2026-10-27
 - **Author**: nightly runner session (architect role), user directive 2026-10-27
-- **Status**: draft → implemented
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Skill**: `skills/project-resync/SKILL.md` 1.6.2 → **1.7.0** (root-only; `l2_propagate: false`; no template mirror — verified 2026-10-27)
 - **Companion spec**: extends 2026-10-07-daily-fleet-learning-extraction-design (2e/2f); ADR-0031 backport safety unchanged
 

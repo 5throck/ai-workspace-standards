@@ -4,7 +4,7 @@
 
 - **Spec ID**: 2026-09-26-design-foundation-v1-2-design
 - **Date**: 2026-09-26
-- **Status**: Approved
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Owner**: architect
 - **Sources**: `memory/meeting-2026-09-26-design-foundation-improvements.md` (meeting transcript + dissent), `docs/designs/2026-08-30-design-foundation-design.md` (v1.0 design; v1.1 pipeline added by ADR-0066), `templates/common/docs/design-foundation.md` v1.1, Design Foundation v1.1 coverage audit (2026-09-26)
 
