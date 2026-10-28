@@ -1,5 +1,31 @@
 #!/usr/bin/env bun
-// @version 1.79.0
+// @version 1.80.0
+// v1.80.0 (2026-10-28, T-20261028-010 — spec
+//          docs/designs/2026-10-28-stub-frontmatter-backfill-design.md):
+//          STUB FM BACKFILL in the agents/ pass. When a template extends-stub
+//          dead-ends in the STUB skip branch (MERGE_MANAGED files such as
+//          agents/pm.md, or stubs whose `extends:` target does not resolve)
+//          and the PROJECT file at that rel is itself stub-shaped, missing
+//          top-level scalar tier/version/last_updated frontmatter keys are
+//          backfilled from the template counterpart (last_updated = the
+//          delivery date) via lib/upgrade-policy backfillStubFrontmatter
+//          (v1.28.0, pure), the stub is written back, the path counts as
+//          delivered (TIER NORMALIZED precedent), and one STUB_FM_BACKFILL
+//          (INFO) decision row records the fields + source. The
+//          validate-model-registry v2.1.0 missing-tier FAIL flip
+//          (T-20261027-003, template-v0.22.0) turned stale project stubs red —
+//          co-price/co-export/co-security agents/pm.md lacked `tier:`
+//          (frontmatter predates the field; the MERGE pass never touches
+//          frontmatter beyond the tier block, delivery never touches
+//          MERGE_MANAGED pm.md, and normalizeAgentTierFrontmatter never ADDS a
+//          missing field), so the three stubs were hand-mirrored during the
+//          v0.22.0 wave — this change makes the delivery pass do it
+//          mechanically. Scope: frontmatter scalars only, bodies untouched
+//          (frontmatter ownership for stubs is template-side; body stays
+//          project-owned, cf. U-20261028-001); the v1.75.0 extends-target arm
+//          is deliberately NOT wired — every untouched branch there either
+//          replaces frontmatter wholesale (fields present afterward) or
+//          preserves the file under an explicit CONFLICT (ERROR) disposition.
 // v1.79.0 (2026-10-28, T-20261028-014 — U-20261028-001 D4 integration defect):
 //          BASELINES CARRY-FORWARD at manifest write. The writer rebuilt
 //          `baselines` from the delivered set alone (T-20261027-004 D1), which
@@ -795,6 +821,7 @@ import {
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
   MERGE_MANAGED_FILES,
+  backfillStubFrontmatter,
   baselineKeyFor,
   classifyProjectState,
   globToRegExp,
@@ -2884,6 +2911,28 @@ for (const agentsDir of tplAgentsDirs) {
         // D3 decision log (STUB_SKIP, INFO): the stub never delivers — the
         // resolved project body is the content (the v1.49.0 clobber lesson).
         recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_SKIP', 'template extends-stub never delivers through this pass — resolved at scaffold' + (MERGE_MANAGED_FILES.has(rel) ? ' (MERGE pass owns the body)' : ''));
+        // v1.80.0 (T-20261028-010): stub frontmatter scalar backfill. This
+        // branch is the only path where a stub-shaped project file survives a
+        // run untouched — the extends-target arm below either replaces the
+        // frontmatter wholesale (fields present afterward) or preserves the
+        // file under an explicit CONFLICT disposition. Frontmatter ownership
+        // for stubs is template-side: fill MISSING top-level scalar
+        // tier/version/last_updated from the template counterpart
+        // (last_updated = the delivery date); bodies stay project-owned and
+        // are never touched here (U-20261028-001). Idempotent — a stub whose
+        // frontmatter already carries the fields is byte-identical (no write,
+        // no decision row).
+        if (existsSync(projFile)) {
+          const backfill = backfillStubFrontmatter(readFileSync(projFile, 'utf8'), rawTpl, new Date().toISOString().slice(0, 10));
+          if (backfill.changed) {
+            console.log(`  ${dryTag}STUB FM BACKFILL: ${rel} — filled ${backfill.filled.join(', ')} (template counterpart; frontmatter only, body untouched)`);
+            if (!dryRun) {
+              writeFileSync(projFile, backfill.content, 'utf8');
+              noteDelivered(rel);
+            }
+            recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_FM_BACKFILL', `backfilled missing stub frontmatter scalar(s) ${backfill.filled.join(', ')} from the template counterpart (last_updated = delivery date) — frontmatter only, body untouched`);
+          }
+        }
         continue;
       }
       console.log(`  STUB → delivers extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')}`);

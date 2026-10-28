@@ -1,4 +1,26 @@
-// @version 1.27.0
+// @version 1.28.0
+// v1.28.0 (2026-10-28, T-20261028-010 — spec
+//          docs/designs/2026-10-28-stub-frontmatter-backfill-design.md): stub
+//          frontmatter scalar backfill. Exports backfillStubFrontmatter() —
+//          fills MISSING top-level scalar tier/version/last_updated keys in a
+//          project extends-stub from its template counterpart (tier from the
+//          counterpart's scalar, version verbatim, last_updated = the delivery
+//          date), and STUB_FM_BACKFILL (INFO) joins DecisionVerdict +
+//          DECISION_SEVERITY_CONTRACT. The validate-model-registry v2.1.0
+//          missing-tier FAIL flip (template-v0.22.0) turned stubs whose
+//          frontmatter predates the field red, and no delivery pass adds a
+//          missing key: the v1.24.0 normalizer rewrites an EXISTING tier block
+//          only, and the agents/ version-gated passes replace frontmatter
+//          wholesale. Guards: the project content must itself be stub-shaped
+//          (a column-0 `extends:` in the frontmatter — resolved agent bodies
+//          are never touched, the v1.24.0 ownership contract stays intact);
+//          MISSING = the column-0 key is absent (existing values are never
+//          overwritten — deliberate project divergence stays; empty-value keys
+//          stay out of scope; nested lifecycle-block keys are never touched);
+//          filled keys append at the end of the frontmatter body; CRLF
+//          preserved; idempotent; body bytes untouched (frontmatter scalars
+//          only — frontmatter ownership for stubs is template-side, body stays
+//          project-owned, cf. U-20261028-001).
 // v1.27.0 (2026-10-28, U-20261028-001 — spec
 //          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md,
 //          D1–D3 + D6): delivery tombstones. Additive data + one pure guard
@@ -767,6 +789,87 @@ export function normalizeAgentTierFrontmatter(projectContent: string, templateCo
   };
 }
 
+// ── Stub frontmatter scalar backfill (T-20261028-010) ─────────────────────────
+
+export interface StubFrontmatterBackfill {
+  /** Project content after the backfill (identical to the input when nothing changed). */
+  content: string;
+  /** True when at least one missing scalar was filled. */
+  changed: boolean;
+  /** The filled top-level keys, in fill order (subset of tier/version/last_updated). */
+  filled: string[];
+}
+
+/**
+ * Backfill MISSING top-level scalar frontmatter keys (tier / version /
+ * last_updated) in a project extends-stub from its template counterpart
+ * (T-20261028-010 — spec docs/designs/2026-10-28-stub-frontmatter-backfill-
+ * design.md). The validate-model-registry v2.1.0 missing-tier FAIL flip
+ * (T-20261027-003, template-v0.22.0) turned stubs whose frontmatter predates
+ * the field red, and no delivery pass adds a missing key: the MERGE normalizer
+ * above rewrites an EXISTING tier block only, and the agents/ version-gated
+ * passes replace frontmatter wholesale — the agents/ STUB skip branch is the
+ * only place a stub-shaped file survives a run untouched.
+ *
+ * Contract:
+ *  - the PROJECT content must itself be stub-shaped (a column-0 `extends:`
+ *    inside the frontmatter) — resolved agent bodies are never touched even
+ *    when a caller mis-wires the branch (the helper-level ownership guard);
+ *  - MISSING = the top-level (column-0) key is absent from the project
+ *    frontmatter. Existing values are NEVER overwritten (deliberate project
+ *    divergence — a pinned older version — stays); an empty-value key is
+ *    treated as present (the v1.24.0 contract: never invent structure); nested
+ *    keys (the `lifecycle:` block's `last_updated:`) are never touched;
+ *  - field sources: `tier` from the template counterpart's scalar
+ *    (comment-stripped; a map-form template side fills nothing), `version`
+ *    from the counterpart's scalar verbatim (quotes preserved), `last_updated`
+ *    from the DELIVERY DATE (not the counterpart's authoring date — the same
+ *    convention as the post-delivery re-stamp); all three require the
+ *    counterpart to declare the key, and an invalid deliveryDate leaves
+ *    last_updated unfilled;
+ *  - filled keys append at the end of the frontmatter body (YAML mapping key
+ *    order is insignificant; append keeps the diff minimal and never reorders
+ *    existing keys); CRLF line endings are detected and preserved; idempotent;
+ *  - body bytes are untouched — frontmatter scalars only.
+ */
+export function backfillStubFrontmatter(
+  projectContent: string,
+  templateContent: string,
+  deliveryDate: string,
+): StubFrontmatterBackfill {
+  const unchanged: StubFrontmatterBackfill = { content: projectContent, changed: false, filled: [] };
+  const projFm = frontmatterBody(projectContent);
+  if (!projFm || !/^extends:[ \t]*\S/m.test(projFm.body)) return unchanged; // not a stub — never touch
+  const tplFm = frontmatterBody(templateContent);
+  if (!tplFm) return unchanged;
+  const present = (key: string): boolean =>
+    projFm.body.split(/\r?\n/).some((l) => new RegExp(`^${key}:(?:[ \\t].*)?$`).test(l));
+  const tplScalar = (key: string): string => {
+    const m = tplFm.body.match(new RegExp(`^${key}:[ \\t]*(\\S[^\\r\\n]*)$`, 'm'));
+    return m ? m[1].trim() : '';
+  };
+  const fills: string[] = [];
+  if (!present('tier')) {
+    const tier = stripTierComment(tplScalar('tier'));
+    if (tier) fills.push(`tier: ${tier}`);
+  }
+  if (!present('version')) {
+    const version = tplScalar('version');
+    if (version) fills.push(`version: ${version}`);
+  }
+  if (!present('last_updated') && /^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
+    fills.push(`last_updated: ${deliveryDate}`);
+  }
+  if (fills.length === 0) return unchanged;
+  const rebuilt = [...projFm.body.split(/\r?\n/), ...fills];
+  const fmText = `---${projFm.eol}${rebuilt.join(projFm.eol)}${projFm.eol}---`;
+  return {
+    content: projectContent.slice(0, projFm.start) + fmText + projectContent.slice(projFm.end),
+    changed: true,
+    filled: fills.map((f) => f.split(':')[0]!),
+  };
+}
+
 /** Pipeline-generated paths that never count as hand-authored code in a diff.
  *  (U-20261027-002): `scripts-snapshot.json` and `.claude/last-upgrade-pr-body.md`
  *  join the set — both are regenerated by upgrade-project AFTER
@@ -814,7 +917,9 @@ export function isDeliveredDiff(changedFiles: string[], deliveredFiles: string[]
 export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
 
 /** Verdicts of the unified decision log (design D3/D2 matrix). TOMBSTONED /
- *  TOMBSTONED_SKIP joined in v1.27.0 (tombstone-ownership design D3). */
+ *  TOMBSTONED_SKIP joined in v1.27.0 (tombstone-ownership design D3);
+ *  STUB_FM_BACKFILL joined in v1.28.0 (T-20261028-010 — missing stub-frontmatter
+ *  scalar backfill from the template counterpart). */
 export type DecisionVerdict =
   | 'NEW'
   | 'UPDATE'
@@ -825,6 +930,7 @@ export type DecisionVerdict =
   | 'DRIFT_PRESERVE'
   | 'DRIFT_RESTORED'
   | 'STUB_SKIP'
+  | 'STUB_FM_BACKFILL'
   | 'SEED_SKIP'
   | 'SKELETON_COLLISION'
   | 'EVOLVED'
@@ -840,6 +946,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   MERGE: 'INFO',
   SEED_SKIP: 'INFO',
   STUB_SKIP: 'INFO',
+  STUB_FM_BACKFILL: 'INFO',
   CONTEXT_PRESERVE: 'WARN',
   DRIFT_PRESERVE: 'WARN',
   DRIFT_RESTORED: 'WARN',
