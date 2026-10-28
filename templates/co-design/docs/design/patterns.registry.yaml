@@ -1,7 +1,7 @@
 # patterns.registry.yaml — co-design screen-pattern registry (design.md §6,
 # project instantiation; mirrors docs/screen-patterns.md, the declared inventory).
-# Last reconciled: 2026-10-27 (spec 2026-10-27-deferred-items-design — project
-# instantiation record, not present in the template tree).
+# Last reconciled: 2026-10-28 (spec 2026-10-27-co-design-suite-promotion-design —
+# template-side promotion of the project instantiation record, T-20261027-011/-012).
 # New patterns enter only via a revision of that document (design-phase gate).
 version: 1
 patterns:

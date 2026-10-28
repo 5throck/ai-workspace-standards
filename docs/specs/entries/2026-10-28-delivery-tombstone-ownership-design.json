@@ -2,8 +2,8 @@
   "id": "2026-10-28-delivery-tombstone-ownership-design",
   "title": "delivery tombstone ownership design",
   "file": "docs/designs/2026-10-28-delivery-tombstone-ownership-design.md",
-  "status": "draft",
+  "status": "implemented",
   "source": "manual",
   "created": "2026-10-27",
-  "last_updated": "2026-10-27"
+  "last_updated": "2026-10-28"
 }
