@@ -13,7 +13,7 @@ title: >-
   tombstone-ownership design D5 port; until then the single-path ERROR is
   by-design loudness
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-28T09:13:42.616+09:00'
 history:
@@ -29,5 +29,11 @@ history:
   - at: '2026-10-28T12:52:04.165+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-28T13:54:55.012+09:00'
+    from: review
+    to: done
+result: >-
+  landed via PR #1688 (merged 8aa29d256): stub-composed compare/delivery in
+  upgrade-project 1.81.0; co-design i18n-specialist CONFLICT (ERROR) converged
+  (D9)
 error: null
