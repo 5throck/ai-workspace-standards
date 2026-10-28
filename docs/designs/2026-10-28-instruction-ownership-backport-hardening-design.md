@@ -4,7 +4,7 @@
 - **Date**: 2026-10-28
 - **Author**: Template Architect (Design Gate Row 0)
 - **Tickets**: two user directives issued 2026-10-28, folded with T-20261028-001 (validator-hardening, high) and T-20261028-013 (stub-composed delivery at upgrade time, normal)
-- **Status**: draft — design-only for user review. No engine, validator, or template content is changed by this design ticket. Implementation is pending user approval and PM dispatch (§9).
+- **Status**: implemented (registry SSOT; retro-marked from draft per T-20261029-002 — the hardening landed with the instruction-ownership backport).
 
 ## 0. Conclusion
 

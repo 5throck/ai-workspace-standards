@@ -4,7 +4,7 @@
 - **Date**: 2026-10-28
 - **Author**: Template Architect (Design Gate Row 0 dispatch)
 - **Provenance**: workspace-owner directive 2026-10-28 (L0-only operational governance docs must not be verbatim-mirrored into L1 or delivered into scaffolded projects); sibling decision DEC-20261028-01 (workflows.md became a hand-maintained L1-authored doc); upstream ticket U-20261028-001 (co-design deleted its un-adapted workflows.md copy on 2026-10-27, triggering the delivery-tombstone mechanism, root PRs #1677/#1678, manifest-baseline carry-forward v1.79.0)
-- **Status**: proposed — implementation pending PM dispatch (docs-writer for the fork rewrite; automation-engineer for pipeline edits and the per-project removal script)
+- **Status**: implemented (registry SSOT; retro-marked from proposed per T-20261029-002 — the fork rewrite, pipeline edits, and remove-retired-governance-docs.ts landed; DEC-20261028-05 phase 2 executed across 16 projects).
 - **Decision record**: DEC-20261028-05
 
 ## 0. Conclusion

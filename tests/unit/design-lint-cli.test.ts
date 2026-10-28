@@ -49,7 +49,8 @@ describe("design-lint CLI flags", () => {
   test("--help exits 0 and documents the sub-check runner", async () => {
     const { exitCode, stdout } = await run("--help");
     expect(exitCode).toBe(0);
-    expect(stdout).toContain("design-lint.ts v2.3.0");
+    expect(stdout).toContain("design-lint.ts v2.4.0");
+    expect(stdout).toContain("token-role-misuse");
     expect(stdout).toContain("token-usage");
     expect(stdout).toContain("--schema");
     expect(stdout).toContain("design-token-exempt");
@@ -89,9 +90,10 @@ describe("design-lint --json contract", () => {
       checks: Array<{ name: string; status: string; findings: unknown[]; skipReason?: string }>;
     };
     expect(report.tool).toBe("design-lint");
-    expect(report.version).toBe("2.3.0");
+    expect(report.version).toBe("2.4.0");
     expect(report.checks.map((c) => c.name)).toEqual([
       "token-usage",
+      "token-role-misuse",
       "components",
       "patterns",
       "icons",

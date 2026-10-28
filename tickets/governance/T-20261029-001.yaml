@@ -11,12 +11,24 @@ title: >-
   a YAML prose-fragment lint; also reconcile the f9af67cdf census message ('14
   resolved' vs tree 17 done / 2 waiting / 3 backlog)
 priority: high
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-10-29T02:12:27.475+09:00'
 history:
   - at: '2026-10-29T02:12:27.475+09:00'
     from: null
     to: backlog
+  - at: '2026-10-29T04:30:27.354+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T04:30:27.368+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-29T04:30:27.383+09:00'
+    from: running
+    to: review
+  - at: '2026-10-29T04:30:53.638+09:00'
+    from: review
+    to: waiting
 result: null
 error: null
