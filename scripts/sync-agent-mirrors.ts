@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-28, canary finding on Projects/co-newbiz — the design §4.2
+//          flagged ASSUMPTION verified with a real gap): stub bodies resolve
+//          POINTER-FIRST — the stub's own `extends:` value (file-dir-relative,
+//          the ADR-0033 convention; co-newbiz's roster points at the L0
+//          agents/ bodies three levels up) — falling back to the templates-root
+//          convention (common/agents/<name>) via validated --templates-root or
+//          bounded ancestor DISCOVERY (first ancestor carrying
+//          templates/common/agents; not-found is a hard error naming every
+//          searched ancestor, never a silent fallback). In-project runs
+//          previously resolved the stub source against <project>/templates,
+//          which never exists in a delivered project, and ignored the extends
+//          pointer entirely. Mirror OUTPUT bytes are unchanged for the
+//          templates-convention case — only where the body is sourced from.
+//          The scaffold/adopt wiring passes the workspace templates/ explicitly;
+//          dev-sync/audit runs rely on discovery for pointer-less stubs.
 // v1.0.0 (2026-10-28, spec 2026-10-28-platform-agent-mirror / DEC-20261028-06,
 //          PR-1 root scope): initial. One template-managed generator projecting
 //          the platform-neutral agents/*.md SSOT (scalar `tier:` only, NO
@@ -46,7 +61,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, isAbsolute, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { die } from './lib/error-handling.ts';
 import * as yaml from 'js-yaml';
@@ -280,6 +295,53 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
   }
 }
 
+// ── Templates-root discovery (§4.2 stub rule; canary finding) ─────────────────
+
+/** Bounded ancestor walk — a sane cap; a deeper nesting than this is a layout bug. */
+export const TEMPLATES_ROOT_MAX_ANCESTORS = 8;
+
+const TEMPLATES_COMMON_AGENTS_REL = join('templates', 'common', 'agents');
+
+/**
+ * Where extends-stub L1 bodies are sourced from.
+ *
+ * Delivered projects keep no templates/ tree — the common body lives at the
+ * WORKSPACE root, an ancestor of the project. Discovery walks up from the target
+ * root (bounded) and stops at the first ancestor carrying
+ * templates/common/agents. An explicit override (the --templates-root CLI flag,
+ * or the scaffold/adopt wiring) wins and is validated against the same shape;
+ * not-found is a hard error naming every searched ancestor — never a silent
+ * fallback, because a stub must never project as a dead mirror.
+ */
+export function resolveTemplatesRoot(targetRoot: string, override?: string | null): string {
+  if (override !== undefined && override !== null && override !== '') {
+    const tplDir = resolve(override);
+    if (!existsSync(join(tplDir, 'common', 'agents'))) {
+      throw new SsotError(
+        `--templates-root '${override}' does not contain common/agents/ — extends-stub bodies cannot resolve from it ` +
+        `(repair: pass the workspace templates/ directory, e.g. --templates-root <workspace>/templates)`,
+      );
+    }
+    return tplDir;
+  }
+  const searched: string[] = [];
+  let dir = resolve(targetRoot);
+  for (let depth = 0; depth <= TEMPLATES_ROOT_MAX_ANCESTORS; depth++) {
+    searched.push(dir);
+    if (existsSync(join(dir, TEMPLATES_COMMON_AGENTS_REL))) {
+      return join(dir, 'templates');
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new SsotError(
+    `templates/common/agents not found walking up from ${resolve(targetRoot)} ` +
+    `(searched: ${searched.join(' -> ')}) — extends-stubs cannot resolve to self-contained personas ` +
+    `(repair: pass --templates-root <workspace>/templates, or run inside a workspace checkout)`,
+  );
+}
+
 // ── SSOT parsing ──────────────────────────────────────────────────────────────
 
 /** Hard input-contract error; the message names the offending file. */
@@ -311,7 +373,12 @@ function readVariantName(root: string): string {
  * composer; a stub whose L1 body is unavailable is a hard error (a dead stub
  * must never project into a mirror).
  */
-export function parseSsotAgent(filePath: string, root: string, warnings: string[]): SsotAgent {
+export function parseSsotAgent(
+  filePath: string,
+  root: string,
+  warnings: string[],
+  templatesRoot?: string | null,
+): SsotAgent {
   const rel = relative(root, filePath).split('\\').join('/');
   let content: string;
   try {
@@ -327,14 +394,16 @@ export function parseSsotAgent(filePath: string, root: string, warnings: string[
 
   // name/description parse through js-yaml so quoted/escaped values round-trip
   // exactly (quoteScalar re-escapes for the mirror); regex fallback keeps the
-  // hard-error contract when the block does not parse as YAML.
+  // hard-error contract when the block does not parse as YAML. The parsed block
+  // also carries the `extends:` pointer for stub-body resolution below.
+  let parsedFm: Record<string, unknown> | null = null;
   let name = '';
   let description = '';
   try {
-    const parsed = yaml.load(fm) as Record<string, unknown> | null;
-    if (parsed && typeof parsed === 'object') {
-      if (typeof parsed.name === 'string') name = parsed.name.trim();
-      if (typeof parsed.description === 'string') description = parsed.description.trim();
+    parsedFm = yaml.load(fm) as Record<string, unknown> | null;
+    if (parsedFm && typeof parsedFm === 'object') {
+      if (typeof parsedFm.name === 'string') name = parsedFm.name.trim();
+      if (typeof parsedFm.description === 'string') description = parsedFm.description.trim();
     }
   } catch {
     // fall through to the regex extraction below
@@ -367,13 +436,38 @@ export function parseSsotAgent(filePath: string, root: string, warnings: string[
 
   let body = bodyOf(content);
   if (/^extends[ \t]*:/m.test(fm)) {
-    const commonPath = join(root, 'templates', 'common', 'agents', basename(filePath));
+    // Pointer-first stub-body resolution (canary finding): the stub's own
+    // `extends:` value (file-dir-relative, the ADR-0033 convention) is the
+    // primary source — co-newbiz's roster points at the L0 agents/ bodies three
+    // levels up, which no templates-convention path could ever supply. The
+    // templates convention (common/agents/<name> under a validated
+    // --templates-root or bounded ancestor discovery) is the fallback for
+    // pointer-less or dangling stubs.
+    const extendsRaw = parsedFm && typeof parsedFm.extends === 'string' ? parsedFm.extends.trim() : '';
+    const extendsTarget = extendsRaw ? resolve(dirname(filePath), extendsRaw) : '';
+    let commonPath: string;
+    if (extendsTarget && existsSync(extendsTarget)) {
+      commonPath = extendsTarget;
+    } else {
+      // templatesRoot === undefined -> discovery (bounded ancestor walk); an
+      // explicit value (CLI flag / scaffold-adopt wiring) was already validated.
+      const tplRoot = templatesRoot ?? resolveTemplatesRoot(root);
+      commonPath = join(tplRoot, 'common', 'agents', basename(filePath));
+      if (!existsSync(commonPath)) {
+        throw new SsotError(
+          `${rel}: extends-stub but the L1 body is unavailable ` +
+          (extendsTarget ? `(extends '${extendsRaw}' -> ${extendsTarget}; convention path ${commonPath})` : `(${commonPath})`) +
+          ` — a stub must never project as a dead mirror ` +
+          `(repair: restore the body at the extends target or the convention path, or inline the body)`,
+        );
+      }
+    }
     const variant = readVariantName(root);
     const composed = composeResolvedAgentContent(filePath, commonPath, variant);
     if (composed.missingL1) {
       throw new SsotError(
         `${rel}: extends-stub but the L1 body is unavailable (${commonPath}) — a stub must never project as a dead mirror ` +
-        `(repair: restore templates/common/agents/${basename(filePath)} or inline the body)`,
+        `(repair: restore the body at ${commonPath} or inline the body)`,
       );
     }
     if (!composed.composed) {
@@ -482,7 +576,10 @@ export function loadWorkspaceSchema(root: string): WorkspaceSchemaLike {
  * Check mode (check: true): no writes — report missing / extra-managed /
  *   differing drift; the caller turns a non-empty drift list into exit 1.
  */
-export function syncAgentMirrors(targetRoot: string, opts: { check?: boolean } = {}): SyncAgentMirrorsResult {
+export function syncAgentMirrors(
+  targetRoot: string,
+  opts: { check?: boolean; templatesRoot?: string | null } = {},
+): SyncAgentMirrorsResult {
   const root = resolve(targetRoot);
   const result: SyncAgentMirrorsResult = {
     ok: true,
@@ -513,9 +610,13 @@ export function syncAgentMirrors(targetRoot: string, opts: { check?: boolean } =
     return result;
   }
 
+  // An explicit --templates-root override is VALIDATED here (common/agents
+  // shape) before any per-file work; undefined defers to per-stub discovery.
+  const templatesRoot = opts.templatesRoot ? resolveTemplatesRoot(root, opts.templatesRoot) : opts.templatesRoot;
+
   // Parse the SSOT roster (hard errors throw, naming the file).
   const ssotPaths = listSsotAgents(root);
-  const agents: SsotAgent[] = ssotPaths.map((p) => parseSsotAgent(p, root, result.warnings));
+  const agents: SsotAgent[] = ssotPaths.map((p) => parseSsotAgent(p, root, result.warnings, templatesRoot));
   result.agents = agents.length;
 
   // v1 emits exactly the registry's supported rows (today: Claude Code only).
@@ -617,9 +718,10 @@ export function syncAgentMirrors(targetRoot: string, opts: { check?: boolean } =
 
 // ── CLI ───────────────────────────────────────────────────────────────────────
 
-function parseArgs(argv: string[]): { check: boolean; dir: string | null } {
+function parseArgs(argv: string[]): { check: boolean; dir: string | null; templatesRoot: string | null } {
   let check = false;
   let dir: string | null = null;
+  let templatesRoot: string | null = null;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
     if (arg === '--check') {
@@ -627,15 +729,22 @@ function parseArgs(argv: string[]): { check: boolean; dir: string | null } {
     } else if (arg === '--dir') {
       const value = argv[i + 1];
       if (value === undefined || value.startsWith('--')) {
-        die(`--dir requires a path argument (got ${value ?? 'nothing'}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>]`);
+        die(`--dir requires a path argument (got ${value ?? 'nothing'}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
       }
       dir = value;
       i += 1;
+    } else if (arg === '--templates-root') {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('--')) {
+        die(`--templates-root requires a path argument (got ${value ?? 'nothing'}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
+      }
+      templatesRoot = value;
+      i += 1;
     } else {
-      die(`unknown argument '${arg}' — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>]`);
+      die(`unknown argument '${arg}' — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
     }
   }
-  return { check, dir };
+  return { check, dir, templatesRoot };
 }
 
 // Advisory PID-stamped lock (sync-skills T-20260912-017 pattern): PID-validated
@@ -718,7 +827,7 @@ function printReport(res: SyncAgentMirrorsResult, check: boolean): number {
 }
 
 if (import.meta.main) {
-  const { check, dir } = parseArgs(process.argv.slice(2));
+  const { check, dir, templatesRoot } = parseArgs(process.argv.slice(2));
   const rootArg = dir ?? process.cwd();
   const root = isAbsolute(rootArg) ? resolve(rootArg) : resolve(process.cwd(), rootArg);
   if (!existsSync(root)) {
@@ -727,7 +836,7 @@ if (import.meta.main) {
   let res: SyncAgentMirrorsResult;
   try {
     if (!check) acquireLock(root);
-    res = syncAgentMirrors(root, { check });
+    res = syncAgentMirrors(root, { check, templatesRoot: templatesRoot ?? undefined });
   } catch (err) {
     console.error(`ERROR ${SCRIPT_NAME}: ${(err as Error).message}`);
     process.exit(1);

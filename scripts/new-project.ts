@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.37.0
+// @version 1.38.0
+// v1.38.0 (2026-10-28, canary finding on Projects/co-newbiz — design §4.2 stub
+//          rule): §2.3c mirror generation passes --templates-root <workspace>/templates
+//          explicitly — a fresh scaffold sits beside (not under) any workspace
+//          checkout, so the generator's ancestor discovery has nothing to find;
+//          the explicit flag removes the ambiguity. Generator v1.1.0.
 // v1.37.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
 //          DEC-20261028-06): §2.3c — one agent-mirror generator write-mode call
 //          (spawn scripts/sync-agent-mirrors.ts --dir <project>) immediately after
@@ -963,7 +968,7 @@ makeWritable(projectDir);
   const mirrorGenerator = join(workspaceRoot, 'scripts', 'sync-agent-mirrors.ts');
   if (existsSync(mirrorGenerator)) {
     console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
-    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir], { stdio: 'inherit' });
+    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir, '--templates-root', join(workspaceRoot, 'templates')], { stdio: 'inherit' });
     if (mirrorResult.status !== 0) {
       console.error(`❌ Agent-mirror generation failed — the scaffold is complete but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
       if (import.meta.main) {
