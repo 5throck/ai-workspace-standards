@@ -2,7 +2,7 @@
 /**
  * backport-diff.ts — 5-surface backport candidate differ for committed
  * Projects/co-* LOCAL-WORK (project-resync skill Step 2 support).
- * @version 1.0.2
+ * @version 1.1.0
  *
  * v1.0.2 (2026-09-25, ADR-0088 W2): the .hermes platform mirror joins the
  *         skills-classification regex (five-mirror parity).
@@ -60,17 +60,66 @@
  * Safety: report-only per ADR-0031 Principle 5 — drift reporting is the
  * sanctioned direction; automated sibling/template sync is forbidden.
  *
+ * v1.1.0 (2026-10-28, design
+ *         docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+ *         D5): region-aware verdict column — every row gains additive
+ *         `ownership` + `verdict` fields (markdown: two columns). Verdict
+ *         semantics (design §5.1, refined per review dispatch):
+ *           NO_ACTION      — direction in-sync (already promoted / engagement).
+ *           REDELIVER      — the next wave owns the delta: I1 engine-zone
+ *                            template-vocabulary staleness, agents-R1
+ *                            template-defined frontmatter, agents-R3
+ *                            template-ahead bodies; the row names the wave's
+ *                            expected disposition.
+ *           PORT_CANDIDATE — project-ahead/project-only deltas whose content
+ *                            is project-authored: project-asset surfaces
+ *                            (skills/scripts/helpers/other), agents-R3
+ *                            evolved bodies, and authored I3 free-form spans
+ *                            in the five instruction files (the D4 port
+ *                            backlog feed — land them template-side inside a
+ *                            managed zone or skeleton-registry section per
+ *                            the adjudicated-port procedure).
+ *           ADJUDICATE     — port-or-keep decisions: I2 VARIANT-* project
+ *                            state, I3 deltas without cleanly authored
+ *                            content, both-changed rows, and ADAPTED I1
+ *                            spans (project-authored content inside an
+ *                            engine-zone span — the D2 census gates that
+ *                            replace, so the wave cannot cleanly own it).
+ *         The five instruction files (AGENTS.md/CLAUDE.md/GEMINI.md/CODEX.md/
+ *         HERMES.md) join the context surface (D5 — previously only
+ *         CLAUDE.md). Ownership reuses the landed D1 taxonomy
+ *         (lib/upgrade-policy scanInstructionRegions) and the D2 authored-line
+ *         predicate (spanCarriesProjectAuthoredLines over the head-vs-
+ *         counterpart delta minus base-vocabulary lines) — no duplicated
+ *         region logic. Lifecycle-block (agents-R2) deltas are project state
+ *         and never verdict rows.
+ *
  * @module backport-diff
  */
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import {
+  INSTRUCTION_FILE_RELS,
+  scanInstructionRegions,
+  spanCarriesProjectAuthoredLines,
+} from "./lib/upgrade-policy.ts";
 
-const VERSION = "1.0.2";
+const VERSION = "1.1.0";
 
 type Surface = "skills" | "scripts" | "helpers" | "context" | "agents" | "other";
 type Direction = "project-ahead" | "template-ahead" | "both-changed" | "in-sync" | "project-only";
+
+/** D5 region-aware verdicts (design §5.1). */
+export type BackportVerdict = "PORT_CANDIDATE" | "REDELIVER" | "ADJUDICATE" | "NO_ACTION";
+
+/** D5 ownership labels. Instruction files carry the D1 kinds (I1/I2/I3, with
+ *  the region name); agents/ carries the tombstone-design R-model
+ *  (agents-R1 frontmatter / agents-R3 body / agents-R2 lifecycle — the
+ *  lifecycle never deltas into a row); every other surface is project-asset
+ *  material. */
+export type Ownership = string;
 
 interface DiffRow {
   file: string;
@@ -80,6 +129,10 @@ interface DiffRow {
   added: number;
   removed: number;
   note?: string;
+  /** v1.1.0 (D5, additive): where the delta sits in the D1/R ownership model. */
+  ownership: Ownership;
+  /** v1.1.0 (D5, additive): the region-aware verdict. */
+  verdict: BackportVerdict;
 }
 
 interface ProjectReport {
@@ -182,9 +235,12 @@ export function surfaceFor(relFile: string): Surface {
   if (relFile.startsWith("scripts/helpers/")) return "helpers";
   if (relFile.startsWith("scripts/")) return "scripts";
   if (relFile.startsWith("agents/")) return "agents";
-  if (relFile === "CLAUDE.md" || relFile === "docs/context.md" || /^docs\/[^/]+\.context\.md$/.test(relFile)) {
+  // D5: the five instruction files join the context surface (previously only
+  // CLAUDE.md — AGENTS/GEMINI/CODEX/HERMES .md were backport-invisible "other").
+  if (relFile === "docs/context.md" || /^docs\/[^/]+\.context\.md$/.test(relFile)) {
     return "context";
   }
+  if ((INSTRUCTION_FILE_RELS as readonly string[]).includes(relFile)) return "context";
   return "other";
 }
 
@@ -241,6 +297,98 @@ export function directionFor(
 }
 
 // ---------------------------------------------------------------------------
+// D5 region-aware ownership + verdict (design §5.1 — exported for unit tests)
+// ---------------------------------------------------------------------------
+
+const lineSet = (content: string | null): Set<string> =>
+  new Set((content ?? "").split("\n").map((l) => l.trim()).filter((l) => l !== ""));
+
+/** Lines of `head` (trimmed, non-blank) the counterpart does not contain, minus
+ *  lines the delivered base already carried (stale template vocabulary is the
+ *  wave's material, not project authorship). */
+export function projectAuthoredDelta(
+  headContent: string | null,
+  counterpartContent: string | null,
+  baseContent: string | null,
+): string[] {
+  if (headContent === null) return [];
+  const counter = lineSet(counterpartContent);
+  const base = lineSet(baseContent);
+  return headContent
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l !== "" && !counter.has(l) && !base.has(l));
+}
+
+/** Ownership label for one changed file (D5). Instruction files: the D1 region
+ *  kind + name of the region holding the first project-authored delta line
+ *  (`I3` when no authored line exists — the delta is counterpart-vocabulary
+ *  drift). agents/: the tombstone-design R-model (lifecycle deltas are project
+ *  state and excluded; frontmatter → agents-R1, body → agents-R3). Everything
+ *  else: `project-asset`. */
+export function ownershipFor(
+  relFile: string,
+  headContent: string | null,
+  counterpartContent: string | null,
+  baseContent: string | null,
+): Ownership {
+  if ((INSTRUCTION_FILE_RELS as readonly string[]).includes(relFile)) {
+    const authored = projectAuthoredDelta(headContent, counterpartContent, baseContent);
+    if (authored.length === 0 || headContent === null) return "I3";
+    const regions = scanInstructionRegions(headContent, relFile);
+    const lines = headContent.split("\n");
+    for (const line of authored) {
+      const idx = lines.findIndex((l) => l.trim() === line);
+      const region = regions.find((r) => idx >= r.start && idx < r.end);
+      if (region && region.kind !== "I3") return `${region.kind}:${region.name}`;
+      if (region) return "I3";
+    }
+    return "I3";
+  }
+  if (relFile.startsWith("agents/") && relFile.endsWith(".md")) {
+    const authored = projectAuthoredDelta(headContent, counterpartContent, baseContent);
+    if (authored.length === 0 || headContent === null) return "agents-R3";
+    const counter = lineSet(counterpartContent);
+    const fmMatch = headContent.match(/^---\n([\s\S]*?)\n---/);
+    const fmLines = new Set((fmMatch?.[1] ?? "").split("\n").map((l) => l.trim()));
+    // R2 (lifecycle block) deltas are project state — exclude from ownership.
+    const lifecycleLines = new Set(
+      (fmMatch?.[1] ?? "")
+        .split("\n")
+        .filter((l) => /^lifecycle:/.test(l.trim()) || /^\s{2}/.test(l))
+        .map((l) => l.trim()),
+    );
+    for (const line of authored) {
+      if (lifecycleLines.has(line)) continue;
+      if (fmLines.has(line) || /^\w+:/.test(line)) return "agents-R1";
+      void counter;
+      return "agents-R3";
+    }
+    return "agents-R2";
+  }
+  return "project-asset";
+}
+
+/** D5 verdict (design §5.1, refined per review dispatch — see module header):
+ *  the delta authorship splits the I1/agents-R1 REDELIVER arm so an ADAPTED
+ *  engine-zone span adjudicates (the D2 census gates its replace) while
+ *  template-vocabulary staleness re-delivers. */
+export function verdictFor(direction: Direction, ownership: Ownership, authoredDelta: boolean): BackportVerdict {
+  if (direction === "in-sync") return "NO_ACTION";
+  if (ownership === "I1" || ownership.startsWith("I1:") || ownership === "agents-R1") {
+    return authoredDelta ? "ADJUDICATE" : "REDELIVER";
+  }
+  const promotableDirection = direction === "project-ahead" || direction === "project-only";
+  if (promotableDirection && (ownership === "project-asset" || ownership === "agents-R3")) {
+    return "PORT_CANDIDATE";
+  }
+  if (promotableDirection && ownership === "I3" && authoredDelta) {
+    return "PORT_CANDIDATE";
+  }
+  return "ADJUDICATE";
+}
+
+// ---------------------------------------------------------------------------
 // Reporting
 // ---------------------------------------------------------------------------
 
@@ -256,6 +404,9 @@ function markdownReport(reports: ProjectReport[]): string {
     "(docs/designs/2026-08-28-project-template-backport-design.md). Read-only:",
     "the human judgment promotes — this tool never writes (ADR-0031 Principle 5).",
     DIRECTION_LEGEND,
+    "Verdicts (design §5.1): PORT_CANDIDATE = project-authored work awaiting the port-or-keep promotion · " +
+      "REDELIVER = the next wave owns it · ADJUDICATE = port-or-keep decision (I2/I3/adapted-I1 — D4 backlog) · " +
+      "NO_ACTION = in-sync.",
     "",
   ];
   for (const p of reports) {
@@ -269,10 +420,10 @@ function markdownReport(reports: ProjectReport[]): string {
       lines.push("No files matching the requested surfaces in this range.", "");
       continue;
     }
-    lines.push("| path | surface | source counterpart | direction | +added | -removed | note |", "|---|---|---|---|---|---|---|");
+    lines.push("| path | surface | source counterpart | direction | ownership | verdict | +added | -removed | note |", "|---|---|---|---|---|---|---|---|---|");
     for (const r of p.rows) {
       lines.push(
-        `| ${r.file} | ${r.surface} | ${r.counterpart ?? "—"} | ${r.direction} | ${r.added} | ${r.removed} | ${r.note ?? "—"} |`,
+        `| ${r.file} | ${r.surface} | ${r.counterpart ?? "—"} | ${r.direction} | ${r.ownership} | ${r.verdict} | ${r.added} | ${r.removed} | ${r.note ?? "—"} |`,
       );
     }
     lines.push("");
@@ -298,7 +449,10 @@ Usage:
   bun scripts/backport-diff.ts --project <co-name> [--surfaces all|skills|scripts|helpers|context|agents] [--base <commit>] [--json]
 
 Default projects: all Projects/co-*. Default base: HEAD~1 (pass the pre-work
-revision for multi-commit local work). Read-only — never writes.`);
+revision for multi-commit local work). v1.1.0 rows carry the additive
+region-aware ownership + verdict columns (design
+2026-10-28-instruction-ownership-backport-hardening D5). Read-only — never
+writes.`);
     process.exit(0);
   }
   const targets = resolveProjects(projects);
@@ -339,14 +493,19 @@ revision for multi-commit local work). Read-only — never writes.`);
         ? readFileSync(counterpart, "utf-8").replace(/\r\n/g, "\n")
         : null;
       const [added, removed] = numstat(project, resolvedBase, relFile);
+      const direction = directionFor(baseContent, headContent, counterpartContent);
+      const ownership = ownershipFor(relFile, headContent, counterpartContent, baseContent);
+      const authored = projectAuthoredDelta(headContent, counterpartContent, baseContent).length > 0;
       rows.push({
         file: relFile,
         surface,
         counterpart: counterpart ? relative(process.cwd(), counterpart) : null,
-        direction: directionFor(baseContent, headContent, counterpartContent),
+        direction,
         added,
         removed,
         note: headContent === null ? "deleted in range" : undefined,
+        ownership,
+        verdict: verdictFor(direction, ownership, authored),
       });
     }
     reports.push({ project, variant, branch, base: resolvedBase, changedFiles: changed.length, rows });

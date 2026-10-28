@@ -1,5 +1,35 @@
 #!/usr/bin/env bun
-// @version 1.82.0
+// @version 1.83.0
+// v1.83.0 (2026-10-28, design
+//          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//          D6): `--port-candidates` — the mechanical would-revert list.
+//          Dry-run-only (the flag REFUSES in apply mode — design §10 Q3
+//          default; §5.2's "apply ignores the flag" is intentionally
+//          strengthened to a usage error so a silent no-op can never be
+//          mistaken for a clean report). In --dry-run --port-candidates mode
+//          the normal pass output is suppressed and the run ends with a
+//          machine-readable inventory (--json: one document per project;
+//          default: markdown operator view) of exactly which project deltas
+//          the next apply would revert or escalate, composed from the data the
+//          dry-run already computed — the unified decision log + the D9
+//          stub-composed drift set:
+//
+//            { schemaVersion: 1, project, generatedAt, templateVersion,
+//              sections: {
+//                conflict_bound:           CONFLICT rows (agents/ version-gt
+//                                          + equal-version escalation, D2
+//                                          census-gated adapted-span replaces),
+//                tombstone_candidates:     TOMBSTONED rows (first observation —
+//                                          needs --tombstone or restore),
+//                stub_composed_mismatches: D9 stub-composed drift rows (the
+//                                          one-time composed-byte heal),
+//                adapted_span_candidates:  EVOLVED_REGION rows (the D2 census
+//                                          port-backlog feed) },
+//              summary: { per-section counts + errorCount } }
+//
+//          each item {path, surface, trigger, disposition} (design §5.2). The
+//          report is exit-0 report-only — it informs the operator/nightly, it
+//          never gates.
 // v1.82.0 (2026-10-28, design
 //          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //          D1-D4): instruction-file region taxonomy + merge-time region census
@@ -909,6 +939,36 @@ let projectPath = '';
 let variant = '';
 let platform = 'all';
 let dryRun = false;
+// D6 (--port-candidates): dry-run-only would-revert inventory mode (see the
+// v1.83.0 header). Suppressed-output classification run + terminal report.
+let portCandidates = false;
+// D6: --json switches the --port-candidates report to the machine-readable form.
+let reportJson = false;
+
+// D6 (--port-candidates): the classification run is silent — pass output is
+// suppressed from the validation block until the terminal report (restored on
+// every exit path the report mode can reach).
+let passOutputSuppressed = false;
+const passConsole = { log: console.log, error: console.error, warn: console.warn };
+function suppressPassOutput(): void {
+  if (passOutputSuppressed) return;
+  passOutputSuppressed = true;
+  console.log = () => {};
+  console.error = () => {};
+  console.warn = () => {};
+}
+function restorePassOutput(): void {
+  if (!passOutputSuppressed) return;
+  console.log = passConsole.log;
+  console.error = passConsole.error;
+  console.warn = passConsole.warn;
+  passOutputSuppressed = false;
+}
+
+/** D6: stub-originated files whose D9 composed compare found drift this run —
+ *  the next apply re-delivers the composed expectation (one-time heal), so
+ *  they belong in the would-revert inventory. */
+const stubComposedDriftRels = new Set<string>();
 let preflight = false; // T-20261007-028: check apply-blockers (clean tree, open PRs, template-version.txt) without applying
 let pruneRemoved = false;
 let rollback = false;
@@ -942,6 +1002,8 @@ for (let i = 0; i < args.length; i++) {
   }
   if (args[i]?.startsWith('--disposition=')) { applyDispositionArg(args[i].slice('--disposition='.length)); continue; }
   if (args[i] === '--dry-run') { dryRun = true; continue; }
+  if (args[i] === '--port-candidates') { portCandidates = true; continue; }
+  if (args[i] === '--json') { reportJson = true; continue; }
   if (args[i] === '--preflight') { preflight = true; continue; }
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
@@ -993,6 +1055,19 @@ if (dryRun && (tombstoneGrants.length > 0 || clearTombstoneGrants.length > 0)) {
   process.exit(1);
 }
 
+// D6 (design §10 Q3 default): --port-candidates is a dry-run-only report mode.
+// Apply mode REFUSES the flag (a stricter reading than §5.2's "apply ignores
+// it"): a silent no-op must never be mistaken for a clean report.
+if (portCandidates && !dryRun) {
+  console.error('ERROR: --port-candidates is a dry-run-only report mode — re-run with --dry-run --port-candidates.');
+  process.exit(1);
+}
+const reportPortCandidates = portCandidates && dryRun;
+if (reportPortCandidates) {
+  console.error('[port-candidates] pass output suppressed — the would-revert inventory follows on stdout.');
+  suppressPassOutput();
+}
+
 /** Parse one --tombstone value: a required path glob (repeatable). */
 function applyTombstoneArg(raw: string): void {
   const glob = (raw ?? '').trim();
@@ -1014,7 +1089,7 @@ function applyClearTombstoneArg(raw: string): void {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]...');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--port-candidates [--json]]');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -2049,6 +2124,8 @@ function mergeGitattributes(dest: string, src: string): void {
 }
 
 // ── LOCKED files ───────────────────────────────────────────────────────────────
+// (D6: pass output was already suppressed at the validation block when
+// --port-candidates mode is active; the terminal report restores it.)
 console.log('--- LOCKED files (always overwrite) ---');
 const LOCKED_FILES = [
   '.githooks/pre-commit', '.githooks/pre-push', '.githooks/commit-msg',
@@ -2183,6 +2260,7 @@ for (const rel of MERGE_FILES) {
   mergeChanged++;
 }
 if (ciMergeFailed) {
+  restorePassOutput();
   console.error(`\nERROR: ${CI_WORKFLOW_REL} merge failed validation — nothing was written for it. Fix the listed problems (or migrate manually) and re-run.`);
   process.exit(1);
 }
@@ -3103,6 +3181,7 @@ for (const agentsDir of tplAgentsDirs) {
       // reclassified to CONFLICT (ERROR) regardless of templateChanged —
       // equal-version and version-gated arms behave identically for agents/.
       const deliverable = deliverableContent();
+      if (stubComposed !== null) stubComposedDriftRels.add(rel);
       const proceeded = evolvedDeliveryGuard({
         rel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: agents/',
         projectFile: projFile, deliverableContent: deliverable,
@@ -3147,6 +3226,9 @@ for (const agentsDir of tplAgentsDirs) {
       // CONFLICT (ERROR) disposition regardless of which side moved (restoring
       // "canonical" over evolved content is not self-evidently right). Baseline-
       // clean files keep the DRIFT_RESTORED canonical heal (WARN).
+      // D6: a stub-composed file reaching the drift arm re-delivers composed
+      // bytes on the next apply — the would-revert inventory needs the path.
+      if (stubComposed !== null) stubComposedDriftRels.add(rel);
       const cls = classifyCandidate(rel, projFile, rendered)!;
       let proceed = true;
       let verdict: DecisionVerdict = 'DRIFT_RESTORED';
@@ -5214,6 +5296,116 @@ if (!dryRun) {
   console.log('    "chore: upgrade template to <version>"');
   console.log('  (--body-file must be a SEPARATE argument from the message — never inside the quoted message.)');
 }
+// ── D6: --port-candidates terminal report (dry-run-only mode) ─────────────────
+// Composed from what the suppressed dry-run already classified: the unified
+// decision log + the D9 stub-composed drift set. Report-only — exit 0 always;
+// consumers (nightly Step 2, operators) read the sections, nothing gates.
+interface PortCandidateItem { path: string; surface: string; trigger: string; disposition: string; }
+function portCandidatesDocument(): object {
+  const truncate = (s: string, n = 140): string => (s.length > n ? `${s.slice(0, n)}…` : s);
+  const conflict: PortCandidateItem[] = decisions
+    .filter((d) => d.verdict === 'CONFLICT')
+    .map((d) => ({
+      path: d.path,
+      surface: d.pass,
+      trigger: truncate(d.detail),
+      disposition: d.detail.includes('instruction-region census')
+        ? 'span skipped — --disposition adopt-template[=glob] delivers it, or port the content template-side (adjudicated-port §6)'
+        : 're-delivered only via --disposition adopt-template[=glob]; otherwise port template-side (adjudicated-port §6)',
+    }));
+  const tombstones: PortCandidateItem[] = decisions
+    .filter((d) => d.verdict === 'TOMBSTONED')
+    .map((d) => ({
+      path: d.path,
+      surface: d.pass,
+      trigger: truncate(d.detail),
+      disposition: 'confirm with --tombstone <glob> (apply mode) or restore the project copy',
+    }));
+  const stubPaths = [...stubComposedDriftRels];
+  const stubItems: PortCandidateItem[] = stubPaths.map((rel) => {
+    const conflictHere = decisions.find((d) => d.path === rel && d.verdict === 'CONFLICT');
+    return {
+      path: rel,
+      surface: 'SYNC_IF_NEWER: agents/',
+      trigger: conflictHere
+        ? 'D9 stub-composed compare mismatch under CONFLICT disposition'
+        : 'D9 stub-composed compare mismatch — the next apply re-delivers the composed expectation (one-time heal)',
+      disposition: conflictHere
+        ? 'skipped — --disposition adopt-template[=glob] delivers the composed bytes, or port template-side (adjudicated-port §6)'
+        : 'no action needed — the composed bytes carry the stub-owned fields (never a silent revert)',
+    };
+  });
+  const adapted: PortCandidateItem[] = decisions
+    .filter((d) => d.verdict === 'EVOLVED_REGION')
+    .map((d) => ({
+      path: d.path,
+      surface: d.pass,
+      trigger: truncate(d.detail),
+      disposition: 'preserved (WARN) — port candidate: land template-side inside a managed zone or skeleton-registry section (adjudicated-port §6)',
+    }));
+  return {
+    schemaVersion: 1,
+    project: projectDir,
+    generatedAt: new Date().toISOString(),
+    // PriorDeliveryState is the narrow reader view (baselines/tombstones);
+    // the on-disk v2 manifest carries templateVersion — read it defensively.
+    templateVersion: (priorManifest as { templateVersion?: string } | null)?.templateVersion ?? '',
+    sections: {
+      conflict_bound: conflict,
+      tombstone_candidates: tombstones,
+      stub_composed_mismatches: stubItems,
+      adapted_span_candidates: adapted,
+    },
+    summary: {
+      conflictBound: conflict.length,
+      tombstoneCandidates: tombstones.length,
+      stubComposedMismatches: stubItems.length,
+      adaptedSpanCandidates: adapted.length,
+      errorCount: errorDecisions().length,
+    },
+  };
+}
+function printPortCandidatesReport(): void {
+  const doc = portCandidatesDocument() as {
+    project: string; generatedAt: string; templateVersion: string;
+    sections: Record<string, PortCandidateItem[]>;
+    summary: Record<string, number>;
+  };
+  if (reportJson) {
+    console.log(JSON.stringify(doc, null, 2));
+    return;
+  }
+  const SECTION_TITLES: Record<string, string> = {
+    conflict_bound: 'Conflict-bound — the next apply escalates or skips these',
+    tombstone_candidates: 'Tombstone candidates — first observation of a project-side deletion',
+    stub_composed_mismatches: 'Stub-composed mismatches — D9 composed-byte re-delivery',
+    adapted_span_candidates: 'Adapted-span candidates — D2 census port backlog',
+  };
+  console.log(`# port-candidates — would-revert inventory (design 2026-10-28-instruction-ownership-backport-hardening D6)`);
+  console.log(`project: ${doc.project} · template baseline: ${doc.templateVersion || '(none)'} · generated ${doc.generatedAt}`);
+  for (const [key, title] of Object.entries(SECTION_TITLES)) {
+    const items = doc.sections[key] ?? [];
+    console.log('');
+    console.log(`## ${title} (${items.length})`);
+    if (items.length === 0) {
+      console.log('  none');
+      continue;
+    }
+    console.log('  | path | surface | trigger | disposition |');
+    console.log('  |---|---|---|---|');
+    for (const it of items) {
+      console.log(`  | ${it.path} | ${it.surface} | ${it.trigger.slice(0, 90)} | ${it.disposition.slice(0, 90)} |`);
+    }
+  }
+  console.log('');
+  console.log(`summary: ${doc.summary.conflictBound} conflict-bound · ${doc.summary.tombstoneCandidates} tombstone · ${doc.summary.stubComposedMismatches} stub-composed · ${doc.summary.adaptedSpanCandidates} adapted-span (report-only — exit 0, nothing gates)`);
+}
+if (reportPortCandidates) {
+  restorePassOutput();
+  printPortCandidatesReport();
+  process.exit(0);
+}
+
 // M1 (2026-09-15 project review): a failed security check must not read as a
 // green exit for scripted consumers (fleet runners, CI).
 if (import.meta.main && !securityPass) process.exit(1);
