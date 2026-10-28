@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261028-013
+kind: manual
+title: >-
+  upgrade-project: stub-composed delivery at upgrade time — extends-stub
+  frontmatter is scaffold/adopt-time only (helpers/resolve-pm-stub.ts), so the
+  upgrade compare uses the extends-target bytes and variant-scoped stub fields
+  (co-design i18n phases:[4], co-develop [5]) surface as a permanent
+  PROJECT_EVOLVED CONFLICT (ERROR) on every wave. Evidence: PR #1678 dry-run
+  (agents/i18n-specialist.md CONFLICT, project copy preserved), engine semantics
+  at scripts/upgrade-project.ts ~2857 (v1.75.0 lineage). Fix: compose stub over
+  extends target for the upgrade-time compare+delivery. Engine follow-up from
+  tombstone-ownership design D5 port; until then the single-path ERROR is
+  by-design loudness
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-28T09:13:42.616+09:00'
+history:
+  - at: '2026-10-28T09:13:42.616+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
