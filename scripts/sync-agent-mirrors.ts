@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-28, T-20261029-008): CHECK-mode out-of-root degrade — a
+//          standalone CI checkout has no workspace ancestor, so extends-stub
+//          discovery hard-threw inside the SSOT parse and the audit gate
+//          blocked every real-CI project PR (co-abap #227, co-safety #220).
+//          When no templates root is discoverable AND generated mirrors exist,
+//          --check now returns green with an explicit WARN ("parity cannot be
+//          verified out-of-root — run inside a workspace checkout or pass
+//          --templates-root"); write mode keeps the hard error (deliberate
+//          write, never auto-repair). Discovery extracted to the exported pure
+//          discoverTemplatesRoot({root, searched}) reused by
+//          resolveTemplatesRoot (same bounded walk, same error text).
 // v1.1.0 (2026-10-28, canary finding on Projects/co-newbiz — the design §4.2
 //          flagged ASSUMPTION verified with a real gap): stub bodies resolve
 //          POINTER-FIRST — the stub's own `extends:` value (file-dir-relative,
@@ -313,6 +324,21 @@ const TEMPLATES_COMMON_AGENTS_REL = join('templates', 'common', 'agents');
  * not-found is a hard error naming every searched ancestor — never a silent
  * fallback, because a stub must never project as a dead mirror.
  */
+export function discoverTemplatesRoot(targetRoot: string): { root: string | null; searched: string[] } {
+  const searched: string[] = [];
+  let dir = resolve(targetRoot);
+  for (let depth = 0; depth <= TEMPLATES_ROOT_MAX_ANCESTORS; depth++) {
+    searched.push(dir);
+    if (existsSync(join(dir, TEMPLATES_COMMON_AGENTS_REL))) {
+      return { root: join(dir, 'templates'), searched };
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return { root: null, searched };
+}
+
 export function resolveTemplatesRoot(targetRoot: string, override?: string | null): string {
   if (override !== undefined && override !== null && override !== '') {
     const tplDir = resolve(override);
@@ -324,22 +350,15 @@ export function resolveTemplatesRoot(targetRoot: string, override?: string | nul
     }
     return tplDir;
   }
-  const searched: string[] = [];
-  let dir = resolve(targetRoot);
-  for (let depth = 0; depth <= TEMPLATES_ROOT_MAX_ANCESTORS; depth++) {
-    searched.push(dir);
-    if (existsSync(join(dir, TEMPLATES_COMMON_AGENTS_REL))) {
-      return join(dir, 'templates');
-    }
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
+  const { root: found, searched } = discoverTemplatesRoot(targetRoot);
+  if (found === null) {
+    throw new SsotError(
+      `templates/common/agents not found walking up from ${resolve(targetRoot)} ` +
+      `(searched: ${searched.join(' -> ')}) — extends-stubs cannot resolve to self-contained personas ` +
+      `(repair: pass --templates-root <workspace>/templates, or run inside a workspace checkout)`,
+    );
   }
-  throw new SsotError(
-    `templates/common/agents not found walking up from ${resolve(targetRoot)} ` +
-    `(searched: ${searched.join(' -> ')}) — extends-stubs cannot resolve to self-contained personas ` +
-    `(repair: pass --templates-root <workspace>/templates, or run inside a workspace checkout)`,
-  );
+  return found;
 }
 
 // ── SSOT parsing ──────────────────────────────────────────────────────────────
@@ -614,11 +633,6 @@ export function syncAgentMirrors(
   // shape) before any per-file work; undefined defers to per-stub discovery.
   const templatesRoot = opts.templatesRoot ? resolveTemplatesRoot(root, opts.templatesRoot) : opts.templatesRoot;
 
-  // Parse the SSOT roster (hard errors throw, naming the file).
-  const ssotPaths = listSsotAgents(root);
-  const agents: SsotAgent[] = ssotPaths.map((p) => parseSsotAgent(p, root, result.warnings, templatesRoot));
-  result.agents = agents.length;
-
   // v1 emits exactly the registry's supported rows (today: Claude Code only).
   const adapterEntries = Object.entries(PLATFORM_AGENT_ADAPTERS).filter(([platform]) =>
     schema.platform_surfaces?.platforms?.[platform]?.agents?.supported === true,
@@ -634,6 +648,38 @@ export function syncAgentMirrors(
   const mirrorDir = join(root, agentsRow.mirror_dir ?? '.claude/agents');
   result.mirrorDir = mirrorDir;
   const modelFormat = agentsRow.model_format ?? 'alias';
+
+  // T-20261029-008: standalone CI checkouts carry no workspace ancestor, so
+  // extends-stub bodies cannot resolve — discovery hard-throws inside the SSOT
+  // parse and blocks every real-CI project PR at the audit gate (co-abap #227,
+  // co-safety #220). In CHECK mode only, degrade to an explicit WARN + green
+  // exit when no templates root is discoverable AND the project carries
+  // generated mirrors (evidence they were produced out-of-root by a
+  // workspace-anchored run). Write mode keeps the hard error: a repair is a
+  // deliberate write and must never run without the root ("a stub must never
+  // project as a dead mirror").
+  if (opts.check && opts.templatesRoot === undefined && discoverTemplatesRoot(root).root === null) {
+    const hasMirrors =
+      readManagedManifest(mirrorDir) !== null ||
+      (existsSync(mirrorDir) && readdirSync(mirrorDir).some((f) => f.endsWith('.md')));
+    if (hasMirrors) {
+      const degrade =
+        `CHECK DEGRADED TO WARN: no workspace templates root discoverable from ${root} while generated mirrors exist ` +
+        `under ${mirrorDir} — mirror↔SSOT parity cannot be verified out-of-root (T-20261029-008). ` +
+        `Verification is root-anchored: run inside a workspace checkout or pass --templates-root <workspace>/templates; ` +
+        `write mode still refuses to run without the root (deliberate write, never auto-repair).`;
+      result.warnings.push(degrade);
+      result.notes.unshift(`WARN: ${degrade}`);
+      result.skipped = true;
+      result.ok = true;
+      return result;
+    }
+  }
+
+  // Parse the SSOT roster (hard errors throw, naming the file).
+  const ssotPaths = listSsotAgents(root);
+  const agents: SsotAgent[] = ssotPaths.map((p) => parseSsotAgent(p, root, result.warnings, templatesRoot));
+  result.agents = agents.length;
 
   // Projection set: name -> content.
   const projections = new Map<string, string>();
