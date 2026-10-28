@@ -76,7 +76,8 @@
   },
   "_notes": {
     "variant_specific": "Variant-specific phase numbering and names are declared in each variant's docs/phase-definitions.md and docs/<variant>.context.md workflow table (ADR-0096); this canonical list is the workspace-root schema and is not a per-variant naming rule",
-    "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers"
+    "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers",
+    "root_allowlist_divergence": "This L1 copy intentionally diverges from the workspace-root docs/workspace-schema.json: CONSTITUTION.md is absent from rootAllowlist.files here because no scaffolded project carries that file (CONSTITUTION.md §7.5 non-propagation), while the L0 copy must keep the entry for its own stray-root check — intentional per spec 2026-10-28-l0-only-governance-doc-cleanup (DEC-20261028-05); the pair is hand-maintained (ADR-0069), each copy is validated against its own repo."
   },
   "i18n": {
     "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories, and *_<lang-code> suffix files (e.g. README_ko.md, tracked by hash-sync), are exempt from the English-only documentation rule. en is the source language, not a translation-zone target.",
@@ -177,7 +178,6 @@
       "HERMES.md",
       "AGENTS.md",
       "CHANGELOG.md",
-      "CONSTITUTION.md",
       "SECURITY.md",
       "LICENSE",
       "NOTICES",

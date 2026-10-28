@@ -8,7 +8,7 @@
 
 <!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
 > **Governance references (ADR-0090)**: [`AGENTS.md`](AGENTS.md) is the SSOT registry — **read it first**, and Read the owning governance documents it points to before executing their workflows. Operational workflow bodies live outside this file — **Read the owning file before governing work**:
-> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
+> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·
 > > Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
 > > Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
 > > Language Policy → [docs/context.md](docs/context.md).
@@ -30,7 +30,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 > **Note**: This Role Declaration and the Mandatory Execution Plan serve as the strict system-prompt-level enforcement for the PM Gateway.
 
-> **Auto-enforcement (Gemini CLI)**: `scripts/hooks/pm-dispatch-gate.ts` runs as a BeforeTool hook on `invoke_subagent` (decision `deny`) — direct specialist dispatch is auto-denied unless a fresh PM-role session marker exists (`pm-role-bootstrap.ts` at SessionStart, 24h TTL). Detail: `docs/governance/agents/pm-gateway-workflow.md` §3.1.3. Antigravity does not fire hooks — self-enforce this rule.
+> **Auto-enforcement (Gemini CLI)**: `scripts/hooks/pm-dispatch-gate.ts` runs as a BeforeTool hook on `invoke_subagent` (decision `deny`) — direct specialist dispatch is auto-denied unless a fresh PM-role session marker exists (`pm-role-bootstrap.ts` at SessionStart, 24h TTL). Detail: `scripts/hooks/pm-dispatch-gate.ts`. Antigravity does not fire hooks — self-enforce this rule.
 
 ---
 
@@ -373,7 +373,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-10-26 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-10-28 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- graft:start -->
 ## Graft — repo context graph

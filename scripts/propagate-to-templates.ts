@@ -5,8 +5,21 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.19.1
+ * @version 2.20.0
  *
+ * v2.20.0 (2026-10-28, L0-only governance doc cleanup — spec
+ *          docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md
+ *          §5.2, DEC-20261028-05): NEW Phase B-PGW in applyGovernanceTransforms
+ *          — six explicit literal replace pairs (T1-T6) retarget every
+ *          pm-gateway-workflow.md pointer in the five GOVERNANCE_L1_FILES
+ *          renditions to delivered targets (agents/pm.md anchors, AGENTS.md §3
+ *          anchor idiom, the delivered pm-dispatch-gate hook source), because
+ *          the L1 delivery of docs/governance/agents/pm-gateway-workflow.md is
+ *          retired in the same root PR. A mandatory post-transform guard dies()
+ *          when any pm-gateway-workflow.md file link survives (anchor-style
+ *          AGENTS.md#… references stay valid) — the B-7 silent-regex-rot class
+ *          made loud for this retirement. CODEX.md carries zero references
+ *          (design E8) and needs no transform, but the guard covers it anyway.
  * v2.19.0 (2026-09-27, ADR-0093 — user directive 2026-09-27; spec
  *          docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
  *          HERMES.md joins GOVERNANCE_L1_FILES as the fourth platform
@@ -1253,6 +1266,77 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
         `(spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5).`
       );
     }
+  }
+
+  // ── Phase B-PGW (v2.20.0, spec
+  //    docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md §5.2,
+  //    DEC-20261028-05): pm-gateway-workflow.md retires from L1 delivery — the
+  //    L1 instruction renditions must stop pointing at it IN THE SAME root PR,
+  //    or the next --governance-l1 run regenerates dangling links. House style:
+  //    explicit literal content.replace() pairs, one per known pointer sentence
+  //    (the B-1..B-7 precedent) — these sentences cite L0-only specifics that
+  //    need per-sentence rewrites, not a blind regex sweep.
+  //    T1-T3 → AGENTS.md (:68/:89/:112); T4 → CLAUDE.md + GEMINI.md (:11,
+  //    identical line text, one ungated replace); T5 → CLAUDE.md + GEMINI.md
+  //    (shared `…` §3.1.3 detail-pointer substring, global regex); T6 →
+  //    HERMES.md (:43). CODEX.md carries ZERO pm-gateway-workflow.md
+  //    references at both levels (design E8) — no transform, but the guard
+  //    below still covers it.
+
+  // T1 (AGENTS.md) — the "Read it before" mandate becomes an L0-only statement
+  // retargeted to the delivered agents/pm.md.
+  content = content.replace(
+    'The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**',
+    'The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries are workspace-root-only (L0) and are not delivered to projects; the core MUST policy in §3.1–§3.7 above plus [`agents/pm.md`](agents/pm.md) carry the project-applicable rules — **read them before dispatching specialists.**'
+  );
+
+  // T2 (AGENTS.md) — Permission Denial Protocol anchor retarget. Anchor verified
+  // against templates/common/agents/pm.md ("## Permission Denial Protocol").
+  content = content.replace(
+    '[Permission Denial Protocol](docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol)',
+    '[Permission Denial Protocol](agents/pm.md#permission-denial-protocol)'
+  );
+
+  // T3 (AGENTS.md) — roster-detail pointer retarget.
+  content = content.replace(
+    '*Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*',
+    '*Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*'
+  );
+
+  // T4 (CLAUDE.md + GEMINI.md) — pointer-table line retarget to the AGENTS.md §3
+  // anchor idiom (same shape agents/pm.md already uses: AGENTS.md#3-pm-gateway-workflow).
+  content = content.replace(
+    '> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·',
+    '> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·'
+  );
+
+  // T5 (CLAUDE.md + GEMINI.md) — §3.1.3 detail pointer retargets to the DELIVERED
+  // hook source (scripts/hooks/pm-dispatch-gate.ts ships in templates/common/scripts/hooks/).
+  content = content.replace(
+    /`docs\/governance\/agents\/pm-gateway-workflow\.md` §3\.1\.3/g,
+    '`scripts/hooks/pm-dispatch-gate.ts`'
+  );
+
+  // T6 (HERMES.md) — bootstrap-block protocol pointer retarget.
+  content = content.replace(
+    'Full phase protocol: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md); mandatory criteria and plan format: `AGENTS.md` §5.',
+    'Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.'
+  );
+
+  // Phase B-PGW fatal guard (design §5.2, mandatory): the transform suite's own
+  // history records a silent-match failure class (the B-7 comment above — the
+  // GEMINI regex that silently stopped matching after a restructure). If any
+  // pm-gateway-workflow.md FILE link survives the transforms, fail loudly
+  // instead of regenerating a dangling pointer into every scaffold. Anchor-style
+  // references (AGENTS.md#3-pm-gateway-workflow, CONSTITUTION-derived
+  // context anchors) carry no ".md" after the literal and stay valid by design.
+  if (content.includes('pm-gateway-workflow.md')) {
+    die(
+      `governance-l1: "${filename}" still references docs/governance/agents/pm-gateway-workflow.md after ` +
+      `the B-PGW transforms — a pointer sentence no longer matches the L0 source (regex rot, the B-7 failure class). ` +
+      `Add/repair the matching literal replace in Phase B-PGW; never silently ship a dangling link ` +
+      `(spec docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md §5.2).`
+    );
   }
 
   // ── Phase B-AGENTS: AGENTS.md workspace roster replacement ──────────────

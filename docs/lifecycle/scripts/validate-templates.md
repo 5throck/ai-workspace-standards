@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.62.0
+- **Version**: 1.63.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-27
+- **Last Updated**: 2026-10-28
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-28 | production | production | v1.62.0 → v1.63.0 (spec docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md, DEC-20261028-05): workspace-schema.json L0↔L1 parity checks (schema-hash-parity / ws-schema-l1-parity) normalize the single sanctioned L1 divergence — L1 drops the stale rootAllowlist entry for the non-propagating workspace constitution marker (§7.5) and records _notes.root_allowlist_divergence; the pair is hand-maintained (ADR-0069, the T-20261026-017 propagation premise was wrong); any other divergence still fails. | automation-engineer |
 | 2026-10-27 | production | production | v1.61.0 → v1.62.0 (T-20261027-002): new Error check C-CM-06 — forward path-existence for every declared common_commands/common_platform_skills `*_source` path: a `.`-prefixed value must resolve under templates/common/ (2026-10-27 project-review slot D found 13 of 154 declarations pointing at non-existent mirrors — `.gemini/commands/<n>.md` vs the rendered `.toml` mirrors, `.agents/commands/<n>.md` vs the L0-resident surface with no L1 mirror — while entries carried propagated_to_common:true); non-`.` values are exclusion prose records (gateguard precedent) and skip. | automation-engineer |
 | 2026-10-27 | production | production | v1.60.0 → v1.61.0 (T-20261027-001): new Error arm `agent-quality-recursive` — recursive scan of every templates/<common\|co-*>/agents/ tree covering co-safety's nested agents/domains/** + agents/_shared/** layout: exactly one scalar `tier: high\|medium\|low` per non-README/non-underscore/non-extends agent file (ADR-0102; map form, invalid scalar, or missing declaration FAILs; extends stubs skip — chain-resolved by roster-tier-consistency) plus body completeness via validate-agents.ts agentBodyCompletenessFinding (≥40 non-empty body lines, ≥4 `## ` sections). Closes the flat-scan gap where 37 map-form tier files + 23 stub-quality bodies under co-safety's nested trees survived every shipped gate until the nightly scaffold E2E caught them. | automation-engineer |
 | 2026-10-26 | production | production | v1.59.1 → v1.60.0 (ADR-0102 / T-20261026-018, user ruling 2): WS-01 Check 4 (agents/*.md tier frontmatter vs schema agent_tiers) retired — agent_tiers removed from docs/workspace-schema.json; the agent file's scalar `tier:` declaration is the single source (validity: validate-model-registry v2; cross-surface parity: Check F). ws-schema-missing hint drops agent_tiers. | automation-engineer |

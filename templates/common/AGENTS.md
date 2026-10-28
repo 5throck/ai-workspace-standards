@@ -49,7 +49,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 ## §3: PM Gateway Workflow
 
-**Thin-dispatcher section (ADR-0090)**: the PM Gateway is MANDATORY for all substantive work. Core MUST policy (§3.1), the 3-Tier model table (§3.6), meeting facilitation (§3.7), and the L0-only governance-backlog dispatch (§3.7.5) remain below. The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**
+**Thin-dispatcher section (ADR-0090)**: the PM Gateway is MANDATORY for all substantive work. Core MUST policy (§3.1), the 3-Tier model table (§3.6), meeting facilitation (§3.7), and the L0-only governance-backlog dispatch (§3.7.5) remain below. The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries are workspace-root-only (L0) and are not delivered to projects; the core MUST policy in §3.1–§3.7 above plus [`agents/pm.md`](agents/pm.md) carry the project-applicable rules — **read them before dispatching specialists.**
 
 ### §3.1 PM Gateway Policy
 
@@ -70,7 +70,7 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 
 **Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns. See [Role Clarification](agents/pm.md#-role-clarification) in `agents/pm.md` and the Task Owner vs Executor Distinction below.
 
-When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol) — never substitutes for the specialist.
+When a specialist agent's required tool is denied, PM applies the [Permission Denial Protocol](agents/pm.md#permission-denial-protocol) — never substitutes for the specialist.
 
 #### §3.1.2 PM Role Boundaries
 
@@ -93,7 +93,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 - PM creates tasks (owner: pm), dispatches project specialists (executor: `[specialist agent]`), and updates task status upon completion
 
 
-*Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*
+*Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*
 
 ### §3.7 Meeting Facilitation
 
