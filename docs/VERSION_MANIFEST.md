@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-28T10:04:03.799Z
+**Generated**: 2026-10-28T11:58:48.668Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 58
-- **Scripts**: 124 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 125 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -157,12 +157,13 @@
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
 | promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.19.1 | scripts/propagate-to-templates.ts | js-yaml |
+| propagate-to-templates.ts | 2.20.0 | scripts/propagate-to-templates.ts | js-yaml |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
 | readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | N/A |
 | regenerate-agents-md.ts | 1.3.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
+| remove-retired-governance-docs.ts | 1.0.0 | scripts/remove-retired-governance-docs.ts | N/A |
 | render-commands.ts | 1.1.0 | scripts/render-commands.ts | N/A |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | N/A |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
@@ -211,8 +212,8 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.62.0 | scripts/validate-templates.ts | js-yaml |
-| validate-ticket-doc-commands.ts | 1.0.0 | scripts/validate-ticket-doc-commands.ts | N/A |
+| validate-templates.ts | 1.63.0 | scripts/validate-templates.ts | js-yaml |
+| validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.5.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
 | variant-feature.ts | 1.1.0 | scripts/variant-feature.ts | N/A |

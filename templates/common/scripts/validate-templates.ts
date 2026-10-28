@@ -1,8 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.62.0
+ * @version 1.63.0
  *
+ * v1.63.0 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup,
+ *          DEC-20261028-05): the workspace-schema.json L0↔L1 parity checks
+ *          (schema-hash-parity / ws-schema-l1-parity) normalize the SINGLE
+ *          sanctioned L1 divergence — the L1 copy drops the stale
+ *          context.md rootAllowlist entry (no scaffolded project carries
+ *          that file, §7.5 non-propagation) and records
+ *          _notes.root_allowlist_divergence. The pair is hand-maintained
+ *          (ADR-0069 — no propagation domain covers it; the T-20261026-017
+ *          "delivered by propagation" premise was wrong). Any divergence
+ *          beyond that documented delta still fails both checks.
  * v1.62.0 (2026-10-27, T-20261027-002): new ERROR check C-CM-06 — forward
  *          path-existence for every declared common_commands/common_platform_skills
  *          *_source path: a '.'-prefixed value must resolve under templates/common/
@@ -368,7 +378,6 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -1125,15 +1134,26 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         }
       }
 
-      // T-20261026-017: hash-parity — the L1 copy of workspace-schema.json (delivered
-      // by propagation) must byte-match the L0 root copy; silent divergence leaves the
-      // project-side gates reading a different contract than the workspace gate.
+      // T-20261026-017: hash-parity — the L1 copy of workspace-schema.json must
+      // match the L0 root copy so the project-side gates read the same contract
+      // as the workspace gate. 2026-10-28-l0-only-governance-doc-cleanup
+      // (DEC-20261028-05): the pair is hand-maintained (ADR-0069 — no
+      // propagation domain covers it; the original "delivered by propagation"
+      // premise was wrong) and INTENTIONALLY diverges in exactly one documented
+      // delta: the L1 copy drops the stale context.md rootAllowlist entry
+      // (no scaffolded project carries that file, §7.5 non-propagation) and
+      // carries the _notes.root_allowlist_divergence record. The comparison
+      // normalizes that sanctioned delta; ANY other divergence still fails.
       const l1SchemaPath = join(TEMPLATES_DIR, 'common', 'docs', 'workspace-schema.json');
       if (existsSync(schemaPath) && existsSync(l1SchemaPath)) {
-        const rootHash = createHash('sha256').update(readFileSync(schemaPath)).digest('hex');
-        const l1Hash = createHash('sha256').update(readFileSync(l1SchemaPath)).digest('hex');
-        if (rootHash !== l1Hash) {
-          fail('root', 'schema-hash-parity', `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverged (sha256 ${rootHash.slice(0, 12)} != ${l1Hash.slice(0, 12)}) — re-run propagation-to-templates to re-deliver the L1 copy.`);
+        try {
+          const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, 'utf-8'), 'root');
+          const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, 'utf-8'), 'l1');
+          if (rootCanon !== l1Canon) {
+            fail('root', 'schema-hash-parity', `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) — reconcile the hand-maintained pair deliberately, do not blind-copy.`);
+          }
+        } catch {
+          fail('root', 'schema-hash-parity', `docs/workspace-schema.json or templates/common/docs/workspace-schema.json is not valid JSON.`);
         }
       }
 
@@ -2952,6 +2972,46 @@ function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest):
 }
 
 // Check WS-01: workspace-schema.json consistency
+/**
+ * Canonical form of workspace-schema.json for L0↔L1 parity comparison, with
+ * the SINGLE sanctioned L1 divergence normalized away (spec
+ * 2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05):
+ *   - level 'root': drop 'context.md' from rootAllowlist.files (the L1
+ *     copy legitimately lacks it — no scaffolded project carries that file);
+ *   - level 'l1': drop the _notes.root_allowlist_divergence record (L0 keeps
+ *     its own rootAllowlist entry for the audit.ts stray-root check, so it
+ *     does not carry the divergence note).
+ * After normalization the two copies must be semantically identical — any
+ * OTHER divergence is real drift and still fails both parity checks.
+ */
+function canonicalWsSchemaForParity(raw: string, level: 'root' | 'l1'): string {
+  const obj = JSON.parse(raw) as Record<string, unknown>;
+  const clone = JSON.parse(JSON.stringify(obj)) as {
+    rootAllowlist?: { files?: string[] };
+    _notes?: Record<string, unknown>;
+  };
+  if (level === 'root') {
+    const files = clone.rootAllowlist?.files;
+    if (Array.isArray(files)) {
+      const idx = files.indexOf('CONSTITUTION.md');
+      if (idx !== -1) files.splice(idx, 1);
+    }
+  } else {
+    if (clone._notes) delete clone._notes.root_allowlist_divergence;
+  }
+  const canon = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(canon);
+    if (v && typeof v === 'object') {
+      return Object.keys(v as Record<string, unknown>).sort().reduce<Record<string, unknown>>((acc, k) => {
+        acc[k] = canon((v as Record<string, unknown>)[k]);
+        return acc;
+      }, {});
+    }
+    return v;
+  };
+  return JSON.stringify(canon(clone));
+}
+
 function checkWorkspaceSchema(): void {
   if (!JSON_MODE) console.log('\n=== Check WS-01: workspace-schema.json consistency ===');
 
@@ -2976,34 +3036,30 @@ function checkWorkspaceSchema(): void {
   // copy in sync. Scaffold reads the L1 copy at project creation; a stale copy ships
   // wrong country/variant registries into new projects (found by the 2026-09-08
   // project review — validator-hardening pilot).
+  // 2026-10-28-l0-only-governance-doc-cleanup (DEC-20261028-05): the pair is
+  // hand-maintained and intentionally diverges in one documented delta (L1 drops
+  // the stale context.md rootAllowlist entry and records
+  // _notes.root_allowlist_divergence). canonicalWsSchemaForParity normalizes that
+  // sanctioned delta; any OTHER key divergence still fails below.
   const l1SchemaPath = join(ROOT, 'templates', 'common', 'docs', 'workspace-schema.json');
   if (!existsSync(l1SchemaPath)) {
     fail('root', 'ws-schema-l1-missing', 'templates/common/docs/workspace-schema.json not found — scaffold reads the L1 copy; re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json');
   } else {
-    // Canonical stringify (sorted keys, recursively) so comparison is semantic, not
-    // key-order sensitive (review 2026-09-08, Slot C F2).
-    const canon = (v: unknown): unknown => {
-      if (Array.isArray(v)) return v.map(canon);
-      if (v && typeof v === 'object') {
-        return Object.keys(v as Record<string, unknown>).sort().reduce<Record<string, unknown>>((acc, k) => {
-          acc[k] = canon((v as Record<string, unknown>)[k]);
-          return acc;
-        }, {});
-      }
-      return v;
-    };
     try {
-      const l1Schema = JSON.parse(readFileSync(l1SchemaPath, 'utf-8')) as Record<string, unknown>;
-      const rootKeys = new Set(Object.keys(schema));
-      const l1Keys = new Set(Object.keys(l1Schema));
+      const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, 'utf-8'), 'root');
+      const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, 'utf-8'), 'l1');
+      const rootObj = JSON.parse(rootCanon) as Record<string, unknown>;
+      const l1Obj = JSON.parse(l1Canon) as Record<string, unknown>;
+      const rootKeys = new Set(Object.keys(rootObj));
+      const l1Keys = new Set(Object.keys(l1Obj));
       const diverged: string[] = [];
       for (const k of new Set([...rootKeys, ...l1Keys])) {
-        if (JSON.stringify(canon(schema[k])) !== JSON.stringify(canon(l1Schema[k]))) diverged.push(k);
+        if (JSON.stringify(rootObj[k]) !== JSON.stringify(l1Obj[k])) diverged.push(k);
       }
       if (diverged.length > 0) {
-        fail('root', 'ws-schema-l1-parity', `templates/common/docs/workspace-schema.json diverged from root on key(s): ${diverged.join(', ')} — re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json`);
+        fail('root', 'ws-schema-l1-parity', `templates/common/docs/workspace-schema.json diverged from root beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) on key(s): ${diverged.join(', ')} — reconcile the hand-maintained pair deliberately, do not blind-copy.`);
       } else {
-        pass('workspace-schema.json L1 parity: templates/common copy matches root');
+        pass('workspace-schema.json L1 parity: templates/common copy matches root (modulo the sanctioned DEC-20261028-05 delta)');
       }
     } catch {
       fail('root', 'ws-schema-l1-invalid', 'templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json');

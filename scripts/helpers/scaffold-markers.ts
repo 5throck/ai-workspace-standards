@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.8.0
+ * @version 1.9.0
+ * v1.9.0 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup): the
+ *          docs/governance/agents/ prefix rule in REVIEWED_DELIVERY_EXCLUSIONS
+ *          narrows to per-file exact paths and the pm-gateway-workflow.md rule
+ *          is dropped in the same commit as the L1 git rm of the file (retired
+ *          from L1 delivery, DEC-20261028-05; a stale exact rule fails Check 2
+ *          once no gap remains). workflows.md (L1-authored since
+ *          DEC-20261028-01) and execution-plan-templates.md (forked
+ *          L1-authored) keep reviewed rules. The exact-path form keeps the
+ *          harness loud: a future file in that dir can no longer ride a prefix
+ *          rule into the reviewed set (H13).
+ *
  * v1.8.0 (2026-10-04, spec 2026-10-04-llm-interaction-standard-design): deriveL3ScaffoldDelivery
  *          models the docs/standards/ dedicated copy (create-l3-scaffold v1.18.0) — the LLM
  *          Interaction Standard delivery closes the parity gap instead of widening the
@@ -325,9 +336,20 @@ export interface ReviewedDeliveryExclusion {
 }
 
 export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] = [
+  // Per-file exact paths, NOT the former directory prefix: after the L0-only
+  // governance doc cleanup (spec 2026-10-28-l0-only-governance-doc-cleanup,
+  // DEC-20261028-05) this dir is PARTIALLY delivered — a prefix rule would
+  // silently cover any future file dropped into templates/common/docs/governance/agents/
+  // (the H13 silent-widening class). The pm-gateway-workflow.md entry was
+  // dropped in the same commit as the L1 `git rm` of the file (a stale exact
+  // rule fails Check 2 once no gap remains).
   {
-    path: 'docs/governance/agents/',
-    reason: 'ADR-0090 W2: workspace operational reference (AGENTS.md pointer-table targets: pm-gateway-workflow / execution-plan-templates / workflows) — L3 drafts are variant seeds and do not carry workspace-level procedure docs; new-project delivers them from templates/common/docs/governance/agents/',
+    path: 'docs/governance/agents/workflows.md',
+    reason: 'L1-authored hand-maintained rewrite (DEC-20261028-01, excluded from the agents-governance-docs propagation domain) — L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/',
+  },
+  {
+    path: 'docs/governance/agents/execution-plan-templates.md',
+    reason: 'forked as L1-authored hand-maintained (2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05) — project-applicable plan-format reference delivered at the same path; L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/',
   },
   {
     path: '.agents/',

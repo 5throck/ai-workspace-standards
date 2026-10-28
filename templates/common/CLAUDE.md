@@ -8,7 +8,7 @@
 
 <!-- GOVERNANCE-POINTER-TABLE (ADR-0090) -->
 > **Governance references (ADR-0090)**: [`AGENTS.md`](AGENTS.md) is the SSOT registry — **read it first**, and Read the owning governance documents it points to before executing their workflows. Operational workflow bodies live outside this file — **Read the owning file before governing work**:
-> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·
+> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·
 > > Execution plan templates → [`docs/governance/agents/execution-plan-templates.md`](docs/governance/agents/execution-plan-templates.md) ·
 > > Dispatch/lifecycle/skill-review schedules → [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) ·
 > > Language Policy → [docs/context.md](docs/context.md).
@@ -72,7 +72,7 @@ To disable the PostToolUse hook, remove the following block from `.claude/settin
 | Gemini CLI equivalent | — | — | Gemini AfterTool fires the same script with `--platform gemini` |
 | PreToolUse (GateGuard) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/gateguard-fact-force.ts` sync before first Edit/Write/MultiEdit per file — asks agent to investigate importers |
 | PreToolUse (GateGuard) | Claude Code Desktop App | ✅* | Should fire via bundled CLI; fallback: agent self-enforces |
-| PreToolUse (PM dispatch gate) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/pm-dispatch-gate.ts` on the `Agent` tool (`ask` verdict) — direct specialist dispatch needs user confirmation or a PM-role session marker (`pm-role-bootstrap.ts`, 24h TTL). Detail: `docs/governance/agents/pm-gateway-workflow.md` §3.1.3 |
+| PreToolUse (PM dispatch gate) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/pm-dispatch-gate.ts` on the `Agent` tool (`ask` verdict) — direct specialist dispatch needs user confirmation or a PM-role session marker (`pm-role-bootstrap.ts`, 24h TTL). Detail: `scripts/hooks/pm-dispatch-gate.ts` |
 | PreToolUse (PM dispatch gate) | Claude Code Desktop App | ⚠️ | Hooks intermittent; fallback: role-declaration self-enforcement |
 | TeammateIdle (lifecycle) | Claude Code CLI | ✅ | Runs `bun scripts/hooks/post-write-lifecycle-check.ts` async when teammate becomes idle |
 | TeammateIdle (lifecycle) | Claude Code Desktop App | ⚠️ | Hooks intermittent; run manually |
@@ -363,7 +363,7 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-10-27 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+*Last Updated: 2026-10-28 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
 
 

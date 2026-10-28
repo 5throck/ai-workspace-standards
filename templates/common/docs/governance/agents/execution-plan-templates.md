@@ -1,8 +1,13 @@
 # Execution Plan Templates — Operational Reference
 
-> Canonical operational reference relocated from L0 `AGENTS.md` (ADR-0090 thin-dispatcher restructure, 2026-09-26).
-> Content below is verbatim from the source section at extraction time; AGENTS.md points here.
-> Source: `AGENTS.md §5`. Relocation-only move — rules unchanged (design N2).
+> Project-applicable operational guidance for execution-plan authoring — the
+> standard plan template, the Row 0 Design Gate, exemption codes, and worked
+> examples. Maintained at L1 (templates/common) and delivered to every scaffolded
+> project; it is companion guidance to the thin-dispatcher sections in
+> [`AGENTS.md`](../../../AGENTS.md) (§5), not a copy of any workspace-root document.
+> The workspace root maintains its own L0-authored equivalent at
+> `docs/governance/agents/execution-plan-templates.md`; divergence between the
+> two is intentional (DEC-20261028-05, design 2026-10-28-l0-only-governance-doc-cleanup).
 
 **Load contract**: PM and specialists MUST Read this file before executing the workflow it describes. Citing a rule without reading its owning file is a process violation.
 

@@ -40,7 +40,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 ### 2. PM Gateway — Single Point of Entry
 
-PM is the ONLY agent a user may invoke directly; all specialist agents require PM dispatch (4-level enforcement). Full phase protocol: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md); mandatory criteria and plan format: `AGENTS.md` §5.
+PM is the ONLY agent a user may invoke directly; all specialist agents require PM dispatch (4-level enforcement). Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.
 
 - **PM is an orchestrator, not an executor**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications are dispatched to specialists (docs-writer, architect, automation-engineer, auditor).
 - **Execution plan first**: every multi-step task starts with the plan table (Design Gate Row 0 included) before any specialist work.

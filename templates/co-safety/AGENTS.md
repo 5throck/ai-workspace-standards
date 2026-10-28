@@ -439,7 +439,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 ## §3: PM Gateway Workflow
 
-**Thin-dispatcher section (ADR-0090)**: full phase protocol and ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).
+**Thin-dispatcher section (ADR-0090)**: full phase protocol → `AGENTS.md` §3 below. ADR policy summaries are workspace-root-only (L0); [`agents/pm.md`](agents/pm.md) carries the project-applicable rules.
 
 ### §3.6 3-Tier Strategy
 

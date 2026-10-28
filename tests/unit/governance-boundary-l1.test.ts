@@ -29,6 +29,92 @@ const l1 = (name: string): string => readFileSync(join(workspaceRoot, 'templates
 const WORKSPACE_HEADING = 'Workspace & Template Boundary Policy';
 const PROJECT_HEADING = 'Project Boundary Policy';
 
+describe('governance-l1 pm-gateway-workflow.md retirement transforms (B-PGW)', () => {
+  // Spec: docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md §5.2
+  // (DEC-20261028-05). The L1 delivery of docs/governance/agents/pm-gateway-workflow.md
+  // is retired; T1-T6 retarget every pointer in the five GOVERNANCE_L1_FILES
+  // renditions to delivered targets, and the post-transform guard dies() when any
+  // pm-gateway-workflow.md FILE link survives (anchor-style references stay valid).
+
+  const OLD_AGENTS_MANDATE =
+    'policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists';
+  const OLD_POINTER_TABLE =
+    '> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·';
+
+  test('T1-T3 (AGENTS.md): mandate, permission-denial anchor, and roster pointer retarget to agents/pm.md', () => {
+    const out = applyGovernanceTransforms(l0('AGENTS.md'), 'AGENTS.md');
+    // T1 — the "Read it before" mandate becomes the L0-only statement + pm.md pointer.
+    expect(out).toContain(
+      'The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries are workspace-root-only (L0) and are not delivered to projects; the core MUST policy in §3.1–§3.7 above plus [`agents/pm.md`](agents/pm.md) carry the project-applicable rules — **read them before dispatching specialists.**'
+    );
+    expect(out).not.toContain(OLD_AGENTS_MANDATE);
+    // T2 — Permission Denial Protocol anchor retarget (anchor verified at pm.md).
+    expect(out).toContain('[Permission Denial Protocol](agents/pm.md#permission-denial-protocol)');
+    expect(out).not.toContain('docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol');
+    // T3 — roster-detail pointer retarget.
+    expect(out).toContain(
+      '*Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*'
+    );
+    // No pm-gateway-workflow.md FILE link survives anywhere in the rendition.
+    expect(out).not.toContain('pm-gateway-workflow.md');
+  });
+
+  test('T4/T5 (CLAUDE.md): pointer-table line → AGENTS.md §3 anchor, §3.1.3 detail → delivered hook', () => {
+    const out = applyGovernanceTransforms(l0('CLAUDE.md'), 'CLAUDE.md');
+    expect(out).toContain('> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·');
+    expect(out).not.toContain(OLD_POINTER_TABLE);
+    expect(out).toContain('`scripts/hooks/pm-dispatch-gate.ts`');
+    expect(out).not.toContain('`docs/governance/agents/pm-gateway-workflow.md` §3.1.3');
+    expect(out).not.toContain('pm-gateway-workflow.md');
+    // The T4 anchor idiom is anchor-style — the guard must NOT flag it (the call
+    // above returning is the assertion; pinned explicitly here).
+    expect(out).toContain('AGENTS.md#3-pm-gateway-workflow');
+  });
+
+  test('T4/T5 (GEMINI.md): same shared replaces land in the GEMINI rendition', () => {
+    const out = applyGovernanceTransforms(l0('GEMINI.md'), 'GEMINI.md');
+    expect(out).toContain('> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·');
+    expect(out).not.toContain(OLD_POINTER_TABLE);
+    expect(out).toContain('`scripts/hooks/pm-dispatch-gate.ts`');
+    expect(out).not.toContain('`docs/governance/agents/pm-gateway-workflow.md` §3.1.3');
+    expect(out).not.toContain('pm-gateway-workflow.md');
+  });
+
+  test('T6 (HERMES.md): bootstrap protocol pointer retargets to AGENTS.md §3 and §5', () => {
+    const out = applyGovernanceTransforms(l0('HERMES.md'), 'HERMES.md');
+    expect(out).toContain('Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.');
+    expect(out).not.toContain('Full phase protocol: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md); mandatory criteria and plan format: `AGENTS.md` §5.');
+    expect(out).not.toContain('pm-gateway-workflow.md');
+  });
+
+  test('CODEX.md (E8): zero pm-gateway-workflow.md references — no transform needed, guard clean', () => {
+    const l0Codex = l0('CODEX.md');
+    expect(l0Codex).not.toContain('pm-gateway-workflow');
+    const out = applyGovernanceTransforms(l0Codex, 'CODEX.md');
+    expect(out).not.toContain('pm-gateway-workflow');
+  });
+
+  test('fatal guard: an unmatched pm-gateway-workflow.md file link dies() instead of regenerating a dangling pointer', () => {
+    // A pointer sentence the T1-T6 literals do not match (the B-7 regex-rot
+    // class): the guard must fail loudly, never ship the stale file link.
+    const doctored = l0('HERMES.md') + '\nSee docs/governance/agents/pm-gateway-workflow.md for details.\n';
+
+    const originalExit = process.exit;
+    let exitCode: number | undefined;
+    (process as unknown as { exit: (code?: number) => never }).exit = ((code?: number) => {
+      exitCode = code;
+      throw new Error('__process_exit_sentinel__');
+    }) as never;
+    try {
+      expect(() => applyGovernanceTransforms(doctored, 'HERMES.md'))
+        .toThrow('__process_exit_sentinel__');
+      expect(exitCode).toBe(1);
+    } finally {
+      process.exit = originalExit;
+    }
+  });
+});
+
 describe('governance-l1 boundary transforms (P1 bug 5)', () => {
   test('GEMINI.md: workspace policy replaced in-place, marker pair intact, numbering preserved', () => {
     const out = applyGovernanceTransforms(l0('GEMINI.md'), 'GEMINI.md');

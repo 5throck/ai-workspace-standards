@@ -1072,7 +1072,10 @@ if (reportPortCandidates) {
 function applyTombstoneArg(raw: string): void {
   const glob = (raw ?? '').trim();
   if (!glob) {
-    console.error('ERROR: --tombstone requires a path glob (e.g. --tombstone docs/governance/agents/workflows.md).');
+    // (example is deliberately neutral — docs/governance/agents/workflows.md was
+    //  retired as an example because that path is re-delivered at L1, never
+    //  tombstoned: spec 2026-10-28-l0-only-governance-doc-cleanup §5.1)
+    console.error('ERROR: --tombstone requires a path glob (e.g. --tombstone docs/deprecated/**).');
     process.exit(1);
   }
   tombstoneGrants.push({ re: globToRegExp(glob), source: glob });

@@ -1,11 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.0
-// v1.0.0 (2026-10-02, T-20261002-008): governance docs may only name ticket.ts
-//           subcommands that exist (review H1 doc-command lint — the §3.12 rewrite
-//           shipped `ticket.ts resolve` while the CLI had no such command once, and
-//           nothing caught it). Scans the PM-gateway workflow doc and agents/pm.md
-//           (L0 + templates/common copies) for `ticket.ts <token>` references and
-//           fails on any token that is not a real subcommand.
+// @version 1.0.1
+// v1.0.1 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup): the
+//           templates/common/docs/governance/agents/pm-gateway-workflow.md
+//           docPaths entry is dropped — the L1 delivery of that doc is retired
+//           (DEC-20261028-05); the L0 copy and agents/pm.md (both levels) stay
+//           linted. v1.0.0 (2026-10-02, T-20261002-008): governance docs may
+//           only name ticket.ts subcommands that exist (review H1 doc-command
+//           lint — the §3.12 rewrite shipped `ticket.ts resolve` while the CLI
+//           had no such command once, and nothing caught it). Scans the
+//           PM-gateway workflow doc and agents/pm.md for `ticket.ts <token>`
+//           references and fails on any token that is not a real subcommand.
 // @l2-propagate: false
 // Design: docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md §B3
 
@@ -59,7 +63,8 @@ function main(): void {
   const docPaths = [
     'docs/governance/agents/pm-gateway-workflow.md',
     'agents/pm.md',
-    'templates/common/docs/governance/agents/pm-gateway-workflow.md',
+    // templates/common/docs/governance/agents/pm-gateway-workflow.md removed
+    // (v1.0.1): L1 delivery retired by 2026-10-28-l0-only-governance-doc-cleanup.
     'templates/common/agents/pm.md',
   ].map((p) => join(WORKSPACE_ROOT, p));
   const files = docPaths

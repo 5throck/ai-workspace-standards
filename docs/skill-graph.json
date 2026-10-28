@@ -2359,6 +2359,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261028-05",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -7000,8 +7005,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-10-27"
+        "sessions": 3,
+        "last_used": "2026-10-28"
       }
     },
     {
@@ -7394,8 +7399,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-10-27"
+        "sessions": 3,
+        "last_used": "2026-10-28"
       }
     },
     {
@@ -8057,8 +8062,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-10-27"
+        "sessions": 3,
+        "last_used": "2026-10-28"
       }
     },
     {
