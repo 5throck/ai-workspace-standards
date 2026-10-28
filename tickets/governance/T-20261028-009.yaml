@@ -17,7 +17,7 @@ title: >-
   unaffected (template→project direction, content derives from tagged
   template-v0.22.0)
 priority: high
-status: running
+status: done
 attempts: 0
 created_at: '2026-10-28T03:19:52.283+09:00'
 history:
@@ -30,5 +30,19 @@ history:
   - at: '2026-10-28T10:19:27.172+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-10-28T11:08:11.454+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T11:08:11.470+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated FP (4/4) by security-expert independent verification — actual
+  flagged values were test password fixtures (pw-gi-analyst-123 /
+  pw-p2c-analyst-123 in gate-integrity-p1/p2 test files), not the
+  key/snapshot_hash lines cited in the ticket prose; range sweep clean; no
+  project content entered root/templates (verified). Allowlist landed in
+  .github/gitleaks-full.toml with narrow path∧exact-value scope (condition=and);
+  range re-run: no leaks found; gitleaks-merge tests green. Landed via PR #1683
+  (merged)
 error: null

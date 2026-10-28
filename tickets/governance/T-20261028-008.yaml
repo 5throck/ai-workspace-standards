@@ -16,12 +16,32 @@ title: >-
   (requires_human_approval / APPROVED). Extracted by Step 2f 2026-10-28
   (co-newbiz #533/#534 reviewed, nothing to extract)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-28T03:08:25.334+09:00'
 history:
   - at: '2026-10-28T03:08:25.334+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-28T11:44:19.732+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T11:44:19.747+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-28T11:44:19.762+09:00'
+    from: running
+    to: review
+  - at: '2026-10-28T11:44:19.776+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1685 (merged): skills/decision-write-integrity v1.0.0 (256-line
+  SKILL.md, scope common, l2_propagate false, owner pm) distilling co-newbiz
+  ADR-0186 gate-integrity into domain-neutral process guidance — HARD
+  BLOCK/ACK/DISPLAY taxonomy, off|shadow|enforce rollout, snapshot-hash
+  propose-confirm, form-not-merit rationale checks, maker/checker
+  deny-by-default, AI-divergence recording; lifecycle record + contract entry +
+  10 platform mirrors; gates green (validate-skills 100 files 0 errors, bun test
+  2705)
 error: null
