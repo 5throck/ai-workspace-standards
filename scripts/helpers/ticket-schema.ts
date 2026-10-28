@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.8.0
+// @version 1.9.0
+// v1.9.0 (2026-10-29, T-20261029-001): YAML prose-fragment lint — the
+//          2026-10-29 upstream-adjudication batch's writer embedded broken
+//          shell conditionals verbatim into resolution/result prose
+//          ("re-injected.((((((( [ 008 = 020 ] && echo ...") self-referencing
+//          each ticket number. corruptedProseFinding() is the report-only
+//          pure detector (parenthesis runs >= 5, or a bracketed comparison
+//          followed by && echo/printf); validateTicket stays prose-blind so
+//          the store never refuses to read an already-corrupted record —
+//          repair needs a sanctioned re-render path, not a read gate.
 // v1.8.0 (2026-10-26, T-20261026-015): PRIORITIES exported as the canonical
 //          priority enum — ticket.ts create validates --priority against the
 //          same list the schema validates with, closing the create → corrupt
@@ -186,6 +195,30 @@ export function validateCatalog(obj: unknown): asserts obj is Catalog {
       }
     }
   }
+}
+
+/** Paren-run length that distinguishes interpolation debris from prose. */
+export const SHELL_FRAGMENT_PAREN_RUN = 5;
+
+/**
+ * Report-only prose-integrity detector (T-20261029-001). Returns a finding
+ * string when the text carries writer-class corruption — a long
+ * parenthesis run, or a shell conditional fragment ("[ x = y ] && echo").
+ * null on clean/absent text. NOT wired into validateTicket: a hard gate here
+ * would brick ticket.ts on records already carrying the corruption.
+ */
+export function corruptedProseFinding(text: unknown): string | null {
+  if (typeof text !== 'string' || text.length === 0) return null;
+  const parenRun = text.match(new RegExp(String.raw`\({${SHELL_FRAGMENT_PAREN_RUN},}`));
+  if (parenRun) {
+    return `parenthesis run of ${parenRun[0].length} — shell interpolation debris (T-20261029-001 writer-class corruption)`;
+  }
+  const bracketCmp = /\[\s*\S+\s*[=!<>]=?\s*\S+\s*\]/.test(text);
+  const conditionalEcho = /\]\s*&&\s*(echo|printf)\b/.test(text);
+  if (bracketCmp && conditionalEcho) {
+    return 'shell conditional fragment ([ x = y ] && echo) inside prose — interpolation debris (T-20261029-001 writer-class corruption)';
+  }
+  return null;
 }
 
 export function validateTicket(obj: unknown): asserts obj is Ticket {
