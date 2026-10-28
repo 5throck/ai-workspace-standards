@@ -1,4 +1,27 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-28, design
+//         docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//         D3/D2): the ADR-0101 skeleton registry widens to ALL FIVE instruction
+//         files — SkeletonSectionEntry.rel admits AGENTS.md and CODEX.md /
+//         HERMES.md alongside CLAUDE.md / GEMINI.md, making the guarded
+//         registry the delivery channel for template-authoritative instruction
+//         sections everywhere. Registry ENTRIES are still added per
+//         adjudicated-port decision only (never big-bang) — with zero entries
+//         for a rel the merge is a no-op, so widening is protective-by-default.
+//         Guards G1/G2/number-collision, the anchor rules, and the
+//         pre-skeleton.bak snapshot contract ride along UNCHANGED. Two
+//         additions: (1) mergeSkeletonSections takes an optional `entries`
+//         override (defaults to the registry — pure and injection-testable for
+//         the D3 acceptance rehearsal); (2) an optional instruction-region
+//         census gate (structurally upgrade-policy's InstructionCensusGate,
+//         declared inline as SkeletonCensusGate so the pure lib stays
+//         import-cycle-free): a drifted section span that carries
+//         project-authored content is REPLACED only under an explicit
+//         --disposition adopt-template grant (D2 §4.2); without the grant the
+//         replace is blocked, the span lands in `escalated[]`, and the engine
+//         records the CONFLICT (ERROR) row. Sections whose lines are all
+//         template-vocabulary (a stale older section body) keep today's
+//         guarded replace.
 // v1.1.0 (2026-10-27, T-20261027-008): claude-s2 heading collision resolved —
 //         the registry heading is now `### 2.5 Native Slash Commands`
 //         (house-style N.M numbering, §4.5 precedent) so the insert no longer
@@ -67,7 +90,7 @@ export type SkeletonAnchor =
 export interface SkeletonSectionEntry {
   /** Stable registry id (log lines carry it). */
   id: string;
-  rel: 'CLAUDE.md' | 'GEMINI.md';
+  rel: 'CLAUDE.md' | 'GEMINI.md' | 'AGENTS.md' | 'CODEX.md' | 'HERMES.md';
   /** The exact heading line identifying the section (trimmed compare). */
   heading: string;
   anchor: SkeletonAnchor;
@@ -146,6 +169,26 @@ export interface SkeletonMergeResult {
    *  BEFORE writing the merged content (fail-closed); dry-run callers skip
    *  writing. Empty unless a replace fired (inserts delete nothing). */
   snapshots: { rel: string; content: string }[];
+  /** v1.2.0 (D2): section spans the census BLOCKED — project-authored content
+   *  in the span and no --disposition adopt-template grant. The engine
+   *  records the CONFLICT (ERROR) decision; the span is left untouched. */
+  escalated: { rel: string; content: string }[];
+  /** v1.2.0 (D2): guarded replaces that PROCEEDED on an adapted span under an
+   *  explicit grant (snapshot + replace as today; engine records ADOPT). */
+  adaptedReplaces: number;
+}
+
+/** v1.2.0 (D2): the instruction-region census gate (structurally
+ *  upgrade-policy's InstructionCensusGate; declared inline to keep this pure
+ *  lib import-cycle-free). */
+export interface SkeletonCensusGate {
+  /** The file's census found out-of-zone divergence — false closes the gate
+   *  entirely (in-sync files keep today's replace behavior). */
+  divergent: boolean;
+  /** The section span about to be replaced carries project-authored content. */
+  isSpanAdapted: (spanContent: string) => boolean;
+  /** --disposition adopt-template[=glob] covers this rel. */
+  dispositionGranted: boolean;
 }
 
 // ── Line/marker primitives ────────────────────────────────────────────────────
@@ -350,21 +393,25 @@ export function mergeSkeletonSections(
   templateContent: string,
   rel: string,
   dryRun: boolean,
+  entries: SkeletonSectionEntry[] = MANAGED_SKELETON_SECTIONS,
+  censusGate?: SkeletonCensusGate,
 ): SkeletonMergeResult {
   const dryTag = dryRun ? '[DRY RUN] ' : '';
   const log: string[] = [];
   const snapshots: { rel: string; content: string }[] = [];
+  const escalated: { rel: string; content: string }[] = [];
+  let adaptedReplaces = 0;
 
-  const entries = MANAGED_SKELETON_SECTIONS.filter((e) => e.rel === rel);
-  if (entries.length === 0) {
-    return { content: projectContent, merged: false, log, snapshots };
+  const relEntries = entries.filter((e) => e.rel === rel);
+  if (relEntries.length === 0) {
+    return { content: projectContent, merged: false, log, snapshots, escalated, adaptedReplaces };
   }
 
-  const registeredHeadings = new Set(entries.map((e) => e.heading));
+  const registeredHeadings = new Set(relEntries.map((e) => e.heading));
   const templateLines = templateContent.split('\n');
   const lines = projectContent.split('\n');
 
-  for (const entry of entries) {
+  for (const entry of relEntries) {
     // 1. Template section must exist, out-of-zone (template rot → skip, no write).
     const tpl = extractTemplateSkeletonSection(templateLines, entry.heading, registeredHeadings, templateContent);
     if (!tpl.ok) {
@@ -387,9 +434,22 @@ export function mergeSkeletonSections(
         log.push(`    ${dryTag}SKELETON REPLACE SKIPPED (span exceeds ${SKELETON_REPLACE_MAX_SPAN_LINES}-line cap — manual review): ${entry.id} in: ${rel} — guard G2 kept the section untouched`);
         continue;
       }
-      snapshots.push({ rel, content: span.lines.join('\n') });
+      // v1.2.0 (design D2 §4.2): after G1/G2, the census gates the replace —
+      // a drifted span carrying project-authored content needs an explicit
+      // --disposition adopt-template grant; without it the replace is blocked
+      // and the engine records the CONFLICT (ERROR) row.
+      const spanText = span.lines.join('\n');
+      const adapted = Boolean(censusGate && censusGate.divergent && censusGate.isSpanAdapted(spanText));
+      if (adapted && censusGate && !censusGate.dispositionGranted) {
+        log.push(`    ${dryTag}SKELETON REPLACE BLOCKED (adapted span): ${entry.id} in: ${rel} — the instruction-region census found project-authored content in the section span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`);
+        log.push('      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump');
+        escalated.push({ rel, content: spanText });
+        continue;
+      }
+      snapshots.push({ rel, content: spanText });
+      if (adapted) adaptedReplaces++;
       lines.splice(span.start, span.lines.length, ...tpl.section.lines);
-      log.push(`    ${dryTag}SKELETON REPLACED ${entry.id}: ${entry.heading} in: ${rel}`);
+      log.push(`    ${dryTag}SKELETON REPLACED ${entry.id}: ${entry.heading} in: ${rel}${adapted ? ' (adapted span — delivered via --disposition adopt-template)' : ''}`);
       continue;
     }
 
@@ -418,7 +478,7 @@ export function mergeSkeletonSections(
   }
 
   const content = lines.join('\n');
-  return { content, merged: content !== projectContent, log, snapshots };
+  return { content, merged: content !== projectContent, log, snapshots, escalated, adaptedReplaces };
 }
 
 // ── Registry-vs-template validation (validate-templates `skeleton-registry`) ──
