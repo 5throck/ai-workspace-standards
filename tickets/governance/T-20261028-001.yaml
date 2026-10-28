@@ -7,7 +7,7 @@ title: >-
   tickets uncovered; batch-backfill retro records and add a windowed review
   check)
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-28T02:21:45.293+09:00'
 history:
@@ -23,5 +23,11 @@ history:
   - at: '2026-10-28T12:52:04.179+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-28T13:54:54.996+09:00'
+    from: review
+    to: done
+result: >-
+  landed via PR #1688 (merged 8aa29d256): design-gate-coverage.ts +
+  review-baseline battery #9; F-1 reconciliation in PR body; T-20261027-002/-010
+  residual noted for PM adjudication
 error: null
