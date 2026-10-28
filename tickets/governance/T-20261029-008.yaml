@@ -17,7 +17,7 @@ title: >-
   root). Wave disposition: billing-walled repos merged (unaffected); co-abap
   #227 + co-safety #220 stay OPEN until this lands
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-29T03:40:04.448+09:00'
 history:
@@ -33,5 +33,17 @@ history:
   - at: '2026-10-29T04:30:27.339+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-29T07:58:55.188+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed and proven in real CI: root PR #1709 (merged, 9db9edaca lineage) added
+  the out-of-root WARN degrade to the agent-mirror parity check
+  (sync-agent-mirrors --check exits 0 with a visible WARN when no workspace root
+  is discoverable; audit v2.58.0 surfaces it on the green path) — co-safety #222
+  and co-abap #228 merged with Documentation Audit PASS on the real-CI gate; the
+  previously blocked #227/#220 closed superseded. Follow-on wave behavior: each
+  project's first sync after acquiring the capability needs its one deliberate
+  generator write (design §5) — executed fleet-wide 2026-10-29 (12 parity + 3
+  variant-less no-op + co-newbiz 41).
 error: null
