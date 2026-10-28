@@ -3,14 +3,32 @@ id: U-20261028-001
 kind: manual
 title: Upstream request from co-design
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-28T01:20:19.284+09:00
+created_at: '2026-10-28T01:20:19.284+09:00'
 history:
-  - at: 2026-10-28T01:20:19.284+09:00
+  - at: '2026-10-28T01:20:19.284+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-28T09:46:22.428+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-28T09:46:22.428+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered per the user-approved tombstone-ownership design (spec
+  2026-10-28-delivery-tombstone-ownership-design): delivery tombstones (deletion
+  honoring — co-design workflows.md recorded, TOMBSTONED_SKIP INFO), agents/*.md
+  ownership conflict surfacing (EVOLVED/CONFLICT ERROR rows), and the D5 content
+  port (six Can-Lead echo fixes + i18n stub phases) shipped in root PR #1677
+  (engine 1.27.0/1.78.0) + #1678 (port, T-20261028-004/-006), released as
+  template-v0.22.1 and delivered to co-design via co-design PR #67 (merged
+  17662b3) with --tombstone confirmation per Ruling 3. Known residual:
+  extends-stub frontmatter cannot converge the upgrade compare (T-20261028-013)
+  and a baselines carry-forward defect for conflict-skipped paths
+  (T-20261028-014) — both tracked engine follow-ups; the co-design i18n project
+  copy is preserved by the ERROR skip until then
 error: null
 upstream:
   project: co-design
@@ -19,7 +37,29 @@ upstream:
   source: project/co-design
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Template delivery waves resurrect deleted project files and revert project-side agent-body corrections — two concrete symptoms beyond the content-clobber class already tracked under U-20261026-005''s follow-up. Observed in the co-design project during the 2026-10-27 15:21 UTC delivery (commit 5e53c4c, PR #63 "design-system suite promotion healing", #1659 wave): (1) docs/governance/agents/workflows.md — deleted by merged PR #59 on 2026-10-27 (design-lead Ruling 3: un-adapted L0 copy, zero inbound references) — reappeared byte-identical in the wave. (2) agents/*.md — project-side body corrections (six specialists'' "Can Lead Phases" lines aligned to their frontmatter phases per the normative docs/phase-definitions.md model) and agents/i18n-specialist.md frontmatter additions (phases: [4], last_updated stamp) were reverted to the delivered template wording; the frontmatter phases values themselves survived, so the revert is selective to body/added-field content. This is the second consecutive wave re-delivering workflow-deleted or project-corrected state (the 2026-10-27 06:06 wave re-clobbered tokens.json and six more files — recorded in CHANGELOG 2026-10-27 and U-20261026-005''s resolution notes). Requested consideration: honor project-side deletions (a tombstone or exclusion list for files the project has removed), and treat agents/*.md body sections outside managed markers as project-owned in merge decisions, or surface re-delivered-vs-project-owned conflicts for explicit resolution instead of silent overwrite.'
+  symptom: >-
+    Template delivery waves resurrect deleted project files and revert
+    project-side agent-body corrections — two concrete symptoms beyond the
+    content-clobber class already tracked under U-20261026-005's follow-up.
+    Observed in the co-design project during the 2026-10-27 15:21 UTC delivery
+    (commit 5e53c4c, PR #63 "design-system suite promotion healing", #1659
+    wave): (1) docs/governance/agents/workflows.md — deleted by merged PR #59 on
+    2026-10-27 (design-lead Ruling 3: un-adapted L0 copy, zero inbound
+    references) — reappeared byte-identical in the wave. (2) agents/*.md —
+    project-side body corrections (six specialists' "Can Lead Phases" lines
+    aligned to their frontmatter phases per the normative
+    docs/phase-definitions.md model) and agents/i18n-specialist.md frontmatter
+    additions (phases: [4], last_updated stamp) were reverted to the delivered
+    template wording; the frontmatter phases values themselves survived, so the
+    revert is selective to body/added-field content. This is the second
+    consecutive wave re-delivering workflow-deleted or project-corrected state
+    (the 2026-10-27 06:06 wave re-clobbered tokens.json and six more files —
+    recorded in CHANGELOG 2026-10-27 and U-20261026-005's resolution notes).
+    Requested consideration: honor project-side deletions (a tombstone or
+    exclusion list for files the project has removed), and treat agents/*.md
+    body sections outside managed markers as project-owned in merge decisions,
+    or surface re-delivered-vs-project-owned conflicts for explicit resolution
+    instead of silent overwrite.
   affected_paths:
     - docs/governance/agents/workflows.md
     - agents/i18n-specialist.md
@@ -27,7 +67,13 @@ upstream:
     - agents/prototype-engineer.md
     - agents/service-designer.md
   identity_source: cwd
-  repro: 'In the co-design project: (1) delete docs/governance/agents/workflows.md via a merged PR, then run the next template delivery wave (e.g. upgrade-project or the fleet resync) — the deleted file reappears byte-identical. (2) Correct any agents/*.md Dispatch-Protocol body line or add frontmatter fields via a merged PR, then run the next wave — the corrections revert to the delivered template wording while frontmatter phases values survive.'
+  repro: >-
+    In the co-design project: (1) delete docs/governance/agents/workflows.md via
+    a merged PR, then run the next template delivery wave (e.g. upgrade-project
+    or the fleet resync) — the deleted file reappears byte-identical. (2)
+    Correct any agents/*.md Dispatch-Protocol body line or add frontmatter
+    fields via a merged PR, then run the next wave — the corrections revert to
+    the delivered template wording while frontmatter phases values survive.
   triage: ready
   flagged: false
   triage_reasons:
@@ -39,4 +85,22 @@ upstream:
   dedupe_key: 083c207543d2fa9f5533edf8c697f8154341e69a0e7cac22f640f180a74950f7
   duplicates:
     - project: co-design
-      at: 2026-10-28T01:20:19.284+09:00
+      at: '2026-10-28T01:20:19.284+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1678
+    template_version: 0.22.1
+    summary: >-
+      Delivered per the user-approved tombstone-ownership design (spec
+      2026-10-28-delivery-tombstone-ownership-design): delivery tombstones
+      (deletion honoring — co-design workflows.md recorded, TOMBSTONED_SKIP
+      INFO), agents/*.md ownership conflict surfacing (EVOLVED/CONFLICT ERROR
+      rows), and the D5 content port (six Can-Lead echo fixes + i18n stub
+      phases) shipped in root PR #1677 (engine 1.27.0/1.78.0) + #1678 (port,
+      T-20261028-004/-006), released as template-v0.22.1 and delivered to
+      co-design via co-design PR #67 (merged 17662b3) with --tombstone
+      confirmation per Ruling 3. Known residual: extends-stub frontmatter cannot
+      converge the upgrade compare (T-20261028-013) and a baselines
+      carry-forward defect for conflict-skipped paths (T-20261028-014) — both
+      tracked engine follow-ups; the co-design i18n project copy is preserved by
+      the ERROR skip until then
