@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+//          DEC-20261028-06): §4b — one agent-mirror generator write-mode call
+//          (spawn scripts/sync-agent-mirrors.ts --dir <project>) after the agents/
+//          extends-stub settling pass, so adopted projects have conforming
+//          .claude/agents mirrors from minute zero and the parity gate is green on
+//          the project's first audit. Generator absence (pre-delivery L0) skips silently.
 // v1.3.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
 //          --platform accepts a comma-separated list incl. `hermes` (lib/platforms.ts
 //          parsePlatformList; legacy `both` = all). Platform prune is the union rule over
@@ -519,6 +525,25 @@ const projPmMd = join(projectDir, 'agents', 'pm.md');
 if (existsSync(projPmMd)) {
   stripL1BMetadata(projPmMd);
   if (!pmResolvedAsStub) console.log('  ✅ agents/pm.md: L1-B metadata stripped');
+}
+
+// 4b. Generate platform agent mirrors (design
+//     docs/designs/2026-10-28-platform-agent-mirror-design.md §4.2 wiring).
+// One generator write-mode call after the agents/ settling pass: adopted
+// projects get conforming .claude/agents mirrors from minute zero, so the
+// parity gate is green on the project's first audit.
+{
+  const mirrorGenerator = join(WORKSPACE_ROOT, 'scripts', 'sync-agent-mirrors.ts');
+  if (existsSync(mirrorGenerator)) {
+    console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
+    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir], { stdio: 'inherit' });
+    if (mirrorResult.status !== 0) {
+      console.error(`❌ Agent-mirror generation failed — the project is adopted but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+  }
 }
 
 // 5. docs/<variant>.context.md + Template Provenance footer.

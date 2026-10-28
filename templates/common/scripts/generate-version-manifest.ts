@@ -1,4 +1,14 @@
-// @version 1.10.2
+// @version 1.11.0
+// v1.11.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+//          DEC-20261028-06 §4.4): the Agents table Model column renders the
+//          registry-resolved model — the agents/*.md SSOT no longer carries a
+//          `model:` frontmatter field (single-declaration tier only, ADR-0102),
+//          so when the frontmatter field is absent the column resolves the tier
+//          through docs/workspace-schema.json models.claude (full registry ID,
+//          e.g. claude-opus-5-5) and renders '—' when tier or schema cannot
+//          resolve (fail-open, deterministic from the committed schema).
+//          detectDrift's "missing tier or model" warning narrows to tier-only:
+//          an absent model field is the expected SSOT shape, not drift.
 // v1.10.2 (2026-10-28, T-20261028-012 — spec
 //           docs/designs/2026-10-28-dev-sync-staged-count-design.md D6):
 //           normalizeManifestForCompare collapses any number of pre-existing
@@ -138,6 +148,36 @@ export interface AgentInfo {
     tier: string;
     model: string;
     last_modified: string;
+}
+
+// v1.11.0 (spec docs/designs/2026-10-28-platform-agent-mirror-design.md §4.4):
+// tier → registry-ID resolution for the Agents table Model column. Cached per
+// process; any failure is fail-open (resolveAgentModel renders '—') so manifest
+// generation stays deterministic from the committed schema and never blocks on
+// a schema hiccup.
+let claudeModelsCache: Record<string, string> | null | undefined;
+function loadClaudeModels(): Record<string, string> | null {
+    if (claudeModelsCache !== undefined) return claudeModelsCache;
+    try {
+        const schema = JSON.parse(fs.readFileSync(path.join('docs', 'workspace-schema.json'), 'utf-8')) as {
+            models?: Record<string, Record<string, string>>;
+        };
+        claudeModelsCache = schema.models?.claude ?? null;
+    } catch {
+        claudeModelsCache = null;
+    }
+    return claudeModelsCache;
+}
+
+/**
+ * The Model column value: the frontmatter `model:` field when one is present
+ * (pre-sweep shape, back-compat), else the registry-resolved models.claude
+ * registry ID for the tier, else '—' when neither can resolve.
+ */
+function resolveAgentModel(tier: string | undefined, model: string | undefined): string {
+    if (model && model !== 'N/A') return model;
+    if (!tier || tier === 'N/A') return '—';
+    return loadClaudeModels()?.[tier] ?? '—';
 }
 
 export interface SkillInfo {
@@ -385,7 +425,7 @@ async function collectAgents(): Promise<AgentInfo[]> {
             name: path.basename(file, '.md'),
             file: normalizePath(filePath),
             tier: tier || 'N/A',
-            model: model || 'N/A',
+            model: resolveAgentModel(tier, model),
             last_modified: lastModified,
         });
     }
@@ -578,10 +618,13 @@ async function collectCommands(): Promise<CommandInfo[]> {
 export function detectDrift(agents: AgentInfo[], skills: SkillInfo[], commands: CommandInfo[]): string[] {
     const issues = new Set<string>();
 
-    // Check for agents without tier/model metadata
+    // Check for agents without tier metadata. v1.11.0 (agent-mirror design
+    // §4.4): narrowed to tier-only — an absent frontmatter `model:` field is
+    // the expected SSOT shape since the sweep (the Model column resolves the
+    // registry instead), so its absence is no longer drift.
     for (const agent of agents) {
-        if (agent.tier === 'N/A' || agent.model === 'N/A') {
-            issues.add(`[WARNING] Agent ${agent.name} missing tier or model metadata`);
+        if (agent.tier === 'N/A') {
+            issues.add(`[WARNING] Agent ${agent.name} missing tier metadata`);
         }
     }
 

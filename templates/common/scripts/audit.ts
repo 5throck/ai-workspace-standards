@@ -1,4 +1,10 @@
-// @version 2.56.0
+// @version 2.57.0
+// v2.57.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+//          DEC-20261028-06): agent-mirror parity gate — when scripts/sync-agent-mirrors.ts
+//          exists, spawn its --check (the same projection code as write mode); nonzero
+//          exit = audit failure. Spawn-if-exists keeps pre-delivery projects and the two
+//          orphans green until their upgrade visit (the validate-model-registry arm
+//          precedent); drift classes are named per file with the one-line repair command.
 // v2.56.0 (2026-10-26, U-20261026-006): design-lint scan-root fallback — when no
 //           CONFIGURED designLint.scanRoots path exists in the checkout (the
 //           L1-delivered schema names templates/co-design/playground/src, which
@@ -3519,6 +3525,26 @@ if (fs.existsSync(path.join('scripts', 'validate-model-registry.ts'))) {
         Fail('Model registry gate failed — model comments / tier→model prose disagree with docs/workspace-schema.json models (bun scripts/validate-model-registry.ts lists them)');
     } else {
         Pass('Model registry gate: model comments + tier→model mapping prose match the models registry');
+    }
+}
+
+// ── Agent-mirror parity gate (2026-10-28-platform-agent-mirror-design.md §4.3.1) ──
+// When scripts/sync-agent-mirrors.ts exists, its --check (the same projection code
+// as write mode) is the mirror↔SSOT parity gate: any missing / extra-managed /
+// differing mirror fails the audit. Spawn-if-exists keeps pre-delivery projects and
+// the two orphans audit-green until their upgrade visit (the validate-model-registry
+// precedent); at the workspace root the check is a green no-op (mirrors are
+// project-scoped by design).
+if (fs.existsSync(path.join('scripts', 'sync-agent-mirrors.ts'))) {
+    const { status, stdout, stderr } = spawnSync('bun', ['scripts/sync-agent-mirrors.ts', '--check'], {
+        encoding: 'utf-8',
+    });
+    if (status !== 0) {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+        Fail('Agent-mirror parity gate failed — bun scripts/sync-agent-mirrors.ts --check lists the drifted mirrors (repair: bun scripts/sync-agent-mirrors.ts)');
+    } else {
+        Pass('Agent-mirror parity gate: generated mirrors match the agents/ SSOT (or root is mirror-less by design)');
     }
 }
 

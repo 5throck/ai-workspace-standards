@@ -1,0 +1,112 @@
+schemaVersion: 1
+id: U-20261028-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-10-28T20:44:17.609+09:00'
+history:
+  - at: '2026-10-28T20:44:17.609+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-28T21:05:11.494+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.22.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Follow-up to U-20261028-002, at the owner's request (2026-10-28): the
+    recurring agent-mirror drift is a symptom of platform-specific knowledge
+    living in individual project scripts instead of the workspace.
+
+
+    Observed:
+
+    - Each platform (Claude Code, Gemini CLI, Codex, Antigravity, Hermes,
+    generic `.agents`) accepts different agent-definition fields and model
+    identifiers. For example, Claude Code reads only
+    `name`/`description`/`model` with model aliases sonnet/opus/haiku and
+    ignores `tier`. Gemini expects literal model IDs.
+
+    - These platform rules are encoded ad hoc. In co-newbiz they live in a
+    project-local script (`scripts/co-newbiz/sync-agent-personas.ts`, not
+    template-managed), with a hard-coded tier→alias map and an outdated
+    frontmatter shape. When the SSOT frontmatter changed shape, the project
+    script silently produced wrong mirrors (every `model:` line deleted), and
+    nothing at workspace level detected it.
+
+    - Only `.claude/agents/` has mirrors. Whether other platforms need generated
+    agent definitions, and in what format, is not recorded anywhere. Every
+    project has to rediscover it.
+
+    - The same class of problem has recurred for other platform surfaces:
+      - skills mirrored to five platform dirs;
+      - command parity between `.claude/commands` and `.gemini/commands`;
+      - the model registry comment checks.
+
+    Expected:
+
+    - The workspace owns a per-platform capability/adapter definition: which
+    surfaces each platform supports (agents, skills, commands, hooks), the
+    accepted fields per surface, and the model-identifier format resolved from
+    the models registry by tier.
+
+    - One template-managed generator projects `agents/*.md` (SSOT,
+    platform-neutral `tier` only) into every platform that supports agent
+    definitions.
+
+    - A blocking parity/drift gate runs in every project's audit across the
+    fleet, so a change to the SSOT shape or a platform's rules fails loudly
+    instead of corrupting mirrors.
+
+    - Project-local copies of this logic are retired in favour of the template
+    version.
+  affected_paths:
+    - scripts/co-newbiz/sync-agent-personas.ts
+    - scripts/validate-model-registry.ts
+    - docs/workspace-schema.json
+    - agents/
+    - .claude/agents/
+    - .claude/skills/
+    - .gemini/
+    - .codex/
+    - .agents/
+    - .hermes/
+  identity_source: client_roots
+  repro: >-
+    See U-20261028-002 for the concrete co-newbiz reproduction: running `bun
+    scripts/co-newbiz/sync-agent-personas.ts` strips `model:` from all 40
+    `.claude/agents/*.md` files, because the SSOT now uses a flat `tier:` field.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: scripts/co-newbiz/sync-agent-personas.ts'
+    - 'path_not_template_managed: agents/'
+    - 'path_not_template_managed: .claude/agents/'
+    - 'path_not_template_managed: .claude/skills/'
+    - 'path_not_template_managed: .gemini/'
+    - 'path_not_template_managed: .codex/'
+    - 'path_not_template_managed: .agents/'
+    - 'path_not_template_managed: .hermes/'
+    - info:in_last_delivery scripts/co-newbiz/sync-agent-personas.ts=false
+    - info:in_last_delivery scripts/validate-model-registry.ts=true
+    - info:in_last_delivery docs/workspace-schema.json=false
+    - info:in_last_delivery agents/=false
+    - info:in_last_delivery .claude/agents/=false
+    - info:in_last_delivery .claude/skills/=false
+    - info:in_last_delivery .gemini/=false
+    - info:in_last_delivery .codex/=false
+    - info:in_last_delivery .agents/=false
+    - info:in_last_delivery .hermes/=false
+  dedupe_key: 89e728199b9d3bc4bc6c4253b614dad75e9d582d4862a786add3ce2afcd7b385
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-28T20:44:17.609+09:00'

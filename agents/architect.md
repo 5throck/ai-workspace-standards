@@ -4,7 +4,6 @@ name: Template Architect
 role: specialist
 status: active
 tier: high
-model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31
 color: blue

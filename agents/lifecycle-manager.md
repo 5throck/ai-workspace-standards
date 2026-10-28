@@ -6,7 +6,6 @@ status: active
 version: 1.1.0
 last_reviewed: 2026-07-31
 tier: medium
-model: inherit
 color: teal
 description: >
   Lifecycle state monitor and governance record keeper for the workspace root (8 domains × 3 layers).

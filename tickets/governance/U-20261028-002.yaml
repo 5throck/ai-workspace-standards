@@ -1,0 +1,166 @@
+schemaVersion: 1
+id: U-20261028-002
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T20:41:52.659+09:00'
+history:
+  - at: '2026-10-28T20:41:52.659+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-28T21:05:11.476+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T21:05:24.135+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-28T21:05:24.135+09:00'
+    from: review
+    to: done
+result: >-
+  Independently verified (PM, 2026-10-28): the defect lives in the project-local
+  script scripts/co-newbiz/sync-agent-personas.ts:61 (nested-tier regex
+  /claude:\s*(high|medium|low)/) — confirmed not template-managed
+  (path_not_template_managed at filing). The agent SSOT shape changed to flat
+  tier: via the ADR-0102 tier normalization delivered in template v0.22.0, so a
+  wholesale sync run would strip model: from all 40 mirrors; current tree is
+  intact except 1 mirror thanks to the project's hand-fix in co-newbiz PR #761 —
+  do not run the sync wholesale until replaced. True layer = L3 (project-local),
+  so closed local-only per pm-gateway-workflow §3.12 step 4. The template-side
+  residue the ticket surfaced IS real — model: inherit coexists with flat tier:
+  in 144 template agent files (single-declaration violation, ADR-0102) — and is
+  queued as a workstream item of U-20261028-003 (platform-neutral SSOT +
+  template-managed mirror generator + parity gate), not fixed ad hoc here to
+  avoid double churn. Interim guidance: fix the local regex to the flat tier:
+  shape, or wait for the U-003 generator and retire the script.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.22.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: unsure
+  symptom: >-
+    Agent persona SSOT and platform mirrors disagree on the model/tier fields,
+    and persona sync deletes the per-agent model.
+
+
+    Observed in co-newbiz:
+
+    1. `scripts/co-newbiz/sync-agent-personas.ts` derives the Claude `model:`
+    from a nested `tier: { claude: high|medium|low }` field (regex
+    `claude:\s*(high|medium|low)`). The agent SSOT files `agents/*.md` now use a
+    flat `tier: high|medium|low` field, so no tier is found and the regenerated
+    `.claude/agents/*.md` mirrors are written without a `model:` line. All 40
+    mirrors lose `model:` on every run. Without `model:`, Claude Code falls back
+    to the parent session's model, so Low and Medium tier agents run on the top
+    model.
+
+    2. `agents/*.md` frontmatter carries both `tier: high` and `model: inherit`.
+    That is two sources for one fact, and the values contradict each other: a
+    high tier implies a specific model, while inherit means the parent session's
+    model.
+
+    3. Only `.claude/agents/` has generated agent mirrors. `.gemini/`,
+    `.codex/`, `.agents/` and `.hermes/` have no agent mirror directories. It is
+    unclear whether those platforms read `agents/*.md` directly or whether their
+    mirrors are missing, so platform parity of agent definitions is not
+    guaranteed or checked.
+
+    4. `sync-agent-personas --check` reports every mirror as drifted, so the
+    drift check cannot catch real divergence.
+
+
+    Expected:
+
+    - `agents/*.md` is the single source of truth and carries a platform-neutral
+    `tier` only, with no `model` field.
+
+    - Each platform mirror is generated from it, with the platform model value
+    resolved from the tier through the models registry (Claude: high=opus,
+    medium=sonnet, low=haiku; Gemini: registry model IDs).
+
+    - Every platform that supports agent definitions gets an equivalent mirror.
+
+    - A blocking drift check keeps the mirrors identical to the SSOT.
+
+
+    The owner asked for this fix to apply to the template and the whole fleet,
+    not only co-newbiz.
+  affected_paths:
+    - scripts/co-newbiz/sync-agent-personas.ts
+    - agents/
+    - .claude/agents/
+    - .gemini/
+    - .codex/
+    - .agents/
+    - .hermes/
+    - scripts/validate-model-registry.ts
+    - docs/workspace-schema.json
+  identity_source: client_roots
+  repro: >-
+    In co-newbiz on main (2026-10-28):
+
+    1. Confirm `.claude/agents/valuation-agent.md` contains `model: opus`.
+
+    2. Run `bun scripts/co-newbiz/sync-agent-personas.ts`.
+
+    3. `grep -c '^model:' .claude/agents/*.md`: the line is removed from all 40
+    files.
+
+    4. `agents/valuation-agent.md` frontmatter shows `tier: high` and `model:
+    inherit` together.
+
+    5. `ls -d .gemini/agents .codex/agents .agents/agents .hermes/agents` finds
+    no agent mirror directories.
+
+
+    Local handling: co-newbiz has not run the sync wholesale. In PR #761, only
+    the five changed persona mirrors were edited by hand, keeping their existing
+    `model:` lines.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: scripts/co-newbiz/sync-agent-personas.ts'
+    - 'path_not_template_managed: agents/'
+    - 'path_not_template_managed: .claude/agents/'
+    - 'path_not_template_managed: .gemini/'
+    - 'path_not_template_managed: .codex/'
+    - 'path_not_template_managed: .agents/'
+    - 'path_not_template_managed: .hermes/'
+    - info:in_last_delivery scripts/co-newbiz/sync-agent-personas.ts=false
+    - info:in_last_delivery agents/=false
+    - info:in_last_delivery .claude/agents/=false
+    - info:in_last_delivery .gemini/=false
+    - info:in_last_delivery .codex/=false
+    - info:in_last_delivery .agents/=false
+    - info:in_last_delivery .hermes/=false
+    - info:in_last_delivery scripts/validate-model-registry.ts=true
+    - info:in_last_delivery docs/workspace-schema.json=false
+  dedupe_key: a5dd052504b494b404a96e6267a6b62e95fc0d730a9747de768829d0456ca6e3
+  duplicates:
+    - project: co-newbiz
+      at: '2026-10-28T20:41:52.659+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.0
+    summary: >-
+      Independently verified (PM, 2026-10-28): the defect lives in the
+      project-local script scripts/co-newbiz/sync-agent-personas.ts:61
+      (nested-tier regex /claude:\s*(high|medium|low)/) — confirmed not
+      template-managed (path_not_template_managed at filing). The agent SSOT
+      shape changed to flat tier: via the ADR-0102 tier normalization delivered
+      in template v0.22.0, so a wholesale sync run would strip model: from all
+      40 mirrors; current tree is intact except 1 mirror thanks to the project's
+      hand-fix in co-newbiz PR #761 — do not run the sync wholesale until
+      replaced. True layer = L3 (project-local), so closed local-only per
+      pm-gateway-workflow §3.12 step 4. The template-side residue the ticket
+      surfaced IS real — model: inherit coexists with flat tier: in 144 template
+      agent files (single-declaration violation, ADR-0102) — and is queued as a
+      workstream item of U-20261028-003 (platform-neutral SSOT +
+      template-managed mirror generator + parity gate), not fixed ad hoc here to
+      avoid double churn. Interim guidance: fix the local regex to the flat
+      tier: shape, or wait for the U-003 generator and retire the script.

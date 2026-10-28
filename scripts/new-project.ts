@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.36.2
+// @version 1.37.0
+// v1.37.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+//          DEC-20261028-06): §2.3c — one agent-mirror generator write-mode call
+//          (spawn scripts/sync-agent-mirrors.ts --dir <project>) immediately after
+//          the §2.3b agents/ extends-stub resolution, so fresh scaffolds have
+//          conforming .claude/agents mirrors from minute zero and the parity gate
+//          is green on the project's first audit. Templates ship no mirror trees
+//          (design trade-off T3) — this is the only generation point for new
+//          projects. Generator absence (pre-delivery L0) skips silently.
 // v1.36.2 (2026-10-13, T-20261013-001): §6.6 registry-append mechanics extracted to
 //          helpers/registry-append.ts (shared with upgrade-project VARIANT SCRIPTS SYNC).
 // v1.36.0 (2026-10-10, eight-platform coverage — spec docs/designs/2026-10-10-eight-platform-coverage-design.md):
@@ -940,6 +948,26 @@ makeWritable(projectDir);
         console.log(`  ✅ ${rel}: resolved empty extends-stub against templates/common body`);
       } else if (stubResult.missingL1) {
         console.log(`  ⚠️  ${rel}: extends-stub but templates/common/agents/${fname} is missing — project ships a stub agent`);
+      }
+    }
+  }
+}
+
+// ── 2.3c. Generate platform agent mirrors (design
+//          2026-10-28-platform-agent-mirror-design.md §4.2 wiring) ─────────────
+// One generator write-mode call after agents/ delivery: fresh scaffolds get
+// conforming .claude/agents mirrors from minute zero, so the parity gate is
+// green on the project's first audit. Templates ship no mirror trees (trade-off
+// T3) — the scaffold-time run is the only generation point for new projects.
+{
+  const mirrorGenerator = join(workspaceRoot, 'scripts', 'sync-agent-mirrors.ts');
+  if (existsSync(mirrorGenerator)) {
+    console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
+    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir], { stdio: 'inherit' });
+    if (mirrorResult.status !== 0) {
+      console.error(`❌ Agent-mirror generation failed — the scaffold is complete but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
+      if (import.meta.main) {
+        process.exit(1);
       }
     }
   }

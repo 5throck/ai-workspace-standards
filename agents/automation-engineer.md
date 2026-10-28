@@ -4,7 +4,6 @@ name: Automation Engineer
 role: specialist
 status: active
 tier: low
-model: inherit
 version: 1.0.0
 last_reviewed: 2026-07-31
 color: green

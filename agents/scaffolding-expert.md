@@ -4,7 +4,6 @@ name: Scaffolding Expert
 role: specialist
 status: active
 tier: low
-model: inherit
 color: orange
 description: 'New Project & Template Specialist. Use when: "Creating new projects", "Template validation", "Scaffolding tasks"'
 examples:

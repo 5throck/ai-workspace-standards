@@ -4,7 +4,7 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.63.0
+- **Version**: 1.64.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-28
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.

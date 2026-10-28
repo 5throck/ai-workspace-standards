@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: T-20261028-016
+kind: manual
+title: >-
+  Phase-2 mechanics follow-ups — four defects/gaps found while landing the
+  L0-only doc retirement across 16 projects (2026-10-28, DEC-20261028-05
+  phase 2). (1) scripts/remove-retired-governance-docs.ts raw `git commit`
+  cannot pass the delivered pre-commit hooks (SYNC_ACTIVE=1 +
+  DEV_SYNC_CONTEXT/CONTEXT_FILE required; direct commits refused in all 16
+  repos) — the script must route each repo's commit through that project's
+  dev-sync (PR pathway) or be redesigned; the 16 landings were completed
+  manually via per-project dev-sync PRs. (2) --clear-tombstone catch-22:
+  clearing the manifest tombstone does not drop the delivered baseline, and
+  the absent-copy+baseline detection RE-RECORDS the tombstone on the next run
+  (observed co-design runs 2-3) — clear should drop the baseline too, or
+  document the direct-placement workaround (used: co-design 3c75fe2 received
+  the L1 workflows.md rewrite by file placement; next upgrade classifies it
+  IN_SYNC). (3) Silent-clobber class: co-architect + co-price designLint
+  allowlists (committed project token-debt mitigations) were overwritten by
+  the version-gated workspace-schema.json delivery classified UNTOUCHED —
+  the pre-flight divergence survey had mislabeled it "formatting-only";
+  design-lint then failed the sync until the allowlists were re-applied
+  (landed: co-architect 8166988, co-price c9a2244). Consider a
+  designLint/known-custom-blocks CONFLICT check for schema deliveries.
+  (4) Disclosure: co-abap landing 673c460 swept the project session's
+  memory/2026-10-28.md block (37 lines, benign) — the helper script's bash-3.2
+  associative-array dirt exclusion silently failed (declare -A unsupported on
+  macOS); no history rewrite (force-push forbidden), disclosed here.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-28T21:50:00.000+09:00'
+history:
+  - at: '2026-10-28T21:50:00.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
