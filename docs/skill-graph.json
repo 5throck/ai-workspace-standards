@@ -2354,6 +2354,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261028-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -10353,6 +10358,12 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261026-03",
       "to": "skill:root/project-review",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261028-04",
+      "to": "skill:common/decision-record",
       "source": "skills_used"
     },
     {
