@@ -44,6 +44,25 @@ project-only) | +added/-removed. L0-only — reads Projects/; no L1 mirror. Neve
 **Usage**: `bun scripts/backport-diff.ts --project <co-name> [--surfaces all|skills|scripts|helpers|context|agents] [--base <commit>] [--json]`
 **Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
 
+#### `design-gate-coverage.ts`
+**Purpose**: Windowed Design-Gate coverage check (T-20261028-001, design
+docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md D8).
+Given a review window, lists the commits touching the template/code surfaces,
+extracts ticket ids from commit subjects/bodies, merge-commit PR bodies, and
+changed tickets/ file paths, joins them against docs/specs/registry.json
+(registry-join per the approved design's §10 Q4 default — a registered design
+doc naming the ticket in prose counts; the registry is the SSOT), and emits a
+coverage table (covered-by-spec / uncovered / unattributed commit) for the
+review to adjudicate E1–E5. Report-only: nothing auto-closes, exit 0 always.
+Reproduces the 2026-10-28 FULL review's F-1 finding mechanically (the
+reconciliation rode PR T-20261028-001). Consumed as review-baseline battery #9
+(--json over a 24h window). L0-only — reads git history + docs/specs; no L1
+mirror. Never writes anywhere.
+**Usage**: `bun scripts/design-gate-coverage.ts [--since <rev|date>] [--until <rev|date>] [--json]`
+**Runs automatically**: review-baseline.ts battery #9 (24h window, --json);
+the FULL project review's Step 0 evidence rows (operator-invoked with the
+review window)
+
 #### `audit.ts`
 **Purpose**: Documentation audit gate. Checks CHANGELOG.md, workspace standards, AGENTS.md,
 agent frontmatter, skill health, template lifecycle validation, and variant context guidelines
