@@ -54,3 +54,37 @@ Snapshot `memory/skill-graph-metrics/snapshot-2026-10-29.json` (committed with t
 ## Mode note
 
 Phase I green (no ≥3 ERRORs, no Critical) → Phase 1b and Phase II run in **normal mode**.
+
+---
+
+# Phase 1b — Per-variant project-review (templates/co-*)
+
+## Batteries (14/14 PASS)
+
+All 14 variants: `validate-variant-claims.ts --template <v>` exit 0 ×14; `validate-variant-readiness.ts --variant <v>` — 7 "All checks passed", 7 "READY (warnings only)" (known `country-config-default` cosmetic class). **0 FAIL.**
+
+## Scope triage
+
+All 14 variants share the same common wave (model: sweep d1247fad6, L0-only mirror retirement 352953758, adjudication batch 90040b8b4); co-design adds the tombstone-design D5 port (c38c93e62). ONE systemic SCOPED review covered the common wave (4 variants sampled) + co-design specifics.
+
+## Common wave (systemic) — CLEAN
+
+(a) `model:` gone from all sampled frontmatter, `tier:` scalar everywhere (55 sampled: 15 high / 9 low / 31 medium); version bumps consistent. (b) AGENTS/HERMES regenerations identical where applied; variants never referencing the retired mirrors correctly untouched; no variant-specific content lost. (c) Zero dangling references to retired L0-only mirror paths across templates/.
+
+## co-design specifics — CLEAN
+
+Phase echoes now equal frontmatter `phases:` on all 7 specialists (the old echoes were incoherent — a genuine fix, matches docs/phase-definitions.md); **registry provenance headers now cite the template-side promotion spec (T-20261028-004 ask satisfied, ticket done via #1678)**; composition fix consistent with the accessibility posture.
+
+## co-safety scripts — CLEAN
+
+audit-variant.ts 1.2.0 == SCRIPTS.md row; the skill_manifest.variant_specific parsing fix matches the real variant.json shape and un-silenced a previously no-op gate; malformed variant.json now fails loud.
+
+## Findings
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| S-1 | Info | Self-referential ADR-0078 boilerplate phrasing in regenerated AGENTS.md (one systemic instance) | templates/co-deck/AGENTS.md:265-267 et al. | fold into next common-wave regeneration |
+| S-2 | Info | **New Phase 1b structural-trigger class**: variant agent frontmatter is now platform_surfaces-coupled (scalar tier = model-resolution key; `model:` = gate violation; roster deltas flow through the generator manifest) | docs/workspace-schema.json:629-643 | added to the 1b checklist |
+| S-3 | Info | Fleet wave open item: co-newbiz agent-mirror canary (persona-sync retirement) not yet landed | platform-agent-mirror design §6 | watch co-newbiz waves |
+
+**No Critical/Major/Minor. Phase 1b ticket spend: 0. Daily shared cap: 3/10 used.**
