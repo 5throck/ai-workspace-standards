@@ -1,4 +1,21 @@
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-28, design
+//           docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//           D2): the destructive unlabeled-block count-mismatch reconcile now
+//           consults the instruction-region census. New optional trailing
+//           parameter `censusGate` (structurally upgrade-policy's
+//           InstructionCensusGate — defined inline here so the pure lib stays
+//           import-cycle-free): when the gate says the file carries
+//           out-of-zone divergence AND the span about to be replaced carries
+//           project-authored content AND no --disposition adopt-template grant
+//           covers the path, the reconcile is BLOCKED (skipped, span returned
+//           in the new `escalated[]` result field — the engine records the
+//           CONFLICT (ERROR) row and names the adjudicated-port procedure).
+//           An adapted span under an explicit grant proceeds with its recovery
+//           snapshot as today and is counted in `adaptedReplaces` (ADOPT row).
+//           In-sync files (gate.divergent === false) and clean spans behave
+//           exactly as before. Keyed-block replaces are engine-zone (I1)
+//           delivery and are never gated.
 // v1.4.0 (2026-09-29): WORKSPACE-MANAGED keys may contain hyphens (`tier-model-mapping`
 //           was never matched, so model bumps never reached projects); repeated keys pair
 //           by occurrence order (fresh scan per replace) and a missing later occurrence is
@@ -246,12 +263,36 @@ export interface ManagedBlockMergeResult {
   merged: boolean;
   /** Verbatim log lines (4-space indented, `[DRY RUN] ` tagged when dryRun). */
   log: string[];
-  /** T-20260917-010: exact project span(s) replaced by an unlabeled-block
-   *  reconcile, in merge order. The caller must persist each to
-   *  `<target>.pre-reconcile.bak` BEFORE writing the merged content (and
+  /** T-20261017-010 / T-20260917-010: exact project span(s) replaced by an
+   *  unlabeled-block reconcile, in merge order. The caller must persist each
+   *  to `<target>.pre-reconcile.bak` BEFORE writing the merged content (and
    *  abort fail-closed when the write fails); dry-run callers skip writing.
    *  Empty unless a count-mismatch reconcile fired. */
   snapshots: { rel: string; content: string }[];
+  /** v1.5.0 (D2): spans the census BLOCKED — an adapted out-of-zone span the
+   *  count-mismatch reconcile would have replaced without an explicit
+   *  --disposition adopt-template grant. The engine records the CONFLICT
+   *  (ERROR) decision for each and the span is left untouched. */
+  escalated: { rel: string; content: string }[];
+  /** v1.5.0 (D2): count of adapted-span reconciles that PROCEEDED under an
+   *  explicit --disposition adopt-template grant (snapshot + replace as
+   *  today; the engine records the ADOPT row). */
+  adaptedReplaces: number;
+}
+
+/** v1.5.0 (D2): the instruction-region census gate. Structurally
+ *  upgrade-policy's InstructionCensusGate (declared inline so this pure lib
+ *  stays free of an import cycle); the engine builds it from
+ *  censusInstructionRegions + spanCarriesProjectAuthoredLines + the
+ *  --disposition flag. */
+export interface ManagedBlockCensusGate {
+  /** The file's census found out-of-zone divergence — false closes the gate
+   *  entirely (in-sync files keep today's reconcile behavior). */
+  divergent: boolean;
+  /** The span about to be replaced carries project-authored content. */
+  isSpanAdapted: (spanContent: string) => boolean;
+  /** --disposition adopt-template[=glob] covers this rel. */
+  dispositionGranted: boolean;
 }
 
 /**
@@ -269,15 +310,18 @@ export function mergeManagedBlocks(
   commonContent: string | null,
   rel: string,
   dryRun: boolean,
+  censusGate?: ManagedBlockCensusGate,
 ): ManagedBlockMergeResult {
   const dryTag = dryRun ? '[DRY RUN] ' : '';
   const log: string[] = [];
   const snapshots: { rel: string; content: string }[] = [];
+  const escalated: { rel: string; content: string }[] = [];
+  let adaptedReplaces = 0;
   const mergedManaged = buildMergedTemplateBlocks(templateContent, commonContent);
 
   if (mergedManaged.length === 0) {
     log.push(`    INFO: Template has no managed markers — skipping ${rel}`);
-    return { content: projectContent, merged: false, log, snapshots };
+    return { content: projectContent, merged: false, log, snapshots, escalated, adaptedReplaces };
   }
 
   let updated = projectContent;
@@ -340,16 +384,28 @@ export function mergeManagedBlocks(
       // blocks legitimately removes the project's stale unlabeled span.
       const fresh = scanPatternBlocks(updated, pattern).filter((b) => !b.key);
       if (fresh.length > 0) {
-        log.push(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projUnlabeledCount}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
         const first = fresh[0];
         const last = fresh[fresh.length - 1];
+        const spanContent = updated.slice(first.start, last.end);
+        // v1.5.0 (design D2 §4.2): the census gates the destructive reconcile
+        // when the replaced span carries project-authored out-of-zone content
+        // and no --disposition adopt-template grant covers the path.
+        const adapted = Boolean(censusGate && censusGate.divergent && censusGate.isSpanAdapted(spanContent));
+        if (adapted && censusGate && !censusGate.dispositionGranted) {
+          log.push(`    ${dryTag}RECONCILE BLOCKED (adapted out-of-zone span): ${rel} — the instruction-region census found project-authored content in the replaced span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`);
+          log.push('      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump');
+          escalated.push({ rel, content: spanContent });
+          continue;
+        }
+        log.push(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projUnlabeledCount}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
         // T-20260917-010: capture the exact replaced span so the caller can
         // persist a recovery snapshot before applying this destructive
         // replace. Pure data here — the fs write lives in upgrade-project.
-        snapshots.push({ rel, content: updated.slice(first.start, last.end) });
+        snapshots.push({ rel, content: spanContent });
+        if (adapted) adaptedReplaces++;
         updated = updated.slice(0, first.start) + unlabeledTplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
         merged = true;
-        log.push(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}`);
+        log.push(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}${adapted ? ' (adapted span — delivered via --disposition adopt-template)' : ''}`);
       }
     } else {
       // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
@@ -373,5 +429,5 @@ export function mergeManagedBlocks(
     log.push(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
   }
 
-  return { content: updated, merged, log, snapshots };
+  return { content: updated, merged, log, snapshots, escalated, adaptedReplaces };
 }

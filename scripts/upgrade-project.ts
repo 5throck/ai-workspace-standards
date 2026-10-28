@@ -1,5 +1,37 @@
 #!/usr/bin/env bun
-// @version 1.81.0
+// @version 1.82.0
+// v1.82.0 (2026-10-28, design
+//          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//          D1-D4): instruction-file region taxonomy + merge-time region census
+//          + skeleton registry widening. (D1) the five instruction files
+//          (AGENTS.md/CLAUDE.md/GEMINI.md/CODEX.md/HERMES.md) get the region
+//          taxonomy of lib/upgrade-policy v1.30.0: I1 managed marker zones +
+//          skeleton-registry sections (template-authoritative, delivered as
+//          today), I2 VARIANT-* project-state marker sections (project state,
+//          census-only per Q2), I3 free-form template-echo content.
+//          (D2) mergeWorkspaceManaged computes the out-of-zone census (project
+//          copy vs template side) BEFORE the merge and records its rows into
+//          the unified decision log: REGION_IN_SYNC (INFO, only when the file
+//          also carries divergence), EVOLVED_REGION (WARN — project adaptation
+//          preserved; port candidate), TEMPLATE_AHEAD_REGION (WARN — template
+//          content the project never received, or a deliberate project
+//          deletion; Q1: never silently reverted, ERROR only via a write
+//          channel). An in-sync file produces ZERO census rows. The two write
+//          channels that can reach an adapted out-of-zone span now consult the
+//          census gate: the destructive unlabeled-block count-mismatch
+//          reconcile and the guarded skeleton section replace skip with a
+//          CONFLICT (ERROR) decision when the span carries project-authored
+//          content and no --disposition adopt-template[=glob] grant covers the
+//          path (D4: the decision names the adjudicated-port procedure — land
+//          the content template-side inside a managed zone or
+//          skeleton-registry section with a version bump); under an explicit
+//          grant the replace proceeds with its recovery snapshot and records
+//          ADOPT. (D3) the ADR-0101 skeleton step widens from CLAUDE.md /
+//          GEMINI.md to ALL FIVE instruction files (lib
+//          platform-skeleton-merge v1.2.0); with zero registry entries for a
+//          rel it is a no-op — entries land per adjudicated-port decision,
+//          never big-bang. Dry-run classifies + prints the census without
+//          writing (rows ride the dry-run decision summary, nothing persisted).
 // v1.81.0 (2026-10-28, T-20261028-013 — spec
 //          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //          D9): stub-composed compare and delivery at upgrade time. When the
@@ -842,9 +874,12 @@ import {
   baselineKeyFor,
   classifyProjectState,
   globToRegExp,
+  INSTRUCTION_FILE_RELS,
   isExtendsStub,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
+  censusInstructionRegions,
+  spanCarriesProjectAuthoredLines,
   mergeSettingsJson,
   normalizeAgentTierFrontmatter,
   resolveClaim,
@@ -1612,7 +1647,7 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
  *  managed-block merge, with section content read from templates/common/<rel>
  *  at merge time; replaced spans are snapshotted to `<target>.pre-skeleton.bak`
  *  before the write (fail-closed). */
-function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string): { merged: boolean; snapshotCount: number; skeletonLog: string[] } {
+function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: string, pass: 'MERGE' | 'DOCS_MERGE'): { merged: boolean; snapshotCount: number; skeletonLog: string[] } {
   const tplContent = readFileSync(templateFile, 'utf8');
   let commonContent: string | null = null;
 
@@ -1643,8 +1678,41 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   }
 
   const projContent = readFileSync(projectFile, 'utf8');
-  const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun);
+
+  // D2 (design §4.1): the instruction-region census — computed BEFORE any
+  // merge mutation, classifying the out-of-zone delta between the project
+  // copy and the template side. Rows land in the unified decision log (and
+  // print for the dry-run census table); an in-sync file produces zero rows.
+  const census = INSTRUCTION_FILE_RELS.includes(rel)
+    ? censusInstructionRegions(rel, projContent, tplContent)
+    : null;
+  if (census) {
+    for (const row of census.rows) {
+      console.log(`    CENSUS [${row.verdict}] ${rel} — ${row.detail}`);
+      recordDecision(rel, 'MERGE_MANAGED', pass, row.verdict, row.detail, undefined, row.severity);
+    }
+  }
+  // D2 §4.2: the census gate for the two write channels that can reach an
+  // adapted out-of-zone span (unlabeled reconcile, skeleton replace). Closed
+  // entirely for in-sync files — their reconcile/replace behavior is unchanged.
+  const censusGate = census && census.divergent
+    ? {
+        divergent: true,
+        isSpanAdapted: (span: string) => spanCarriesProjectAuthoredLines(span, tplContent),
+        dispositionGranted: dispositionAdopts(rel),
+      }
+    : undefined;
+
+  const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun, censusGate);
   for (const line of result.log) console.log(line);
+  // D2/D4: a census-blocked adapted-span reconcile records CONFLICT (ERROR) —
+  // the decision names the adjudicated-port procedure as the sanctioned path.
+  for (const esc of result.escalated) {
+    recordDecision(rel, 'MERGE_MANAGED', pass, 'CONFLICT', `adapted out-of-zone span replace BLOCKED by the instruction-region census (${esc.content.split('\n').length} line(s)) — delivery SKIPPED, project copy preserved (non-zero exit at completion) — proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump`, undefined, 'ERROR');
+  }
+  if (result.adaptedReplaces > 0) {
+    recordDecision(rel, 'MERGE_MANAGED', pass, 'ADOPT', `adapted out-of-zone span reconcile delivered via explicit --disposition adopt-template (instruction-region census gate; recovery snapshot written)`);
+  }
 
   // spec 2026-10-25-managed-platform-skeleton-design.md (ADR-0101): the
   // skeleton step runs strictly AFTER mergeManagedBlocks so zone markers and
@@ -1655,12 +1723,23 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
   let finalMerged = result.merged;
   let snapshotCount = result.snapshots.length;
   const skeletonLog: string[] = [];
-  if (rel === 'CLAUDE.md' || rel === 'GEMINI.md') {
-    const skeleton = mergeSkeletonSections(result.content, commonContent ?? tplContent, rel, dryRun);
+  // D3: the skeleton step widens from CLAUDE.md/GEMINI.md to ALL FIVE
+  // instruction files (platform-skeleton-merge v1.2.0). With zero registry
+  // entries for a rel the call is a no-op — entries land per adjudicated-port
+  // decision (D4), never big-bang.
+  if (INSTRUCTION_FILE_RELS.includes(rel)) {
+    const skeleton = mergeSkeletonSections(result.content, commonContent ?? tplContent, rel, dryRun, undefined, censusGate);
     for (const line of skeleton.log) console.log(line);
     skeletonLog.push(...skeleton.log);
     finalContent = skeleton.content;
     finalMerged = result.merged || skeleton.merged;
+    // D2/D4: census-blocked adapted section spans record CONFLICT (ERROR).
+    for (const esc of skeleton.escalated) {
+      recordDecision(rel, 'MERGE_MANAGED', pass, 'CONFLICT', `adapted skeleton section replace BLOCKED by the instruction-region census (${esc.content.split('\n').length} line(s)) — delivery SKIPPED, project copy preserved (non-zero exit at completion) — proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump`, undefined, 'ERROR');
+    }
+    if (skeleton.adaptedReplaces > 0) {
+      recordDecision(rel, 'MERGE_MANAGED', pass, 'ADOPT', `adapted skeleton section replace delivered via explicit --disposition adopt-template (instruction-region census gate; pre-skeleton.bak snapshot written)`);
+    }
     if (!dryRun && skeleton.snapshots.length > 0) {
       // T-20260917-010 pattern: persist the replaced span(s) BEFORE the merged
       // content lands — a recovery copy that cannot be written means the
@@ -2061,7 +2140,7 @@ for (const rel of MERGE_FILES) {
     if (!mergeCiWorkflowFile(dest, src, rel)) ciMergeFailed = true;
     continue;
   }
-  const mergeResult = mergeWorkspaceManaged(dest, src, rel);
+  const mergeResult = mergeWorkspaceManaged(dest, src, rel, 'MERGE');
   recordSkeletonCollisions(rel, mergeResult.skeletonLog);
   if (mergeResult.merged) {
     // D3 decision log: an in-zone replace (snapshot written) is WARN — divergence
@@ -2148,7 +2227,7 @@ for (const rel of DOCS_MERGE_FILES) {
   const dest = join(projectDir, rel);
   if (!src) { console.log(`  SKIP (no template): ${rel}`); continue; }
   console.log(`  MERGE: ${rel}`);
-  const mergeResult = mergeWorkspaceManaged(dest, src, rel);
+  const mergeResult = mergeWorkspaceManaged(dest, src, rel, 'DOCS_MERGE');
   recordSkeletonCollisions(rel, mergeResult.skeletonLog);
   if (mergeResult.merged) {
     recordDecision(
