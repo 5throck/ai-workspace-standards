@@ -122,7 +122,9 @@ describe('projection: frontmatter + body byte-preservation', () => {
     makeProject({ 'pm.md': PM_SSOT });
     const res = syncAgentMirrors(SCRATCH);
     expect(res.ok).toBe(true);
-    expect(res.written).toEqual([path.join('.claude', 'agents', 'pm.md').split('\\').join('/')]);
+    // relative() yields platform-native separators (backslashes on win32 CI);
+    // normalize the received paths so the expectation is byte-form, not path-form.
+    expect(res.written.map((w) => w.split('\\').join('/'))).toEqual(['.claude/agents/pm.md']);
     const mirror = readMirror('pm');
     const lines = mirror.split('\n');
     expect(lines[0]).toBe('---');
@@ -131,14 +133,39 @@ describe('projection: frontmatter + body byte-preservation', () => {
     expect(lines[3]).toBe('model: sonnet'); // registry-resolved from tier: medium
     expect(lines[4]).toBe('---');
     expect(mirror).toContain('<!-- GENERATED from agents/pm.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->');
-    // Body byte-preservation: the mirror ends with the exact SSOT body bytes
-    // (everything after the closing frontmatter delimiter), byte for byte.
-    const fm = PM_SSOT.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/)![0];
-    const ssotBody = PM_SSOT.slice(fm.length);
-    expect(mirror.endsWith(ssotBody)).toBe(true);
+    // Body byte-preservation: the mirror ends with the fixture file's ACTUAL body
+    // bytes, derived from a read-back of what the generator consumed — never from
+    // a hardcoded \n literal. Windows CI checks this source out with CRLF, so the
+    // fixture (and therefore the preserved body) may carry \r\n; the delimiter
+    // split below mirrors the generator's own FM_RE semantics.
+    const fixtureOnDisk = fs.readFileSync(path.join(SCRATCH, 'agents', 'pm.md'), 'utf8');
+    const fixtureFm = fixtureOnDisk.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+    const fixtureBody = fixtureOnDisk.slice(fixtureFm ? fixtureFm[0].length : 0);
+    expect(fixtureBody.length).toBeGreaterThan(0);
+    expect(mirror.endsWith(fixtureBody)).toBe(true);
     // The projection never leaks SSOT-only frontmatter into the mirror.
     expect(mirror).not.toMatch(/^role:/m);
     expect(mirror).not.toMatch(/^lifecycle:/m);
+  });
+
+  test('CRLF fixture: body bytes preserved verbatim, frontmatter stays generator-built LF', () => {
+    // Pins the Windows-checkout scenario end to end: the fixture on disk carries
+    // \r\n (what a CRLF checkout produces), the mirror body must carry the SAME
+    // \r\n bytes, and the generator-built frontmatter stays \n regardless.
+    const crlf = PM_SSOT.replace(/\n/g, '\r\n');
+    makeProject({ 'pm.md': crlf });
+    const res = syncAgentMirrors(SCRATCH);
+    expect(res.ok).toBe(true);
+    const mirror = readMirror('pm');
+    const fixtureOnDisk = fs.readFileSync(path.join(SCRATCH, 'agents', 'pm.md'), 'utf8');
+    const fixtureFm = fixtureOnDisk.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/)![0];
+    const fixtureBody = fixtureOnDisk.slice(fixtureFm.length);
+    expect(fixtureBody).toContain('\r\n');
+    expect(mirror.endsWith(fixtureBody)).toBe(true);
+    const fmLines = mirror.slice(0, mirror.indexOf('-->')).split('\n');
+    expect(fmLines[1]).toBe('name: pm');
+    expect(fmLines[3]).toBe('model: sonnet');
+    expect(fmLines.join('\n')).not.toContain('\r');
   });
 
   test('description with quotes/colons is safely double-quoted', () => {
