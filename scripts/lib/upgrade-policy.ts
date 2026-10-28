@@ -1,4 +1,14 @@
-// @version 1.28.0
+// @version 1.29.0
+// v1.29.0 (2026-10-28, T-20261028-013 — spec
+//          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//          D9/Q5): STUB_VERSION_BUMP_ADVICE (INFO) joins DecisionVerdict +
+//          DECISION_SEVERITY_CONTRACT. The upgrade-project agents/ pass emits it
+//          when a stub-composed file reaches the equal-version drift arm with
+//          templateChanged — stub-owned fields moved template-side without the
+//          stub `version` bump that would have made the change arrive as a
+//          normal version-gated ADOPT (design D9 rule). Advisory-only this wave
+//          (design §10 Q5 default); the validate-templates enforcement check is
+//          a follow-up if drift appears.
 // v1.28.0 (2026-10-28, T-20261028-010 — spec
 //          docs/designs/2026-10-28-stub-frontmatter-backfill-design.md): stub
 //          frontmatter scalar backfill. Exports backfillStubFrontmatter() —
@@ -919,7 +929,12 @@ export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
 /** Verdicts of the unified decision log (design D3/D2 matrix). TOMBSTONED /
  *  TOMBSTONED_SKIP joined in v1.27.0 (tombstone-ownership design D3);
  *  STUB_FM_BACKFILL joined in v1.28.0 (T-20261028-010 — missing stub-frontmatter
- *  scalar backfill from the template counterpart). */
+ *  scalar backfill from the template counterpart);
+ *  STUB_VERSION_BUMP_ADVICE joined in v1.29.0 (T-20261028-013 — D9 stub-composed
+ *  compare: advisory-only INFO suggesting a stub `version` bump when stub-owned
+ *  fields changed template-side without the bump that would have version-gated
+ *  the re-delivery; the validate-templates enforcement check is a follow-up per
+ *  the approved design's Q5 default, advisory-first). */
 export type DecisionVerdict =
   | 'NEW'
   | 'UPDATE'
@@ -931,6 +946,7 @@ export type DecisionVerdict =
   | 'DRIFT_RESTORED'
   | 'STUB_SKIP'
   | 'STUB_FM_BACKFILL'
+  | 'STUB_VERSION_BUMP_ADVICE'
   | 'SEED_SKIP'
   | 'SKELETON_COLLISION'
   | 'EVOLVED'
@@ -947,6 +963,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   SEED_SKIP: 'INFO',
   STUB_SKIP: 'INFO',
   STUB_FM_BACKFILL: 'INFO',
+  STUB_VERSION_BUMP_ADVICE: 'INFO',
   CONTEXT_PRESERVE: 'WARN',
   DRIFT_PRESERVE: 'WARN',
   DRIFT_RESTORED: 'WARN',

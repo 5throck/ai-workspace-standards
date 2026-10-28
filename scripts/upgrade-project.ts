@@ -1,5 +1,22 @@
 #!/usr/bin/env bun
-// @version 1.80.0
+// @version 1.81.0
+// v1.81.0 (2026-10-28, T-20261028-013 — spec
+//          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//          D9): stub-composed compare and delivery at upgrade time. When the
+//          agents/ pass resolves an extends-stub to its target, the compare AND
+//          delivery content is now composeResolvedAgentContent(stub, target,
+//          variant) — the exact bytes the scaffold (new-project §2.3b) and the
+//          adopt settling pass wrote — instead of the bare extends-target bytes
+//          that re-read variant-scoped stub frontmatter (co-design i18n
+//          phases:[4], co-develop [5]) as permanent PROJECT_EVOLVED drift. The
+//          version gate reads the composed frontmatter (stub version wins), so
+//          future stub-field changes arrive as normal version-gated ADOPT via
+//          the stub version ladder; a stub-composed file that reaches the
+//          equal-version drift arm with templateChanged emits one
+//          STUB_VERSION_BUMP_ADVICE (INFO) row (design Q5 — advisory-only this
+//          wave, no validate-templates check). MERGE_MANAGED files stay
+//          excluded (pm.md — the MERGE pass owns the body) and the v1.80.0
+//          STUB_SKIP/STUB_FM_BACKFILL dead-end branch is unchanged.
 // v1.80.0 (2026-10-28, T-20261028-010 — spec
 //          docs/designs/2026-10-28-stub-frontmatter-backfill-design.md):
 //          STUB FM BACKFILL in the agents/ pass. When a template extends-stub
@@ -850,6 +867,7 @@ import {
 } from './lib/managed-block-merge.ts';
 import { mergeSkeletonSections } from './lib/platform-skeleton-merge.ts';
 import { applyCiWorkflowMerge } from './lib/ci-workflow-merge.ts';
+import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = '';
@@ -2850,18 +2868,20 @@ const projectManifestSkills: Set<string> = (() => {
 // Agent templates carry scaffold placeholders (`[Project Name]`); render only the
 // project-name tokens so the drift compare and every write see what the scaffold
 // produced — raw template text reverted substituted names on each upgrade.
-function renderAgentTemplate(tplFile: string): string {
-  return readFileSync(tplFile, 'utf8')
+// v1.81.0 (D9, T-20261028-013): the token render and the lifecycle-preserving
+// write are split out on content so the stub-composed delivery path can feed
+// composed bytes (not just a template file path) through the same arms.
+function renderAgentTokens(content: string): string {
+  return content
     .replace(/\[Project Name\]/g, basename(projectDir))
     .replace(/\{\{PROJECT_NAME\}\}/g, basename(projectDir));
 }
 
-function writeAgentWithLifecycle(tplFile: string, projFile: string): void {
-  const rendered = renderAgentTemplate(tplFile);
+function writeAgentContentWithLifecycle(content: string, projFile: string): void {
   if (existsSync(projFile)) {
-    writeFileSync(projFile, preserveLifecycleFrontmatter(rendered, readFileSync(projFile, 'utf8')));
+    writeFileSync(projFile, preserveLifecycleFrontmatter(content, readFileSync(projFile, 'utf8')));
   } else {
-    writeFileSync(projFile, rendered);
+    writeFileSync(projFile, content);
   }
 }
 
@@ -2903,6 +2923,17 @@ for (const agentsDir of tplAgentsDirs) {
     // out-of-zone project content (the v1.49.0 clobber class).
     const rawTpl = readFileSync(tplFile, 'utf8');
     let tplSource = tplFile;
+    // D9 (T-20261028-013): when the template file is an extends-stub whose
+    // target resolves, this variable carries the stub-composed content — the
+    // exact bytes the scaffold (new-project §2.3b) and the adopt settling pass
+    // wrote into the project. The version gate, drift compare, and delivery all
+    // run against composed tokens so variant-scoped stub frontmatter (co-design
+    // i18n `phases: [4]`, co-develop `phases: [5]`) exists on BOTH sides of the
+    // compare instead of re-reading as permanent PROJECT_EVOLVED drift. The L1
+    // common target itself never carries variant values — they live in the stub
+    // frontmatter only. MERGE_MANAGED files stay excluded below (pm.md — the
+    // MERGE pass owns the body).
+    let stubComposed: string | null = null;
     if (isExtendsStub(rawTpl)) {
       const extendsPath = rawTpl.match(/^extends:[ \t]*(\S+)/m)?.[1] ?? '';
       const resolvedTarget = extendsPath ? resolve(dirname(tplFile), extendsPath) : '';
@@ -2935,10 +2966,32 @@ for (const agentsDir of tplAgentsDirs) {
         }
         continue;
       }
-      console.log(`  STUB → delivers extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')}`);
+      // D9 (T-20261028-013): compose the stub over its extends target. If the
+      // composer declines (no frontmatter / missing L1 — both unreachable here:
+      // isExtendsStub passed and existsSync(resolvedTarget) passed), fall back
+      // to the pre-1.81.0 behavior of delivering the target bytes.
+      const composed = composeResolvedAgentContent(tplFile, resolvedTarget, variant);
+      if (composed.composed) {
+        stubComposed = composed.content;
+        console.log(`  STUB → delivers composed extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')} (stub frontmatter merged — D9)`);
+      } else {
+        console.log(`  STUB → delivers extends target: ${relative(tplFile, resolvedTarget).replace(/\\/g, '/')}`);
+      }
       tplSource = resolvedTarget;
     }
-    const tplVer = extractFrontmatterVersion(tplSource);
+    // D9: the raw content this pass compares and delivers for this file — the
+    // composed stub-over-target bytes for extends-stubs, the template bytes
+    // otherwise. The version gate reads THIS content's frontmatter (the stub's
+    // `version` wins in the composed merge), so the stub version ladder gates
+    // stub-owned re-delivery; gating on the target's version instead would
+    // re-adopt an unchanged file on every run once the ladders diverge.
+    const tplContent = stubComposed ?? readFileSync(tplSource, 'utf8');
+    const tplContentVersion = tplContent.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
+    const deliverableContent = (): string => renderAgentTokens(tplContent);
+    const deliverAgentContent = (): void => {
+      if (!dryRun) writeAgentContentWithLifecycle(deliverableContent(), projFile);
+    };
+    const tplVer = tplContentVersion;
     if (!tplVer) { console.log(`  SKIP (no version): ${rel}`); continue; }
     const projVer = extractFrontmatterVersion(projFile);
     if (!existsSync(projFile)) {
@@ -2951,14 +3004,14 @@ for (const agentsDir of tplAgentsDirs) {
         continue;
       }
       console.log(`  NEW   ${rel}  (none) → ${tplVer}`);
-      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentWithLifecycle(tplSource, projFile); }
+      if (!dryRun) { mkdirSync(dirname(projFile), { recursive: true }); writeAgentContentWithLifecycle(deliverableContent(), projFile); }
       recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'NEW', `delivered (none) → ${tplVer}`);
       noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
     } else if (!projVer) {
       console.log(`  UPDATE ${rel}  (no version) → ${tplVer}`);
-      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      deliverAgentContent();
       recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'UPDATE', 'project copy carried no frontmatter version — template copy delivered', priorBaselines[rel]);
       noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
@@ -2970,7 +3023,7 @@ for (const agentsDir of tplAgentsDirs) {
       // template-canonical, so the EVOLVED (WARN) + deliver row is also
       // reclassified to CONFLICT (ERROR) regardless of templateChanged —
       // equal-version and version-gated arms behave identically for agents/.
-      const deliverable = renderAgentTemplate(tplSource);
+      const deliverable = deliverableContent();
       const proceeded = evolvedDeliveryGuard({
         rel, policy: 'SYNC', pass: 'SYNC_IF_NEWER: agents/',
         projectFile: projFile, deliverableContent: deliverable,
@@ -2989,24 +3042,24 @@ for (const agentsDir of tplAgentsDirs) {
         console.log(`  UPDATE ${rel}  ${projVer} → ${tplVer}`);
         recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'ADOPT', `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline (lifecycle block preserved)`, priorBaselines[rel]);
       }
-      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      if (!dryRun) deliverAgentContent();
       noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
-    } else if (lifecyclelessText(renderAgentTemplate(tplSource)) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
+    } else if (lifecyclelessText(deliverableContent()) !== lifecyclelessText(readFileSync(projFile, 'utf8'))) {
       // v1.35.0 drift reconciliation (T-20260920-002): equal frontmatter version
       // but lifecycle-stripped content differs — the same version-gated skip that
       // v1.17.2 fixed for scripts/ (i18n-specialist's 2026-09-15 codex-tier update
       // shipped without a version bump and never reached six projects). Agents are
       // canonical like core scripts; the project lifecycle block stays preserved
-      // by writeAgentWithLifecycle, so the comparison strips it on both sides.
+      // by writeAgentContentWithLifecycle, so the comparison strips it on both sides.
       // v1.75.0 (T-20261027-005 b): focused comparison first — when the ONLY
       // content difference is a legacy-to-scalar tier block, the drift is pure
       // ADR-0102 normalization debt and the template copy delivers with a
       // dedicated TIER DRIFT verdict (deliver, never skip: ADR-0085 D3 leaves
       // genuine same-version content drift to the canonical restore above).
       const projRaw = readFileSync(projFile, 'utf8');
-      const rendered = renderAgentTemplate(tplSource);
+      const rendered = deliverableContent();
       const tierNorm = normalizeAgentTierFrontmatter(projRaw, rendered);
       const tierOnlyDrift = tierNorm.legacy
         && lifecyclelessText(tierNorm.content) === lifecyclelessText(rendered);
@@ -3040,6 +3093,16 @@ for (const agentsDir of tplAgentsDirs) {
         detail = 'tier-block-only drift normalized to the template scalar (ADR-0102, T-20261027-005 delivery)';
       }
       recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', verdict, detail, priorBaselines[rel], severity);
+      // D9 stub version-bump advisory (design §10 Q5 — INFO-only this wave, no
+      // validate-templates check): the composed expectation moved since the
+      // last delivery while the version gate did NOT fire — stub-owned fields
+      // changed template-side without the stub `version` bump that would have
+      // made the change arrive as a normal version-gated ADOPT (design D9
+      // rule). Recorded AFTER the primary verdict row so a consumer reading a
+      // path's first decision row still sees the verdict, not the advisory.
+      if (stubComposed !== null && cls.templateChanged) {
+        recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_VERSION_BUMP_ADVICE', 'stub-owned fields changed template-side without a stub `version` bump — bump the stub version in the port PR so future changes re-deliver as version-gated ADOPT (design D9/Q5, advisory)', priorBaselines[rel], 'INFO');
+      }
       if (!proceed) {
         console.log(`  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${projVer}  — project-evolved since the last delivery (equal-version drift); project copy PRESERVED (non-zero exit at completion)`);
         console.log('      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)');
@@ -3050,7 +3113,7 @@ for (const agentsDir of tplAgentsDirs) {
       } else {
         console.log(`  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from template at same version — ADR-0085 D3)`);
       }
-      if (!dryRun) writeAgentWithLifecycle(tplSource, projFile);
+      if (!dryRun) deliverAgentContent();
       noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;

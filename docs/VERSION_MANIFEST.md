@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-28T02:44:57.969Z
+**Generated**: 2026-10-28T03:57:04.333Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 58
-- **Scripts**: 123 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 124 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -122,6 +122,7 @@
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | N/A |
 | create-l3-scaffold.ts | 1.18.0 | scripts/create-l3-scaffold.ts | N/A |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
+| design-gate-coverage.ts | 1.0.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.3.0 | scripts/design-lint.ts | js-yaml |
 | dev-sync.ts | 1.33.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
@@ -167,7 +168,7 @@
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
 | resync-audit.ts | 1.6.0 | scripts/resync-audit.ts | N/A |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
-| review-baseline.ts | 1.4.0 | scripts/review-baseline.ts | N/A |
+| review-baseline.ts | 1.5.0 | scripts/review-baseline.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
 | skill-graph-fleet-report.ts | 2.1.0 | scripts/skill-graph-fleet-report.ts | N/A |
@@ -197,7 +198,7 @@
 | ticket.ts | 1.11.0 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.80.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.81.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
