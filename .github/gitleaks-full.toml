@@ -131,3 +131,15 @@ paths = [
 regexes = [
   '''curl -X GET "https://api\.example\.com/v1/users" \\''',
 ]
+
+[[allowlists]]
+description = "co-newbiz ADR-0186 gate-integrity unit-test password fixtures (T-20261028-009, human-adjudicated FP 2026-10-28): generic-api-key trips on the throwaway local test-user passwords 'pw-gi-analyst-123' (tests/unit/gate-integrity-p1.test.ts lines 49+52, commit 46d46bac) and 'pw-p2c-analyst-123' (tests/unit/gate-proposal-confirm-p2.test.ts lines 42+45, commit d1df3814) — credentials the tests themselves create for a scratch SQLite user and destroy on teardown; nothing external accepts them (independent verification over range f2477a69..HEAD: no bearer/JWT/AWS/sk-/private-key material present; the only long hex values are git SHAs and template sha256 upgrade baselines). condition = 'and' so BOTH the path AND the exact fixture value must match — any other value in these files (e.g. a real secret pasted in later) is still reported. Paths are repo-relative because the flagging scan is the per-project window scan run inside Projects/co-newbiz; root-relative forms (Projects/co-newbiz/tests/...) are already covered by the Projects/[^/]+/tests/.*$ entry above"
+condition = "and"
+paths = [
+  '''^tests/unit/gate-integrity-p1\.test\.ts$''',
+  '''^tests/unit/gate-proposal-confirm-p2\.test\.ts$''',
+]
+regexes = [
+  '''^pw-gi-analyst-123$''',
+  '''^pw-p2c-analyst-123$''',
+]

@@ -17,12 +17,18 @@ title: >-
   unaffected (template→project direction, content derives from tagged
   template-v0.22.0)
 priority: high
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-28T03:19:52.283+09:00'
 history:
   - at: '2026-10-28T03:19:52.283+09:00'
     from: null
     to: backlog
+  - at: '2026-10-28T10:19:27.153+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-28T10:19:27.172+09:00'
+    from: waiting
+    to: running
 result: null
 error: null
