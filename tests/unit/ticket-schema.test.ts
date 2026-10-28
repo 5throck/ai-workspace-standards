@@ -3,6 +3,7 @@ import {
   CURRENT_SCHEMA_VERSION,
   TRANSITIONS,
   canTransition,
+  corruptedProseFinding,
   validateCatalog,
   validateTicket,
   type Status,
@@ -277,5 +278,37 @@ describe('upstream cross-field invariants (T-20261002-007, M2)', () => {
       ],
       upstream: { ...upstream(), triage: 'inbox', resolution: { outcome: 'fixed', pr_url: 'https://github.com/x/pull/2', summary: 'legacy' } },
     }))).not.toThrow();
+  });
+});
+
+describe('corruptedProseFinding (T-20261029-001 prose-fragment lint)', () => {
+  test('flags the real adjudication-wave corruption (parenthesis run + self-referencing conditional)', () => {
+    const corrupted =
+      "Fixed in the upstream-adjudication mechanical batch: all 14 variant AGENTS.md " +
+      "re-injected.((((((( [ 008 = 020 ] && echo 'ci.yml audit-job comment/guard states the " +
+      "dependency posture honestly for non-root-package layouts.' ) )";
+    const f = corruptedProseFinding(corrupted);
+    expect(f).not.toBeNull();
+    expect(f).toMatch(/parenthesis run of 7/);
+    expect(f).toMatch(/T-20261029-001/);
+  });
+
+  test('flags a bare shell conditional fragment even without the paren run', () => {
+    const f = corruptedProseFinding("delivered [ 010 = 020 ] && echo 'extra note' for this ticket");
+    expect(f).not.toBeNull();
+    expect(f).toMatch(/shell conditional fragment/);
+  });
+
+  test('clean prose passes (code quotes, single parens, URLs)', () => {
+    expect(corruptedProseFinding('delivered via PR #1700 (see upgrade-policy.ts normalizeAgentTierFrontmatter)')).toBeNull();
+    expect(corruptedProseFinding('merge order (a(b)c) restored; tier: (map -> scalar)')).toBeNull();
+    expect(corruptedProseFinding('fixed in https://github.com/x/pull/2 (template 0.23.0)')).toBeNull();
+  });
+
+  test('absent and non-string text is clean (report-only contract)', () => {
+    expect(corruptedProseFinding(null)).toBeNull();
+    expect(corruptedProseFinding(undefined)).toBeNull();
+    expect(corruptedProseFinding('')).toBeNull();
+    expect(corruptedProseFinding(42 as unknown)).toBeNull();
   });
 });

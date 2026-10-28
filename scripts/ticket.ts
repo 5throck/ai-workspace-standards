@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-10-29, T-20261029-001): doctor arms the prose-fragment lint —
+//          scans every ticket's result + upstream.resolution.summary with the
+//          report-only corruptedProseFinding() detector (ticket-schema v1.9.0)
+//          and lists corrupted records for the sanctioned re-render; doctor
+//          never mutates, and validateTicket stays prose-blind so the store
+//          keeps reading records that already carry the corruption.
 // v1.11.0 (2026-10-26, T-20261026-015, finding #19): create input validation —
 //           --priority must be in the canonical PRIORITIES enum and --not-before
 //           must be a real ISO YYYY-MM-DD date; invalid input is a usage error
@@ -45,7 +51,7 @@ import {
 } from './helpers/ticket-store.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
-import { PRIORITIES } from './helpers/ticket-schema.ts';
+import { PRIORITIES, corruptedProseFinding } from './helpers/ticket-schema.ts';
 
 // Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
 // subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
@@ -366,6 +372,27 @@ try {
       } else {
         console.log(`\nTickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}) — escalate or dispose:`);
         for (const t of capped) console.log(`🚧  ${t.id} attempts=${t.attempts} [${t.status}] ${t.kind === 'service' ? t.service : (t.title ?? '').slice(0, 80)}`);
+      }
+      // Prose-fragment lint (T-20261029-001): report-only — the 2026-10-29
+      // adjudication writer embedded shell conditionals verbatim into
+      // resolution/result prose. Repair needs a sanctioned re-render path;
+      // doctor only names the corrupted records.
+      const proseCorrupt = [...listTickets(ticketsDir), ...listTickets(governanceDir)]
+        .map(t => {
+          const fields: string[] = [];
+          const resSummary = (t.upstream as { resolution?: { summary?: unknown } } | undefined)?.resolution?.summary;
+          for (const [label, value] of [['result', t.result], ['upstream.resolution.summary', resSummary]] as const) {
+            const f = corruptedProseFinding(value);
+            if (f) fields.push(`${label} — ${f}`);
+          }
+          return fields.length ? { id: t.id, fields } : null;
+        })
+        .filter((x): x is { id: string; fields: string[] } => x !== null);
+      if (proseCorrupt.length === 0) {
+        console.log('No corrupted prose fragments detected.');
+      } else {
+        console.log(`\nCorrupted prose fragments (T-20261029-001 writer class) — repair needs a sanctioned re-render:`);
+        for (const c of proseCorrupt) console.log(`\u{1F9F9}  ${c.id}: ${c.fields.join('; ')}`);
       }
       // Archive visibility (design 2026-10-04-ticket-archive-design.md): archived
       // tickets leave the live stores, so state them here instead of staying silent.
