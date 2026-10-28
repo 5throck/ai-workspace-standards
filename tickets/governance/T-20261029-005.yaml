@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261029-005
+kind: manual
+title: >-
+  learning: generalize co-newbiz route-audit-scan into L0 tooling mirrored to
+  templates/common/scripts — tripwire asserting every Route Handler exporting
+  POST/PUT/PATCH/DELETE reaches an audit-write token within its local import
+  graph (depth-3), with wildcard-rejected reason-mandatory stale-checked
+  allowlist; parameterize audit-token patterns (appendAudit/auditTokenUse are
+  co-newbiz names) and skip gracefully when a project has no API surface
+  (precedent design-lint.ts:193 existsSync skip). Extracted from co-newbiz PR
+  #742 (FR-SEC-07; swept 226 write routes to 0 unaudited). Evidence:
+  Projects/co-newbiz/scripts/co-newbiz/route-audit-scan.ts:26-28,49-60,90-94.
+  Distinct from #743 guards (T-20261026-003) and decision-write-integrity skill
+  (T-20261028-008) — code-level complement. Step 2f 2026-10-29
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-29T03:14:35.821+09:00'
+history:
+  - at: '2026-10-29T03:14:35.821+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

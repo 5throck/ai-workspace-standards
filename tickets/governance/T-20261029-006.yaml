@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261029-006
+kind: manual
+title: >-
+  URGENT secrets-gate finding (hard-fail): gitleaks flagged 1x generic-api-key
+  in Projects/co-newbiz range d2719379..main —
+  tests/unit/process-ssot-check.test.ts (commit 0febed29, ADR-0187 W3 P1). FP
+  assessment: flagged lines are process-stage key fixtures (policySectionKeys /
+  blockerKey tables 's8.business_case' etc.) — structural identifiers, not
+  credentials; same generic-api-key rule class as the adjudicated T-20261028-009
+  allowlist (which covered only the two gate-integrity test files with exact
+  values — this is a different file). Disposition pending human adjudication:
+  extend the allowlist with this fixture's exact values or restructure
+  identifiers; until cleared, no port of process-ssot-check code into
+  template/skill surfaces
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-29T03:15:54.113+09:00'
+history:
+  - at: '2026-10-29T03:15:54.113+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
