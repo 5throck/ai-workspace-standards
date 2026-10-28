@@ -1,0 +1,75 @@
+schemaVersion: 1
+id: U-20261028-012
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:42:28.807+09:00'
+history:
+  - at: '2026-10-28T23:42:28.807+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-29T00:50:47.022+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.022+09:00'
+    from: review
+    to: done
+result: >-
+  Main claim misfiled: the 4 named scripts ARE registered in
+  scripts/co-abap/SCRIPTS.md sub-registry (lines 7-10) and
+  verify-scripts.ts:347-349 exempts co-* dirs carrying their own SCRIPTS.md
+  (by-design self-governance); the reverse disk-to-registry check exists (Check
+  1, verify-scripts.ts:601-610) and the 'Unregistered script' error the ticket
+  cites proves it fires. Real residue is the scripts/SCRIPTS.md:3 header prose
+  claiming lib/ and helpers/ are 'intentionally excluded' while the registry
+  holds 115 subdirectory rows — one-line project-side prose fix, remedy recorded
+  here for the project session.
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    verify-scripts.ts validates registry→disk but has no reverse disk→registry
+    check: 4 real variant scripts (scripts/co-abap/dispatch.ts,
+    dispatch-serial.ts, dispatch-parallel.ts, retry-handler.ts) are unregistered
+    while the audit passes ("all 191 registered scripts verified"). Additionally
+    the delivered scripts/SCRIPTS.md header prose states that internal modules
+    under lib/ and helpers/ are "intentionally excluded" from the registry, yet
+    115 of the registry's 191 rows are subdirectory files including helpers/ and
+    lib/ entries — the stated policy contradicts the registry's actual content.
+    Expected: a reverse coverage check in verify-scripts and corrected header
+    prose.
+  affected_paths:
+    - scripts/SCRIPTS.md
+    - scripts/verify-scripts.ts
+    - scripts/co-abap/dispatch.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/SCRIPTS.md=true
+    - info:in_last_delivery scripts/verify-scripts.ts=false
+    - info:in_last_delivery scripts/co-abap/dispatch.ts=false
+  dedupe_key: f9b3f03820ef74456c823e28ec404ff0cfc249399ac299ed83f2dddc2459a0f5
+  duplicates:
+    - project: co-abap
+      at: '2026-10-28T23:42:28.807+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.1
+    summary: >-
+      Main claim misfiled: the 4 named scripts ARE registered in
+      scripts/co-abap/SCRIPTS.md sub-registry (lines 7-10) and
+      verify-scripts.ts:347-349 exempts co-* dirs carrying their own SCRIPTS.md
+      (by-design self-governance); the reverse disk-to-registry check exists
+      (Check 1, verify-scripts.ts:601-610) and the 'Unregistered script' error
+      the ticket cites proves it fires. Real residue is the scripts/SCRIPTS.md:3
+      header prose claiming lib/ and helpers/ are 'intentionally excluded' while
+      the registry holds 115 subdirectory rows — one-line project-side prose
+      fix, remedy recorded here for the project session.

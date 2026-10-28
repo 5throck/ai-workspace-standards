@@ -3,7 +3,7 @@ id: U-20261028-003
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-10-28T20:44:17.609+09:00'
 history:
@@ -13,7 +13,25 @@ history:
   - at: '2026-10-28T21:05:11.494+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-10-29T00:34:53.092+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:34:53.092+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented via design 2026-10-28-platform-agent-mirror-design
+  (DEC-20261028-06, owner-approved Q1-Q5 defaults) — PRs #1697 (PR-1:
+  platform_surfaces registry v1.7.0, sync-agent-mirrors.ts generator, blocking
+  parity gate at three placements, root-9 SSOT sweep, 42 unit tests), #1698
+  (PR-2: 146-file L1/L2 model: sweep + version bumps, acceptance grep zero),
+  #1699 (canary finding: pointer-first stub resolution + templates-root
+  discovery for project-context runs). Canary co-newbiz landed end-to-end:
+  capability installed, 41-mirror tree regenerated to registry-resolved form,
+  --check 41-in-parity (PR #766). Remaining per design §6 step 5: fleet wave
+  delivers the capability to the 15 templated projects (script + registry + gate
+  via upgrade; one deliberate generator write per project), tracked for the next
+  wave session; co-architect orphan residual per §5.
 error: null
 upstream:
   project: co-newbiz
@@ -110,3 +128,20 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-10-28T20:44:17.609+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.23.0
+    summary: >-
+      Implemented via design 2026-10-28-platform-agent-mirror-design
+      (DEC-20261028-06, owner-approved Q1-Q5 defaults) — PRs #1697 (PR-1:
+      platform_surfaces registry v1.7.0, sync-agent-mirrors.ts generator,
+      blocking parity gate at three placements, root-9 SSOT sweep, 42 unit
+      tests), #1698 (PR-2: 146-file L1/L2 model: sweep + version bumps,
+      acceptance grep zero), #1699 (canary finding: pointer-first stub
+      resolution + templates-root discovery for project-context runs). Canary
+      co-newbiz landed end-to-end: capability installed, 41-mirror tree
+      regenerated to registry-resolved form, --check 41-in-parity (PR #766).
+      Remaining per design §6 step 5: fleet wave delivers the capability to the
+      15 templated projects (script + registry + gate via upgrade; one
+      deliberate generator write per project), tracked for the next wave
+      session; co-architect orphan residual per §5.

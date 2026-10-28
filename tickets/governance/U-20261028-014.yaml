@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: U-20261028-014
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-28T23:42:28.826+09:00
+history:
+  - at: 2026-10-28T23:42:28.826+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'docs/workspace-schema.json ships designLint.scanRoots = ["templates/co-design/playground/src"] as the delivered value. In delivered variants without that path (for example a non-UI ABAP variant) the design-lint gate can never find its configured root and permanently reports SKIP. audit.ts v2.56.0 added an explicit conventional-root fallback (helpers/design-lint-roots.ts) so the skip is explicit rather than silent, but the configured value itself is not variant-overridable, so non-UI variants can neither point the gate at their own UI sources nor cleanly disable the gate for their project. Expected: designLint configuration overridable per variant (or cleanly disabled per variant).'
+  affected_paths:
+    - docs/workspace-schema.json
+    - scripts/audit.ts
+    - scripts/helpers/design-lint-roots.ts
+  identity_source: cwd
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - project_soft_cap
+    - info:in_last_delivery docs/workspace-schema.json=true
+    - info:in_last_delivery scripts/audit.ts=false
+    - info:in_last_delivery scripts/helpers/design-lint-roots.ts=false
+  dedupe_key: 61d38145d3e6be96b17bf8f65b9cec9e447bc1b6a52237c195a39429a1eb5f54
+  duplicates:
+    - project: co-abap
+      at: 2026-10-28T23:42:28.826+09:00

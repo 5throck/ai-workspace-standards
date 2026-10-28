@@ -1,0 +1,80 @@
+schemaVersion: 1
+id: U-20261028-007
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:42:05.012+09:00'
+history:
+  - at: '2026-10-28T23:42:05.012+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-29T00:50:47.004+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T00:50:47.004+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.004+09:00'
+    from: review
+    to: done
+result: >-
+  Verified + already fixed: the L0-agent routing problem lived in
+  docs/governance/agents/pm-gateway-workflow.md, retired from L1 delivery and
+  deleted from all 16 projects by PR #1696 (DEC-20261028-05 phase 2); L1
+  governance set is now workflows.md + execution-plan-templates.md and pointers
+  retarget to agents/pm.md. Residual: delivered agents/pm.md still names
+  docs-writer/automation-engineer in two lines — L0-agent-name scrub queued in
+  the 2026-10-29 mechanical batch.
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    docs/governance/agents/pm-gateway-workflow.md (relocated verbatim from
+    AGENTS.md by the ADR-0090 thin-dispatcher restructure) routes Phase
+    Determination deliverable types to automation-engineer, docs-writer,
+    security-expert, and scaffolding-expert — none of which exist in the co-abap
+    variant roster (21 agents). The sibling doc
+    docs/governance/agents/workflows.md carries an explicit "(L0 workspace
+    root)" qualifier convention for root-only concepts, but
+    pm-gateway-workflow.md has no such qualifier, so a delivered project's PM
+    reads mandatory dispatch rules naming agents its roster does not have.
+    Expected: the same qualifier convention applied in pm-gateway-workflow.md,
+    or per-variant remapping of the Phase Determination rows.
+  affected_paths:
+    - docs/governance/agents/pm-gateway-workflow.md
+    - docs/governance/agents/workflows.md
+  identity_source: cwd
+  repro: >-
+    In the delivered project: the §3.5 Phase Determination table lists the four
+    agent names; the project's agents/ directory contains none of them;
+    workflows.md header contains the qualifier sentence, pm-gateway-workflow.md
+    header does not.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: docs/governance/agents/pm-gateway-workflow.md'
+    - info:in_last_delivery docs/governance/agents/pm-gateway-workflow.md=false
+    - info:in_last_delivery docs/governance/agents/workflows.md=false
+  dedupe_key: d73d3b9abc3890442d83c3d0cbf62739af51a12d2820baade42117756fbfaef1
+  duplicates:
+    - project: co-abap
+      at: '2026-10-28T23:42:05.012+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1696
+    template_version: 0.22.1
+    summary: >-
+      Verified + already fixed: the L0-agent routing problem lived in
+      docs/governance/agents/pm-gateway-workflow.md, retired from L1 delivery
+      and deleted from all 16 projects by PR #1696 (DEC-20261028-05 phase 2); L1
+      governance set is now workflows.md + execution-plan-templates.md and
+      pointers retarget to agents/pm.md. Residual: delivered agents/pm.md still
+      names docs-writer/automation-engineer in two lines — L0-agent-name scrub
+      queued in the 2026-10-29 mechanical batch.
