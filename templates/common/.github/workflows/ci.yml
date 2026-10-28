@@ -29,7 +29,11 @@ jobs:
           # parse lockfileVersion 2 written by the current toolchain. Bumped deliberately.
           bun-version: "1.4.x"
 
-      # package.json lives at the repository root, not under scripts/.
+      # Dependency posture (U-20261028-020): this step installs only a ROOT
+      # package.json. Projects with a scripts/-scoped package.json (no root
+      # manifest) intentionally skip it — scripts/audit.ts is deliberately
+      # dependency-free, so no job in this workflow relies on Bun's implicit
+      # auto-install; the subpackage's own flow installs its dependencies.
       - name: Install dependencies
         if: ${{ hashFiles('package.json') != '' }}
         run: bun install --frozen-lockfile

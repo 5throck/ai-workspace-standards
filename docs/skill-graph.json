@@ -2155,8 +2155,8 @@
       "name": "pm",
       "scope": "common",
       "capability": "pm",
-      "content_hash": "b4e8d34417c3bac0",
-      "version": "1.4.1",
+      "content_hash": "e12dc3609e1c472b",
+      "version": "1.4.2",
       "mirrors": [
         "templates/common/agents/pm.md"
       ]

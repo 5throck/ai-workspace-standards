@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.6.0
+ * @version 1.7.0
+ * v1.7.0 (2026-10-29, U-20261028-018 + U-20261028-004 rider): the gitleaks
+ *           invocation passes --config .gitleaks.toml (existsSync-guarded,
+ *           pre-commit.ts guard shape) so push-time scans run under the same
+ *           reviewed policy as commit-time scans. Custom secret patterns and
+ *           allowlists belong in .gitleaks.toml (merge-aware and
+ *           upgrade-preserving) — never as local patches inside hook files.
  * v1.6.0 (2026-10-26, U-20261026-011): lands the pr/* remote-branch deletion guard
  *           that 1.5.0 described but never shipped. Pure ref-deletion pushes that
  *           delete refs/heads/pr/* now require ALLOW_REMOTE_BRANCH_DELETE=1; other
@@ -9,6 +15,7 @@
  */
 
 import { $ } from "bun";
+import { existsSync } from "node:fs";
 
 // All-zero OID: git's "null" object id, sent as the local OID of a ref
 // deletion on both SHA-1 (40 zeros) and SHA-256 (64 zeros) repositories.
@@ -195,7 +202,14 @@ async function main() {
           // rev-list arguments (ranges + `^sha` exclusions) as ONE flag value.
           // The previous form (`--log-opts -- ${uniqueShas}`) made the literal `--`
           // the flag value, so the computed SHAs never reached gitleaks.
-          await $`gitleaks detect --redact --log-opts=${shellEscapeRevListArgs(revListArgs)}`;
+          // U-20261028-018: pass the repo config explicitly (pre-commit.ts guard
+          // shape) so push-time scans run under the same reviewed policy as
+          // commit-time — implicit discovery can miss the dot-named file and
+          // silently deviate from the .gitleaks.toml allowlist.
+          const gitleaksArgs = ['detect', '--redact'];
+          if (existsSync('.gitleaks.toml')) gitleaksArgs.push('--config', '.gitleaks.toml');
+          gitleaksArgs.push('--log-opts', shellEscapeRevListArgs(revListArgs));
+          await $`gitleaks ${gitleaksArgs}`;
         }
       }
       // Tag-only or deletion pushes: nothing to scan, pass through

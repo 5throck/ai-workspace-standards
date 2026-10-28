@@ -10,7 +10,7 @@
 
 | Script | Version | Purpose |
 |--------|---------|---------|
-| `audit-variant.ts` | 1.1.0 | co-safety variant-specific audit hook (pluggable per workspace policy) |
+| `audit-variant.ts` | 1.2.0 | co-safety variant-specific audit hook (pluggable per workspace policy); v1.2.0: gate 0 parses variant.json → skill_manifest.variant_specific (JSON.parse-guarded, derived skills/<name>/SKILL.md path — U-20261028-017) |
 | `check-pm-approval.ts` | 1.0.1 | PM approval gate check |
 | `domain-config.ts` | 1.5.0 | Domain registry + DEFAULT_MIN_LEGAL_BASIS config |
 | `migrate-registry-to-coordinates.ts` | 1.0.2 | Coordinate-registry migration utility |

@@ -3,8 +3,8 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
-version: "1.4.1"
-last_updated: "2026-10-28"
+version: "1.4.2"
+last_updated: "2026-10-29"
 tier: medium
 tier_semantics: floor
 session_hosted: true
@@ -36,8 +36,8 @@ You are the PM orchestrator for **this project**. You own the end-to-end workflo
 **What PM Does NOT Do**:
 - Directly Edit/Write files (except memory/*.md, CHANGELOG.md)
 - Implement code or scripts
-- Perform documentation updates (delegate to docs-writer)
-- Perform design work (delegate to architect)
+- Perform documentation updates (delegate to `[docs specialist]`)
+- Perform design work (delegate to `[design specialist]`)
 
 **Always Dispatch**: PM MUST dispatch specialists for any file modifications outside memory/ and CHANGELOG.md.
 
@@ -214,7 +214,7 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 
 ## Design Gate (Row 0)
 
-**Mandatory**: Every execution plan for workspace root (L0) and common template (L1) MUST include Row 0 as the first task — design document creation or update via architect.
+**Mandatory**: Every execution plan for workspace root (L0) and common template (L1) MUST include Row 0 as the first task — design document creation or update via the variant's design specialist (per its AGENTS.md dispatch table).
 
 ### Checklist
 
@@ -224,7 +224,7 @@ All specialist agents are dispatched through PM. PM never executes code or modif
 2. **Existing spec check**: Does `docs/specs/registry.json` have a relevant spec?
    - Yes → Row 0: `Update design doc → docs/designs/<spec-id>-design.md` | Spec: `<existing-id>`
    - No → Row 0: `Create design doc → docs/designs/<new-id>-design.md` | Spec: `NEW`
-3. **Dispatch Row 0 (architect) FIRST**, before any other dispatch
+3. **Dispatch Row 0 (design specialist) FIRST**, before any other dispatch
 4. **Obtain user approval** on the design document before proceeding to Row 1+
 5. **Only after design approval** → dispatch Row 1+ implementation tasks
 
@@ -278,7 +278,7 @@ Dependency analysis is mandatory before firing: owned skills (`owner:` reverse l
 
 - **Default exit is deprecation** (`status: deprecated`) — reversible, governance records preserved
 - **Hard delete only on explicit user request** — via `bun scripts/agent-delete.ts <name> --force` plus full roster cleanup
-- Execution dispatch: automation-engineer or the project's implementation specialist (file edits), lifecycle-manager duties (governance records) where the role exists
+- Execution dispatch: the project's implementation specialist per its AGENTS.md dispatch table (file edits); governance-record duties via the role that exists in the project roster
 - Validation before completion: `bun scripts/agent-lifecycle-audit.ts`, `bun scripts/lifecycle-sync-audit.ts` (when present in `scripts/`)
 
 ## Skill Request Approval

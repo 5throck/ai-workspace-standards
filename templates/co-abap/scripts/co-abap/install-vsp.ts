@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-29, U-20261028-015): post-install guidance no longer tells
+//           the operator to export SAP_PASSWORD — credentials go in a .env
+//           file (chmod 600, gitignored) or the OS keychain. Ports the
+//           delivered project's LOCAL-PATCH(U-20261028-015) wording into the
+//           template so re-delivery clears the patch by version.
 // install-vsp.ts - Downloads and installs the vsp binary from GitHub Releases
 // Canonical source (verified 2026-10-06 via GitHub API): oisee/vibing-steampunk
 // publishes actual vsp release assets (vsp-<os>-<arch>[.exe] + checksums.txt);
@@ -164,11 +169,13 @@ async function main() {
   console.log(`   Binary: ${target}`);
   console.log("");
   console.log("Next steps:");
-  console.log("  1. Configure SAP connection in your environment:");
-  console.log("     export SAP_URL=https://your-sap-host:44300");
-  console.log("     export SAP_USER=your-username");
-  console.log("     export SAP_PASSWORD=your-password");
-  console.log("     export SAP_CLIENT=100");
+  console.log("  1. Configure the SAP connection in .env at the project root (copy .env.sample,");
+  console.log("     then chmod 600 .env; .env is gitignored) or store the password in the OS keychain.");
+  console.log("     Never export SAP_PASSWORD in a shell profile or pass it on the command line:");
+  console.log("     SAP_URL=https://your-sap-host:44300");
+  console.log("     SAP_USER=your-username");
+  console.log("     SAP_CLIENT=100");
+  console.log("     (SAP_PASSWORD: set in .env only, see SECURITY.md Secrets Handling)");
   console.log(`  2. Verify binary: ${target} --version`);
   console.log(`  3. Test SAP connection: ${target} system info`);
   console.log("");

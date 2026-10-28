@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.3.0
+ * @version 1.4.0
+ *
+ * v1.4.0 (2026-10-29, U-20261028-009): VARIANT-PHASE-GATE blocks emit the same
+ *         header+separator shape as the sibling VARIANT-DISPATCH-TRIGGERS block
+ *         (bare data rows shipped headerless tables), and empty agent phases
+ *         render the defined "Phase —" placeholder instead of the unresolved
+ *         "Phase ?" (phase pinning is an owner call, not a generator default).
  *
  * v1.2.0 (2026-09-26, tier-extraction hygiene): strip inline YAML
  *         comments in tier.* extraction (`medium # claude-sonnet-5-0` →
@@ -185,7 +191,9 @@ function deriveDispatchTriggers(agent: AgentMeta): string[] {
 }
 
 function derivePhaseGateRow(agent: AgentMeta): string {
-  const phasesDisplay = agent.phases ? `Phase ${agent.phases}` : 'Phase ?';
+  // U-20261028-009: empty phases render the defined "Phase —" placeholder,
+  // never the unresolved "Phase ?" (pinning the phases is an owner call).
+  const phasesDisplay = agent.phases ? `Phase ${agent.phases}` : 'Phase —';
   const tierCap = agent.tier.charAt(0).toUpperCase() + agent.tier.slice(1);
   return `| ${agent.role.split(',')[0].trim()} | ${phasesDisplay} | \`${agent.name}\` | ${tierCap} | |`;
 }
@@ -215,9 +223,12 @@ function generateVariantBlocks(agents: AgentMeta[]): Record<string, string> {
   }).join('\n');
   const dispatchTriggers = `| Agent | Phase | Dispatch Trigger |\n|-------|-------|------------------|\n${triggerRows}`;
 
-  // VARIANT-PHASE-GATE
+  // VARIANT-PHASE-GATE — U-20261028-009: emit the same header+separator shape
+  // as the sibling VARIANT-DISPATCH-TRIGGERS block (:213-216); bare data rows
+  // directly after the START marker shipped headerless tables into every
+  // regenerated AGENTS.md.
   const phaseGateRows = agents.map(a => derivePhaseGateRow(a)).join('\n');
-  const phaseGate = phaseGateRows;
+  const phaseGate = `| Deliverable Type | Phase | Required Agent | Tier | Notes |\n|------------------|-------|----------------|------|-------|\n${phaseGateRows}`;
 
   // VARIANT-SUBAGENT-ROSTER
   const rosterRows = agents.map(a => {
