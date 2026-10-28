@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261029-002
+kind: manual
+title: >-
+  records hygiene batch: (1) spec-flip must update the design doc Status header,
+  not only registry.json — 4 docs still draft/proposed while registry says
+  implemented (2026-10-28-delivery-tombstone-ownership, -dev-sync-staged-count,
+  -l0-only-governance-doc-cleanup, -instruction-ownership-backport-hardening) +
+  platform-agent-mirror status paragraph still says PR-2 open (landed
+  d1247fad6); add a registry-vs-doc-header consistency check; (2) backfill
+  docs/lifecycle/scripts/test-runner.md (1.6.0, only swept script without a
+  record); (3) retro-register D8 E3-class rows: T-20261028-014, U-20261026-009,
+  U-20261027-002, 567f1413 (templates-root discovery), a18d98a8 (windows test
+  budget)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-29T02:12:27.489+09:00'
+history:
+  - at: '2026-10-29T02:12:27.489+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

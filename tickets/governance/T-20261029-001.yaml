@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261029-001
+kind: manual
+title: >-
+  URGENT records integrity: adjudicated U-ticket prose corrupted —
+  result/resolution.summary fields in at least 8 tickets
+  (U-20261028-008/-009/-010/-011/-015/-017/-018/-020) carry broken
+  shell-fragment interpolations like '((((((( [ 008 = 020 ] && echo ...'
+  self-referencing each ticket number; writer template in the adjudication
+  runner interpolated wrong; fix the writer, re-render the affected fields, add
+  a YAML prose-fragment lint; also reconcile the f9af67cdf census message ('14
+  resolved' vs tree 17 done / 2 waiting / 3 backlog)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-29T02:12:27.475+09:00'
+history:
+  - at: '2026-10-29T02:12:27.475+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
