@@ -18,12 +18,30 @@ title: >-
   use -m --diff-filter=D; observed on the 2026-10-29 run (co-design, post-0.23.0
   canary #69)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-29T03:24:53.592+09:00'
 history:
   - at: '2026-10-29T03:24:53.592+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T07:48:14.519+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T07:48:14.543+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T07:48:14.573+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated keep-intent: co-design's workflows.md re-delivery traces to the
+  sanctioned direct placement (DEC-20261028-05 resolution; the 0.22.1 tombstone
+  targeted the since-replaced un-adapted L0 copy). Cleared the stale tombstone
+  grant (manifest tombstones {}); delivered file IN_SYNC. Also swept the
+  retirement regression surfaced by the same check: pm-gateway-workflow.md had
+  re-entered co-design and co-price via project-side sync commits — re-removed
+  (co-design PR #70, co-price PR #163); fleet main tracking verified clean.
+  Guard-infra note (merge-carried deletions missed by --diff-filter=D) folded
+  into T-20261029-003's engine polish scope.
 error: null
