@@ -742,3 +742,137 @@ describe('upgrade-project.ts agents/ version-gt escalation + NO_BASELINE detail 
     }
   }, 180000);
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Baselines carry-forward (T-20261028-014 — U-20261028-001 D4 integration
+// defect): the manifest writer rebuilt `baselines` from the delivered set
+// alone, dropping the provenance of every non-delivered path; the next run
+// classified those NO_BASELINE and the agents/ equal-version arm degraded the
+// designed CONFLICT (ERROR) into the §8 WARN-deliver — proven end-to-end by
+// the co-design 0.22.1 canary. Fix under test: baselines = (prior ∪ freshly
+// delivered) − paths delivered this run, --clear-tombstone also resets
+// matched baselines, template-departed entries pruned.
+// ═════════════════════════════════════════════════════════════════════════════
+
+describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
+  /** The co-design canary shape: template content + the project-canonical
+   *  `phases: [4]` frontmatter addition at the template's equal version —
+   *  lifecycleless-different from both the deliverable and any prior
+   *  delivered baseline → PROJECT_EVOLVED → CONFLICT (ERROR) skip. */
+  const canaryEvolved = commonAgentTpl.replace(
+    /^(version:\s*"?[\d.]+"?)$/m,
+    `$1\nphases: [4]`,
+  );
+  const CANARY_REL = 'agents/i18n-specialist.md';
+  const DELIVERED_THEN = '---\nname: i18n-specialist\nversion: "1.0.0"\n---\nold delivered body the project later evolved past\n';
+
+  test('conflict-skipped path retains its baseline — rerun re-derives CONFLICT (ERROR), not NO_BASELINE WARN-deliver', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, CANARY_REL), canaryEvolved);
+      seedPriorDelivery(tmp, CANARY_REL, DELIVERED_THEN);
+      commitAll(tmp, 'chore: committed project-canonical phases frontmatter');
+      // Run 1 — the conflict-skip run (the 0.22.1 canary apply).
+      const first = runUpgrade(tmp);
+      expect(first.status).toBe(1);
+      expect(readFileSync(join(tmp, CANARY_REL), 'utf8')).toContain('phases: [4]');
+      expect(first.out).toContain('CONFLICT DISPOSITION (SKIP): agents/i18n-specialist.md');
+      const manifest1 = readManifest(tmp);
+      expect(manifest1.decisions.some((d) => d.path === CANARY_REL && d.verdict === 'CONFLICT' && d.severity === 'ERROR')).toBe(true);
+      // THE FIX: the skipped path's baseline survives the manifest rewrite.
+      expect(manifest1.baselines[CANARY_REL]).toBeDefined();
+      expect(manifest1.baselines[CANARY_REL]!.hash).toBe(baselineKeyFor(CANARY_REL, DELIVERED_THEN));
+      // Land run 1 — the pre-upgrade stash reverts an uncommitted prior wave,
+      // so run 2 must start from a commit (same pattern as the tombstone
+      // two-run test; delivered hooks unset so the landing commit is not
+      // blocked by the /sync-gated pre-commit hook).
+      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath']);
+      commitAll(tmp, 'chore: wave 1 landing (conflict skipped, copy preserved)');
+      // Run 2 — classification must re-derive CONFLICT from the PERSISTED
+      // baseline. Pre-fix this was NO_BASELINE → DRIFT_RESTORED (WARN) +
+      // COPIED, clobbering the project frontmatter at WARN.
+      const second = runUpgrade(tmp);
+      expect(second.status).toBe(1);
+      expect(readFileSync(join(tmp, CANARY_REL), 'utf8')).toContain('phases: [4]');
+      expect(second.out).toContain('CONFLICT DISPOSITION (SKIP): agents/i18n-specialist.md');
+      expect(second.out).not.toContain('DRIFT (restored to canonical) agents/i18n-specialist.md');
+      const manifest2 = readManifest(tmp);
+      const decision2 = manifest2.decisions.find((d) => d.path === CANARY_REL);
+      expect(decision2).toBeDefined();
+      expect(decision2!.verdict).toBe('CONFLICT');
+      expect(decision2!.severity).toBe('ERROR');
+      expect(manifest2.baselines[CANARY_REL]).toBeDefined();
+      expect(manifestHasUnresolvedErrors(manifest2)).toBe(true);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 240000);
+
+  test('tombstoned path retains its baseline across the manifest rewrite', () => {
+    const tmp = makeTempProject();
+    try {
+      seedPriorTombstone(tmp, WORKFLOWS_REL, OLD_WORKFLOWS);
+      commitAll(tmp, 'chore: prior delivery recorded');
+      // The honored run skips the path (INFO) — nothing delivered for it, so
+      // pre-fix the writer dropped its baseline while carrying the tombstone.
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      expect(existsSync(join(tmp, WORKFLOWS_REL))).toBe(false);
+      const manifest = readManifest(tmp);
+      expect(manifest.tombstones?.[WORKFLOWS_REL]).toBeDefined();
+      expect(manifest.baselines[WORKFLOWS_REL]).toBeDefined();
+      expect(manifest.baselines[WORKFLOWS_REL]!.hash).toBe(baselineKeyFor(WORKFLOWS_REL, OLD_WORKFLOWS));
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+
+  test('delivered path replaces a stale prior baseline with the fresh disk bytes', () => {
+    const tmp = makeTempProject();
+    try {
+      // Baseline-clean copy at an OLDER delivered version → the run delivers
+      // the current template over it (version-gated ADOPT) and must REPLACE
+      // the stale baseline with the exact post-delivery disk bytes.
+      const staleCopy = commonAgentTpl.replace(/^(version:\s*"?[\d.]+"?)$/m, 'version: "1.2.0"');
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, CANARY_REL), staleCopy);
+      seedPriorDelivery(tmp, CANARY_REL, staleCopy);
+      commitAll(tmp, 'chore: baseline-clean copy at an older delivered version');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      expect(readFileSync(join(tmp, CANARY_REL), 'utf8')).toBe(commonAgentTpl);
+      const manifest = readManifest(tmp);
+      expect(manifest.decisions.some((d) => d.path === CANARY_REL && d.verdict === 'ADOPT')).toBe(true);
+      const entry = manifest.baselines[CANARY_REL];
+      expect(entry).toBeDefined();
+      expect(entry!.hash).not.toBe(baselineKeyFor(CANARY_REL, staleCopy));
+      expect(entry!.hash).toBe(baselineKeyFor(CANARY_REL, readFileSync(join(tmp, CANARY_REL), 'utf8')));
+      expect(entry!.templateVersion.length).toBeGreaterThan(0);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+
+  test('baseline for a template-departed path is pruned; a retained non-delivered template path survives', () => {
+    const RETIRED_REL = 'docs/retired-never-shipped.md';
+    const README_REL = 'agents/README.md'; // PRESERVE-class — never delivered, template-side
+    const tmp = makeTempProject();
+    try {
+      seedPriorDelivery(tmp, RETIRED_REL, 'content of a file the template no longer ships\n');
+      seedPriorDelivery(tmp, README_REL, 'prior readme delivery bytes\n');
+      commitAll(tmp, 'chore: prior baselines recorded');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      const manifest = readManifest(tmp);
+      // Template-departed → pruned (never a classification candidate again).
+      expect(manifest.baselines[RETIRED_REL]).toBeUndefined();
+      // PRESERVE-class template path, not delivered this run → carried forward
+      // verbatim (retention is the fix; the PRESERVE pass never re-baselines).
+      expect(manifest.baselines[README_REL]).toBeDefined();
+      expect(manifest.baselines[README_REL]!.hash).toBe(baselineKeyFor(README_REL, 'prior readme delivery bytes\n'));
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+});

@@ -1,5 +1,25 @@
 #!/usr/bin/env bun
-// @version 1.78.0
+// @version 1.79.0
+// v1.79.0 (2026-10-28, T-20261028-014 — U-20261028-001 D4 integration defect):
+//          BASELINES CARRY-FORWARD at manifest write. The writer rebuilt
+//          `baselines` from the delivered set alone (T-20261027-004 D1), which
+//          dropped the provenance of every path this run did NOT deliver
+//          (conflict-skipped, tombstoned, disposition-skipped). The next run
+//          then classified those paths NO_BASELINE, and for an agents/
+//          equal-version drift the designed CONFLICT (ERROR) preservation
+//          degraded into the overwrite-policy §8 migration-window WARN-deliver
+//          — the 0.22.1 co-design canary proved it end-to-end: the
+//          conflict-skipped agents/i18n-specialist.md lost its baseline and the
+//          follow-up dry-run showed DRIFT-restore WARN + COPIED, i.e. the next
+//          wave would clobber the project-canonical phases:[4] frontmatter at
+//          WARN. Rule now mirrors the D1 tombstones carry-forward exactly:
+//          baselines = (prior ∪ freshly delivered) − paths delivered this run;
+//          delivered paths already receive fresh baselines above; prior
+//          entries whose path left the template tree are pruned (never a
+//          classification candidate again — the same bound that stops firing a
+//          tombstone whose template counterpart is gone). schemaVersion stays
+//          2; the reader side (priorBaselines, classifyProjectState) is
+//          unchanged.
 // v1.78.0 (2026-10-28, U-20261028-001 — spec
 //          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md):
 //          delivery tombstones + agents/*.md project-ownership escalation
@@ -4743,6 +4763,26 @@ if (!dryRun) {
       if (st.isFile()) deliveredFileSet.add(rel);
     };
     for (const rel of deliveredRels) expandTombstoneClear(rel);
+    // Baselines carry-forward (T-20261028-014 — U-20261028-001 D4 integration
+    // defect): (prior ∪ freshly delivered) − paths delivered this run, the
+    // exact mirror of the tombstones rule below. The writer previously rebuilt
+    // `baselines` from the delivered set alone, dropping the provenance of
+    // every path this run did NOT deliver — conflict-skipped, tombstoned,
+    // disposition-skipped — so the NEXT run classified those paths NO_BASELINE
+    // and the agents/ equal-version arm degraded the designed CONFLICT (ERROR)
+    // preservation into the §8 migration-window WARN-deliver (proven by the
+    // 0.22.1 co-design canary: the skipped agents/i18n-specialist.md lost its
+    // baseline and the follow-up dry-run showed DRIFT-restore WARN + COPIED).
+    // Delivered paths already hold fresh baselines above; non-delivered paths
+    // keep theirs verbatim; entries whose path left the template tree are
+    // pruned (no template counterpart → never a classification candidate
+    // again — the same bound that stops firing a tombstone whose path is no
+    // longer shipped). schemaVersion stays 2 (additive behavior, no new key).
+    for (const [rel, entry] of Object.entries(priorManifest?.baselines ?? {})) {
+      if (deliveredFileSet.has(rel)) continue; // delivered this run — fresh baseline above
+      if (!existsSync(join(templatesDir, rel)) && !existsSync(join(commonDir, rel))) continue; // template-departed — pruned
+      baselines[rel] = entry;
+    }
     const tombstones: Record<string, TombstoneEntry> = {};
     for (const [rel, entry] of Object.entries(priorManifest?.tombstones ?? {})) {
       if (deliveredFileSet.has(rel)) continue; // delivered this run — the clear event
@@ -4760,6 +4800,15 @@ if (!dryRun) {
     for (const re of clearTombstoneGrants) {
       for (const rel of Object.keys(tombstones)) {
         if (re.test(rel)) delete tombstones[rel];
+      }
+      // T-20261028-014: the clear grant also resets carried-forward baselines —
+      // the D2 fire condition is `absent && (tombstones[rel] || baselines[rel])`,
+      // so a retained baseline would re-fire TOMBSTONED (ERROR) next run and
+      // break the documented contract ("drops entries so the next run delivers
+      // the path as NEW"). Resetting provenance IS the grant's semantics: the
+      // operator retracts the deletion and the next delivery is a clean NEW.
+      for (const rel of Object.keys(baselines)) {
+        if (re.test(rel)) delete baselines[rel];
       }
     }
     // D3 unified decision log, persisted with the delivery.
