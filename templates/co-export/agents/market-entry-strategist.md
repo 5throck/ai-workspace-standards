@@ -4,7 +4,6 @@ role: Overseas market entry strategy, buyer discovery, and market research lead
 status: active
 formal_name: Market Entry Strategist
 tier: medium
-model: inherit
 color: orange
 description: >
   Overseas market entry strategy, buyer discovery, and market research lead for co-export.
@@ -29,8 +28,8 @@ handoff_to: [trade-documentation-specialist, logistics-coordinator]
 handoff_from: [pm, foreign-regulatory-intelligence-analyst]
 required_skills: [market-entry-strategy]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, presentation]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

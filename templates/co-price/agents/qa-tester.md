@@ -5,14 +5,14 @@ formal_name: End-to-End QA Engineer
 role: E2E flows, React component mounting, browser assertions, and cross-feature regression
 status: active
 tier: high
-model: inherit
 domain: quality
 subdomain: testing
 description: >-
   Verifies the user experience end-to-end after UX writes: dashboard tabs render without
   console errors, props flow correctly, new v10.1 surfaces (Cost Shock, comparison,
   scorecard, copilot panel incl. streaming and fallback badge) behave under real browsers.
-version: "2.2.0"
+version: "2.2.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: green
 lifecycle:

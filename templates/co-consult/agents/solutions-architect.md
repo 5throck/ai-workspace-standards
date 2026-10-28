@@ -4,7 +4,6 @@ role: Technical solution design and implementation planning specialist
 status: active
 formal_name: Solutions Architect & Technical Designer
 tier: medium
-model: inherit
 color: cyan
 description: >
   Solutions architect - designs technical solutions, system architectures, and
@@ -17,8 +16,8 @@ phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
 required_skills: [solution-design, technical-feasibility]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -4,7 +4,6 @@ role: Collaboration platforms and digital transformation support specialist
 status: active
 formal_name: Technology Specialist & Collaboration Platform Lead
 tier: low
-model: inherit
 color: blue
 description: >
   Technology specialist - leads collaboration technology implementation, platform
@@ -17,8 +16,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [communications-lead, solutions-architect]
 required_skills: [technical-feasibility, solution-design]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

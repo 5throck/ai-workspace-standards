@@ -2,7 +2,6 @@
 name: read-only-analyst
 phases: [1]
 role: SAP Business Data Analyst (read-only)
-model: inherit
 color: magenta
 status: active
 tier: medium
@@ -20,7 +19,8 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/read-only-analyst.md
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 ---
 
 ## Role

@@ -4,7 +4,6 @@ role: Project delivery and operations coordination specialist
 status: active
 formal_name: Delivery Manager & Operations Lead
 tier: low
-model: inherit
 color: green
 description: >
   Delivery manager - oversees project delivery, operations coordination, and
@@ -17,8 +16,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [project-delivery, stakeholder-review-management]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

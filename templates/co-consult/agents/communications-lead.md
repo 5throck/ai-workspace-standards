@@ -4,7 +4,6 @@ role: Client-facing communications and strategic narrative producer
 status: active
 formal_name: Communications Lead & Client Storyteller
 tier: medium
-model: inherit
 color: cyan
 description: >
   Communications lead - crafts client-facing communications, presentations, and
@@ -17,8 +16,8 @@ phases: [3]
 handoff_to: [technology-specialist]
 handoff_from: [strategy-analyst]
 required_skills: [narrative-framework, consulting-report-writing, executive-presentation]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -3,7 +3,6 @@ name: service-designer
 status: active
 formal_name: Service Designer & Customer Experience Strategist
 tier: medium
-model: inherit
 role: End-to-end service experience and customer journey designer
 color: teal
 description: >
@@ -17,8 +16,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: [service-design]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

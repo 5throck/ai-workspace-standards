@@ -5,7 +5,6 @@ status: active
 capabilities:
   - documentation
 tier: medium
-model: inherit
 color: cyan
 description: >
   Reporter - drafts the article headline, lead, and body strictly from the
@@ -19,8 +18,8 @@ phases: [3]
 handoff_to: [style-editor]
 handoff_from: [fact-checker]
 required_skills: [financial-journalism-style]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-12"

@@ -1,11 +1,10 @@
 ---
 name: threat-modeler
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Threat Modeler
 role: STRIDE analysis, ATT&CK mapping, and risk scoring specialist
 tier: high
-model: inherit
 color: purple
 description: >
   STRIDE analysis, MITRE ATT&CK mapping, and risk scoring. Produces the threat model that gates

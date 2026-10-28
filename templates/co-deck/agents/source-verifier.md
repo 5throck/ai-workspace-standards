@@ -1,11 +1,10 @@
 ---
 name: source-verifier
-version: "1.1.0"
+version: "1.1.1"
 role: Research source credibility and URL existence verification specialist
 status: active
-last_updated: "2026-10-27"
+last_updated: "2026-10-28"
 tier: medium
-model: inherit
 color: yellow
 description: >-
   Verification agent — validates that URLs in research_notes.md actually exist and

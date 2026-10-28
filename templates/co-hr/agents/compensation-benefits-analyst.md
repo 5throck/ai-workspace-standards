@@ -3,7 +3,6 @@ name: compensation-benefits-analyst
 role: "Wage structure, incentives, benefits design, compensation benchmarking (HRM)"
 status: active
 tier: medium
-model: inherit
 color: gold
 description: >
   Compensation and benefits analyst - designs wage structures, incentive schemes,
@@ -17,8 +16,8 @@ phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
 required_skills: [compensation-benchmarking]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

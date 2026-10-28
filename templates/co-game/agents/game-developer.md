@@ -2,13 +2,12 @@
 name: game-developer
 role: Canvas rendering engine, game loop, collision detection, and entity implementation specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - game-loop
   - engine-implementation
 tier: low
-model: inherit
 color: cyan
 description: >
   Game implementation agent - implements Canvas rendering engine, game loop, collision

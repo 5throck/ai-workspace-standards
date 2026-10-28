@@ -5,7 +5,6 @@ status: active
 capabilities:
   - documentation
 tier: medium
-model: inherit
 color: teal
 description: >
   Visual editor - turns the financial-analyst's narrative brief into inline
@@ -19,8 +18,8 @@ phases: [5]
 handoff_to: [pm]
 handoff_from: [style-editor]
 required_skills: [financial-infographic-svg]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-12"

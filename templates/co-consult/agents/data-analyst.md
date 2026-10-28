@@ -4,7 +4,6 @@ role: Statistical analysis, data modeling, and business insights specialist
 status: active
 formal_name: Data Analyst & Analytics Specialist
 tier: medium
-model: inherit
 color: cyan
 description: >
   Data analyst - provides advanced data analysis, visualization, and statistical
@@ -17,8 +16,8 @@ phases: [1, 3]
 handoff_to: [strategy-analyst, communications-lead]
 handoff_from: [pm]
 required_skills: [company-intelligence, financial-modeling, financial-statement-analysis, insight-synthesis]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

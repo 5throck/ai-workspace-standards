@@ -5,7 +5,6 @@ status: active
 capabilities:
   - documentation
 tier: medium
-model: inherit
 color: orange
 description: >
   Fact-checker - the newsroom's citation gatekeeper. Extracts every material
@@ -20,8 +19,8 @@ phases: [2]
 handoff_to: [reporter]
 handoff_from: [financial-analyst, legal-researcher]
 required_skills: [source-verification-ledger]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-12"

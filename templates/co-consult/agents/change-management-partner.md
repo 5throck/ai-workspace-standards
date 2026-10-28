@@ -4,7 +4,6 @@ role: Organizational transformation and stakeholder alignment specialist
 status: active
 formal_name: Change Management Partner & Culture Strategist
 tier: medium
-model: inherit
 color: purple
 description: >
   Change management partner - leads organizational transformation, culture change,
@@ -17,8 +16,8 @@ phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [stakeholder-alignment, org-readiness-assessment, change-impact-assessment]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

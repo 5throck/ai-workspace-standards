@@ -4,7 +4,6 @@ role: Incoterms selection, freight/forwarding, and bonded warehouse logistics co
 status: active
 formal_name: Logistics & Freight Coordinator
 tier: low
-model: inherit
 color: teal
 description: >
   Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for
@@ -28,8 +27,8 @@ handoff_to: [pm]
 handoff_from: [pm, market-entry-strategist, trade-documentation-specialist]
 required_skills: [logistics-coordination, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, client-engagement, analysis, reporting]
-version: "1.2.0"
-last_updated: "2026-10-27"
+version: "1.2.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

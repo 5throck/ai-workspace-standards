@@ -3,7 +3,6 @@ name: labor-relations-specialist
 role: "labor-relations-authority case response, collective bargaining strategy support, labor-management council operation advisory, precedent research"
 status: active
 tier: medium
-model: inherit
 color: teal
 description: >
   Labor relations specialist - supports responses to labor-relations-authority
@@ -19,8 +18,8 @@ phases: [1, 2]
 handoff_to: [change-management-partner, org-design-consultant]
 handoff_from: [pm, labor-compliance-analyst]
 required_skills: [labor-compliance-audit]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

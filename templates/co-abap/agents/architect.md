@@ -2,7 +2,6 @@
 name: architect
 phases: [1, 2]
 role: SAP Technical Architect
-model: inherit
 color: blue
 status: active
 tier: high
@@ -20,7 +19,8 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/architect.md
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 ---
 
 ## Role

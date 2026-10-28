@@ -4,7 +4,6 @@ role: Market analysis, competitive research, and strategic assessment lead
 status: active
 formal_name: Strategy Analyst & Research Lead
 tier: medium
-model: inherit
 color: magenta
 description: >
   Strategy analyst - leads market analysis, competitive research, financial modeling,
@@ -17,8 +16,8 @@ phases: [1]
 handoff_to: [communications-lead, solutions-architect]
 handoff_from: [pm]
 required_skills: [company-intelligence, competitive-intelligence, financial-modeling, insight-synthesis]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

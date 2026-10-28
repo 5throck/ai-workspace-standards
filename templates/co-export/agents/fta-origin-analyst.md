@@ -4,7 +4,6 @@ role: FTA rules-of-origin analysis and origin certification specialist
 status: active
 formal_name: FTA / Origin Analyst
 tier: high
-model: inherit
 color: green
 description: >
   FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for
@@ -30,8 +29,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist]
 required_skills: [fta-origin-determination]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

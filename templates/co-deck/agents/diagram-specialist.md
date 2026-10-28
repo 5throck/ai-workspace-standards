@@ -1,11 +1,10 @@
 ---
 name: diagram-specialist
-version: "1.2.0"
-last_updated: "2026-10-27"
+version: "1.2.1"
+last_updated: "2026-10-28"
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier: medium
-model: inherit
 language: ko
 color: teal
 description: >-

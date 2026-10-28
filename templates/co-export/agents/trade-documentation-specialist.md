@@ -4,7 +4,6 @@ role: Trade documentation and customs clearance paperwork specialist
 status: active
 formal_name: Trade Documentation Specialist
 tier: medium
-model: inherit
 color: cyan
 description: >
   Trade documentation and customs clearance paperwork specialist for co-export. Prepares
@@ -29,8 +28,8 @@ handoff_to: [logistics-coordinator]
 handoff_from: [pm, fta-origin-analyst, export-control-compliance-specialist, halal-certification-specialist, market-entry-strategist]
 required_skills: [trade-documentation-checklist]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.2.0"
-last_updated: "2026-10-27"
+version: "1.2.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

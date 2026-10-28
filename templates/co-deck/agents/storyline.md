@@ -1,11 +1,10 @@
 ---
 name: storyline
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Storyline architect and slide deck planner for lecture content
 status: active
 tier: medium
-model: inherit
 language: ko
 color: green
 description: >-

@@ -2,10 +2,9 @@
 name: exam-bank-steward
 role: Question bank quality and exam operations stewardship for the harness-assessment deliverable
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: medium
-model: inherit
 color: blue
 lifecycle:
   phase: production

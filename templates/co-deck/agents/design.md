@@ -1,11 +1,10 @@
 ---
 name: design
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Visual design specialist for lecture slide aesthetics and brand alignment
 status: active
 tier: medium
-model: inherit
 color: purple
 description: >-
   Design agent — locks color palette, fonts, and layout into design_spec.md.

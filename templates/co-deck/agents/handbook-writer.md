@@ -1,11 +1,10 @@
 ---
 name: handbook-writer
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Handbook content creation specialist — chapter structure, section prose, and AUTHORING_GUIDELINES compliance
 status: active
 tier: medium
-model: inherit
 language: ko
 color: teal
 description: >-

@@ -2,14 +2,13 @@
 name: game-designer
 role: Universal game design agent — core loop, difficulty curves, reward systems, tutorial/onboarding across all genres
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - game-design
   - game-loop
   - level-design
 tier: high
-model: inherit
 color: orange
 description: >
   Universal game design agent - produces core game loop specifications, difficulty curves,

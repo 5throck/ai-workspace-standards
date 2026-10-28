@@ -4,7 +4,6 @@ role: HS code classification, customs valuation, and tariff rate determination s
 status: active
 formal_name: HS Classification & Customs Valuation Specialist
 tier: high
-model: inherit
 color: blue
 description: >
   HS code classification, customs valuation, and tariff rate determination specialist
@@ -29,8 +28,8 @@ handoff_to: [fta-origin-analyst, export-control-compliance-specialist, halal-cer
 handoff_from: [pm]
 required_skills: [hs-classification-workflow, landed-cost-calculation]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.2.0"
-last_updated: "2026-10-27"
+version: "1.2.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

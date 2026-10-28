@@ -1,11 +1,10 @@
 ---
 name: research
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Web research and source collection specialist for lecture preparation
 status: active
 tier: medium
-model: inherit
 language: ko
 color: cyan
 description: >-

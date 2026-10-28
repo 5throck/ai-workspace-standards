@@ -3,8 +3,8 @@ extends: ../../common/agents/pm.md
 name: pm
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-price
-version: "2.1.0"
-last_updated: "2026-10-27"
+version: "2.1.1"
+last_updated: "2026-10-28"
 status: active
 variant_overrides:
   governance_workflow: |
@@ -19,7 +19,6 @@ variant_overrides:
     ## Dispatch Protocol
     Dispatch by pricing method and deliverable: research and model design to pricing specialists, financial reconciliation to finance specialists, localization to l10n, and executive-ready synthesis to PM.
 tier: medium
-model: inherit
 ---
 
 This co-price PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

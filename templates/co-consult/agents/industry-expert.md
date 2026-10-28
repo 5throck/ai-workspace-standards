@@ -4,7 +4,6 @@ role: Industry-specific insights and competitive dynamics specialist
 status: active
 formal_name: Industry Expert & Domain Specialist
 tier: high
-model: inherit
 color: purple
 description: >
   Industry expert - provides deep domain knowledge and industry-specific insights
@@ -17,8 +16,8 @@ phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
 required_skills: [company-intelligence, competitive-intelligence]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

@@ -3,8 +3,8 @@ extends: ../../common/agents/pm.md
 name: pm
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-export
-version: "1.2.0"
-last_updated: "2026-10-27"
+version: "1.2.1"
+last_updated: "2026-10-28"
 status: active
 variant_overrides:
   governance_workflow: |
@@ -19,7 +19,6 @@ variant_overrides:
     ## Dispatch Protocol
     Dispatch by trade risk and deliverable type: classification/origin questions go to the relevant compliance specialist; logistics and landed-cost questions go to logistics/cost specialists; final packages require PM synthesis and compliance sign-off.
 tier: medium
-model: inherit
 ---
 
 This co-export PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

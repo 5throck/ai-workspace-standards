@@ -1,11 +1,10 @@
 ---
 name: measure
-version: "2.1.0"
-last_updated: "2026-10-27"
+version: "2.1.1"
+last_updated: "2026-10-28"
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
 tier: low
-model: inherit
 color: yellow
 description: >-
   PDF prep agent — validates the 4-layer spec merge, checks font availability, and

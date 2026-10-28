@@ -1,11 +1,10 @@
 ---
 name: handbook-reviewer
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Handbook quality gate specialist — runs validation scripts, applies fixes, ensures AUTHORING_GUIDELINES compliance
 status: active
 tier: medium
-model: inherit
 language: ko
 color: orange
 description: >-

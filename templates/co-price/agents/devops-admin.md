@@ -5,14 +5,14 @@ formal_name: DevOps & CI/CD Admin
 role: build pipelines, Docker deployment, git hooks, bun toolchain, and infrastructure operations
 status: active
 tier: high
-model: inherit
 domain: quality
 subdomain: infrastructure
 description: >-
   Gatekeeps production: bun-based install pipelines, Docker multi-stage builds (bun deps +
   Node standalone runtime), git hooks (audit + gitleaks pre-push), Cloudflare tunnel
   standards, and zero-downtime release discipline.
-version: "2.2.0"
+version: "2.2.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:

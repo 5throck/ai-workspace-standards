@@ -3,7 +3,6 @@ name: learning-development-specialist
 role: "Training system design, competency model, training program operation (HRD)"
 status: active
 tier: medium
-model: inherit
 color: cyan
 description: >
   Learning and development specialist - designs training systems, competency
@@ -16,8 +15,8 @@ phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
 required_skills: [learning-curriculum-design]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

@@ -3,7 +3,6 @@ name: org-design-consultant
 role: "Org structure/job architecture design, workforce planning, governance, reorganization, workforce restructuring linked to voluntary retirement and outplacement support"
 status: active
 tier: medium
-model: inherit
 color: orange
 description: >
   Org design consultant - designs organizational structure, job architecture,
@@ -19,8 +18,8 @@ phases: [2, 3]
 handoff_to: [change-management-partner]
 handoff_from: [pm, labor-relations-specialist, safety-health-officer, talent-acquisition-specialist, compensation-benefits-analyst, performance-management-consultant, learning-development-specialist, career-succession-consultant]
 required_skills: [org-design-framework]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

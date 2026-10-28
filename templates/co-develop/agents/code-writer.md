@@ -2,10 +2,9 @@
 name: code-writer
 role: Approved plan implementation with surgical, minimal code changes
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: low
-model: inherit
 color: green
 description: >
   Implementation agent - writes code from an approved plan. Use when: an architect plan has been

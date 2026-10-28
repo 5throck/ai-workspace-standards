@@ -4,9 +4,9 @@ phases: [3]
 alias: SWM
 role: orchestrator
 status: active
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: high
-model: opus
 color: green
 description: "Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordination."
 lifecycle:

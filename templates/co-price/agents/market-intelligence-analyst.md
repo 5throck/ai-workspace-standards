@@ -5,14 +5,14 @@ formal_name: Market Intelligence Analyst
 role: competitive price intelligence, survey analytics (Van Westendorp / Gabor-Granger), and benchmark curation
 status: active
 tier: high
-model: inherit
 domain: finance
 subdomain: research
 description: >-
   Curates the industry benchmark dataset, manages competitor price observations and survey
   response data (CSV import validation included), runs VW-PSM and Gabor-Granger analyses,
   and challenges pricing-strategist assumptions with market evidence.
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

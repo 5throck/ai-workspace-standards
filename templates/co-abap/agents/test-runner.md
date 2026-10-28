@@ -2,7 +2,6 @@
 name: test-runner
 phases: [3, 4]
 role: SAP Quality Assurance Specialist
-model: inherit
 color: red
 status: active
 tier: low
@@ -21,7 +20,8 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/test-runner.md
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 ---
 
 ## Role

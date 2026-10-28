@@ -3,7 +3,6 @@ name: prototype-engineer
 status: active
 formal_name: Interactive Prototyping Specialist
 tier: medium
-model: inherit
 role: Interactive prototypes and design handoff artifacts builder
 color: orange
 description: >
@@ -17,8 +16,8 @@ phases: [4]
 handoff_to: [pm]
 handoff_from: [service-designer, visual-designer, typography-expert]
 required_skills: [token-usage-lint]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

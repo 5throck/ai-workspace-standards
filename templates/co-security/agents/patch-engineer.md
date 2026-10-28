@@ -1,11 +1,10 @@
 ---
 name: patch-engineer
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Patch Engineer
 role: Cross-platform patch deployment and remediation specialist
 tier: medium
-model: inherit
 color: blue
 description: >
   Ansible-based cross-platform patch automation (Windows/macOS/Linux via SSH). Writes and executes

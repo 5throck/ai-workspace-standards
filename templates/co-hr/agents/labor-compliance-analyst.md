@@ -3,7 +3,6 @@ name: labor-compliance-analyst
 role: "labor-law compliance review (jurisdiction per active country profile), work rules maintenance, wage & working-time system review"
 status: active
 tier: medium
-model: inherit
 color: blue
 description: >
   Labor compliance analyst - reviews compliance with the labor legislation of the
@@ -19,8 +18,8 @@ phases: [1]
 handoff_to: [labor-relations-specialist, safety-health-officer]
 handoff_from: [pm]
 required_skills: [labor-compliance-audit]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

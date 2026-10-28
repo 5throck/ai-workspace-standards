@@ -3,8 +3,8 @@ extends: ../../common/agents/pm.md
 name: pm
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-safety
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 status: active
 owner: architect
 lifecycle:
@@ -25,7 +25,6 @@ variant_overrides:
     ## Dispatch Protocol
     Dispatch by safety domain first, then by functional expertise. TBM/PTW/PSM/MSDS requests go to matching domain or workflow specialists; legal-basis and compliance evidence return to PM for closeout approval.
 tier: medium
-model: inherit
 ---
 
 This co-safety PM override inherits the common PM body and supplies only variant-specific governance, roster, and dispatch deltas.

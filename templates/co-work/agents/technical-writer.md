@@ -2,11 +2,10 @@
 name: technical-writer
 role: API documentation, technical guides, and developer resources creator
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Technical Writer & Developer Documentation Specialist
 tier: medium
-model: inherit
 color: cyan
 description: >
   Technical writer - creates API documentation, technical guides, and developer resources.

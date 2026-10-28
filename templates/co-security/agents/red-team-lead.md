@@ -1,11 +1,10 @@
 ---
 name: red-team-lead
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Red Team Lead
 role: Attack methodology, MITRE ATT&CK TTPs, and PoC review specialist
 tier: high
-model: inherit
 color: red
 description: >
   Attack methodology owner. Designs recon strategy, selects MITRE ATT&CK TTPs, reviews all PoCs
