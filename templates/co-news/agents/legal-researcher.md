@@ -5,7 +5,6 @@ status: active
 capabilities:
   - knowledge-sharing
 tier: medium
-model: inherit
 color: blue
 description: >
   Legal researcher - runs the k-law skill against the National Law Information
@@ -20,8 +19,8 @@ phases: [1]
 handoff_to: [fact-checker]
 handoff_from: [pm, financial-analyst]
 required_skills: []
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-12"

@@ -2,11 +2,10 @@
 name: ms365-expert
 role: Microsoft 365 platform expertise for productivity and collaboration tools
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Microsoft 365 Collaboration Expert
 tier: low
-model: inherit
 color: blue
 description: >
   Microsoft 365 expert - provides guidance on Outlook, Word, Excel, PowerPoint, SharePoint,

@@ -2,7 +2,6 @@
 name: security-monitor
 phases: [5]
 role: Security Monitor
-model: inherit
 color: red
 status: active
 tier: low
@@ -15,7 +14,8 @@ lifecycle:
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/security-monitor.md
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 ---
 
 # Security Monitor Agent

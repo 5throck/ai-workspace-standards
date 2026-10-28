@@ -2,11 +2,10 @@
 name: content-writer
 role: Research-to-documentation transformation and communications specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Content Writer & Documentation Specialist
 tier: medium
-model: inherit
 color: cyan
 description: >
   Content writer - transforms research into clear, accessible documentation and communications.

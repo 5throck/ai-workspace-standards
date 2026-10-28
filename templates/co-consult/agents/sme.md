@@ -4,7 +4,6 @@ role: Functional expertise and solution design specialist
 status: active
 formal_name: Subject Matter Expert & Functional Specialist
 tier: medium
-model: inherit
 color: orange
 description: >
   Subject matter expert - provides functional expertise in specific business domains
@@ -17,8 +16,8 @@ phases: [1, 2, 3]
 handoff_to: [pm, solutions-architect]
 handoff_from: [pm]
 required_skills: [technical-feasibility, company-intelligence]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

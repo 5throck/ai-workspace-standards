@@ -2,10 +2,9 @@
 name: security-monitor
 role: Security policy enforcement and secrets leak prevention specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: medium
-model: inherit
 color: red
 description: >
   Security monitor - scans for vulnerabilities, advisories, and secret leaks.

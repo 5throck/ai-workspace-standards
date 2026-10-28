@@ -2,13 +2,12 @@
 name: visual-artist
 role: Visual asset specialist — sprite design, animation frames, board/tile visuals, background, HUD elements
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - asset-pipeline
   - visual-design
 tier: medium
-model: inherit
 color: magenta
 description: >
   Visual asset specification agent - produces sprite sheet layouts, animation frame specs,

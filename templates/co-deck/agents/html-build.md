@@ -1,11 +1,10 @@
 ---
 name: html-build
-version: "1.3.0"
-last_updated: "2026-10-27"
+version: "1.3.1"
+last_updated: "2026-10-28"
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
-model: inherit
 color: orange
 description: >-
   Build agent — generates lecture_vN.html from slide_deck.md and design_spec.md, integrates images.

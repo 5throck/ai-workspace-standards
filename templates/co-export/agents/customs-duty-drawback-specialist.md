@@ -4,7 +4,6 @@ role: Customs duty drawback (refund of duties on raw materials for export) deter
 status: active
 formal_name: Customs Duty Drawback Specialist
 tier: high
-model: inherit
 color: teal
 description: >
   Duty drawback specialist for co-export. Determines whether raw materials used in an export
@@ -33,8 +32,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [hs-classification-specialist, pm]
 required_skills: [customs-duty-drawback-workflow]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

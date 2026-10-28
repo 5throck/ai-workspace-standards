@@ -5,7 +5,6 @@ formal_name: Security Auditor
 role: Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation
 status: active
 tier: high
-model: inherit
 domain: technical
 subdomain: security
 description: >-
@@ -13,7 +12,8 @@ description: >-
   guards, API route validation (incl. /api/copilot/chat rate limits and payload caps),
   PRICE_* env schema, CSV import validation, and prompt-injection defenses for injected
   simulation context.
-version: "2.2.0"
+version: "2.2.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: red
 lifecycle:

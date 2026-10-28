@@ -3,7 +3,6 @@ name: ux-researcher
 status: active
 formal_name: User Research & Usability Testing Specialist
 tier: medium
-model: inherit
 role: User research, needs analysis, and UX insights specialist
 color: teal
 description: >
@@ -17,8 +16,8 @@ phases: [1]
 handoff_to: [design-lead]
 handoff_from: [pm]
 required_skills: []
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

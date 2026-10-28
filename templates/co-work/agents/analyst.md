@@ -2,11 +2,10 @@
 name: analyst
 role: Systematic investigation, data synthesis, and evidence gathering specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Research & Data Analyst
 tier: medium
-model: inherit
 color: magenta
 description: >
   Research analyst - conducts systematic investigation, data synthesis, and evidence gathering.

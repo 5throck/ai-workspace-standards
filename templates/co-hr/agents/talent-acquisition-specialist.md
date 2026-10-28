@@ -3,7 +3,6 @@ name: talent-acquisition-specialist
 role: "Recruiting strategy, sourcing, selection process, talent pipeline design (HRM)"
 status: active
 tier: medium
-model: inherit
 color: green
 description: >
   Talent acquisition specialist - designs recruiting strategy, sourcing channels,
@@ -17,8 +16,8 @@ phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
 required_skills: [talent-acquisition-strategy]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

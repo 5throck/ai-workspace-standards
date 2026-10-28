@@ -4,7 +4,6 @@ role: Foreign import regulation and tariff-change monitoring specialist
 status: active
 formal_name: Foreign Regulatory Intelligence Analyst
 tier: medium
-model: inherit
 color: purple
 description: >
   Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense
@@ -29,8 +28,8 @@ handoff_to: [export-control-compliance-specialist, market-entry-strategist]
 handoff_from: [pm]
 required_skills: [foreign-regulation-monitoring]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

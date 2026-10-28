@@ -4,7 +4,6 @@ role: Strategic items export control and sanctions screening specialist
 status: active
 formal_name: Export Control & Sanctions Screening Specialist
 tier: high
-model: inherit
 color: red
 description: >
   Strategic items export control and sanctions/denied-party screening specialist for
@@ -29,8 +28,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist, foreign-regulatory-intelligence-analyst]
 required_skills: [export-control-screening]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-08"

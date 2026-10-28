@@ -2,13 +2,12 @@
 name: puzzle-designer
 role: Puzzle/board game design specialist — matching logic, turn systems, difficulty generation
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - game-design
   - puzzle-mechanics
 tier: high
-model: inherit
 color: purple
 description: >
   Puzzle and board game design specialist. Produces matching/link logic, turn-based systems,

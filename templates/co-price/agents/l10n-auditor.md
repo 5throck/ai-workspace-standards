@@ -7,14 +7,14 @@ status: active
 lang: ko
 lang_reason: proper-noun
 tier: medium
-model: inherit
 domain: ux
 subdomain: localization
 description: >-
   Guarantees structural and linguistic integrity of 16 locale files (en, ko, ja, zh-CN,
   zh-TW, de, es, fr, pt, vi, ms, id, th, ru, it, ar) incl. RTL Arabic; runs the Vitest
   i18n harness after every key change; maintains the financial glossary.
-version: "2.2.0"
+version: "2.2.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: cyan
 lifecycle:

@@ -1,11 +1,10 @@
 ---
 name: version
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 role: Version snapshot manager for all lecture production files
 status: active
 tier: low
-model: inherit
 color: gray
 description: >-
   Version agent — creates snapshots before any file edit and restores prior states on demand.

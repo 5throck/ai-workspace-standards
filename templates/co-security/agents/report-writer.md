@@ -1,11 +1,10 @@
 ---
 name: report-writer
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Report Writer
 role: Pentest reports and executive summary documentation specialist
 tier: medium
-model: inherit
 color: green
 description: >
   Pentest reports and executive summaries. Synthesizes findings from docs/findings/ into structured

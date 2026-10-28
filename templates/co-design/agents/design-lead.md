@@ -3,7 +3,6 @@ name: design-lead
 status: active
 formal_name: Design System & Visual Direction Lead
 tier: high
-model: inherit
 role: Design direction, design system architecture, and creative strategy owner
 color: indigo
 description: >
@@ -17,8 +16,8 @@ phases: [2, 3]
 handoff_to: [visual-designer, service-designer, typography-expert]
 handoff_from: [ux-researcher]
 required_skills: [ui-ux-design-intelligence, service-design]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

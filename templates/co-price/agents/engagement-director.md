@@ -7,7 +7,6 @@ status: active
 lang: ko
 lang_reason: proper-noun
 tier: high
-model: inherit
 domain: finance
 subdomain: delivery
 description: >-
@@ -15,7 +14,8 @@ description: >-
   sequences agent workstreams per client question, gates client-facing deliverables behind
   human approval, governs trade-line scorecard reviews, and owns executive-readability of
   final outputs (PDF/PPTX) in partnership with ux-specialist.
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

@@ -2,13 +2,12 @@
 name: designer
 role: UI/UX specs, wireframes, and component definition producer
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - level-design
   - visual-design
 tier: medium
-model: inherit
 color: purple
 description: >
   UI/UX design agent - produces wireframes, component specs, and design tokens.

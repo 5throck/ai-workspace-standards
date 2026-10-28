@@ -2,12 +2,11 @@
 name: architect
 role: Implementation plans, ADRs, and system architecture design specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 capabilities:
   - architecture
 tier: high
-model: inherit
 color: blue
 description: >
   Design agent - produces implementation plans and technical specs. Use when: planning a new

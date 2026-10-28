@@ -5,7 +5,6 @@ status: active
 capabilities:
   - documentation
 tier: medium
-model: inherit
 color: purple
 description: >
   Style editor - runs the AI-tell reduction pass and house-style conformance
@@ -19,8 +18,8 @@ phases: [4]
 handoff_to: [visual-editor]
 handoff_from: [reporter]
 required_skills: [financial-journalism-style, ai-tell-reduction]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-12"

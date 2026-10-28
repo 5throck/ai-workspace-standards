@@ -2,10 +2,9 @@
 name: test-runner
 role: Test execution and acceptance criteria verification specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: medium
-model: inherit
 color: cyan
 description: >
   QA and verification agent - runs tests and validates acceptance criteria. Use when: code has

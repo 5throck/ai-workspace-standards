@@ -5,7 +5,6 @@ formal_name: Pricing Strategist
 role: price-setting methodology design — elasticity application, floor/target/stretch guidance, discount policy architecture, dual-market pricing strategy
 status: active
 tier: high
-model: inherit
 domain: finance
 subdomain: strategy
 description: >-
@@ -13,7 +12,8 @@ description: >-
   list-price moves within guardrails, designs quantity/revenue discount ladders with
   deferred-timing awareness, arbitrates wholesale vs retail tiers, and frames
   domestic-vs-export price corridors under FX scenarios.
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

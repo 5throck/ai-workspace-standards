@@ -3,7 +3,6 @@ name: career-succession-consultant
 role: "Career path design, leadership pipeline, succession planning (HRD)"
 status: active
 tier: medium
-model: inherit
 color: indigo
 description: >
   Career and succession consultant - designs career pathing, leadership pipelines,
@@ -16,8 +15,8 @@ phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
 required_skills: [career-path-succession-planning]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

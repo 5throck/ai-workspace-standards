@@ -3,7 +3,6 @@ name: safety-health-officer
 role: "occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation"
 status: active
 tier: medium
-model: inherit
 color: red
 description: >
   Safety and health officer - reviews compliance with the jurisdiction's occupational
@@ -19,8 +18,8 @@ phases: [1]
 handoff_to: [change-management-partner, org-design-consultant]
 handoff_from: [pm, labor-compliance-analyst]
 required_skills: [labor-compliance-audit]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

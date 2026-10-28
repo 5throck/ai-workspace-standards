@@ -4,7 +4,6 @@ role: Halal certification requirement analysis and certification process special
 status: active
 formal_name: Halal Certification Specialist
 tier: medium
-model: inherit
 color: emerald
 description: >
   Halal certification requirement analysis and certification process specialist for co-export.
@@ -29,8 +28,8 @@ handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist, foreign-regulatory-intelligence-analyst]
 required_skills: [halal-certification-workflow]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: beta
   created: "2026-08-16"

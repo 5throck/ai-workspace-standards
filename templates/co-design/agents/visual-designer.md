@@ -3,7 +3,6 @@ name: visual-designer
 status: active
 formal_name: UI Execution & Visual Design Specialist
 tier: medium
-model: inherit
 role: Visual designs, design tokens, and component specifications producer
 color: purple
 description: >
@@ -17,8 +16,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: [ui-ux-design-intelligence]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

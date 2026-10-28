@@ -5,7 +5,6 @@ formal_name: Finance Strategy & Channel Lead
 role: P&L strategy, channel logic, pricing business rules, and LaTeX specification authorship across industries
 status: active
 tier: high
-model: inherit
 domain: finance
 subdomain: strategy
 description: >-
@@ -13,7 +12,8 @@ description: >-
   Authors the mathematical reality of the platform in docs/biz_logic.md before any code:
   revenue/pricing engine, channel economics, waterfall, dual domestic-export pricing,
   discount timing, trade-line scorecard, VW/GG methodology specs.
-version: "2.2.0"
+version: "2.2.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: yellow
 lifecycle:

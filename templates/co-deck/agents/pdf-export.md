@@ -1,11 +1,10 @@
 ---
 name: pdf-export
-version: "2.2.0"
-last_updated: "2026-10-27"
+version: "2.2.1"
+last_updated: "2026-10-28"
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
 tier: low
-model: inherit
 color: red
 description: >-
   Export agent — generates sample (5 slides) and full PDF from slidedata.json using pdf-lib.

@@ -3,10 +3,9 @@ extends: ../../../agents/pm.md
 name: pm
 formal_name: Project Manager (PM) Agent
 status: active
-version: "1.4.0"
-last_updated: "2026-10-27"
+version: "1.4.1"
+last_updated: "2026-10-28"
 tier: medium
-model: inherit
 tier_semantics: floor
 session_hosted: true
 color: yellow

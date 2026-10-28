@@ -3,7 +3,6 @@ name: typography-expert
 status: active
 formal_name: Typography Expert & Type System Designer
 tier: medium
-model: inherit
 role: Font selection, type systems, and visual hierarchy specialist
 color: violet
 description: >
@@ -17,8 +16,8 @@ phases: [3]
 handoff_to: [prototype-engineer]
 handoff_from: [design-lead]
 required_skills: []
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-12"

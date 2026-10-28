@@ -3,7 +3,6 @@ name: data-analyst
 role: "Workforce statistics, turnover/hiring-conversion/labor-cost analysis, HR dashboards/people analytics"
 status: active
 tier: medium
-model: inherit
 color: slate
 description: >
   HR data analyst - analyzes workforce statistics, turnover, hiring conversion,
@@ -18,8 +17,8 @@ handoff_to: [pm]
 handoff_from: [pm, change-management-partner]
 capabilities: [analysis, reporting]
 required_skills: [hr-metrics-analysis]
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 lifecycle:
   phase: production
   created: "2026-08-23"

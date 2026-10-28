@@ -1,11 +1,10 @@
 ---
 name: image-curator
-version: "1.4.0"
-last_updated: "2026-10-27"
+version: "1.4.1"
+last_updated: "2026-10-28"
 role: Image search, evaluation, and download specialist for slide decks
 status: active
 tier: low
-model: inherit
 color: purple
 description: >-
   Image agent — searches license-clear sources and downloads images for each slide

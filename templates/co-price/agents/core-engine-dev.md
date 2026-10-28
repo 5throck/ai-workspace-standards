@@ -5,7 +5,6 @@ formal_name: Core Engine Developer
 role: simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation
 status: active
 tier: high
-model: inherit
 domain: technical
 subdomain: engine
 description: >-
@@ -13,7 +12,8 @@ description: >-
   roll-forwards, diagnostics/sensitivity/partner-PnL/discount/VW-GG/export-pricing modules)
   and implements the on-rails AI transport layer (providers, circuit breaker, ledger,
   critic, SSE stream) per the approved architecture design.
-version: "2.1.0"
+version: "2.1.1"
+last_updated: "2026-10-28"
 last_reviewed: "2026-08-25"
 color: blue
 lifecycle:

@@ -2,11 +2,10 @@
 name: storyteller
 status: active
 formal_name: Brand Narrative & Design Principles Lead
-last_updated: "2026-10-27"
-version: "2.2.0"
+last_updated: "2026-10-28"
+version: "2.2.1"
 capability: design-brand-narrative
 tier: medium
-model: inherit
 role: Brand narrative, design principles, and cross-pattern consistency owner
 color: purple
 description: >

@@ -6,9 +6,9 @@ phases: [2, 6]
 alias: SGM
 role: specialist
 status: active
-version: "1.1.0"
+version: "1.1.1"
+last_updated: "2026-10-28"
 tier: high
-model: opus
 color: blue
 description: "Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates."
 lifecycle:

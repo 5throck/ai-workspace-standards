@@ -2,11 +2,10 @@
 name: project-coordinator
 role: Schedule management, stakeholder communication, and delivery logistics specialist
 status: active
-version: "1.1.0"
-last_updated: "2026-10-27"
+version: "1.1.1"
+last_updated: "2026-10-28"
 formal_name: Project Coordinator
 tier: low
-model: inherit
 color: green
 description: >
   Project coordinator - manages schedules, stakeholder communication, and delivery logistics.
