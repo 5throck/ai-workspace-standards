@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261028-006
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-28T23:42:05.003+09:00
+history:
+  - at: 2026-10-28T23:42:05.003+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'dev-sync.ts propagates agent frontmatter changes during workspace sync (it bumps version — e.g. legacy tier map converted to scalar and version 1.0.0 to 1.1.0 across 19 agent files in a single sync commit) but never refreshes the nested lifecycle.last_updated value in those files. The agent lifecycle audit then reports one WARN per agent ("frontmatter last_updated is older than the last git commit") — in the delivered project all 21 of 21 agents warn although the sync tool itself made the changes. Exempting "workspace sync" commit subjects inside the audit would be incorrect because those commits demonstrably carry content edits. Expected: dev-sync bumps the nested lifecycle.last_updated whenever it modifies an agent file''s frontmatter.'
+  affected_paths:
+    - scripts/dev-sync.ts
+    - agents/pm.md
+  identity_source: cwd
+  repro: 'In the delivered project: agent-lifecycle-audit.ts reports 21 WARNs; git show of the 2026-10-27 workspace-sync commit shows agents/read-only-analyst.md gained tier/version changes while last_updated stayed 2026-10-10.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/dev-sync.ts=true
+    - info:in_last_delivery agents/pm.md=false
+  dedupe_key: 2cfe68e5487482ecca2d484cd6b247566ee6c98c1d73a8d140519c0942a8cc9b
+  duplicates:
+    - project: co-abap
+      at: 2026-10-28T23:42:05.003+09:00

@@ -1,0 +1,77 @@
+schemaVersion: 1
+id: U-20261028-021
+kind: manual
+title: Upstream request from co-safety
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:49:58.375+09:00'
+history:
+  - at: '2026-10-28T23:49:58.375+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-29T00:50:47.038+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.038+09:00'
+    from: review
+    to: done
+result: >-
+  Downgraded by verification: the L1/L2 sources are already clean
+  (templates/common/AGENTS.md:206 points at the delivered
+  docs/governance/agents/execution-plan-templates.md;
+  templates/co-safety/AGENTS.md:520 uses the same-doc anchor; the
+  ../../../AGENTS.md links in docs/governance/agents/*.md resolve at both
+  layouts). The only stale artifact is the project's own AGENTS.md:234
+  '[workspace AGENTS.md §5](../../../AGENTS.md#5-execution-plan-templates)' from
+  project commit 23ec1b0 — ../../../ overshoots by one; correct target
+  ../../AGENTS.md. One-line project-side edit; upgrade cannot repair it
+  (AGENTS.md body is project-owned/MERGE-managed). Remedy recorded here.
+error: null
+upstream:
+  project: co-safety
+  variant: co-safety
+  template_version: 0.22.1
+  source: project/co-safety
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The Execution Plan Boilerplate shipped in AGENTS.md carries a self-relative
+    link that resolves outside the repository in both places it ships. Deployed
+    project AGENTS.md:234: "For full execution plan format, mandatory criteria,
+    platform parity, and examples, see [workspace AGENTS.md
+    §5](../../../AGENTS.md#5-execution-plan-templates)". From a deployed project
+    (Projects/co-safety/), ../../../ resolves outside the workspace repository —
+    the workspace AGENTS.md is two levels up (../../AGENTS.md). The same
+    ../../../ link text also appears in the workspace-root AGENTS.md
+    boilerplate, where the target is the root's own AGENTS.md (a self-reference
+    that resolves to git/AGENTS.md instead of the root's
+    AGENTS.md#5-execution-plan-templates anchor). Expected: the boilerplate link
+    resolves correctly at the workspace root and in deployed projects.
+    Reproduction: from Projects/co-safety, test -e ../../../AGENTS.md — does not
+    exist; test -e ../../AGENTS.md — exists with the §5 anchor.
+  affected_paths:
+    - AGENTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery AGENTS.md=false
+  dedupe_key: a2620eb82de3f197de60967670b7742c50e423a644d6543a11f9528d5fc328b5
+  duplicates:
+    - project: co-safety
+      at: '2026-10-28T23:49:58.375+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.1
+    summary: >-
+      Downgraded by verification: the L1/L2 sources are already clean
+      (templates/common/AGENTS.md:206 points at the delivered
+      docs/governance/agents/execution-plan-templates.md;
+      templates/co-safety/AGENTS.md:520 uses the same-doc anchor; the
+      ../../../AGENTS.md links in docs/governance/agents/*.md resolve at both
+      layouts). The only stale artifact is the project's own AGENTS.md:234
+      '[workspace AGENTS.md §5](../../../AGENTS.md#5-execution-plan-templates)'
+      from project commit 23ec1b0 — ../../../ overshoots by one; correct target
+      ../../AGENTS.md. One-line project-side edit; upgrade cannot repair it
+      (AGENTS.md body is project-owned/MERGE-managed). Remedy recorded here.

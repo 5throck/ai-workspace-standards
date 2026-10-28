@@ -1,0 +1,66 @@
+schemaVersion: 1
+id: U-20261028-013
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:42:28.817+09:00'
+history:
+  - at: '2026-10-28T23:42:28.817+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-29T00:50:47.054+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.054+09:00'
+    from: review
+    to: done
+result: >-
+  Verified (3x Added / 4x Changed / 3x Fixed, 2026-10-13 block appended after
+  2026-10-11). The file is project-owned; remedy = merge duplicate category
+  headings into one block per category and re-order chronologically (project
+  session, one commit). Standing prevention (duplicate-category check in the
+  changelog-touching gate) grouped into the delivery-bookkeeping engine design
+  with U-005/U-006/U-019 — tracked at workspace level, not re-filed per project.
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    CHANGELOG.md [Unreleased] accumulated duplicate category headings across
+    merge waves (3x Added, 4x Changed, 3x Fixed within one release section, with
+    a 2026-10-13 block appended after 2026-10-11 entries — each merge wave
+    appended a fresh category block instead of merging into the existing one).
+    No standing check rejects duplicate "### Category" headings inside a single
+    release section, so the per-wave append habit goes undetected. Expected: the
+    changelog-touching gate (pre-commit/audit/dev-sync QA) flags duplicate
+    category headings within a release section.
+  affected_paths:
+    - CHANGELOG.md
+    - scripts/dev-sync.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery CHANGELOG.md=false
+    - info:in_last_delivery scripts/dev-sync.ts=true
+  dedupe_key: e922876deedffce3d49e337f45c98063424508dbbae5dbe52f0fdfdc3b9f6bf8
+  duplicates:
+    - project: co-abap
+      at: '2026-10-28T23:42:28.817+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.1
+    summary: >-
+      Verified (3x Added / 4x Changed / 3x Fixed, 2026-10-13 block appended
+      after 2026-10-11). The file is project-owned; remedy = merge duplicate
+      category headings into one block per category and re-order chronologically
+      (project session, one commit). Standing prevention (duplicate-category
+      check in the changelog-touching gate) grouped into the
+      delivery-bookkeeping engine design with U-005/U-006/U-019 — tracked at
+      workspace level, not re-filed per project.

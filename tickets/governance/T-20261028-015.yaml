@@ -15,20 +15,33 @@ title: >-
   docs/designs/2026-08-19-co-newbiz-design_ko.md (co-newbiz) — L0 design docs;
   (5) docs/lifecycle/skills/skill-modification-checklist.md referenced by
   co-consult + co-deck — exists NOWHERE (L0, templates, projects); (6) vague
-  paths docs/implementation (co-architect) and docs/logs (co-price). Fix
-  locus: L0 source text (most lines propagate via governance-l1) + new
-  applyGovernanceTransforms rules where regeneration would resurrect them
-  (PR #1696 T1-T6 pattern), L2 for variant-authored lines (co-safety
-  CONSTITUTION links). Prevention: extend validate-docs-links with a
-  cross-layer dangling-reference arm for delivered contexts (L3 resolution
-  root) so this class fails loudly at delivery time.
+  paths docs/implementation (co-architect) and docs/logs (co-price). Fix locus:
+  L0 source text (most lines propagate via governance-l1) + new
+  applyGovernanceTransforms rules where regeneration would resurrect them (PR
+  #1696 T1-T6 pattern), L2 for variant-authored lines (co-safety CONSTITUTION
+  links). Prevention: extend validate-docs-links with a cross-layer
+  dangling-reference arm for delivered contexts (L3 resolution root) so this
+  class fails loudly at delivery time.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-28T21:50:00.000+09:00'
 history:
   - at: '2026-10-28T21:50:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T02:01:11.294+09:00'
+    from: backlog
+    to: done
+result: >-
+  Implemented in PR #1700 (upstream-adjudication mechanical batch, design
+  2026-10-29-upstream-adjudication-mechanical-batch-design registered
+  implemented): B-A15 transform retargets docs/adr/0078 links to in-file anchors
+  in L1 renditions (L0 keeps the file); co-safety CLAUDE/GEMINI CONSTITUTION.md
+  links converted to plain-text L0-only mentions (project working-tree edits);
+  dead skill-modification-checklist refs removed (co-consult/co-deck working
+  trees); co-price context.md template prose fixed; docs/templates +
+  common-contract mentions covered by B-A14. Residual prevention (cross-layer
+  dangling-reference validator arm) noted as follow-up — the transform layer now
+  prevents the known regeneration sources.
 error: null

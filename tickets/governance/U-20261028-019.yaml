@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261028-019
+kind: manual
+title: Upstream request from co-safety
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-28T23:49:36.211+09:00
+history:
+  - at: 2026-10-28T23:49:36.211+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-safety
+  variant: co-safety
+  template_version: 0.22.1
+  source: project/co-safety
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'Template-upgrade waves rewrite delivered agent and skill files without refreshing their frontmatter dates, so the lifecycle audits re-flag the same staleness class after every upgrade. Observed in co-safety after the 2026-10-27 v0.22.0 upgrade: agent-lifecycle-audit reports 8 warnings (frontmatter last_updated older than the last git content commit of 2026-10-27) and skill-lifecycle-audit reports 21 warnings (last_reviewed older than the content commit) — all caused by upgrade delivery modifying file content while leaving last_updated/last_reviewed untouched. The validators detect the class; nothing in the delivery path repairs it, so each upgrade wave re-adds ~29 warnings fleet-wide. Expected: content-rewriting delivery also refreshes the affected frontmatter dates, or the lifecycle audits tolerate dates equal to the recorded template-version upgrade date. Reproduction: run agent-lifecycle-audit and skill-lifecycle-audit in any project right after an upgrade wave — staleness warnings match the upgrade commit timestamp.'
+  affected_paths:
+    - agents
+    - skills
+    - template-version.txt
+  identity_source: cwd
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: agents'
+    - 'path_not_template_managed: skills'
+    - 'path_not_template_managed: template-version.txt'
+    - info:in_last_delivery agents=false
+    - info:in_last_delivery skills=false
+    - info:in_last_delivery template-version.txt=true
+  dedupe_key: 4f2435c97951bc31c58c35a10341c9707c263bea7c447782392b2ab497d80372
+  duplicates:
+    - project: co-safety
+      at: 2026-10-28T23:49:36.211+09:00

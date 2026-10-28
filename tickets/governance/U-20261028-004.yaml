@@ -1,0 +1,98 @@
+schemaVersion: 1
+id: U-20261028-004
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:42:04.941+09:00'
+history:
+  - at: '2026-10-28T23:42:04.941+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-29T00:50:47.087+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T00:50:47.087+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.087+09:00'
+    from: review
+    to: done
+result: >-
+  Verified: the SECRET_ERE pre-push patch was silently reverted by template
+  waves (patch-inside-template-managed-hook = tombstone blind spot). Remedy
+  needs no new machinery: .gitleaks.toml is merge-aware (mergeGitleaksToml,
+  upgrade-project.ts:836,883) and preserves project-specific entries — move the
+  custom secret patterns into the project .gitleaks.toml [[rules]], retire the
+  orphaned scripts/lib/secret-patterns.ts, correct the SCRIPTS.md:140 row
+  (project session). Template-side rider: an extension-point note (custom secret
+  patterns belong in .gitleaks.toml, never in hook files) is queued in the
+  2026-10-29 mechanical batch.
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Template upgrade waves (0.20.1 tree sync, 0.22.0) overwrote template-managed
+    scripts/hooks/pre-commit.ts and scripts/hooks/pre-push.ts in a delivered
+    project and silently dropped a local patch that wired custom secret patterns
+    (SECRET_ERE) into the pre-push gitleaks scan. The helper
+    scripts/lib/secret-patterns.ts remains but now has no importer anywhere;
+    scripts/SCRIPTS.md and the lib header still claim hook consumers that no
+    longer exist on disk, and the project's older docs/upstream-fix-list.md
+    (§-series ledger) is inconsistent with the UR-id series used by LOCAL-PATCH
+    markers and CHANGELOG entries, with no reconciliation step after upgrades.
+    Expected: upgrade tooling preserves/re-applies LOCAL-PATCH-marked content
+    (or offers an upgrade-safe merge path such as .gitleaks.toml custom rules)
+    and emits a local-patch reconciliation checklist after each delivery,
+    instead of silently reverting patched security-relevant hooks. Base gitleaks
+    scanning still runs in pre-push; only the added custom pattern class is
+    unenforced.
+  affected_paths:
+    - scripts/hooks/pre-push.ts
+    - scripts/hooks/pre-commit.ts
+    - scripts/lib/secret-patterns.ts
+    - docs/upstream-fix-list.md
+    - scripts/SCRIPTS.md
+  identity_source: cwd
+  repro: >-
+    In the delivered project: grep -rln "SECRET_ERE|secret-patterns"
+    scripts/hooks/ returns nothing; only reference to the lib is SCRIPTS.md
+    itself. pre-push.ts header is the delivered v1.6.0 whose notes contain no
+    secret-scan content. Change history: hooks overwritten by upgrade tree syncs
+    (0.20.1) and workspace sync (2026-10-28).
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: docs/upstream-fix-list.md'
+    - first_request_from_project
+    - info:in_last_delivery scripts/hooks/pre-push.ts=false
+    - info:in_last_delivery scripts/hooks/pre-commit.ts=false
+    - >-
+      info:l0_origin scripts/lib/secret-patterns.ts <-
+      scripts/lib/secret-patterns.ts
+    - info:in_last_delivery scripts/lib/secret-patterns.ts=false
+    - info:in_last_delivery docs/upstream-fix-list.md=false
+    - info:in_last_delivery scripts/SCRIPTS.md=true
+  dedupe_key: efc36d75ab9c40b0ac815590a2770c2b2d2f012d146b3f67649def0d9f1934c9
+  duplicates:
+    - project: co-abap
+      at: '2026-10-28T23:42:04.941+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.1
+    summary: >-
+      Verified: the SECRET_ERE pre-push patch was silently reverted by template
+      waves (patch-inside-template-managed-hook = tombstone blind spot). Remedy
+      needs no new machinery: .gitleaks.toml is merge-aware (mergeGitleaksToml,
+      upgrade-project.ts:836,883) and preserves project-specific entries — move
+      the custom secret patterns into the project .gitleaks.toml [[rules]],
+      retire the orphaned scripts/lib/secret-patterns.ts, correct the
+      SCRIPTS.md:140 row (project session). Template-side rider: an
+      extension-point note (custom secret patterns belong in .gitleaks.toml,
+      never in hook files) is queued in the 2026-10-29 mechanical batch.

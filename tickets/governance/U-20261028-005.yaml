@@ -1,0 +1,76 @@
+schemaVersion: 1
+id: U-20261028-005
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-28T23:42:04.990+09:00'
+history:
+  - at: '2026-10-28T23:42:04.990+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-29T00:50:47.071+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T00:50:47.071+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T00:50:47.071+09:00'
+    from: review
+    to: done
+result: >-
+  Convention verified real: co-architect/co-develop/co-safety CHANGELOGs all
+  hand-record chore(upgrade) wave entries; co-abap is missing 0.20.1/0.22.0 rows
+  (0.22.1 was recorded 2026-10-28). Remedy: backfill two one-line chore(upgrade)
+  entries citing templates/CHANGELOG.md rows (project session). Standing
+  automation (upgrade-project scaffolding a CHANGELOG entry per delivery) is an
+  engine gap grouped into the delivery-bookkeeping design with
+  U-006/U-019/U-013-check.
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.22.1
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Two template upgrade deliveries (0.20.1 and 0.22.0; template-version.txt
+    records upgraded=2026-10-27) landed in a delivered project with no
+    corresponding CHANGELOG [Unreleased] entries — the newest changelog entry
+    predates both waves. Project context requires harness infrastructure changes
+    to be recorded in CHANGELOG.md, and the normal /sync pipeline enforces the
+    changelog step, but the upgrade-project delivery path bypasses it. Expected:
+    each upgrade delivery emits (or scaffolds) a CHANGELOG entry recording the
+    template version bump, or the exemption is documented in the sync/lifecycle
+    contract.
+  affected_paths:
+    - CHANGELOG.md
+    - template-version.txt
+  identity_source: cwd
+  repro: >-
+    In the delivered project: grep "0.22.0|0.20.1" CHANGELOG.md returns nothing
+    while template-version.txt says version=0.22.0, upgraded=2026-10-27; git log
+    shows the upgrade tree-sync commits.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: template-version.txt'
+    - info:in_last_delivery CHANGELOG.md=false
+    - info:in_last_delivery template-version.txt=true
+  dedupe_key: 10039e0809b680fcf6527957541b2990833f5b98f10fa6a41b05a36c3ec849ab
+  duplicates:
+    - project: co-abap
+      at: '2026-10-28T23:42:04.990+09:00'
+  resolution:
+    outcome: local-only
+    template_version: 0.22.1
+    summary: >-
+      Convention verified real: co-architect/co-develop/co-safety CHANGELOGs all
+      hand-record chore(upgrade) wave entries; co-abap is missing 0.20.1/0.22.0
+      rows (0.22.1 was recorded 2026-10-28). Remedy: backfill two one-line
+      chore(upgrade) entries citing templates/CHANGELOG.md rows (project
+      session). Standing automation (upgrade-project scaffolding a CHANGELOG
+      entry per delivery) is an engine gap grouped into the delivery-bookkeeping
+      design with U-006/U-019/U-013-check.

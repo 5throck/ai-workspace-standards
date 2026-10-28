@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: U-20261028-022
+kind: manual
+title: Upstream request from co-safety
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-28T23:49:58.389+09:00
+history:
+  - at: 2026-10-28T23:49:58.389+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-safety
+  variant: co-safety
+  template_version: 0.22.1
+  source: project/co-safety
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The promotion gate state is contradictory because the shipped PROMOTION_CHECKLIST.md is static text that ages against the live variant.json. In co-safety, variant.json:94 declares "phaseAComplete": true while PROMOTION_CHECKLIST.md:6 says "Phase A Complete: false" with its rows still Pending; the checklist''s inventory counts have also drifted (it cites 60 skills registered and a 40-agent manifest, while skill-lifecycle-audit scans 43 skills and the agent counts match at 40). The project copy of PROMOTION_CHECKLIST.md is byte-identical to templates/co-safety/PROMOTION_CHECKLIST.md, so nothing regenerates or reconciles the checklist when variant.json changes — the static text inevitably diverges from the machine-readable flag. Expected: the checklist is generated from variant.json state, or the upgrade/reconciliation path updates its flag and inventory counts. Reproduction: grep phaseAComplete variant.json (true) vs grep "Phase A Complete" PROMOTION_CHECKLIST.md (false) in the same checkout.'
+  affected_paths:
+    - PROMOTION_CHECKLIST.md
+    - variant.json
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery PROMOTION_CHECKLIST.md=false
+    - info:in_last_delivery variant.json=false
+  dedupe_key: 0a1cbe7f7a0f7ca2bbfb85ad63e587a11309ba487ae738a26c8ddb9fb337f6d4
+  duplicates:
+    - project: co-safety
+      at: 2026-10-28T23:49:58.389+09:00
