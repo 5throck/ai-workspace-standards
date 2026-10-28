@@ -59,6 +59,10 @@ reconciliation rode PR T-20261028-001). Consumed as review-baseline battery #9
 (--json over a 24h window). L0-only — reads git history + docs/specs; no L1
 mirror. Never writes anywhere.
 **Usage**: `bun scripts/design-gate-coverage.ts [--since <rev|date>] [--until <rev|date>] [--json]`
+**SHA form**: commit identities are reported as canonical 8-char short SHAs —
+git's auto-abbrev length varies with repository size/environment (CI printed 9
+chars where a local run printed 8 for the same commit), so the report
+normalizes to the git-default human form.
 **Runs automatically**: review-baseline.ts battery #9 (24h window, --json);
 the FULL project review's Step 0 evidence rows (operator-invoked with the
 review window)

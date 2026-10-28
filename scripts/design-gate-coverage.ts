@@ -19,7 +19,10 @@
  *      CLAUDE.md / GEMINI.md / CODEX.md / HERMES.md plus the root agents/
  *      instruction directory — the design's "six root instruction files").
  *   2. Ticket ids (T-/U- <yyyymmdd>-<nnn>) from commit subjects/bodies, merge
- *      commit bodies (PR titles), and changed tickets/ file paths.
+ *      commit bodies (PR titles), and changed tickets/ file paths. Commit
+ *      identities are reported as canonical 8-char short SHAs (git's
+ *      environment-dependent auto-abbrev normalized to the git-default human
+ *      form so local runs and CI agree).
  *   3. Coverage join: a ticket is COVERED when any REGISTERED spec (a
  *      docs/specs/registry.json entry) names it anywhere in its design doc —
  *      prose mention counts (the registry is the SSOT; the design-doc mention
@@ -233,7 +236,11 @@ function buildReport(since: string, until: string): CoverageReport {
     const [sha, subject, ...bodyLines] = headAndBody.split('\x1f');
     if (!sha) continue;
     commits.push({
-      sha: sha.trim(),
+      // Canonical report SHA: 8-char short SHA (the git-default human form).
+      // git's auto-abbrev length is repository-size dependent — CI printed 9
+      // chars for the same commit a local run printed 8 for — so the report
+      // normalizes to exactly 8 to stay comparable across environments.
+      sha: sha.trim().slice(0, 8),
       subject: (subject ?? '').trim(),
       body: bodyLines.join('\x1f').trim(),
       paths: pathsPart.split('\n').map((s) => s.trim()).filter(Boolean),

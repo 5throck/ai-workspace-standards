@@ -204,8 +204,15 @@ describe('design-gate-coverage e2e — the F-1 window (T-20261028-001 acceptance
   });
 
   test('a template-touching commit citing no ticket id is flagged unattributed', () => {
-    // f466b2cd4 — project-resync v1.7.0 landing, no ticket id in subject/body.
-    expect(report.unattributedCommits.map((c) => c.sha)).toContain('f466b2cd4');
+    // f466b2cd — project-resync v1.7.0 landing, no ticket id in subject/body.
+    // The report canonicalizes to 8-char short SHAs: git's auto-abbrev length
+    // is environment-dependent (CI printed 9 chars where local printed 8), so
+    // the pin is the canonical 8-char form, not whatever %h printed locally.
+    expect(report.unattributedCommits.map((c) => c.sha)).toContain('f466b2cd');
+    // Every reported sha is exactly 8 chars — the canonical form holds for the
+    // whole table, not just the pinned row.
+    for (const c of report.unattributedCommits) expect(c.sha).toMatch(/^[0-9a-f]{8}$/);
+    for (const c of report.commits) expect(c.sha).toMatch(/^[0-9a-f]{8}$/);
   });
 
   test('the CLI always exits 0 — report-only, nothing auto-closes (design D8)', () => {
@@ -235,5 +242,29 @@ describe('design-gate-coverage e2e — a fully covered window yields an empty un
     expect(report.tickets.every((t) => t.covered)).toBe(true);
     expect(report.uncovered).toEqual([]);
     expect(report.unattributedCommits).toEqual([]);
+  }, 120_000);
+});
+
+describe('design-gate-coverage e2e — the 2026-10-28 ticket family joins correctly (id-family pin)', () => {
+  // Regression pin for the F-1 reconciliation review note: T-20261028-002 and
+  // T-20261028-010 are DIFFERENT tickets from the F-1 rows T-20261027-002 /
+  // T-20261027-010 they resemble. The 2026-10-28 family was created after the
+  // F-1 window closed (tickets filed 02:21 KST, window ends 02:02) and each IS
+  // named by a registered implemented design — the join must resolve them
+  // covered, while the 2026-10-27 ids stay flagged (no registered doc names
+  // them; verified by grep at reconciliation time).
+  test('T-20261028-002 and T-20261028-010 resolve covered by their registered specs', () => {
+    const { status, out } = runCoverage(['--json', '--since', '2026-10-28T02:02:01+09:00']);
+    expect(status).toBe(0);
+    const report = JSON.parse(out) as {
+      tickets: Array<{ id: string; covered: boolean; specs: Array<{ id: string; status: string }> }>;
+    };
+    const byId = new Map(report.tickets.map((t) => [t.id, t]));
+    expect(byId.get('T-20261028-002')!.covered).toBe(true);
+    expect(byId.get('T-20261028-002')!.specs.map((s) => s.id))
+      .toContain('2026-10-28-ticket-runner-mechanical-batch-design');
+    expect(byId.get('T-20261028-010')!.covered).toBe(true);
+    expect(byId.get('T-20261028-010')!.specs.map((s) => s.id))
+      .toContain('2026-10-28-stub-frontmatter-backfill-design');
   }, 120_000);
 });
