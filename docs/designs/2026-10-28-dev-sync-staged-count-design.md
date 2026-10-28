@@ -4,7 +4,7 @@
 - **Date**: 2026-10-28
 - **Author**: Template Architect (Design Gate Row 0)
 - **Tickets**: new (root PR #1669 and co-design PR #65 evidence; follows T-20261012-011's partial fix)
-- **Status**: draft — design-only for user review. No script content is changed by this design ticket. Implementation is pending user approval and PM dispatch (§7).
+- **Status**: implemented (registry SSOT; retro-marked from draft per T-20261029-002 — the staged-count surfacing landed in dev-sync).
 - **NEW vs UPDATE**: this is a **new spec**. No existing spec covers T-20261012-011: the commit-message composition mechanism's origin spec is `2026-10-11-backlog-batch-2-design` (implemented; covers commit-message 1.0.0 / U-20261008-001), and T-20261012-011 (commit-message 1.1.0 + dev-sync 1.27.0) shipped without a design doc of its own (verified: no doc in `docs/designs/` mentions T-20261012-011). This design amends one invariant of the 2026-10-11 design — see §1.3.
 
 ## 0. Conclusion

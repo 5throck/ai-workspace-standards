@@ -4,7 +4,7 @@
 - **Date**: 2026-10-28
 - **Author**: Template Architect (Design Gate Row 0)
 - **Ticket**: U-20261028-001 (upstream request, co-design, `waiting`; suspected layer L1/L2) + T-20261028-004 + T-20261028-006 (remediation-wave riders)
-- **Status**: draft — design-only for user review. No engine, template, or ticket content is changed by this design ticket. Implementation is pending user approval and PM dispatch (§8).
+- **Status**: implemented (registry SSOT; retro-marked from draft per T-20261029-002 — the engine landed in the 2026-10-28 tombstone-ownership delivery).
 
 ## 0. Conclusion
 
