@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.33.0
+- **Version**: 1.34.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-28
 - **Last Reviewer**: pm

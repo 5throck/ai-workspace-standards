@@ -68,6 +68,11 @@ describe('SURFACES completeness against the actual repo', () => {
       // Generated projections — regenerated from SSOTs; renames propagate via regeneration, not sweeping.
       'docs/skill-graph.json',
       'docs/skill-graph.md',
+      // Generated projection (generate-version-manifest.ts): since the agent-mirror
+      // sweep (spec 2026-10-28-platform-agent-mirror, DEC-20261028-06) the Agents
+      // table Model column renders registry-resolved IDs, so the manifest bears
+      // model literals by generation — never hand-managed prose.
+      'docs/VERSION_MANIFEST.md',
       'tests/',
       'Handbooks/',
       'Projects/', 'services/', 'memory/', 'tickets/', 'node_modules/',

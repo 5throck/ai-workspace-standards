@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.63.0
+ * @version 1.64.0
+ *
+ * v1.64.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+ *          DEC-20261028-06 §4.1): WS-01 Check 8 — platform_surfaces registry
+ *          shape check. The docs/workspace-schema.json capability block must:
+ *          be present; carry exactly the validate-model-registry.ts PLATFORMS
+ *          platform set; give every agents/skills/commands/hooks row a boolean
+ *          `supported`; carry an `evidence` string on every supported:false row;
+ *          and stay in lockstep with scripts/sync-agent-mirrors.ts
+ *          PLATFORM_AGENT_ADAPTERS (supported agents rows ↔ adapters, both
+ *          directions). Imports the two consumers — both L0+L1 delivered, so
+ *          the L1 twin's import closure holds.
  *
  * v1.63.0 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup,
  *          DEC-20261028-05): the workspace-schema.json L0↔L1 parity checks
@@ -415,6 +426,8 @@ import {
   auditFixedTargets,
 } from './lib/propagation-map-schema.ts';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
+import { PLATFORMS } from './validate-model-registry.ts';
+import { PLATFORM_AGENT_ADAPTERS } from './sync-agent-mirrors.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
@@ -3063,6 +3076,63 @@ function checkWorkspaceSchema(): void {
       }
     } catch {
       fail('root', 'ws-schema-l1-invalid', 'templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json');
+    }
+  }
+
+  // --- WS-01 Check 8: platform_surfaces capability registry (design
+  //     docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1,
+  //     DEC-20261028-06). The registry's shape is validated here and its
+  //     enforced (agents) rows are cross-checked against the generator's
+  //     adapters: every supported:true agents row MUST have a
+  //     PLATFORM_AGENT_ADAPTERS entry and every adapter MUST name a supported
+  //     row (the coverage guard re-asserts this before any per-file work; this
+  //     closes the loop at L0), and every supported:false row carries an
+  //     evidence string so the matrix cannot rot back to oral tradition. The
+  //     platform set is pinned to validate-model-registry.ts PLATFORMS — one
+  //     platform vocabulary.
+  {
+    const psBlock = schema.platform_surfaces as
+      | { platforms?: Record<string, Record<string, { supported?: unknown; evidence?: unknown }>> }
+      | undefined;
+    if (!psBlock || typeof psBlock !== 'object' || !psBlock.platforms) {
+      fail('root', 'ws-platform-surfaces-missing', 'workspace-schema.json is missing the platform_surfaces block — the capability registry is the generator\'s contract', 'Restore the block per docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1');
+    } else {
+      const psRows = psBlock.platforms;
+      const registryPlatforms = Object.keys(psRows).sort();
+      const pinnedPlatforms = [...PLATFORMS].sort();
+      if (JSON.stringify(registryPlatforms) !== JSON.stringify(pinnedPlatforms)) {
+        fail('root', 'ws-platform-surfaces-set', `platform_surfaces platform set [${registryPlatforms.join(', ')}] does not match validate-model-registry.ts PLATFORMS [${pinnedPlatforms.join(', ')}] — one platform vocabulary only`, 'Add or remove registry rows to match PLATFORMS');
+      }
+      const supportedAgentsPlatforms = new Set<string>();
+      let shapeProblems = 0;
+      for (const [platform, row] of Object.entries(psRows)) {
+        for (const surface of ['agents', 'skills', 'commands', 'hooks']) {
+          const cap = row?.[surface];
+          if (!cap || typeof cap !== 'object' || typeof cap.supported !== 'boolean') {
+            fail('root', 'ws-platform-surfaces-shape', `platform_surfaces.platforms.${platform}.${surface} is missing a boolean "supported"`, 'Give every surface row a boolean supported flag');
+            shapeProblems += 1;
+            continue;
+          }
+          if (cap.supported === false && !(typeof cap.evidence === 'string' && cap.evidence.trim() !== '')) {
+            fail('root', 'ws-platform-surfaces-evidence', `platform_surfaces.platforms.${platform}.${surface} is supported:false without an "evidence" string`, 'Record WHY the surface is unsupported (an unsupported row without evidence FAILs — design §4.1)');
+            shapeProblems += 1;
+          }
+        }
+        if (row?.agents?.supported === true) supportedAgentsPlatforms.add(platform);
+      }
+      for (const platform of supportedAgentsPlatforms) {
+        if (!PLATFORM_AGENT_ADAPTERS[platform]) {
+          fail('root', 'ws-platform-surfaces-adapter', `platform_surfaces marks platforms.${platform}.agents supported:true but scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has no '${platform}' adapter`, 'Add the adapter, or set the row to supported:false with evidence');
+        }
+      }
+      for (const platform of Object.keys(PLATFORM_AGENT_ADAPTERS)) {
+        if (!supportedAgentsPlatforms.has(platform)) {
+          fail('root', 'ws-platform-surfaces-adapter', `sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has a '${platform}' adapter naming no agents.supported:true registry row`, 'Remove the adapter, or flip the registry row deliberately');
+        }
+      }
+      if (shapeProblems === 0) {
+        pass(`platform_surfaces registry: ${registryPlatforms.length} platform row(s) well-formed, ${supportedAgentsPlatforms.size} agents-capable (adapters in lockstep)`);
+      }
     }
   }
 

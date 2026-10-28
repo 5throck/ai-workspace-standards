@@ -4,7 +4,6 @@ name: pm
 role: orchestrator
 status: active
 tier: medium
-model: inherit
 tier_semantics: floor
 session_hosted: true
 color: yellow

@@ -2168,7 +2168,7 @@
       "name": "architect",
       "scope": "root",
       "capability": "architect",
-      "content_hash": "b6933a785d41de77",
+      "content_hash": "e24a6bf8a3295d6f",
       "version": "1.0.0",
       "mirrors": [
         "agents/architect.md"
@@ -2181,7 +2181,7 @@
       "name": "auditor",
       "scope": "root",
       "capability": "auditor",
-      "content_hash": "5f1d188626829525",
+      "content_hash": "c5fcbc63a93c6f63",
       "version": "1.0.0",
       "mirrors": [
         "agents/auditor.md"
@@ -2194,7 +2194,7 @@
       "name": "automation-engineer",
       "scope": "root",
       "capability": "automation-engineer",
-      "content_hash": "8fabb3af3bc9eb23",
+      "content_hash": "8dcdf3da249cacc4",
       "version": "1.0.0",
       "mirrors": [
         "agents/automation-engineer.md"
@@ -2207,7 +2207,7 @@
       "name": "docs-writer",
       "scope": "root",
       "capability": "docs-writer",
-      "content_hash": "4e2c4a57ddfdf433",
+      "content_hash": "f567f865886bffa6",
       "version": "1.0.0",
       "mirrors": [
         "agents/docs-writer.md"
@@ -2220,7 +2220,7 @@
       "name": "lifecycle-manager",
       "scope": "root",
       "capability": "lifecycle-manager",
-      "content_hash": "85226031bff7a843",
+      "content_hash": "23bb14de339f06a2",
       "version": "1.1.0",
       "mirrors": [
         "agents/lifecycle-manager.md"
@@ -2233,7 +2233,7 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "ccf8006cb418e62c",
+      "content_hash": "99e82f537ff41073",
       "version": "1.2.2",
       "mirrors": [
         "agents/pm.md"
@@ -2246,7 +2246,7 @@
       "name": "scaffolding-expert",
       "scope": "root",
       "capability": "scaffolding-expert",
-      "content_hash": "708c974ff992bb5d",
+      "content_hash": "fc435e1eb80fc3b3",
       "version": "1.0.0",
       "mirrors": [
         "agents/scaffolding-expert.md"
@@ -2259,7 +2259,7 @@
       "name": "security-expert",
       "scope": "root",
       "capability": "security-expert",
-      "content_hash": "85c7ffe8d86fa491",
+      "content_hash": "9c0525b06ff13b64",
       "version": "1.0.0",
       "mirrors": [
         "agents/security-expert.md"
@@ -2272,7 +2272,7 @@
       "name": "skill-graph-analyst",
       "scope": "root",
       "capability": "skill-graph-analyst",
-      "content_hash": "8fa67ccf2c0404a9",
+      "content_hash": "1b439e7ad48665b3",
       "version": "1.0.0",
       "mirrors": [
         "agents/skill-graph-analyst.md"
@@ -2360,6 +2360,11 @@
     },
     {
       "id": "dec:DEC-20261028-05",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261028-06",
       "type": "decision",
       "layer": "L0"
     },

@@ -6,7 +6,6 @@ status: active
 version: 1.0.0
 last_reviewed: 2026-09-22
 tier: low
-model: inherit
 color: cyan
 description: >
   Fleet skill-graph analytics specialist: runs the weekly consolidation report

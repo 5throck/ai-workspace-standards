@@ -1,4 +1,11 @@
-// @version 1.33.0
+// @version 1.34.0
+// v1.34.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+//          DEC-20261028-06): new step 4.61 — agent-mirror parity check running
+//          `bun scripts/sync-agent-mirrors.ts --check` immediately after the step 4.6
+//          skill sync. Blocking from day one (Q3 default): at the workspace root the
+//          step is a green no-op (mirrors are project-scoped; root dispatch reads
+//          agents/ directly), in delivered projects a drift blocks /sync until one
+//          deliberate write-mode run repairs it — /sync never silently repairs.
 // v1.33.0 (2026-10-28, T-20261028-012 — spec
 //          docs/designs/2026-10-28-dev-sync-staged-count-design.md): new step 6.9 —
 //          the commit-time message is re-derived from the FINAL staged set, read
@@ -1030,6 +1037,30 @@ if (syncSkillsResult.exitCode !== 0) {
         console.warn(`${YELLOW}⚠️  Skill sync failed (exit ${syncSkillsResult.exitCode}) — continuing sync${RESET}`);
         if (syncSkillsErr) console.warn(syncSkillsErr);
     }
+}
+
+// 4.61 Agent-mirror parity gate — blocking from day one (design
+//     docs/designs/2026-10-28-platform-agent-mirror-design.md §4.3, DEC-20261028-06):
+//     the generator's own --check (same projection code) verifies every
+//     registry-marked agents-capable mirror matches its agents/*.md SSOT. At the
+//     workspace root this is a green no-op (root dispatch reads agents/ directly —
+//     no mirrors by design, §12); in delivered projects it blocks /sync until the
+//     one deliberate write-mode run has produced the mirror tree (§5 wave notes).
+console.log('📋 Step 4.61: Agent-mirror parity check (--check)...');
+const syncMirrorsResult = await $`bun scripts/sync-agent-mirrors.ts --check`.nothrow();
+if (syncMirrorsResult.exitCode !== 0) {
+    const syncMirrorsErr = syncMirrorsResult.stderr ? String(syncMirrorsResult.stderr).trim() : '';
+    // Blocking gate (Q3 default): a drift here means a mirror was regenerated or
+    // hand-edited behind the pipeline's back — /sync must fail loudly, and repair
+    // is a deliberate write-mode run, never an auto-fix.
+    console.error(`${RED}❌ Agent-mirror parity check failed (exit ${syncMirrorsResult.exitCode}) — blocking gate.${RESET}`);
+    if (syncMirrorsErr) console.error(syncMirrorsErr);
+    console.error(`${YELLOW}   Repair (deliberate, reviewable write): bun scripts/sync-agent-mirrors.ts${RESET}`);
+    if (import.meta.main) {
+        process.exit(1);
+    }
+} else {
+    console.log(`${GREEN}✓ Step 4.61: agent-mirror parity check passed${RESET}`);
 }
 
 // 4.62 Cascade re-publish — unconditional second L0→L1 pass after skill sync.

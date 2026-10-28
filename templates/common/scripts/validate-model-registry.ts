@@ -5,7 +5,15 @@
  * docs/workspace-schema.json `models`, and that the tier→model mapping prose
  * in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md names exactly the
  * models the registry declares for each tier.
- * Level: L0 | Status: active | @version 2.1.0
+ * Level: L0 | Status: active | @version 2.2.0
+ *
+ * v2.2.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+ *          DEC-20261028-06): PLATFORMS is exported — the platform_surfaces
+ *          registry block in docs/workspace-schema.json, its sync-agent-mirrors.ts
+ *          coverage guard, and the validate-templates shape check all pin their
+ *          platform set to this constant (one code SSOT for the platform
+ *          vocabulary; a registry row outside it is a shape-check FAIL). No
+ *          validation logic changes.
  *
  * v2.1.0 (2026-10-27, T-20261027-003 — ADR-0102 §5 post-soak transition, design
  *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
@@ -67,7 +75,10 @@ const WORKSPACE_ROOT = fileURLToPath(new URL("..", import.meta.url))
   .replace(/\/$/, "")
   .replace(/^\/([A-Z]:)/, "$1");
 
-const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
+// Exported since v2.2.0: the platform-vocabulary SSOT consumed by the
+// platform_surfaces registry consumers (sync-agent-mirrors coverage guard,
+// validate-templates shape check, registry unit tests).
+export const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
 type Platform = typeof PLATFORMS[number];
 
 export const VALID_TIERS = ["high", "medium", "low"] as const;
