@@ -1,4 +1,8 @@
-// @version 2.57.0
+// @version 2.58.0
+// v2.58.0 (2026-10-28, T-20261029-008): agent-mirror parity gate — on the green
+//          path, the sync-agent-mirrors --check stdout is logged when it carries the
+//          out-of-root WARN degrade, so a CI checkout's unverifiable-parity state is
+//          visible in the audit log instead of a silent Pass.
 // v2.57.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
 //          DEC-20261028-06): agent-mirror parity gate — when scripts/sync-agent-mirrors.ts
 //          exists, spawn its --check (the same projection code as write mode); nonzero
@@ -3544,6 +3548,10 @@ if (fs.existsSync(path.join('scripts', 'sync-agent-mirrors.ts'))) {
         if (stderr) console.error(stderr);
         Fail('Agent-mirror parity gate failed — bun scripts/sync-agent-mirrors.ts --check lists the drifted mirrors (repair: bun scripts/sync-agent-mirrors.ts)');
     } else {
+        // T-20261029-008: surface the out-of-root WARN degrade on the green path
+        // too — a CI checkout cannot verify mirror parity, and a silent Pass
+        // would hide that from the audit log.
+        if (stdout && stdout.includes('WARN:')) console.log(stdout.trim());
         Pass('Agent-mirror parity gate: generated mirrors match the agents/ SSOT (or root is mirror-less by design)');
     }
 }
