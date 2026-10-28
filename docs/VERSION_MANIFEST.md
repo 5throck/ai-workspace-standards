@@ -1,7 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-28T01:56:01.747Z
-**Generated**: 2026-10-28T01:02:42.455Z
+**Generated**: 2026-10-28T02:37:52.164Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +9,7 @@
 ## Summary
 
 - **Agents**: 9
-- **Skills**: 57
+- **Skills**: 58
 - **Scripts**: 123 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
@@ -45,6 +44,7 @@
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
 | create-variant | 1.4.2 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, variant creation, scaffold new variant, new co- project | pm |
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
+| decision-write-integrity | 1.0.0 | active | skills/decision-write-integrity/SKILL.md | workspace | decision write integrity, gate integrity, approval gate, hard block, maker checker, countersign, snapshot hash, decision audit | pm |
 | design-foundation | 1.1.0 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | architect |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
@@ -249,8 +249,8 @@
 
 - **Commands with parity (gemini mirror)**: 0 / 7
 - **Commands with codex prompts mapping**: 0 / 7
-- **Skills in all four mirrors**: 0 / 43
-- **Skills in claude+gemini only (both)**: 0 / 43 (common-template skills are parity-exempt)
+- **Skills in all four mirrors**: 0 / 44
+- **Skills in claude+gemini only (both)**: 0 / 44 (common-template skills are parity-exempt)
 
 ---
 

@@ -437,6 +437,15 @@
       "description": "Reviews cross-variant docs/<variant>.context.md duplication and promotes genuinely shared content into the common docs/context.md (ADR-0050 Part 3). Use when: after scaffolding a new variant, on a periodic cadence (every 5 new variants or quarterly, whichever first), or on-demand when asked to check for or reduce context.md duplication across variants.",
       "propagated_to_common": true
     },
+    "decision-write-integrity": {
+      "claude_source": ".claude/skills/decision-write-integrity/SKILL.md",
+      "gemini_source": ".gemini/skills/decision-write-integrity/SKILL.md",
+      "agents_source": ".agents/skills/decision-write-integrity/SKILL.md",
+      "codex_source": ".codex/skills/decision-write-integrity/SKILL.md",
+      "version": "1.0.0",
+      "description": "Process guidance for designing and operating integrity gates around human decision writes — any governed record where a named human decision changes state: approvals, ticket transitions, ADR acceptances, waivers, sign-offs, state transitions. Covers the HARD BLOCK / ACK / DISPLAY enforcement taxonomy, off|shadow|enforce staged rollout, server-recomputed snapshot-hash propose-then-confirm flow (409 on stale), deterministic script-aware rationale substance checks, maker/checker countersign with deny-by-default grants, and AI-recommendation divergence recording. Use when: designing or reviewing a decision-write gate, planning a gate rollout, hardening an approval path, or making human decisions auditable.",
+      "propagated_to_common": true
+    },
     "migrate-project": {
       "claude_source": ".claude/skills/migrate-project/SKILL.md",
       "gemini_source": ".gemini/skills/migrate-project/SKILL.md",

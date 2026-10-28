@@ -19,6 +19,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.3.1 | active | pm | 2026-09-21 | — | PM-led hiring/firing workflows + skill attach/detach rules |
 | `create-variant` | 1.4.2 | active | pm | 2026-09-21 | — | Workspace operator only — not deployed to L2 |
+| `decision-write-integrity` | 1.0.0 | active | pm | 2026-10-28 | — | Fleet process skill distilled from co-newbiz ADR-0186 gate-integrity: HARD BLOCK/ACK/DISPLAY taxonomy, off/shadow/enforce rollout, snapshot-hash propose-then-confirm, rationale substance, maker/checker, AI-divergence recording. L0-only (T-20261028-008) |
 | `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.4.4 | active | pm | 2026-09-26 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.2 | active | pm | 2026-10-08 | — | — |
