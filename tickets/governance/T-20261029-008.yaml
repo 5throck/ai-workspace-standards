@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261029-008
+kind: manual
+title: >-
+  URGENT gate regression: agent-mirror parity gate cannot run in standalone CI
+  checkouts — sync-agent-mirrors.ts --check hard-fails 'templates/common/agents
+  not found walking up from /home/runner/work/<p>/<p>' (extends-stubs cannot
+  resolve) and audit.ts turns it into an Agent-mirror parity FAIL — blocking
+  every real-CI project PR that delivers agent content: co-abap #227 and
+  co-safety #220 (0.23.0 wave) both blocked, local audits green. The 567f1413
+  canary fix covered the DELIVERY path (new-project/adopt-project pass
+  --templates-root) but not the AUDIT path. Fix: the Documentation Audit
+  workflow step (or audit.ts checkAgentMirror) must pass --templates-root for CI
+  checkouts, or the check must degrade to WARN when no workspace root is
+  discoverable while mirrors exist and were generated out-of-root (repair
+  contract: deliberate write, never auto-repair — the CHECK is what needs the
+  root). Wave disposition: billing-walled repos merged (unaffected); co-abap
+  #227 + co-safety #220 stay OPEN until this lands
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-29T03:40:04.448+09:00'
+history:
+  - at: '2026-10-29T03:40:04.448+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

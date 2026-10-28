@@ -84,6 +84,58 @@ Git-mode gitleaks (full config) over the non-mechanical landing ranges: co-deck,
 
 Report-only landing (judgment report + tickets T-20261029-004/-005/-006). Design Gate: covered by standing specs 2026-09-25-daily-fleet-review-resync-design (ADR-0089) + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design.
 
-## Steps 4–5 — v0.23.0 upgrade wave
+## Steps 4–5 — v0.23.0 upgrade wave (03:30–05:45 KST)
 
-Appended after the wave (canary co-design — carries the T-004/-006 pairing; tombstone guard per project post-merge).
+Canary **co-design** first (carries the T-20261028-004/-006 pairing — delivered): dry-run 0 ERROR (115 census WARNs = the tombstone engine's designed loudness) → real run → PR #69 → billing-wall merge (4× fail-at-start 0 steps) → post-merge audit PASS → **tombstone honor verified** (guard: 6 recent deletions all still absent; the workflows.md case is ticketed separately as T-20261029-007, see below).
+
+| Project | PR | Path | Result |
+|---|---|---|---|
+| co-design (canary) | #69 | billing exception | MERGED, 0.23.0, audit green |
+| co-abap | #227 | real CI | **OPEN — gate regression** (see below) |
+| co-consult | #108 | billing exception (4× 0 steps) | MERGED, 0.23.0, audit green |
+| co-develop | #193 | billing exception | MERGED, 0.23.0, audit green |
+| co-export | #61 | billing exception | MERGED, 0.23.0, audit green |
+| co-game | #61 | billing exception | MERGED, 0.23.0, audit green |
+| co-hr | #17 | billing exception | MERGED, 0.23.0, audit green |
+| co-learning | #30 | billing exception | MERGED, 0.23.0, audit green |
+| co-news | #17 | billing exception | MERGED, 0.23.0, audit green |
+| co-security | #90 | billing exception | MERGED, 0.23.0, audit green |
+| co-work | #28 | billing exception | MERGED, 0.23.0, audit green |
+| co-deck | #186 | billing exception | MERGED, 0.23.0, audit green |
+| co-safety | #220 | real CI | **OPEN — gate regression** (see below) |
+| co-price | #162-adjacent | — | **SKIPPED this cycle** — the 0.23.0 delivery was already carried by #162's session (workspace-schema conflict-bound; see port-candidates) — template-version verified 0.23.0 on main |
+| co-architect | — | — | **SKIPPED — CONFLICT (ERROR)**: docs/workspace-schema.json project-evolved (designLint allowlist) AND template-changed (platform_surfaces); engine refuses without --disposition (runner never passes one). Working tree reverted to pre-upgrade. Human path: hand-port the platform_surfaces/models blocks into the project's schema (keep the allowlist), then re-run |
+| co-newbiz | #769 | billing exception | MERGED, 0.23.0, clean (its agent-mirror canary landed project-side via #767) |
+
+**Gate regression (2 real-CI projects) → T-20261029-008 (high, URGENT)**: the agent-mirror parity gate hard-fails in standalone CI checkouts ("templates/common/agents not found walking up from /home/runner/work/...") — the 567f1413 canary fix covered the delivery path but not the audit path. co-abap #227 and co-safety #220 stay **OPEN** (local audits green, content sound) until the workflow passes `--templates-root` or the check degrades to WARN in rootless environments. Landing in-flight fixes during the wave: registry-row syncs (co-abap install-vsp 1.2.0, co-safety audit-variant 1.2.0), co-design agent-mirror repair (write-mode, 7 mirrors), skill-graph + manifest regens — all gate-satisfying, none a bypass.
+
+## Step 6 — Final state (05:50 KST)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| co-abap | main, synced | 0 | **#227** (0.23.0 delivery; blocked by T-20261029-008 gate regression) | 0.22.1 (delivery on PR) |
+| co-architect | main, synced | 0 | 0 | 0.22.1-era (delivery skipped — schema CONFLICT, human port path) |
+| co-consult | main, synced | 0 | 0 | 0.23.0 |
+| co-deck | main, synced | 0 | 0 | 0.23.0 |
+| co-design | main, synced | 0 | 0 | 0.23.0 |
+| co-develop | main, synced | 0 | 0 | 0.23.0 |
+| co-export | main, synced | 0 | 0 | 0.23.0 |
+| co-game | main, synced | 0 | 0 | 0.23.0 |
+| co-hr | main, synced | 0 | 0 | 0.23.0 |
+| co-learning | main, synced | 0 | 0 | 0.23.0 |
+| co-newbiz | main, synced | 0 | **#768** (project session, valuation fix — intentionally open) | 0.23.0 |
+| co-news | main, synced | 0 | 0 | 0.23.0 |
+| co-price | main, synced | 0 | 0 | 0.23.0 |
+| co-safety | main, synced | 0 | **#220** (0.23.0 delivery; blocked by T-20261029-008) | 0.22.1 (delivery on PR) |
+| co-security | main, synced | 0 | 0 | 0.23.0 |
+| co-work | main, synced | 0 | 0 | 0.23.0 |
+
+**13/16 projects at 0.23.0 with green audits** (co-price verified; 11 merged this cycle + co-design canary). Open PRs: 3, each with a stated reason (#227/#220 gate regression T-008; #768 project-session work). co-architect delivery deferred with the human port path recorded.
+
+**Tombstone guard (corrected invocation `log -m --diff-filter=D`)**: 12 merged projects scanned — every 14-day deletion still absent (co-consult 7, co-deck 53, co-design 6, co-develop 7, co-export 7, co-game 8, co-hr 8, co-learning 8, co-news 8, co-price 7, co-security 8, co-work 8; co-newbiz 970, all absent). **One violation class caught**: co-design workflows.md reappeared via the Oct-28 21:39 retire-wave delivery (pre-guard-era) — mixed intent (project had re-applied it deliberately) → **T-20261029-007 (high)** for intent adjudication; guard-infra gap (merge-carried deletions invisible to plain `--diff-filter=D`) documented in the same ticket.
+
+Branch pruning: merged local pr/* branches deleted project-side; **root open-PR heads checked before pruning** (open set: co-abap #227, co-newbiz #768, co-safety #220 — their branches untouched); root's own pr/20261029 branches deleted only where no open PR backs them. Root main synced to 4b58438e2 (includes a concurrent-session landing).
+
+## Verdict
+
+13/16 at 0.23.0 green; 3 open PRs with reasons; 2 gated follow-ups (T-20261029-007 tombstone intent, T-20261029-008 gate regression) both filed high. No PRESUME-STALE/KEEP discarded; no gates bypassed (the co-architect conflict was reverted, not forced); billing-wall exception applied and recorded per merge (13 merges this cycle).
