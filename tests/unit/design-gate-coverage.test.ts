@@ -13,7 +13,14 @@
  * over pinned historical windows of this repository's git history (the
  * 2026-10-28 FULL review's F-1 window) — immutable once merged.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-10-28, DEC-20261028-04 retro-backfill): the F-1 window pin
+ *           "genuinely uncovered F-1 tickets stay flagged (no
+ *           retro-registration)" was updated per its own maintenance note —
+ *           T-20261027-010 and U-20261027-005 are retro-covered by
+ *           2026-10-27-validator-hardening-retro-design; the ids the retro
+ *           scopes out (U-20261026-009, U-20261027-002) stay pinned flagged.
  */
 import { describe, test, expect } from 'bun:test';
 import { spawnSync } from 'node:child_process';
@@ -196,11 +203,25 @@ describe('design-gate-coverage e2e — the F-1 window (T-20261028-001 acceptance
     expect(byId.get('U-20261026-005')!.specs.length).toBeGreaterThanOrEqual(2);
   });
 
-  test('genuinely uncovered F-1 tickets stay flagged (no retro-registration)', () => {
-    // The instruction-ownership design §1.5 verified these have no design-doc
-    // mention; they remain flagged for the review to adjudicate.
-    expect(report.uncovered).toContain('T-20261027-010');
-    expect(report.uncovered).toContain('U-20261027-005');
+  test('retro-covered F-1 ids resolve covered; genuinely uncovered ids stay flagged', () => {
+    // T-20261027-010 and U-20261027-005 were retro-covered by the
+    // 2026-10-27-validator-hardening-retro-design registration (the F-1
+    // retro-backfill adjudication, DEC-20261028-04). This pin was updated per
+    // the maintenance note in the F-1 window comment above ("a later wave
+    // that retro-covers one of the uncovered ids must update its pin") — the
+    // original "no retro-registration" assertion was the pre-retro state.
+    const retroCovered = (id: string) => {
+      const row = byId.get(id)!;
+      expect(row.covered).toBe(true);
+      expect(row.specs.map((s) => s.id)).toContain('2026-10-27-validator-hardening-retro-design');
+    };
+    retroCovered('T-20261027-010');
+    retroCovered('U-20261027-005');
+    // The F-1 window ids the retro deliberately does NOT adjudicate (they
+    // belong to other commits; DEC-20261028-04 scopes them out) stay flagged
+    // for the review to adjudicate — report-only, nothing auto-closes.
+    expect(report.uncovered).toContain('U-20261026-009');
+    expect(report.uncovered).toContain('U-20261027-002');
   });
 
   test('a template-touching commit citing no ticket id is flagged unattributed', () => {
@@ -246,13 +267,14 @@ describe('design-gate-coverage e2e — a fully covered window yields an empty un
 });
 
 describe('design-gate-coverage e2e — the 2026-10-28 ticket family joins correctly (id-family pin)', () => {
-  // Regression pin for the F-1 reconciliation review note: T-20261028-002 and
-  // T-20261028-010 are DIFFERENT tickets from the F-1 rows T-20261027-002 /
-  // T-20261027-010 they resemble. The 2026-10-28 family was created after the
-  // F-1 window closed (tickets filed 02:21 KST, window ends 02:02) and each IS
-  // named by a registered implemented design — the join must resolve them
-  // covered, while the 2026-10-27 ids stay flagged (no registered doc names
-  // them; verified by grep at reconciliation time).
+// Regression pin for the F-1 reconciliation review note: T-20261028-002 and
+// T-20261028-010 are DIFFERENT tickets from the F-1 rows T-20261027-002 /
+// T-20261027-010 they resemble. The 2026-10-28 family was created after the
+// F-1 window closed (tickets filed 02:21 KST, window ends 02:02) and each IS
+// named by a registered implemented design — the join must resolve them
+// covered. (The 2026-10-27 rows themselves: T-20261027-002/-010 were
+// retro-covered by 2026-10-27-validator-hardening-retro-design per
+// DEC-20261028-04; the unattributed window ids stay flagged.)
   test('T-20261028-002 and T-20261028-010 resolve covered by their registered specs', () => {
     const { status, out } = runCoverage(['--json', '--since', '2026-10-28T02:02:01+09:00']);
     expect(status).toBe(0);

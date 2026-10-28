@@ -424,6 +424,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261028-01` | decision | — | — | — |
 | `dec:DEC-20261028-02` | decision | — | — | — |
 | `dec:DEC-20261028-03` | decision | — | — | — |
+| `dec:DEC-20261028-04` | decision | `common/decision-record` | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
