@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261029-003
+kind: manual
+title: >-
+  tombstone/engine polish: (1) opportunistic prune of tombstones whose template
+  counterpart left the tree (baselines carry-forward already prunes that case —
+  asymmetry at upgrade-project.ts:5024-5066); (2) surface stub version
+  divergence as INFO/WARN decision row when the stub's existing version differs
+  from the template counterpart (upgrade-policy.ts:843-846 backfill never
+  overwrites but never reports); (3) align census hunk-merge comment (says <3
+  common lines, code merges on distance<6, upgrade-policy.ts:1577-1586)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-29T02:12:27.502+09:00'
+history:
+  - at: '2026-10-29T02:12:27.502+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
