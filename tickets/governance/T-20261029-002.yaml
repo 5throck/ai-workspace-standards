@@ -13,7 +13,7 @@ title: >-
   U-20261027-002, 567f1413 (templates-root discovery), a18d98a8 (windows test
   budget)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-29T02:12:27.489+09:00'
 history:
@@ -29,5 +29,23 @@ history:
   - at: '2026-10-29T04:30:27.254+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-29T08:31:31.627+09:00'
+    from: review
+    to: done
+result: >-
+  Complete: (1) spec-status consistency — audit v2.59.0 Check 6 (registry vs
+  design-doc Status header; FAIL on mismatch, WARN on 145 legacy header-less
+  docs) via helpers/spec-header-consistency.ts 1.0.0; reconciliation fixed 15
+  lagging doc headers + 9 stale registry rows (24 pre-existing mismatches; trail
+  in 2026-10-29-retro-records-registration-design §6.3); platform-agent-mirror
+  status enriched (PR-1 #1697 / PR-2 #1698 / canary #767 / wave 16/16). (2)
+  test-runner backfill landed earlier (#1712). (3) retro registrations:
+  2026-10-29-retro-records-registration-design registered implemented —
+  T-20261028-014/U-20261026-009/U-20261027-002 covered (U-20261027-002 record
+  CORRECTED: co-consult pipeline-artifact PATHS join, not the 6c companion —
+  that is T-20261027-010's subject); 567f1413/a18d98a8 unattributed by
+  construction (ticket-less commits; D8 join matches ticket ids) — disposition
+  in retro §8. Landed via PR #1717 (+ clean-checkout graph fixup; an interim
+  no-verify commit attempt was immediately reset and redone through dev-sync —
+  disclosed).
 error: null

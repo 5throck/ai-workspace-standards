@@ -143,3 +143,13 @@ regexes = [
   '''^pw-gi-analyst-123$''',
   '''^pw-p2c-analyst-123$''',
 ]
+
+[[allowlists]]
+description = "co-newbiz ADR-0187 W3 process-ssot unit-test stage-key fixtures (T-20261029-006, human-adjudicated FP 2026-10-29): generic-api-key trips on process-stage structural identifiers ('s8.business_case', 's8.npv_quantiles', 's8.adopted_case', 's4.legal_regulatory_screening') in tests/unit/process-ssot-check.test.ts (commit 0febed29, ADR-0187 P3). These are SSOT registry keys the test itself asserts against, not credentials; independent verification over the flagged commit found no bearer/JWT/AWS/sk-/private-key material. condition = 'and' so BOTH the path AND the exact fixture shape must match - any other value in this file (e.g. a real secret pasted in later) is still reported. Path repo-relative (per-project window scan), same convention as the T-20261028-009 entry."
+condition = "and"
+paths = [
+  '''^tests/unit/process-ssot-check\.test\.ts$''',
+]
+regexes = [
+  '''^s[0-9]+\.[a-z_]+$''',
+]
