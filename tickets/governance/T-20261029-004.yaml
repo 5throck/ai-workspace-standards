@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261029-004
+kind: manual
+title: >-
+  learning: design-lint token-role-misuse sub-check — flag status fill/border
+  tokens (--success/--warning/--danger, *-bg, *-border) referenced in text
+  color: declarations, per the bg/fg/border triplet convention codified in
+  templates/common/docs/design-tokens.template.css:128-131; extracted from
+  co-newbiz PR #740 (commit 8cf2f396 hand-fixed the anti-pattern in 3 files and
+  deferred the mechanized check in its PR body); design-lint.ts CHECK_ORDER
+  currently classifies raw-vs-token only (scripts/design-lint.ts:103);
+  root+template copies byte-identical so one change propagates. Evidence:
+  Projects/co-newbiz/app/web-next/components/wacc/WaccPanel.tsx,
+  components/stages/BusinessCaseStage.tsx, styles.css;
+  docs/design-system/design-tokens.md:29. Step 2f 2026-10-29 (co-newbiz #741
+  reviewed, nothing to extract)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-29T03:14:35.808+09:00'
+history:
+  - at: '2026-10-29T03:14:35.808+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
