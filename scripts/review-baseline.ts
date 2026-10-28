@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-28, T-20261028-001 — spec
+//          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+//          D8): battery #9 — windowed Design-Gate coverage check. Runs
+//          scripts/design-gate-coverage.ts over the last 24 hours and surfaces
+//          the uncovered set (template-touching commits whose tickets resolve
+//          to no registered spec) as a passed-with-WARN note: report-only per
+//          the design ("nothing auto-closes"), so the row never fails the
+//          battery — E1–E5 adjudication stays human. A hard crash or
+//          unparseable JSON output DOES fail the row (the drift-json-contract
+//          precedent: a check that never ran must not green-light).
 // v1.4.0 (2026-10-26, T-20261026-014): battery #8 hardening — ANY nightly conclusion
 //          other than 'success' (timed_out/cancelled/startup_failure/...) and an
 //          empty run list now surface as a visible WARN instead of a green
@@ -15,7 +25,7 @@
  * review-baseline.ts — consolidated read-only runner for the project-review
  * Step 0 baseline battery (T-20260912-030).
  *
- * Runs the seven baseline validators in guaranteed read-only mode and prints a
+ * Runs the eight baseline validators in guaranteed read-only mode and prints a
  * PASS/FAIL summary. Each validator is invoked exactly the way the
  * project-review skill's Step 0 documents them; nothing here mutates the tree.
  *
@@ -26,6 +36,8 @@
  *   5. bun run skill-lifecycle-audit                      # skill health
  *   6. bun scripts/propagate-to-templates.ts --check-drift # L1↔L2 drift
  *   7. bun scripts/validate-variant-claims.ts             # variant contract-truth (D6, T-20261005-011..014)
+ *   8. nightly E2E conclusion (gh run list)               # CI surfacing (battery #8)
+ *   9. bun scripts/design-gate-coverage.ts --json         # Design-Gate coverage, 24h window (battery #9, D8)
  *
  * Exit codes: 0 = all green, 1 = one or more validators failed.
  * Known-tolerated noise (not failures): propagate --check-drift exits 1 on
@@ -88,6 +100,36 @@ export function nightlyE2EVerdict(runs: unknown): { warn: boolean; note: string 
   return {
     warn: true,
     note: `WARN: nightly scaffold E2E did not conclude success — run ${r.databaseId ?? "?"} (${r.createdAt ?? "?"}) ${r.url ?? "(no url)"} — conclusion: ${r.conclusion ?? "none"}, status: ${r.status ?? "unknown"} — non-success conclusion class (T-20261026-014)`,
+  };
+}
+
+/** T-20261028-001 (design 2026-10-28-instruction-ownership-backport-hardening
+ *  D8): pure classifier for the battery #9 verdict over one parsed
+ *  design-gate-coverage.ts --json payload. The row NEVER fails on findings —
+ *  the uncovered set is surfaced as a WARN for human E1–E5 adjudication
+ *  ("nothing auto-closes") — but the spawn block maps a non-zero exit or
+ *  unparseable payload to ok:false (the drift-json-contract precedent: a check
+ *  that never ran must not green-light). Exported so unit tests pin the verdict
+ *  table without spawning the check. */
+export function designGateCoverageVerdict(report: unknown): { warn: boolean; note: string } {
+  const r = report as
+    | { tickets?: Array<{ id: string; covered: boolean }>; uncovered?: string[]; unattributedCommits?: Array<{ sha: string; subject: string }>; touchingCommits?: number; window?: { since?: string; until?: string } }
+    | undefined;
+  if (!r || !Array.isArray(r.tickets) || !Array.isArray(r.uncovered) || !Array.isArray(r.unattributedCommits)) {
+    return { warn: true, note: "unparseable design-gate-coverage JSON — treated as a failure by the spawn wrapper" };
+  }
+  const uncoveredCount = r.uncovered.length + r.unattributedCommits.length;
+  if (uncoveredCount === 0) {
+    return {
+      warn: false,
+      note: `fully covered over ${r.window?.since ?? "?"} → ${r.window?.until ?? "HEAD"} (${r.touchingCommits ?? "?"} template-touching commits)`,
+    };
+  }
+  const ids = [...r.uncovered, ...r.unattributedCommits.map((c) => c.sha)].slice(0, 6).join(", ");
+  const more = uncoveredCount > 6 ? ` (+${uncoveredCount - 6} more)` : "";
+  return {
+    warn: true,
+    note: `${uncoveredCount} uncovered row(s) over ${r.window?.since ?? "?"} → ${r.window?.until ?? "HEAD"}: ${ids}${more} — run bun scripts/design-gate-coverage.ts for the table; adjudicate E1–E5 at the review (report-only, nothing auto-closes)`,
   };
 }
 
@@ -171,6 +213,41 @@ function main(): void {
     results.push({ name, ok, note, warn });
     if (warn) console.error(`⚠️  ${name} — ${note}`);
     else if (!quiet) console.log(`✅ ${name} — ${note}`);
+  }
+
+  // T-20261028-001 (design 2026-10-28-instruction-ownership-backport-hardening
+  // D8): battery #9 — windowed Design-Gate coverage. Template-touching commits
+  // in the last 24 hours must resolve to a registered spec (registry-join).
+  // Report-only: findings ride as a passed-with-WARN note that prints even
+  // under --quiet; a crash or unparseable JSON fails the row.
+  {
+    const name = "design-gate-coverage (Design-Gate coverage, 24h window — D8)";
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const ok = true;
+    let warn = false;
+    let note = "skipped (design-gate-coverage unavailable)";
+    const cov = Bun.spawnSync(
+      ["bun", "scripts/design-gate-coverage.ts", "--json", "--since", since],
+      { stdout: "pipe", stderr: "pipe", timeout: 120_000 },
+    );
+    const covOut = new TextDecoder().decode(cov.stdout);
+    if (cov.exitCode !== 0) {
+      // The check is report-only and always exits 0 on a produced report; a
+      // non-zero exit is a setup error (git failure, bad args) — fail loudly.
+      results.push({ name, ok: false, note: `exit ${cov.exitCode} — the coverage check never produced a report` });
+      console.error(`❌ ${name} — exit ${cov.exitCode}`);
+      console.error(new TextDecoder().decode(cov.stderr).trim().split("\n").slice(-8).join("\n"));
+    } else {
+      try {
+        ({ warn, note } = designGateCoverageVerdict(JSON.parse(covOut)));
+      } catch {
+        warn = true;
+        note = "unparseable design-gate-coverage JSON";
+      }
+      results.push({ name, ok, note, warn });
+      if (warn) console.error(`⚠️  ${name} — ${note}`);
+      else if (!quiet) console.log(`✅ ${name} — ${note}`);
+    }
   }
 
   const failures = results.filter((r) => !r.ok);

@@ -2636,7 +2636,7 @@
       "id": "2026-10-28-instruction-ownership-backport-hardening-design",
       "title": "instruction ownership backport hardening design",
       "file": "docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md",
-      "status": "draft",
+      "status": "approved",
       "source": "manual",
       "created": "2026-10-28",
       "last_updated": "2026-10-28"

@@ -29,11 +29,24 @@
  *         backfilled from the template counterpart with the manifest row; a
  *         stub already carrying the fields is untouched with no row).
  *
+ * v1.3.0 (2026-10-28, T-20261028-013 — spec
+ *         docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
+ *         D9): the stub-composed compare changes what "today's deliverable"
+ *         means for the extends-stub i18n-specialist fixture — the agents/ pass
+ *         now composes the stub over its L1 target (composeResolvedAgentContent)
+ *         instead of comparing the bare target bytes, and the version gate reads
+ *         the COMPOSED frontmatter (the stub version ladder). Fixtures updated:
+ *         baselines meaning "template unchanged since delivery" seed the
+ *         composed bytes; delivery expectations expect composed bytes; the
+ *         version-gated ADOPT case rides the stub ladder (project version below
+ *         the stub's). Pure helper suites and the tombstone/baseline suites are
+ *         untouched.
+ *
  * Pure-helper suites run against scripts/lib/upgrade-policy.ts exports;
  * engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -54,6 +67,7 @@ import {
   sha256Hex,
   type DecisionBaseline,
 } from '../../scripts/lib/upgrade-policy.ts';
+import { composeResolvedAgentContent } from '../../scripts/helpers/resolve-pm-stub.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const upgradeScript = join(workspaceRoot, 'scripts', 'upgrade-project.ts');
@@ -509,13 +523,16 @@ describe('upgrade-project.ts agents/ equal-version escalation (D2 dedicated row)
       // today's behavior (deliver), now with a WARN decision. The drift is a
       // body line appended after the frontmatter (the template carries no body
       // headings, so the marker cannot corrupt the frontmatter).
-      const untouchedDrift = `${agentTpl.trimEnd()}\n<!-- drift marker: untouched since delivery -->\n`;
+      // D9: "canonical" for the extends-stub i18n-specialist is the COMPOSED
+      // bytes (stub frontmatter over the L1 target), so the baseline and the
+      // expected delivery both use composedDeliverable.
+      const untouchedDrift = `${composedDeliverable.trimEnd()}\n<!-- drift marker: untouched since delivery -->\n`;
       writeFileSync(join(tmp, 'agents', 'i18n-specialist.md'), untouchedDrift);
       seedPriorDelivery(tmp, 'agents/i18n-specialist.md', untouchedDrift);
       commitAll(tmp, 'chore: untouched drift');
       const { status } = runUpgrade(tmp);
       expect(status).toBe(0);
-      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(agentTpl);
+      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(restamped(composedDeliverable));
       const manifest = readManifest(tmp);
       const restored = manifest.decisions.find((d) => d.path === 'agents/i18n-specialist.md' && d.verdict === 'DRIFT_RESTORED');
       expect(restored).toBeDefined();
@@ -529,6 +546,22 @@ describe('upgrade-project.ts agents/ equal-version escalation (D2 dedicated row)
 const OLD_PHASE_DEFS = '# phase definitions — old delivered revision\n\nstale body the template no longer ships\n';
 const commonAgentTpl = readFileSync(join(workspaceRoot, 'templates', 'common', 'agents', 'i18n-specialist.md'), 'utf8');
 const commonAgentVersion = commonAgentTpl.match(/^version:\s*"?(\d+\.\d+\.\d+)"?/m)!.slice(1).join('');
+// D9 (T-20261028-013): for the extends-stub i18n-specialist, "today's
+// deliverable" is the stub-composed bytes — the stub frontmatter (co-develop
+// carries `phases: [5]`, version 1.1.0) merged over the L1 target — exactly
+// what the scaffold wrote. The bare target bytes above are the pre-D9 shape.
+const composedDeliverable = composeResolvedAgentContent(
+  join(workspaceRoot, 'templates', VARIANT, 'agents', 'i18n-specialist.md'),
+  join(workspaceRoot, 'templates', 'common', 'agents', 'i18n-specialist.md'),
+  VARIANT,
+).content;
+// The post-delivery re-stamp (v1.74.0) advances the TOP-LEVEL frontmatter
+// `last_updated` — the stub frontmatter carries one (the bare L1 target does
+// not), so a delivered stub-composed file differs from composedDeliverable by
+// exactly that line. The engine stamps new Date().toISOString().slice(0, 10).
+const deliveryDate = new Date().toISOString().slice(0, 10);
+const restamped = (content: string): string =>
+  content.replace(/^last_updated:.*$/m, `last_updated: ${deliveryDate}`);
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Delivery tombstones (U-20261028-001 D1–D3, spec
@@ -781,9 +814,10 @@ describe('upgrade-project.ts agents/ version-gt escalation + NO_BASELINE detail 
     try {
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, 'agents', 'i18n-specialist.md'), EVOLVED_LOWER);
-      // Baseline == today's deliverable (the current template bytes) — the
-      // template content is UNCHANGED since delivery; only the project moved.
-      seedPriorDelivery(tmp, 'agents/i18n-specialist.md', commonAgentTpl);
+      // Baseline == today's deliverable (the D9 COMPOSED bytes for the stub
+      // i18n-specialist) — the template content is UNCHANGED since delivery;
+      // only the project moved.
+      seedPriorDelivery(tmp, 'agents/i18n-specialist.md', composedDeliverable);
       commitAll(tmp, 'chore: evolved agent at an older version');
       const { status, out } = runUpgrade(tmp);
       expect(status).toBe(1);
@@ -804,11 +838,11 @@ describe('upgrade-project.ts agents/ version-gt escalation + NO_BASELINE detail 
     try {
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, 'agents', 'i18n-specialist.md'), EVOLVED_LOWER);
-      seedPriorDelivery(tmp, 'agents/i18n-specialist.md', commonAgentTpl);
+      seedPriorDelivery(tmp, 'agents/i18n-specialist.md', composedDeliverable);
       commitAll(tmp, 'chore: evolved agent at an older version');
       const { status, out } = runUpgrade(tmp, ['--disposition', 'adopt-template']);
       expect(status).toBe(0);
-      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(commonAgentTpl);
+      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(restamped(composedDeliverable));
       expect(out).toContain('DISPOSITION (adopt-template): agents/i18n-specialist.md');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
@@ -826,9 +860,10 @@ describe('upgrade-project.ts agents/ version-gt escalation + NO_BASELINE detail 
       commitAll(tmp, 'chore: evolved agent, never delivered under the v2 manifest');
       const { status } = runUpgrade(tmp);
       expect(status).toBe(0);
-      // The canonical restore proceeds (WARN degrade), and the decision detail
+      // The canonical restore proceeds (WARN degrade) — D9: the restored
+      // canonical content is the COMPOSED bytes — and the decision detail
       // names the migration window.
-      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(commonAgentTpl);
+      expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(restamped(composedDeliverable));
       const manifest = readManifest(tmp);
       const restored = manifest.decisions.find((d) => d.path === 'agents/i18n-specialist.md' && d.verdict === 'DRIFT_RESTORED');
       expect(restored).toBeDefined();
@@ -929,16 +964,19 @@ describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
     const tmp = makeTempProject();
     try {
       // Baseline-clean copy at an OLDER delivered version → the run delivers
-      // the current template over it (version-gated ADOPT) and must REPLACE
-      // the stale baseline with the exact post-delivery disk bytes.
-      const staleCopy = commonAgentTpl.replace(/^(version:\s*"?[\d.]+"?)$/m, 'version: "1.2.0"');
+      // over it (version-gated ADOPT) and must REPLACE the stale baseline with
+      // the exact post-delivery disk bytes. D9: the version gate reads the
+      // COMPOSED frontmatter — the stub version ladder (co-develop stub at
+      // 1.1.0) — so the stale copy rides a version BELOW the stub's to trip the
+      // version-gt arm, and the delivered bytes are the composed expectation.
+      const staleCopy = composedDeliverable.replace(/^(version:\s*"?[\d.]+"?)$/m, 'version: "1.0.0"');
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, CANARY_REL), staleCopy);
       seedPriorDelivery(tmp, CANARY_REL, staleCopy);
       commitAll(tmp, 'chore: baseline-clean copy at an older delivered version');
       const { status } = runUpgrade(tmp);
       expect(status).toBe(0);
-      expect(readFileSync(join(tmp, CANARY_REL), 'utf8')).toBe(commonAgentTpl);
+      expect(readFileSync(join(tmp, CANARY_REL), 'utf8')).toBe(restamped(composedDeliverable));
       const manifest = readManifest(tmp);
       expect(manifest.decisions.some((d) => d.path === CANARY_REL && d.verdict === 'ADOPT')).toBe(true);
       const entry = manifest.baselines[CANARY_REL];
