@@ -1,7 +1,7 @@
 # Hermes.md Instruction File Design — a Hermes-Specific Behavioral File for the Hermes Agents Platform
 
 - **Date**: 2026-09-27
-- **Status**: Approved (Row 0 design; user directive 2026-09-27 — implementation in a single PR per approved plan)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0093 (decision record — amends ADR-0088 D2), ADR-0088 (Hermes platform support — spike evidence F1–F4, D1–D8, Addendum 1 truncation finding), ADR-0077 (Codex platform support — the twin-file delivery pattern this follows), ADR-0035/ADR-0048 (AGENTS.md structure & SSOT), ADR-0090 (AGENTS.md thin dispatcher)
 - **Scope**: One root file (`Hermes.md`) + its 3-tier delivery (L0 → L1 `templates/common` → L2 all 13 `templates/co-*`) + gate/policy wiring + scaffold/upgrade delivery for the `hermes` platform profile. No changes to skill mirrors, no AGENTS.md body rewrite, no variant AGENTS.md header updates (explicitly out of scope this pass).
 

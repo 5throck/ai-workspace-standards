@@ -217,11 +217,24 @@ describe('design-gate-coverage e2e — the F-1 window (T-20261028-001 acceptance
     };
     retroCovered('T-20261027-010');
     retroCovered('U-20261027-005');
-    // The F-1 window ids the retro deliberately does NOT adjudicate (they
-    // belong to other commits; DEC-20261028-04 scopes them out) stay flagged
-    // for the review to adjudicate — report-only, nothing auto-closes.
-    expect(report.uncovered).toContain('U-20261026-009');
-    expect(report.uncovered).toContain('U-20261027-002');
+    // T-20261029-002 batch registration (2026-10-29-retro-records-registration-
+    // design): U-20261026-009 and U-20261027-002 were "genuinely uncovered" pins
+    // here until the records-hygiene batch retro-registered them (both landed in
+    // PR #1634, commit ec3921e74). Pin updated per the maintenance note in the
+    // F-1 window comment above ("a later wave that retro-covers one of the
+    // uncovered ids must update its pin").
+    const batchCovered = (id: string) => {
+      const row = byId.get(id)!;
+      expect(row.covered).toBe(true);
+      expect(row.specs.map((s) => s.id)).toContain('2026-10-29-retro-records-registration-design');
+    };
+    batchCovered('U-20261026-009');
+    batchCovered('U-20261027-002');
+    // After both retro registrations, every ticketed id in the F-1 window
+    // resolves covered — the window's uncovered set is empty (the only
+    // remaining finding is the unattributed commit f466b2cd, pinned by the
+    // next test; report-only, nothing auto-closes).
+    expect(report.uncovered).toEqual([]);
   });
 
   test('a template-touching commit citing no ticket id is flagged unattributed', () => {

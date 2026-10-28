@@ -1,7 +1,7 @@
 # Validator Gap Port (co-newbiz to L0/L1) — Design
 
 - **Date**: 2026-09-30
-- **Status**: approved
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Spec id**: `2026-09-30-validator-gap-port-design`
 - **Owner**: architect (dispatched by PM)
 - **Related**: `docs/decisions/DEC-20260930-01.md`, co-newbiz commit `a66f2446` (project review 2026-09-30 remediations), T-20260909-004 (Check 11)

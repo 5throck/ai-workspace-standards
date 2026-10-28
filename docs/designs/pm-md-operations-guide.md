@@ -29,7 +29,7 @@ This section provides immediate guidance for different user personas and current
 **Warning**: Includes unimplemented features, requires manual implementation
 
 **variant_sections Architecture (v1.2.0)**
-- **Status**: 📋 PROPOSED - Design complete, not implemented
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Effort**: Low (~30 minutes)
 - **Prerequisites**: None
 - **Note**: Remove implementation pending Phase 1+ completion

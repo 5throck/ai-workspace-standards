@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-10-28-decision-write-integrity-skill`
 - **Date**: 2026-10-28
-- **Status**: Approved (Row 0 design; implementation lands in the same PR)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0074 (Universal Design Gate), ADR-0031 (L1/L2 fork model — fleet propagation stays gated), design 2026-10-07-daily-fleet-learning-extraction (learning-extraction pipeline that filed the ticket), T-20261028-008
 - **Scope**: One new L0 skill (`skills/decision-write-integrity/`) + registry row (`skills/SKILLS.md`) + lifecycle record (`docs/lifecycle/skills/decision-write-integrity.md`). No templates/, Projects/, or agents/ changes; no script surface.
 

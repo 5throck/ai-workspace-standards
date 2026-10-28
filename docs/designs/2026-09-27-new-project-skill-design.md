@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-09-27-new-project-skill`
 - **Date**: 2026-09-27
-- **Status**: Approved (Row 0 design; implementation lands in the same PR)
+- **Status**: implemented (registry SSOT; retro-marked per T-20261029-002 header-registry reconciliation)
 - **Related**: ADR-0074 (Universal Design Gate), ADR-0088 (Hermes platform support — `--platform hermes` profile), ADR-0089 (template release cadence), ADR-0092 (Team Gateway — sibling consumer of the same engine), T-20260927-011 (dead `/new-project` README references removed), T-20260927-019 (pinned-scaffold defect)
 - **Scope**: One new L0 skill (`skills/new-project/`) + registry row (`skills/SKILLS.md`) + lifecycle record (`docs/lifecycle/skills/new-project.md`). No engine changes — `scripts/new-project.ts` is consumed as-is.
 
