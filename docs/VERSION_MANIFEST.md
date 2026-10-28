@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-28T19:16:31.122Z
+**Generated**: 2026-10-28T19:10:23.819Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -111,7 +112,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.57.0 | scripts/audit.ts | bun |
+| audit.ts | 2.58.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.1.0 | scripts/backport-diff.ts | N/A |
@@ -178,7 +179,7 @@
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
-| sync-agent-mirrors.ts | 1.1.0 | scripts/sync-agent-mirrors.ts | js-yaml |
+| sync-agent-mirrors.ts | 1.2.0 | scripts/sync-agent-mirrors.ts | js-yaml |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
 | sync-model-registry.ts | 1.2.0 | scripts/sync-model-registry.ts | N/A |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
