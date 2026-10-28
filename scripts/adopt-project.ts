@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-10-28, canary finding on Projects/co-newbiz — design §4.2 stub
+//          rule): §4b mirror generation passes --templates-root <workspace>/templates
+//          explicitly (generator v1.1.0 discovery covers standalone runs; the
+//          wiring removes the ambiguity at the delivery paths).
 // v1.4.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
 //          DEC-20261028-06): §4b — one agent-mirror generator write-mode call
 //          (spawn scripts/sync-agent-mirrors.ts --dir <project>) after the agents/
@@ -536,7 +540,7 @@ if (existsSync(projPmMd)) {
   const mirrorGenerator = join(WORKSPACE_ROOT, 'scripts', 'sync-agent-mirrors.ts');
   if (existsSync(mirrorGenerator)) {
     console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
-    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir], { stdio: 'inherit' });
+    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir, '--templates-root', join(WORKSPACE_ROOT, 'templates')], { stdio: 'inherit' });
     if (mirrorResult.status !== 0) {
       console.error(`❌ Agent-mirror generation failed — the project is adopted but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
       if (import.meta.main) {

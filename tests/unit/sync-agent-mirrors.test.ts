@@ -25,8 +25,11 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import * as os from 'node:os';
 import {
   resolvePlatformModel,
+  resolveTemplatesRoot,
+  TEMPLATES_ROOT_MAX_ANCESTORS,
   assertRegistryAdapterCoverage,
   parseSsotAgent,
   listSsotAgents,
@@ -199,7 +202,13 @@ describe('extends-stub projects as a self-contained resolved persona', () => {
     makeProject({
       'pm.md': '---\nname: pm\ntier: medium\ndescription: x\nextends: ../../common/agents/pm.md\n---\n',
     });
-    expect(() => syncAgentMirrors(SCRATCH)).toThrow(/pm\.md.*L1 body is unavailable/);
+    // Deterministic missing-body fixture: an EMPTY templates override. (Plain
+    // discovery would legitimately find the real workspace templates from a
+    // scratch root inside the checkout — the co-newbiz canary fix — so the
+    // not-found case is pinned through the validated explicit flag instead.)
+    fs.mkdirSync(path.join(SCRATCH, 'templates', 'common', 'agents'), { recursive: true });
+    expect(() => syncAgentMirrors(SCRATCH, { templatesRoot: path.join(SCRATCH, 'templates') }))
+      .toThrow(/pm\.md.*L1 body is unavailable/);
   });
 
   test('the generator consumes the SAME composer upgrade-project uses (import identity)', () => {
@@ -426,6 +435,155 @@ describe('root scoping', () => {
   test('README-class and _COMMON.md SSOT files are excluded from the roster', () => {
     makeProject({ 'pm.md': PM_SSOT, 'README.md': '# docs\n', 'README_ko.md': '# docs\n', '_COMMON.md': 'x\n' });
     expect(listSsotAgents(SCRATCH).map((p) => path.basename(p))).toEqual(['pm.md']);
+  });
+});
+
+describe('templates-root discovery for stub resolution (canary finding)', () => {
+  const L1_BODY_A = '---\nname: docs-writer\ntier: low\ndescription: Common docs writer\n---\n\n## L1 Body\n\nDiscovered ancestor body.\n';
+  const L1_BODY_B = '---\nname: docs-writer\ntier: low\ndescription: Common docs writer\n---\n\n## L1 Body\n\nExplicit override body.\n';
+
+  function seedTemplates(dir: string, body: string): void {
+    fs.mkdirSync(path.join(dir, 'common', 'agents'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'common', 'agents', 'docs-writer.md'), body, 'utf8');
+  }
+
+  function seedStandaloneProject(projectRoot: string, stubTarget: string): void {
+    fs.mkdirSync(path.join(projectRoot, 'agents'), { recursive: true });
+    fs.mkdirSync(path.join(projectRoot, 'docs'), { recursive: true });
+    fs.writeFileSync(
+      path.join(projectRoot, 'docs', 'workspace-schema.json'),
+      fs.readFileSync(path.join(REPO_ROOT, 'docs', 'workspace-schema.json'), 'utf8'),
+      'utf8',
+    );
+    fs.writeFileSync(path.join(projectRoot, 'variant.json'), JSON.stringify({ variant: 'co-test' }), 'utf8');
+    fs.writeFileSync(
+      path.join(projectRoot, 'agents', 'docs-writer.md'),
+      `---\nname: docs-writer\ntier: low\ndescription: Stub docs writer\nextends: ${stubTarget}\n---\n`,
+      'utf8',
+    );
+  }
+
+  test('project-context stub resolves via ancestor discovery (no flag)', () => {
+    // Fixture mirrors the real fleet layout: the project sits NESTED under a
+    // fleet root; templates/common lives at the fleet (workspace) root, an
+    // ANCESTOR of the target root — never inside the project.
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../common/agents/docs-writer.md');
+    const res = syncAgentMirrors(projectRoot);
+    expect(res.ok).toBe(true);
+    expect(res.written.map((w) => w.split('\\').join('/'))).toEqual(['.claude/agents/docs-writer.md']);
+    const mirror = fs.readFileSync(path.join(projectRoot, '.claude', 'agents', 'docs-writer.md'), 'utf8');
+    expect(mirror).toContain('Discovered ancestor body.');
+    expect(mirror).not.toMatch(/^extends:/m);
+    expect(mirror).toContain('model: haiku');
+  });
+
+  test('explicit --templates-root override takes precedence over discovery', () => {
+    // BOTH bodies exist: discovery would find the fleet root copy, but the flag
+    // names a different templates dir — the flag must win.
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    seedTemplates(path.join(SCRATCH, 'fleet', 'templates'), L1_BODY_B);
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../common/agents/docs-writer.md');
+    const res = syncAgentMirrors(projectRoot, { templatesRoot: path.join(SCRATCH, 'fleet', 'templates') });
+    expect(res.ok).toBe(true);
+    const mirror = fs.readFileSync(path.join(projectRoot, '.claude', 'agents', 'docs-writer.md'), 'utf8');
+    expect(mirror).toContain('Explicit override body.');
+    expect(mirror).not.toContain('Discovered ancestor body.');
+  });
+
+  test('canary-shaped stub resolves via its OWN extends pointer (L0-roster style)', () => {
+    // Mirrors Projects/co-newbiz: the stub extends a shared roster body N levels
+    // outside the project — a path no templates convention could supply. No
+    // templates/ tree exists anywhere in this fixture.
+    const sharedBody = '---\nname: docs-writer\ntier: low\ndescription: Shared roster body\n---\n\n## Shared body\n\nRoster content.\n';
+    fs.mkdirSync(path.join(SCRATCH, 'shared', 'agents'), { recursive: true });
+    fs.writeFileSync(path.join(SCRATCH, 'shared', 'agents', 'docs-writer.md'), sharedBody, 'utf8');
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../../../shared/agents/docs-writer.md');
+    const res = syncAgentMirrors(projectRoot); // no flag, no templates tree anywhere
+    expect(res.ok).toBe(true);
+    const mirror = fs.readFileSync(path.join(projectRoot, '.claude', 'agents', 'docs-writer.md'), 'utf8');
+    expect(mirror).toContain('Roster content.');
+    expect(mirror).toContain('Stub docs writer'); // stub FM wins for name/description
+    expect(mirror).toContain('model: haiku');
+  });
+
+  test('dangling extends AND incomplete convention: hard error names BOTH paths', () => {
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../nowhere/docs-writer.md'); // dangling pointer
+    // Convention dir exists but lacks THIS agent's body -> the combined error
+    // names the extends target and the convention path.
+    fs.rmSync(path.join(SCRATCH, 'templates', 'common', 'agents', 'docs-writer.md'));
+    let message = '';
+    try {
+      syncAgentMirrors(projectRoot, { templatesRoot: path.join(SCRATCH, 'templates') });
+    } catch (err) {
+      message = (err as Error).message;
+    }
+    expect(message).toMatch(/L1 body is unavailable/);
+    expect(message).toContain('nowhere');
+    expect(message).toContain(path.join(SCRATCH, 'templates', 'common', 'agents', 'docs-writer.md'));
+  });
+
+  test('CLI --templates-root flag reaches the generator (spawn-level precedence)', () => {
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    seedTemplates(path.join(SCRATCH, 'fleet', 'templates'), L1_BODY_B);
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../common/agents/docs-writer.md');
+    const r = spawnSync(process.execPath, [
+      GENERATOR_SRC, '--dir', projectRoot, '--templates-root', path.join(SCRATCH, 'fleet', 'templates'),
+    ], { encoding: 'utf8' });
+    expect(r.status).toBe(0);
+    const mirror = fs.readFileSync(path.join(projectRoot, '.claude', 'agents', 'docs-writer.md'), 'utf8');
+    expect(mirror).toContain('Explicit override body.');
+  });
+
+  test('not-found discovery is a HARD error naming the searched ancestors', () => {
+    // Standalone root OUTSIDE any workspace checkout (os.tmpdir chain), so the
+    // bounded walk genuinely finds nothing.
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'sam-tpl-notfound-'));
+    try {
+      const projectRoot = path.join(outside, 'Projects', 'co-x');
+      seedStandaloneProject(projectRoot, '../../common/agents/docs-writer.md');
+      let message = '';
+      try {
+        syncAgentMirrors(projectRoot);
+      } catch (err) {
+        message = (err as Error).message;
+      }
+      expect(message).toMatch(/templates\/common\/agents not found walking up/);
+      expect(message).toContain(projectRoot);
+      expect(message).toContain('searched:');
+      expect(message).toContain('--templates-root');
+      expect(fs.existsSync(path.join(projectRoot, '.claude'))).toBe(false);
+    } finally {
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  test('explicit override that lacks common/agents is a hard error naming the path', () => {
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    const projectRoot = path.join(SCRATCH, 'fleet', 'Projects', 'co-x');
+    seedStandaloneProject(projectRoot, '../../common/agents/docs-writer.md');
+    const bogus = path.join(SCRATCH, 'not-templates');
+    fs.mkdirSync(bogus, { recursive: true });
+    expect(() => syncAgentMirrors(projectRoot, { templatesRoot: bogus }))
+      .toThrow(/does not contain common\/agents/);
+  });
+
+  test('resolveTemplatesRoot stops at the FIRST ancestor carrying templates/common/agents', () => {
+    seedTemplates(path.join(SCRATCH, 'templates'), L1_BODY_A);
+    expect(resolveTemplatesRoot(path.join(SCRATCH, 'fleet', 'Projects', 'co-x'))).toBe(path.join(SCRATCH, 'templates'));
+    // Target root itself carrying the tree wins immediately (L0-style layout).
+    expect(resolveTemplatesRoot(SCRATCH)).toBe(path.join(SCRATCH, 'templates'));
+  });
+
+  test('the ancestor walk is bounded', () => {
+    expect(TEMPLATES_ROOT_MAX_ANCESTORS).toBeGreaterThan(2);
+    expect(TEMPLATES_ROOT_MAX_ANCESTORS).toBeLessThan(32);
   });
 });
 
