@@ -16,11 +16,24 @@
  *         flags, and the agents/ version-gt CONFLICT escalation + NO_BASELINE
  *         migration-window detail (D4).
  *
+ * v1.2.0 (2026-10-28, T-20261028-010 — spec
+ *         docs/designs/2026-10-28-stub-frontmatter-backfill-design.md): stub
+ *         frontmatter scalar backfill — backfillStubFrontmatter pure-helper
+ *         cases (all-three-missing → tier/version from the counterpart +
+ *         last_updated = delivery date; all-present → byte-identical no-op;
+ *         non-stub content never touched; body bytes unchanged in every case;
+ *         CRLF preserved; map-form/absent counterpart side fills nothing;
+ *         invalid delivery date leaves last_updated unfilled), the
+ *         STUB_FM_BACKFILL (INFO) severity-contract row, and engine cases
+ *         (temp project stub agents/pm.md without the scalars gets them
+ *         backfilled from the template counterpart with the manifest row; a
+ *         stub already carrying the fields is untouched with no row).
+ *
  * Pure-helper suites run against scripts/lib/upgrade-policy.ts exports;
  * engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -30,6 +43,7 @@ import { describe, test, expect } from 'bun:test';
 
 import {
   DECISION_SEVERITY_CONTRACT,
+  backfillStubFrontmatter,
   baselineKeyFor,
   classifyProjectState,
   globToRegExp,
@@ -224,6 +238,89 @@ describe('upgrade-policy decision-log helpers (sync-overwrite-policy)', () => {
     expect(isDeliveredDiff(changed, v1.files)).toBe(true);
     expect(isDeliveredDiff(changed, JSON.parse(JSON.stringify(v2)).files)).toBe(true);
     expect(isDeliveredDiff(['docs/other.md'], v2.files)).toBe(false);
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Stub frontmatter scalar backfill (T-20261028-010 — spec
+// docs/designs/2026-10-28-stub-frontmatter-backfill-design.md)
+// ═════════════════════════════════════════════════════════════════════════════
+describe('backfillStubFrontmatter (T-20261028-010 stub FM backfill)', () => {
+  const DATE = '2026-10-28';
+  // The variant-stub counterpart shape (templates/<variant>/agents/pm.md):
+  // scalar tier, quoted version, its own authoring last_updated.
+  const counterpart = [
+    '---',
+    'extends: ../../common/agents/pm.md',
+    'name: pm',
+    'version: "2.1.0"',
+    'last_updated: "2026-10-27"',
+    'status: active',
+    'tier: medium',
+    'model: inherit',
+    '---',
+    '',
+    'Stub-pointer body — project-owned, never touched.',
+    '',
+  ].join('\n');
+  const BODY = '\nFixture stub body line that stays project-owned.\n';
+
+  test('all three missing → tier/version from the counterpart, last_updated = delivery date, INFO contract row', () => {
+    const stub = `---\nextends: ../../../agents/pm.md\nname: pm\nstatus: active\n---${BODY}`;
+    const out = backfillStubFrontmatter(stub, counterpart, DATE);
+    expect(out.changed).toBe(true);
+    expect(out.filled).toEqual(['tier', 'version', 'last_updated']);
+    expect(out.content).toContain('tier: medium');
+    expect(out.content).toContain('version: "2.1.0"');
+    // last_updated is the DELIVERY date, not the counterpart's authoring date.
+    expect(out.content).toContain(`last_updated: ${DATE}`);
+    expect(out.content).not.toContain('2026-10-27');
+    // Body bytes unchanged; existing frontmatter keys not reordered.
+    expect(out.content.endsWith(`---\nextends: ../../../agents/pm.md\nname: pm\nstatus: active\ntier: medium\nversion: "2.1.0"\nlast_updated: ${DATE}\n---${BODY}`)).toBe(true);
+    expect(DECISION_SEVERITY_CONTRACT.STUB_FM_BACKFILL).toBe('INFO');
+  });
+
+  test('all fields present → byte-identical no-op (no write, no row)', () => {
+    const stub = `---\nextends: ../../../agents/pm.md\nname: pm\nversion: "2.0.1"\nlast_updated: "2026-08-28"\nstatus: active\ntier: medium\n---${BODY}`;
+    const out = backfillStubFrontmatter(stub, counterpart, DATE);
+    expect(out).toEqual({ content: stub, changed: false, filled: [] });
+  });
+
+  test('non-stub content (no extends:) is never touched — helper-level ownership guard', () => {
+    const resolved = `---\nname: pm\nstatus: active\nversion: "1.0.0"\ntier: medium\n---${BODY}`;
+    const missingTier = `---\nname: pm\nstatus: active\n---${BODY}`;
+    expect(backfillStubFrontmatter(resolved, counterpart, DATE)).toEqual({ content: resolved, changed: false, filled: [] });
+    expect(backfillStubFrontmatter(missingTier, counterpart, DATE)).toEqual({ content: missingTier, changed: false, filled: [] });
+  });
+
+  test('body bytes unchanged in every case; partial absence fills only the missing keys', () => {
+    const hasVersion = `---\nextends: ../../../agents/pm.md\nname: pm\nversion: "2.0.1"\nstatus: active\n---${BODY}`;
+    const out = backfillStubFrontmatter(hasVersion, counterpart, DATE);
+    expect(out.changed).toBe(true);
+    expect(out.filled).toEqual(['tier', 'last_updated']);
+    expect(out.content.endsWith(BODY)).toBe(true);
+    expect(out.content).not.toContain('version: "2.1.0"'); // existing value untouched
+    // A map-form or absent template tier side fills nothing (never invent structure).
+    const noTierCounterpart = counterpart.replace('\ntier: medium', '');
+    const tierMissing = `---\nextends: ../../../agents/pm.md\nname: pm\nstatus: active\n---${BODY}`;
+    const out2 = backfillStubFrontmatter(tierMissing, noTierCounterpart, DATE);
+    expect(out2.filled).toEqual(['version', 'last_updated']);
+    expect(out2.content.endsWith(BODY)).toBe(true);
+    // Empty-value tier key is treated as present (v1.24.0 contract: never invent structure).
+    const emptyTier = `---\nextends: ../../../agents/pm.md\nname: pm\nversion: "2.0.1"\nlast_updated: "2026-08-28"\ntier:\nstatus: active\n---${BODY}`;
+    expect(backfillStubFrontmatter(emptyTier, counterpart, DATE).content).toBe(emptyTier);
+  });
+
+  test('CRLF stubs stay CRLF; invalid delivery date leaves last_updated unfilled', () => {
+    const stub = '---\r\nextends: ../../../agents/pm.md\r\nname: pm\r\nstatus: active\r\n---\r\n\r\nCRLF body.\r\n';
+    const out = backfillStubFrontmatter(stub, counterpart.replace(/\n/g, '\r\n'), DATE);
+    expect(out.changed).toBe(true);
+    expect(out.filled).toEqual(['tier', 'version', 'last_updated']);
+    expect(out.content).toContain('tier: medium\r\nversion: "2.1.0"\r\nlast_updated: 2026-10-28\r\n');
+    expect(out.content.endsWith('---\r\n\r\nCRLF body.\r\n')).toBe(true);
+    const badDate = backfillStubFrontmatter(stub, counterpart, '2026-10-28T00:00:00Z');
+    expect(badDate.filled).toEqual(['tier', 'version']);
+    expect(badDate.content).not.toContain('last_updated:');
   });
 });
 
@@ -871,6 +968,98 @@ describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
       // verbatim (retention is the fix; the PRESERVE pass never re-baselines).
       expect(manifest.baselines[README_REL]).toBeDefined();
       expect(manifest.baselines[README_REL]!.hash).toBe(baselineKeyFor(README_REL, 'prior readme delivery bytes\n'));
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Stub frontmatter scalar backfill in the agents/ pass (T-20261028-010 — spec
+// docs/designs/2026-10-28-stub-frontmatter-backfill-design.md): the STUB skip
+// branch (MERGE_MANAGED agents/pm.md) backfills MISSING top-level scalar
+// tier/version/last_updated from the template counterpart with one
+// STUB_FM_BACKFILL (INFO) decision row; bodies stay project-owned.
+// ═════════════════════════════════════════════════════════════════════════════
+describe('upgrade-project.ts stub FM backfill (T-20261028-010)', () => {
+  // The template counterpart the STUB skip branch sources from: the variant
+  // stub at the same rel (templates/co-develop/agents/pm.md — scalar tier,
+  // quoted version).
+  const counterpartStub = readFileSync(join(workspaceRoot, 'templates', VARIANT, 'agents', 'pm.md'), 'utf8');
+  const counterpartVersion = counterpartStub.match(/^version:[ \t]*(\S+)/m)![1];
+  const extractFm = (content: string): string => content.match(/^---\r?\n[\s\S]*?\r?\n---/)?.[0] ?? '';
+
+  test('stale stub without tier/version/last_updated gets all three backfilled + INFO manifest row', () => {
+    const tmp = makeTempProject();
+    try {
+      const staleStub = [
+        '---',
+        'extends: ../../../agents/pm.md',
+        'name: pm',
+        `variant: ${VARIANT}`,
+        'status: active',
+        '---',
+        '',
+        '<!-- WORKSPACE-MANAGED: PM agent body. Content outside this block is preserved during project upgrades. -->',
+        '## Role',
+        '',
+        'Fixture stub body line that stays project-owned.',
+        '',
+      ].join('\n');
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'pm.md'), staleStub);
+      commitAll(tmp, 'chore: stale stub fixture');
+      const { status, out } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      const after = readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8');
+      // Frontmatter filled from the template counterpart (tier) / delivery date.
+      expect(after).toContain('tier: medium');
+      expect(after).toContain(`version: ${counterpartVersion}`);
+      expect(after.match(/^last_updated: \d{4}-\d{2}-\d{2}$/m)).toBeTruthy();
+      // Body stays project-owned — the fixture body line survives the run.
+      expect(after).toContain('Fixture stub body line that stays project-owned.');
+      expect(out).toContain('STUB FM BACKFILL: agents/pm.md');
+      const manifest = readManifest(tmp);
+      const row = manifest.decisions.find((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_FM_BACKFILL');
+      expect(row).toBeDefined();
+      expect(row!.severity).toBe('INFO');
+      expect(row!.detail).toContain('tier');
+      expect(row!.detail).toContain('frontmatter only');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+
+  test('stub whose frontmatter already carries the fields: frontmatter byte-identical, no backfill row', () => {
+    const tmp = makeTempProject();
+    try {
+      const fm = [
+        '---',
+        'extends: ../../../agents/pm.md',
+        'name: pm',
+        `variant: ${VARIANT}`,
+        'version: "1.2.0"',
+        'last_updated: "2026-10-27"',
+        'status: active',
+        'tier: medium',
+        '---',
+      ].join('\n');
+      const full = `${fm}\n\nFixture stub body line that stays project-owned.\n`;
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'pm.md'), full);
+      commitAll(tmp, 'chore: complete stub fixture');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      const after = readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8');
+      // The backfill is a no-op: the frontmatter gains no key (the MERGE pass
+      // may union managed body blocks, and a MERGE-delivered file is then
+      // legitimately re-stamped by the v1.74.0 post-delivery restamp — so the
+      // comparison excludes the last_updated line; the helper-level test pins
+      // the strict byte-identity).
+      const stripLu = (s: string): string => s.split('\n').filter((l) => !/^last_updated:/.test(l)).join('\n');
+      expect(stripLu(extractFm(after))).toBe(stripLu(fm));
+      const manifest = readManifest(tmp);
+      expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_FM_BACKFILL')).toBe(false);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
