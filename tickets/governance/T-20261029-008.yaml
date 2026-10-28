@@ -17,7 +17,7 @@ title: >-
   root). Wave disposition: billing-walled repos merged (unaffected); co-abap
   #227 + co-safety #220 stay OPEN until this lands
 priority: high
-status: running
+status: review
 attempts: 0
 created_at: '2026-10-29T03:40:04.448+09:00'
 history:
@@ -30,5 +30,8 @@ history:
   - at: '2026-10-29T04:02:25.388+09:00'
     from: waiting
     to: running
+  - at: '2026-10-29T04:30:27.339+09:00'
+    from: running
+    to: review
 result: null
 error: null
