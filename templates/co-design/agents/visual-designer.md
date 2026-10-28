@@ -65,7 +65,7 @@ In a `/meeting` session, Claude role-plays you inline.
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [3, 4]
+**Can Lead Phases**: [3]
 **Can Support In**: [2, 5]
 **Auto-Dispatch To**: prototype-engineer | ux-researcher
 **Tier**: medium

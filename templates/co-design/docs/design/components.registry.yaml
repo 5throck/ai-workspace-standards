@@ -1,8 +1,8 @@
 # components.registry.yaml — co-design component registry (design.md §6,
 # project instantiation; entries mirror docs/component-primitives.md, the
 # binding contract).
-# Last reconciled: 2026-10-27 (spec 2026-10-27-deferred-items-design — project
-# instantiation record, not present in the template tree).
+# Last reconciled: 2026-10-28 (spec 2026-10-27-co-design-suite-promotion-design —
+# template-side promotion of the project instantiation record, T-20261027-011/-012).
 # New components enter only via the design-phase gate ([DESIGN-R1] —
 # instantiation rule register, co-design.context.md / design.md).
 version: 1

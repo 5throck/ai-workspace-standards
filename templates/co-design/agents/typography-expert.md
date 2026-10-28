@@ -71,7 +71,7 @@ In a `/meeting` session, Claude role-plays you inline.
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [2, 3]
+**Can Lead Phases**: [3]
 **Can Support In**: [1, 4]
 **Auto-Dispatch To**: design-lead (for system integration), visual-designer (for execution)
 **Tier**: medium

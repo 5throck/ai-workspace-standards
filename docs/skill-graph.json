@@ -557,7 +557,6 @@
         "templates/co-abap/agents/i18n-specialist.md",
         "templates/co-consult/agents/i18n-specialist.md",
         "templates/co-deck/agents/i18n-specialist.md",
-        "templates/co-design/agents/i18n-specialist.md",
         "templates/co-export/agents/i18n-specialist.md",
         "templates/co-game/agents/i18n-specialist.md",
         "templates/co-price/agents/i18n-specialist.md",
@@ -1010,10 +1009,23 @@
       "name": "design-lead",
       "scope": "co-design",
       "capability": "design-lead",
-      "content_hash": "e378d0f9402032f3",
+      "content_hash": "5d6d066810f29f60",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/design-lead.md"
+      ]
+    },
+    {
+      "id": "agent:co-design/i18n-specialist",
+      "type": "agent",
+      "layer": "variant:co-design",
+      "name": "i18n-specialist",
+      "scope": "co-design",
+      "capability": "i18n-specialist",
+      "content_hash": "90df2d969ecf5a5f",
+      "version": "1.2.0",
+      "mirrors": [
+        "templates/co-design/agents/i18n-specialist.md"
       ]
     },
     {
@@ -1023,7 +1035,7 @@
       "name": "prototype-engineer",
       "scope": "co-design",
       "capability": "prototype-engineer",
-      "content_hash": "c560fb1c0be8ca48",
+      "content_hash": "5a2b8bc323c39efa",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/prototype-engineer.md"
@@ -1036,7 +1048,7 @@
       "name": "service-designer",
       "scope": "co-design",
       "capability": "service-designer",
-      "content_hash": "b20913b372aad90e",
+      "content_hash": "22e3c6a21a279b67",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/service-designer.md"
@@ -1062,7 +1074,7 @@
       "name": "typography-expert",
       "scope": "co-design",
       "capability": "typography-expert",
-      "content_hash": "bf4501fc128dd8fb",
+      "content_hash": "0e7116076a055811",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/typography-expert.md"
@@ -1075,7 +1087,7 @@
       "name": "ux-researcher",
       "scope": "co-design",
       "capability": "ux-researcher",
-      "content_hash": "fd2c5bf5dc05abfd",
+      "content_hash": "38035dc46255bb8a",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/ux-researcher.md"
@@ -1088,7 +1100,7 @@
       "name": "visual-designer",
       "scope": "co-design",
       "capability": "visual-designer",
-      "content_hash": "ca22bc6d48942324",
+      "content_hash": "1480c2f987c705e1",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-design/agents/visual-designer.md"

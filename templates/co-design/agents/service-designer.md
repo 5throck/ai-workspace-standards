@@ -70,7 +70,7 @@ In a `/meeting` session, Claude role-plays you inline.
 
 ## Dispatch Protocol
 
-**Can Lead Phases**: [1, 2]
+**Can Lead Phases**: [3]
 **Can Support In**: [3, 4]
 **Auto-Dispatch To**: ux-researcher (for customer research), design-lead (for service consistency)
 **Tier**: medium
