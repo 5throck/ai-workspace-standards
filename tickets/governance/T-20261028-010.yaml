@@ -16,7 +16,7 @@ title: >-
   ownership for stubs is template-side; body stays project-owned (cf.
   U-20261028-001)
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-28T03:28:34.667+09:00'
 history:
@@ -32,5 +32,13 @@ history:
   - at: '2026-10-28T10:36:17.024+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-28T11:08:02.655+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1683 (merged): upgrade-project 1.80.0 + upgrade-policy 1.28.0 —
+  backfillStubFrontmatter fills MISSING scalar tier/version/last_updated in
+  extends-stub frontmatter from template counterparts (STUB_FM_BACKFILL INFO
+  row, STUB skip-branch wiring); body bytes untouched; 7 new tests; L1 twin
+  republished, check-drift green; bun test 2705 pass
 error: null
