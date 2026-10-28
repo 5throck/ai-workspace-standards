@@ -5,8 +5,21 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.20.0
+ * @version 2.21.0
  *
+ * v2.21.0 (2026-10-29, upstream adjudication mechanical batch — spec
+ *          docs/designs/2026-10-29-upstream-adjudication-mechanical-batch-design.md,
+ *          U-20261028-008 + T-20261028-015 a/d/f): applyGovernanceTransforms
+ *          AGENTS.md branch gains B-A14/B-A15 — (1) the §6 common-skills
+ *          delivery sentence is qualified as workspace-root delivery machinery
+ *          (docs/templates/common-contract.json does not exist in delivered
+ *          projects) and the §3.7.5 governance-backlog design link is stripped
+ *          to a plain workspace-root mention; (2) the COMMON-AGENTS ADR-0078
+ *          backtick path mention (docs/adr/0078-agent-mediated-llm-work-routing.md)
+ *          is retargeted to the in-file LLM Work Routing Policy anchor in L1
+ *          renditions — the L0 source keeps it. Literal replace pairs per the
+ *          B-PGW house style; the L0 source edits land in the same root PR so
+ *          L0 and L1 converge.
  * v2.20.0 (2026-10-28, L0-only governance doc cleanup — spec
  *          docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md
  *          §5.2, DEC-20261028-05): NEW Phase B-PGW in applyGovernanceTransforms
@@ -1577,6 +1590,40 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
         `## §5: Execution Plan Templates`
       );
     }
+    // B-A14 (v2.21.0, U-20261028-008 + T-20261028-015 d/f): workspace-root-scoped
+    //        prose delivered verbatim into projects. (1) The §6 common-skills
+    //        delivery note cites docs/templates/common-contract.json — the
+    //        workspace-root delivery contract, which does not exist in a
+    //        delivered project; qualify the sentence as workspace-root
+    //        machinery. The L0 source carries the qualified form (this batch);
+    //        the literal replace keeps the L1 rendition qualified even if the
+    //        L0 source regresses to the unqualified phrasing. Covers the
+    //        common-contract.json mention for T-015(d). (2) The §3.7.5
+    //        governance-backlog design link targets an L0-only design doc;
+    //        strip the relative link, keep the text as a plain workspace-root
+    //        mention (the §3.7.5 section itself is L0-scoped prose and stays).
+    //        Covers T-015(f) for the co-abap delivery.
+    content = content.replace(
+      'delivered to scaffolded projects via `docs/templates/common-contract.json`',
+      'delivered to scaffolded projects via the workspace delivery contract (workspace-root `docs/templates/common-contract.json`)'
+    );
+    content = content.replace(
+      '[docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md)',
+      '`docs/designs/2026-08-16-governance-backlog-design.md` (workspace-root-only design doc)'
+    );
+
+    // B-A15 (v2.21.0, T-20261028-015 a): the COMMON-AGENTS LLM Work Routing
+    //        section cites the L0-only ADR file as a backtick path mention —
+    //        a form the constitution-scrub A-9 link rule never matches, so it
+    //        survives into every L1/L2/delivered rendition where docs/adr/ does
+    //        not exist. L0 keeps the mention (L0 has the file); the L1 rendition
+    //        points at the in-file policy anchor — the LLM Work Routing Policy
+    //        section itself, the same anchor L1 agents/pm.md already cites.
+    content = content.replace(
+      'see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.',
+      'see ADR-0078; the LLM Work Routing Policy section above is the project-applicable policy summary.'
+    );
+
     // B-A13 die-guard: the two injection anchors are structural — if either
     // drifts, the placeholder zones silently vanish again (the exact failure
     // mode the scaffold-marker-source check caught on 2026-09-27). Fail loud.

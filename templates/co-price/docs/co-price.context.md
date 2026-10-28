@@ -159,7 +159,7 @@ Use `bun scripts/dev-sync.ts "feat: …"` (or the `/sync` slash command) to comm
 - Every user-facing string exists in all 16 locales within the same PR.
 - `PRICE_*` keys and all secrets never leave env files; never log secrets.
 - Client-facing deliverables require human approval before export.
-- Conversational replies in Korean by default; code/docs/logs in English.
+- Conversational replies in Korean by default; code, docs, and logs in English.
 <!-- END VARIANT-INJECT -->
 
 ## File Organization Policy

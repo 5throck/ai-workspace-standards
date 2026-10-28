@@ -15,7 +15,7 @@
 | `new-requirement.ts` | 1.2.0 | Scaffold deliverables/REQ-NNN-<slug>/ stage docs (01_srs.md, 05_unit_test_plan.md, 06_release_report.md) and register the RTM row; exits non-zero when required templates are missing | L2 |
 | `scratch-cleanup.ts` | 1.1.0 | Scratch workspace hygiene (temp purge, task archival, status; 30-day archive default, validated --days) | L2 |
 | `setup.ts` | 1.1.0 | Project environment setup (uv pip install into .venv, exit-code honesty, opt-in --with-rtk) | L2 |
-| `install-vsp.ts` | 1.1.0 | vsp binary installation from GitHub Releases (canonical repo oisee/vibing-steampunk, pinned version, fail-closed checksums.txt verification) | L2 |
+| `install-vsp.ts` | 1.2.0 | vsp binary installation from GitHub Releases (canonical repo oisee/vibing-steampunk, pinned version, fail-closed checksums.txt verification); v1.2.0: post-install credential guidance uses .env (chmod 600) or OS keychain — never export SAP_PASSWORD (U-20261028-015) | L2 |
 | `install-bun.ts` | 1.0.1 | Bun runtime installation | L2 |
 
 ## Common-layer imports (dispatch / retry-handler)

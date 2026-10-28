@@ -86,10 +86,10 @@ PM running on: <model>
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | Update agents/pm.md | docs-writer | Medium | sonnet | <spec-id> |
-| 2 | Update scripts/audit.ts | automation-engineer | Low | haiku | <spec-id> |
-| 3 | Update CLAUDE.md §5 | docs-writer | Medium | sonnet | <spec-id> |
-| 4 | Update GEMINI.md §5 | docs-writer | Medium | sonnet | <spec-id> |
+| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku | <spec-id> |
+| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
 | 5 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
@@ -100,7 +100,7 @@ PM running on: <model>
 
 | # | Task | Agent | Tier | Model | Spec |
 |---|------|-------|------|-------|------|
-| 1 | Update project README introduction | docs-writer | Medium | sonnet | <spec-id> |
+| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet | <spec-id> |
 | 2 | `/sync "docs: update project README introduction"` | pm | Medium | sonnet | |
 
 **Execution Order**: Sequential
