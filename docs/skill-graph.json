@@ -7533,6 +7533,24 @@
       ]
     },
     {
+      "id": "skill:root/decision-write-integrity",
+      "type": "skill",
+      "layer": "L0",
+      "name": "decision-write-integrity",
+      "scope": "root",
+      "capability": "decision-write-integrity",
+      "content_hash": "3db63e1302b01803",
+      "version": "1.0.0",
+      "mirrors": [
+        "skills/decision-write-integrity/SKILL.md",
+        ".claude/skills/decision-write-integrity/SKILL.md",
+        ".gemini/skills/decision-write-integrity/SKILL.md",
+        ".agents/skills/decision-write-integrity/SKILL.md",
+        ".codex/skills/decision-write-integrity/SKILL.md",
+        ".hermes/skills/decision-write-integrity/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:root/design-foundation",
       "type": "skill",
       "layer": "L0",
@@ -29065,6 +29083,23 @@
       "from": "skill:root/create-variant",
       "to": "skill:root/promote-variant",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/decision-write-integrity",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "skill:root/decision-write-integrity",
+      "to": "skill:root/meeting-facilitation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/decision-write-integrity/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
     },
     {
       "type": "composes_with",
