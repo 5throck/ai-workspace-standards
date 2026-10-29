@@ -56,3 +56,23 @@ Snapshot `memory/skill-graph-metrics/snapshot-2026-10-30.json` committed with th
 ## Mode note
 
 Phase I green → Phase 1b and Phase II run in **normal mode**.
+
+---
+
+# Phase 1b — Per-variant project-review (templates/co-*)
+
+## Batteries (14/14 PASS)
+
+All 14 variants: `validate-variant-claims.ts --template <v>` exit 0 ×14 (now including the new check u — PROMOTION_CHECKLIST/variant cross-validation); `validate-variant-readiness.ts --variant <v>` — 7 "All checks passed", 7 "READY (warnings only)" (known `country-config-default` cosmetic class). **0 FAIL.**
+
+## Scope triage
+
+Only 2 variants have window template changes, and both were deep-reviewed in Phase I (shared 4-slot pairing): **co-deck** (estimate-layout v1.3.0 indentation parser + extract_slidedata v1.3.0 placeholder skip — slot A item 3, SOUND with the self-corrected A-1 note) and **co-safety** (owner-decision batch: workflow-run-record schema + audit-variant v1.3.0 gate 3 + PROMOTION_CHECKLIST authored-snapshot semantics — slot D item 1, registered implemented, check u green across all 14 variants). The other 12 variants: 0 window changes → baseline-only rows.
+
+## Findings
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| A-1 (carried) | Minor | PR #1732 claimed the estimate-layout v1.3.0 fix but landed manifest only — self-corrected same day by #1734 | git show 30007c4b5 --stat | recorded (Phase I) |
+
+**No new Critical/Major/Minor. Phase 1b ticket spend: 0. Daily shared cap: 2/10 used.**
