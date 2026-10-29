@@ -8,7 +8,10 @@
  * Hermetic fixture project trees under mkdtempSync(os.tmpdir()); shell-out via
  * Bun $ with .nothrow() (compile-tokens.test.ts idiom).
  *
- * @version 1.0.0
+ * v1.1.0 (2026-10-29, U-20261028-014): version pins follow design-lint v2.5.0; the
+ * --help pin also asserts the new --allow passthrough is documented.
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect, afterAll } from "bun:test";
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
@@ -49,7 +52,8 @@ describe("design-lint CLI flags", () => {
   test("--help exits 0 and documents the sub-check runner", async () => {
     const { exitCode, stdout } = await run("--help");
     expect(exitCode).toBe(0);
-    expect(stdout).toContain("design-lint.ts v2.4.0");
+    expect(stdout).toContain("design-lint.ts v2.5.0");
+    expect(stdout).toContain("--allow"); // v2.5.0 (U-20261028-014): the allowlist passthrough is documented
     expect(stdout).toContain("token-role-misuse");
     expect(stdout).toContain("token-usage");
     expect(stdout).toContain("--schema");
@@ -90,7 +94,7 @@ describe("design-lint --json contract", () => {
       checks: Array<{ name: string; status: string; findings: unknown[]; skipReason?: string }>;
     };
     expect(report.tool).toBe("design-lint");
-    expect(report.version).toBe("2.4.0");
+    expect(report.version).toBe("2.5.0");
     expect(report.checks.map((c) => c.name)).toEqual([
       "token-usage",
       "token-role-misuse",

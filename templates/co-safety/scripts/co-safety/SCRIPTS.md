@@ -10,7 +10,7 @@
 
 | Script | Version | Purpose |
 |--------|---------|---------|
-| `audit-variant.ts` | 1.2.0 | co-safety variant-specific audit hook (pluggable per workspace policy); v1.2.0: gate 0 parses variant.json → skill_manifest.variant_specific (JSON.parse-guarded, derived skills/<name>/SKILL.md path — U-20261028-017) |
+| `audit-variant.ts` | 1.3.0 | co-safety variant-specific audit hook (pluggable per workspace policy); v1.3.0: gate 3 validates memory/workflows/ run records against docs/workflow-run-record.schema.md when present — zero records is an explicit "0 workflow runs recorded" INFO, malformed records FAIL naming file + field (U-20261028-016); v1.2.0: gate 0 parses variant.json → skill_manifest.variant_specific (JSON.parse-guarded, derived skills/<name>/SKILL.md path — U-20261028-017) |
 | `check-pm-approval.ts` | 1.0.1 | PM approval gate check |
 | `domain-config.ts` | 1.5.0 | Domain registry + DEFAULT_MIN_LEGAL_BASIS config |
 | `migrate-registry-to-coordinates.ts` | 1.0.2 | Coordinate-registry migration utility |

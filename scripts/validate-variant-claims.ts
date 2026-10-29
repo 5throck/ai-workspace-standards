@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-10-29, U-20261028-022 — spec
+//          docs/designs/2026-10-29-owner-decision-batch-design.md §4): check u
+//          — PROMOTION_CHECKLIST Phase A vs variant.json phaseAComplete. The
+//          checklist is an authored snapshot (it records the promotion review
+//          at its time; machine state lives in variant.json), so when
+//          variant.json declares a boolean phaseAComplete and the checklist
+//          carries a "Phase A Complete" claim, the two must agree — a
+//          contradiction FAILs naming both values with the checklist line.
+//          Parsing lives in the exported pure parsePhaseAChecklistClaim
+//          (unit-pinned in tests/unit/validate-variant-claims.test.ts).
 // v1.5.0 (2026-10-08, T-20261006-006): the calibration-sensitive pure helpers
 //          (splitMdRow, markerTableNames, setDiff, extractBareImports,
 //          isBuiltin, lineOf, isRosterAgent) are exported for unit tests
@@ -94,6 +104,11 @@
  *                               `command` is the co-abap malformed class);
  *                               duplicate (event, matcher, command) triples are
  *                               warnings. Batch 3 (T-20261005-019).
+ *   u. Checklist Phase A      — when variant.json declares a boolean
+ *                               phaseAComplete, the PROMOTION_CHECKLIST
+ *                               "Phase A Complete" claim must not contradict
+ *                               it (the checklist is an authored snapshot;
+ *                               machine state is variant.json). (U-20261028-022)
  *
  * Check p is calibrated (v1.3.0): spawn-target literals must look like paths —
  * no whitespace, plus a `/`/`\` separator or a plausible bare script basename —
@@ -125,7 +140,7 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as yamlLoad } from 'js-yaml';
 
-const VERSION = '1.5.0';
+const VERSION = '1.6.0';
 const WORKSPACE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
@@ -136,9 +151,9 @@ if (args.includes('--help') || args.includes('-h')) {
 validate-variant-claims v${VERSION}
 
 Validates a template variant's descriptive claims against its manifests
-(contract-truth checks a-t; design D6 of 2026-10-05-co-deck-review-remediation
+(contract-truth checks a-u; design D6 of 2026-10-05-co-deck-review-remediation
 + batch-2 D9 of 2026-10-05-consult-abap-develop-review-remediation
-+ batch-3 T-20261005-019).
++ batch-3 T-20261005-019 + check u U-20261028-022).
 
 Usage:
   bun scripts/validate-variant-claims.ts [--template <name>]   # default: co-deck
@@ -1784,6 +1799,44 @@ function checkT(): { skipped?: string } {
   return {};
 }
 
+// ── Check u — checklist Phase A vs variant.json phaseAComplete (U-20261028-022) ──
+
+/**
+ * Parse the checklist's "Phase A Complete" claim line (e.g.
+ * `**Phase A Complete:** false`). Returns the claimed boolean with its 1-based
+ * line number, or null when the checklist states no such claim (nothing to
+ * contradict — the check skips). The FIRST matching line wins (the header
+ * field); stray prose mentions of the phrase do not match the anchored form.
+ */
+export function parsePhaseAChecklistClaim(text: string): { value: boolean; line: number } | null {
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*\*{0,2}Phase A Complete\s*:?\*{0,2}\s*(true|false)\s*$/i);
+    if (m) return { value: m[1].toLowerCase() === 'true', line: i + 1 };
+  }
+  return null;
+}
+
+function checkU(): { skipped?: string } {
+  const CHECK = 'u';
+  const declared = variant.phaseAComplete;
+  if (typeof declared !== 'boolean') return { skipped: 'variant.json declares no boolean phaseAComplete' };
+  const checklistPath = join(tpl, 'PROMOTION_CHECKLIST.md');
+  const checklist = readText(checklistPath);
+  if (checklist === null) return { skipped: 'no PROMOTION_CHECKLIST.md' };
+  const claim = parsePhaseAChecklistClaim(checklist);
+  if (claim === null) return { skipped: 'checklist states no "Phase A Complete" claim' };
+  if (claim.value !== declared) {
+    add(
+      CHECK,
+      rel(checklistPath),
+      `checklist claims "Phase A Complete: ${claim.value}" but variant.json phaseAComplete is ${declared} (the checklist is an authored snapshot — reconcile it or update the machine state; design 2026-10-29-owner-decision-batch §4)`,
+      claim.line,
+    );
+  }
+  return {};
+}
+
 // ── Dispatch ─────────────────────────────────────────────────────────────────
 
 interface CheckDef {
@@ -1813,6 +1866,7 @@ const CHECKS: CheckDef[] = [
   { id: 'r', label: 'PROMOTION_CHECKLIST cited variant.json keys exist', run: checkR },
   { id: 's', label: 'SCRIPTS.md documented flags exist in script source', run: checkS },
   { id: 't', label: '.claude/settings.json hook lint (wrapper contract, duplicates)', run: checkT },
+  { id: 'u', label: 'PROMOTION_CHECKLIST Phase A vs variant.json phaseAComplete', run: checkU },
 ];
 
 console.log(`validate-variant-claims v${VERSION} — templates/${templateName}\n`);

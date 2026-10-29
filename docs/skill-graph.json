@@ -1986,7 +1986,7 @@
       "name": "safety-workflow-manager",
       "scope": "co-safety",
       "capability": "safety-workflow-manager",
-      "content_hash": "a7147208af5ddb05",
+      "content_hash": "ea3b2b10879667ab",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-safety/agents/safety-workflow-manager.md"

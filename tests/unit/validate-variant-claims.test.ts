@@ -9,7 +9,11 @@
  * deliberately NOT in this change (test.yml edits need explicit CI-change
  * approval per workspace §7 Security Boundaries).
  *
- * @version 1.0.0
+ * v1.1.0 (2026-10-29, U-20261028-022): parsePhaseAChecklistClaim pin — the
+ * pure parser behind check u (checklist Phase A claim vs variant.json
+ * phaseAComplete).
+ *
+ * @version 1.1.0
  */
 import { describe, expect, test } from 'bun:test';
 import {
@@ -19,6 +23,7 @@ import {
   extractBareImports,
   isBuiltin,
   lineOf,
+  parsePhaseAChecklistClaim,
 } from '../../scripts/validate-variant-claims.ts';
 
 describe('splitMdRow (table-cell parser)', () => {
@@ -104,5 +109,37 @@ describe('lineOf (needle locator)', () => {
   });
   test('null when the needle is absent', () => {
     expect(lineOf('a\nb\n', 'zzz')).toBeUndefined();
+  });
+});
+
+describe('parsePhaseAChecklistClaim (check u, U-20261028-022)', () => {
+  const header = (value: string): string =>
+    ['# co-safety Promotion Checklist', '', `**Phase A Complete:** ${value}`].join('\n');
+
+  test('parses the co-safety header shape (bold, colon inside bold)', () => {
+    expect(parsePhaseAChecklistClaim(header('false'))).toEqual({ value: false, line: 3 });
+    expect(parsePhaseAChecklistClaim(header('true'))).toEqual({ value: true, line: 3 });
+  });
+
+  test('plain (non-bold) form with space before the colon also parses', () => {
+    expect(parsePhaseAChecklistClaim('Phase A Complete : true\n')).toEqual({ value: true, line: 1 });
+  });
+
+  test('case-insensitive value and label', () => {
+    expect(parsePhaseAChecklistClaim('**phase a complete:** TRUE')?.value).toBe(true);
+  });
+
+  test('first matching line wins', () => {
+    const text = ['**Phase A Complete:** false', '', '**Phase A Complete:** true'].join('\n');
+    expect(parsePhaseAChecklistClaim(text)).toEqual({ value: false, line: 1 });
+  });
+
+  test('no claim line (absent field) yields null — nothing to contradict', () => {
+    expect(parsePhaseAChecklistClaim('# checklist\n\n| Phase A complete | Pending |')).toBeNull();
+  });
+
+  test('prose mentions without a trailing boolean value do not match', () => {
+    expect(parsePhaseAChecklistClaim('Phase A Complete is tracked in variant.json')).toBeNull();
+    expect(parsePhaseAChecklistClaim('**Phase A Complete:** pending')).toBeNull();
   });
 });

@@ -158,6 +158,26 @@ Backend/non-UI work is exempt only when the design doc or ADR states the exempti
   verifies that design docs prescribe no colors, fonts, or trends — style decisions stay
   project-owned.
 
+### Design-lint Configuration (designLint)
+
+The audit's blocking design-lint gate reads its config from `docs/workspace-schema.json`
+(`designLint`: `{ enabled, scanRoots, allowlist }`). A scaffolded project can override it
+per project by declaring the same block in its `variant.json` (U-20261028-014):
+
+- **Order**: `variant.json` designLint > `workspace-schema.json` designLint. The block
+  replaces the schema block wholesale — `enabled` (boolean) is required; `scanRoots`
+  (string array) and `allowlist` (string array) are optional. No block in `variant.json`
+  means schema behavior, unchanged.
+- **Semantics**: `enabled: false` disables the gate for the project (the audit reports an
+  explicit SKIP naming `variant.json`); `enabled: true` scans the declared `scanRoots`
+  (falling back to the conventional `playground/src` / `src` roots when none exist on
+  disk, and skipping with an explicit reason when neither set exists); `allowlist`
+  entries exempt documented raw literals (same match-equality rule as schema allowlist
+  rows, forwarded to `scripts/design-lint.ts` via `--allow`).
+- **Validation**: an invalid block fails the audit naming the violation, and
+  `bun scripts/validate-templates.ts` enforces the same shape on template
+  `variant.json` files (Check 2, `variant-designlint`).
+
 ### Session Log Format (`memory/YYYY-MM-DD.md`)
 
 Every session log entry MUST include the following four sections:
