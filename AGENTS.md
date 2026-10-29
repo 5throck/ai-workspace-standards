@@ -111,6 +111,21 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 *Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*
 
+### §3.6 3-Tier Strategy
+
+When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-5.6-sol / glm-5.3)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-5.6-terra / glm-5.3-flash)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-5.6-luna / glm-5.3-flash)
+<!-- /WORKSPACE-MANAGED -->
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max).
+<!-- /WORKSPACE-MANAGED -->
+
+> **Tier semantics**: see [PM Tier Semantics](#pm-tier-semantics) in the shared policy section below.
+
 ### §3.7 Meeting Facilitation
 
 When a meeting is requested, the PM orchestrates structured multi-agent discussions via the `meeting-facilitation` skill (`skills/meeting-facilitation/`).
@@ -134,21 +149,6 @@ The PM Agent follows a three-level inheritance model: **L0 (workspace root base)
 > **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
 
 > **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
-
-### §3.6 3-Tier Strategy
-
-When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
-
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-5.6-sol / glm-5.3)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-5.6-terra / glm-5.3-flash)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-5.6-luna / glm-5.3-flash)
-<!-- /WORKSPACE-MANAGED -->
-<!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max).
-<!-- /WORKSPACE-MANAGED -->
-
-> **Tier semantics**: see [PM Tier Semantics](#pm-tier-semantics) in the shared policy section below.
 
 ### §3.7.5 Governance Backlog Dispatch
 

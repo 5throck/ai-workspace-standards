@@ -95,30 +95,6 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 
 *Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*
 
-### §3.7 Meeting Facilitation
-
-When a meeting is requested, the PM orchestrates structured multi-agent discussions via the `meeting-facilitation` skill (`skills/meeting-facilitation/`).
-
-**Meeting Process**:
-1. **Open meeting**: Set agenda and objectives
-2. **Facilitate dialogue**: Ensure all specialists contribute
-3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
-4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
-
-### L0→L1→L2 PM Agent Architecture
-
-The PM Agent follows a three-level inheritance model: **L0 (workspace root base)** → **L1 (common template pure-extends)** → **L2 (variant YAML overrides)**. PM files at each level inherit from the previous, with L2 variants adding only YAML frontmatter overrides. See [`agents/pm.md`](agents/pm.md) for the complete specification, [docs/context.md](docs/context.md) for governance workflow details.
-
-**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
-
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
-
-**Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
-
-> **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
-
-> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
-
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
 <!-- Define project-specific agent dispatch triggers here. Format:
      | Agent | Phase | Dispatch Trigger |
@@ -146,6 +122,30 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 <!-- /WORKSPACE-MANAGED -->
 
 > **Tier semantics**: see [PM Tier Semantics](#pm-tier-semantics) in the shared policy section below.
+
+### §3.7 Meeting Facilitation
+
+When a meeting is requested, the PM orchestrates structured multi-agent discussions via the `meeting-facilitation` skill (`skills/meeting-facilitation/`).
+
+**Meeting Process**:
+1. **Open meeting**: Set agenda and objectives
+2. **Facilitate dialogue**: Ensure all specialists contribute
+3. **Synthesize outcomes**: Cross-domain agent synthesizes agreements
+4. **Document results**: Write transcript to `memory/meeting-YYYY-MM-DD-[slug].md`
+
+### L0→L1→L2 PM Agent Architecture
+
+The PM Agent follows a three-level inheritance model: **L0 (workspace root base)** → **L1 (common template pure-extends)** → **L2 (variant YAML overrides)**. PM files at each level inherit from the previous, with L2 variants adding only YAML frontmatter overrides. See [`agents/pm.md`](agents/pm.md) for the complete specification, [docs/context.md](docs/context.md) for governance workflow details.
+
+**⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
+
+**Integrated from pm.md, CLAUDE.md §5, GEMINI.md §5**
+
+> **⚠️ IMPORTANT**: Do NOT invoke any specialist agent directly. All requests must go through PM.
+
+> **Execution Plan Format**: For mandatory criteria, boilerplate table, and rules, see [§5 Execution Plan Templates](#5-execution-plan-templates). For platform-specific dispatch instructions, see [CLAUDE.md §5](CLAUDE.md#5-agent-dispatch-rules) or [GEMINI.md §5](GEMINI.md#5-agent-dispatch-rules).
 
 ### §3.7.5 Governance Backlog Dispatch
 

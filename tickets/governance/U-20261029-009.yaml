@@ -3,33 +3,14 @@ id: U-20261029-009
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: done
+status: waiting
 attempts: 0
-created_at: '2026-10-29T21:46:30.856+09:00'
+created_at: 2026-10-29T21:46:30.856+09:00
 history:
-  - at: '2026-10-29T21:46:30.856+09:00'
+  - at: 2026-10-29T21:46:30.856+09:00
     from: null
     to: waiting
-  - at: '2026-10-30T06:36:39.373+09:00'
-    from: waiting
-    to: review
-  - at: '2026-10-30T06:36:39.373+09:00'
-    from: review
-    to: done
-result: >-
-  Verified not-a-defect (upstream-adjudication read-only verification,
-  2026-10-30 runner): the managed-block machinery deliberately supports repeated
-  keys — lib/managed-block-merge.ts:343-363 pairs the Nth template occurrence
-  with the Nth project occurrence (keySeen counter, project re-scanned per match
-  so offsets never go stale; a repeated key's later insert anchors after its
-  predecessor), and lib/managed-block-parity.ts:33-37 documents 'Duplicate keys
-  are legitimate (templates/common/AGENTS.md itself carries two
-  tier-model-mapping blocks with different content: the §3.6 tier list and the
-  §5.3 Model-column note)' with parity as SET-of-contents per key enforced by
-  the managed-block-parity validator arm. Confirmed both copies carry exactly 2
-  wrapped pairs (root AGENTS.md + templates/common/AGENTS.md). No corruption
-  path exists; the ticket's conditional ('if managed-block merge tooling matches
-  by ID') is false — matching is key+occurrence. No file changes needed.
+result: null
 error: null
 upstream:
   project: co-abap
@@ -38,15 +19,7 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: >-
-    AGENTS.md §3.6 carries two consecutive complete WORKSPACE-MANAGED block
-    pairs with the same block ID "tier-model-mapping" (first pair wraps the tier
-    bullet list, second wraps the Model-column note; verified lines ~370-377
-    pre-regeneration, still present in the delivered copy). If managed-block
-    merge tooling matches by ID, repeated template upgrades may duplicate or
-    misplace the second body. Expected: distinct block IDs for the two managed
-    bodies (e.g. tier-model-mapping and tier-model-mapping-note), or a single
-    merged block.
+  symptom: 'AGENTS.md §3.6 carries two consecutive complete WORKSPACE-MANAGED block pairs with the same block ID "tier-model-mapping" (first pair wraps the tier bullet list, second wraps the Model-column note; verified lines ~370-377 pre-regeneration, still present in the delivered copy). If managed-block merge tooling matches by ID, repeated template upgrades may duplicate or misplace the second body. Expected: distinct block IDs for the two managed bodies (e.g. tier-model-mapping and tier-model-mapping-note), or a single merged block.'
   affected_paths:
     - AGENTS.md
   identity_source: cwd
@@ -57,22 +30,4 @@ upstream:
   dedupe_key: b853988c94e9d88a8bb4a4ed50a5688b5db1f353390284438e9c6d92d1606c3d
   duplicates:
     - project: co-abap
-      at: '2026-10-29T21:46:30.856+09:00'
-  resolution:
-    outcome: rejected
-    summary: >-
-      Verified not-a-defect (upstream-adjudication read-only verification,
-      2026-10-30 runner): the managed-block machinery deliberately supports
-      repeated keys — lib/managed-block-merge.ts:343-363 pairs the Nth template
-      occurrence with the Nth project occurrence (keySeen counter, project
-      re-scanned per match so offsets never go stale; a repeated key's later
-      insert anchors after its predecessor), and
-      lib/managed-block-parity.ts:33-37 documents 'Duplicate keys are legitimate
-      (templates/common/AGENTS.md itself carries two tier-model-mapping blocks
-      with different content: the §3.6 tier list and the §5.3 Model-column
-      note)' with parity as SET-of-contents per key enforced by the
-      managed-block-parity validator arm. Confirmed both copies carry exactly 2
-      wrapped pairs (root AGENTS.md + templates/common/AGENTS.md). No corruption
-      path exists; the ticket's conditional ('if managed-block merge tooling
-      matches by ID') is false — matching is key+occurrence. No file changes
-      needed.
+      at: 2026-10-29T21:46:30.856+09:00
