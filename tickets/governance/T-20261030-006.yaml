@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261030-006
+kind: manual
+title: >-
+  URGENT wave-blocker: 0.24.0 canary (co-safety) blocked by language-gate vs
+  changelog-reorganization interaction — the 0.24.0 delivery's changelog
+  scaffold rewrote the project CHANGELOG (pre-existing Korean statute/term
+  entries, file carries the sanctioned lang_reason: legal exception) and the
+  moved history blocks re-appear as 'newly added lines' (25 Korean-bearing
+  additions in the staged diff), failing dev-sync's non-English additions check.
+  Third gate-vs-legacy-content interaction in two waves (mirror-gate CI 10-29,
+  changelog duplicate gate + language gate 10-30). Fix needed (systemic): (a)
+  the changelog scaffold should preserve block positions (append-only insert of
+  the new version section) so history lines never re-enter the add-set, or (b)
+  the language additions check needs the same baseline-hash tolerance PR2 gave
+  the audit gate (content that exists verbatim in the parent commit is not
+  'newly added'). Canary disposition per runner contract: co-safety tree
+  reverted to main, delivery abandoned; remaining 15 projects NOT waved tonight.
+  0.24.0 rides the next cycle after the fix. Worktree state: clean at main
+  f47036f
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-30T02:25:59.047+09:00'
+history:
+  - at: '2026-10-30T02:25:59.047+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

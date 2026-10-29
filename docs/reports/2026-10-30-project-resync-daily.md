@@ -79,6 +79,42 @@ Git-mode gitleaks (full config) over the four non-mechanical ranges: co-deck, co
 
 Report-only landing (judgment report + tickets T-20261030-003/-004/-005). Design Gate: standing specs 2026-09-25-daily-fleet-review-resync-design (ADR-0089) + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design.
 
-## Steps 4–5 — v0.24.0 upgrade wave
+## Steps 4–5 — v0.24.0 upgrade wave: **HALTED at canary** (runner contract)
 
-Appended after the wave (canary-first; tombstone guard per project post-merge).
+Canary **co-safety**: dry-run clean (0 ERROR) → real run (327 decisions, 0 ERROR) → landing blocked by a **gate-vs-legacy-content interaction**:
+
+1. The new duplicate-category changelog gate (bookkeeping PR3, first 0.24.0 delivery) flagged the project's historical changelog style (dated `### Fixed (2026-08-07 — …)` sub-headings, a misplaced second `## [Unreleased]`). Mechanically merged via project dev-sync fixups (3 python passes; content preserved, headings normalized).
+2. After the duplicate gate cleared, **dev-sync's non-English additions check failed**: the changelog scaffold's rewrite re-positioned pre-existing Korean statute/term entries (the file carries the sanctioned `lang_reason: legal` exception) so they re-enter the add-set — 25 Korean-bearing lines in the staged diff. Content is months-old project history, not new Korean.
+
+**Disposition (runner contract: canary failure → halt + urgent ticket)**: co-safety tree reverted to clean `main` (f47036f), delivery abandoned, **remaining 15 projects not waved tonight**. → **T-20261030-006 (high, URGENT)**: systemic fix needed — (a) changelog scaffold preserves block positions (append-only version-section insert), or (b) the language additions check gets the same parent-commit baseline tolerance that PR2 gave the audit gate. This is the third gate-vs-legacy-content interaction in two waves (mirror-gate CI 10-29; changelog duplicate + language gates 10-30) — the pattern deserves a consolidated look, not another per-case patch.
+
+v0.24.0 (tagged, root CI green) rides the next cycle after T-20261030-006 lands. No project was left dirty; the only in-flight surfaces untouched tonight were co-deck's active session (37 files) and co-newbiz's project-session PR #778.
+
+## Step 6 — Final state (03:15 KST)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| co-abap | main, synced | 0 | 0 | 0.23.0 |
+| co-architect | main, synced | 0 | 0 | 0.23.x (workspace-schema conflict-bound — standing human item) |
+| co-consult | main, synced | 0 | 0 | 0.23.x |
+| co-deck | main | 37 (active session — untouched) | 0 | 0.23.x |
+| co-design | main, synced | 0 | 0 | 0.23.x |
+| co-develop | main, synced | 0 | 0 | 0.23.x |
+| co-export | main, synced | 0 | 0 | 0.23.x |
+| co-game | main, synced | 0 | 0 | 0.23.x |
+| co-hr | main, synced | 0 | 0 | 0.23.x |
+| co-learning | main, synced | 0 | 0 | 0.23.x |
+| co-newbiz | main | 9 (session branch work + PR #778 open — session-owned) | **#778** | 0.23.x |
+| co-news | main, synced | 0 | 0 | 0.23.x |
+| co-price | main, synced | 0 | 0 | 0.23.x |
+| co-safety | main, clean (canary reverted) | 0 | 0 | 0.23.x |
+| co-security | main, synced | 0 | 0 | 0.23.x |
+| co-work | main, synced | 0 | 0 | 0.23.x |
+
+Fleet at **0.23.x** (0.24.0 delivered to zero projects — wave halted at canary). Open PRs: 1 (co-newbiz #778, project session). Post-merge audits green on all Step-1-merged projects (co-abap #230 real CI CLEAN; co-consult #109, co-design #72 billing-wall with local audits green). Tombstone guard: Step 0's manifest-based scan ran fleet-clean (0 violations) — per-project post-merge guard not re-run this cycle because the wave produced no project merges beyond Step 1 records (guard applies to wave merges; the three Step-1 landings carried no deletions — verified via their diffs).
+
+Root landings this cycle: #1737 (Phase I FULL) · #1738 (Phase 1b) · #1739 (auto-release v0.24.0, tagged) · #1740 (Steps 0–3 judgment) · final closeout PR (this landing).
+
+## Verdict
+
+Fleet healthy at 0.23.x; v0.24.0 tagged but undelivered pending T-20261030-006 (language-gate tolerance). Wave halted at canary per contract — no gates bypassed, no force, co-safety restored cleanly. Two live sessions (co-deck, co-newbiz) untouched.
