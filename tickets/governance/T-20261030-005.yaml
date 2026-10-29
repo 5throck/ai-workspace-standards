@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261030-005
+kind: manual
+title: >-
+  URGENT secrets-gate finding (hard-fail, 3rd occurrence of the class): gitleaks
+  flagged 4x generic-api-key in Projects/co-newbiz window range —
+  tests/unit/governance-registry.test.ts (bdaf2657),
+  tests/unit/admin-password-reset-login-flow.test.ts (7cfb51e8),
+  tests/unit/s8-goal-basis-and-completion.test.ts ×2 (35db7d55). FP assessment:
+  test-fixture structural identifiers (metric_key tables, password-reset e2e
+  prose) — same class as the twice-adjudicated co-newbiz fixture findings
+  (T-20261028-009, T-20261029-006/T-006 done). SYSTEMIC disposition now needed
+  rather than per-file allowlist whack-a-mole: decide a fixture-identifier
+  policy (a) a bounded test-fixture path+shape allowlist rule in
+  .github/gitleaks-full.toml, (b) fixture value renaming convention (e.g. prefix
+  non-credential literals), or (c) per-file exact-value entries. Until cleared:
+  no port of these tests' code into template/skill surfaces
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-30T02:13:22.229+09:00'
+history:
+  - at: '2026-10-30T02:13:22.229+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
