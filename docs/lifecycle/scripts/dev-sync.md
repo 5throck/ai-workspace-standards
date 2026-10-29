@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.34.0
+- **Version**: 1.35.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-10-29
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-10-29 | production | production | v1.35.0 (U-20261028-013, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A4): new step 3b — CHANGELOG structural-duplicate gate (blocking): duplicate `### <Category>` headings within one release section, or more than one `[Unreleased]` section, FAIL with a merge-action fix message; detection in helpers/changelog-duplicates.ts v1.0.0, unit-pinned | automation-engineer |
 | 2026-10-28 | - | production | Record seeded at v1.33.0 (T-20261028-012, spec docs/designs/2026-10-28-dev-sync-staged-count-design.md): step 6.9 re-derives the commit-time message from the FINAL staged set after step 6.5 staging, fixing the "(0 files)" subject/PR-title class (root PR #1669: 12 files; co-design PR #65: 17 files); memory summary header + MEMORY.md index re-converge when the message changes | automation-engineer |
 
 ## Acceptance Criteria
