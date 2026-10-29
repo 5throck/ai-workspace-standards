@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: U-20261029-009
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-29T21:46:30.856+09:00
+history:
+  - at: 2026-10-29T21:46:30.856+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.23.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'AGENTS.md §3.6 carries two consecutive complete WORKSPACE-MANAGED block pairs with the same block ID "tier-model-mapping" (first pair wraps the tier bullet list, second wraps the Model-column note; verified lines ~370-377 pre-regeneration, still present in the delivered copy). If managed-block merge tooling matches by ID, repeated template upgrades may duplicate or misplace the second body. Expected: distinct block IDs for the two managed bodies (e.g. tier-model-mapping and tier-model-mapping-note), or a single merged block.'
+  affected_paths:
+    - AGENTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery AGENTS.md=false
+  dedupe_key: b853988c94e9d88a8bb4a4ed50a5688b5db1f353390284438e9c6d92d1606c3d
+  duplicates:
+    - project: co-abap
+      at: 2026-10-29T21:46:30.856+09:00

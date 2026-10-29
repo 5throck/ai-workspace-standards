@@ -10,12 +10,41 @@ title: >-
   tokens.json + registries) and shrink the allowlist
 priority: low
 not_before: '2026-10-29'
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-28T03:31:38.543+09:00'
 history:
   - at: '2026-10-28T03:31:38.543+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T23:19:49.186+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T23:19:49.204+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T23:19:49.237+09:00'
+    from: review
+    to: done
+result: >-
+  Token adoption COMPLETE per the project design
+  (Projects/co-price/docs/designs/2026-10-29-token-adoption-design.md,
+  owner-approved OQ-1..4 defaults; spec registered implemented in co-price).
+  Stages: 0 foundation (src/app/tokens.css 3-layer SSOT + Tailwind v4 @theme
+  inline bridge + schema truth-up scanRoots:[src]/tokenSources — co-price PR
+  #164); 1 type scale (482 replacements 8/9/10/11px → micro/caption/label/small;
+  px literals 693→204); 2 color/surface consolidation + onyx collapse (OQ-2; PR
+  #165); 3 radii/shadows/dims (rounded-card/-panel/-panel-lg + 3 glow presets;
+  22 literal classes; PR #166); 4 machine-verified allowlist residue (PR #167 —
+  emptied-and-recollect method over the FULL match field: 141 → 130 live + 1px =
+  131, 11 dead deleted). Trajectory: 158 (pre-adoption) → 131 (machine-verified
+  live classes). DESIGN DEVIATION documented: the ≤30 default target is not
+  reachable without adopting the inline-style/overlay surfaces (CopilotPanel
+  inline <style>, recharts chart-internal fontSize, globals.css overlay rules) —
+  that deeper adoption is the remaining path if the ≤30 target is confirmed.
+  Gate: design-lint CLEAN throughout. ADR-0070 screenshots + axe-core runs
+  DEFERRED (environment: dashboard needs seed data; 0 users) — the co-price
+  session should run them at the next natural UI change. Also resolved on the
+  way: §2.5 latent defect (bg-primary utilities generated no CSS) fixed by the
+  bridge.
 error: null

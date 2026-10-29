@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261029-006
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-29T21:34:52.530+09:00
+history:
+  - at: 2026-10-29T21:34:52.530+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.23.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'estimate-layout.ts --lint validates only maxima — max_bullets_per_slide and max_body_chars from theme.json content_rules. There is no minimum content check, so sparse decks pass the layout gate: standard content slides with too few bullets (e.g. 1–2) produce sparse, thin-looking decks that clients flag in review. The zen theme.json content_rules schema has no min_* fields, so there is nothing for the lint to read even if it wanted to enforce a floor. Observed on 2026-10-ai-era-business-majors: slides with 2 bullets passed --lint with exit 0 while the client review flagged insufficient density.'
+  affected_paths:
+    - scripts/co-deck/estimate-layout.ts
+    - docs/html-themes/themes/zen/theme.json
+  identity_source: cwd
+  repro: Create or point --lint at a deck whose standard content slides have 2 bullets each (well under typical density expectations but within all maxima). Run `bun scripts/co-deck/estimate-layout.ts --lint`. The lint reports no violations and exits 0.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=false
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.json=false
+  dedupe_key: ebed4868cf36ce4710742fc23b8b2cad99fb301e876aa56fa41b3fc06772bfae
+  duplicates:
+    - project: co-deck
+      at: 2026-10-29T21:34:52.530+09:00
