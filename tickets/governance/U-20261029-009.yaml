@@ -3,14 +3,28 @@ id: U-20261029-009
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-29T21:46:30.856+09:00
+created_at: '2026-10-29T21:46:30.856+09:00'
 history:
-  - at: 2026-10-29T21:46:30.856+09:00
+  - at: '2026-10-29T21:46:30.856+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-30T06:39:15.034+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-30T06:39:15.034+09:00'
+    from: review
+    to: done
+result: >-
+  Verified not-a-defect (2026-10-30 runner, PR #1742): managed-block machinery
+  deliberately supports repeated keys — lib/managed-block-merge.ts:343-363 pairs
+  Nth template occurrence with Nth project occurrence (keySeen counter, project
+  re-scanned per match); lib/managed-block-parity.ts:33-37 documents 'Duplicate
+  keys are legitimate (two tier-model-mapping blocks: §3.6 tier list + §5.3
+  Model-column note)' with SET-of-contents parity enforced by the
+  managed-block-parity validator arm. Both copies carry exactly 2 wrapped pairs.
+  No corruption path; the ticket's conditional is false. No file changes.
 error: null
 upstream:
   project: co-abap
@@ -19,7 +33,15 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'AGENTS.md §3.6 carries two consecutive complete WORKSPACE-MANAGED block pairs with the same block ID "tier-model-mapping" (first pair wraps the tier bullet list, second wraps the Model-column note; verified lines ~370-377 pre-regeneration, still present in the delivered copy). If managed-block merge tooling matches by ID, repeated template upgrades may duplicate or misplace the second body. Expected: distinct block IDs for the two managed bodies (e.g. tier-model-mapping and tier-model-mapping-note), or a single merged block.'
+  symptom: >-
+    AGENTS.md §3.6 carries two consecutive complete WORKSPACE-MANAGED block
+    pairs with the same block ID "tier-model-mapping" (first pair wraps the tier
+    bullet list, second wraps the Model-column note; verified lines ~370-377
+    pre-regeneration, still present in the delivered copy). If managed-block
+    merge tooling matches by ID, repeated template upgrades may duplicate or
+    misplace the second body. Expected: distinct block IDs for the two managed
+    bodies (e.g. tier-model-mapping and tier-model-mapping-note), or a single
+    merged block.
   affected_paths:
     - AGENTS.md
   identity_source: cwd
@@ -30,4 +52,16 @@ upstream:
   dedupe_key: b853988c94e9d88a8bb4a4ed50a5688b5db1f353390284438e9c6d92d1606c3d
   duplicates:
     - project: co-abap
-      at: 2026-10-29T21:46:30.856+09:00
+      at: '2026-10-29T21:46:30.856+09:00'
+  resolution:
+    outcome: rejected
+    summary: >-
+      Verified not-a-defect (2026-10-30 runner, PR #1742): managed-block
+      machinery deliberately supports repeated keys —
+      lib/managed-block-merge.ts:343-363 pairs Nth template occurrence with Nth
+      project occurrence (keySeen counter, project re-scanned per match);
+      lib/managed-block-parity.ts:33-37 documents 'Duplicate keys are legitimate
+      (two tier-model-mapping blocks: §3.6 tier list + §5.3 Model-column note)'
+      with SET-of-contents parity enforced by the managed-block-parity validator
+      arm. Both copies carry exactly 2 wrapped pairs. No corruption path; the
+      ticket's conditional is false. No file changes.
