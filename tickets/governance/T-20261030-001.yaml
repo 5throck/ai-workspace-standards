@@ -10,12 +10,18 @@ title: >-
   SCRIPTS.md copies (version cell bumped without prose — Phase I 2026-10-30
   F-1/slot-B)
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-10-30T01:40:18.232+09:00'
 history:
   - at: '2026-10-30T01:40:18.232+09:00'
     from: null
     to: backlog
+  - at: '2026-10-30T06:34:29.524+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-30T06:34:29.540+09:00'
+    from: waiting
+    to: running
 result: null
 error: null
