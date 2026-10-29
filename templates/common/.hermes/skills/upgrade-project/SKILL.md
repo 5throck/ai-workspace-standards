@@ -57,6 +57,7 @@ Upgrades an existing project created from a variant template to match the curren
 | `--yes` | No | Skip the proceed prompt when `template-version.txt` is missing |
 | `--skip-context-commonization` | No | Opt out of the CONTEXT_COMMONIZATION pass for this run |
 | `--force-context-sync` | No | Take the template `docs/context.md` even when the project copy carries project-only content (the discarded section count is logged) |
+| `--changelog-entry` | No | Opt-in (default OFF): scaffold one editable `chore(upgrade): template sync` bullet at the top of the project CHANGELOG's `[Unreleased]` section for this delivery (idempotent per template version; apply-mode only — refused under `--dry-run`; spec 2026-10-29-delivery-bookkeeping-engine A3). The daily resync runner and operator upgrade sessions pass it by convention |
 
 ## How It Works
 

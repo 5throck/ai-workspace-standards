@@ -42,11 +42,25 @@
  *         the stub's). Pure helper suites and the tombstone/baseline suites are
  *         untouched.
  *
+ * v1.4.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-
+ *         design.md, DEC-20261029-01 — PR1): (B1) the TOMBSTONE_CLEARED (INFO)
+ *         retraction row — the existing clear → next-run-NEW regression gains
+ *         row assertions, a glob-exactness engine case (non-matching tombstone
+ *         + baseline entries survive the grant), and the pure tombstoneGuard
+ *         no-fire pin for cleared paths; (B2) the tombstones carry-forward
+ *         prunes template-departed entries (the v1.3.0 "carried forward
+ *         verbatim" ghost expectation flips — the asymmetry with the baselines
+ *         rule is closed) while template-present tombstones still survive;
+ *         (D1) STUB_VERSION_DIVERGENCE (INFO) — a stub pinned at an older
+ *         version than its template counterpart reports the divergence
+ *         (backfill never overwrites; a sanctioned pin stays INFO), an
+ *         equal-version stub reports nothing.
+ *
  * Pure-helper suites run against scripts/lib/upgrade-policy.ts exports;
  * engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 1.3.0
+ * @version 1.4.0
  */
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -65,6 +79,7 @@ import {
   manifestHasUnresolvedErrors,
   resolveDisposition,
   sha256Hex,
+  tombstoneGuard,
   type DecisionBaseline,
 } from '../../scripts/lib/upgrade-policy.ts';
 import { composeResolvedAgentContent } from '../../scripts/helpers/resolve-pm-stub.ts';
@@ -176,6 +191,27 @@ describe('upgrade-policy decision-log helpers (sync-overwrite-policy)', () => {
     expect(DECISION_SEVERITY_CONTRACT.SEED_SKIP).toBe('INFO');
     expect(DECISION_SEVERITY_CONTRACT.STUB_SKIP).toBe('INFO');
     expect(DECISION_SEVERITY_CONTRACT.ADOPT).toBe('INFO');
+    // v1.31.0 verdicts (2026-10-29-delivery-bookkeeping-engine B1/D1): both
+    // INFO — a retraction is expected mechanics and a pinned stub version is
+    // sanctioned divergence (WARN would fire on every legitimate pin).
+    expect(DECISION_SEVERITY_CONTRACT.TOMBSTONE_CLEARED).toBe('INFO');
+    expect(DECISION_SEVERITY_CONTRACT.STUB_VERSION_DIVERGENCE).toBe('INFO');
+  });
+
+  test('tombstoneGuard: no fire for a path whose entries were cleared (B1 regression)', () => {
+    // The clear grant drops matching tombstones AND carried-forward baselines
+    // (94a390945) — with both gone the D2 fire condition
+    // `absent && (tombstones[rel] || baselines[rel])` cannot fire, so the next
+    // run delivers the path as a clean NEW.
+    const cleared = { tombstones: {}, baselines: {} };
+    expect(tombstoneGuard(WORKFLOWS_REL, cleared, true).fires).toBe(false);
+    // The catch-22 the baseline drop prevents: a retained baseline re-fires
+    // TOMBSTONED (ERROR) on the next run.
+    const baselineOnly = { tombstones: {}, baselines: { [WORKFLOWS_REL]: { hash: 'h', templateVersion: '0.0.0' } } };
+    const fired = tombstoneGuard(WORKFLOWS_REL, baselineOnly, true);
+    expect(fired.fires).toBe(true);
+    expect(fired.verdict).toBe('TOMBSTONED');
+    expect(fired.severity).toBe('ERROR');
   });
 
   test('resolveDisposition: ERROR default-skip, adopt flip, EVOLVED deliver, non-evolved pass-through', () => {
@@ -555,13 +591,15 @@ const composedDeliverable = composeResolvedAgentContent(
   join(workspaceRoot, 'templates', 'common', 'agents', 'i18n-specialist.md'),
   VARIANT,
 ).content;
-// The post-delivery re-stamp (v1.74.0) advances the TOP-LEVEL frontmatter
-// `last_updated` — the stub frontmatter carries one (the bare L1 target does
-// not), so a delivered stub-composed file differs from composedDeliverable by
-// exactly that line. The engine stamps new Date().toISOString().slice(0, 10).
+// The post-delivery re-stamp (v1.74.0 top-level; v1.84.0 nested lifecycle
+// block, A1) advances BOTH frontmatter `last_updated` stamps — the stub
+// frontmatter carries a top-level one and the L1 target's lifecycle block
+// carries the nested one. The engine stamps new Date().toISOString().slice(0, 10).
 const deliveryDate = new Date().toISOString().slice(0, 10);
 const restamped = (content: string): string =>
-  content.replace(/^last_updated:.*$/m, `last_updated: ${deliveryDate}`);
+  content
+    .replace(/^last_updated:.*$/m, `last_updated: ${deliveryDate}`)
+    .replace(/^([ \t]+last_updated:).*$/m, `$1 ${deliveryDate}`);
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Delivery tombstones (U-20261028-001 D1–D3, spec
@@ -710,6 +748,17 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
       expect(manifest1.tombstones?.[WORKFLOWS_REL]).toBeUndefined();
       expect(Object.keys(manifest1.tombstones ?? {}).length).toBe(0);
       expect(manifest1.baselines[WORKFLOWS_REL]).toBeUndefined();
+      // B1 (v1.84.0): the retraction is auditable — one TOMBSTONE_CLEARED
+      // (INFO) row naming the grant glob and the dropped paths, recorded via
+      // the shipped baseline-drop semantics (94a390945), which this run's
+      // entry+baseline absences pin.
+      const clearedRow = manifest1.decisions.find((d) => d.verdict === 'TOMBSTONE_CLEARED');
+      expect(clearedRow).toBeDefined();
+      expect(clearedRow!.severity).toBe('INFO');
+      expect(clearedRow!.path).toBe('docs/governance/**');
+      expect(clearedRow!.detail).toContain(WORKFLOWS_REL);
+      expect(clearedRow!.detail).toContain('docs/governance/**');
+      expect(manifestHasUnresolvedErrors(manifest1)).toBe(false);
       // Land run 1 before run 2 — the engine's pre-upgrade stash reverts an
       // uncommitted prior wave, so the second wave must start from a commit.
       // Run 1 delivered the template tree, which configured the project's git
@@ -732,6 +781,37 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
     }
   }, 240000);
 
+  test('--clear-tombstone drop scope is glob-exact: non-matching tombstone + baseline entries survive', () => {
+    // B1 (ii): a grant names a glob; entries outside it must survive BOTH the
+    // tombstone carry-forward and the baseline reset. The survivor is a
+    // template-PRESENT path no delivery pass ever claims (agents/README.md is
+    // PRESERVE'd by the agents pass), so no natural clear event can touch it —
+    // the entry's fate is decided purely by the grant's glob scope.
+    const README_REL = 'agents/README.md';
+    const tmp = makeTombstoneProject(true);
+    try {
+      seedPriorTombstone(tmp, README_REL, 'retired readme body\n', 'fixture: awaiting adjudication');
+      commitAll(tmp, 'chore: readme tombstone fixture');
+      const { status } = runUpgrade(tmp, ['--clear-tombstone', 'docs/governance/**']);
+      expect(status).toBe(0);
+      // Matching path: both entries dropped + the TOMBSTONE_CLEARED row.
+      expect(readFileSync(join(tmp, '.claude', 'last-upgrade-delivery.json'), 'utf8')).toContain('TOMBSTONE_CLEARED');
+      const manifest = readManifest(tmp);
+      expect(manifest.tombstones?.[WORKFLOWS_REL]).toBeUndefined();
+      expect(manifest.baselines[WORKFLOWS_REL]).toBeUndefined();
+      const cleared = manifest.decisions.filter((d) => d.verdict === 'TOMBSTONE_CLEARED');
+      expect(cleared.length).toBe(1);
+      expect(cleared[0]!.path).toBe('docs/governance/**');
+      expect(cleared[0]!.detail).toContain(WORKFLOWS_REL);
+      // Non-matching path: tombstone AND baseline survive intact.
+      expect(manifest.tombstones?.[README_REL]).toBeDefined();
+      expect(manifest.tombstones![README_REL]!.reason).toContain('awaiting adjudication');
+      expect(manifest.baselines[README_REL]).toBeDefined();
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 240000);
+
   test('--disposition adopt-template cannot deliver a tombstoned path (D3b)', () => {
     const tmp = makeTombstoneProject(true);
     try {
@@ -747,25 +827,32 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
     }
   }, 180000);
 
-  test('carry-forward: tombstones = (prior ∪ newly recorded) − paths delivered this run', () => {
+  test('carry-forward: tombstones = (prior ∪ newly recorded) − paths delivered this run − template-departed entries (B2 prune symmetry)', () => {
     // Three tombstone states in one run: (a) workflows.md carries a BASELINE
     // only — absent again → TOMBSTONED (ERROR), no entry written (recording
     // needs the grant); (b) phase-definitions carries a tombstone + its copy
     // at the delivered baseline — the run DELIVERS it (UNTOUCHED + template
     // changed → ADOPT) and the natural clear event drops the entry; (c) a
-    // retired procedures entry no pass walks — carried forward verbatim.
+    // retired procedures entry no pass walks — TEMPLATE-DEPARTED, so the B2
+    // prune symmetry (v1.84.0, mirroring the baselines carry-forward) removes
+    // it: the guard is reachable only from template-walking passes, the entry
+    // is provably inert, and (d) a template-PRESENT tombstone (agents/
+    // README.md — PRESERVE'd by the agents pass) survives.
     // Seeds land BEFORE commitAll (the pre-upgrade stash reverts uncommitted
     // tracked changes).
     const GHOST_REL = 'procedures/ghost-entry';
+    const KEEP_REL = 'agents/README.md';
     const tmp = makeTempProject();
     seedPriorDelivery(tmp, WORKFLOWS_REL, OLD_WORKFLOWS);
     seedPriorDelivery(tmp, PHASE_DEFS_REL, OLD_PHASE_DEFS);
     seedPriorDelivery(tmp, GHOST_REL, 'retired procedure entry\n');
+    seedPriorDelivery(tmp, KEEP_REL, 'retired readme body\n');
     const manifestPath = join(tmp, '.claude', 'last-upgrade-delivery.json');
     const seeded = JSON.parse(readFileSync(manifestPath, 'utf8'));
     seeded.tombstones = {
       [PHASE_DEFS_REL]: { hash: seeded.baselines[PHASE_DEFS_REL].hash, templateVersion: '0.0.0', recordedAt: '2026-10-28', reason: 'fixture: superseded' },
       [GHOST_REL]: { hash: seeded.baselines[GHOST_REL].hash, templateVersion: '0.0.0', recordedAt: '2026-10-28', reason: 'fixture: retired entry' },
+      [KEEP_REL]: { hash: seeded.baselines[KEEP_REL].hash, templateVersion: '0.0.0', recordedAt: '2026-10-28', reason: 'fixture: firing-capable (template present)' },
     };
     writeFileSync(manifestPath, JSON.stringify(seeded, null, 2) + '\n');
     mkdirSync(join(tmp, 'docs'), { recursive: true });
@@ -778,10 +865,17 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
       expect(readFileSync(join(tmp, PHASE_DEFS_REL), 'utf8')).toBe(phaseDefsTemplate);
       expect(existsSync(join(tmp, WORKFLOWS_REL))).toBe(false);
       const manifest = readManifest(tmp);
-      expect(manifest.tombstones?.[GHOST_REL]).toBeDefined();
+      // Template-present entry survives the carry-forward (no clear grant —
+      // prune and clear are different mechanisms; the prune is silent).
+      expect(manifest.tombstones?.[KEEP_REL]).toBeDefined();
+      // Template-departed entry pruned (B2) — the v1.3.0 "carried forward
+      // verbatim" expectation flipped by the prune symmetry.
+      expect(manifest.tombstones?.[GHOST_REL]).toBeUndefined();
       expect(manifest.tombstones?.[PHASE_DEFS_REL]).toBeUndefined();
       expect(manifest.tombstones?.[WORKFLOWS_REL]).toBeUndefined();
       expect(manifest.decisions.some((d) => d.path === WORKFLOWS_REL && d.verdict === 'TOMBSTONED')).toBe(true);
+      // No grants ran — no TOMBSTONE_CLEARED rows (the prune is not a grant).
+      expect(manifest.decisions.some((d) => d.verdict === 'TOMBSTONE_CLEARED')).toBe(false);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
@@ -1098,6 +1192,159 @@ describe('upgrade-project.ts stub FM backfill (T-20261028-010)', () => {
       expect(stripLu(extractFm(after))).toBe(stripLu(fm));
       const manifest = readManifest(tmp);
       expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_FM_BACKFILL')).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// STUB_VERSION_DIVERGENCE (2026-10-29-delivery-bookkeeping-engine design D1 —
+// DEC-20261029-01): the stub-frontmatter backfill contract blesses a pinned
+// older stub `version` as deliberate project divergence (never overwritten),
+// but the divergence was invisible — the decision log showed only the STUB
+// skip. The agents/ STUB skip arm now records an INFO row naming both
+// versions (INFO, not WARN: the pin is sanctioned; repeat-per-run accepted,
+// same as STUB_VERSION_BUMP_ADVICE).
+// ═════════════════════════════════════════════════════════════════════════════
+describe('upgrade-project.ts STUB_VERSION_DIVERGENCE (D1)', () => {
+  // The template counterpart the STUB skip branch sources from: the variant
+  // stub at the same rel (templates/co-develop/agents/pm.md — MERGE_MANAGED,
+  // so the agents/ pass always dead-ends in the skip branch).
+  const counterpartStub = readFileSync(join(workspaceRoot, 'templates', VARIANT, 'agents', 'pm.md'), 'utf8');
+  const counterpartVersion = counterpartStub.match(/^version:[ \t]*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
+  const makeStub = (version: string): string => [
+    '---',
+    'extends: ../../../agents/pm.md',
+    'name: pm',
+    `variant: ${VARIANT}`,
+    `version: "${version}"`,
+    'last_updated: "2026-09-01"',
+    'status: active',
+    'tier: medium',
+    '---',
+    '',
+    '<!-- WORKSPACE-MANAGED: PM agent body. Content outside this block is preserved during project upgrades. -->',
+    '## Role',
+    '',
+    'Fixture stub body line that stays project-owned.',
+    '',
+  ].join('\n');
+
+  test('stub pinned at an older version → STUB_VERSION_DIVERGENCE (INFO) row naming both versions', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub('0.9.0'));
+      commitAll(tmp, 'chore: pinned stub fixture');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      expect(counterpartVersion.length).toBeGreaterThan(0);
+      // The pin survives: backfill never overwrites the existing version.
+      expect(readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8')).toContain('version: "0.9.0"');
+      const manifest = readManifest(tmp);
+      const row = manifest.decisions.find((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_DIVERGENCE');
+      expect(row).toBeDefined();
+      expect(row!.severity).toBe('INFO');
+      expect(row!.detail).toContain('stub version 0.9.0 pinned vs counterpart');
+      expect(row!.detail).toContain(counterpartVersion);
+      expect(row!.detail).toContain('backfill never overwrites');
+      // The row rides AFTER the primary skip rows — a consumer reading the
+      // path's FIRST decision row still sees the verdict.
+      const firstPmRow = manifest.decisions.find((d) => d.path === 'agents/pm.md');
+      expect(firstPmRow!.verdict).not.toBe('STUB_VERSION_DIVERGENCE');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+
+  test('stub at the counterpart version → no divergence row', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub(counterpartVersion));
+      commitAll(tmp, 'chore: equal-version stub fixture');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      const manifest = readManifest(tmp);
+      expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_DIVERGENCE')).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// --changelog-entry (2026-10-29-delivery-bookkeeping-engine design A3 —
+// DEC-20261029-01): opt-in CHANGELOG entry scaffolding, default OFF at the
+// engine (CHANGELOG.md is project-owned). The pure insert/section/idempotency
+// cases live in tests/unit/upgrade-restamp.test.ts; these pin the engine
+// wiring: the scaffolded entry rides the recorded delivery (files[]
+// attribution), a repeated version is skipped, the default run never touches
+// the file, and the flag is refused under --dry-run (apply-mode only).
+// ═════════════════════════════════════════════════════════════════════════════
+describe('upgrade-project.ts --changelog-entry (A3)', () => {
+  const templateVersion = readFileSync(join(workspaceRoot, 'templates', 'VERSION'), 'utf8').trim();
+  const deliveryDate = new Date().toISOString().slice(0, 10);
+  const readChangelog = (tmp: string): string => readFileSync(join(tmp, 'CHANGELOG.md'), 'utf8');
+  const verEsc = templateVersion.replace(/\./g, '\\.');
+  const entryRe = new RegExp(`^- \\*\\*\\[${deliveryDate}\\]\\*\\*: chore\\(upgrade\\): template sync v${verEsc} \\(\\d+ file\\(s\\) delivered; engine-scaffolded — edit or merge before commit; see templates/CHANGELOG\\.md v${verEsc}\\)$`, 'm');
+
+  test('apply with the flag scaffolds one entry into [Unreleased], rides files[] attribution, and is idempotent on re-run', () => {
+    const tmp = makeTempProject();
+    try {
+      writeFileSync(join(tmp, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- curated project entry\n\n## [0.1.0] - 2026-10-01\n\n- released\n');
+      commitAll(tmp, 'chore: changelog fixture');
+      const first = runUpgrade(tmp, ['--changelog-entry']);
+      expect(first.status).toBe(0);
+      const after = readChangelog(tmp);
+      // One entry at the top of [Unreleased]; the curated bullet stays below;
+      // historical sections untouched.
+      expect(after).toMatch(entryRe);
+      const lines = after.split('\n');
+      const unreleased = lines.findIndex((l) => l === '## [Unreleased]');
+      expect(lines[unreleased + 1]).toMatch(/chore\(upgrade\): template sync v/);
+      expect(lines[unreleased + 1]).toContain('engine-scaffolded');
+      expect(lines[unreleased + 3]).toBe('- curated project entry');
+      expect(after).toContain('## [0.1.0] - 2026-10-01');
+      // The CHANGELOG change rides the recorded delivery (files[] attribution).
+      const manifest1 = readManifest(tmp);
+      expect(manifest1.files).toContain('CHANGELOG.md');
+      // Idempotent: a second run at the same template version adds nothing.
+      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath']);
+      commitAll(tmp, 'chore: wave 1 landing (changelog scaffolded)');
+      const second = runUpgrade(tmp, ['--changelog-entry']);
+      expect(second.status).toBe(0);
+      const occurrences = readChangelog(tmp).split('\n').filter((l) => l.includes(`template sync v${templateVersion}`)).length;
+      expect(occurrences).toBe(1);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 240000);
+
+  test('default OFF: a run without the flag never touches CHANGELOG.md', () => {
+    const tmp = makeTempProject();
+    try {
+      const changelog = '# Changelog\n\n## [Unreleased]\n\n- curated project entry\n';
+      writeFileSync(join(tmp, 'CHANGELOG.md'), changelog);
+      commitAll(tmp, 'chore: changelog fixture');
+      const { status } = runUpgrade(tmp);
+      expect(status).toBe(0);
+      expect(readChangelog(tmp)).toBe(changelog);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 180000);
+
+  test('--changelog-entry is refused under --dry-run (apply-mode only)', () => {
+    const tmp = makeTempProject();
+    try {
+      writeFileSync(join(tmp, 'CHANGELOG.md'), '# Changelog\n');
+      commitAll(tmp, 'chore: changelog fixture');
+      const { status, out } = runUpgrade(tmp, ['--dry-run', '--changelog-entry']);
+      expect(status).toBe(1);
+      expect(out).toContain('apply-mode only');
+      expect(readChangelog(tmp)).toBe('# Changelog\n');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

@@ -1,4 +1,16 @@
-// @version 1.30.0
+// @version 1.31.0
+// v1.31.0 (2026-10-29, spec
+//          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md,
+//          DEC-20261029-01): TOMBSTONE_CLEARED (INFO) and
+//          STUB_VERSION_DIVERGENCE (INFO) join DecisionVerdict +
+//          DECISION_SEVERITY_CONTRACT. TOMBSTONE_CLEARED records an applied
+//          --clear-tombstone grant that deleted ≥ 1 manifest entry (the
+//          retraction becomes auditable in the unified decision log instead of
+//          a silent manifest rewrite; schemaVersion stays 2 — additive
+//          verdicts only). STUB_VERSION_DIVERGENCE surfaces the stub-frontmatter
+//          backfill contract's sanctioned divergence: an existing stub
+//          `version` that differs from its template counterpart (a deliberate
+//          pin — INFO, never WARN; the backfill never overwrites it).
 // v1.30.0 (2026-10-28, design
 //          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //          D1/D2): instruction-file region taxonomy + merge-time region census.
@@ -952,7 +964,10 @@ export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
  *  REGION_IN_SYNC / EVOLVED_REGION / TEMPLATE_AHEAD_REGION joined in v1.30.0
  *  (instruction-ownership design D1/D2 — the instruction-file region census;
  *  CONFLICT (ERROR) for a census-gated adapted-span replace is recorded by the
- *  engine under the existing CONFLICT verdict). */
+ *  engine under the existing CONFLICT verdict); TOMBSTONE_CLEARED /
+ *  STUB_VERSION_DIVERGENCE joined in v1.31.0 (delivery-bookkeeping-engine
+ *  design B1/D1 — the auditable --clear-tombstone retraction row and the
+ *  sanctioned-pin stub version divergence row). */
 export type DecisionVerdict =
   | 'NEW'
   | 'UPDATE'
@@ -965,6 +980,7 @@ export type DecisionVerdict =
   | 'STUB_SKIP'
   | 'STUB_FM_BACKFILL'
   | 'STUB_VERSION_BUMP_ADVICE'
+  | 'STUB_VERSION_DIVERGENCE'
   | 'REGION_IN_SYNC'
   | 'EVOLVED_REGION'
   | 'TEMPLATE_AHEAD_REGION'
@@ -973,6 +989,7 @@ export type DecisionVerdict =
   | 'EVOLVED'
   | 'TOMBSTONED'
   | 'TOMBSTONED_SKIP'
+  | 'TOMBSTONE_CLEARED'
   | 'CONFLICT';
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
@@ -985,6 +1002,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   STUB_SKIP: 'INFO',
   STUB_FM_BACKFILL: 'INFO',
   STUB_VERSION_BUMP_ADVICE: 'INFO',
+  STUB_VERSION_DIVERGENCE: 'INFO',
   REGION_IN_SYNC: 'INFO',
   EVOLVED_REGION: 'WARN',
   TEMPLATE_AHEAD_REGION: 'WARN',
@@ -995,6 +1013,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   EVOLVED: 'WARN',
   TOMBSTONED: 'ERROR',
   TOMBSTONED_SKIP: 'INFO',
+  TOMBSTONE_CLEARED: 'INFO',
   CONFLICT: 'ERROR',
 };
 

@@ -8195,7 +8195,7 @@
       "name": "upgrade-project",
       "scope": "root",
       "capability": "upgrade-project",
-      "content_hash": "553103591cbd780f",
+      "content_hash": "88a42ca598e8f7b6",
       "version": "1.6.1",
       "mirrors": [
         "skills/upgrade-project/SKILL.md",

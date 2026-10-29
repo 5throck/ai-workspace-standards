@@ -1,5 +1,45 @@
 #!/usr/bin/env bun
-// @version 1.83.0
+// @version 1.84.0
+// v1.84.0 (2026-10-29, spec
+//          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md,
+//          DEC-20261029-01 — PR1 of five): delivery bookkeeping engine, four
+//          groups in one engine unit. (A1) NESTED LIFECYCLE RE-STAMP: the
+//          post-delivery re-stamp applies BOTH change-date primitives to each
+//          delivered ∩ git-dirty file — the existing top-level
+//          bumpFrontmatterLastUpdated AND the new
+//          bumpNestedLifecycleLastUpdated (helpers/upgrade-versions.ts v1.2.0),
+//          so a version-gated delivery no longer leaves
+//          `lifecycle.last_updated` claiming a pre-delivery date (the
+//          co-abap staleness class); `last_reviewed` is NEVER engine-stamped
+//          (DEC-20261029-01 condition 1). The T-20261028-002
+//          deliveredRels ∩ git-dirty restriction is the honesty guard — a
+//          write that leaves the tree clean is not re-stamped. (A3) OPT-IN
+//          CHANGELOG SCAFFOLDING: new `--changelog-entry` flag (apply-mode
+//          only, default OFF — CHANGELOG.md is project-owned) inserts one
+//          editable chore(upgrade) bullet at the top of the project
+//          CHANGELOG's first [Unreleased] section (section created when
+//          absent) via helpers/upgrade-versions.ts scaffoldChangelogEntry;
+//          idempotent per template version; runs BEFORE the manifest write so
+//          the CHANGELOG change rides the recorded delivery (files[]
+//          attribution; PIPELINE_ARTIFACT_PATHS membership keeps dev-sync
+//          step 3.9 tolerant). (B1) TOMBSTONE_CLEARED (INFO, lib
+//          v1.31.0): an applied --clear-tombstone grant that deletes ≥ 1
+//          manifest entry now records an auditable decision row naming the
+//          glob and the dropped paths — the retraction is visible in the
+//          unified decision log instead of a silent manifest rewrite; the
+//          shipped baseline-drop semantics (v1.79.0, 94a390945) are unchanged
+//          and pinned by regression tests. (B2) TOMBSTONE PRUNE SYMMETRY:
+//          the tombstones carry-forward now prunes entries whose template
+//          counterpart left the template tree — the exact mirror of the
+//          baselines rule (v1.79.0); a template-departed tombstone is provably
+//          inert (tombstoneGuard is reachable only from template-walking
+//          passes) and the deletion-intent history lives in past decision
+//          logs and ticket records. (D1) STUB_VERSION_DIVERGENCE (INFO, lib
+//          v1.31.0): the agents/ STUB skip arm reports a stub whose existing
+//          `version` differs from its template counterpart's — the backfill
+//          contract blesses the pin (never overwrites) but the divergence was
+//          invisible; placed after the primary skip rows so a consumer reading
+//          a path's first decision row still sees the verdict.
 // v1.83.0 (2026-10-28, design
 //          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //          D6): `--port-candidates` — the mechanical would-revert list.
@@ -876,7 +916,7 @@ import {
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated } from './helpers/upgrade-versions.ts';
+import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated, bumpNestedLifecycleLastUpdated, scaffoldChangelogEntry } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
@@ -976,6 +1016,13 @@ let yesFlag = false;
 let skipContextCommonization = false;
 let forceContextSync = false;
 let acceptCiPermDiff = false;
+// A3 (delivery-bookkeeping-engine design, spec 2026-10-29-...-design): opt-in
+// CHANGELOG entry scaffolding, default OFF — CHANGELOG.md is project-owned
+// (PIPELINE_ARTIFACT_PATHS member) and an unconditional engine write would
+// churn every wave. Apply-mode only (refused under --dry-run, like the
+// tombstone grants, so a silently-lost write can never be mistaken for a
+// clean scaffold).
+let changelogEntry = false;
 // T-20261027-004 (D2): --disposition adopt-template[=glob] flips the CONFLICT
 // (ERROR) default SKIP to deliver-and-adopt, optionally narrowed to paths
 // matching the glob. Accepts `--disposition <value>` and `--disposition=<value>`.
@@ -985,7 +1032,9 @@ let disposition: DispositionFlag = { mode: 'default' };
 // (--clear-tombstone, repeatable) drop entries so the next run delivers the
 // path as NEW. Both are apply-mode only (validated after the parse loop).
 const tombstoneGrants: Array<{ re: RegExp; source: string }> = [];
-const clearTombstoneGrants: RegExp[] = [];
+// B1: each clear grant keeps its source glob so the TOMBSTONE_CLEARED decision
+// row can name it (the retraction must be auditable, not just silent state).
+const clearTombstoneGrants: Array<{ re: RegExp; source: string }> = [];
 let tombstoneReason = 'confirmed deletion intent via --tombstone (delivery-tombstone-ownership design D3)';
 /** Tombstone entries recorded THIS run (grant-matched first observations) —
  *  merged into the manifest at write time (D1 carry-forward). */
@@ -1011,6 +1060,9 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
   if (args[i] === '--accept-ci-perm-diff') { acceptCiPermDiff = true; continue; }
+  // A3 (delivery-bookkeeping-engine design): opt-in CHANGELOG entry
+  // scaffolding for THIS delivery — apply-mode only, no value argument.
+  if (args[i] === '--changelog-entry') { changelogEntry = true; continue; }
   // U-20261028-001 (D3): --tombstone <glob> (repeatable) confirms the deletion
   // intent of a previously delivered path; --clear-tombstone <glob> (repeatable)
   // drops entries so the next run delivers the path as NEW. Both apply-mode
@@ -1055,6 +1107,13 @@ if (dryRun && (tombstoneGrants.length > 0 || clearTombstoneGrants.length > 0)) {
   process.exit(1);
 }
 
+// A3: --changelog-entry mutates the project CHANGELOG — apply-mode only, so a
+// dry-run cannot mistake the flag for a scaffolded entry.
+if (dryRun && changelogEntry) {
+  console.error('ERROR: --changelog-entry is apply-mode only — re-run without --dry-run.');
+  process.exit(1);
+}
+
 // D6 (design §10 Q3 default): --port-candidates is a dry-run-only report mode.
 // Apply mode REFUSES the flag (a stricter reading than §5.2's "apply ignores
 // it"): a silent no-op must never be mistaken for a clean report.
@@ -1088,11 +1147,11 @@ function applyClearTombstoneArg(raw: string): void {
     console.error('ERROR: --clear-tombstone requires a path glob (e.g. --clear-tombstone docs/governance/**).');
     process.exit(1);
   }
-  clearTombstoneGrants.push(globToRegExp(glob));
+  clearTombstoneGrants.push({ re: globToRegExp(glob), source: glob });
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--port-candidates [--json]]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -3123,6 +3182,20 @@ for (const agentsDir of tplAgentsDirs) {
             }
             recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_FM_BACKFILL', `backfilled missing stub frontmatter scalar(s) ${backfill.filled.join(', ')} from the template counterpart (last_updated = delivery date) — frontmatter only, body untouched`);
           }
+          // D1 (v1.84.0, delivery-bookkeeping-engine design): surface the
+          // backfill contract's sanctioned divergence. A stub `version` that
+          // differs from its template counterpart is a deliberate pin —
+          // backfill never overwrites it — but the divergence was invisible:
+          // the decision log showed only the STUB skip. INFO, not WARN (a pin
+          // is sanctioned); placed after the primary skip rows so a consumer
+          // reading a path's first decision row still sees the verdict (same
+          // placement rule as STUB_VERSION_BUMP_ADVICE). Repeat-per-run is
+          // accepted (same as the existing advisory).
+          const stubPinnedVersion = extractFrontmatterVersion(projFile);
+          const counterpartVersion = rawTpl.match(/^version:[ \t]*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? '';
+          if (stubPinnedVersion && counterpartVersion && stubPinnedVersion !== counterpartVersion) {
+            recordDecision(rel, 'SYNC', 'SYNC_IF_NEWER: agents/', 'STUB_VERSION_DIVERGENCE', `stub version ${stubPinnedVersion} pinned vs counterpart ${counterpartVersion} — backfill never overwrites; bump the stub version to re-arm version-gated delivery, or adopt via --disposition adopt-template`);
+          }
         }
         continue;
       }
@@ -4910,44 +4983,55 @@ if (syncChanged > 0 && existsSync(syncSkillsScript)) {
   console.log('');
 }
 
-// ── Post-delivery re-stamp (U-20261026-009) ────────────────────────────────────
+// ── Post-delivery re-stamp (U-20261026-009; nested lifecycle dates since v1.84.0) ──
 // Every content delivery above can rewrite a frontmatter-carrying file (agents/
 // above all) without advancing its `last_updated` date, so
 // agent-lifecycle-audit reported stale-date warnings after every upgrade wave
 // (8/9 agent files warned 2026-10-26; commits 548ca96/5361921/2a48945 touched
 // agent bodies with zero date bumps). Re-stamp the files THIS RUN delivered
 // (deliveredRels ∩ git status — the git-status leg still restricts to content
-// that actually changed on disk, so a version-touch-only write leaves the tree
-// clean and is not re-stamped; T-20261028-002 narrowed the set from every
-// dirty worktree file so pre-existing user changes keep their dates) to the
-// delivery date. bumpFrontmatterLastUpdated
-// only moves the TOP-LEVEL frontmatter key; lifecycle-block dates and files
-// without the key are untouched. Runs BEFORE the delivery manifest so the
+// that actually changed on disk, so a write that leaves the tree clean is not
+// re-stamped; T-20261028-002 narrowed the set from every dirty worktree file
+// so pre-existing user changes keep their dates) to the delivery date.
+// v1.84.0 (spec 2026-10-29-delivery-bookkeeping-engine, DEC-20261029-01
+// condition 1 — the change/review date split): BOTH change-date primitives
+// apply — bumpFrontmatterLastUpdated moves the TOP-LEVEL frontmatter key and
+// the new bumpNestedLifecycleLastUpdated moves the nested
+// `lifecycle.last_updated` key — so a version-gated delivery no longer leaves
+// the lifecycle block claiming a pre-delivery date. `last_reviewed` is NEVER
+// engine-stamped (an engine write is not a review); files without the keys
+// are untouched (no injection). Runs BEFORE the delivery manifest so the
 // re-stamped files ride the recorded delivery (dev-sync step 3.9 attribution).
 // Non-fatal: a status/IO failure warns and leaves the dates as delivered.
+/** Expand the delivered rels (directories recurse — same semantics as the
+ *  manifest's baseline expansion below) into the set of delivered files.
+ *  Shared by the re-stamp step and the --changelog-entry scaffolding. */
+const collectDeliveredFiles = (): Set<string> => {
+  const deliveredFiles = new Set<string>();
+  const expandDelivered = (rel: string): void => {
+    const abs = join(projectDir, rel);
+    let st;
+    try { st = statSync(abs); } catch { return; }
+    if (st.isDirectory()) {
+      for (const entry of readdirSync(abs, { withFileTypes: true })) {
+        if (entry.name === '.git' || entry.name === 'node_modules') continue;
+        expandDelivered(rel.endsWith('/') ? `${rel}${entry.name}` : `${rel}/${entry.name}`);
+      }
+      return;
+    }
+    if (st.isFile()) deliveredFiles.add(rel);
+  };
+  for (const rel of deliveredRels) expandDelivered(rel);
+  return deliveredFiles;
+};
 if (!dryRun) {
   try {
     const restampDate = new Date().toISOString().slice(0, 10);
     // T-20261028-002: re-stamp only files THIS run delivered. The original
     // walk re-stamped every dirty worktree file, so pre-existing user changes
     // (unrelated WIP open during the upgrade) silently received the delivery
-    // date. Directory rels (skills/<name>) expand recursively — same
-    // semantics as the manifest's baseline expansion below.
-    const deliveredFiles = new Set<string>();
-    const expandDelivered = (rel: string): void => {
-      const abs = join(projectDir, rel);
-      let st;
-      try { st = statSync(abs); } catch { return; }
-      if (st.isDirectory()) {
-        for (const entry of readdirSync(abs, { withFileTypes: true })) {
-          if (entry.name === '.git' || entry.name === 'node_modules') continue;
-          expandDelivered(rel.endsWith('/') ? `${rel}${entry.name}` : `${rel}/${entry.name}`);
-        }
-        return;
-      }
-      if (st.isFile()) deliveredFiles.add(rel);
-    };
-    for (const rel of deliveredRels) expandDelivered(rel);
+    // date.
+    const deliveredFiles = collectDeliveredFiles();
     const por = spawnSync('git', ['-C', projectDir, 'status', '--porcelain', '-uall'], { encoding: 'utf8' });
     const changed = (por.stdout || '').split('\n')
       .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
@@ -4963,17 +5047,52 @@ if (!dryRun) {
       let text: string;
       try { text = readFileSync(absPath, 'utf8'); } catch { continue; } // non-UTF8 / binary
       const res = bumpFrontmatterLastUpdated(text, restampDate);
-      if (res.bumped) {
-        writeFileSync(absPath, res.text);
+      const nested = bumpNestedLifecycleLastUpdated(res.text, restampDate);
+      if (res.bumped || nested.bumped) {
+        writeFileSync(absPath, nested.text);
         restamped++;
-        console.log(`  Re-stamped last_updated → ${restampDate}: ${rel}`);
+        console.log(`  Re-stamped last_updated → ${restampDate}: ${rel}${nested.bumped && !res.bumped ? ' (lifecycle block)' : ''}`);
       }
     }
     if (restamped > 0) {
-      console.log(`  Delivery re-stamp: ${restamped} file(s) — top-level frontmatter last_updated advanced to ${restampDate}`);
+      console.log(`  Delivery re-stamp: ${restamped} file(s) — frontmatter last_updated advanced to ${restampDate} (top-level + nested lifecycle)`);
     }
   } catch (err) {
     console.log(`  ⚠️  re-stamp step failed (${String(err)}) — non-fatal, delivered dates stay as-is`);
+  }
+}
+
+// ── CHANGELOG entry scaffolding (--changelog-entry, A3, v1.84.0) ──────────────
+// Opt-in (default OFF — CHANGELOG.md is project-owned, PIPELINE_ARTIFACT_PATHS
+// member): when set, insert ONE editable chore(upgrade) bullet at the top of
+// the project CHANGELOG's first [Unreleased] section (created when absent) via
+// scaffoldChangelogEntry (helpers/upgrade-versions.ts). Idempotent per
+// template version. Runs BEFORE the manifest write so the CHANGELOG change
+// rides the recorded delivery (files[] attribution); the file's
+// PIPELINE_ARTIFACT_PATHS membership keeps dev-sync step 3.9 attribution
+// tolerant. Non-fatal: a failure warns and leaves the CHANGELOG untouched.
+if (!dryRun && changelogEntry) {
+  try {
+    const changelogPath = join(projectDir, 'CHANGELOG.md');
+    if (!existsSync(changelogPath)) {
+      console.log('  --changelog-entry: no CHANGELOG.md in the project — nothing scaffolded');
+    } else {
+      const deliveredCount = collectDeliveredFiles().size;
+      const current = readFileSync(changelogPath, 'utf8');
+      const scaffold = scaffoldChangelogEntry(current, {
+        date: new Date().toISOString().slice(0, 10),
+        templateVersion: currentVersion,
+        deliveredCount,
+      });
+      if (scaffold.changed) {
+        writeFileSync(changelogPath, scaffold.text);
+        console.log(`  CHANGELOG entry scaffolded: [Unreleased] ← template sync v${currentVersion} (${deliveredCount} file(s) delivered) — edit or merge before commit`);
+      } else {
+        console.log(`  --changelog-entry: a template sync v${currentVersion} entry is already in [Unreleased] — skipped (idempotent)`);
+      }
+    }
+  } catch (err) {
+    console.log(`  ⚠️  CHANGELOG scaffolding failed (${String(err)}) — non-fatal, CHANGELOG untouched`);
   }
 }
 
@@ -5021,9 +5140,15 @@ if (!dryRun) {
     // (no separate cleanup pass); --clear-tombstone grants drop entries so the
     // next run delivers the path as NEW. Directory rels (skills/<name>) expand
     // recursively so a whole-skill delivery clears the skill's sub-file
-    // tombstones too. Tombstones whose path leaves the template tree stop
-    // firing on their own (the path is no longer a candidate); opportunistic
-    // pruning of those entries is deliberately not attempted here.
+    // tombstones too. v1.84.0 (B2 prune symmetry): entries whose template
+    // counterpart left the template tree are pruned — the exact mirror of the
+    // baselines carry-forward rule below. A template-departed tombstone is
+    // provably inert: tombstoneGuard is consulted exclusively from
+    // absent-copy branches of passes walking template-side files, so the path
+    // can never again be a candidate and the entry is dead state polluting the
+    // manifest and the fleet census. The deletion-intent history survives in
+    // past decision logs and ticket records (delivery-bookkeeping-engine
+    // design §3.B2); if the template re-adds the path, delivery is a plain NEW.
     const deliveredFileSet = new Set<string>(deliveredRels);
     const expandTombstoneClear = (rel: string): void => {
       const abs = join(projectDir, rel);
@@ -5062,6 +5187,7 @@ if (!dryRun) {
     const tombstones: Record<string, TombstoneEntry> = {};
     for (const [rel, entry] of Object.entries(priorManifest?.tombstones ?? {})) {
       if (deliveredFileSet.has(rel)) continue; // delivered this run — the clear event
+      if (!existsSync(join(templatesDir, rel)) && !existsSync(join(commonDir, rel))) continue; // template-departed — pruned (v1.84.0 B2, mirrors the baselines rule)
       tombstones[rel] = entry;
     }
     for (const [rel, reason] of newlyTombstoned) {
@@ -5073,9 +5199,10 @@ if (!dryRun) {
         reason,
       };
     }
-    for (const re of clearTombstoneGrants) {
+    for (const { re, source } of clearTombstoneGrants) {
+      const droppedTombstones: string[] = [];
       for (const rel of Object.keys(tombstones)) {
-        if (re.test(rel)) delete tombstones[rel];
+        if (re.test(rel)) { delete tombstones[rel]; droppedTombstones.push(rel); }
       }
       // T-20261028-014: the clear grant also resets carried-forward baselines —
       // the D2 fire condition is `absent && (tombstones[rel] || baselines[rel])`,
@@ -5083,8 +5210,22 @@ if (!dryRun) {
       // break the documented contract ("drops entries so the next run delivers
       // the path as NEW"). Resetting provenance IS the grant's semantics: the
       // operator retracts the deletion and the next delivery is a clean NEW.
+      const droppedBaselines: string[] = [];
       for (const rel of Object.keys(baselines)) {
-        if (re.test(rel)) delete baselines[rel];
+        if (re.test(rel)) { delete baselines[rel]; droppedBaselines.push(rel); }
+      }
+      // B1 (v1.84.0): an applied grant that deleted ≥ 1 entry is auditable —
+      // one TOMBSTONE_CLEARED (INFO) row naming the glob and the dropped
+      // paths. Without this the retraction was a silent manifest rewrite. The
+      // documented NO_BASELINE consequence for subsequent direct placement
+      // (overwrite-policy §8 migration window) is the grant's accepted
+      // semantics and the row makes it traceable.
+      const dropped = [...droppedTombstones, ...droppedBaselines];
+      if (dropped.length > 0) {
+        recordDecision(
+          source, 'TOMBSTONE', `--clear-tombstone ${source}`, 'TOMBSTONE_CLEARED',
+          `--clear-tombstone ${source} retracted ${dropped.length} manifest entr${dropped.length === 1 ? 'y' : 'ies'} (${dropped.join(', ')}) — deletion intent withdrawn, the next delivery of these path(s) is a clean NEW (NO_BASELINE migration window, overwrite-policy design §8)`,
+        );
       }
     }
     // D3 unified decision log, persisted with the delivery.
