@@ -1,0 +1,86 @@
+schemaVersion: 1
+id: U-20261029-003
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-29T15:19:44.687+09:00'
+history:
+  - at: '2026-10-29T15:19:44.687+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-29T20:26:58.714+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T20:26:58.714+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T20:26:58.714+09:00'
+    from: review
+    to: done
+result: >-
+  Verified and fixed (estimate-layout v1.3.0, root PR #1732): the
+  layout_overrides terminator /^\s{2}[a-z]/ matched the block's own
+  2-space-indented first child, so standard nested blocks parsed as {} —
+  reproduced (old parser {} on a dotted-key block). Fixed by
+  indentation-relative block parsing (entry at layout_overrides: captures the
+  parent indent; children are deeper-indented lines; block ends at the first
+  dedent to/below the parent) — dotted-key overrides parse fully and the
+  terminator fires at the next top-level key. Template-side landed; project
+  re-delivery via the version-gated variant-scripts pass (co-deck repo has an
+  active concurrent session — direct project sync deferred; the project's
+  estimate-layout consumption picks it up at the next upgrade).
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.23.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    scripts/co-deck/estimate-layout.ts (parseLayoutOverrides, ~lines 70-116)
+    terminates the layout_overrides block at the first 2-space-indented child
+    key — its terminator regex /^\s{2}[a-z]/ matches the block's own first child
+    (e.g. '  content_rules:'). Consequently any standard nested-YAML
+    layout_overrides block parses as {} and project overrides are silently
+    ignored for every project (verified: the shipped precedent deck's overrides
+    also never took effect). Only flattened dotted-key notation (4-space
+    'content_rules.max_bullets_per_slide: 5') is accepted.
+  affected_paths:
+    - scripts/co-deck/estimate-layout.ts
+  identity_source: cwd
+  repro: >-
+    1. In any project's lecture-profile.md, write layout_overrides with standard
+    nested YAML: layout_overrides: / content_rules: / max_bullets_per_slide: 5
+    (2-space children). 2. Run bun scripts/co-deck/estimate-layout.ts --project
+    <project> --lint. 3. Output shows no 'layout_overrides detected' warning and
+    the overrides are not applied. 4. Flatten the same keys to 4-space dotted
+    notation (content_rules.max_bullets_per_slide: 5) and re-run: '⚠️
+    layout_overrides detected' appears and overrides apply.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=false
+  dedupe_key: 5fd28155867c3c30f3a2b31a7d49c2dc981553248fd81ba77237d64b2bed7efc
+  duplicates:
+    - project: co-deck
+      at: '2026-10-29T15:19:44.687+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1732
+    template_version: 0.23.0
+    summary: >-
+      Verified and fixed (estimate-layout v1.3.0, root PR #1732): the
+      layout_overrides terminator /^\s{2}[a-z]/ matched the block's own
+      2-space-indented first child, so standard nested blocks parsed as {} —
+      reproduced (old parser {} on a dotted-key block). Fixed by
+      indentation-relative block parsing (entry at layout_overrides: captures
+      the parent indent; children are deeper-indented lines; block ends at the
+      first dedent to/below the parent) — dotted-key overrides parse fully and
+      the terminator fires at the next top-level key. Template-side landed;
+      project re-delivery via the version-gated variant-scripts pass (co-deck
+      repo has an active concurrent session — direct project sync deferred; the
+      project's estimate-layout consumption picks it up at the next upgrade).
