@@ -1,0 +1,70 @@
+schemaVersion: 1
+id: U-20261029-004
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-10-29T15:22:51.440+09:00
+history:
+  - at: 2026-10-29T15:22:51.440+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.23.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: |-
+    A variant project cannot declare its own generators to run automatically at commit time, so generated projections can only be drift-gated, not auto-regenerated.
+
+    Observed in co-newbiz (2026-10-29):
+    - co-newbiz has several project-specific generated projections, each with its own generator:
+      - the glossary data (`scripts/co-newbiz/generate-glossary-data.ts` → `app/web-next/lib/glossary-data.generated.ts`);
+      - the library projection (`scripts/co-newbiz/sync-library-projection.ts`);
+      - the wiki projection (`sync-wiki-projection.ts`);
+      - the review matrix (`generate-review-matrix.ts`);
+      - the PM catalog and the agent registry.
+    - The variant audit hook (`scripts/co-newbiz/audit-variant.ts`) can only block on drift. When a source file changes (glossary YAML, docs, wiki pages), `/sync` fails at the audit gate. Someone then has to run the right generator by hand and re-run `/sync`.
+    - This happened repeatedly in this session: library projection after doc edits, wiki projection, glossary data, skill graph.
+    - `scripts/dev-sync.ts` and `.githooks/*` are template-managed, so the project cannot add a pre-commit generator step without a local patch that the next upgrade would overwrite.
+    - The owner wants the glossary (and similar projections) to update automatically.
+
+    Expected:
+    - A template-supported way for a variant to declare its generators, for example a list in `variant.json` or a `scripts/<variant>/generators.json` manifest of `{ name, command, outputs, sources }`.
+    - dev-sync runs those generators before its audit gate (in the same step family as VERSION_MANIFEST / skill-graph regeneration) and stages their outputs as pipeline-generated files.
+    - The `--check` form of each generator remains the audit's drift gate.
+  affected_paths:
+    - scripts/dev-sync.ts
+    - .githooks/pre-commit
+    - scripts/co-newbiz/audit-variant.ts
+    - scripts/co-newbiz/generate-glossary-data.ts
+    - scripts/co-newbiz/sync-library-projection.ts
+  identity_source: client_roots
+  repro: |-
+    In co-newbiz:
+    1. Edit `glossary/business.yaml`, e.g. a term's ko label.
+    2. Run /sync (`bun scripts/dev-sync.ts ...`).
+    3. The audit fails at the "Glossary-data" drift gate.
+    4. The operator must run `bun run glossary:generate` manually and re-run /sync.
+
+    The same happens with library and wiki projections after doc edits.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: scripts/co-newbiz/audit-variant.ts'
+    - 'path_not_template_managed: scripts/co-newbiz/generate-glossary-data.ts'
+    - 'path_not_template_managed: scripts/co-newbiz/sync-library-projection.ts'
+    - info:in_last_delivery scripts/dev-sync.ts=true
+    - info:in_last_delivery .githooks/pre-commit=false
+    - info:in_last_delivery scripts/co-newbiz/audit-variant.ts=false
+    - info:in_last_delivery scripts/co-newbiz/generate-glossary-data.ts=false
+    - info:in_last_delivery scripts/co-newbiz/sync-library-projection.ts=false
+  dedupe_key: ba4dbfd53ea2f74fd9dff65101e30af552b86df13d7c9bcfb76e84acc23507a7
+  duplicates:
+    - project: co-newbiz
+      at: 2026-10-29T15:22:51.440+09:00
