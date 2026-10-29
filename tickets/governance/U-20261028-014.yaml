@@ -3,14 +3,35 @@ id: U-20261028-014
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-28T23:42:28.826+09:00
+created_at: '2026-10-28T23:42:28.826+09:00'
 history:
-  - at: 2026-10-28T23:42:28.826+09:00
+  - at: '2026-10-28T23:42:28.826+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T14:52:53.668+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T14:52:53.668+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T14:52:53.668+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented the variant-override mechanism (owner-decision batch design
+  docs/designs/2026-10-29-owner-decision-batch-design.md, PR #1729): a validated
+  designLint block in variant.json overrides the workspace-schema block whole
+  (order variant.json > schema; invalid block FAILs naming the violation;
+  enabled:false = explicit SKIP naming the winning source) — audit v2.60.0 +
+  design-lint-roots v1.1.0 (pure validateDesignLintOverride) + design-lint
+  v2.5.0 --allow flag (so override allowlists are enforceable end-to-end: L3
+  projects have no workspace-schema.json for the engine to read) +
+  validate-templates Check 2 variant-designlint shape check. Documented in
+  templates/common/docs/context.md. co-abap adoption is the variant's own call —
+  its SKIP is now explicit and harmless, and the mechanism unblocks any variant
+  that wants the gate.
 error: null
 upstream:
   project: co-abap
@@ -19,7 +40,17 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'docs/workspace-schema.json ships designLint.scanRoots = ["templates/co-design/playground/src"] as the delivered value. In delivered variants without that path (for example a non-UI ABAP variant) the design-lint gate can never find its configured root and permanently reports SKIP. audit.ts v2.56.0 added an explicit conventional-root fallback (helpers/design-lint-roots.ts) so the skip is explicit rather than silent, but the configured value itself is not variant-overridable, so non-UI variants can neither point the gate at their own UI sources nor cleanly disable the gate for their project. Expected: designLint configuration overridable per variant (or cleanly disabled per variant).'
+  symptom: >-
+    docs/workspace-schema.json ships designLint.scanRoots =
+    ["templates/co-design/playground/src"] as the delivered value. In delivered
+    variants without that path (for example a non-UI ABAP variant) the
+    design-lint gate can never find its configured root and permanently reports
+    SKIP. audit.ts v2.56.0 added an explicit conventional-root fallback
+    (helpers/design-lint-roots.ts) so the skip is explicit rather than silent,
+    but the configured value itself is not variant-overridable, so non-UI
+    variants can neither point the gate at their own UI sources nor cleanly
+    disable the gate for their project. Expected: designLint configuration
+    overridable per variant (or cleanly disabled per variant).
   affected_paths:
     - docs/workspace-schema.json
     - scripts/audit.ts
@@ -35,4 +66,21 @@ upstream:
   dedupe_key: 61d38145d3e6be96b17bf8f65b9cec9e447bc1b6a52237c195a39429a1eb5f54
   duplicates:
     - project: co-abap
-      at: 2026-10-28T23:42:28.826+09:00
+      at: '2026-10-28T23:42:28.826+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1729
+    template_version: 0.23.0
+    summary: >-
+      Implemented the variant-override mechanism (owner-decision batch design
+      docs/designs/2026-10-29-owner-decision-batch-design.md, PR #1729): a
+      validated designLint block in variant.json overrides the workspace-schema
+      block whole (order variant.json > schema; invalid block FAILs naming the
+      violation; enabled:false = explicit SKIP naming the winning source) —
+      audit v2.60.0 + design-lint-roots v1.1.0 (pure validateDesignLintOverride)
+      + design-lint v2.5.0 --allow flag (so override allowlists are enforceable
+      end-to-end: L3 projects have no workspace-schema.json for the engine to
+      read) + validate-templates Check 2 variant-designlint shape check.
+      Documented in templates/common/docs/context.md. co-abap adoption is the
+      variant's own call — its SKIP is now explicit and harmless, and the
+      mechanism unblocks any variant that wants the gate.
