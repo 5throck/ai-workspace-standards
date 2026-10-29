@@ -1,4 +1,18 @@
-// @version 2.59.0
+// @version 2.60.0
+// v2.60.0 (2026-10-29, U-20261028-014 — spec
+//          docs/designs/2026-10-29-owner-decision-batch-design.md §2):
+//          designLint per-variant override — a project's variant.json
+//          `designLint` block (shape-checked by the new pure helper
+//          helpers/design-lint-roots.ts v1.1.0 validateDesignLintOverride:
+//          required boolean `enabled`, optional string[] scanRoots/allowlist)
+//          replaces the workspace-schema block as checkDesignLint's effective
+//          config (order: variant.json > workspace-schema, whole-block).
+//          Invalid block = Fail naming the violation; enabled=false = explicit
+//          Skip naming the winning source; override allowlist entries ride the
+//          engine's new --allow flag (design-lint.ts v2.5.0) so project-level
+//          literal exemptions are real in L3 checkouts with no
+//          docs/workspace-schema.json. A malformed variant.json does not fail
+//          this gate (other gates own that) — schema behavior applies.
 // v2.59.0 (2026-10-29, T-20261029-002 — spec
 //          docs/designs/2026-10-29-retro-records-registration-design.md §6):
 //          spec-check Check 6 — registry-vs-design-header status consistency.
@@ -257,7 +271,7 @@ import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 import { variantContextPlacement } from './helpers/variant-context.ts';
-import { resolveDesignLintRoots } from './helpers/design-lint-roots.ts';
+import { resolveDesignLintRoots, validateDesignLintOverride, type DesignLintOverride } from './helpers/design-lint-roots.ts';
 import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
@@ -1762,9 +1776,35 @@ function checkDesignLint() {
         Skip('Design-lint gate: scripts/design-lint.ts not present — skipped');
         return;
     }
+    // U-20261028-014: a project's variant.json `designLint` block (shape-checked
+    // by helpers/design-lint-roots.ts validateDesignLintOverride) REPLACES the
+    // workspace-schema block as the gate's effective config — order:
+    // variant.json > workspace-schema, whole-block (`enabled` is required so no
+    // partial-merge ambiguity). An invalid block Fails naming the violation (an
+    // explicit wrong config must not silently fall back); a malformed
+    // variant.json does NOT fail this gate (other gates own that failure) and
+    // the gate falls back to schema behavior.
+    let override: DesignLintOverride | null = null;
+    if (fs.existsSync('variant.json')) {
+        let rawVariant: unknown = null;
+        try {
+            rawVariant = JSON.parse(readUTF8File('variant.json') || '{}');
+        } catch { /* malformed variant.json — schema behavior; owners are told elsewhere */ }
+        const block = (rawVariant as Record<string, unknown> | null)?.designLint;
+        if (block !== undefined) {
+            const checked = validateDesignLintOverride(block);
+            if (!checked.ok) {
+                Fail(`Design-lint gate: ${checked.error} — fix the block or remove it (order: variant.json > workspace-schema)`);
+                return;
+            }
+            override = checked.config;
+        }
+    }
     const schemaPath = path.join('docs', 'workspace-schema.json');
-    let config: { enabled?: boolean; scanRoots?: string[] } = {};
-    if (fs.existsSync(schemaPath)) {
+    let config: { enabled?: boolean; scanRoots?: string[]; allowlist?: string[] } = {};
+    if (override) {
+        config = { enabled: override.enabled, scanRoots: override.scanRoots ?? [], allowlist: override.allowlist ?? [] };
+    } else if (fs.existsSync(schemaPath)) {
         try {
             config = JSON.parse(readUTF8File(schemaPath) || '{}')?.designLint ?? {};
         } catch { /* schema unreadable — treat as disabled below */ }
@@ -1779,7 +1819,8 @@ function checkDesignLint() {
     if (config.enabled !== true) {
         // T-20261007-001: the last Pass-shaped silent skip — all three
         // design-lint self-skip branches now read [SKIP] consistently.
-        Skip('Design-lint gate: disabled (workspace-schema.json designLint.enabled) — skipped');
+        // U-20261028-014: the disabled message names the winning source.
+        Skip(`Design-lint gate: disabled (${override ? 'variant.json' : 'workspace-schema.json'} designLint.enabled) — skipped`);
         return;
     }
     const resolved = resolveDesignLintRoots(config.scanRoots ?? [], (r) => fs.existsSync(r));
@@ -1802,11 +1843,16 @@ function checkDesignLint() {
     // the same schema now agree on roots. The Pass/Fail messages below annotate
     // the fallback so the run is visible, never silent.
     const fallbackNote = resolved.source === 'conventional-fallback' ? ' (conventional fallback — configured scan roots absent)' : '';
-    const result = spawnSync('bun', [lintScript, '--dir', ...roots], { encoding: 'utf-8' });
+    const overrideNote = override ? ' (variant.json designLint override)' : '';
+    // U-20261028-014: override allowlist entries ride the engine's --allow
+    // (design-lint.ts v2.5.0) so project-level literal exemptions are real in
+    // L3 checkouts that have no docs/workspace-schema.json for the engine to read.
+    const allowArgs = (config.allowlist ?? []).flatMap((a) => ['--allow', a]);
+    const result = spawnSync('bun', [lintScript, '--dir', ...roots, ...allowArgs], { encoding: 'utf-8' });
     if (result.status === 0) {
-        Pass(`Design-lint gate: token SSOT compliance CLEAN across ${roots.length} scan root(s)${fallbackNote}`);
+        Pass(`Design-lint gate: token SSOT compliance CLEAN across ${roots.length} scan root(s)${fallbackNote}${overrideNote}`);
     } else {
-        Fail(`Design-lint gate: should-be-token finding(s) in UI source${fallbackNote} — run: bun scripts/design-lint.ts --dir ${roots.join(' --dir ')} (exempt literals with a "design-token-exempt: <reason>" comment or list them in workspace-schema.json designLint)`);
+        Fail(`Design-lint gate: should-be-token finding(s) in UI source${fallbackNote} — run: bun scripts/design-lint.ts --dir ${roots.join(' --dir ')} (exempt literals with a "design-token-exempt: <reason>" comment or list them in workspace-schema.json designLint${override ? ' or the variant.json designLint override' : ''})`);
     }
 }
 checkDesignLint();

@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-10-29, U-20261028-014): project-override validation — pure
+// validateDesignLintOverride() checks the shape of a variant.json `designLint`
+// block ({ enabled: boolean (required), scanRoots?: string[], allowlist?:
+// string[] }) so audit.ts checkDesignLint can treat a valid block as the gate's
+// effective config (order: variant.json > workspace-schema) and fail loud with
+// a named violation on an invalid one. Pure + injected-free so both the audit
+// gate and validate-templates' variant-designlint shape check state one rule.
 // v1.0.0 (2026-10-26, U-20261026-006): design-lint scan-root resolution — pure
 // helper consumed by audit.ts's checkDesignLint. The L1-delivered
 // docs/workspace-schema.json configures designLint.scanRoots as
@@ -12,6 +19,58 @@
 
 /** Conventional UI-source roots — mirrors design-lint.ts's uiSourceRoots default. */
 export const CONVENTIONAL_DESIGN_LINT_ROOTS: readonly string[] = ['./playground/src', './src'];
+
+/** Shape of a variant.json `designLint` override block (U-20261028-014). */
+export interface DesignLintOverride {
+    enabled: boolean;
+    scanRoots?: string[];
+    allowlist?: string[];
+}
+
+export type DesignLintOverrideResult =
+    | { ok: true; config: DesignLintOverride }
+    | { ok: false; error: string };
+
+function isStringArray(v: unknown): v is string[] {
+    return Array.isArray(v) && v.every((x) => typeof x === 'string');
+}
+
+/**
+ * Validate the shape of a variant.json `designLint` block (U-20261028-014).
+ * `enabled` is required and must be a boolean (no partial-merge ambiguity: the
+ * block replaces the workspace-schema block wholesale or does not speak);
+ * `scanRoots` and `allowlist` are optional string arrays. Unknown keys are
+ * tolerated (forward-compatible), wrong-typed known keys are named errors.
+ */
+export function validateDesignLintOverride(raw: unknown): DesignLintOverrideResult {
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+        return { ok: false, error: `variant.json designLint must be an object with a required boolean "enabled" (got ${Array.isArray(raw) ? 'array' : raw === null ? 'null' : typeof raw})` };
+    }
+    const block = raw as Record<string, unknown>;
+    if (typeof block.enabled !== 'boolean') {
+        return { ok: false, error: `variant.json designLint.enabled must be a boolean (got ${JSON.stringify(block.enabled ?? null)})` };
+    }
+    // Validate into typed locals — narrowing through the Record index does not
+    // persist, and the conditional spread below needs the array types.
+    let scanRoots: string[] | undefined;
+    let allowlist: string[] | undefined;
+    for (const key of ['scanRoots', 'allowlist'] as const) {
+        if (block[key] === undefined) continue;
+        if (!isStringArray(block[key])) {
+            return { ok: false, error: `variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(block[key])})` };
+        }
+        if (key === 'scanRoots') scanRoots = block[key];
+        else allowlist = block[key];
+    }
+    return {
+        ok: true,
+        config: {
+            enabled: block.enabled,
+            ...(scanRoots !== undefined ? { scanRoots } : {}),
+            ...(allowlist !== undefined ? { allowlist } : {}),
+        },
+    };
+}
 
 export type DesignLintRootsResult =
   | { status: 'scan'; roots: string[]; source: 'configured' | 'conventional-fallback' }

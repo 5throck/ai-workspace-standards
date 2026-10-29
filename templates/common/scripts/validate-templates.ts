@@ -1,7 +1,17 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.64.0
+ * @version 1.65.0
+ *
+ * v1.65.0 (2026-10-29, U-20261028-014 — spec
+ *          docs/designs/2026-10-29-owner-decision-batch-design.md §2):
+ *          variant-designlint shape check (Check 2) — when a template's
+ *          variant.json declares a `designLint` block it must be
+ *          { enabled: boolean (required), scanRoots?: string[],
+ *          allowlist?: string[] } (same rule as audit.ts's gate via
+ *          helpers/design-lint-roots.ts v1.1.0 validateDesignLintOverride;
+ *          restated inline — this validator does not import audit helpers).
+ *          Absent block stays valid (the override is opt-in per variant).
  *
  * v1.64.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
  *          DEC-20261028-06 §4.1): WS-01 Check 8 — platform_surfaces registry
@@ -880,6 +890,32 @@ function checkVariantManifests(): Map<string, VariantManifest> {
           ccOk = false;
         }
         if (ccOk) pass(`templates/${dir}/variant.json country_config declaration OK (ADR-0091 R3)`);
+      }
+
+      // B-05 (U-20261028-014): variant.json `designLint` block shape check —
+      // the per-variant override audit.ts's design-lint gate consumes. Same
+      // rule as helpers/design-lint-roots.ts validateDesignLintOverride,
+      // restated inline. Absent block = valid (opt-in per variant).
+      const designLint = raw.designLint;
+      if (designLint !== undefined) {
+        let dlOk = true;
+        if (designLint === null || typeof designLint !== 'object' || Array.isArray(designLint)) {
+          fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint must be an object with a required boolean "enabled" (got ${designLint === null ? 'null' : Array.isArray(designLint) ? 'array' : typeof designLint})`);
+          dlOk = false;
+        } else {
+          const dl = designLint as Record<string, unknown>;
+          if (typeof dl.enabled !== 'boolean') {
+            fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint.enabled must be a boolean (got ${JSON.stringify(dl.enabled ?? null)})`);
+            dlOk = false;
+          }
+          for (const key of ['scanRoots', 'allowlist'] as const) {
+            if (dl[key] !== undefined && (!Array.isArray(dl[key]) || !(dl[key] as unknown[]).every(x => typeof x === 'string'))) {
+              fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(dl[key])})`);
+              dlOk = false;
+            }
+          }
+        }
+        if (dlOk) pass(`templates/${dir}/variant.json designLint override shape OK (U-20261028-014)`);
       }
 
       // B-03: script_manifest path existence check
