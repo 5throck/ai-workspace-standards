@@ -9,8 +9,16 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.8.0
- *          v1.8.0 (2026-10-26, ADR-0102 scalar tier declaration, design
+ * @version 1.9.0
+ *          v1.9.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
+ *          §3.A2, DEC-20261029-01 PR2): Check 11 gains the baseline-hash-equality
+ *          tolerance — a flagged staleness warning is suppressed to an INFO line
+ *          when the file's current bytes hash-match the delivered baseline recorded
+ *          in the in-project .claude/last-upgrade-delivery.json manifest (shared
+ *          loadDeliveryBaselineManifest / isDeliveredBaselineEqual helpers, consumed
+ *          by skill-lifecycle-audit Check SD too). Absent/corrupt/v1-shaped manifest
+ *          degrades to the pre-tolerance behavior; at the workspace root (no
+ *          manifest) the tolerance is inert. v1.8.0 (2026-10-26, ADR-0102 scalar tier declaration, design
  *          2026-10-26-model-registry-platform-coverage-design §7): Checks 8-10
  *          parse the scalar `tier: high|medium|low` form as the canonical shape
  *          via the shared parseTierDeclaration() (lifecycle-sync-audit 1.19.0);
@@ -27,7 +35,7 @@
  *          template-relative extends cannot be resolved at the audit location are
  *          exempted instead of failing with "Missing tier".
  * @l2-propagate false
- * @last_updated 2026-09-30
+ * @last_updated 2026-10-29
  * v1.5.0: Check 11 compares against the newest non-sync-only commit (DEC-20260930-01
  *         ruling 2, T-20260930-024) — `chore(upgrade): template sync`,
  *         `chore(templates): auto-release`, and `propagate sync` cascade commits no
@@ -47,6 +55,7 @@ import { join, relative, dirname, basename, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { cwd } from 'node:process';
 import { parseTierDeclaration, type TierDecl } from './lifecycle-sync-audit.ts';
+import { baselineKeyFor } from './lib/upgrade-policy.ts';
 
 interface AgentFrontmatter {
   name: string;
@@ -351,6 +360,101 @@ export function parseFrontmatterDate(value: unknown): string | null {
 // ISO YYYY-MM-DD dates compare correctly as plain strings.
 export function isFrontmatterStale(frontmatterDate: string, lastCommitDate: string): boolean {
   return frontmatterDate < lastCommitDate;
+}
+
+// ── v1.9.0 A2 baseline-hash-equality tolerance (spec
+//    docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A2,
+//    DEC-20261029-01 PR2) ────────────────────────────────────────────────────
+// The delivery engine never stamps `last_reviewed` (an engine write is not a
+// review), so after every upgrade wave the staleness checks re-flag files whose
+// bytes are exactly what the engine delivered. The tolerance: when a flagged
+// file's current content hashes to the manifest's recorded delivered baseline
+// (baselineKeyFor — lifecycleless form for agents/, raw bytes otherwise), the
+// staleness is explained by the delivery and suppressed to an INFO line naming
+// the templateVersion. Self-expiring: any genuine project edit changes the
+// bytes → hash mismatch → the warning returns. At the workspace root there is
+// no manifest (the manifest is written into delivered projects only), so the
+// tolerance is inert at L0 and L0's own template-side audits stay strict.
+
+/** The fields of `.claude/last-upgrade-delivery.json` the A2 tolerance consumes
+ *  (delivery manifest v2 shape — unknown extra keys are ignored). */
+export interface DeliveryBaselineManifest {
+  templateVersion: string;
+  baselines: Record<string, { hash: string }>;
+}
+
+// Read ONCE per audit run (design §6: "Read once per audit run (lazy, cached);
+// only on the warning path"). Keyed by root so callers in different audit
+// locations never see each other's manifest.
+let deliveryManifestCache: { root: string; manifest: DeliveryBaselineManifest | null } | null = null;
+
+/** Unit-test hook — clears the lazy manifest cache. */
+export function resetDeliveryManifestCache(): void {
+  deliveryManifestCache = null;
+}
+
+/**
+ * Lazy, cached read of the in-project delivery manifest
+ * (`.claude/last-upgrade-delivery.json`). Returns null — and caches the null —
+ * when the manifest is absent (workspace root: tolerance inert), unreadable,
+ * corrupt JSON, or v1-shaped / structurally wrong (no templateVersion or no
+ * baselines object): every degenerate form degrades to the pre-tolerance
+ * behavior (no suppression), never to a false suppression.
+ */
+export function loadDeliveryBaselineManifest(root: string = ROOT): DeliveryBaselineManifest | null {
+  if (deliveryManifestCache && deliveryManifestCache.root === root) {
+    return deliveryManifestCache.manifest;
+  }
+  let manifest: DeliveryBaselineManifest | null = null;
+  try {
+    const parsed = JSON.parse(readFileSync(join(root, '.claude', 'last-upgrade-delivery.json'), 'utf-8')) as Partial<DeliveryBaselineManifest> | null;
+    if (
+      parsed && typeof parsed === 'object' &&
+      typeof parsed.templateVersion === 'string' &&
+      parsed.baselines && typeof parsed.baselines === 'object'
+    ) {
+      manifest = { templateVersion: parsed.templateVersion, baselines: parsed.baselines };
+    }
+  } catch {
+    manifest = null; // absent / unreadable / corrupt — degrade, never suppress
+  }
+  deliveryManifestCache = { root, manifest };
+  return manifest;
+}
+
+/**
+ * The A2 tolerance decision for one flagged staleness warning: true only when
+ * the manifest records a baseline for `relPath` AND the file's current content
+ * hashes to it via baselineKeyFor (the same key form the delivery writer used,
+ * so re-stamped `last_updated` dates do not count as drift). Any hash failure
+ * is a mismatch — the tolerance can only suppress, never invent.
+ */
+export function isDeliveredBaselineEqual(
+  relPath: string,
+  content: string,
+  manifest: DeliveryBaselineManifest | null,
+): boolean {
+  if (!manifest) return false;
+  const entry = manifest.baselines[relPath];
+  if (!entry || typeof entry.hash !== 'string' || !entry.hash) return false;
+  try {
+    return baselineKeyFor(relPath, content) === entry.hash;
+  } catch {
+    return false;
+  }
+}
+
+/** The INFO line that replaces a suppressed staleness warning (design §3.A2) —
+ *  names the templateVersion so template-side drift stays visible. */
+export function deliveryStalenessInfoLine(
+  relPath: string,
+  fmDate: string,
+  commitDate: string,
+  manifest: DeliveryBaselineManifest,
+): string {
+  return `${relPath}: frontmatter date (${fmDate}) is older than the last git content commit (${commitDate})` +
+    ` — staleness explained by delivery v${manifest.templateVersion}` +
+    ` — file equals the recorded delivered baseline; review stamp intentionally not engine-managed`;
 }
 
 // Sync-only commit subjects (DEC-20260930-01 ruling 2, T-20260930-024): pipeline
@@ -674,16 +778,29 @@ function auditAgents(jsonMode = false): AuditResult {
     // cascade) are skipped per DEC-20260930-01 ruling 2. Metadata-only commits
     // (changing only last_updated: lines) are also skipped per isMetadataOnlyChange.
     // Archived agents are exempt: stale metadata is expected there by definition.
+    // v1.9.0 A2 tolerance (spec 2026-10-29-delivery-bookkeeping-engine-design):
+    // a flagged file whose current bytes hash-match the recorded delivered
+    // baseline (delivered projects only — L0 has no manifest) is suppressed to
+    // an INFO line; PR1's engine re-stamp plus the delivery→landing skew no
+    // longer re-flag wave-delivered content, and any genuine project edit
+    // breaks the hash and re-arms the warning.
     if (frontmatter.status !== 'archived' && !relPath.includes('_archive')) {
       const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'last_updated'));
       const commitDate = lastContentCommitDate(agentFile);
       if (fmDate && commitDate && isFrontmatterStale(fmDate, commitDate)) {
-        warnings.push({
-          level: 'warning',
-          file: relPath,
-          message: `frontmatter last_updated (${fmDate}) is older than the last git commit (${commitDate})`,
-          fix: "Update 'last_updated' in frontmatter to reflect the latest change",
-        });
+        const manifest = loadDeliveryBaselineManifest();
+        if (isDeliveredBaselineEqual(relPath, readFileSync(agentFile, 'utf-8'), manifest)) {
+          if (!jsonMode) {
+            console.log(`  ℹ️  ${deliveryStalenessInfoLine(relPath, fmDate, commitDate, manifest!)}`);
+          }
+        } else {
+          warnings.push({
+            level: 'warning',
+            file: relPath,
+            message: `frontmatter last_updated (${fmDate}) is older than the last git commit (${commitDate})`,
+            fix: "Update 'last_updated' in frontmatter to reflect the latest change",
+          });
+        }
       }
     }
 

@@ -9,7 +9,18 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.9.0
+ * @version 1.10.0
+ * v1.10.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
+ *         §3.A2, DEC-20261029-01 PR2): Check SD gains the baseline-hash-equality
+ *         tolerance — a flagged last_reviewed staleness warning is suppressed to
+ *         an INFO line when the SKILL.md's current bytes hash-match the delivered
+ *         baseline recorded in the in-project .claude/last-upgrade-delivery.json
+ *         manifest (shared loadDeliveryBaselineManifest / isDeliveredBaselineEqual
+ *         helpers from agent-lifecycle-audit). The engine never stamps last_reviewed
+ *         (an engine write is not a review), so wave-delivered skills no longer
+ *         re-flag; any genuine project edit breaks the hash and re-arms the
+ *         warning. Absent/corrupt/v1-shaped manifest degrades to the pre-tolerance
+ *         behavior; at the workspace root (no manifest) the tolerance is inert.
  * v1.9.0 (2026-10-29, U-20261028-011): Check LC (and its MV arm) moved OUT of
  *         the IS_WORKSPACE_ROOT gate — delivered projects run the lifecycle-
  *         record check too, so the health summary stops over-claiming
@@ -56,7 +67,7 @@ import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from 'no
 import { join, dirname, relative, basename } from 'node:path';
 import { cwd } from 'node:process';
 import { isSelfManagedPath } from './lib/self-managed-tools.ts';
-import { lastContentCommitDate } from './agent-lifecycle-audit.ts';
+import { lastContentCommitDate, loadDeliveryBaselineManifest, isDeliveredBaselineEqual, deliveryStalenessInfoLine } from './agent-lifecycle-audit.ts';
 import { findModelLiterals } from './lib/model-literal-patterns.ts';
 
 interface SkillFrontmatter {
@@ -809,16 +820,30 @@ function auditSkills(jsonMode = false): AuditResult {
       // lastContentCommitDate helper skips sync-only pipeline commits and
       // metadata-only (stamp-only) commits; archived and self-managed skills are
       // exempt (tool-owned SKILL.md content moves without review stamps).
+      // v1.10.0 A2 tolerance (spec 2026-10-29-delivery-bookkeeping-engine-design):
+      // the engine never stamps last_reviewed (an engine write is not a review),
+      // so a wave-delivered SKILL.md whose current bytes hash-match the recorded
+      // delivered baseline (in-project .claude/last-upgrade-delivery.json —
+      // absent at L0, where the tolerance is inert) is suppressed to an INFO
+      // line instead; any genuine project edit breaks the hash and re-arms the
+      // warning with full history.
       if (frontmatter.status === 'active' && !selfManaged) {
         const reviewed = frontmatter.last_reviewed;
         const commitDate = lastContentCommitDate(skillFile);
         if (reviewed && /^\d{4}-\d{2}-\d{2}$/.test(reviewed) && commitDate && reviewed < commitDate) {
-          warnings.push({
-            level: 'warning',
-            file: relPath,
-            message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
-            fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
-          });
+          const manifest = loadDeliveryBaselineManifest();
+          if (isDeliveredBaselineEqual(relPath, skillContent, manifest)) {
+            if (!jsonMode) {
+              console.log(`  ℹ️  ${deliveryStalenessInfoLine(relPath, reviewed, commitDate, manifest!)}`);
+            }
+          } else {
+            warnings.push({
+              level: 'warning',
+              file: relPath,
+              message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
+              fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
+            });
+          }
         }
       }
 
