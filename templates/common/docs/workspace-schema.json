@@ -626,6 +626,16 @@
     "allowlist": [],
     "description": "Design-lint gate config (audit.ts checkDesignLint): token SSOT compliance scan roots for UI source; allowlist entries exempt documented literals. A scaffolded project may declare the same block in variant.json to override this one per project (order: variant.json > workspace-schema; enabled boolean required, scanRoots/allowlist optional string arrays - U-20261028-014)."
   },
+  "routeAudit": {
+    "auditTokenPatterns": [
+      "\\bappendAudit\\s*\\(",
+      "\\bauditTokenUse\\s*\\(",
+      "\\baudit\\s*\\(",
+      "INTO\\s+audit_log\\b"
+    ],
+    "allowlist": {},
+    "description": "Write-route audit tripwire config (scripts/route-audit-scan.ts, T-20261029-005, generalized from co-newbiz PR #742 FR-SEC-07): every route.ts exporting POST/PUT/PATCH/DELETE must reach an auditTokenPatterns match within its local import graph (depth-3) or carry an allowlist entry with a >= 10-char reason. auditTokenPatterns are regex sources (here: the documented co-newbiz defaults verbatim — a host project with different audit-token names declares its own); allowlist keys are root-relative POSIX route.ts paths; optional sharedInfra (string[]) lists basenames whose audit tokens never count as route-level audit. Not yet wired into audit.ts/dev-sync — wiring follows host adoption. A present-but-malformed block is a hard error; a missing block falls back to the script's co-newbiz defaults."
+  },
   "platform_surfaces": {
     "description": "Per-platform capability and adapter SSOT for agent-persona mirrors (design 2026-10-28-platform-agent-mirror, DEC-20261028-06). `agents.supported: true` rows MUST have a generator adapter in scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS; the coverage guard fails loud on a mismatch (registry row without adapter, adapter without a supported row). Every `supported: false` row carries an `evidence` string so the matrix cannot silently rot back to oral tradition. Skills/commands/hooks rows are descriptive today (machinery: sync-skills.ts); agents rows are enforced. The platform set is pinned by validate-model-registry.ts PLATFORMS; directory-name constants stay in scripts/lib/platforms.ts — this registry owns capabilities and formats, not paths.",
     "platforms": {
