@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-10-29, Windows CI on PR #1730): sharedInfra basename extraction
+//          made platform-independent — resolveLocal's candidates are
+//          host-native paths, and `cand.split("/").pop()` never segmented a
+//          win32 backslash path, so the whole path went into
+//          sharedInfra.has() and the shared-infrastructure exclusion NEVER
+//          fired on Windows (infra audit tokens leaked as route-level audits;
+//          the sharedInfra test failed expected-1/received-0). New exported
+//          pure importBasename() splits both separators on every platform
+//          (node:path basename is NOT equivalent — on posix a backslash is a
+//          legal filename character); scan output stays posix-normal (the
+//          report path mapper already normalizes). Scan behavior on posix is
+//          byte-identical; only the win32 exclusion semantics change.
 // v1.0.0 (2026-10-29, T-20261029-005 — design docs/designs/2026-10-29-route-audit-scan-fleet-design.md):
 //          initial. Fleet-general write-route audit tripwire generalized from
 //          Projects/co-newbiz/scripts/co-newbiz/route-audit-scan.ts v1.0.0
@@ -73,7 +85,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { die } from "./lib/error-handling.ts";
 
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 const SCRIPT_NAME = "route-audit-scan.ts";
 const SCHEMA_REL = join("docs", "workspace-schema.json");
 
@@ -254,10 +266,25 @@ export function hasAuditToken(src: string, tokens: readonly RegExp[]): boolean {
   return false;
 }
 
+/**
+ * Basename of a native OR mixed-separator path — both separators handled on
+ * every platform. Not node:path basename(): on a POSIX host a backslash is a
+ * legal filename character, so sharedInfra semantics must be decided by pure
+ * string logic to stay identical on win32 and posix. v1.0.1 (Windows CI,
+ * PR #1730): resolveLocal's candidates are host-native, and the previous
+ * `cand.split("/").pop()` never segmented a win32 backslash path — the whole
+ * path went into sharedInfra.has(), the exclusion never fired, and
+ * intentionally-shared infra tokens leaked as route-level audits on Windows.
+ */
+export function importBasename(p: string): string {
+  const i = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return i === -1 ? p : p.slice(i + 1);
+}
+
 function resolveLocal(from: string, spec: string, sharedInfra: ReadonlySet<string>): string | null {
   const base = resolve(dirname(from), spec);
   for (const cand of [base, `${base}.ts`, `${base}.tsx`, join(base, "index.ts")]) {
-    if (existsSync(cand) && statSync(cand).isFile() && /\.(ts|tsx)$/.test(cand) && !sharedInfra.has(cand.split("/").pop() ?? "")) {
+    if (existsSync(cand) && statSync(cand).isFile() && /\.(ts|tsx)$/.test(cand) && !sharedInfra.has(importBasename(cand))) {
       return cand;
     }
   }

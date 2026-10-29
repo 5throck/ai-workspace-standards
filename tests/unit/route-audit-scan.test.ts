@@ -25,6 +25,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
+  importBasename,
   MAX_DEPTH,
   DEFAULT_AUDIT_TOKEN_PATTERNS,
   RouteAuditConfigError,
@@ -333,5 +334,14 @@ describe('discoverRouteFiles', () => {
     put('app/.next/cache/route.ts', 'export const POST = () => Response.json({});\n');
     const files = discoverRouteFiles(SCRATCH).map((f) => f.split('\\').join('/').slice(SCRATCH.length + 1));
     expect(files).toEqual(['app/api/a/route.ts', 'src/app/api/b/route.ts']);
+  });
+});
+
+describe('importBasename (v1.0.1 win32 sharedInfra fix)', () => {
+  test('segments both separators on every platform', () => {
+    expect(importBasename('app/lib/auth.ts')).toBe('auth.ts');
+    expect(importBasename('app\\lib\\auth.ts')).toBe('auth.ts');
+    expect(importBasename('D:\\a\\pkg\\src\\lib\\auth.ts')).toBe('auth.ts');
+    expect(importBasename('auth.ts')).toBe('auth.ts');
   });
 });
