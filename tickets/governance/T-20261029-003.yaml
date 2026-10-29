@@ -10,12 +10,29 @@ title: >-
   overwrites but never reports); (3) align census hunk-merge comment (says <3
   common lines, code merges on distance<6, upgrade-policy.ts:1577-1586)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-29T02:12:27.502+09:00'
 history:
   - at: '2026-10-29T02:12:27.502+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T11:25:18.245+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T11:25:18.261+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T11:25:18.276+09:00'
+    from: review
+    to: done
+result: >-
+  Polish items resolved via the same design (PR1 #1721 / PR4 #1724): (1)
+  tombstone prune symmetry — template-departed tombstones now pruned mirroring
+  the baselines carry-forward (PR1 B2, ghost-tombstone expectation flipped with
+  test); (2) STUB_VERSION_DIVERGENCE INFO row emitted in the agents/ STUB skip
+  arm (PR1 D1); (3) census hunk-merge comment aligned to the actual distance-<6
+  rule (design Group D); plus (bonus) merge-carried-deletion scan fix pinned
+  with a real-git fixture test (resync-audit v1.7.0, PR4) closing the
+  T-20261029-007 guard gap.
 error: null
