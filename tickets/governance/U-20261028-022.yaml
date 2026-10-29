@@ -3,14 +3,30 @@ id: U-20261028-022
 kind: manual
 title: Upstream request from co-safety
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-28T23:49:58.389+09:00
+created_at: '2026-10-28T23:49:58.389+09:00'
 history:
-  - at: 2026-10-28T23:49:58.389+09:00
+  - at: '2026-10-28T23:49:58.389+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-29T14:52:53.703+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T14:52:53.703+09:00'
+    from: review
+    to: done
+result: >-
+  Semantics decided and implemented (same batch): PROMOTION_CHECKLIST.md
+  declared an AUTHORED SNAPSHOT (header added; machine state is variant.json) —
+  one-time sync executed on the template AND project copies (Phase A Complete:
+  true matching variant.json:358; row 1 Pending→Complete; counts reconciled to
+  the calibrated truth set {4 top-level, 40 definitions, 41 agent-tree files};
+  rows 2-10 stay Pending per the open beta→stable criteria — only the
+  machine-declared flag reconciled). Durable cross-check:
+  validate-variant-claims v1.6.0 check u FAILs on phaseAComplete vs
+  checklist-row contradiction at any status (6 unit tests; FAIL path verified
+  live). All 14 variants PASS.
 error: null
 upstream:
   project: co-safety
@@ -19,7 +35,22 @@ upstream:
   source: project/co-safety
   trust: untrusted
   suspected_layer: L2
-  symptom: 'The promotion gate state is contradictory because the shipped PROMOTION_CHECKLIST.md is static text that ages against the live variant.json. In co-safety, variant.json:94 declares "phaseAComplete": true while PROMOTION_CHECKLIST.md:6 says "Phase A Complete: false" with its rows still Pending; the checklist''s inventory counts have also drifted (it cites 60 skills registered and a 40-agent manifest, while skill-lifecycle-audit scans 43 skills and the agent counts match at 40). The project copy of PROMOTION_CHECKLIST.md is byte-identical to templates/co-safety/PROMOTION_CHECKLIST.md, so nothing regenerates or reconciles the checklist when variant.json changes — the static text inevitably diverges from the machine-readable flag. Expected: the checklist is generated from variant.json state, or the upgrade/reconciliation path updates its flag and inventory counts. Reproduction: grep phaseAComplete variant.json (true) vs grep "Phase A Complete" PROMOTION_CHECKLIST.md (false) in the same checkout.'
+  symptom: >-
+    The promotion gate state is contradictory because the shipped
+    PROMOTION_CHECKLIST.md is static text that ages against the live
+    variant.json. In co-safety, variant.json:94 declares "phaseAComplete": true
+    while PROMOTION_CHECKLIST.md:6 says "Phase A Complete: false" with its rows
+    still Pending; the checklist's inventory counts have also drifted (it cites
+    60 skills registered and a 40-agent manifest, while skill-lifecycle-audit
+    scans 43 skills and the agent counts match at 40). The project copy of
+    PROMOTION_CHECKLIST.md is byte-identical to
+    templates/co-safety/PROMOTION_CHECKLIST.md, so nothing regenerates or
+    reconciles the checklist when variant.json changes — the static text
+    inevitably diverges from the machine-readable flag. Expected: the checklist
+    is generated from variant.json state, or the upgrade/reconciliation path
+    updates its flag and inventory counts. Reproduction: grep phaseAComplete
+    variant.json (true) vs grep "Phase A Complete" PROMOTION_CHECKLIST.md
+    (false) in the same checkout.
   affected_paths:
     - PROMOTION_CHECKLIST.md
     - variant.json
@@ -32,4 +63,19 @@ upstream:
   dedupe_key: 0a1cbe7f7a0f7ca2bbfb85ad63e587a11309ba487ae738a26c8ddb9fb337f6d4
   duplicates:
     - project: co-safety
-      at: 2026-10-28T23:49:58.389+09:00
+      at: '2026-10-28T23:49:58.389+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1729
+    template_version: 0.23.0
+    summary: >-
+      Semantics decided and implemented (same batch): PROMOTION_CHECKLIST.md
+      declared an AUTHORED SNAPSHOT (header added; machine state is
+      variant.json) — one-time sync executed on the template AND project copies
+      (Phase A Complete: true matching variant.json:358; row 1 Pending→Complete;
+      counts reconciled to the calibrated truth set {4 top-level, 40
+      definitions, 41 agent-tree files}; rows 2-10 stay Pending per the open
+      beta→stable criteria — only the machine-declared flag reconciled). Durable
+      cross-check: validate-variant-claims v1.6.0 check u FAILs on
+      phaseAComplete vs checklist-row contradiction at any status (6 unit tests;
+      FAIL path verified live). All 14 variants PASS.

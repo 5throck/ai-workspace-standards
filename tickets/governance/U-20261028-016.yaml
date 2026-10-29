@@ -3,14 +3,35 @@ id: U-20261028-016
 kind: manual
 title: Upstream request from co-safety
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-10-28T23:49:36.035+09:00
+created_at: '2026-10-28T23:49:36.035+09:00'
 history:
-  - at: 2026-10-28T23:49:36.035+09:00
+  - at: '2026-10-28T23:49:36.035+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-29T14:52:53.686+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-29T14:52:53.686+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T14:52:53.686+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented (same batch): workflow-run-record schema at
+  templates/co-safety/docs/workflow-run-record.schema.md (yaml frontmatter +
+  body; required fields derived from the safety-workflow-manager spec lines
+  69-126: workflow_id, date, dispatched_by, agents, legal_basis, outcome,
+  evidence, sign_off with pending-acceptance per the SWM Disclaimer) +
+  validation gate 3 in co-safety audit-variant v1.3.0 (absent/zero records =
+  honest '0 workflow runs recorded' INFO — no empty-dir noise per the research
+  warning; malformed record = FAIL naming file+field). Agent spec line 69
+  references the schema doc. Note: records live at memory/workflows/ per the
+  agent spec (the ticket's memory/workflow-runs/ path was the reporter's
+  paraphrase). Co-safety adoption (actually writing records on workflow runs) is
+  the project session's flow.
 error: null
 upstream:
   project: co-safety
@@ -19,7 +40,27 @@ upstream:
   source: project/co-safety
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Safety workflow run records are never persisted and no validator checks them. The variant''s safety-workflow-manager agent spec (agents/safety-workflow-manager.md:69,76,108,126, shipped from templates/co-safety) mandates a completion record for every workflow run at memory/workflows/YYYY-MM-DD-<workflow-id>.md with an evidence chain. In the deployed co-safety project, memory/workflows/ (and memory/incidents/, memory/registers/) contain only .gitkeep since scaffold — every session log in memory/ is a template-upgrade chore; zero workflow-run, incident, or register records exist. Two root gaps above the project: (1) no schema anywhere in the hierarchy defines the RUN-record fields — the workflow definitions carry workflow_id (workflows/_shared/tbm/schema.yaml), but nothing specifies the required fields of a run record (timestamp, dispatching agent ID, workflow ID, legal_basis array); (2) scripts/verify-memory.ts (templates/common copy) validates only the 4-section session-log format and the MEMORY.md index — it never inspects memory/workflows/ or memory/incidents/. Expected: the record-keeping posture declared in variant.json (record-keeping duties under OSHA-KR Enforcement Rule Art. 37) is machine-verifiable. Reproduction: list memory/workflows/ in a deployment — .gitkeep only; run scripts/verify-memory.ts — passes with no mention of the empty evidence directories.'
+  symptom: >-
+    Safety workflow run records are never persisted and no validator checks
+    them. The variant's safety-workflow-manager agent spec
+    (agents/safety-workflow-manager.md:69,76,108,126, shipped from
+    templates/co-safety) mandates a completion record for every workflow run at
+    memory/workflows/YYYY-MM-DD-<workflow-id>.md with an evidence chain. In the
+    deployed co-safety project, memory/workflows/ (and memory/incidents/,
+    memory/registers/) contain only .gitkeep since scaffold — every session log
+    in memory/ is a template-upgrade chore; zero workflow-run, incident, or
+    register records exist. Two root gaps above the project: (1) no schema
+    anywhere in the hierarchy defines the RUN-record fields — the workflow
+    definitions carry workflow_id (workflows/_shared/tbm/schema.yaml), but
+    nothing specifies the required fields of a run record (timestamp,
+    dispatching agent ID, workflow ID, legal_basis array); (2)
+    scripts/verify-memory.ts (templates/common copy) validates only the
+    4-section session-log format and the MEMORY.md index — it never inspects
+    memory/workflows/ or memory/incidents/. Expected: the record-keeping posture
+    declared in variant.json (record-keeping duties under OSHA-KR Enforcement
+    Rule Art. 37) is machine-verifiable. Reproduction: list memory/workflows/ in
+    a deployment — .gitkeep only; run scripts/verify-memory.ts — passes with no
+    mention of the empty evidence directories.
   affected_paths:
     - agents/safety-workflow-manager.md
     - scripts/verify-memory.ts
@@ -36,4 +77,21 @@ upstream:
   dedupe_key: dc3ecad72840057a757d7063a60c1983c83f0e8942ed5af119eb70b8f394b9d1
   duplicates:
     - project: co-safety
-      at: 2026-10-28T23:49:36.035+09:00
+      at: '2026-10-28T23:49:36.035+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1729
+    template_version: 0.23.0
+    summary: >-
+      Implemented (same batch): workflow-run-record schema at
+      templates/co-safety/docs/workflow-run-record.schema.md (yaml frontmatter +
+      body; required fields derived from the safety-workflow-manager spec lines
+      69-126: workflow_id, date, dispatched_by, agents, legal_basis, outcome,
+      evidence, sign_off with pending-acceptance per the SWM Disclaimer) +
+      validation gate 3 in co-safety audit-variant v1.3.0 (absent/zero records =
+      honest '0 workflow runs recorded' INFO — no empty-dir noise per the
+      research warning; malformed record = FAIL naming file+field). Agent spec
+      line 69 references the schema doc. Note: records live at memory/workflows/
+      per the agent spec (the ticket's memory/workflow-runs/ path was the
+      reporter's paraphrase). Co-safety adoption (actually writing records on
+      workflow runs) is the project session's flow.
