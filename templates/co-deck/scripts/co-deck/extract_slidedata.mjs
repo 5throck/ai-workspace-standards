@@ -1,5 +1,5 @@
 /**
- * extract_slidedata.mjs  v1.2.0
+ * extract_slidedata.mjs  v1.3.0 — try-every-declaration extraction (first strict-JSON-parseable slideData wins; doc-comment placeholders skipped, U-20261029-002). Prior: v1.2.0
  * HTML 슬라이드 파일에서 slideData 배열을 추출하여 slidedata.json으로 저장.
  *
  * 사용법:
@@ -15,7 +15,7 @@
  *   v1.2.0 — JS→JSON transform 제거; html-build strict-JSON 계약(Stage C) 적용 후 단순화 (A-04).
  */
 
-// @version 1.2.0
+// @version 1.3.0
 import { readFileSync, writeFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 
@@ -99,35 +99,56 @@ function extractBalancedArray(src, startPos) {
   return null; // unbalanced — no complete array found
 }
 
-// Primary extraction: locate `slideData` declaration and extract array via state machine
+// Primary extraction: try EVERY `slideData` declaration and take the first
+// whose bracketed content parses as strict JSON — built decks carry the
+// html-build usage doc-comment ("const slideData = [...];") before the real
+// runtime array, and its `[...]` placeholder is not valid JSON
+// (U-20261029-002, v1.3.0).
+const declRe = /(?:const|let|var)\s+slideData\s*=\s*/g;
+const candidates = [];
 let rawJson = null;
-const declMatch = html.match(/(?:const|let|var)\s+slideData\s*=\s*/);
-if (declMatch) {
-  const afterAssign = (declMatch.index ?? 0) + declMatch[0].length;
-  rawJson = extractBalancedArray(html, afterAssign);
+let slideData = null;
+for (const m of html.matchAll(declRe)) {
+  const candidate = extractBalancedArray(html, m.index + m[0].length);
+  if (candidate) {
+    candidates.push(candidate);
+    try {
+      slideData = JSON.parse(candidate);
+      rawJson = candidate;
+      break;
+    } catch {
+      // doc-comment placeholder or non-strict assignment — try the next match
+    }
+  }
 }
 
 // Secondary extraction: find `slideData` keyword anywhere and scan forward for `[`
 if (!rawJson) {
   const kwIdx = html.indexOf("slideData");
   if (kwIdx !== -1) {
-    rawJson = extractBalancedArray(html, kwIdx);
+    const candidate = extractBalancedArray(html, kwIdx);
+    if (candidate) {
+      candidates.push(candidate);
+      try {
+        slideData = JSON.parse(candidate);
+        rawJson = candidate;
+      } catch {
+        // fall through to the error below with the last candidate as context
+      }
+    }
   }
 }
 
-if (!rawJson) {
-  console.error("❌ slideData를 찾을 수 없습니다. HTML 파일에 'slideData' 변수가 있는지 확인하세요.");
-  process.exit(1);
-}
-
-// JSON.parse directly — html-build must emit strict JSON (Stage C contract)
-let slideData;
-try {
-  slideData = JSON.parse(rawJson);
-} catch (e) {
-  console.error("❌ slideData JSON.parse 실패:", e.message);
-  console.error("   힌트: html-build가 strict JSON을 출력하는지 확인하세요 (모든 키/값 큰따옴표, 후행 쉼표 없음, 주석 없음).");
-  console.error("raw JSON 일부:", rawJson.slice(0, 200));
+if (!slideData) {
+  if (candidates.length > 0) {
+    // Declarations existed but none parsed — the old strict-JSON failure, with context
+    const last = candidates[candidates.length - 1];
+    console.error("❌ slideData JSON.parse 실패: 후보 " + candidates.length + "개 모두 strict JSON이 아닙니다 (doc-comment 예제 포함).");
+    console.error("   힌트: html-build가 strict JSON을 출력하는지 확인하세요 (모든 키/값 큰따옴표, 후행 쉼표 없음, 주석 없음).");
+    console.error("raw JSON 일부:", last.slice(0, 200));
+  } else {
+    console.error("❌ slideData를 찾을 수 없습니다. HTML 파일에 'slideData' 변수가 있는지 확인하세요.");
+  }
   process.exit(1);
 }
 
