@@ -2,7 +2,38 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.6.0
+ * @version 1.7.0
+ *
+ * v1.7.0 (2026-10-29, spec
+ *          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
+ *          §3.B3, PR4): tombstone reappearance check + nightly-guard
+ *          invocation contract.
+ *          (a) TOMBSTONE-VIOLATION row — the delivery manifest's
+ *          `tombstones` are diffed against the working tree EVERY run: a
+ *          tombstoned path PRESENT on disk emits a TOMBSTONE-VIOLATION row
+ *          (non-KEEP, state `tombstoned`; the basis carries recordedAt,
+ *          templateVersion, and a reason snippet) regardless of git status,
+ *          so a wave re-delivery or project re-application is caught
+ *          deterministically even when the file is tracked-clean (the
+ *          T-20261029-007 class — co-design workflows.md reappeared via a
+ *          merge-carried delivery). The violation row overrides the
+ *          ordinary modified/stale classification for that path; the
+ *          tombstone census line gains a zero-inclusive
+ *          `violation(s) present on disk` count.
+ *          (b)+(c) Nightly tombstone-guard invocation contract
+ *          (T-20261029-007): the 01:30 runner's per-path deletion-history
+ *          scan MUST use `git log -m --diff-filter=D -- <path>` — a
+ *          deletion carried by a MERGE commit is invisible to plain
+ *          `--diff-filter=D` (validated by the fixture test
+ *          tests/unit/resync-audit-tombstone.test.ts: a merge whose tree
+ *          deletes a file with no standalone deletion commit finds 0 rows
+ *          plain, 1 commit with `-m`). The live cron prompt is user-managed
+ *          and lives OUTSIDE this repo — the runner should rely on THIS
+ *          script's deterministic TOMBSTONE-VIOLATION row for
+ *          manifest-tombstoned paths (manifest-based, no git-log
+ *          semantics); the `log -m` form remains necessary only for retired
+ *          paths with no manifest tombstone (template-departed
+ *          retirements).
  *
  * v1.6.0 (2026-10-28, U-20261028-001 — spec
  *          docs/designs/2026-10-28-delivery-tombstone-ownership-design.md
@@ -102,13 +133,19 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const VERSION = "1.6.0";
+const VERSION = "1.7.0";
 
 interface FileRow {
   file: string;
-  state: "modified" | "untracked";
+  state: "modified" | "untracked" | "tombstoned";
   mtime: string;
-  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP" | "TOMBSTONE-UNCONFIRMED";
+  verdict:
+    | "STALE-RESIDUE"
+    | "PRESUME-STALE"
+    | "LOCAL-WORK"
+    | "KEEP"
+    | "TOMBSTONE-UNCONFIRMED"
+    | "TOMBSTONE-VIOLATION";
   basis: string;
 }
 
@@ -116,7 +153,10 @@ interface FileRow {
  *  (U-20261028-001 D1). Both keys optional: v1-shaped manifests and missing
  *  manifests degrade to empty maps (a zero census, no guard rows). */
 interface DeliveryTombstoneState {
-  tombstones: Record<string, { recordedAt?: string; reason?: string }>;
+  tombstones: Record<
+    string,
+    { recordedAt?: string; templateVersion?: string; reason?: string }
+  >;
   baselines: Record<string, unknown>;
 }
 
@@ -127,7 +167,10 @@ export function loadDeliveryTombstoneState(projectPath: string): DeliveryTombsto
   if (!existsSync(manifestPath)) return empty;
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
-      tombstones?: Record<string, { recordedAt?: string; reason?: string }>;
+      tombstones?: Record<
+        string,
+        { recordedAt?: string; templateVersion?: string; reason?: string }
+      >;
       baselines?: Record<string, unknown>;
     };
     return {
@@ -139,6 +182,63 @@ export function loadDeliveryTombstoneState(projectPath: string): DeliveryTombsto
   }
 }
 
+/** Reason snippets longer than this are truncated in the violation basis. */
+const TOMBSTONE_REASON_SNIPPET_MAX = 80;
+
+/**
+ * TOMBSTONE-VIOLATION rows (v1.7.0 — spec
+ * docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.B3, PR4):
+ * a tombstoned path that is PRESENT on disk is a violation regardless of its
+ * git state — wave re-delivery or project re-application. Manifest-based and
+ * deterministic every daily run; needs no git-log semantics, so it catches
+ * reappearances that are tracked-clean (invisible to `git status`, the
+ * T-20261029-007 class) as well as dirty/untracked ones. Exported for unit
+ * tests.
+ */
+export function tombstoneViolations(projectPath: string, delivery: DeliveryTombstoneState): FileRow[] {
+  const rows: FileRow[] = [];
+  for (const [rel, t] of Object.entries(delivery.tombstones)) {
+    const abs = join(projectPath, rel);
+    if (!existsSync(abs)) continue;
+    let mtime = "";
+    try {
+      mtime = statSync(abs).mtime.toISOString().slice(0, 10);
+    } catch { /* vanished mid-audit — the next run re-flags */ }
+    const recorded = [
+      `recorded ${t.recordedAt ?? "?"}`,
+      t.templateVersion ? `template v${t.templateVersion}` : null,
+    ]
+      .filter(Boolean)
+      .join(", ");
+    const reason = t.reason
+      ? ` — ${
+        t.reason.length > TOMBSTONE_REASON_SNIPPET_MAX
+          ? `${t.reason.slice(0, TOMBSTONE_REASON_SNIPPET_MAX)}…`
+          : t.reason
+      }`
+      : "";
+    rows.push({
+      file: rel,
+      state: "tombstoned",
+      mtime,
+      verdict: "TOMBSTONE-VIOLATION",
+      basis: `tombstoned path is present on disk (${recorded}) — wave re-delivery or project re-application; adjudicate intent${reason}`,
+    });
+  }
+  return rows.sort((a, b) => a.file.localeCompare(b.file));
+}
+
+/**
+ * Violation rows override the ordinary classification for the same path — a
+ * tombstoned reappearance must not read as STALE-RESIDUE/LOCAL-WORK (the
+ * presence itself is the finding). Exactly one row per path. Exported for
+ * unit tests.
+ */
+export function mergeViolationRows(porcelainRows: FileRow[], violations: FileRow[]): FileRow[] {
+  const violating = new Set(violations.map((v) => v.file));
+  return [...porcelainRows.filter((r) => !violating.has(r.file)), ...violations];
+}
+
 interface ProjectReport {
   project: string;
   branch: string;
@@ -146,7 +246,7 @@ interface ProjectReport {
   dirtyCount: number;
   rows: FileRow[];
   groups: Array<{ group: string; verdict: string; files: string[]; note: string }>;
-  tombstoneCensus: { honored: number; unconfirmed: number };
+  tombstoneCensus: { honored: number; unconfirmed: number; violations: number };
 }
 
 function parseArgs(): { projects: string[]; json: boolean; snapshotDir?: string; help: boolean } {
@@ -508,7 +608,7 @@ function markdownReport(reports: ProjectReport[]): string {
   const lines: string[] = [
     `# resync-audit report — ${new Date().toISOString().slice(0, 10)}`,
     "",
-    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR).`,
+    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR) · TOMBSTONE-VIOLATION = a tombstoned path is present on disk (wave re-delivery or project re-application) — adjudicate intent.`,
     "",
   ];
   for (const p of reports) {
@@ -516,7 +616,8 @@ function markdownReport(reports: ProjectReport[]): string {
     lines.push(`- branch: \`${p.branch}\` · remote: \`${p.remote || "(none)"}\` · dirty files: ${p.dirtyCount}`, "");
     // U-20261028-001 (§4.3): the tombstone census row — present for EVERY
     // project, zero-inclusive, so the daily fleet report always carries it.
-    lines.push(`- tombstone census: ${p.tombstoneCensus.honored} honored deletion(s) · ${p.tombstoneCensus.unconfirmed} unconfirmed candidate(s)`, "");
+    // v1.7.0 (PR4, §3.B3): the census gains the violation count.
+    lines.push(`- tombstone census: ${p.tombstoneCensus.honored} honored deletion(s) · ${p.tombstoneCensus.unconfirmed} unconfirmed candidate(s) · ${p.tombstoneCensus.violations} violation(s) present on disk`, "");
     lines.push("| group | verdict | note |", "|---|---|---|");
     for (const g of p.groups) {
       lines.push(`| ${g.group} | ${g.verdict} | ${g.note} |`);
@@ -611,16 +712,24 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
       }
       rows.push(classify(project, relFile, state, delivery));
     }
+    const porcelainCount = rows.length;
+    // v1.7.0 (PR4, §3.B3): deterministic tombstone reappearance check — the
+    // manifest tombstones are diffed against the working tree independent of
+    // git status, so a tracked-clean re-delivery is caught too. Violation
+    // rows override the ordinary classification for the same path.
+    const violations = tombstoneViolations(project, delivery);
+    const allRows = mergeViolationRows(rows, violations);
     const report: ProjectReport = {
       project,
       branch,
       remote: remoteRaw,
-      dirtyCount: rows.length,
-      rows,
-      groups: groupRows(rows),
+      dirtyCount: porcelainCount,
+      rows: allRows,
+      groups: groupRows(allRows),
       tombstoneCensus: {
-        honored: rows.filter((r) => r.verdict === "KEEP" && r.basis.startsWith("tombstoned deletion honored")).length,
-        unconfirmed: rows.filter((r) => r.verdict === "TOMBSTONE-UNCONFIRMED").length,
+        honored: allRows.filter((r) => r.verdict === "KEEP" && r.basis.startsWith("tombstoned deletion honored")).length,
+        unconfirmed: allRows.filter((r) => r.verdict === "TOMBSTONE-UNCONFIRMED").length,
+        violations: violations.length,
       },
     };
     if (snapshotDir) {
