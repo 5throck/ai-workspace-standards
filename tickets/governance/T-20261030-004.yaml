@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261030-004
+kind: manual
+title: >-
+  learning (deferred-extraction): record co-newbiz ADR-0189 P1 scheduled-jobs
+  runtime pattern as a handbook reference for variants that later need periodic
+  jobs — OS fires one minute-tick dispatcher; schedule lives in DB
+  (runtime-editable cron, CAS last_fire_minute fire-once under overlap, atomic
+  expired-lease takeover locks, heartbeat liveness, detached run-job with
+  exit-124/timeout 125/backstop contract, secret-scrubbed output). Defer
+  template/code promotion until a second variant demands it or P2+ (OS
+  registration, notifications) stabilizes. Evidence:
+  Projects/co-newbiz/docs/adr/0189-amend-adr-0019-launchd-and-docker-scheduler-model.md
+  §2-5; scripts/co-newbiz/scheduler-core.ts:121-128; schedule-tick.ts:56-65;
+  db/lib/secret-scrubber.ts. Step 2f 2026-10-30
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-30T02:12:50.106+09:00'
+history:
+  - at: '2026-10-30T02:12:50.106+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

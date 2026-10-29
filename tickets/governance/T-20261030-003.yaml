@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261030-003
+kind: manual
+title: >-
+  learning: design-token retrofit playbook — extract co-price PRs #164–#167
+  staged adoption method (foundation SSOT tokens.css with @theme inline bridge,
+  no UI change → per-layer codemods: type scale → color with onyx near-duplicate
+  collapse under computed WCAG contrast proof → radii/shadow/layout →
+  machine-verified allowlist residue: remove-entry-then-relint, full
+  hex/px/rgba/hsla match collection, dead entries deleted 158→131) into a
+  retrofit playbook attached to design-foundation (or thin design-token-adoption
+  skill related to token-usage-lint). Gap: design-foundation Stage 4 covers
+  greenfield copy-template only; token-usage-lint is detection half only. First
+  proven fleet target: co-architect (122-entry allowlist, same Tailwind v4 +
+  design-lint substrate). Evidence:
+  Projects/co-price/docs/designs/2026-10-29-token-adoption-design.md
+  §5:120,§7:149; src/app/tokens.css; scripts/design-lint.ts:286-319. Step 2f
+  2026-10-30 (co-newbiz #777 reviewed, nothing to extract — i18n-audit skill
+  already covers glossary drift)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-30T02:12:50.090+09:00'
+history:
+  - at: '2026-10-30T02:12:50.090+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
