@@ -1,4 +1,16 @@
-// @version 1.34.0
+// @version 1.35.0
+// v1.35.0 (2026-10-29, U-20261028-013 — spec
+//          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A4):
+//          new step 3b — CHANGELOG structural-duplicate gate. Blocking, matching
+//          step 3's precedent: duplicate `### <Category>` headings within one
+//          release section, or more than one `[Unreleased]` section (`^## [Unreleased]`
+//          prefix match — the live case is Projects/co-work carrying both
+//          `## [Unreleased]` and `## [Unreleased] 2026-09-01`), FAIL with a fix
+//          message naming the merge action. Scan covers ALL `## [...]` sections;
+//          detection lives in scripts/helpers/changelog-duplicates.ts v1.0.0
+//          (pure, unit-pinned). Intended one-time remediation for previously
+//          tolerated dirty CHANGELOGs; the gate is content-local and trivially
+//          satisfied once merged.
 // v1.34.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
 //          DEC-20261028-06): new step 4.61 — agent-mirror parity check running
 //          `bun scripts/sync-agent-mirrors.ts --check` immediately after the step 4.6
@@ -246,6 +258,7 @@ import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
+import { changelogGateFindings } from './helpers/changelog-duplicates.ts';
 import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
 
 const GREEN = '\x1b[32m';
@@ -599,6 +612,28 @@ if (fs.existsSync('CHANGELOG.md')) {
             if (import.meta.main) {
               process.exit(1);
             }
+        }
+    }
+}
+
+// 3b. CHANGELOG structural-duplicate gate (v1.35.0, U-20261028-013 — spec
+//     docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A4).
+//     Blocking, matching step 3's precedent: duplicate `### <Category>` headings
+//     within one release section, or more than one `[Unreleased]` section, are
+//     structural defects that fragment the release history. Detection is pure
+//     (helpers/changelog-duplicates.ts) and covers ALL `## [...]` sections.
+if (fs.existsSync('CHANGELOG.md')) {
+    const clDup = fs.readFileSync('CHANGELOG.md', 'utf-8');
+    const dupFindings = changelogGateFindings(clDup);
+    if (dupFindings.length > 0) {
+        console.log("");
+        for (const f of dupFindings) {
+            console.log(`${RED}❌ CHANGELOG.md: ${f.message}${RESET}`);
+        }
+        console.log(`${YELLOW}   Merge the duplicated structure above, then re-run /sync.${RESET}`);
+        console.log("");
+        if (import.meta.main) {
+          process.exit(1);
         }
     }
 }

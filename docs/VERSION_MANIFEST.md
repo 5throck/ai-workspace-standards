@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-29T00:39:32.316Z
+**Generated**: 2026-10-29T01:42:05.394Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -124,7 +124,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-gate-coverage.ts | 1.0.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.4.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.34.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.35.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
@@ -194,7 +194,7 @@
 | test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.10.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.4.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.6.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.7.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.12.0 | scripts/ticket.ts | js-yaml |

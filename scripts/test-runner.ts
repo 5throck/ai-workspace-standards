@@ -1,6 +1,19 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.6.0
+ * @version 1.7.0
+ *
+ * v1.7.0 (2026-10-29, Windows CI timing budgets — PR #1723 CI run
+ * 40799972562): `upgrade-decision-log.test.ts` suite budget 300s → 600s
+ * (test ceiling stays 60s). The delivery-bookkeeping PR1 wave (spec
+ * 2026-10-29-delivery-bookkeeping-engine-design) added the TOMBSTONE_CLEARED
+ * + clear-grant regression cases to the file (now 45 tests / 3087 expect()
+ * calls; macOS total 16.7s, max per-test 1.4s); on windows-latest 41/45
+ * tests printed (pass) before the 300s suite wall killed the file — the same
+ * every-test-passes-file-killed-at-the-suite-wall shape v1.6.0 budgeted for.
+ * Not a hang: observed win32 per-test max 36.7s (< the 60s bun ceiling, so no
+ * individual test timed out) and the four tests that never ran are full
+ * `upgrade-project.ts` integration runs (~15-37s each on win32). Projected
+ * win32 file total ~330-440s → suite 600s keeps ~1.4-1.8x headroom.
  *
  * v1.6.0 (2026-10-28, Windows CI timing budgets — PR #1677 CI run
  * 40603661108): `upgrade-decision-log.test.ts` joins FILE_TIME_BUDGETS
@@ -97,7 +110,7 @@ const DEFAULT_TEST_TIMEOUT_MS = 15000;
 const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
   'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
-  'upgrade-decision-log.test.ts': { suite: 300000, test: 60000 },
+  'upgrade-decision-log.test.ts': { suite: 600000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {
