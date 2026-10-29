@@ -3,7 +3,7 @@ id: U-20261029-010
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-29T21:46:30.869+09:00'
 history:
@@ -16,7 +16,17 @@ history:
   - at: '2026-10-30T06:58:00.176+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-30T07:45:55.814+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed: §3.6 3-Tier Strategy moved before §3.7 Meeting Facilitation in both
+  root AGENTS.md and templates/common/AGENTS.md — surviving subsections ascend
+  §3.1 → §3.6 → §3.7 → L0→L1→L2 → §3.7.5 matching the intro list. Heading text
+  unchanged so #36-3-tier-strategy anchors and cross-references resolve; the two
+  WORKSPACE-MANAGED tier-model-mapping pairs moved with §3.6 preserving mutual
+  order; variant templates carry §3.6 without §3.7 (no drift). Landed in #1745,
+  merged via #1747.
 error: null
 upstream:
   project: co-abap
@@ -47,3 +57,14 @@ upstream:
   duplicates:
     - project: co-abap
       at: '2026-10-29T21:46:30.869+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1747
+    summary: >-
+      Fixed: §3.6 3-Tier Strategy moved before §3.7 Meeting Facilitation in both
+      root AGENTS.md and templates/common/AGENTS.md — surviving subsections
+      ascend §3.1 → §3.6 → §3.7 → L0→L1→L2 → §3.7.5 matching the intro list.
+      Heading text unchanged so #36-3-tier-strategy anchors and cross-references
+      resolve; the two WORKSPACE-MANAGED tier-model-mapping pairs moved with
+      §3.6 preserving mutual order; variant templates carry §3.6 without §3.7
+      (no drift). Landed in #1745, merged via #1747.

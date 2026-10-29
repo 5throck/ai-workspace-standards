@@ -3,7 +3,7 @@ id: U-20261029-008
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-10-29T21:46:30.831+09:00'
 history:
@@ -16,7 +16,16 @@ history:
   - at: '2026-10-30T06:58:00.210+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-10-30T07:45:55.783+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed: gitleaks-merge 1.0.0 → 1.1.0 preserves project-only [[rules]] blocks —
+  extractRulesBlocks (top-level-header boundaries keep [rules.allowlists]
+  sub-tables inside their parent), templateCoversRule (same-id → template
+  authoritative; id-less blocks by exact text), verbatim concatenation append; 7
+  new tests. Landed in #1744, merged via the unified re-land #1747. co-abap's 9
+  co-abap-* rules now survive every template re-merge.
 error: null
 upstream:
   project: co-abap
@@ -53,3 +62,14 @@ upstream:
   duplicates:
     - project: co-abap
       at: '2026-10-29T21:46:30.831+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1747
+    summary: >-
+      Fixed: gitleaks-merge 1.0.0 → 1.1.0 preserves project-only [[rules]]
+      blocks — extractRulesBlocks (top-level-header boundaries keep
+      [rules.allowlists] sub-tables inside their parent), templateCoversRule
+      (same-id → template authoritative; id-less blocks by exact text), verbatim
+      concatenation append; 7 new tests. Landed in #1744, merged via the unified
+      re-land #1747. co-abap's 9 co-abap-* rules now survive every template
+      re-merge.
