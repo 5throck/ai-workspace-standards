@@ -3,13 +3,19 @@ id: U-20261029-008
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: waiting
+status: review
 attempts: 0
-created_at: 2026-10-29T21:46:30.831+09:00
+created_at: '2026-10-29T21:46:30.831+09:00'
 history:
-  - at: 2026-10-29T21:46:30.831+09:00
+  - at: '2026-10-29T21:46:30.831+09:00'
     from: null
     to: waiting
+  - at: '2026-10-30T06:54:50.559+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-30T06:54:50.575+09:00'
+    from: running
+    to: review
 result: null
 error: null
 upstream:
@@ -19,7 +25,21 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/helpers/gitleaks-merge.ts v1.0.0 preserves only project-specific `regexes` and `paths` allowlist entries (extractGitleaksArray on the two array names, lines 55-58) when re-merging the template .gitleaks.toml over a project copy; custom [[rules]] table blocks are silently dropped. A delivered project (co-abap) has just been advised by the U-20261028-004 adjudication to host its custom secret patterns as project [[rules]] entries ("custom secret patterns belong in .gitleaks.toml") — 9 co-abap-* rules currently live there — so the next upgrade wave that re-merges .gitleaks.toml will silently revert exactly the remediation the adjudication prescribed, recreating the original U-004 blind spot. Expected: mergeGitleaksToml preserves project-only [[rules]] blocks (e.g. by rule id/name union like the array handling), or documents [[rules]] as non-preservable and prescribes a different upgrade-safe home for custom rules.'
+  symptom: >-
+    scripts/helpers/gitleaks-merge.ts v1.0.0 preserves only project-specific
+    `regexes` and `paths` allowlist entries (extractGitleaksArray on the two
+    array names, lines 55-58) when re-merging the template .gitleaks.toml over a
+    project copy; custom [[rules]] table blocks are silently dropped. A
+    delivered project (co-abap) has just been advised by the U-20261028-004
+    adjudication to host its custom secret patterns as project [[rules]] entries
+    ("custom secret patterns belong in .gitleaks.toml") — 9 co-abap-* rules
+    currently live there — so the next upgrade wave that re-merges
+    .gitleaks.toml will silently revert exactly the remediation the adjudication
+    prescribed, recreating the original U-004 blind spot. Expected:
+    mergeGitleaksToml preserves project-only [[rules]] blocks (e.g. by rule
+    id/name union like the array handling), or documents [[rules]] as
+    non-preservable and prescribes a different upgrade-safe home for custom
+    rules.
   affected_paths:
     - scripts/helpers/gitleaks-merge.ts
     - .gitleaks.toml
@@ -32,4 +52,4 @@ upstream:
   dedupe_key: 9bbd59f6e533b4d7812f67e8a17d174a7c82aa6810fac7729e8e57935c272a9f
   duplicates:
     - project: co-abap
-      at: 2026-10-29T21:46:30.831+09:00
+      at: '2026-10-29T21:46:30.831+09:00'
