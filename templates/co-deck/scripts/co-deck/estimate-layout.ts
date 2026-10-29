@@ -1,4 +1,4 @@
-// @version 1.2.0 — adds --lint layout gate: checks every slide in slidedata.json
+// @version 1.3.0 — adds --lint layout gate: checks every slide in slidedata.json
 // against the merged spec's content_constraints; exits 1 on any violation.
 // v1.1.0: OS-aware font search paths (Windows, macOS, Linux).
 // Playwright-free PDF layout preparation — replaces measure-layout.ts.
@@ -75,26 +75,29 @@ function parseLayoutOverrides(frontmatterContent: string): Record<string, any> {
   const result: Record<string, any> = {};
   const lines = frontmatterContent.split('\n');
 
-  // Detect the base indentation of the layout_overrides block
+  // Block entry/termination by INDENTATION relative to the layout_overrides
+  // parent (U-20261029-003): the old terminator /^\s{2}[a-z]/ matched the
+  // block's own first child when children sit at 2-space indent, so standard
+  // blocks parsed as {}. Children are any line indented deeper than the
+  // parent; the block ends at the first non-empty line dedented to/below it.
   let inBlock = false;
+  let parentIndent = -1;
   let baseIndent = -1;
 
   for (const line of lines) {
-    if (/^\s*layout_overrides:\s*$/.test(line)) {
-      inBlock = true;
+    if (!inBlock) {
+      const entry = line.match(/^(\s*)layout_overrides:\s*$/);
+      if (entry) {
+        inBlock = true;
+        parentIndent = entry[1].length;
+      }
       continue;
     }
-    if (inBlock && /^\s{2}[a-z]/.test(line)) {
-      // Next top-level key encountered — end of layout_overrides block
-      break;
-    }
-    if (!inBlock) continue;
-
-    if (baseIndent < 0 && line.trim().length > 0) {
-      const match = line.match(/^(\s+)/);
-      if (match) baseIndent = match[1].length;
-    }
-    if (baseIndent < 0) continue;
+    if (!line.trim()) continue;
+    const indent = line.match(/^(\s+)/)?.[1].length ?? 0;
+    if (indent <= parentIndent) break;
+    if (baseIndent < 0) baseIndent = indent;
+    if (indent < baseIndent) break;
 
     const trimmed = line.slice(baseIndent);
     if (!trimmed.trim()) continue;
