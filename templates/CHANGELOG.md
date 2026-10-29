@@ -4,6 +4,10 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-29
+### Changed
+- **[2026-10-30]**: auto-release 2026-10-30: 34 delivered paths (A 4 / M 30 / D 0 / R 0)
+
 ## [0.23.0] - 2026-10-28
 ### Changed
 - **[2026-10-29]**: auto-release 2026-10-29: 209 delivered paths (A 6 / M 202 / D 1 / R 0)
