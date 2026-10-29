@@ -589,9 +589,13 @@ describe('templates-root discovery for stub resolution (canary finding)', () => 
 });
 
 
-describe('out-of-root CHECK degrade (T-20261029-008)', () => {
+describe('out-of-root CHECK degrade, per-agent (U-20261029-001 — T-20261029-008 follow-up)', () => {
   // A real standalone checkout: os.tmpdir() guarantees no ancestor carries
-  // templates/common/agents (the CI-runner condition).
+  // templates/common/agents (the CI-runner condition). The roster mixes a
+  // stub agent (unresolvable body out-of-root) with a verifiable non-stub
+  // agent — detached runs must still catch REAL drift on the latter.
+  const PLAIN_SSOT = '---\nname: plain\ntier: low\ndescription: Plain body agent\n---\n\nPlain body.\n';
+
   function seedIsolatedProject(): string {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sam-out-of-root-'));
     fs.mkdirSync(path.join(root, 'agents'), { recursive: true });
@@ -604,7 +608,22 @@ describe('out-of-root CHECK degrade (T-20261029-008)', () => {
       `---\nname: docs-writer\ntier: low\ndescription: Stub docs writer\nextends: ../../common/agents/docs-writer.md\n---\n`,
       'utf8',
     );
+    fs.writeFileSync(path.join(root, 'agents', 'plain.md'), PLAIN_SSOT, 'utf8');
     return root;
+  }
+
+  /** The exact projection a workspace-anchored run would produce for plain.md. */
+  function expectedPlainMirror(): string {
+    const schema = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'docs', 'workspace-schema.json'), 'utf8')) as WorkspaceSchemaLike;
+    const models = schema.models as ModelRegistry;
+    const agent = { file: 'plain.md', name: 'plain', description: 'Plain body agent', tier: 'low', body: '\nPlain body.\n' };
+    return PLATFORM_AGENT_ADAPTERS.claude.render(agent, resolvePlatformModel('claude', 'low', models), 'agents/plain.md');
+  }
+
+  function seedMirror(root: string, name: string, content: string): void {
+    const mirrorDirPath = path.join(root, '.claude', 'agents');
+    fs.mkdirSync(mirrorDirPath, { recursive: true });
+    fs.writeFileSync(path.join(mirrorDirPath, `${name}.md`), content, 'utf8');
   }
 
   test('discoverTemplatesRoot returns null searched out-of-root and the root under a workspace', () => {
@@ -617,42 +636,75 @@ describe('out-of-root CHECK degrade (T-20261029-008)', () => {
     }
   });
 
-  test('CHECK mode degrades to a green WARN when mirrors exist but no root is discoverable', () => {
+  test('detached + stubs + all mirrors present: exit 0 WARN — stub unverifiable, non-stub still verified', () => {
     const root = seedIsolatedProject();
     try {
-      const mirrorDirPath = path.join(root, '.claude', 'agents');
-      fs.mkdirSync(mirrorDirPath, { recursive: true });
-      fs.writeFileSync(path.join(mirrorDirPath, 'docs-writer.md'), 'generated out-of-root earlier\n', 'utf8');
+      seedMirror(root, 'docs-writer', 'generated out-of-root earlier\n');
+      seedMirror(root, 'plain', expectedPlainMirror());
       const res = syncAgentMirrors(root, { check: true });
+      // Green: the only finding class is the unverifiable stub.
       expect(res.ok).toBe(true);
-      expect(res.skipped).toBe(true);
+      expect(res.drifts).toEqual([]);
+      // Per-agent degrade, NOT the v1.2.0 blanket skip: the non-stub agent was compared.
+      expect(res.skipped).toBe(false);
+      expect(res.agents).toBe(1);
+      expect(res.unverifiable.map((uv) => uv.name)).toEqual(['docs-writer']);
+      expect(res.unverifiable[0]!.file).toBe('agents/docs-writer.md');
+      expect(res.warnings.join(' ')).toMatch(/unverifiable/);
       expect(res.warnings.join(' ')).toMatch(/T-20261029-008/);
-      expect(res.warnings.join(' ')).toMatch(/cannot be verified out-of-root/);
-      expect(res.notes[0]).toMatch(/^WARN:/);
+      expect(res.warnings.join(' ')).toMatch(/--templates-root/);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
 
-  test('CLI --check exits 0 with the WARN on stdout (gate-lifting contract)', () => {
+  test('CLI --check exits 0 with the WARN + repair line on stdout (gate-lifting contract)', () => {
     const root = seedIsolatedProject();
     try {
-      const mirrorDirPath = path.join(root, '.claude', 'agents');
-      fs.mkdirSync(mirrorDirPath, { recursive: true });
-      fs.writeFileSync(path.join(mirrorDirPath, 'docs-writer.md'), 'generated out-of-root earlier\n', 'utf8');
+      seedMirror(root, 'docs-writer', 'generated out-of-root earlier\n');
+      seedMirror(root, 'plain', expectedPlainMirror());
       const r = spawnSync(process.execPath, [GENERATOR_SRC, '--check', '--dir', root], { encoding: 'utf8' });
       expect(r.status).toBe(0);
       expect(r.stdout ?? '').toContain('WARN:');
       expect(r.stdout ?? '').toContain('T-20261029-008');
+      expect(r.stdout ?? '').toContain('run inside a workspace checkout or pass --templates-root');
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
 
-  test('CHECK mode still hard-fails with no root and no mirrors (unverifiable is not green)', () => {
+  test('detached + stub mirror MISSING: still exit 1 — presence is real drift, not unverifiable', () => {
     const root = seedIsolatedProject();
     try {
-      expect(() => syncAgentMirrors(root, { check: true })).toThrow(/templates\/common\/agents not found/);
+      // plain.md mirror present and matching; docs-writer mirror absent.
+      seedMirror(root, 'plain', expectedPlainMirror());
+      const res = syncAgentMirrors(root, { check: true });
+      expect(res.ok).toBe(false);
+      expect(res.drifts).toHaveLength(1);
+      expect(res.drifts[0]!.kind).toBe('missing');
+      expect(res.drifts[0]!.file.split('\\').join('/')).toBe('.claude/agents/docs-writer.md');
+      expect(res.drifts[0]!.detail).toMatch(/presence is enforceable/);
+      expect(res.unverifiable.map((uv) => uv.name)).toEqual(['docs-writer']);
+      const r = spawnSync(process.execPath, [GENERATOR_SRC, '--check', '--dir', root], { encoding: 'utf8' });
+      expect(r.status).toBe(1);
+      expect(`${r.stdout ?? ''}${r.stderr ?? ''}`).toContain('docs-writer.md');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('detached + non-stub drift: exit 1 — the verifiable class is never skipped', () => {
+    const root = seedIsolatedProject();
+    try {
+      seedMirror(root, 'docs-writer', 'generated out-of-root earlier\n');
+      seedMirror(root, 'plain', 'tampered out-of-root content\n');
+      const res = syncAgentMirrors(root, { check: true });
+      expect(res.ok).toBe(false);
+      expect(res.drifts.map((d) => d.kind)).toEqual(['differing']);
+      expect(res.drifts[0]!.file.split('\\').join('/')).toBe('.claude/agents/plain.md');
+      const r = spawnSync(process.execPath, [GENERATOR_SRC, '--check', '--dir', root], { encoding: 'utf8' });
+      expect(r.status).toBe(1);
+      expect(`${r.stdout ?? ''}${r.stderr ?? ''}`).toContain('plain.md');
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
@@ -661,9 +713,8 @@ describe('out-of-root CHECK degrade (T-20261029-008)', () => {
   test('WRITE mode keeps the hard error even when mirrors exist (deliberate write, never auto-repair)', () => {
     const root = seedIsolatedProject();
     try {
-      const mirrorDirPath = path.join(root, '.claude', 'agents');
-      fs.mkdirSync(mirrorDirPath, { recursive: true });
-      fs.writeFileSync(path.join(mirrorDirPath, 'docs-writer.md'), 'generated out-of-root earlier\n', 'utf8');
+      seedMirror(root, 'docs-writer', 'generated out-of-root earlier\n');
+      seedMirror(root, 'plain', expectedPlainMirror());
       expect(() => syncAgentMirrors(root, {})).toThrow(/templates\/common\/agents not found/);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
