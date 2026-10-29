@@ -3,14 +3,35 @@ id: U-20261029-001
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-29T07:28:12.388+09:00
+created_at: '2026-10-29T07:28:12.388+09:00'
 history:
-  - at: 2026-10-29T07:28:12.388+09:00
+  - at: '2026-10-29T07:28:12.388+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-29T12:09:38.385+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-29T12:09:38.385+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by the check-mode stub degrade (PR #1727, sync-agent-mirrors v1.3.0;
+  supersedes the v1.2.0 blanket guard which both concealed real drift among
+  verifiable mirrors and still hard-threw on absent mirrors): per-agent
+  semantics — an existing stub-derived mirror in a detached checkout is
+  UNVERIFIABLE (WARN listing the file + the repair line, exit 0; stdout so the
+  audit arm's WARN-grep surfaces it), a missing stub mirror is real
+  missing-drift (exit 1 — presence is always enforceable), non-stub mirrors
+  compare normally everywhere, write mode still hard-errors. Verified on a
+  detached git-archive checkout of co-newbiz main: baseline exit 1 → v1.3.0 exit
+  0 with 39-in-parity + 2 unverifiable WARNs; deleted non-stub mirror → exit 1.
+  Same defect class as T-20261029-008 (fixed #1709); this closes the
+  stub-carrying-project half. Delivery to co-newbiz rides the next upgrade
+  delivery of the script (its current v1.1.0 local copy predates v1.1.1+/1.3.0;
+  its CI is not currently running the gate — the canary install carried no audit
+  arm).
 error: null
 upstream:
   project: co-abap
@@ -19,12 +40,31 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The new agent-mirror parity gate (sync-agent-mirrors.ts v1.0.0, wired into audit.ts as a FATAL gate) hard-errors in detached project checkouts: it resolves extends-stub personas by walking up for templates/common/agents, which exists only in workspace checkouts. A delivered project''s CI (ubuntu runner, single-repo checkout) therefore fails the Documentation Audit on every run after the delivering commit — the PR carrying the gate cannot merge and the project''s CI is permanently red. The script''s own help says the repair is "pass --templates-root <workspace>/templates, or run inside a workspace checkout", but audit.ts invokes it without flags and ci.yml modification is a protected surface. Expected: in detached L3 checkouts without a resolvable templates root the gate degrades to an explicit [SKIP] (like design-lint / validate-agents'' validators guard — the same class was fixed for validate-agents 1.4.1 / validate-skills 1.5.2 in commit 346c743), or the gate/CI wiring supplies a self-contained persona resolution path.'
+  symptom: >-
+    The new agent-mirror parity gate (sync-agent-mirrors.ts v1.0.0, wired into
+    audit.ts as a FATAL gate) hard-errors in detached project checkouts: it
+    resolves extends-stub personas by walking up for templates/common/agents,
+    which exists only in workspace checkouts. A delivered project's CI (ubuntu
+    runner, single-repo checkout) therefore fails the Documentation Audit on
+    every run after the delivering commit — the PR carrying the gate cannot
+    merge and the project's CI is permanently red. The script's own help says
+    the repair is "pass --templates-root <workspace>/templates, or run inside a
+    workspace checkout", but audit.ts invokes it without flags and ci.yml
+    modification is a protected surface. Expected: in detached L3 checkouts
+    without a resolvable templates root the gate degrades to an explicit [SKIP]
+    (like design-lint / validate-agents' validators guard — the same class was
+    fixed for validate-agents 1.4.1 / validate-skills 1.5.2 in commit 346c743),
+    or the gate/CI wiring supplies a self-contained persona resolution path.
   affected_paths:
     - scripts/sync-agent-mirrors.ts
     - .github/workflows/ci.yml
   identity_source: cwd
-  repro: 'In any detached L3 project whose local checkout has no workspace templates/ ancestor: run `bun scripts/sync-agent-mirrors.ts --check` — ERROR templates/common/agents not found. Same run passes inside the workspace checkout (templates root found by ancestor walk). CI evidence: PR #227 Documentation Audit failure 2026-10-28T22:25Z, exit code 1.'
+  repro: >-
+    In any detached L3 project whose local checkout has no workspace templates/
+    ancestor: run `bun scripts/sync-agent-mirrors.ts --check` — ERROR
+    templates/common/agents not found. Same run passes inside the workspace
+    checkout (templates root found by ancestor walk). CI evidence: PR #227
+    Documentation Audit failure 2026-10-28T22:25Z, exit code 1.
   triage: ready
   flagged: false
   triage_reasons:
@@ -33,4 +73,24 @@ upstream:
   dedupe_key: f32fd4b285833fb5fda8119a268170bc1b5326f8821c34d0d55acb3146f2ab43
   duplicates:
     - project: co-abap
-      at: 2026-10-29T07:28:12.388+09:00
+      at: '2026-10-29T07:28:12.388+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1727
+    template_version: 0.23.0
+    summary: >-
+      Fixed by the check-mode stub degrade (PR #1727, sync-agent-mirrors v1.3.0;
+      supersedes the v1.2.0 blanket guard which both concealed real drift among
+      verifiable mirrors and still hard-threw on absent mirrors): per-agent
+      semantics — an existing stub-derived mirror in a detached checkout is
+      UNVERIFIABLE (WARN listing the file + the repair line, exit 0; stdout so
+      the audit arm's WARN-grep surfaces it), a missing stub mirror is real
+      missing-drift (exit 1 — presence is always enforceable), non-stub mirrors
+      compare normally everywhere, write mode still hard-errors. Verified on a
+      detached git-archive checkout of co-newbiz main: baseline exit 1 → v1.3.0
+      exit 0 with 39-in-parity + 2 unverifiable WARNs; deleted non-stub mirror →
+      exit 1. Same defect class as T-20261029-008 (fixed #1709); this closes the
+      stub-carrying-project half. Delivery to co-newbiz rides the next upgrade
+      delivery of the script (its current v1.1.0 local copy predates
+      v1.1.1+/1.3.0; its CI is not currently running the gate — the canary
+      install carried no audit arm).
