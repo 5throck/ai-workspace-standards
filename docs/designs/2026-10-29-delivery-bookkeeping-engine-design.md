@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-10-29-delivery-bookkeeping-engine`
 - **Date**: 2026-10-29
-- **Status**: PENDING USER APPROVAL — this document ends at a user-approval gate. Nothing is registered, nothing is implemented.
+- **Status**: implemented — the approval gate was accepted (DEC-20261029-01); the spec `2026-10-29-delivery-bookkeeping-engine-design` is registered implemented and the bookkeeping engine landed. Header retro-marked from PENDING USER APPROVAL per T-20261030-001 (Phase I 2026-10-30 D-1).
 - **Author**: architect (L0)
 - **Decision record**: DEC-20261029-01 (`docs/decisions/DEC-20261029-01.md`) — adopt pending user approval
 - **Vocabulary**: reuses the sync-overwrite-policy design (D1 baselines, D2 disposition matrix, D3 decision log, D4 template-side classification) and the tombstone-ownership design (D1–D3 tombstone state) — `docs/designs/2026-10-27-sync-overwrite-policy-design.md`, `docs/designs/2026-10-28-delivery-tombstone-ownership-design.md`
