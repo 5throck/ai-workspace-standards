@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-10-30](2026-10-30.md) | docs(review): daily fleet review 2026-10-30 |
 | [2026-10-29](2026-10-29.md) | fix(agents): templates-root discovery for stub resolution in project context (canary finding) |
 | [2026-10-28](2026-10-28.md) | docs(governance): promote co-design design-system suite assets + bilingual user-guide parity to variant template (T-20261027-011, T-20261027-012) |
 | [2026-10-27](2026-10-27.md) | feat(governance): tier normalization — scalar agent tier, models SSOT resolution, agent_tiers removal (T-20261026-018, ADR-0102) |
@@ -14,7 +15,7 @@
 | [2026-10-24](2026-10-24.md) | fix(pipeline): dev-sync flag-leak guard + copy-safe landing emission (T-20261024-001); land backlog tickets T-20261022-034..051, T-20261024-001 |
 | [2026-10-23](2026-10-23.md) | feat(design-lint): schema designLint wiring, app token discovery, list-table check (T-20261022-045/046/047) |
 | [2026-10-23](2026-10-23.md) | chore(deps): js-yaml ^5.5.0 — root/template SSOT parity |
-| [2026-10-22](2026-10-22.md) | tickets: re-land 21 co-newbiz S1-S12 track review tickets on updated main (supersedes #1578) |
+| 2026-10-22 | tickets: re-land 21 co-newbiz S1-S12 track review tickets on updated main (supersedes #1578) |
 | 2026-10-21 | docs(memory): 2026-10-21 daily log — 01:30 skip note + 03:00 empty ticket run |
 | 2026-10-20 | docs(memory): 2026-10-20 03:00 ticket run summary re-landed from conflicting #1575 |
 | 2026-10-19 | docs(review): daily fleet review 2026-10-19 — baseline-only, three green PRs merged |

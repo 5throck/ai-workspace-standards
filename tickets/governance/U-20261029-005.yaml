@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: U-20261029-005
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-10-29T21:34:52.513+09:00
+history:
+  - at: 2026-10-29T21:34:52.513+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.23.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The template runtime renders slides that carry `slideData[i].videoId` exactly like standard content slides: a white bubble card (`.slide-content`) with title and bullets. There is no video-slide branch in the template''s renderSlide/buildSlideChildren path, so every deck that uses videos hand-rolls a post-build injector to overlay a player, and the standard bubble must then be suppressed per-project. This is a recurring defect class — the white bubble shows through under/near the injected player when suppression is missed. Observed in presentations 2026-10-ai-industry-research and 2026-10-ai-era-business-majors. Expected: slides with a videoId render chrome-free (full-bleed thumbnail + play affordance + plain caption) natively from the template, so no per-project bubble suppression is needed.'
+  affected_paths:
+    - docs/html-themes/themes/zen/template.html
+    - docs/html-themes/themes/_shared/ppt-engine.js
+    - scripts/co-deck/inject-video-players.ts
+  identity_source: cwd
+  repro: 'Build any deck containing a slide with a videoId via build-theme-deck.ts, then open the generated lecture_vN.html in a browser. Navigate to the video slide: the standard white content bubble with title/bullets renders underneath/near the injected player overlay, instead of the slide rendering chrome-free.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/themes/zen/template.html=false
+    - info:in_last_delivery docs/html-themes/themes/_shared/ppt-engine.js=false
+    - info:in_last_delivery scripts/co-deck/inject-video-players.ts=false
+  dedupe_key: 39c71bd5e37d025dabfc2393e3ca9c3d9c05fd857a8edd9edc7d92e5c8509b29
+  duplicates:
+    - project: co-deck
+      at: 2026-10-29T21:34:52.513+09:00

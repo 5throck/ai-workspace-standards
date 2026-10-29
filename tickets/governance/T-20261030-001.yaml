@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261030-001
+kind: manual
+title: >-
+  records/registry prose hygiene batch: (1) flip
+  docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md header from
+  'PENDING USER APPROVAL' to implemented (registry+sidecar already implemented;
+  approval gate DEC-20261029-01 accepted) — Phase I 2026-10-30 D-1; (2) append
+  v1.0.1 win32 sharedInfra history prose to route-audit-scan rows in both
+  SCRIPTS.md copies (version cell bumped without prose — Phase I 2026-10-30
+  F-1/slot-B)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-30T01:40:18.232+09:00'
+history:
+  - at: '2026-10-30T01:40:18.232+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
