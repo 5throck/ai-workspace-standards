@@ -1,4 +1,4 @@
-// @version 1.1.0
+// @version 1.2.0
 // scripts/helpers/upgrade-versions.ts
 // Pure version-extraction and frontmatter-merge helpers for upgrade-project.ts.
 // Extracted so the version-detection logic is unit-testable (the CLI script's
@@ -7,6 +7,22 @@
 // Usage (in upgrade-project.ts):
 //   import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated } from "./helpers/upgrade-versions.ts";
 //
+// v1.2.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-
+//          design.md, DEC-20261029-01): two additions. (A1)
+//          bumpNestedLifecycleLastUpdated — the change-date re-stamp primitive
+//          for the nested `lifecycle:` block: the v1.1.0 primitive explicitly
+//          skipped nested dates, so a version-gated delivery that moved an
+//          agent's `version` left `lifecycle.last_updated` honestly wrong
+//          (co-abap read-only-analyst.md claimed 2026-10-10 for content the
+//          engine changed 2026-10-27) and every wave re-added lifecycle-audit
+//          staleness warnings. Mirrors bumpFrontmatterLastUpdated's contract
+//          with inverted scope (nested key only; the top-level key,
+//          last_reviewed, and the rest of the block are never touched; no
+//          injection). (A3) scaffoldChangelogEntry — the pure half of the
+//          opt-in --changelog-entry flag: inserts one editable chore(upgrade)
+//          bullet at the top of the project CHANGELOG's first [Unreleased]
+//          section (creates the section after the title when absent),
+//          idempotent per template version.
 // v1.1.0 (2026-10-27, U-20261026-009): bumpFrontmatterLastUpdated — the pure
 //          re-stamp primitive behind upgrade-project's post-delivery re-stamp
 //          step. Template-upgrade deliveries mechanically rewrite agent bodies
@@ -116,4 +132,108 @@ export function bumpFrontmatterLastUpdated(
     return { text: text.replace(fm[0], `---\n${lines.join("\n")}\n---`), bumped: true };
   }
   return { text, bumped: false };
+}
+
+/**
+ * Re-stamp the NESTED `last_updated:` key inside a markdown file's `lifecycle:`
+ * frontmatter block with the delivery date (spec
+ * 2026-10-29-delivery-bookkeeping-engine, design A1 — the change-date half of
+ * the DEC-20261029-01 split: `last_updated` means "when the content last
+ * changed" and the engine owns it, at the top level (bumpFrontmatterLastUpdated)
+ * AND inside the lifecycle block). Contract mirrors bumpFrontmatterLastUpdated
+ * with inverted scope:
+ *  - No frontmatter block, no column-0 `lifecycle:` block, or no indented
+ *    `last_updated:` key inside the block → unchanged (bump only where the key
+ *    exists — never injects a key or a block).
+ *  - Nested value already equals `date` → unchanged (idempotent).
+ *  - ONLY the nested key moves: the top-level `last_updated`, `last_reviewed`,
+ *    `created`, `phase`, `governance`, and every other lifecycle key are never
+ *    touched; comment lines (`#`) inside the block are skipped.
+ * Returns { text, bumped } — bumped is true only when the output differs.
+ */
+export function bumpNestedLifecycleLastUpdated(
+  text: string,
+  date: string,
+): { text: string; bumped: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { text, bumped: false };
+  const fm = text.match(/^---(\r?\n)([\s\S]*?)\r?\n---/);
+  if (!fm) return { text, bumped: false };
+  const eol = fm[1]; // the frontmatter's own boundary EOL — reused verbatim on rebuild
+  const lines = fm[2].split("\n");
+  let inLifecycle = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // CRLF-safe: split("\n") leaves the CR on each line, and `.` in a regex
+    // does not match \r — compare and rewrite the CR-stripped line, then
+    // re-attach the CR so each line's EOL style survives byte-for-byte.
+    const crlf = line.endsWith("\r");
+    const bare = crlf ? line.slice(0, -1) : line;
+    if (/^lifecycle:\s*$/.test(bare)) { inLifecycle = true; continue; }
+    if (!inLifecycle) continue;
+    if (/^[^\s#]/.test(bare)) { inLifecycle = false; continue; } // block ended (column-0 key)
+    const m = bare.match(/^(\s+)last_updated:(\s*)(\S.*)?$/);
+    if (!m) continue; // other lifecycle keys (phase, created, governance, …) stay verbatim
+    if (m[3] === date) return { text, bumped: false };
+    lines[i] = `${m[1]}last_updated:${m[2]}${date}${crlf ? "\r" : ""}`;
+    // Replacer function — a literal replacement (a `$&`/`$'` sequence in some
+    // other frontmatter line must not be interpreted as a replace pattern).
+    return { text: text.replace(fm[0], () => `---${eol}${lines.join("\n")}${eol}---`), bumped: true };
+  }
+  return { text, bumped: false };
+}
+
+/**
+ * Scaffold one editable upgrade entry into a project CHANGELOG's first
+ * `## [Unreleased]` section (spec 2026-10-29-delivery-bookkeeping-engine,
+ * design A3 — the pure half of upgrade-project's opt-in `--changelog-entry`
+ * flag). Contract:
+ *  - Entry shape (the fleet's established chore(upgrade) convention):
+ *    `- **[<date>]**: chore(upgrade): template sync v<templateVersion> (<n>
+ *    file(s) delivered; engine-scaffolded — edit or merge before commit; see
+ *    templates/CHANGELOG.md v<templateVersion>)`
+ *  - Inserted as the FIRST bullet of the first `## [Unreleased]` section
+ *    (prefix match, so `## [Unreleased] 2026-09-01` also matches).
+ *  - No `## [Unreleased]` section → one is created after the leading `# `
+ *    title block (or at the top when the file has no title).
+ *  - Idempotent: a section that already carries a `template sync
+ *    v<templateVersion>` line is left unchanged (changed = false).
+ *  - CRLF-aware: the file's dominant line ending is preserved.
+ *  - Invalid date or empty templateVersion → unchanged.
+ * Returns { text, changed } — changed is true only when the output differs.
+ */
+export function scaffoldChangelogEntry(
+  text: string,
+  opts: { date: string; templateVersion: string; deliveredCount: number },
+): { text: string; changed: boolean } {
+  const { date, templateVersion, deliveredCount } = opts;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !templateVersion.trim()) return { text, changed: false };
+  const eol = text.includes("\r\n") ? "\r\n" : "\n";
+  const entry = `- **[${date}]**: chore(upgrade): template sync v${templateVersion} (${deliveredCount} file(s) delivered; engine-scaffolded — edit or merge before commit; see templates/CHANGELOG.md v${templateVersion})`;
+  const lines = text.split(eol);
+  const sectionIdx = lines.findIndex((l) => /^## \[Unreleased\]/.test(l));
+  if (sectionIdx !== -1) {
+    // Idempotency: an entry for THIS template version already in the section → skip.
+    const sectionEnd = lines.findIndex((l, i) => i > sectionIdx && /^## /.test(l));
+    const section = lines.slice(sectionIdx + 1, sectionEnd === -1 ? lines.length : sectionEnd);
+    if (section.some((l) => l.includes(`template sync v${templateVersion}`))) {
+      return { text, changed: false };
+    }
+    lines.splice(sectionIdx + 1, 0, entry);
+    // Keep a blank line between the scaffolded bullet and the following content.
+    const after = lines[sectionIdx + 2];
+    if (after !== undefined && after.trim() !== "") lines.splice(sectionIdx + 2, 0, "");
+    return { text: lines.join(eol), changed: true };
+  }
+  // No [Unreleased] section — create one after the leading `# ` title block.
+  let insertAt = 0;
+  if (/^# /.test(lines[0] ?? "")) {
+    insertAt = 1;
+    while (insertAt < lines.length && lines[insertAt].trim() === "") insertAt++;
+  }
+  const created = ["## [Unreleased]", "", entry, ""];
+  lines.splice(insertAt, 0, ...created);
+  // Leave a blank line before the content that followed the title block.
+  const next = lines[insertAt + created.length];
+  if (next !== undefined && next.trim() !== "") lines.splice(insertAt + created.length, 0, "");
+  return { text: lines.join(eol), changed: true };
 }
