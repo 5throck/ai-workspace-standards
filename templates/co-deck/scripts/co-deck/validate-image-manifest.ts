@@ -1,4 +1,10 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (U-20261029-007): background_image section rules — family/hero reuse
+// (one global background serving multiple background-scoped slides), missing
+// background coverage under a declared scope, pathless background entries,
+// and an unreadable background_image.path file are now ERRORs; slidedata.json
+// supplies slide types (explicit WARN-skip when absent). See
+// agents/image-curator.md "Background image handling".
 // Validate image-manifest.json for a co-deck project — Gate 3.5 hard gate.
 //
 // Recomputes a SHA-256 content hash and reads pixel dimensions for every image
@@ -12,6 +18,16 @@
 //   4. WARN  — an image whose aspect ratio deviates > 30% from its theme × image_role
 //      target (deck theme read from lecture-profile.md; see agents/image-curator.md
 //      "Aspect-Ratio Targets by Theme × Role").
+//   5. ERROR — background_image section rules (U-20261029-007): family/hero reuse
+//      (a global background serving ≥2 background-scoped slides), missing coverage
+//      when scope all/divider-cover declares no global path, a background entry
+//      without a path, and an unreadable background_image.path file. Each
+//      background slide (cover + each divider + punchline under divider-cover)
+//      is expected to carry its own DISTINCT image — the compliant flow is
+//      scope "individual" with one image_role:"background" entry per background
+//      slide (agents/image-curator.md).
+//   6. WARN  — background_image.path set under scope "individual" (ignored by
+//      both renderers); slidedata.json absent while a counting rule needs it.
 //
 // Dimensions are read with inline zero-dependency parsers for PNG (IHDR),
 // JPEG (SOF marker), and SVG (viewBox / width / height). No external image library.
@@ -229,6 +245,83 @@ if (missingFieldEntries > 0) {
 for (const [hash, idxs] of hashToSlides) {
   if (idxs.length > 1) {
     err(`duplicate image across slides ${idxs.join(', ')} — identical content hash sha256:${hash.slice(0, 12)}… (re-curate one of them before html-build handoff)`);
+  }
+}
+
+// ── 2b. background_image section rules (U-20261029-007) ────────────────────────
+// Both renderers bind per-slide background entries ONLY under scope
+// "individual" (html-build agents/html-build.md "Background image binding";
+// gen-slides-pdf.ts resolveBgImagePath). Under "all"/"divider-cover" the single
+// global background_image.path is applied to every in-scope slide — i.e. N ≥ 2
+// background slides share one family/hero image, the defect class the ticket
+// flags ("each background slide is expected to carry its own distinct image").
+
+// Slide types come from slidedata.json (the deck SSOT produced by html-build).
+// Its absence degrades to an explicit WARN-skip, never a false pass.
+function loadSlideTypes(workspaceDir: string): { typeOf: (i: number) => string; count: number } | null {
+  const sdPath = join(workspaceDir, 'slidedata.json');
+  if (!existsSync(sdPath)) return null;
+  try {
+    const arr = JSON.parse(readFileSync(sdPath, 'utf-8'));
+    if (!Array.isArray(arr)) return null;
+    const typeOf = (i: number): string => {
+      const s = arr[i] ?? {};
+      const t = s.type ?? (s.isTitleSlide ? 'cover' : s.isDividerSlide ? 'divider' : s.isPunchline ? 'punchline' : 'standard');
+      return t === 'title' ? 'cover' : t;
+    };
+    return { typeOf, count: arr.length };
+  } catch {
+    return null;
+  }
+}
+
+const bg = manifest.background_image ?? null;
+const bgEnabled = !!(bg && bg.enabled);
+const bgScope: string | null = bg ? (bg.scope ?? 'divider-cover') : null;
+const bgCountsScope = bgEnabled && (bgScope === 'all' || bgScope === 'divider-cover');
+
+if (bgEnabled && bgScope === 'individual' && bg.path) {
+  warn(`background_image.path is set but scope "individual" ignores the global path (per-slide image_role:"background" entries are the source) → ${bg.path}`);
+}
+
+if (bgCountsScope) {
+  const types = loadSlideTypes(workspaceDir);
+  if (!types) {
+    warn('slidedata.json not found or unreadable in the workspace — background coverage/reuse checks skipped (slide types needed to count background-scoped slides)');
+  } else {
+    // Background-scoped slides: scope "all" → every slide; "divider-cover" →
+    // cover/title, divider, and punchline slides.
+    const scoped: number[] = [];
+    for (let i = 0; i < types.count; i++) {
+      const t = types.typeOf(i);
+      if (bgScope === 'all' || t === 'cover' || t === 'divider' || t === 'punchline') scoped.push(i);
+    }
+
+    if (!bg.path || typeof bg.path !== 'string') {
+      err(`background_image scope "${bgScope}" declares background slides but background_image.path is missing — ${scoped.length} background slide(s) would render with no background at all (per-slide entries are ignored in this scope; use scope "individual" with one image_role:"background" entry per background slide)`);
+    } else {
+      // Rule A — family/hero reuse: the global image serves every in-scope slide.
+      if (scoped.length >= 2) {
+        err(`family reuse: background_image.path serves ${scoped.length} background-scoped slides (slide indices ${scoped.join(', ')}) — each background slide must carry its own DISTINCT image; re-curate with scope "individual" + one distinct image_role:"background" entry per background slide → ${bg.path}`);
+      }
+      // Rule B3 — the global path never passes through the slides[] loop, so
+      // its file must be checked here.
+      const bgAbs = resolve(instanceRoot, bg.path);
+      if (!existsSync(bgAbs)) {
+        err(`background_image.path file missing → ${bg.path}`);
+      }
+    }
+  }
+}
+
+// Rule B2 — a declared background entry without a path was silently skipped by
+// the per-slide loop above; it is a coverage defect, not a no-image slide.
+for (const slide of slides) {
+  if (slide.image_role !== 'background') continue;
+  const idx = slide.slide_index;
+  if (idx === -1) continue; // global background entry (background_image.path is its source)
+  if (!slide.path || typeof slide.path !== 'string') {
+    err(`background entry for slide ${idx} (${slide.slide_title ?? '?'}) has no image path — declared background with no file (re-curate or drop the entry)`);
   }
 }
 

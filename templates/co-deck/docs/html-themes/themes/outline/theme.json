@@ -12,6 +12,8 @@
   "content_rules": {
     "max_bullets_per_slide": 6,
     "max_title_chars": 35,
+    "min_bullets_per_slide": 3,
+    "min_body_chars": 40,
     "recommended_slide_count": "20-50",
     "notes": "Research-oriented outline style. Titles up to 35 chars. Max 6 bullets per slide. Images and diagrams are NOT displayed. Focus on structured text content."
   },

@@ -12,6 +12,8 @@
   "content_rules": {
     "max_bullets_per_slide": 5,
     "max_title_chars": 50,
+    "min_bullets_per_slide": 3,
+    "min_body_chars": 40,
     "recommended_slide_count": "15-25",
     "notes": "Presentation Zen style. Titles up to 50 chars. Max 5 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration."
   },

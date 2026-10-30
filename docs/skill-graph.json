@@ -918,7 +918,7 @@
       "name": "image-curator",
       "scope": "co-deck",
       "capability": "image-curator",
-      "content_hash": "7b40fcc43653f04e",
+      "content_hash": "8043070e6b7ceb37",
       "version": "1.4.1",
       "mirrors": [
         "templates/co-deck/agents/image-curator.md"
@@ -5392,7 +5392,7 @@
       "name": "slide-layout-gate",
       "scope": "co-deck",
       "capability": "slide-layout-gate",
-      "content_hash": "7929bb744142ecb6",
+      "content_hash": "9630565e044a430e",
       "version": "1.0.0",
       "mirrors": [
         "templates/co-deck/skills/slide-layout-gate/SKILL.md"
@@ -7015,8 +7015,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-28"
+        "sessions": 4,
+        "last_used": "2026-10-30"
       }
     },
     {
@@ -7409,8 +7409,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-28"
+        "sessions": 4,
+        "last_used": "2026-10-30"
       }
     },
     {
@@ -8072,8 +8072,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-28"
+        "sessions": 4,
+        "last_used": "2026-10-30"
       }
     },
     {

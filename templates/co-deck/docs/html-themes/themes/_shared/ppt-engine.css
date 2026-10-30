@@ -770,3 +770,71 @@ body {
     margin: 10mm;
   }
 }
+
+/* ── Video slides (slideData[i].videoId) — chrome-free full-bleed ─────
+   U-20261029-005: a slide carrying videoId renders no theme card/bubble —
+   full-bleed dark stage + click-to-load play affordance + plain caption.
+   Play modes follow the injector contract (ADR-0002); themes/styles may
+   restyle via the cascade. */
+.video-slide {
+  background: #000;
+}
+
+.video-slide .video-caption {
+  position: absolute;
+  left: 1.4rem;
+  right: 1.4rem;
+  bottom: 1.2rem;
+  z-index: 6;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.video-slide .video-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  font: inherit;
+}
+
+.video-slide .video-stage:hover .video-play-glyph {
+  transform: scale(1.08);
+}
+
+.video-slide .video-play-glyph {
+  font-size: 2.6rem;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s ease;
+}
+
+.video-slide .video-play-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.video-slide .video-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+}

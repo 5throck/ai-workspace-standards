@@ -52,6 +52,18 @@ You are a specialist agent that may ONLY be dispatched by the PM. If a user atte
     - `all` → every slide
     - `divider-cover` → only title, divider, and punchline slides
     - `individual` → only slides with their own `image_role: "background"` entry (no global download needed)
+  - **Distinctness rule (U-20261029-007, Gate 3.5 hard gate)**: each background
+    slide (cover/title + each divider + punchline under `divider-cover`) is
+    expected to carry its **own distinct image**. A single global download
+    (`bg-deck` + scope `all`/`divider-cover`) is only valid when **exactly one**
+    background slide is in scope — with two or more, the validator ERRORS on
+    family/hero reuse. The compliant flow for multi-divider decks is
+    `scope: "individual"` with one `image_role: "background"` entry per
+    background slide, each pointing at its own image (both renderers bind
+    per-slide entries under `individual`; the shared download may be reused as
+    the image source for at most one of them). The validator also ERRORs on a
+    declared scope with no global path, a background entry without a `path`,
+    and an unreadable `background_image.path` file.
 - For each slide with an image query:
   - Derive a **content slug** from the image concept (e.g., `ai-future-professional`, `data-analysis-dashboard`) — 2-4 word kebab-case, no slide number prefix
   - **Check shared pool first**: if `presentations/assets/images/<slug>.<ext>` already exists, set `"reused": true` and skip download
@@ -82,7 +94,7 @@ Two quality checks apply to EVERY downloaded image, in addition to the slug reus
   "source_profile": "pixabay",
   "background_image": {
     "enabled": true,
-    "scope": "divider-cover",
+    "scope": "individual",
     "slug": "bg-deck",
     "path": "presentations/assets/images/bg-deck.jpg",
     "overlay_color": [0, 0, 0],
@@ -222,8 +234,10 @@ The validator recomputes a SHA-256 content hash and reads dimensions for every i
 
 - **ERROR** — any image file missing or unreadable.
 - **ERROR** — two or more slides sharing the same `content_hash` (duplicate image across the deck). This is a hard block: re-curate one of the duplicates before handoff.
+- **ERROR** — background rules (U-20261029-007): family/hero reuse (one global `background_image.path` serving ≥ 2 background-scoped slides under scope `all`/`divider-cover`); a declared scope with no `background_image.path`; a background entry without a `path`; an unreadable `background_image.path` file. Each background slide must carry its own distinct image (see "Background image handling" above).
 - **WARN** — an entry missing `content_hash` / `width` / `height` / `aspect_ratio` (regenerate the manifest to populate them).
 - **WARN** — an image whose aspect ratio deviates more than 30 % from its `theme × image_role` target.
+- **WARN** — `background_image.path` set under scope `individual` (ignored by both renderers); `slidedata.json` absent so the counting rules are skipped.
 
 **Handoff to `html-build` is blocked until the validator exits 0** (no ERRORs; WARNs reviewed). See the Gate 3.5 entry in `pm.md`.
 

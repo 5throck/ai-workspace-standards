@@ -94,6 +94,8 @@
     "standard": {
       "max_bullets": 4,
       "max_title_chars": 28,
+      "min_bullets": 3,
+      "min_body_chars": 40,
       "max_body_chars": 100
     },
     "divider": {

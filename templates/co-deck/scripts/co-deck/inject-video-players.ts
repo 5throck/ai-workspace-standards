@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (U-20261029-005): the binding loop skips slides the template rendered
+// natively as chrome-free video slides (marked data-video="1" by the shared
+// ppt-engine VideoSlide component), so the documented re-run-after-every-rebuild
+// procedure cannot double-stage a player on decks built from template 0.24.0+.
 // inject-video-players.ts — post-build video player injection for built lecture decks.
 //
 // Generalized from the 2026-10-ai-industry-research engagement's inject_video_players.py
@@ -85,6 +89,10 @@ const injection = `<style id="cdk-video-players">
     vids.forEach(function (v) {
       var el = document.getElementById("slide-" + v.i);
       if (!el || el.dataset.videoBound) return;
+      // Native video slide (ppt-engine VideoSlide, data-video="1"): the
+      // template already rendered the chrome-free stage — skip to avoid a
+      // double player overlay.
+      if (el.dataset.video) return;
       el.dataset.videoBound = "1";
       el.classList.add("cdk-video-slide");
       var btn = document.createElement("button");
