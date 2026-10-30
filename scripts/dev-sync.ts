@@ -1,4 +1,20 @@
-// @version 1.35.0
+// @version 1.36.0
+// v1.36.0 (2026-10-31, T-20261031-003 — spec
+//          docs/designs/2026-10-31-changelog-normalize-design.md §4): step 3b
+//          gains the fail-then-heal loop — when the CHANGELOG structural-duplicate
+//          detector reports findings, dev-sync runs
+//          `bun scripts/changelog-normalize.ts CHANGELOG.md` (write mode,
+//          standalone script per design D1), re-stages the file, and re-runs the
+//          detector, asserting zero findings before the gate verdict. Files with
+//          zero findings are never touched (no write, no diff). Findings that
+//          survive normalization are a hard FAIL surfaced with the raw findings.
+//          Migration path for legacy project CHANGELOG structures: the 2026-10-31
+//          wave run had 6 of 11 projects blocked on the v1.35.0 fail-only gate
+//          (malformed dated `## [Unreleased] YYYY-MM-DD` variants plus duplicate
+//          category blocks; co-deck/co-newbiz multi-heading shapes) and the wave
+//          halted. The normalizer is structure-only and idempotent, so the write
+//          happens at most once per legacy structure; entry lines and
+//          `lang:` / `lang_reason:` frontmatter stay byte-identical.
 // v1.35.0 (2026-10-29, U-20261028-013 — spec
 //          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A4):
 //          new step 3b — CHANGELOG structural-duplicate gate. Blocking, matching
@@ -622,18 +638,53 @@ if (fs.existsSync('CHANGELOG.md')) {
 //     within one release section, or more than one `[Unreleased]` section, are
 //     structural defects that fragment the release history. Detection is pure
 //     (helpers/changelog-duplicates.ts) and covers ALL `## [...]` sections.
+//     v1.36.0 (T-20261031-003 — spec
+//     docs/designs/2026-10-31-changelog-normalize-design.md §4): fail-then-heal —
+//     findings first trigger the standalone normalizer (write mode), then the
+//     file is re-staged and the detector re-run; zero findings after → the gate
+//     proceeds. Findings remaining after normalization are a hard FAIL with the
+//     raw findings. Zero findings never touch the file (no write, no diff).
 if (fs.existsSync('CHANGELOG.md')) {
     const clDup = fs.readFileSync('CHANGELOG.md', 'utf-8');
     const dupFindings = changelogGateFindings(clDup);
     if (dupFindings.length > 0) {
         console.log("");
         for (const f of dupFindings) {
-            console.log(`${RED}❌ CHANGELOG.md: ${f.message}${RESET}`);
+            console.log(`${YELLOW}⚠️  CHANGELOG.md: ${f.message}${RESET}`);
         }
-        console.log(`${YELLOW}   Merge the duplicated structure above, then re-run /sync.${RESET}`);
-        console.log("");
-        if (import.meta.main) {
-          process.exit(1);
+        const normalizer = path.join('scripts', 'changelog-normalize.ts');
+        if (fs.existsSync(normalizer)) {
+            console.log(`${YELLOW}   Normalizing legacy structure (scripts/changelog-normalize.ts, write mode)...${RESET}`);
+            let changelogHealed = false;
+            try {
+                await $`bun ${normalizer} CHANGELOG.md`;
+                await $`git add CHANGELOG.md`;
+                const clHealed = fs.readFileSync('CHANGELOG.md', 'utf-8');
+                const reFindings = changelogGateFindings(clHealed);
+                if (reFindings.length === 0) {
+                    changelogHealed = true;
+                    console.log(`${GREEN}✅ CHANGELOG.md normalized (${dupFindings.length} finding(s) repaired) and re-staged — structural-duplicate gate now clean.${RESET}`);
+                }
+            } catch {
+                // normalization failed or exited nonzero — fall through to the FAIL below
+            }
+            if (!changelogHealed) {
+                console.log("");
+                console.log(`${RED}❌ CHANGELOG.md structural defects could not be normalized — gate FAIL.${RESET}`);
+                console.log(`${YELLOW}   Repair the structure by hand (see findings above), or inspect the repair first:`);
+                console.log(`${YELLOW}   bun scripts/changelog-normalize.ts --dry-run CHANGELOG.md${RESET}`);
+                console.log("");
+                if (import.meta.main) {
+                  process.exit(1);
+                }
+            }
+        } else {
+            // Normalizer not present (copy divergence) — v1.35.0 fail-only behavior.
+            console.log(`${YELLOW}   Merge the duplicated structure above, then re-run /sync.${RESET}`);
+            console.log("");
+            if (import.meta.main) {
+              process.exit(1);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-10-30T23:05:04.390Z
+**Generated**: 2026-10-30T23:35:11.690Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +11,7 @@
 
 - **Agents**: 9
 - **Skills**: 58
-- **Scripts**: 126 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 127 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -116,6 +117,7 @@
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.1.0 | scripts/backport-diff.ts | N/A |
 | bootstrap-stages.ts | 1.1.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
+| changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | N/A |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
@@ -124,7 +126,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-gate-coverage.ts | 1.0.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.35.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.36.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
