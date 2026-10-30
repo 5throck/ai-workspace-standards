@@ -2,8 +2,23 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.11.0
+ * @version 1.12.0
  *
+ * v1.12.0 (2026-10-30, T-20261030-006 — spec
+ *  docs/designs/2026-10-30-language-gate-parent-verbatim-tolerance-design.md):
+ *  check 2-B gains parent-commit verbatim tolerance. The 0.24.0 co-safety canary
+ *  blocked because the changelog reorganization (duplicate-category merge per the
+ *  dev-sync v1.35.0 gate's fix action) MOVED pre-existing Korean-bearing CHANGELOG
+ *  lines — moved lines re-appear as "+ lines" in the staged diff and the non-English
+ *  additions check failed on 25 of them (file carries the sanctioned
+ *  lang_reason: legal exception; third gate-vs-legacy-content interaction in two
+ *  waves). An added line whose trimmed content exists verbatim in HEAD's blob of
+ *  the same file is moved/reordered, not newly added. HEAD is the baseline
+ *  `git diff --cached` already compares against; fetched via Bun.spawnSync
+ *  (shell-quoting-safe) ONLY on the failing path (hasNonEnglish hit), empty parent
+ *  set on git-show failure (initial commit / file-new-in-HEAD → fail behavior
+ *  preserved). Genuinely new non-English lines still block. Extends the A2
+ *  baseline-tolerance honesty principle (delivery-bookkeeping design §A2, PR #1722).
  * v1.11.0 (2026-10-27, T-20261027-010): check 6c's content gate was DEAD — it
  *  parsed `parsed.results` from `lifecycle-sync-audit.ts --json`, but the
  *  AuditResult wire shape is {passed, errors, warnings, registry}: `results`
@@ -39,7 +54,7 @@
 
 import { $ } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { hasNonEnglish } from "../lib/language-guard.ts";
+import { hasNonEnglish, filterParentVerbatimLines } from "../lib/language-guard.ts";
 import { localDateISO } from "../lib/local-date.ts";
 import {
   evaluateScriptsMdGate,
@@ -159,12 +174,29 @@ async function main() {
   // Only newly *added* lines (via the staged diff) are checked — scanning the whole
   // file would false-positive on pre-existing legitimate non-English content elsewhere
   // in CHANGELOG.md (e.g. CJK glyph names quoted in an unrelated font-rendering fix).
+  // v1.12.0 parent-commit verbatim tolerance (T-20261030-006): an added line whose
+  // trimmed content exists verbatim in HEAD's blob of the same file is moved/reordered
+  // history, not new content (observed: the co-safety 0.24.0 changelog reorganization
+  // moved sanctioned Korean statute entries back into the add-set — 25 phantom
+  // additions). HEAD is the baseline `git diff --cached` already compares against;
+  // the parent blob is fetched ONLY on the failing path (raw hasNonEnglish hit) via
+  // argv-array Bun.spawnSync (shell-quoting-safe). git-show failure (initial commit,
+  // file new in HEAD) leaves the parent set empty — every added line stays genuinely
+  // new and the fail behavior is preserved. Genuinely new non-English lines still
+  // block: the tolerance self-expires the moment the content is truly new.
   const docsToCheck = staged.filter(f => /^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')) && !/_ko\.md$/.test(f.replace(/\\/g, '/')));
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
     const diff = await $`git diff --cached -U0 -- ${file}`.text();
-    const addedLines = diff.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).map(l => l.slice(1)).join('\n');
-    if (hasNonEnglish(addedLines)) {
+    const addedLines = diff.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).map(l => l.slice(1));
+    if (!hasNonEnglish(addedLines.join('\n'))) continue;
+    let parentLines: string[] = [];
+    try {
+      const show = Bun.spawnSync(['git', 'show', `HEAD:${file}`], { stdout: 'pipe', stderr: 'pipe' });
+      if (show.exitCode === 0) parentLines = show.stdout.toString().split('\n');
+    } catch { /* parent unavailable — treat as no parent content */ }
+    const genuinelyNew = filterParentVerbatimLines(addedLines, parentLines);
+    if (hasNonEnglish(genuinelyNew.join('\n'))) {
       console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters detected in newly added lines of ${file}`);
       process.exit(1);
     }
