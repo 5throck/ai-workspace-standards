@@ -16,12 +16,34 @@ title: >-
   non-credential literals), or (c) per-file exact-value entries. Until cleared:
   no port of these tests' code into template/skill surfaces
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-30T02:13:22.229+09:00'
 history:
   - at: '2026-10-30T02:13:22.229+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-30T08:50:06.228+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-30T08:50:06.311+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-30T08:50:06.380+09:00'
+    from: review
+    to: done
+result: >-
+  FP adjudicated (4th occurrence of the class, same standard as
+  T-20261028-009/T-20261029-006): the flagged generic-api-key values are test
+  fixtures in Projects/co-newbiz commit bdaf2657 — governance-doc registry keys
+  ('shared-p-one', 'chk-*', 'pol-x': SSOT structural identifiers) and one
+  throwaway scratch-user password 'pw-analyst-12345' (created and destroyed by
+  the test; nothing external accepts it; independent verification found no
+  bearer/JWT/AWS/sk-/private-key material). .github/gitleaks-full.toml extended
+  with a path-and-value-narrowed allowlist entry (path + exact fixture shape
+  both required); git-mode re-scan of the flagged commit: no leaks found.
+  Porting hold on the affected test code lifted. PATTERN NOTE: this is the 4th
+  co-newbiz test-fixture FP — if a 5th lands, propose a structural fix (rename
+  fixture namespace or scope the generic-api-key rule's entropy threshold for
+  tests/unit/) rather than another entry.
 error: null
