@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-27
+last_updated: 2026-10-28
 name: Lifecycle Manager
 role: specialist
 status: active

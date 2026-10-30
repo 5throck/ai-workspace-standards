@@ -16,6 +16,7 @@
 | 2026-09-29 | production | production | v1.2.1: PM tier defined as a capability floor for session-hosted agents (tier_semantics, session_hosted); spec 2026-09-29-pm-tier-capability-floor-design | pm |
 | 2026-10-04 | production | production | Instruction Duty reworded to the LLM Interaction Standard (ADR-0098); spec 2026-10-04-llm-interaction-standard-design | pm |
 | 2026-10-26 | production | production | agents/pm.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8, which predated the record (project review 2026-10-26 finding #9, T-20261026-004) | lifecycle-manager |
+| 2026-10-28 | production | production | Engine-day roster content changes (2026-10-28 commits); frontmatter last_updated backfilled per Check 11/F (agent-lifecycle-audit) | pm |
 
 ## Acceptance Criteria
 
@@ -69,6 +70,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-26
+- **Last Updated**: 2026-10-28
 - **Last Reviewer**: lifecycle-manager
 

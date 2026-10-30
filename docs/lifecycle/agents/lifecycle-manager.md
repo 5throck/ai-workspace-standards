@@ -14,6 +14,7 @@
 | 2026-10-26 | production | production | Body-text canon fix: Phase 6 (Finalization) references renumbered to Phase 5 (Lifecycle Finalization); last_updated bumped (project review 2026-10-26, DEC-20261026-01) | lifecycle-manager |
 | 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/lifecycle-manager.md SSOT (lead [6], support [5], async) (project review 2026-10-26 finding #4, T-20261026-004) | lifecycle-manager |
 | 2026-10-27 | production | production | Check F wording updated to the ADR-0102 scalar form (frontmatter anchor, schema `agent_tiers` removed); last_updated bumped (T-20261026-018 PR-1) | lifecycle-manager |
+| 2026-10-28 | production | production | Engine-day roster content changes (2026-10-28 commits); frontmatter last_updated backfilled per Check 11/F (agent-lifecycle-audit) | pm |
 
 ## Acceptance Criteria
 
@@ -68,5 +69,5 @@
 
 - **Current Phase**: production
 - **Owner**: lifecycle-manager
-- **Last Updated**: 2026-10-27
+- **Last Updated**: 2026-10-28
 - **Last Reviewer**: lifecycle-manager

@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-26
+last_updated: 2026-10-28
 name: Consistency Auditor
 role: specialist
 status: active
