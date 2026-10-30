@@ -591,26 +591,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | Term | Layer | Referencing skills |
 |------|-------|--------------------|
 | `100대 통계지표` | common | `common/k-ecos` |
-| `balPayments` | common | `common/k-opendata` |
-| `ELW 일별매매정보` | common | `common/k-krx` |
-| `ESG` | common | `common/k-krx` |
-| `ESG 증권상품` | common | `common/k-krx` |
-| `ESG 지수` | common | `common/k-krx` |
-| `ETF 일별매매정보` | common | `common/k-krx` |
-| `ETN 일별매매정보` | common | `common/k-krx` |
-| `expDlr` | common | `common/k-opendata` |
-| `expWgt` | common | `common/k-opendata` |
-| `hsCd` | common | `common/k-opendata` |
-| `hsCode` | common | `common/k-opendata` |
-| `impDlr` | common | `common/k-opendata` |
-| `impWgt` | common | `common/k-opendata` |
-| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
-| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
-| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
-| `statCd` | common | `common/k-opendata` |
-| `statKor` | common | `common/k-opendata` |
 | `가구당월평균소득` | common | `common/k-ecos` |
 | `감사` | variant:co-consult | `co-consult/company-intelligence` |
 | `감사보고서` | variant:co-consult | `co-consult/company-intelligence` |
@@ -639,11 +619,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반년` | common | `common/k-ecos` |
 | `반월` | common | `common/k-ecos` |
 | `배출권 시장 일별매매정보` | common | `common/k-krx` |
-| `법령ID` | common | `common/k-law` |
 | `법령명한글` | common | `common/k-law` |
 | `법령용어` | common | `common/k-law` |
 | `법령일련번호` | common | `common/k-law` |
 | `법령해석례` | common | `common/k-law` |
+| `법령ID` | common | `common/k-law` |
 | `법원명` | common | `common/k-law` |
 | `별표` | common | `common/k-law` |
 | `별표서식` | common | `common/k-law` |
@@ -762,6 +742,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `현행법령` | common | `common/k-law` |
 | `활용신청` | common | `common/k-opendata` |
 | `회장` | variant:co-consult | `co-consult/company-intelligence` |
+| `balPayments` | common | `common/k-opendata` |
+| `ELW 일별매매정보` | common | `common/k-krx` |
+| `ESG` | common | `common/k-krx` |
+| `ESG 증권상품` | common | `common/k-krx` |
+| `ESG 지수` | common | `common/k-krx` |
+| `ETF 일별매매정보` | common | `common/k-krx` |
+| `ETN 일별매매정보` | common | `common/k-krx` |
+| `expDlr` | common | `common/k-opendata` |
+| `expWgt` | common | `common/k-opendata` |
+| `hsCd` | common | `common/k-opendata` |
+| `hsCode` | common | `common/k-opendata` |
+| `impDlr` | common | `common/k-opendata` |
+| `impWgt` | common | `common/k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
+| `statCd` | common | `common/k-opendata` |
+| `statKor` | common | `common/k-opendata` |
 
 ## Same-Name Divergence (E2)
 
