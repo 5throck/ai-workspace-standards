@@ -7,6 +7,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-10-31](2026-10-31.md) | docs(review): daily fleet review 2026-10-31 |
+| [2026-10-31](2026-10-31.md) | fix(templates): correct co-safety promotion checklist numeric claims to manifest truth (T-20261031-001) |
 | [2026-10-30](2026-10-30.md) | docs(review): daily fleet review 2026-10-30 |
 | [2026-10-29](2026-10-29.md) | fix(agents): templates-root discovery for stub resolution in project context (canary finding) |
 | [2026-10-28](2026-10-28.md) | docs(governance): promote co-design design-system suite assets + bilingual user-guide parity to variant template (T-20261027-011, T-20261027-012) |
