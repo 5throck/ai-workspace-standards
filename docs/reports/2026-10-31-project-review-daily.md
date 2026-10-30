@@ -49,3 +49,24 @@ Unit suite: 2919 pass / 0 fail (221 files). Orphan sweep: 0 NEW / 0 VANISHED (sn
 ## Mode note
 
 Phase I green → Phase 1b and Phase II run in **normal mode**. 0.24.0 wave unblocked (T-20261030-006 verified fixed) — Phase II resumes the halted wave.
+
+---
+
+# Phase 1b — Per-variant project-review (templates/co-*)
+
+## Batteries (14/14 PASS)
+
+All 14 variants: `validate-variant-claims.ts --template <v>` exit 0 ×14 (check u — authored-snapshot cross-validation — green on all, including co-safety); `validate-variant-readiness.ts --variant <v>` — 7 "All checks passed", 7 "READY (warnings only)" (known `country-config-default` cosmetic class). **0 FAIL.**
+
+## Scope triage
+
+Only **co-deck** has window template changes (1 commit — the render/validation batch 4e0b72b1a), deep-reviewed in Phase I slot A: 7/7 SCRIPTS.md↔@version rows, 20 pin tests, 6-theme floor coverage, image-curator↔validator contract — SOUND, deliberately post-`template-v0.24.0` (accumulates for the next train). **co-safety's PROMOTION_CHECKLIST staleness lives on OPEN PR #1758's branch, not main** — main's co-safety template is unchanged this window and check-u passes on main (verified in batteries). The other 13 variants: 0 window changes → baseline-only rows.
+
+## Findings
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| F1 (carried) | **Major** | PR #1758 checklist numeric staleness + DIRTY rebase need — blocks that PR's merge, not main | branch PROMOTION_CHECKLIST.md:17,19 | **T-20261031-001 (high)** — the PR's session fixes before merge |
+| A-6 (carried, Info) | Info | PR #1758's new skill uses English-alias legal citations vs the Korean citations in the 4 pre-existing variant_specific entries (internally consistent; convention note suggested) | branch variant.json skill_manifest | recorded in T-20261031-001 scope |
+
+**No new findings on main. Phase 1b ticket spend: 0 (F1 already ticketed as T-20261031-001). Daily shared cap: 2/10 used.**
