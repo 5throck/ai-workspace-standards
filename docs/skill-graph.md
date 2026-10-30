@@ -134,6 +134,7 @@
 | `co-safety/emergency-response` | variant:co-safety | 1.0.1 | — | — | — | — | — |
 | `co-safety/environmental-compliance-checker` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/ess-fire-risk-assessor` | variant:co-safety | 1.0.0 | — | — | — | — | — |
+| `co-safety/evidence-collection-hot-work-permit` | variant:co-safety | 1.0.0 | co-safety/safety-workflow-manager | — | co-safety/permit-to-work (composes_with), co-safety/risk-assessment (follows), co-safety/tool-box-meeting (composes_with) | — | — |
 | `co-safety/fall-hazard-assessor` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/gas-dispersion-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/ghs-classifier` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -428,6 +429,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261028-05` | decision | — | — | — |
 | `dec:DEC-20261028-06` | decision | — | — | — |
 | `dec:DEC-20261029-01` | decision | — | — | — |
+| `dec:DEC-20261030-01` | decision | — | — | — |
 | `dec:DEC-20261031-01` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
@@ -801,7 +803,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 54 | (expected until docs `references` edges are mined) |
 | agent | 12 | co-abap/i18n-specialist, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 11 | (expected until docs `references` edges are mined) |
+| decision | 12 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/standup-synthesizer |
 
 ## Skills Without `used_by` (G6)
@@ -839,10 +841,10 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-31), window 90 days. Skill nodes with usage: 4.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-31), window 90 days. Skill nodes with usage: 6.
 
-- **used-but-unlinked** (usage > 0, no `used_by`) (4): co-safety/sync, common/sync, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (231): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 191 more
+- **used-but-unlinked** (usage > 0, no `used_by`) (6): co-safety/sync, common/sync, root/project-resync, root/project-to-variant, root/sync, root/ticket-run
+- **unused** (0 sessions in 90 days) (230): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 190 more
 
 ## Ambiguous Name Resolutions
 

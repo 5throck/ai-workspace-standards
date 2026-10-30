@@ -116,3 +116,35 @@ No template files change in this PR.
 
 - Divergence measurements recorded in session memory `memory/2026-08-28.md` (2026-08-28).
 - PR #737 (generic skill promotion), #738/#739 (harness-verification sync) as prior upstream-carrier evidence.
+
+## Addendum (2026-10-30) — user-directed backport cycle: co-deck, co-abap, co-safety
+
+A user-directed backport cycle dated 2026-10-30 covers three pairs — `Projects/co-deck` ↔
+`templates/co-deck`, `Projects/co-abap` ↔ `templates/co-abap`, `Projects/co-safety` ↔
+`templates/co-safety` — executing this design's standing project→template backport procedure
+(project-resync Step 2, plus the evidence-plane Step 2b added by design
+`2026-09-19-actor-model-and-evidence-backport-design`).
+
+- **Method.** The 5-surface method above (variant skills, core scripts, shared helpers, context
+  documents, agents) runs with the verdict columns of design
+  `2026-10-28-instruction-ownership-backport-hardening-design.md` (D5): each window-delta row
+  carries a mechanical verdict — `PORT_CANDIDATE`, `REDELIVER`, `ADJUDICATE`, or `NO_ACTION` —
+  derived from surface + direction + ownership. Verdicts remain report-only (ADR-0031 Principle
+  5); they inform the human judgment and never write.
+- **Record.** Dispositions for all three pairs — promote / stays-project / discarded-stale,
+  including the Step 2b evidence-plane judgment for co-safety — are recorded in the cycle report
+  `docs/reports/2026-10-30-backport-user-directed-co-deck-co-abap-co-safety.md`.
+- **Gate.** The standing backport gate is unchanged (project-resync Safety Rule 6; ADR-0031):
+  promote only template-grade, reusable content. Engagement output, domain stacks (e.g.
+  co-abap's ABAP/SAP stack), VARIANT-INJECT content, and deprecated skills stay in the project,
+  exactly as the Findings above recorded for the 2026-08-28 cycle.
+- **Cycle 2 (same day).** A second user-directed cycle dated 2026-10-30 covers `Projects/co-design`,
+  `Projects/co-develop`, and `Projects/co-game` with a fresh 5-surface review: co-develop and
+  co-game carry zero window commits since the 2026-10-30 nightly, and co-design's only landing
+  (PR #72, Step-1 residue) was already adjudicated by the nightly. The cycle also executes the
+  DEC-20261030-01 follow-up condition: the co-safety M2/M4 UNVERIFIED-BY-DELTA marks may clear
+  upon native Graph Delta Log verification (project `scripts/graph-delta-log.ts` plus an
+  `evidence-backport-scan` re-run), and the template README provenance record is updated
+  accordingly if verification passes. Dispositions land as additional commits on the open
+  cycle-1 PR (branch reuse; the M2/M4 README edit depends on cycle-1 content) — per the
+  sequential-branch rule's stacking rationale.

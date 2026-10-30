@@ -113,6 +113,11 @@
       "layer": "variant:co-safety"
     },
     {
+      "id": "evidence-collection-hot-work-permit",
+      "type": "skill",
+      "layer": "variant:co-safety"
+    },
+    {
       "id": "fall-hazard-assessor",
       "type": "skill",
       "layer": "variant:co-safety"
@@ -570,6 +575,65 @@
       "from": "dangerous-cargo-handling-planner",
       "to": "tool-box-meeting",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "audit-preparation",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "permit-to-work",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "risk-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "risk-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "safety-workflow-manager",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "tool-box-meeting",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "follows",

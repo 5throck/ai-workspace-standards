@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261030-007
+kind: manual
+title: >-
+  hardening: wire co-safety graph-delta-log.ts into the project sync pipeline —
+  evidence delta channel never accumulates. Class: script-gap (systemic for the
+  project's evidence plane). Evidence: Projects/co-safety/scripts/graph-delta-log.ts
+  v1.1.0 is standalone — no invocation anywhere in the project's
+  scripts/dev-sync.ts — so Projects/co-safety/docs/graph-deltas/ has never
+  received a record and the channel is empty by design-absence, not by
+  quiescence. Consequence: native M2/M4 Graph Delta Log verification of the
+  cycle-1 evidence-plane pair (DEC-20261030-01 follow-up condition) is
+  structurally unreachable — re-verified NOT CLEARED in backport cycle 2
+  (2026-10-30); even once wired plus a first real graph change, the >= 90-day
+  accumulated generated_at span puts earliest native clearance at
+  approximately 2027-01-28. Seeding a record today would flip M2 to FAIL
+  (0-day span preempts the git-log fallback); backdating was rejected as
+  evidence falsification. Suggested remedy: invoke the generator in the
+  project's sync pipeline as a post-commit step, same pattern as the workspace
+  root's skill-graph regen (scripts/dev-sync.ts step 4.65 generate-skill-graph.ts
+  invocation); re-verify no earlier than 2027-01-28. Refs: DEC-20261030-01
+  consequence clause; docs/reports/2026-10-30-backport-user-directed-cycle2-co-design-co-develop-co-game.md
+  §Follow-up status
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-10-30T22:11:59.575+09:00'
+history:
+  - at: '2026-10-30T22:11:59.575+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

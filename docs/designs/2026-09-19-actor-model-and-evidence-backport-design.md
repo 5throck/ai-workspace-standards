@@ -871,3 +871,47 @@ template-layer registry path is resolved in §3.6; only the co-newbiz promotion 
   curates it, and what retirement policy it carries.
 - **Graph delta retention and compaction** — deferred, but now constrained by §5.9.
 - **Mandating the Actor Model at `governed`** — blocked on a second adopter (§3.5, open question 7).
+
+---
+
+## Addendum (2026-10-30) — co-safety evidence plane: standing PROMOTABLE row adjudicated PROMOTE
+
+**Adjudication.** The nightly project-resync cycle of 2026-10-30
+(`docs/reports/2026-10-30-project-resync-daily.md`, Step 2b) reported `Projects/co-safety` as
+**PROMOTABLE** for the third consecutive cycle — 187/190 schema-typed evidence files, M1–M6
+PASS, with M2/M4 carried as `UNVERIFIED-BY-DELTA` under §4.5's git-log fallback. That row has
+stood as a human-triage item awaiting explicit adjudication since the first of the three cycles.
+The user's explicit directive of 2026-10-30 to backport `Projects/co-deck`, `Projects/co-abap`,
+and `Projects/co-safety` **is** that adjudication: the co-safety evidence plane is ruled
+**PROMOTE**, and the standing triage row is closed.
+
+**Execution contract — §4.6 and §4.8 Step 2b rules apply verbatim.** The promotion authors the
+pair under `templates/co-safety/`, in one change:
+
+1. the F3 schema at `templates/co-safety/evidence-models/<record-type>.schema.json` — draft-07,
+   validating against `templates/common/schemas/evidence-model.schema.json`;
+2. the companion `templates/co-safety/.claude/skills/evidence-collection-<name>/SKILL.md` as a
+   **generalization of the source collection procedure**, never a copy of engagement-specific
+   content: it preserves the source skill's step sequence, record-ID convention, and status or
+   closure discipline, and drops engagement-specific scope, client identifiers, and project-local
+   tool paths (§4.6);
+3. the provenance `README.md` recording the source project, the source form (F3), the skill path
+   that satisfied M6, the commit range the maturity bar was measured over, and the M1–M6 results —
+   including how the M2/M4 `UNVERIFIED-BY-DELTA` marks get verified this cycle: M2 and M4 are
+   confirmed by the §4.5 git-log fallback over the measured commit range (span from the first
+   establishing commit to the most recent touching commit ≥ 90 days; no breaking contract change
+   inside the trailing 30-day window), and the marks stay visible in the README and in the cycle
+   report until the project's own Graph Delta Log (§5.7) can re-verify them natively.
+
+A schema promoted without its companion procedure is an incomplete backport and MUST be rejected
+at review. The pair is authored at review time; nothing auto-writes into `templates/`.
+
+**Relationship to §4.7.** co-safety remains the reference implementation. This promotion extends
+the variant's existing `evidence-models/` plane with record types proven in the project instance;
+it forces no `deg_conformance` declaration and does not disturb the untouched commitment as
+recorded — §4.7 bars conformance mandates and modification of the existing plane, not the Step 2b
+route available to any variant.
+
+**Dispositions.** Per-pair dispositions for the user-directed cycle (co-deck, co-abap, co-safety)
+are recorded in `docs/reports/2026-10-30-backport-user-directed-co-deck-co-abap-co-safety.md`;
+the gate-moment decision record is `docs/decisions/DEC-20261030-01.md`.

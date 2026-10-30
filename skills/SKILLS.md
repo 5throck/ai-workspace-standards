@@ -212,3 +212,4 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `trade-promotion-roi` | 1.0.0 | active | market-intelligence-analyst | 2026-08-25 | — | co-price only |
 | `ui-component-design` | 2.0.0 | active | ux-specialist | 2026-08-25 | — | co-price only |
 | `van-westendorp-psm` | 1.0.0 | active | market-intelligence-analyst | 2026-08-25 | — | co-price only |
+| `evidence-collection-hot-work-permit` | 1.0.0 | active | safety-workflow-manager | 2026-10-30 | — | co-safety only |

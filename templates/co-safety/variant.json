@@ -52,6 +52,10 @@
       "file": "skills/contractor-onboarding/SKILL.md"
     },
     {
+      "name": "evidence-collection-hot-work-permit",
+      "file": "skills/evidence-collection-hot-work-permit/SKILL.md"
+    },
+    {
       "name": "permit-to-work",
       "file": "skills/permit-to-work/SKILL.md"
     },
@@ -299,30 +303,14 @@
   "skill_manifest": {
     "variant_specific": [
       {
-        "name": "risk-assessment",
+        "name": "compliance-gap",
         "layer": "root",
         "used_by_agents": [
-          "risk-assessment-agent",
-          "safety-workflow-manager"
+          "compliance-agent"
         ],
         "legal_basis": [
           "산업안전보건법 제36조 (위험성평가 의무)",
-          "중대재해처벌법 제4조 (안전·보건 확보 의무)",
-          "산업안전보건법 시행규칙 제37조 (위험성평가의 실시 및 기록·보존)",
-          "고용노동부 고시 「사업장 위험성평가에 관한 지침」 (위험성평가 방법 등)"
-        ],
-        "platform_parity": "not-required"
-      },
-      {
-        "name": "permit-to-work",
-        "layer": "root",
-        "used_by_agents": [
-          "safety-workflow-manager",
-          "risk-assessment-agent"
-        ],
-        "legal_basis": [
-          "산업안전보건법 제38조 (안전조치)",
-          "산업안전보건법 제39조 (건강조치)",
+          "산업안전보건법 제57조 (사고 기록·보고)",
           "중대재해처벌법 제4조 (안전·보건 확보 의무)"
         ],
         "platform_parity": "not-required"
@@ -341,15 +329,45 @@
         "platform_parity": "not-required"
       },
       {
-        "name": "compliance-gap",
+        "name": "evidence-collection-hot-work-permit",
         "layer": "root",
         "used_by_agents": [
-          "compliance-agent"
+          "safety-workflow-manager",
+          "risk-assessment-agent"
+        ],
+        "legal_basis": [
+          "OSHA-KR Article 38 (safety measures — pre-hot-work precautions)",
+          "OSHA-KR Article 36 (risk assessment)",
+          "SAPA Article 4 (obligation to secure safety and health)"
+        ],
+        "platform_parity": "not-required"
+      },
+      {
+        "name": "permit-to-work",
+        "layer": "root",
+        "used_by_agents": [
+          "safety-workflow-manager",
+          "risk-assessment-agent"
+        ],
+        "legal_basis": [
+          "산업안전보건법 제38조 (안전조치)",
+          "산업안전보건법 제39조 (건강조치)",
+          "중대재해처벌법 제4조 (안전·보건 확보 의무)"
+        ],
+        "platform_parity": "not-required"
+      },
+      {
+        "name": "risk-assessment",
+        "layer": "root",
+        "used_by_agents": [
+          "risk-assessment-agent",
+          "safety-workflow-manager"
         ],
         "legal_basis": [
           "산업안전보건법 제36조 (위험성평가 의무)",
-          "산업안전보건법 제57조 (사고 기록·보고)",
-          "중대재해처벌법 제4조 (안전·보건 확보 의무)"
+          "중대재해처벌법 제4조 (안전·보건 확보 의무)",
+          "산업안전보건법 시행규칙 제37조 (위험성평가의 실시 및 기록·보존)",
+          "고용노동부 고시 「사업장 위험성평가에 관한 지침」 (위험성평가 방법 등)"
         ],
         "platform_parity": "not-required"
       }
