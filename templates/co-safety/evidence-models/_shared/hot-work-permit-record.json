@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hot-work-permit-record.json",
+  "title": "Cross-Industry Hot Work Permit Record — Shared Base",
+  "description": "Shared base evidence model for hot work permit records across industries. Derived from psm-hot-work-permit-record.json (the most complete domain-specific hot work permit model) with common core fields from railway thermite-welding hot-work, shipbuilding pre-hot-work gas-free, and ehsconst permit-to-work (hot_work type) provisions. Domain-specific provisions go in industry_specific_fields. Dedicated domain models (e.g., psm-hot-work-permit-record.json, railway-thermite-welding-hot-work-record.json, shipbuilding-pre-hot-work-gas-free-record.json) are preserved per the non-migration decision and remain authoritative for their respective domains.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "record_id",
+    "industry_profile",
+    "issue_date",
+    "permit_number",
+    "work_location",
+    "work_description",
+    "gas_test",
+    "fire_watch",
+    "authorization",
+    "permit_expiry",
+    "legal_basis",
+    "e_signature",
+    "nomenclature",
+    "audit_trail"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "pattern": "^HWP-[A-Z]{2,8}-[0-9]{4}-[0-9]{4}$",
+      "description": "Format: HWP-<DOMAIN>-YYYY-NNNN (e.g., HWP-PSM-2026-0001, HWP-RLW-2026-0014, HWP-SHIP-2026-0007)"
+    },
+    "industry_profile": {
+      "type": "string",
+      "enum": [
+        "ehschem",
+        "gasterm",
+        "steelmaking",
+        "shipbuilding",
+        "powergen",
+        "waste",
+        "defense",
+        "semicon",
+        "battery",
+        "biotech",
+        "datacenter",
+        "logistics",
+        "railway",
+        "food",
+        "construction"
+      ],
+      "description": "Industry profile determines the legal_basis template and industry_specific_fields schema"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the hot work permit was issued."
+    },
+    "permit_number": {
+      "type": "string",
+      "description": "Unique permit number assigned to this hot work authorization."
+    },
+    "work_location": {
+      "type": "string",
+      "description": "Specific location where the hot work will be performed (e.g., compartment, weld location, unit area)."
+    },
+    "work_description": {
+      "type": "string",
+      "description": "Description of the hot work activity to be performed (e.g., welding, cutting, grinding, thermite welding)."
+    },
+    "work_type": {
+      "type": "string",
+      "enum": [
+        "welding",
+        "cutting",
+        "grinding",
+        "open_flame",
+        "thermite_welding",
+        "soldering",
+        "other_hot_work"
+      ],
+      "description": "Classified hot work type. Use industry_specific_fields when the domain taxonomy needs finer granularity."
+    },
+    "gas_test": {
+      "type": "object",
+      "description": "Pre-work gas-free verification. Per the domain precedents (railway pre_ignition_lel_percent, shipbuilding lel_percent), any positive LEL reading invalidates the hot work permit; the gas-free certificate is typically valid for a bounded window (e.g., max 4 hours in the shipbuilding precedent) after which retesting is required.",
+      "properties": {
+        "test_timestamp_iso": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time the gas test was performed."
+        },
+        "lel_percent": {
+          "type": "number",
+          "maximum": 0,
+          "description": "Measured lower explosive limit (LEL) in percent. Must be 0 — a positive LEL reading invalidates the permit."
+        },
+        "instrument_id": {
+          "type": "string",
+          "description": "Name or ID of the gas detection instrument used (psm flammable_gas_test / shipbuilding gas_tester_certification_id)."
+        },
+        "tested_by": {
+          "type": "string",
+          "description": "Name or certification ID of the person who performed the gas test."
+        },
+        "safe_to_proceed": {
+          "type": "boolean",
+          "description": "Confirmation that gas concentration is below the acceptable threshold and work may proceed (psm precedent)."
+        }
+      },
+      "required": [
+        "test_timestamp_iso",
+        "lel_percent",
+        "tested_by"
+      ]
+    },
+    "fire_watch": {
+      "type": "object",
+      "description": "Fire watch assignment. Present with required=true whenever the permit conditions demand a fire watch attendant.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "Whether a fire watch attendant is required for this hot work (psm fire_watch_required / railway fire_watch_posted / ehsconst fire_watch_assigned control)."
+        },
+        "attendant_id": {
+          "type": "string",
+          "description": "Name or ID of the assigned fire watch attendant (required when required is true; psm fire_watch_name)."
+        },
+        "posted_confirmed": {
+          "type": "boolean",
+          "description": "Confirms the fire watch is posted at the work location before work starts (railway fire_watch_posted precedent)."
+        }
+      },
+      "required": [
+        "required"
+      ]
+    },
+    "authorization": {
+      "type": "object",
+      "description": "Permit authorization. The issuing authority approves the permit before work begins; the performing authority acknowledges execution.",
+      "properties": {
+        "authorized_by": {
+          "type": "string",
+          "description": "Name or ID of the supervisor/authority who authorized the hot work permit (psm authorized_by)."
+        },
+        "issuing_authority_id": {
+          "type": "string",
+          "description": "ID of the issuing authority (ehsconst issuing_authority_id precedent)."
+        },
+        "performing_authority_id": {
+          "type": "string",
+          "description": "ID of the performing authority executing the work (ehsconst performing_authority_id precedent)."
+        }
+      },
+      "required": [
+        "authorized_by"
+      ]
+    },
+    "permit_expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date and time at which the permit expires and work must stop unless renewed (psm permit_expiry / ehsconst validity_end / railway possession_window precedent)."
+    },
+    "closure": {
+      "type": "object",
+      "description": "Permit closure record upon work completion, including post-work fire watch confirmation where applicable.",
+      "properties": {
+        "closed_by": {
+          "type": "string",
+          "description": "Signature or name of the person who closed the permit upon work completion (psm closure_signature / ehsconst closeout_signed)."
+        },
+        "closure_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time the permit was closed."
+        },
+        "closeout_signed": {
+          "type": "boolean",
+          "description": "Confirms the close-out signature block is complete (ehsconst closeout_signed precedent)."
+        }
+      },
+      "required": [
+        "closed_by"
+      ]
+    },
+    "tbm_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the Tool Box Meeting (TBM) record covering this hot work, where the crew reviewed the permit conditions. May reference an _shared/tbm-record.json or domain-specific TBM record. Null if not applicable."
+    },
+    "risk_assessment_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the risk assessment record identifying the fire/explosion hazards for this work. Null if not applicable."
+    },
+    "ptw_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to the parent permit-to-work record when this hot work permit is issued under a general PTW (e.g., ehsconst-ptw-record.json work_type=hot_work). Null when standalone."
+    },
+    "industry_specific_fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Domain-specific extension fields (e.g., {thermite_charge_grams, cooling_time_minutes, weld_location_kp} for railway, {compartment_id, oxygen_percent, benzene_ppm, h2s_ppm, co_ppm} for shipbuilding, {contractor_tier, sapa_article_5_compliance} for construction, {flammable_gas_instrument_class} for ehschem/gasterm)"
+    },
+    "legal_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "description": "Multi-source legal basis. Must cite >= 3 regulatory sources. Common cross-industry base: OSHA-KR Article 38 (safety measures — de facto hot work anchor: safety measures before hazardous work), OSHA-KR Article 36 (risk assessment), SAPA Article 4 (obligation to secure safety and health). Industry-specific additions per the domain's legal_basis template: HPGSCA Article 11 (gas cutting/welding facility safety maintenance — shipbuilding/gasterm), Firearms-Swords-Explosives-Safety Act Article 37 (prohibition of fire handling and smoking — defense/explosives), DSSMA Article 5 (handling of dangerous substances — shipbuilding painting), OSHA-KR Article 44 (process safety management — PSM facilities).",
+      "examples": [
+        [
+          "OSHA-KR Article 38 (safety measures — pre-hot-work precautions)",
+          "OSHA-KR Article 36 (risk assessment)",
+          "SAPA Article 4 (obligation to secure safety and health)"
+        ],
+        [
+          "OSHA-KR Article 38 (safety measures for hot work)",
+          "High-Pressure Gas Safety Control Act Article 11 (gas cutting/welding facility safety maintenance plan)",
+          "SAPA Article 4 (safety management system obligation)"
+        ]
+      ]
+    },
+    "e_signature": {
+      "$ref": "base/common.schema.json#/definitions/e_signature"
+    },
+    "nomenclature": {
+      "$ref": "base/common.schema.json#/definitions/nomenclature"
+    },
+    "audit_trail": {
+      "$ref": "base/common.schema.json#/definitions/audit_trail"
+    }
+  }
+}

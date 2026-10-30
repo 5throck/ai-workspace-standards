@@ -2374,6 +2374,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261030-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "dec:DEC-20261031-01",
       "type": "decision",
       "layer": "L0"
@@ -6555,6 +6560,19 @@
       ]
     },
     {
+      "id": "skill:co-safety/evidence-collection-hot-work-permit",
+      "type": "skill",
+      "layer": "variant:co-safety",
+      "name": "evidence-collection-hot-work-permit",
+      "scope": "co-safety",
+      "capability": "evidence-collection-hot-work-permit",
+      "content_hash": "c5cc37fb0881ef7e",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-safety/fall-hazard-assessor",
       "type": "skill",
       "layer": "variant:co-safety",
@@ -7814,7 +7832,11 @@
         ".agents/skills/project-resync/SKILL.md",
         ".codex/skills/project-resync/SKILL.md",
         ".hermes/skills/project-resync/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-30"
+      }
     },
     {
       "id": "skill:root/project-review",
@@ -7851,7 +7873,11 @@
         ".agents/skills/project-to-variant/SKILL.md",
         ".codex/skills/project-to-variant/SKILL.md",
         ".hermes/skills/project-to-variant/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-30"
+      }
     },
     {
       "id": "skill:root/promote-variant",
@@ -26124,6 +26150,65 @@
       "from": "skill:co-safety/dangerous-cargo-handling-planner",
       "to": "skill:co-safety/tool-box-meeting",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "agent:co-safety/safety-workflow-manager",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/audit-preparation",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/permit-to-work",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/psm-loto",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/risk-assessment",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/risk-assessment",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-safety/evidence-collection-hot-work-permit",
+      "to": "skill:co-safety/tool-box-meeting",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-safety/skills/evidence-collection-hot-work-permit/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
     },
     {
       "type": "follows",

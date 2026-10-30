@@ -24,6 +24,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `emergency-response` | 1.0.1 | active | emergency-agent | — | — | co-safety only — Trigger emergency response protocol on incident, fire, spill, or injury report |
 | `environmental-compliance-checker` | 1.0.0 | active | ehschem-agent | — | — | co-safety only — Check environmental discharge compliance for chemical plants |
 | `ess-fire-risk-assessor` | 1.0.0 | active | powergen-agent | — | — | co-safety only — Lithium-ion ESS (Energy Storage System) fire risk assessment |
+| `evidence-collection-hot-work-permit` | 1.0.0 | active | safety-workflow-manager | 2026-10-30 | — | co-safety only — Collect schema-typed hot work permit evidence records (HWP) by running the permit-to-work issuance procedure against the cross-industry hot-work-permit shared base model |
 | `fall-hazard-assessor` | 1.0.0 | active | ehsconst-agent | — | — | co-safety only — Assess fall hazards at construction sites |
 | `gas-dispersion-analyzer` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Model gas dispersion after leak for emergency response |
 | `ghs-classifier` | 1.0.0 | active | msds-agent | — | — | co-safety only — Apply GHS Rev 9 (2021) classification rules to chemical substances and mixtures per OSHA-KR Article… |

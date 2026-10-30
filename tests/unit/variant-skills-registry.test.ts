@@ -7,14 +7,14 @@
  * Pins the eleven curated variant registries: parseSkillRegistryRows must
  * return one row per skill directory (co-consult 18, co-deck 10, co-security
  * 6, co-develop 4 — the 38-row inventory batch; co-abap 13, co-export 11,
- * co-hr 12, co-news 6, co-price 22, co-safety 60, co-work 1 — the 125-row
+ * co-hr 12, co-news 6, co-price 22, co-safety 61, co-work 1 — the 126-row
  * registry-completeness batch), every row's version/status/owner/last_reviewed
  * must equal the skill's SKILL.md frontmatter, and no row may name a
  * non-existent directory. co-design/co-game were already clean and are pinned
  * too, so the whole registry-covered variant set cannot silently regress.
  *
  * co-safety's inherited/exclusive split is pinned by name: exactly 8 rows are
- * customized forks of common skills (variant-maintained), the other 52 are
+ * customized forks of common skills (variant-maintained), the other 53 are
  * co-safety-exclusive (design §1 classification, R1.5).
  *
  * @version 1.1.0
@@ -37,7 +37,7 @@ const EXPECTED_COUNTS: Record<string, number> = {
   'co-hr': 12,
   'co-news': 6,
   'co-price': 22,
-  'co-safety': 60,
+  'co-safety': 61,
   'co-work': 1,
 };
 
@@ -110,14 +110,14 @@ describe('variant SKILLS.md registries (T-20260924-009 R3.5)', () => {
     }
   });
 
-  test('co-safety: exactly the 8 audited fork names carry the fork notes marker; 52 rows are co-safety only', () => {
+  test('co-safety: exactly the 8 audited fork names carry the fork notes marker; 53 rows are co-safety only', () => {
     const content = readFileSync(join(templatesDir, 'co-safety', 'skills', 'SKILLS.md'), 'utf-8');
     const { rows } = parseSkillRegistryRows(content);
     const forkRows = [...rows.values()].filter(r => r.notes === FORK_NOTES_MARKER);
     expect(forkRows.length).toBe(8);
     expect(new Set(forkRows.map(r => r.skill))).toEqual(CO_SAFETY_FORKS);
     const exclusiveRows = [...rows.values()].filter(r => r.notes !== FORK_NOTES_MARKER);
-    expect(exclusiveRows.length).toBe(52);
+    expect(exclusiveRows.length).toBe(53);
     for (const row of exclusiveRows) {
       expect(row.notes).toContain('co-safety only');
     }
