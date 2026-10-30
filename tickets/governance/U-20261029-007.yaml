@@ -3,14 +3,30 @@ id: U-20261029-007
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-10-29T21:34:52.544+09:00
+created_at: '2026-10-29T21:34:52.544+09:00'
 history:
-  - at: 2026-10-29T21:34:52.544+09:00
+  - at: '2026-10-29T21:34:52.544+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-10-30T10:13:24.180+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-30T10:13:24.180+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented in the same batch: validate-image-manifest v1.1.0 —
+  background_image rules per the renderer truth (per-slide background entries
+  honored only under scope individual): ERROR on family reuse (global path
+  serving ≥2 background-scoped slides), declared scope with no global path,
+  pathless background entries (previously silently skipped), unreadable path
+  (previously invisible); WARN on individual-scope global path and absent
+  slidedata.json. The ticket's literal repro clause was imprecise (per-slide
+  same-path entries already ERROR via the generic hash rule) — corrected in the
+  batch design doc. image-curator.md flow updated (scope individual, Gate 3.5
+  extended). 9 real-CLI tests with generated PNGs.
 error: null
 upstream:
   project: co-deck
@@ -19,12 +35,26 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'validate-image-manifest.ts checks duplicate content_hash across slides but has no rule covering the manifest''s background_image section. Two failure modes pass with 0 errors: (a) several background-scoped slides sharing one family/hero image (family reuse), and (b) a background-scoped divider or cover with no background entry at all. With background_image scope divider-cover, each background slide (cover + each divider) is expected to carry its own distinct image. Observed in 2026-10-ai-era-business-majors: 10 background slides shared 4 images and the validator reported 0 errors; the defect surfaced only at client review.'
+  symptom: >-
+    validate-image-manifest.ts checks duplicate content_hash across slides but
+    has no rule covering the manifest's background_image section. Two failure
+    modes pass with 0 errors: (a) several background-scoped slides sharing one
+    family/hero image (family reuse), and (b) a background-scoped divider or
+    cover with no background entry at all. With background_image scope
+    divider-cover, each background slide (cover + each divider) is expected to
+    carry its own distinct image. Observed in 2026-10-ai-era-business-majors: 10
+    background slides shared 4 images and the validator reported 0 errors; the
+    defect surfaced only at client review.
   affected_paths:
     - scripts/co-deck/validate-image-manifest.ts
     - agents/image-curator.md
   identity_source: cwd
-  repro: Craft an image-manifest.json in which two background-scoped slides point at the same image path (or omit a background entry for a divider under divider-cover scope). Run `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>`. The validator reports no errors and exits 0.
+  repro: >-
+    Craft an image-manifest.json in which two background-scoped slides point at
+    the same image path (or omit a background entry for a divider under
+    divider-cover scope). Run `bun scripts/co-deck/validate-image-manifest.ts
+    --workspace presentations/<project>`. The validator reports no errors and
+    exits 0.
   triage: ready
   flagged: false
   triage_reasons:
@@ -33,4 +63,20 @@ upstream:
   dedupe_key: a801aefd6f0f9dfdc22ccd6c7ebfec847060731ab42945acfcf7dae95a0c8b3b
   duplicates:
     - project: co-deck
-      at: 2026-10-29T21:34:52.544+09:00
+      at: '2026-10-29T21:34:52.544+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1751
+    template_version: 0.24.0
+    summary: >-
+      Implemented in the same batch: validate-image-manifest v1.1.0 —
+      background_image rules per the renderer truth (per-slide background
+      entries honored only under scope individual): ERROR on family reuse
+      (global path serving ≥2 background-scoped slides), declared scope with no
+      global path, pathless background entries (previously silently skipped),
+      unreadable path (previously invisible); WARN on individual-scope global
+      path and absent slidedata.json. The ticket's literal repro clause was
+      imprecise (per-slide same-path entries already ERROR via the generic hash
+      rule) — corrected in the batch design doc. image-curator.md flow updated
+      (scope individual, Gate 3.5 extended). 9 real-CLI tests with generated
+      PNGs.

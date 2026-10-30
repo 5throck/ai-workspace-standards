@@ -153,3 +153,13 @@ paths = [
 regexes = [
   '''^s[0-9]+\.[a-z_]+$''',
 ]
+
+[[allowlists]]
+description = "co-newbiz ADR-0187 governance-registry unit-test throwaway password (T-20261030-005, human-adjudicated FP 2026-10-30): generic-api-key trips on 'pw-analyst-12345' in tests/unit/governance-registry.test.ts (commit bdaf2657, admin console work) - a scratch-user password the test itself creates and destroys; nothing external accepts it (independent verification over the flagged commit: no bearer/JWT/AWS/sk-/private-key material). condition = 'and' so BOTH the path AND the exact fixture value must match - any other value in this file (e.g. a real secret pasted in later) is still reported. Path repo-relative (per-project window scan), same convention as the T-20261028-009 entry."
+condition = "and"
+paths = [
+  '''^tests/unit/governance-registry\.test\.ts$''',
+]
+regexes = [
+  '''^pw-analyst-12345$''',
+]

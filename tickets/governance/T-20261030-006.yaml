@@ -19,12 +19,34 @@ title: >-
   0.24.0 rides the next cycle after the fix. Worktree state: clean at main
   f47036f
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-30T02:25:59.047+09:00'
 history:
   - at: '2026-10-30T02:25:59.047+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-30T09:19:54.059+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-30T09:19:54.079+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-30T09:19:54.099+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed via PR #1750 (merged 6c5d4e561): the non-English ADDITIONS check
+  (pre-commit 2-B / language-guard) now tolerates added lines whose trimmed
+  content exists verbatim in the parent commit's blob — moved/reordered lines
+  are not new content (design option b; the same honesty principle as the PR2
+  baseline tolerance). Fail-closed preserved: git-show failure or genuinely-new
+  Korean lines still block (self-expiring tolerance). E2E on a scratch clone of
+  co-safety: the 0.24.0 changelog reorganization reproduced the 35-additions
+  failure pre-fix → PASS post-fix → injecting one genuinely-new Korean line
+  fails again naming exactly it. Implementation detail: the check lives in
+  pre-commit 2-B (not dev-sync as assumed) — language-guard v1.1.0
+  filterParentVerbatimLines + pre-commit v1.12.0. The 0.24.0 canary (co-safety)
+  can re-ride the next cycle; the second co-safety tree interaction class
+  (mirror-gate CI, 10-29) was already fixed by #1709.
 error: null
