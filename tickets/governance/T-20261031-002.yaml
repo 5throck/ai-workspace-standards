@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261031-002
+kind: manual
+title: >-
+  records hygiene batch (Phase I 2026-10-31 nits): (1) sync-commit subject file
+  counts mismatch landed diffs in 3 window commits (d95c33ba7 '4 files'=2;
+  567afa9de '88'=86; ffab5f51c '7'=5) — count from the post-merge diff or
+  annotate planned-vs-landed; (2) 9 agent lifecycle record footers still say
+  'Last Reviewer: lifecycle-manager' after the pm-authored 2026-10-28 backfill
+  rows — bump reviewer or document footer-as-phase-owner convention; (3)
+  CONSTITUTION.md §4.1 line ~175 names docs/README_ko.md + docs/user-guide_ko.md
+  as enforced twins but neither exists anywhere — update prose or document
+  relocation; (4) templates/common/scripts/lib/language-guard.ts comment says
+  'context.md §3' vs repo copy 'CONSTITUTION.md §3' — align on next touch
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-10-31T01:40:36.452+09:00'
+history:
+  - at: '2026-10-31T01:40:36.452+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
