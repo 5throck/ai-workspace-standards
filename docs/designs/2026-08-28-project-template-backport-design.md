@@ -138,3 +138,13 @@ A user-directed backport cycle dated 2026-10-30 covers three pairs — `Projects
   promote only template-grade, reusable content. Engagement output, domain stacks (e.g.
   co-abap's ABAP/SAP stack), VARIANT-INJECT content, and deprecated skills stay in the project,
   exactly as the Findings above recorded for the 2026-08-28 cycle.
+- **Cycle 2 (same day).** A second user-directed cycle dated 2026-10-30 covers `Projects/co-design`,
+  `Projects/co-develop`, and `Projects/co-game` with a fresh 5-surface review: co-develop and
+  co-game carry zero window commits since the 2026-10-30 nightly, and co-design's only landing
+  (PR #72, Step-1 residue) was already adjudicated by the nightly. The cycle also executes the
+  DEC-20261030-01 follow-up condition: the co-safety M2/M4 UNVERIFIED-BY-DELTA marks may clear
+  upon native Graph Delta Log verification (project `scripts/graph-delta-log.ts` plus an
+  `evidence-backport-scan` re-run), and the template README provenance record is updated
+  accordingly if verification passes. Dispositions land as additional commits on the open
+  cycle-1 PR (branch reuse; the M2/M4 README edit depends on cycle-1 content) — per the
+  sequential-branch rule's stacking rationale.
