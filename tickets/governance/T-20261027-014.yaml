@@ -15,12 +15,32 @@ title: >-
   recovers (support contact or self-heal). Re-verify CI health before trusting
   co-design CI evidence again.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-27T23:35:21.627+09:00'
 history:
   - at: '2026-10-27T23:35:21.627+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-31T06:56:27.529+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T06:56:27.545+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T06:56:27.560+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T06:56:27.574+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved-by-diagnosis: original symptom (Azure BlobNotFound at job start,
+  2026-10-27) no longer occurs; since ~2026-10-30 all co-design CI jobs fail
+  instead at the GitHub Actions billing wall ('recent account payments have
+  failed or your spending limit needs to be increased' — run 41102426433, 4 jobs
+  in 5-6s). Same class as T-20261007-025 — USER ACTION REQUIRED: Settings >
+  Billing & plans, fix payment method or raise spending limit. Fleet-wide CI is
+  down; re-verify CI health after billing is fixed before trusting CI evidence
+  again.
 error: null

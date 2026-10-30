@@ -15,12 +15,33 @@ title: >-
   tests/unit/variant-skills-registry.test.ts pins 61/53. Found by Phase I
   2026-10-31 slot A (F1)
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-31T01:40:36.439+09:00'
 history:
   - at: '2026-10-31T01:40:36.439+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-31T06:56:27.604+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T06:56:27.623+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T06:56:27.638+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T06:56:27.653+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed (E3, DEC-20261031-01 ruling 5). Ticket paths were
+  workspace-root-relative; PR lives in 5throck/ai-workspace-standards.
+  PROMOTION_CHECKLIST numeric claims corrected to branch variant.json truth (61
+  skills / 5 variant_specific), VERSION_MANIFEST + skill-graph regenerated,
+  rebased onto main 4f50ed8a2, memory appends preserved. Gates green:
+  variant-skills-registry 29/29, audit.ts PASS, validate-variant-claims 0
+  findings. PR #1758 now MERGEABLE:
+  https://github.com/5throck/ai-workspace-standards/pull/1758 — user merges; CI
+  evidence blocked fleet-wide by billing wall.
 error: null

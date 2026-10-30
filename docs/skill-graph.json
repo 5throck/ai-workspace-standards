@@ -2374,6 +2374,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261031-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -7015,8 +7020,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-30"
+        "sessions": 4,
+        "last_used": "2026-10-31"
       }
     },
     {
@@ -7409,8 +7414,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-30"
+        "sessions": 4,
+        "last_used": "2026-10-31"
       }
     },
     {
@@ -8072,8 +8077,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 3,
-        "last_used": "2026-10-30"
+        "sessions": 4,
+        "last_used": "2026-10-31"
       }
     },
     {
@@ -8111,7 +8116,11 @@
         ".agents/skills/ticket-run/SKILL.md",
         ".codex/skills/ticket-run/SKILL.md",
         ".hermes/skills/ticket-run/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-10-31"
+      }
     },
     {
       "id": "skill:root/token-usage-lint",

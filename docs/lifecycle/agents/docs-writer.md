@@ -60,4 +60,4 @@
 - **Current Phase**: production
 - **Owner**: docs-writer
 - **Last Updated**: 2026-10-28
-- **Last Reviewer**: lifecycle-manager
+- **Last Reviewer**: pm
