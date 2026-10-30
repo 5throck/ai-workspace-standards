@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261031-003
+kind: manual
+title: >-
+  URGENT wave-halt summary (0.25.0 wave, 2026-10-31 run): the changelog
+  duplicate-category gate (dev-sync v1.35.0, bookkeeping PR3) has NO migration
+  path for legacy project CHANGELOG structures — 6 of 11 waved projects failed
+  landing on it tonight (co-game/co-hr/co-learning/co-news: malformed dated '##
+  [Unreleased] YYYY-MM-DD' heading variants + duplicate category blocks;
+  co-deck: 6 gate hits; co-newbiz: 3). Runner hand-merged
+  co-safety/co-abap/co-consult/co-design/co-export/co-develop (6 landed+merged
+  successfully — co-safety canary green incl. the T-20261030-006 language-gate
+  tolerance which WORKED), but the remaining 6 have multi-heading legacy
+  structures needing a real tool, not sed passes — halt condition (>2 failing
+  projects) reached. SYSTEMIC fix needed: ship the runner's 2-pass normalizer as
+  scripts/changelog-normalize.ts (or a --changelog-normalize mode on dev-sync)
+  so the gate carries its own migration path; or grandfather legacy changelogs
+  until a project opts in. State: 6 projects reverted clean at 0.23.0
+  (co-game/co-hr/co-learning/co-news/co-newbiz/co-deck, audits green); 7
+  projects at 0.25.0 merged+green (co-safety canary, co-abap #233, co-consult
+  #110, co-design #73, co-export #62, co-develop #194, co-price #170-era +
+  co-newbiz #779 records); co-architect/co-price delivery-deferred (schema/CI
+  conflicts, prior tickets). 0.24.0+0.25.0 ride the next cycle after this lands
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-31T02:59:18.392+09:00'
+history:
+  - at: '2026-10-31T02:59:18.392+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
