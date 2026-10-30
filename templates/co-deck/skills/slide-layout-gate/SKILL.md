@@ -96,6 +96,15 @@ bound from the merged spec's `content_constraints`, checked against the built
 deck. A compliant storyline that is edited afterwards can still fail the gate;
 a deck failing both was non-compliant at creation.
 
+**Minimum content (U-20261029-006)**: the gate also enforces floors —
+`min_bullets` / `min_body_chars` per type from `content_constraints`
+(mirrored in `content_rules` as `min_bullets_per_slide` / `min_body_chars`).
+Standard slides default to 3 bullets / 40 body chars when the theme declares
+no minimum (explicit `0` disables); title/divider/profile/contact/punchline
+slides are exempt unless they declare minimums; slides carrying `videoId` are
+exempt (media slides). The remediation ladder's under-bound arm is the reverse
+of over-bound: densify or merge thin slides, or reclassify.
+
 ## Related Skills
 
 - `html-build` — produces the slideData this gate reads

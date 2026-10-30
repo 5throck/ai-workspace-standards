@@ -1,4 +1,8 @@
-// @version 1.3.0 — adds --lint layout gate: checks every slide in slidedata.json
+// @version 1.4.0 — --lint gains minimum content checks (U-20261029-006):
+// min_bullets / min_body_chars read per type from the merged content_constraints;
+// standard slides default to 3 bullets / 40 body chars when the theme declares
+// no minimum (explicit 0 disables); slides carrying videoId are exempt.
+// v1.3.0 — adds --lint layout gate: checks every slide in slidedata.json
 // against the merged spec's content_constraints; exits 1 on any violation.
 // v1.1.0: OS-aware font search paths (Windows, macOS, Linux).
 // Playwright-free PDF layout preparation — replaces measure-layout.ts.
@@ -336,6 +340,7 @@ interface SlideDataItem {
   subtitle?: string;
   sub?: string;
   text?: string;
+  videoId?: string;
   bullets?: (string | { text?: string })[];
 }
 
@@ -375,9 +380,36 @@ async function loadSlideData(projectDir: string, workspaceRoot: string): Promise
 
 /**
  * Lint slide content against the merged spec's content_constraints.
- * FAIL (exit 1) on any over-bound check or a slide type missing from slide_types;
- * WARN (pass) on slide types with no declared constraints.
+ * FAIL (exit 1) on any over-bound or under-bound check or a slide type missing
+ * from slide_types; WARN (pass) on slide types with no declared constraints.
+ *
+ * Minimums (U-20261029-006): min_bullets / min_body_chars read per type from
+ * the same merged content_constraints as the maxima. Sensible defaults apply
+ * to `standard` slides when the theme declares no minimum (explicit 0
+ * disables); other types (title/divider/profile/contact/punchline) are exempt
+ * unless they declare explicit minimums; slides carrying videoId are exempt
+ * (media slides render chrome-free, cf. the template VideoSlide branch).
  */
+const DEFAULT_MIN_BULLETS = 3;
+const DEFAULT_MIN_BODY_CHARS = 40;
+
+function effectiveMinimums(
+  type: string,
+  c: Record<string, number> | undefined,
+): { minBullets: number | undefined; minBodyChars: number | undefined } {
+  const declaredMinBullets = c?.min_bullets;
+  const declaredMinBody = c?.min_body_chars;
+  const isStandard = type === 'standard';
+  // Explicit 0 disables; undefined falls back to the standard-slide defaults.
+  const minBullets = declaredMinBullets !== undefined
+    ? (declaredMinBullets > 0 ? declaredMinBullets : undefined)
+    : (isStandard ? DEFAULT_MIN_BULLETS : undefined);
+  const minBodyChars = declaredMinBody !== undefined
+    ? (declaredMinBody > 0 ? declaredMinBody : undefined)
+    : (isStandard ? DEFAULT_MIN_BODY_CHARS : undefined);
+  return { minBullets, minBodyChars };
+}
+
 function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: string): void {
   const constraints = merged.content_constraints ?? {};
   const slideTypes = merged.slide_types ?? {};
@@ -408,18 +440,26 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
       ? s.bullets.map(b => typeof b === 'string' ? b : (b.text ?? '')).join('').length
       : (s.text ?? '').length;
 
-    const checks: Array<[string, number, number | undefined]> = [
-      ['title chars', (s.title ?? '').length, c.max_title_chars],
-      ['subtitle chars', subtitle.length, c.max_subtitle_chars],
-      ['desc chars', (s.sub ?? s.text ?? '').length, c.max_desc_chars],
-      ['bullet count', s.bullets?.length ?? 0, c.max_bullets],
-      ['body chars', bodyChars, c.max_body_chars],
+    const checks: Array<[string, number, number | undefined, string]> = [
+      ['title chars', (s.title ?? '').length, c.max_title_chars, '≤'],
+      ['subtitle chars', subtitle.length, c.max_subtitle_chars, '≤'],
+      ['desc chars', (s.sub ?? s.text ?? '').length, c.max_desc_chars, '≤'],
+      ['bullet count', s.bullets?.length ?? 0, c.max_bullets, '≤'],
+      ['body chars', bodyChars, c.max_body_chars, '≤'],
     ];
 
-    for (const [label, actual, limit] of checks) {
+    // Minimum content (U-20261029-006): media slides are exempt.
+    if (!s.videoId) {
+      const { minBullets, minBodyChars } = effectiveMinimums(type, c);
+      checks.push(['bullet count (min)', s.bullets?.length ?? 0, minBullets, '≥']);
+      checks.push(['body chars (min)', bodyChars, minBodyChars, '≥']);
+    }
+
+    for (const [label, actual, limit, op] of checks) {
       if (limit === undefined) continue; // constraint not declared for this type
-      if (actual > limit) {
-        rows.push(`| ${num} | ${type} | ${label} | ${actual} | ≤ ${limit} | FAIL |`);
+      const violated = op === '≤' ? actual > limit : actual < limit;
+      if (violated) {
+        rows.push(`| ${num} | ${type} | ${label} | ${actual} | ${op} ${limit} | FAIL |`);
         failCount++;
       } else {
         passCount++;
@@ -437,7 +477,8 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
   if (failCount > 0) {
     console.error(`\n❌ Layout gate FAILED (${failCount} violation${failCount > 1 ? 's' : ''}) — PDF export is blocked.`);
     console.error(`   Remediation ladder (see skills/slide-layout-gate/SKILL.md):`);
-    console.error(`   1. Cut content — trim title/subtitle, tighten or merge bullets (preferred)`);
+    console.error(`   1. Cut content — trim title/subtitle, tighten or merge bullets (over-bound rows)`);
+    console.error(`   1b. Densify content — merge thin slides or add substance (under-bound "min" rows)`);
     console.error(`   2. Split the slide into two standard slides`);
     console.error(`   3. Reclassify the slide type (Uniform Layout Principle)`);
     console.error(`   4. Record a justified layout_overrides entry in lecture-profile.md (last resort)`);

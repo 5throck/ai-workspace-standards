@@ -70,6 +70,8 @@
     "standard": {
       "max_bullets": 8,
       "max_title_chars": 40,
+      "min_bullets": 3,
+      "min_body_chars": 40,
       "max_body_chars": 200
     },
     "punchline": {

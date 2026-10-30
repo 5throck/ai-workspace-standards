@@ -11,6 +11,8 @@
   "content_rules": {
     "max_bullets_per_slide": 4,
     "max_title_chars": 28,
+    "min_bullets_per_slide": 3,
+    "min_body_chars": 40,
     "recommended_slide_count": "20-50",
     "notes": "Floating card leaves natural padding on all sides. Titles up to 28 chars (2 display lines OK). Max 4 bullets; each bullet should be a concise takeaway. Divider slides must have a compelling image on the right panel. Script field is shown in the presenter panel — keep it to 2-3 sentences."
   },

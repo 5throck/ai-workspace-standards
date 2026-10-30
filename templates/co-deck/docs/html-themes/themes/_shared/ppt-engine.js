@@ -15,6 +15,7 @@
     - FullscreenManager: browser Fullscreen API toggle via F key or button
     - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
     - FootnoteBuilder: abbreviation footnotes from slideData[i].footnotes
+    - VideoSlide: chrome-free video slides from slideData[i].videoId (U-20261029-005)
     - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
 
   ─── Shared Runtime Contract ─────────────────────────────────────────────
@@ -1112,6 +1113,93 @@ var FootnoteBuilder = {
       box.textContent = d.footnotes.join('  ·  ');
       host.appendChild(box);
     }
+  }
+};
+
+// ── VideoSlide (chrome-free video slides) ────────────────────────────────
+// slideData[i].videoId renders a chrome-free video slide: full-bleed dark
+// stage + play affordance + plain caption — no .slide-card / .slide-content
+// bubble (U-20261029-005). Themes call VideoSlide.render(slide, data) as the
+// FIRST branch of buildSlideChildren(); the per-project injector
+// (inject-video-players.ts) skips slides marked data-video="1", so the
+// documented re-run-after-rebuild procedure cannot double-stage.
+// Play-mode contract follows ADR-0002 / inject-video-players.ts (triple
+// fallback): local mp4 (videoLocal) → inline YouTube iframe (http/s + origin)
+// → new-tab watch URL (file:// dodges YouTube embed error 153), with a
+// client-side error fall-through from the local attempt to the embed.
+// Stop-on-slide-change: one shared MutationObserver removes playing frames
+// when the slide loses .active (the v4 stale-index defect class) — kept out
+// of showSlide so the shared navigation path is untouched.
+// Styling lives in ppt-engine.css (.video-slide / .video-caption /
+// .video-stage / .video-frame); themes and styles can override via cascade.
+
+var VideoSlide = {
+  _watching: false,
+  render: function (slide, data) {
+    slide.classList.add('video-slide');
+    slide.dataset.video = '1';
+    var caption = el('div', 'video-caption');
+    appendInline(caption, data.title || data.headline || '');
+    slide.appendChild(caption);
+    var stage = el('button', 'video-stage');
+    stage.setAttribute('aria-label', 'Play video');
+    stage.appendChild(el('span', 'video-play-glyph', '▶'));
+    stage.appendChild(el('span', 'video-play-label', 'Play video'));
+    var self = this;
+    stage.addEventListener('click', function () { self.play(slide, data); });
+    slide.appendChild(stage);
+    this._watch();
+    return slide;
+  },
+  play: function (slide, data) {
+    var self = this;
+    function embed() {
+      var src = 'https://www.youtube.com/embed/' + data.videoId + '?autoplay=1&rel=0&playsinline=1';
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        src += '&origin=' + location.origin;
+        var f = document.createElement('iframe');
+        f.className = 'video-frame';
+        f.src = src;
+        f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        f.allowFullscreen = true;
+        f.setAttribute('allowfullscreen', '');
+        slide.appendChild(f);
+        slide.classList.add('playing');
+      } else {
+        window.open('https://www.youtube.com/watch?v=' + data.videoId, '_blank');
+      }
+    }
+    if (data.videoLocal) {
+      var v = document.createElement('video');
+      v.className = 'video-frame';
+      v.controls = true;
+      v.autoplay = true;
+      v.setAttribute('playsinline', '');
+      v.src = data.videoLocal;
+      v.addEventListener('error', function () { v.remove(); embed(); });
+      slide.appendChild(v);
+      slide.classList.add('playing');
+      v.play().catch(function () {});
+      return;
+    }
+    embed();
+  },
+  _watch: function () {
+    if (this._watching) return;
+    var target = document.getElementById('presentation') || document.body;
+    if (!target) return;
+    this._watching = true;
+    new MutationObserver(function () {
+      document.querySelectorAll('.video-slide.playing').forEach(function (s) {
+        if (!s.classList.contains('active')) {
+          var f = s.querySelector('iframe.video-frame');
+          if (f) f.remove();
+          var v = s.querySelector('video.video-frame');
+          if (v) { try { v.pause(); } catch (e) {} v.removeAttribute('src'); v.load(); v.remove(); }
+          s.classList.remove('playing');
+        }
+      });
+    }).observe(target, { attributes: true, attributeFilter: ['class'], subtree: true });
   }
 };
 

@@ -164,6 +164,12 @@
       var subtitle = data.subtitle || '';
       var meta = data.meta || '';
 
+      // ── Video slide (chrome-free, U-20261029-005): no card/bubble DOM ─
+      if (data.videoId) {
+        VideoSlide.render(slide, data);
+        return slide;
+      }
+
       // ── Cover slide ───────────────────────────────────────────────
       if (type === 'cover') {
         slide.classList.add('center', 'act-cover');

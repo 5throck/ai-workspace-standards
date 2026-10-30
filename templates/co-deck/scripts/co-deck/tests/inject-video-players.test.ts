@@ -5,7 +5,7 @@
  *
  * Runs the real CLI against a synthetic deck fixture (bun test scripts/co-deck/tests/).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -77,5 +77,25 @@ describe('inject-video-players (T-20261007-008 promotion pin)', () => {
     expect(res.status).toBe(1);
     expect(readFileSync(join(d2, 'deck.html'), 'utf8')).toBe(before);
     rmSync(d2, { recursive: true, force: true });
+  });
+
+  // U-20261029-005: slides the template rendered natively (ppt-engine
+  // VideoSlide marks them data-video="1") must not receive an overlay stage —
+  // the injected binding loop skips them client-side.
+  test('native video slides (data-video="1") are skipped by the binding loop', () => {
+    const d3 = fixture(true, false);
+    const deck3 = join(d3, 'deck.html');
+    // Mark slide-1 as natively rendered by the template's VideoSlide.
+    const html = readFileSync(deck3, 'utf8')
+      .replace('<div id="slide-1"></div>', '<div id="slide-1" class="video-slide" data-video="1"></div>');
+    writeFileSync(deck3, html);
+    const res = run(d3);
+    expect(res.status).toBe(0);
+    const out = readFileSync(deck3, 'utf8');
+    // The injected script carries the native-slide skip guard...
+    expect(out).toContain('el.dataset.video');
+    // ...and the vids array still lists the video (skip happens at binding time).
+    expect(out).toContain('dQw4w9WgXcQ');
+    rmSync(d3, { recursive: true, force: true });
   });
 });
