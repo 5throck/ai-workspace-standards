@@ -11,6 +11,7 @@
 | 2026-09-22 | - | production | New recurring work type: weekly fleet skill-graph analytics (ADR-0080 gate-moment hiring decision, docs/designs/2026-09-22-skill-graph-fleet-analytics-design.md) | pm |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/skill-graph-analyst.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-26 | production | production | agents/skill-graph-analyst.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8, which predated the record (project review 2026-10-26 finding #9, T-20261026-004) | lifecycle-manager |
+| 2026-10-28 | production | production | Engine-day roster content changes (2026-10-28 commits); frontmatter last_updated backfilled per Check 11/F (agent-lifecycle-audit) | pm |
 
 ## Acceptance Criteria
 
@@ -57,5 +58,5 @@ No skill modification, no promotion execution, no graph regeneration, no snapsho
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-27
+- **Last Updated**: 2026-10-28
 - **Last Reviewer**: pm
