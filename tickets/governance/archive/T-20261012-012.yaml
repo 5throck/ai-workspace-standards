@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261012-012
+kind: manual
+title: >-
+  co-abap: platform-neutralize the 18 Windows-dependent unit tests (dispatch
+  fan-out / SAP proxy suites — POSIX signal/process-group cases, path-separator
+  assertions, 5000ms spawn timeouts), then re-apply the pre-push SECRET_ERE
+  local patch (@version 1.4.2, dropped in PR #200 to clear the equal-version
+  L0/L1 drift gate) and bump skills/abap-code-review SKILL.md version (deferred
+  in PR #201; flagged by check-project-meta lifecycle-metadata). Unblocks
+  win32-hosted /sync runs; cross-referenced as 5throck/co-abap#203
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-12T19:49:00.832+09:00'
+history:
+  - at: '2026-10-12T19:49:00.832+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-12T20:14:33.718+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-12T20:14:33.810+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-12T20:14:33.903+09:00'
+    from: review
+    to: done
+result: >-
+  PR 5throck/co-abap#204 (merged 2026-10-12): unit suite platform-neutralized
+  (204 pass / 16 skip / 0 fail on win32; POSIX-only cases skip on win32 and
+  still run in Linux CI); pre-push SECRET_ERE patch re-applied at @1.4.2;
+  abap-code-review skill bumped to 1.0.2. win32-hosted /sync runs unblocked.
+  GitHub issue #203 closed.
+error: null
