@@ -591,6 +591,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | Term | Layer | Referencing skills |
 |------|-------|--------------------|
 | `100대 통계지표` | common | `common/k-ecos` |
+| `balPayments` | common | `common/k-opendata` |
+| `ELW 일별매매정보` | common | `common/k-krx` |
+| `ESG` | common | `common/k-krx` |
+| `ESG 증권상품` | common | `common/k-krx` |
+| `ESG 지수` | common | `common/k-krx` |
+| `ETF 일별매매정보` | common | `common/k-krx` |
+| `ETN 일별매매정보` | common | `common/k-krx` |
+| `expDlr` | common | `common/k-opendata` |
+| `expWgt` | common | `common/k-opendata` |
+| `hsCd` | common | `common/k-opendata` |
+| `hsCode` | common | `common/k-opendata` |
+| `impDlr` | common | `common/k-opendata` |
+| `impWgt` | common | `common/k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
+| `statCd` | common | `common/k-opendata` |
+| `statKor` | common | `common/k-opendata` |
 | `가구당월평균소득` | common | `common/k-ecos` |
 | `감사` | variant:co-consult | `co-consult/company-intelligence` |
 | `감사보고서` | variant:co-consult | `co-consult/company-intelligence` |
@@ -619,11 +639,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반년` | common | `common/k-ecos` |
 | `반월` | common | `common/k-ecos` |
 | `배출권 시장 일별매매정보` | common | `common/k-krx` |
+| `법령ID` | common | `common/k-law` |
 | `법령명한글` | common | `common/k-law` |
 | `법령용어` | common | `common/k-law` |
 | `법령일련번호` | common | `common/k-law` |
 | `법령해석례` | common | `common/k-law` |
-| `법령ID` | common | `common/k-law` |
 | `법원명` | common | `common/k-law` |
 | `별표` | common | `common/k-law` |
 | `별표서식` | common | `common/k-law` |
@@ -742,26 +762,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `현행법령` | common | `common/k-law` |
 | `활용신청` | common | `common/k-opendata` |
 | `회장` | variant:co-consult | `co-consult/company-intelligence` |
-| `balPayments` | common | `common/k-opendata` |
-| `ELW 일별매매정보` | common | `common/k-krx` |
-| `ESG` | common | `common/k-krx` |
-| `ESG 증권상품` | common | `common/k-krx` |
-| `ESG 지수` | common | `common/k-krx` |
-| `ETF 일별매매정보` | common | `common/k-krx` |
-| `ETN 일별매매정보` | common | `common/k-krx` |
-| `expDlr` | common | `common/k-opendata` |
-| `expWgt` | common | `common/k-opendata` |
-| `hsCd` | common | `common/k-opendata` |
-| `hsCode` | common | `common/k-opendata` |
-| `impDlr` | common | `common/k-opendata` |
-| `impWgt` | common | `common/k-opendata` |
-| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
-| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
-| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
-| `statCd` | common | `common/k-opendata` |
-| `statKor` | common | `common/k-opendata` |
 
 ## Same-Name Divergence (E2)
 
@@ -838,7 +838,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-30), window 90 days. Skill nodes with usage: 3.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-10-31), window 90 days. Skill nodes with usage: 3.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, common/sync, root/sync
 - **unused** (0 sessions in 90 days) (232): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/research, co-deck/slide-layout-gate, co-deck/storyline … and 192 more

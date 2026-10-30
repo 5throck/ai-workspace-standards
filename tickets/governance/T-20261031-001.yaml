@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261031-001
+kind: manual
+title: >-
+  PR #1758 merge-blocker (user-directed backport cycle, DEC-20261030-01):
+  templates/co-safety/PROMOTION_CHECKLIST.md numeric claims stale vs the PR's
+  own manifests — checklist says 'skill manifest (60)' / 'variant_specific
+  designates 4' but the branch's variant.json has 61 skills and 5
+  variant_specific entries (evidence-collection-hot-work-permit added);
+  validate-variant-claims check-a numeric regex will FAIL on merge
+  (scripts/validate-variant-claims.ts:331). Also needs rebase onto main (DIRTY:
+  docs/VERSION_MANIFEST.md Generated-line + memory/2026-10-30.md append-position
+  conflicts — regenerate the manifest, concatenate the memory appends).
+  Evidence: templates/co-safety/PROMOTION_CHECKLIST.md:17,19 on branch;
+  tests/unit/variant-skills-registry.test.ts pins 61/53. Found by Phase I
+  2026-10-31 slot A (F1)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-10-31T01:40:36.439+09:00'
+history:
+  - at: '2026-10-31T01:40:36.439+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
