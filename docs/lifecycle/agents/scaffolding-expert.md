@@ -71,4 +71,4 @@
 - **Current Phase**: production
 - **Owner**: scaffolding-expert
 - **Last Updated**: 2026-10-28
-- **Last Reviewer**: lifecycle-manager
+- **Last Reviewer**: pm
