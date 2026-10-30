@@ -69,10 +69,54 @@ Git-mode gitleaks (full config) over the four delta ranges: **all CLEAN** (co-ab
 
 Report-only landing (judgment report; zero new tickets — 2f clean verdicts and existing routed items only). Design Gate: standing specs 2026-09-25-daily-fleet-review-resync-design (ADR-0089) + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design.
 
-## Steps 4–5 — v0.25.0 upgrade wave (delivers 0.24.0 + 0.25.0)
+## Steps 4–5 — v0.25.0 upgrade wave (delivers 0.24.0 + 0.25.0): **partial — 7/16 delivered, then HALTED**
 
-Appended after the wave (canary-first; T-20261030-006's fix verified by Phase I slot C — language-gate parent-verbatim tolerance live; tombstone guard per project post-merge).
+Canary **co-safety**: dry-run clean → real run → landing initially blocked by the duplicate-category changelog gate (the project's legacy changelog structure), mechanically merged via project dev-sync fixups → **PR #225 merged, 0.25.0 live, post-merge audit ALL PASS, tombstone guard clean (3 deletions absent)**. Critically, **yesterday's T-20261030-006 language-gate tolerance worked** — the same reorganization that failed last night passed tonight.
 
-## Step 6 — Final state
+| Project | PR | Path | Result |
+|---|---|---|---|
+| co-safety (canary) | #225 | real CI | MERGED, 0.25.0, audit green |
+| co-abap | #233 | billing exception | MERGED, 0.25.0, audit green |
+| co-consult | #110 | billing exception | MERGED, 0.25.0, audit green |
+| co-design | #73 | billing exception | MERGED, 0.25.0, audit green |
+| co-export | #62 | billing exception | MERGED, 0.25.0, audit green |
+| co-develop | #194 | billing exception | MERGED, 0.25.0, audit green (one legacy spec-header drift fixed in-flight: thin-dispatcher design Approved→Implemented retro-mark) |
+| co-price | — | — | **DEFERRED — `.github/workflows/ci.yml` MIGRATION_UNSAFE** (project migrated its CI; template triggers differ; the sanctioned `--accept-ci-perm-diff` would rewrite project CI intent — human decision) |
+| co-architect | — | — | **DEFERRED — standing workspace-schema conflict** (prior cycles) |
+| co-game / co-hr / co-learning / co-news | — | — | **HALTED — changelog duplicate gate, no migration path** for their multi-heading legacy structures (malformed dated `## [Unreleased] YYYY` variants); hand-merges worked on simpler structures but these need a real tool; trees reverted clean at 0.23.0, audits green |
+| co-newbiz / co-deck | — | — | **HALTED — same class** (3 and 6 gate hits); trees reverted clean at 0.23.0, audits green |
 
-Appended after the wave.
+**HALT (runner stop condition: >2 failing projects)**: 6 of 11 waved projects failed on the same gate class → wave stopped, trees reverted, ONE summarizing urgent ticket filed: **T-20261031-003 (high)** — the changelog duplicate-category gate needs its own migration path (ship the runner's 2-pass normalizer as `scripts/changelog-normalize.ts` or a dev-sync `--changelog-normalize` mode; or grandfather legacy changelogs). 0.24.0+0.25.0 ride the next cycle after it lands.
+
+Note: the new spec-header-consistency check (yesterday's T-002) also surfaced legacy drift in-wave — fixed in-flight for co-develop/co-design (thin-dispatcher + reversion-restoration design headers retro-marked Implemented); the pattern is working as designed.
+
+## Step 6 — Final state (04:20 KST)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| co-abap | main, synced | 0 | 0 | **0.25.0** |
+| co-architect | main, synced | 0 | 0 | 0.23.x (deferred: schema conflict) |
+| co-consult | main, synced | 0 | 0 | **0.25.0** |
+| co-deck | main, synced | 0 | 0 | 0.23.x (halted) |
+| co-design | main, synced | 0 | 0 | **0.25.0** |
+| co-develop | main, synced | 0 | 0 | **0.25.0** |
+| co-export | main, synced | 0 | 0 | **0.25.0** |
+| co-game | main, synced | 0 | 0 | 0.23.x (halted) |
+| co-hr | main, synced | 0 | 0 | 0.23.x (halted) |
+| co-learning | main, synced | 0 | 0 | 0.23.x (halted) |
+| co-newbiz | main, synced | 0 | **#778** (project session, stale docs-sync — session-owned) | 0.23.x (halted) |
+| co-news | main, synced | 0 | 0 | 0.23.x (halted) |
+| co-price | main, synced | 1 (docker-compose.override.yml — deliberately untracked, see Step 1) | 0 | 0.23.x (deferred: ci.yml MIGRATION_UNSAFE) |
+| co-safety | main, synced | 0 | 0 | **0.25.0** |
+| co-security | main, synced | 0 | 0 | 0.23.x |
+| co-work | main, synced | 0 | 0 | 0.23.x |
+
+**7/16 at 0.25.0 (all audits green), 9 at 0.23.x (6 halted + 2 deferred + co-security/co-work undelivered-by-halt), 1 open PR (co-newbiz #778, project session).**
+
+**Tombstone guard (corrected `-m` invocation, all 16)**: **every deletion from the last 14 days still absent across the entire fleet** (counts: co-abap 13, co-architect 6, co-consult 8, co-deck 54, co-design 8, co-develop 8, co-export 7, co-game 8, co-hr 8, co-learning 8, co-newbiz 37, co-news 8, co-price 8, co-safety 3, co-security 8, co-work 8). Zero violations.
+
+Prune safety: root OPEN PR heads checked before pruning (#1758 — user-directed backport cycle, OPEN with T-20261031-001's checklist fix pending — head branch untouched; the root checkout was found on that branch at guard time and left so). Project-side merged pr/* branches pruned local+remote.
+
+## Verdict
+
+7/16 delivered to 0.25.0 with green audits; 6 halted on the changelog-gate migration gap (T-20261031-003, high — systemic normalizer needed); 2 deferred on project-evolved conflicts (workspace-schema, ci.yml — human ports recorded); 1 open project-session PR. Zero tombstone violations fleet-wide. No gates bypassed; the halt was executed per the >2-failing-projects stop condition with one summarizing urgent ticket.
