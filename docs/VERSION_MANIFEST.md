@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-10-31T01:13:05.301Z
+**Generated**: 2026-10-31T01:36:16.714Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -9,7 +9,7 @@
 ## Summary
 
 - **Agents**: 9
-- **Skills**: 58
+- **Skills**: 59
 - **Scripts**: 127 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
@@ -46,6 +46,7 @@
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | decision-write-integrity | 1.0.0 | active | skills/decision-write-integrity/SKILL.md | workspace | decision write integrity, gate integrity, approval gate, hard block, maker checker, countersign, snapshot hash, decision audit | pm |
 | design-foundation | 1.1.0 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | architect |
+| design-token-adoption | 1.0.0 | active | skills/design-token-adoption/SKILL.md | workspace | token retrofit, design token adoption, allowlist reduction, adopt design tokens in existing UI, brownfield design tokens | pm |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.0 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
@@ -204,7 +205,7 @@
 | upgrade-project.ts | 1.84.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
-| validate-doc-folder.ts | 1.2.1 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.2.2 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | 2.2.0 | scripts/validate-model-registry.ts | N/A |
@@ -253,8 +254,8 @@
 
 - **Commands with parity (gemini mirror)**: 0 / 7
 - **Commands with codex prompts mapping**: 0 / 7
-- **Skills in all four mirrors**: 0 / 44
-- **Skills in claude+gemini only (both)**: 0 / 44 (common-template skills are parity-exempt)
+- **Skills in all four mirrors**: 0 / 45
+- **Skills in claude+gemini only (both)**: 0 / 45 (common-template skills are parity-exempt)
 
 ---
 

@@ -32,6 +32,8 @@ Core system rules, constitution modules, system architecture, security policies,
   - [Extends Pattern](architecture/extends-pattern.md) — Layer inheritance and configuration overriding (migration completed — historical)
   - [Governance Docs Architecture](designs/2026-06-02-governance-docs-architecture-design.md) — Structural design of governance documentation (rehomed to designs/, pending implementation)
   - [L0/L1 Differences](architecture/l0-l1-differences.md) — Distinctions between Core (L0) and Common (L1) layers
+- [**Patterns**](patterns/) — Reusable runtime/architecture shapes proven in a variant, recorded for other variants:
+  - [Scheduled Jobs Runtime Pattern](patterns/scheduled-jobs-runtime-pattern.md) — OS minute-tick dispatcher, DB-resident schedules, CAS fire-once, lease locks, heartbeat liveness, detached runners, secret-scrubbed output (provenance: co-newbiz ADR-0189)
 - [**Security Policies**](security/) — Workspace security standards and audit records:
   - [Extends Chain Security](security/extends-chain-security.md) — Validation rules for extends inheritance chains
   - [Dependency Overrides](security/dependency-overrides.md) — Security policies for package dependency overrides

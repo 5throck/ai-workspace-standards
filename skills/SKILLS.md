@@ -61,6 +61,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `skill-graph-analytics` | 1.2.0 | active | pm | 2026-10-08 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
 | `graft` | 1.0.0 | active | pm | 2026-10-04 | — | — |
+| `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |
 
 ### Variant-Exclusive Skills
 

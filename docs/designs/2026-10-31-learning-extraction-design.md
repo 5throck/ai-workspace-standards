@@ -1,7 +1,7 @@
 # Learning extraction batch — design-token retrofit playbook + scheduled-jobs pattern reference (T-20261030-003, T-20261030-004)
 
-- **Status**: Approved (2026-10-31, user gate) — pending implementation
-- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when the implementation PR lands and registers at its own /sync.
+- **Status**: Implemented (this PR)
+- **Registry status**: `implemented` (docs/specs/registry.json) — flipped via `spec-register.ts --update` in this change set.
 - **Date**: 2026-10-31
 - **Owner**: docs-writer (0d-1 playbook) + docs-writer (0d-2 pattern reference),
   with the ADR-0080 skill-lifecycle hand-off in §4 (PM Gateway dispatch, after

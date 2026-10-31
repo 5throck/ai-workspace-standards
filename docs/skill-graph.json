@@ -7618,6 +7618,24 @@
       ]
     },
     {
+      "id": "skill:root/design-token-adoption",
+      "type": "skill",
+      "layer": "L0",
+      "name": "design-token-adoption",
+      "scope": "root",
+      "capability": "design-token-adoption",
+      "content_hash": "a716e156588715a4",
+      "version": "1.0.0",
+      "mirrors": [
+        "skills/design-token-adoption/SKILL.md",
+        ".claude/skills/design-token-adoption/SKILL.md",
+        ".gemini/skills/design-token-adoption/SKILL.md",
+        ".agents/skills/design-token-adoption/SKILL.md",
+        ".codex/skills/design-token-adoption/SKILL.md",
+        ".hermes/skills/design-token-adoption/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:root/documentation-writing",
       "type": "skill",
       "layer": "L0",
@@ -29277,6 +29295,47 @@
       "type": "references",
       "from": "skill:root/design-foundation",
       "to": "skill:root/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-token-adoption",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-token-adoption",
+      "to": "skill:root/design-foundation",
+      "source": "prose"
+    },
+    {
+      "type": "relates_to",
+      "from": "skill:root/design-token-adoption",
+      "to": "skill:root/design-foundation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/design-token-adoption/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/design-token-adoption",
+      "to": "skill:root/token-usage-lint",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/design-token-adoption/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-token-adoption",
+      "to": "skill:root/token-usage-lint",
       "source": "prose"
     },
     {
