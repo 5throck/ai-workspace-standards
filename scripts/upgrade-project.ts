@@ -1,5 +1,23 @@
 #!/usr/bin/env bun
-// @version 1.86.0
+// @version 1.87.0
+// v1.87.0 (2026-10-31, design
+//          docs/designs/2026-10-31-graft-trail-migration-design.md R2.4,
+//          U-20261031-009): the two trail-migration upgrade-pass tolerance
+//          rules. (a) JSON_MERGE hook-entry guard: the TEMPLATE side of the
+//          .claude/.gemini settings merge is pre-filtered via
+//          dropMissingPathHookEntries (lib/hook-dedupe.ts v1.1.0) before the
+//          deep merge — a template hook entry whose command references a
+//          repo-relative path absent from the project is dropped, so a
+//          trail-init-rewritten project (graft helper deleted, hooks re-pointed
+//          at .trail/hook.cjs) never gets graft-era hook entries re-merged; the
+//          dropped entries are reported (GUARD line) and named in the MERGE
+//          decision row. (b) Retired-seed guard: when the project carries
+//          .trail/ (the migration marker), the graft-era seeds .mcp.json /
+//          .claude/helpers/graft-hooks.cjs / .claude/helpers/graft-statusline.cjs
+//          are RETIRED (isTrailRetiredSeed, lib/upgrade-policy.ts v1.33.0) — an
+//          absent-copy delivery is withheld and decision-logged SEED_SKIP
+//          (retired-surface) instead of re-seeded over the rewritten tree.
+//          Projects without the marker keep today's behavior byte-for-byte.
 // v1.86.0 (2026-10-31, spec
 //          docs/designs/2026-10-31-template-security-hardening-design.md R2.6
 //          arm 1, U-20261031-008): the JSON_MERGE pass now collapses
@@ -956,7 +974,7 @@ import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
-import { dedupeClaudeSettingsHooks } from './lib/hook-dedupe.ts';
+import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from './lib/hook-dedupe.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -982,11 +1000,12 @@ import {
   globToRegExp,
   INSTRUCTION_FILE_RELS,
   isExtendsStub,
+  isTrailRetiredSeed,
   iterEffectiveTemplateFiles,
   lifecyclelessText,
   censusInstructionRegions,
   spanCarriesProjectAuthoredLines,
-  mergeSettingsJson,
+  mergeSettingsData,
   mergeWorkspaceSchemaJson,
   normalizeAgentTierFrontmatter,
   resolveClaim,
@@ -4005,6 +4024,20 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
 
     const dest = join(projectDir, rel);
 
+    // U-20261031-009 (design docs/designs/2026-10-31-graft-trail-migration-design.md
+    // R2.4 arm (b)): `.trail/` is the trail-migration marker — `trail init` rewrote
+    // these graft-era surfaces (MCP entries swapped, helpers replaced by
+    // `.trail/hook.cjs`) and deliberately deleted the project copies. An
+    // absent-copy re-seed would resurrect pre-migration state, so a retired seed is
+    // withheld and decision-logged — never silently skipped, never re-seeded.
+    // Projects without the marker (pre-migration fleet majority) keep today's
+    // behavior byte-for-byte.
+    if (!existsSync(dest) && isTrailRetiredSeed(rel) && existsSync(join(projectDir, '.trail'))) {
+      console.log(`  SKIP   ${rel}  (retired-surface — .trail/ migration marker present, graft-era seed withheld)`);
+      recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SEED_SKIP', 'retired-surface — trail migration marker (.trail/) present; graft-era seed withheld (design 2026-10-31-graft-trail-migration, U-20261031-009)');
+      continue;
+    }
+
     if (claim.policy === 'JSON_MERGE') {
       if (!existsSync(dest)) {
         // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
@@ -4017,31 +4050,47 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
         console.log(`  ${dryTag}COPIED: ${rel}`);
       } else {
         try {
-          const result = mergeSettingsJson(dest, abs);
+          // U-20261031-009 (design docs/designs/2026-10-31-graft-trail-migration-design.md
+          // R2.4 arm (a)): the TEMPLATE side is pre-filtered before the deep merge —
+          // hook entries whose command references a repo-relative path that does not
+          // exist in the project are dropped (existsSync-style guard on the helper
+          // path), so a trail-init-rewritten project (`.claude/helpers/graft-hooks.cjs`
+          // deliberately deleted, hooks re-pointed at `.trail/hook.cjs`) never gets
+          // graft-era hook entries re-merged. Inert for healthy projects: every path
+          // a current template hook references is delivered everywhere.
+          const guardedTemplate = dropMissingPathHookEntries(
+            JSON.parse(readFileSync(abs, 'utf8')),
+            (p) => existsSync(join(projectDir, p)),
+          );
+          const projectData = JSON.parse(readFileSync(dest, 'utf8'));
+          const { merged: mergedData, preserved } = mergeSettingsData(guardedTemplate.settings, projectData);
           // U-20261031-008 (spec docs/designs/2026-10-31-template-security-hardening-design.md
-          // R2.6 arm 1): the array-union merge above appends template hook entries without
+          // R2.6 arm 1): the array-union merge appends template hook entries without
           // deduping — variant graft installs accumulated exact-duplicate (event, matcher,
           // command) hook entries (co-consult / co-deck carried 5 SessionStart entries vs the
           // template's 2). Collapse exact duplicates (first occurrence wins, distinct commands
           // preserved) before the merged payload lands, and apply the normalization even when
           // the merge itself is a no-op so already-accumulated files heal on their next
           // upgrade visit.
-          const deduped = dedupeClaudeSettingsHooks(JSON.parse(result.merged));
-          const merged = deduped.removed.length > 0
-            ? `${JSON.stringify(deduped.settings, null, 2)}\n`
-            : result.merged;
+          const deduped = dedupeClaudeSettingsHooks(mergedData);
+          const merged = `${JSON.stringify(deduped.settings, null, 2)}\n`;
           const changed = merged !== readFileSync(dest, 'utf8');
           if (!changed) { console.log(`  OK     ${rel}  (json merge — in sync)`); continue; }
-          console.log(`  MERGE  ${rel}${result.preserved.length > 0 ? `  (preserved project-only: ${result.preserved.join(', ')})` : ''}`);
+          console.log(`  MERGE  ${rel}${preserved.length > 0 ? `  (preserved project-only: ${preserved.join(', ')})` : ''}`);
+          if (guardedTemplate.dropped.length > 0) {
+            console.log(`  GUARD  ${rel}  (dropped ${guardedTemplate.dropped.length} template hook entr(ies) referencing paths absent from the project: ${[...new Set(guardedTemplate.dropped.map((d) => d.missingPath))].join(', ')})`);
+          }
           if (deduped.removed.length > 0) {
             console.log(`  DEDUPE ${rel}  (collapsed ${deduped.removed.length} duplicate hook command(s): ${[...new Set(deduped.removed.map((r) => r.command))].join(', ')})`);
           }
           if (!dryRun) writeFileSync(dest, merged, 'utf8');
-          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', deduped.removed.length > 0
-            ? `settings deep-merged — ${deduped.removed.length} duplicate hook command(s) collapsed (U-20261031-008)`
-            : result.preserved.length > 0
-              ? `settings deep-merged — project-only entries preserved: ${result.preserved.join(', ')}`
-              : 'settings deep-merged (template keys arrived, no project-only entries to preserve)');
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', guardedTemplate.dropped.length > 0
+            ? `settings deep-merged — ${guardedTemplate.dropped.length} template hook entr(ies) dropped referencing paths absent from the project (trail-migration guard, U-20261031-009)${deduped.removed.length > 0 ? `; ${deduped.removed.length} duplicate hook command(s) collapsed (U-20261031-008)` : ''}`
+            : deduped.removed.length > 0
+              ? `settings deep-merged — ${deduped.removed.length} duplicate hook command(s) collapsed (U-20261031-008)`
+              : preserved.length > 0
+                ? `settings deep-merged — project-only entries preserved: ${preserved.join(', ')}`
+                : 'settings deep-merged (template keys arrived, no project-only entries to preserve)');
           noteDelivered(rel);
           console.log(`  ${dryTag}WROTE: ${rel}`);
         } catch (err) {

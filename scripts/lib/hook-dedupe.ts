@@ -23,7 +23,20 @@
  * Key semantics: matcher is normalized to '' when absent; an entry is identified by
  * its (matcher, command-sequence) — only byte-equal repeats are exact duplicates.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
+ *           R2.4 arm (a), U-20261031-009): dropMissingPathHookEntries() — the
+ *           trail-migration guard for the upgrade JSON_MERGE pass. Template hook
+ *           entries whose command references a repo-relative path that does not
+ *           exist in the project are dropped from the TEMPLATE side before the
+ *           deep merge, so a trail-init-rewritten project (`.claude/helpers/
+ *           graft-hooks.cjs` deliberately deleted, hooks re-pointed at
+ *           `.trail/hook.cjs`) never gets graft-era hook entries re-added. The
+ *           guard is inert for healthy projects: every path a current template
+ *           hook references (`scripts/hooks/*.ts`) is delivered everywhere. Pure
+ *           in (template, exists-predicate); the exists predicate is injectable
+ *           for fixture tests.
  */
 
 /** One duplicated hook command, located by event + normalized matcher. */
@@ -137,6 +150,100 @@ export function dedupeClaudeSettingsHooks(settings: unknown): DedupeResult {
     nextHooks[event] = kept;
   }
   return { settings: { ...settings, hooks: nextHooks }, removed };
+}
+
+/** One template hook entry dropped by the trail-migration guard, located by event + command. */
+export interface DroppedPathHookRef {
+  /** Hook event name, e.g. `SessionStart`. */
+  event: string;
+  /** Normalized matcher ('' when the entry declares none). */
+  matcher: string;
+  /** The referenced repo-relative path that does not exist in the project. */
+  missingPath: string;
+  /** The command string carrying the reference. */
+  command: string;
+}
+
+export interface PathGuardResult {
+  /** The template settings with missing-path hook entries removed. */
+  settings: Record<string, unknown>;
+  /** One ref per dropped entry (first missing path of the entry). */
+  dropped: DroppedPathHookRef[];
+}
+
+/** Script/config extensions a hook command's file reference may carry. */
+const COMMAND_PATH_EXTENSIONS = /\.(cjs|mjs|js|ts|json)$/;
+
+/**
+ * Repo-relative file-path references inside a hook command: the command is split
+ * on whitespace/quote boundaries (shell-token semantics), and every token ending
+ * in a script/config extension is a candidate — optionally prefixed with the
+ * `${CLAUDE_PROJECT_DIR:-.}/` project-root interpolation
+ * (`node "${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs" post-edit`,
+ * `bun scripts/hooks/pm-dispatch-gate.ts`). Extensionless tokens (`git config
+ * core.hooksPath .githooks`) are never candidates; absolute paths and `..`
+ * escapes are not project-resolvable, so they are ignored.
+ */
+function commandPathRefs(command: string): string[] {
+  const refs: string[] = [];
+  for (const rawToken of command.split(/[\s"'`]+/)) {
+    const token = rawToken.trim();
+    if (!token || !COMMAND_PATH_EXTENSIONS.test(token)) continue;
+    if (token.startsWith('/') || token.includes('..')) continue;
+    refs.push(token.replace(/^\$\{CLAUDE_PROJECT_DIR:-\.\}\//, ''));
+  }
+  return refs;
+}
+
+/**
+ * Trail-migration guard for the upgrade JSON_MERGE pass (pure; fixture-testable).
+ *
+ * Walks the TEMPLATE's `hooks` object; an entry is dropped when ANY of its
+ * commands references a repo-relative path that the `exists` predicate reports
+ * missing from the project (existsSync-style guard on the helper path — design
+ * 2026-10-31-graft-trail-migration R2.4 arm (a)). Everything outside `hooks` is
+ * returned untouched. Never mutates the input.
+ */
+export function dropMissingPathHookEntries(
+  template: unknown,
+  exists: (repoRelPath: string) => boolean,
+): PathGuardResult {
+  const dropped: DroppedPathHookRef[] = [];
+  if (!isPlainObject(template) || !isPlainObject(template.hooks)) {
+    return { settings: isPlainObject(template) ? template : {}, dropped };
+  }
+  const nextHooks: Record<string, unknown> = { ...template.hooks };
+  for (const [event, eventValue] of Object.entries(template.hooks)) {
+    if (!Array.isArray(eventValue)) continue;
+    const kept: unknown[] = [];
+    for (const entry of eventValue) {
+      if (!isPlainObject(entry)) {
+        kept.push(entry);
+        continue;
+      }
+      const matcher = typeof entry.matcher === 'string' ? entry.matcher : '';
+      const inner = Array.isArray(entry.hooks) ? entry.hooks : [];
+      let dropWith: DroppedPathHookRef | null = null;
+      for (const h of inner) {
+        if (!isPlainObject(h) || typeof h.command !== 'string') continue;
+        const command = h.command;
+        for (const rel of commandPathRefs(command)) {
+          if (!exists(rel)) {
+            dropWith = { event, matcher, missingPath: rel, command };
+            break;
+          }
+        }
+        if (dropWith) break;
+      }
+      if (dropWith) {
+        dropped.push(dropWith);
+        continue; // entry references a path absent from the project — not merged
+      }
+      kept.push(entry);
+    }
+    nextHooks[event] = kept;
+  }
+  return { settings: { ...template, hooks: nextHooks }, dropped };
 }
 
 /**

@@ -18,7 +18,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.3.1 | active | pm | 2026-09-21 | — | PM-led hiring/firing workflows + skill attach/detach rules |
-| `create-variant` | 1.4.2 | active | pm | 2026-09-21 | — | Workspace operator only — not deployed to L2 |
+| `create-variant` | 1.4.3 | active | pm | 2026-10-31 | — | Workspace operator only — not deployed to L2 |
 | `decision-write-integrity` | 1.0.0 | active | pm | 2026-10-28 | — | Fleet process skill distilled from co-newbiz ADR-0186 gate-integrity: HARD BLOCK/ACK/DISPLAY taxonomy, off/shadow/enforce rollout, snapshot-hash propose-then-confirm, rationale substance, maker/checker, AI-divergence recording. L0-only (T-20261028-008) |
 | `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.4.4 | active | pm | 2026-09-26 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
@@ -35,8 +35,8 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `team-builder` | 1.2.0 | active | pm | 2026-10-26 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-08-24 | — | — |
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
-| `adopt-project` | 1.1.0 | active | scaffolding-expert | 2026-09-23 | — | Convert an existing external project into a workspace-standard project in place (preserves content + git history); automates variant-conversion-guide §3 Scenario B |
-| `upgrade-project` | 1.6.1 | active | pm | 2026-10-08 | — | Upgrade existing L2/L3 project to current template version |
+| `adopt-project` | 1.1.1 | active | scaffolding-expert | 2026-10-31 | — | Convert an existing external project into a workspace-standard project in place (preserves content + git history); automates variant-conversion-guide §3 Scenario B |
+| `upgrade-project` | 1.6.2 | active | pm | 2026-10-31 | — | Upgrade existing L2/L3 project to current template version |
 | `migrate-project` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | End-to-end external-project migration: GitHub baseline → adopt-project → machine-verified result (artifacts, platform twins, provenance, hooksPath, audit smoke) |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `new-project` | 1.0.0 | active | scaffolding-expert | 2026-09-27 | — | Scaffold a fresh project instance from `templates/<variant>` (non-interactive `new-project.ts` dispatch: variant pick, platform profile, identity flags, post-scaffold verification); L0 operator only — not deployed to L2 |
@@ -60,7 +60,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
 | `skill-graph-analytics` | 1.2.0 | active | pm | 2026-10-08 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
-| `graft` | 1.0.0 | active | pm | 2026-10-04 | — | — |
+| `trail` | 1.1.0 | active | pm | 2026-10-31 | — | Renamed from `graft` (vendor rename 0.28, @trailhq/trail-code): trail-era doctrine with a graft-era alias note — design 2026-10-31-graft-trail-migration, U-20261031-009 |
 | `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |
 
 ### Variant-Exclusive Skills

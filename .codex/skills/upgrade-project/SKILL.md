@@ -1,12 +1,12 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: 1.6.1
+version: 1.6.2
 status: active
 scope: workspace
 owner: pm
 last_updated: 2026-10-26
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-31
 relates_to:
   - skill: promote-variant
     type: follows
@@ -70,7 +70,7 @@ The upgrade tool classifies files into categories:
 | **DOCS_MERGE** | Section-based merge (managed blocks) | `AGENTS.md`, `docs/<variant>.context.md` |
 | **DOCS_OVERWRITE** | Plain overwrite (no blocks) | `docs/phase-definitions.md` |
 | **VARIANT_DOCS_SYNC** *(folded v1.22.0)* | No longer a separate pass — its files (`docs/context.md` and the shared docs pair set) are delivered by **TEMPLATE TREE SYNC**'s default SYNC policy with identical inline-version/hash/conflict semantics | — |
-| **TEMPLATE TREE SYNC** | Default-policy delivery for template files no dedicated pass claims: add-if-missing, then inline-version/hash update with conflict warning. `JSON_MERGE` deep-merges platform settings (project-only array entries preserved); `ADD_IF_MISSING` seeds (`.codex/config.toml`, graft surfaces) never overwrite; `WORKSPACE` seeds (`docs/designs/`, `docs/lifecycle/`, …) are add-if-missing only | Rest of the `docs/` tree (`user-guide`, variant domain docs, `countries/KR.md`, `skill-graph.overrides.json`), `.github/`, `.claude`/`.gemini/settings.json`, `.mcp.json`, `opencode.json`, `.editorconfig`, platform `skills.json` |
+| **TEMPLATE TREE SYNC** | Default-policy delivery for template files no dedicated pass claims: add-if-missing, then inline-version/hash update with conflict warning. `JSON_MERGE` deep-merges platform settings (project-only array entries preserved; template hook entries whose command references a path absent from the project are dropped — the trail-migration guard, design 2026-10-31-graft-trail-migration R2.4); `ADD_IF_MISSING` seeds (`.codex/config.toml`, graft surfaces) never overwrite, and when the project carries `.trail/` (the trail-migration marker) the graft-era seeds (`.mcp.json`, `graft-hooks.cjs`, `graft-statusline.cjs`) are RETIRED — `SEED_SKIP` (retired-surface), never re-seeded; `WORKSPACE` seeds (`docs/designs/`, `docs/lifecycle/`, …) are add-if-missing only | Rest of the `docs/` tree (`user-guide`, variant domain docs, `countries/KR.md`, `skill-graph.overrides.json`), `.github/`, `.claude`/`.gemini/settings.json`, `.mcp.json`, `opencode.json`, `.editorconfig`, platform `skills.json` |
 | **ENV_SAMPLE SYNC** *(since v1.23.0)* | Country-aware MERGE delivery of `.env.sample`: template content with `# >>> country-scoped:<CC>` blocks pruned to the project's detected country (region-neutral = all blocks stripped, matching scaffold posture); same-NAME keys superseded by the template line, project-only keys preserved under a marker section (idempotent); standard conflict warning on locally-modified copies | `.env.sample` |
 | **CONTEXT_COMMONIZATION** *(since v1.20.0)* | After `docs/context.md` refreshes, near-duplicate top-level sections of `docs/<variant>.context.md` are pruned: token-overlap >= 0.65 → REMOVE (logged), >= 0.30 → REVIEW (manual Context Commonization Review, ADR-0050 Part 3 — never auto-removed), below → silent. Sections containing managed COMMON-*/VARIANT-INJECT content downgrade to REVIEW; managed zones and the version footer are excluded. Comparison reads the template source, so dry-run verdicts match apply | `docs/<variant>.context.md` |
 | **GOVERNANCE FILES SYNC** *(since v1.12.0)* | Strictly add-if-missing delivery of top-level governance files from the variant template, then `templates/common`. An existing project file is always preserved (licenses are intentionally forkable) | `LICENSE`, `SECURITY.md` |

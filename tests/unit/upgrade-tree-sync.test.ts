@@ -34,7 +34,16 @@
  *        both servers end up in the merged file, the preserved list names the
  *        project-only entry, and the template server arrives (design D6).
  *
- * @version 1.4.0
+ * @version 1.5.0
+ *
+ * v1.5.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
+ *         R2.4/R5, U-20261031-009): TRAIL MIGRATION TOLERANCE describe block — the
+ *         design's two acceptance fixtures. Migrated shape (`.trail/` marker +
+ *         trail-rewritten settings): `.mcp.json` is NOT re-seeded (SEED_SKIP
+ *         retired-surface in `.claude/last-upgrade-delivery.json`) and the
+ *         template's graft-era hook entries are not merged (the hook-entry path
+ *         guard, GUARD verdict line). Unmigrated shape (helper present): `.mcp.json`
+ *         seeds and graft-era hooks merge exactly as before.
  */
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -707,6 +716,108 @@ describe('upgrade-project.ts MCP JSON MERGE (.agents/mcp.json, registry complete
       expect(out).not.toContain('config.toml');
       // …and the customized project bytes are untouched (dry-run writes nothing).
       expect(readFileSync(join(tmp, '.codex', 'config.toml'), 'utf8')).toBe('[features]\ncodex_hooks = true\n');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+});
+
+// ============================================================================
+// TRAIL MIGRATION TOLERANCE (design docs/designs/2026-10-31-graft-trail-migration-
+// design.md R2.4, U-20261031-009, upgrade-project v1.87.0): the two upgrade-pass
+// conflict points `trail init` creates on a migrated project.
+//   (a) JSON_MERGE hook-entry guard — template hook entries whose command
+//       references a path absent from the project are not merged.
+//   (b) Retired-seed guard — with `.trail/` present, graft-era seeds
+//       (.mcp.json / graft helpers) are SEED_SKIP (retired-surface), never
+//       re-seeded. Without the marker, behavior is unchanged.
+// ============================================================================
+describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
+  /** Trail-rewritten settings shape (observed co-develop post-migration). */
+  function writeTrailSettings(tmp: string): void {
+    writeFileSync(join(tmp, '.claude', 'settings.json'), JSON.stringify({
+      permissions: { allow: ['Bash(my-project-tool *)'] },
+      hooks: {
+        SessionStart: [{
+          matcher: '',
+          hooks: [{ type: 'command', command: 'node .trail/hook.cjs' }],
+        }],
+      },
+    }, null, 2) + '\n');
+  }
+
+  function readDecisionLog(tmp: string): Array<{ path: string; verdict: string; detail: string }> {
+    const manifest = JSON.parse(readFileSync(join(tmp, '.claude', 'last-upgrade-delivery.json'), 'utf8'));
+    return manifest.decisions ?? [];
+  }
+
+  test('migrated shape (.trail/ present): retired seeds withheld with SEED_SKIP (retired-surface); no graft hook re-add', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, '.trail'), { recursive: true }); // the migration marker
+      writeTrailSettings(tmp);
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: trail-migrated project'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // (b) Retired-seed guard: .mcp.json absent + .trail/ present → withheld.
+      expect(existsSync(join(tmp, '.mcp.json'))).toBe(false);
+      expect(out).toContain('retired-surface');
+      const decisions = readDecisionLog(tmp);
+      const seedSkip = decisions.find((d) => d.path === '.mcp.json');
+      expect(seedSkip).toBeDefined();
+      expect(seedSkip?.verdict).toBe('SEED_SKIP');
+      expect(seedSkip?.detail).toContain('retired-surface');
+
+      // (a) Hook-entry guard: the trail-rewritten hooks survive; the template's
+      // graft-era hook entries (referencing the deleted helper) are not merged.
+      const settings = JSON.parse(readFileSync(join(tmp, '.claude', 'settings.json'), 'utf8'));
+      expect(JSON.stringify(settings.hooks)).toContain('.trail/hook.cjs');
+      expect(JSON.stringify(settings.hooks)).not.toContain('graft-hooks.cjs');
+      expect(out).toContain('GUARD  .claude/settings.json');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 300000);
+
+  test('unmigrated shape (no .trail/, helper present): .mcp.json is seeded and template graft hooks merge (unchanged behavior)', () => {
+    const tmp = makeTempProject();
+    try {
+      // Pre-migration graft-era state: the helper shelf is present (no .trail/).
+      mkdirSync(join(tmp, '.claude', 'helpers'), { recursive: true });
+      writeFileSync(join(tmp, '.claude', 'helpers', 'graft-hooks.cjs'), '/* graft-era helper */\n');
+      writeFileSync(join(tmp, '.claude', 'settings.json'), JSON.stringify({
+        permissions: { allow: ['Bash(my-project-tool *)'] },
+      }, null, 2) + '\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: pre-migration project'], { cwd: tmp });
+
+      const result = spawnSync(
+        'bun',
+        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
+        { encoding: 'utf-8', timeout: 300000 }
+      );
+      expect(result.status).toBe(0);
+      const out = result.stdout ?? '';
+
+      // .mcp.json seeded exactly as before the trail migration policy existed.
+      expect(existsSync(join(tmp, '.mcp.json'))).toBe(true);
+      expect(out).not.toContain('retired-surface');
+      const decisions = readDecisionLog(tmp);
+      expect(decisions.find((d) => d.path === '.mcp.json' && d.verdict === 'SEED_SKIP' && d.detail.includes('retired-surface'))).toBeUndefined();
+
+      // The template's graft-era hook entries still merge (every referenced path
+      // exists), and the project-only permission grant survives the union.
+      const settings = JSON.parse(readFileSync(join(tmp, '.claude', 'settings.json'), 'utf8'));
+      expect(JSON.stringify(settings.hooks)).toContain('graft-hooks.cjs');
+      expect(settings.permissions.allow).toContain('Bash(my-project-tool *)');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

@@ -1,7 +1,7 @@
 # graft → Trail Vendor Rename Migration Policy (U-20261031-009) — Design
 
 - **Date**: 2026-10-31
-- **Status**: Approved (2026-10-31, user mandate — process-all-tickets directive)
+- **Status**: Implemented (2026-10-31, PR lands U-20261031-009 per the R3 file table)
 - **Spec id**: `2026-10-31-graft-trail-migration`
 - **Owner**: architect (dispatched by PM)
 - **Related**: ADR-0074 (Design Gate), ADR-0076 (graft fleet integration), design `2026-10-02-self-managed-tool-surfaces` (`docs/self-managed-surfaces.json`), design `2026-10-31-template-security-hardening-design.md` (R2.4 removes the graft Bash wildcards), U-20261031-009, DEC-20261031-03

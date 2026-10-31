@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: adopt-project
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.1.1
 - **Created**: 2026-09-23
-- **Last Updated**: 2026-09-25 (Version 1.1.0: the settling pass generalizes extends-stub resolution from pm.md-only to EVERY agents/*.md carrying `extends:` frontmatter — the 13 variant i18n-specialist.md stubs resolve here too; pm.md keeps the H12 canonical-prose check and the L1-B metadata strip. T-20260924-003, spec `2026-09-25-inventory-decisions-batch-design` R2.3. Previous: 1.0.0 initial — in-place conversion of an external project into the workspace standard, spec `2026-09-23-adopt-project-conversion-design`)
+- **Last Updated**: 2026-10-31 (Version 1.1.0 → 1.1.1: settling-pass prose names trail build with a graft-era alias per design 2026-10-31-graft-trail-migration, U-20261031-009. Previous: 2026-09-25 Version 1.1.0: the settling pass generalizes extends-stub resolution from pm.md-only to EVERY agents/*.md carrying `extends:` frontmatter — the 13 variant i18n-specialist.md stubs resolve here too; pm.md keeps the H12 canonical-prose check and the L1-B metadata strip. T-20260924-003, spec `2026-09-25-inventory-decisions-batch-design` R2.3. Previous: 1.0.0 initial — in-place conversion of an external project into the workspace standard, spec `2026-09-23-adopt-project-conversion-design`)
 
 ## Description
 In-place conversion of an external project (created with other tools) into a

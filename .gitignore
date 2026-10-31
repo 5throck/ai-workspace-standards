@@ -77,9 +77,13 @@ __pycache__/
 
 # --- Claude local settings (personal, not shared) ---
 .claude/settings.local.json
-# --- Graft helper machine-local override (issue #1048: baked path stays untracked) ---
+# --- Trail (ex-graft) tool-owned surfaces — self-managed, design 2026-10-31-graft-trail-migration:
+.trail/cache/
+.claude/helpers/trail-hooks.cjs
+.claude/helpers/trail-statusline.cjs
+# --- graft-era surfaces (pre-migration instances; keep until fleet converges) ---
 .claude/helpers/graft.local.json
-# graft tool-owned mirrors + helpers (self-managed, design 2026-10-02-self-managed-tool-surfaces):
+# tool-owned mirrors (trail-era + graft-era legacy; self-managed, designs 2026-10-02-self-managed-tool-surfaces + 2026-10-31-graft-trail-migration):
 .claude/skills/graft/
 .agents/skills/graft/
 .codex/skills/graft/
