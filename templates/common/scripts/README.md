@@ -295,7 +295,10 @@ agent's output as input to the next.
 
 #### `test-platform-parity.ts`
 **Purpose**: Validates platform parity between L0 workspace files and their L1/L2 counterparts per ADR-0033.
-Compares CLAUDE.md, GEMINI.md, and agents/pm.md across workspace root, templates/common/, and all L2 variants.
+The four platform instruction files (CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md) are transform-verified at L0→L1:
+the checker recomputes the publisher's own applyGovernanceTransforms and requires the L1 copy to match
+(volatile-marker tolerance: `Last Updated: <date>`). agents/pm.md is checked across workspace root,
+templates/common/, and all L2 variants (extends/section rules).
 **Usage**: `bun scripts/test-platform-parity.ts [--verbose]`
 **Runs automatically**: As part of audit.ts (non-lifecycle-only mode)
 **Exit codes**: 0 (pass), 1 (errors), 2 (warnings)
@@ -424,4 +427,4 @@ writeFileSync('file.txt', content, 'utf-8');
 ```
 
 ---
-*Last Updated: 2026-10-31*
+*Last Updated: 2026-11-01*
