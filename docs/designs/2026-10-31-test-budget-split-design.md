@@ -1,7 +1,7 @@
 # upgrade-decision-log test budget — split, dedupe, and the re-inflation guard (T-20261030-002)
 
-- **Status**: Approved (2026-10-31, user gate) — stage 1 of 2 delivered (PR 1: pure-helper split, per-shape fixture dedupe, re-inflation guard; budget held at 600 s); stage 2 (600 s → 300 s) pending its evidence gate.
-- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when stage 2 lands and registers at its own /sync (stage 1 alone is partial delivery by this design's own §4 sequencing, so the registry stays `approved` until then).
+- **Status**: Implemented (PRs #1770 + this PR)
+- **Registry status**: `implemented` (docs/specs/registry.json) — flipped at this stage-2 PR's /sync (stage 1 = PR #1770; the stage-2 evidence gate passed on stage 1's own win32 run, 99.9 s ≤ ~150 s).
 - **Date**: 2026-10-31
 - **Owner**: automation-engineer (PM Gateway dispatch, after user approval)
 - **Ticket**: T-20261030-002 (`kind: manual`, priority low) — test-suite
@@ -140,6 +140,15 @@ Restoring 600 s requires no code motion.
 | Claude Code | None (test infrastructure; no agent/platform config) | N/A |
 | Antigravity (GEMINI.md) | None (test infrastructure; no agent/platform config) | N/A |
 | templates/common | None — tests/unit/ and scripts/test-runner.ts are L0-only; no L1/L2 surface | N/A |
+
+> **Errata (stage 2, 2026-10-31)**: the `templates/common` row above was
+> wrong — `scripts/test-runner.ts` is an **L0+L1 mirrored script** (SCRIPTS.md
+> delivery column `L0+L1`), not L0-only. Stage 1 (PR #1770) proved it the hard
+> way: the lifecycle sync audit's Check B failed on the mirror-version skew
+> and the mirror pair (`templates/common/scripts/test-runner.ts` + the
+> SCRIPTS.md registry span) had to be propagated through the canonical
+> `propagate-to-templates.ts --apply` / `generate-scripts-mirror.ts` path.
+> Stage 2 propagation rides the same pair.
 
 ## 9. Open questions
 

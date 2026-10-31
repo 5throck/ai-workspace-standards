@@ -1,6 +1,19 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.8.0
+ * @version 1.9.0
+ *
+ * v1.9.0 (2026-10-31, T-20261030-002 stage 2 — spec
+ *         docs/designs/2026-10-31-test-budget-split-design.md): the evidence
+ *         gate passed — PR #1770's own win32 CI run (windows-latest, runs
+ *         41153388888/41153395059) measured the split
+ *         upgrade-decision-log.test.ts at 99.9s (≤ the design's ~150s gate;
+ *         ~2x headroom rule satisfied at 300s) and the extracted
+ *         upgrade-policy-decisions.test.ts at 0.34s — so the decision-log row
+ *         drops 600000 → 300000 (test ceiling stays 60s) and the file returns
+ *         to the family convention (mcp-upstream-server and upgrade-tree-sync
+ *         sit at 300s) instead of the twice-raised 600s outlier. Row-only
+ *         behavioral change; the v1.8.0 BUDGET-HEADROOM WARN and the
+ *         budget-raise policy stay on watch over the restored headroom.
  *
  * v1.8.0 (2026-10-31, T-20261030-002 — spec
  *         docs/designs/2026-10-31-test-budget-split-design.md, stage 1 of 2):
@@ -137,7 +150,10 @@ const DEFAULT_TEST_TIMEOUT_MS = 15000;
 const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
   'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
-  'upgrade-decision-log.test.ts': { suite: 600000, test: 60000 },
+  // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence
+  // gate — PR #1770's win32 run measured the split file at 99.9s (≤ ~150s),
+  // restoring the family's ~2x headroom at 300s.
+  'upgrade-decision-log.test.ts': { suite: 300000, test: 60000 },
   // v1.8.0 (T-20261030-002): the pure-helper suite extracted from
   // upgrade-decision-log.test.ts, pinned AT the family defaults — the row
   // exists so any runtime drift on the extracted file is visible without a
