@@ -5,6 +5,11 @@ on:
     branches: [main, master]
   push:
     branches: [main, master]
+  # Manual runs: a one-click full CI pass on any ref. Added 2026-10-31 for fleet
+  # parity with co-price's deliberate 2026-10-30 addition (design:
+  # Projects/co-price/docs/designs/2026-10-30-ci-migration-drift-gate-design.md §3.1;
+  # workspace design: docs/designs/2026-10-31-ci-workflow-dispatch-design.md).
+  workflow_dispatch:
 
 permissions:
   contents: read

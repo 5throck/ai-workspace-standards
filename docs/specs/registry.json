@@ -2768,6 +2768,15 @@
       "last_updated": "2026-10-30"
     },
     {
+      "id": "2026-10-31-ci-workflow-dispatch-design",
+      "title": "ci workflow dispatch design",
+      "file": "docs/designs/2026-10-31-ci-workflow-dispatch-design.md",
+      "status": "implemented",
+      "source": "pm",
+      "created": "2026-10-31",
+      "last_updated": "2026-10-31"
+    },
+    {
       "id": "2026-10-31-learning-extraction-design",
       "title": "learning extraction design",
       "file": "docs/designs/2026-10-31-learning-extraction-design.md",
