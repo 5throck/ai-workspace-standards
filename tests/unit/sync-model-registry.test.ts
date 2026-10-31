@@ -77,7 +77,7 @@ describe('SURFACES completeness against the actual repo', () => {
       'Handbooks/',
       'Projects/', 'services/', 'memory/', 'tickets/', 'node_modules/',
     ];
-    const PATTERN = /\b(?:claude-(?:opus|sonnet|haiku)-\d+-\d+|gemini-[\d.]+-(?:pro|flash)|gpt-5\.\d-(?:sol|terra|luna))\b/i;
+    const PATTERN = /\b(?:claude-(?:opus|sonnet|haiku)-\d+-\d+|gemini-[\d.]+-(?:pro|flash)|gpt-\d+(?:\.\d+)?-(?:sol|terra|luna))\b/i;
     const TEXT_EXT = /\.(md|markdown|txt|json|jsonc|yaml|yml|html|htm|ts|js|mjs|cjs|css|svg)$/i;
     const literalFiles: string[] = [];
     const walk = (dir: string, rel: string, depth: number): void => {

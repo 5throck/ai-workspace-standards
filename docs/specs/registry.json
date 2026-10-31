@@ -2798,7 +2798,7 @@
       "id": "2026-10-31-registry-platform-vocabulary-design",
       "title": "registry platform vocabulary design",
       "file": "docs/designs/2026-10-31-registry-platform-vocabulary-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "architect",
       "created": "2026-10-31",
       "last_updated": "2026-10-31"

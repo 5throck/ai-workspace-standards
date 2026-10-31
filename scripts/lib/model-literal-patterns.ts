@@ -8,18 +8,26 @@
  * (CHANGELOG, docs/adr, docs/designs, registry history lines) — none of which
  * are skill trees.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-10-31, T-20261031-005 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2): the Codex family pattern generalizes from
+ *          `gpt-5\.\d-` to `gpt-\d+(?:\.\d+)?-` so the GPT-6.x rebase
+ *          (gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna) stays under Check MM
+ *          detection while delivered-side gpt-5.6 stragglers keep matching
+ *          through the L3 convergence window.
  */
 
 /**
  * Versioned registry model-ID literal patterns (case-insensitive, word-bounded):
  * Claude `claude-opus-5-5`-style, Gemini `gemini-3.1-pro`/`gemini-3.8-flash`,
- * and Codex `gpt-5.6-sol`/`gpt-5.6-terra`/`gpt-5.6-luna`.
+ * and the Codex sol/terra/luna tier family (`gpt-5.6-*` through the GPT-6.x
+ * generation — `gpt-6.1-*` / `gpt-6-*`).
  */
 export const MODEL_ID_PATTERNS: readonly RegExp[] = [
   /\bclaude-(?:opus|sonnet|haiku)-\d+-\d+\b/i,
   /\bgemini-[\d.]+-(?:pro|flash)\b/i,
-  /\bgpt-5\.\d-(?:sol|terra|luna)\b/i,
+  /\bgpt-\d+(?:\.\d+)?-(?:sol|terra|luna)\b/i,
 ];
 
 /**

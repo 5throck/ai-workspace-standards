@@ -12,7 +12,14 @@
  * - the L0/L1 schema pair carries a byte-identical platform_surfaces block and
  *   the same version (rootAllowlist divergence stays sanctioned by DEC-20261028-05).
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-10-31, T-20261031-007 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.4): the zcode row joins the pinned set (8 platforms,
+ *          registry-only — zai/gemini-cli precedent); its skills capability
+ *          resolves to the shared `.agents/skills` mirror in the dir map, and
+ *          the no-phantom pin extends to `.zcode/skills`. Schema version pin
+ *          moves 1.7.0 → 1.8.0 with the vocabulary batch.
  */
 import { describe, test, expect } from 'bun:test';
 import * as fs from 'node:fs';
@@ -42,8 +49,8 @@ describe('platform_surfaces registry (design §4.1)', () => {
   test('block is present in both schema copies with the same minor-bumped version', () => {
     expect(registry).toBeDefined();
     expect(l1Registry).toBeDefined();
-    expect(root.version).toBe('1.7.0');
-    expect(l1.version).toBe('1.7.0');
+    expect(root.version).toBe('1.8.0');
+    expect(l1.version).toBe('1.8.0');
   });
 
   test('the platform set is exactly validate-model-registry.ts PLATFORMS', () => {
@@ -103,6 +110,9 @@ describe('registry ↔ platforms.ts consistency (§4.1(d))', () => {
     codex: '.codex/skills',
     hermes: '.hermes/skills',
     zai: '',
+    // zcode loads the shared .agents/skills mirror directly (design §R2.4c);
+    // no .zcode/skills mirror exists.
+    zcode: '.agents/skills',
   };
 
   test('every skills.supported:true platform has its skill base in PLATFORM_SKILL_BASES', () => {
@@ -122,6 +132,10 @@ describe('registry ↔ platforms.ts consistency (§4.1(d))', () => {
 
   test('no phantom .zai skill base exists for the unsupported zai row', () => {
     expect(PLATFORM_SKILL_BASES).not.toContain('.zai/skills');
+  });
+
+  test('no phantom .zcode skill base exists (zcode rides the shared .agents/skills mirror)', () => {
+    expect(PLATFORM_SKILL_BASES).not.toContain('.zcode/skills');
   });
 });
 

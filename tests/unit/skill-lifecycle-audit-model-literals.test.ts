@@ -1,6 +1,12 @@
 /**
  * Check MM — model-ID literal ban in skill trees (T-20261011-015)
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-10-31, T-20261031-005 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2 surface 9): fixtures rebase to the GPT-6.x codex ids
+ *          (gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna); a dedicated case pins
+ *          that gpt-5.6 literals still match through the L3 convergence window.
  *
  * Covers the pure detection surfaces behind skill-lifecycle-audit Check MM:
  * findModelLiterals (shared lib) and the exported skill-tree walk. The
@@ -26,8 +32,13 @@ describe('findModelLiterals (Check MM detection patterns)', () => {
 
   test('detects Gemini and Codex registry literals', () => {
     expect(findModelLiterals('dispatch to gemini-3.1-pro')).toEqual(['gemini-3.1-pro']);
-    expect(findModelLiterals('gemini-3.8-flash / gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna'))
-      .toEqual(['gemini-3.8-flash', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']);
+    expect(findModelLiterals('gemini-3.8-flash / gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna'))
+      .toEqual(['gemini-3.8-flash', 'gpt-6.1-sol', 'gpt-6.1-terra', 'gpt-6-luna']);
+  });
+
+  test('delivered-side gpt-5.6 stragglers still match through the L3 convergence window', () => {
+    expect(findModelLiterals('legacy plan row pinned to gpt-5.6-luna'))
+      .toEqual(['gpt-5.6-luna']);
   });
 
   test('matching is case-insensitive', () => {
@@ -93,10 +104,10 @@ describe('scanSkillTreeForModelLiterals (Check MM skill-tree walk)', () => {
   test('literals inside SKILL.md itself are reported', () => {
     const skillDir = join(tmpRoot, 'self-skill');
     mkdirSync(skillDir, { recursive: true });
-    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: self-skill\n---\n\nHigh → `gpt-5.6-sol`\n');
+    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: self-skill\n---\n\nHigh → `gpt-6.1-sol`\n');
     const hits = scanSkillTreeForModelLiterals(skillDir);
     expect(hits.length).toBe(1);
-    expect(hits[0].literals).toEqual(['gpt-5.6-sol']);
+    expect(hits[0].literals).toEqual(['gpt-6.1-sol']);
   });
 
   rmSync(tmpRoot, { recursive: true, force: true });
