@@ -78,6 +78,10 @@ __pycache__/
 # --- Claude local settings (personal, not shared) ---
 .claude/settings.local.json
 # --- Trail (ex-graft) tool-owned surfaces — self-managed, design 2026-10-31-graft-trail-migration:
+# negate the /*/ rule above so trail init wiring (.trail/hook.cjs, README.md,
+# learnings-by-choice) is committable; cache stays ignored (also self-ignored
+# by .trail/.gitignore along with .trail/statusline.cjs)
+!.trail/
 .trail/cache/
 .claude/helpers/trail-hooks.cjs
 .claude/helpers/trail-statusline.cjs
