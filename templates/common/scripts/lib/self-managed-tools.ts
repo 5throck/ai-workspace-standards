@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md,
+//           U-20261031-009): trail-era default paths — the vendor renamed graft to
+//           trail (0.28, @trailhq/trail-code) and `trail init` creates `.trail/` +
+//           `.claude/helpers/trail-*.cjs`. DEFAULT_SELF_MANAGED_PATHS carries BOTH
+//           path generations (graft-era kept as legacy until the fleet converges on
+//           its upgrade visits — never shrink the set), and the built-in-row guard
+//           accepts either tool name (registry `trail` entry suppresses the default
+//           `graft` row). The tracked `skills/trail/` SSOT is deliberately NOT in
+//           the default set — lifecycle gates read its frontmatter (design R2.1).
 // v1.1.0 (2026-10-11, U-20261009-001, spec
 //           docs/designs/2026-10-11-backlog-batch-2-design.md): built-in default
 //           exclusion set — docs/self-managed-surfaces.json is L0-only (ADR-0069
@@ -15,8 +24,9 @@
 // self-managed-tools.ts — Shared loader for docs/self-managed-surfaces.json.
 //
 // A SELF-MANAGED TOOL owns listed repo-relative paths: it installs and rewrites
-// them itself (e.g. graft's session hook re-bakes helpers and strips SKILL.md
-// frontmatter on its platform mirrors). Validators consult this registry to skip
+// them itself (e.g. trail's session hook re-bakes helpers and strips SKILL.md
+// frontmatter on its platform mirrors; graft-era binaries behaved identically).
+// Validators consult this registry to skip
 // such paths instead of each check hard-coding tool names — a future self-managing
 // tool registers here and every consumer follows.
 
@@ -32,13 +42,23 @@ export interface SelfManagedTool {
 const REGISTRY_REL = join('docs', 'self-managed-surfaces.json');
 
 /**
- * Built-in default exclusion set (U-20261009-001). Applied EVEN WHEN the registry
- * file is absent — the registry is L0-only, and a fresh scaffolded project where a
- * third-party tool (graft) has wired its mirrors must not fail the skill version
- * gates. Mirrors the graft entry in docs/self-managed-surfaces.json; keep the two
- * in sync (the registry file is the documentation of record at L0).
+ * Built-in default exclusion set (U-20261009-001; trail-era paths per design
+ * 2026-10-31-graft-trail-migration). Applied EVEN WHEN the registry file is
+ * absent — the registry is L0-only, and a fresh scaffolded project where a
+ * third-party tool (graft / trail) has wired its mirrors must not fail the skill
+ * version gates. Mirrors the trail entry in docs/self-managed-surfaces.json;
+ * keep the two in sync (the registry file is the documentation of record at L0).
+ * BOTH path generations are carried: graft-era paths stay as legacy until the
+ * fleet converges (pre-migration projects still create them); trail-era paths
+ * cover post-`trail init` states. The tracked `skills/trail/` SSOT is NOT
+ * excluded — lifecycle gates read its frontmatter.
  */
 export const DEFAULT_SELF_MANAGED_PATHS: readonly string[] = [
+  // Trail-era (design 2026-10-31-graft-trail-migration R2.1/R2.2).
+  '.trail/',
+  '.claude/helpers/trail-hooks.cjs',
+  '.claude/helpers/trail-statusline.cjs',
+  // Graft-era legacy (kept until fleet convergence — design R2.6 non-goal).
   '.claude/skills/graft/',
   '.agents/skills/graft/',
   '.codex/skills/graft/',
@@ -82,13 +102,18 @@ export function loadSelfManagedTools(rootDir = process.cwd()): SelfManagedTool[]
       throw new Error(`[self-managed-tools] ${REGISTRY_REL} is not valid JSON: ${(err as Error).message}`);
     }
   }
-  const hasGraftEntry = tools.some((t) => t.name === 'graft' && Array.isArray(t.paths) && t.paths.length > 0);
-  const effective: SelfManagedTool[] = hasGraftEntry
+  // The registry entry renamed graft → trail (design 2026-10-31-graft-trail-migration);
+  // a named entry under EITHER spelling suppresses the built-in default row (the
+  // path set is unioned below regardless, so this only keeps tools[] clean).
+  const hasNamedToolEntry = tools.some(
+    (t) => (t.name === 'graft' || t.name === 'trail') && Array.isArray(t.paths) && t.paths.length > 0,
+  );
+  const effective: SelfManagedTool[] = hasNamedToolEntry
     ? tools
     : [
         {
-          name: 'graft',
-          reason: 'built-in default (U-20261009-001): third-party tool-owned surfaces excluded even without docs/self-managed-surfaces.json — see scripts/lib/self-managed-tools.ts',
+          name: 'trail',
+          reason: 'built-in default (U-20261009-001; renamed from graft per design 2026-10-31-graft-trail-migration): third-party tool-owned surfaces excluded even without docs/self-managed-surfaces.json — see scripts/lib/self-managed-tools.ts',
           paths: [...DEFAULT_SELF_MANAGED_PATHS],
         },
         ...tools,

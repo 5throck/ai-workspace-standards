@@ -24,7 +24,13 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.20.0
+ * @version 1.20.1
+ * v1.20.1 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
+ *          R2.5/R2.6 annotation, U-20261031-009): Check I docstring annotation only —
+ *          arm-(b) findings whose excess commands reference graft-era helpers are
+ *          EXPECTED standing WARNs on pre-migration roots (the L0 surface flip is
+ *          deliberately deferred to each root's own `trail init` visit); no check
+ *          behavior change.
  * v1.20.0 (2026-10-31, spec
  *          docs/designs/2026-10-31-template-security-hardening-design.md R2.6
  *          arm 2, U-20261031-008): new Check I — hook drift in
@@ -1097,6 +1103,16 @@ export function runCheckH(): SyncIssue[] {
  * via scripts/lib/hook-dedupe.ts (analyzeClaudeHookDrift). Fix: rerun
  * upgrade-project (the JSON_MERGE pass now collapses exact duplicates) or
  * remove the excess entries manually.
+ *
+ * Trail-migration annotation (design docs/designs/2026-10-31-graft-trail-migration-
+ * design.md R2.5/R2.6, U-20261031-009): arm-(b) findings whose excess commands
+ * reference graft-era helpers (`.claude/helpers/graft-*.cjs`) are EXPECTED,
+ * standing WARNs on pre-migration roots — the L0 workspace root and every
+ * graft-era project still carry their own graft hook surface, and this design
+ * deliberately does NOT hand-migrate it (removal happens at each root's own
+ * `trail init` visit, the trigger event for the L0 surface flip). The upgrade
+ * JSON_MERGE guard (hook-dedupe v1.1.0 dropMissingPathHookEntries) prevents the
+ * reverse direction: re-ADDING graft-era entries to a migrated project.
  */
 export function runCheckI(): SyncIssue[] {
   const issues: SyncIssue[] = [];

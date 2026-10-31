@@ -9,9 +9,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.1.0
+version: 1.1.1
 owner: scaffolding-expert
-last_reviewed: 2026-09-23
+last_reviewed: 2026-10-31
 relates_to:
   - skill: migrate-project
     type: composes_with
@@ -49,7 +49,7 @@ bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform all|cla
 1. Pre-flight: git repo + bun required; working tree must be fully committed; refusal-grade aborts (never bypassed by `--yes`) for tracked secret-shaped files, hook-manager conflicts (husky/simple-git-hooks/lefthook), and gitleaks findings in pre-existing content.
 2. Scans the full effective delivered-path set (upgrade-policy SSOT), inventories collisions, retained foreign scripts, foreign skills, and workflow traces; presents the plan interactively (`--yes` accepts defaults: full roster, region-neutral country).
 3. Preserves every colliding foreign file to a backup outside the project repo, then lets the `upgrade-project.ts` engine deliver the standard tree (subprocess, `--yes` forwarded; the tree stays clean so the engine stash never fires).
-4. Restores collisions into `scripts/_legacy/` (de-executed, gate-exempt archive), registers retained foreign scripts in the project SCRIPTS.md, resolves pm.md extends-stubs, seeds memory/docs-README/CHANGELOG/context files, applies scoped placeholder substitution, merges package.json (project keys win), runs bun install + hooksPath re-assert + graft build, and reports.
+4. Restores collisions into `scripts/_legacy/` (de-executed, gate-exempt archive), registers retained foreign scripts in the project SCRIPTS.md, resolves pm.md extends-stubs, seeds memory/docs-README/CHANGELOG/context files, applies scoped placeholder substitution, merges package.json (project keys win), runs bun install + hooksPath re-assert + trail build (graft-era binaries: `graft build` — design 2026-10-31-graft-trail-migration), and reports.
 5. No auto-commit: review with `git diff HEAD` and commit when satisfied.
 
 ## Directions (disambiguation)

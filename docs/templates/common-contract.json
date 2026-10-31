@@ -424,7 +424,7 @@
       "gemini_source": ".gemini/skills/adopt-project/SKILL.md",
       "agents_source": ".agents/skills/adopt-project/SKILL.md",
       "codex_source": ".codex/skills/adopt-project/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Converts an existing external project (created with other tools) into a workspace-standard project in place, as if delivered by new-project.ts. Use when: adopting a legacy/external project into the workspace standard, re-homing an existing project under a variant, onboarding a project for upgrade-project maintenance.",
       "propagated_to_common": true
     },
@@ -505,7 +505,7 @@
       "gemini_source": ".gemini/skills/upgrade-project/SKILL.md",
       "agents_source": ".agents/skills/upgrade-project/SKILL.md",
       "codex_source": ".codex/skills/upgrade-project/SKILL.md",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "description": "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands.",
       "propagated_to_common": true
     },

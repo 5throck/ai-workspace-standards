@@ -1,4 +1,13 @@
-// @version 1.32.0
+// @version 1.33.0
+// v1.33.0 (2026-10-31, design
+//          docs/designs/2026-10-31-graft-trail-migration-design.md R2.4 arm (b),
+//          U-20261031-009): TRAIL_RETIRED_SEEDS + isTrailRetiredSeed(rel) — the
+//          graft-era seeds (.mcp.json, .claude/helpers/graft-hooks.cjs,
+//          .claude/helpers/graft-statusline.cjs) that a `.trail/`-marked project
+//          treats as retired. The upgrade TEMPLATE TREE SYNC pass consults the
+//          predicate before every absent-copy delivery: a retired seed is
+//          withheld and decision-logged SEED_SKIP (retired-surface) instead of
+//          re-seeded over a trail-init-rewritten tree.
 // v1.32.0 (2026-10-31, spec
 //          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md):
 //          merge-aware delivery for docs/workspace-schema.json (the co-price
@@ -366,6 +375,28 @@ export const JSON_MERGE_FILES = [
   '.claude/settings.json', '.gemini/settings.json', '.mcp.json', 'opencode.json',
   '.agents/mcp.json',
 ] as const;
+
+/** Graft-era seeds retired by the trail migration (design
+ *  docs/designs/2026-10-31-graft-trail-migration-design.md R2.4 arm (b),
+ *  U-20261031-009). When the project carries `.trail/` — the trail-migration
+ *  marker that `trail init` creates — these template seeds are treated as
+ *  RETIRED: `trail init` rewrote the same surfaces (MCP entries swapped,
+ *  helpers replaced by `.trail/hook.cjs`) and deliberately deleted the project
+ *  copies, so an absent-copy re-seed would resurrect pre-migration state. The
+ *  upgrade TEMPLATE TREE SYNC pass withholds them and decision-logs
+ *  `SEED_SKIP` (retired-surface) instead. Kept as a data export so the guard is
+ *  unit-pinnable; the list never shrinks silently (design R2.6: graft-era
+ *  tolerance stays while any project is pre-migration). */
+export const TRAIL_RETIRED_SEEDS = [
+  '.mcp.json',
+  '.claude/helpers/graft-hooks.cjs',
+  '.claude/helpers/graft-statusline.cjs',
+] as const;
+
+/** True when `rel` is a graft-era seed retired by the trail migration. */
+export function isTrailRetiredSeed(rel: string): boolean {
+  return (TRAIL_RETIRED_SEEDS as readonly string[]).includes(rel.replace(/\\/g, '/'));
+}
 
 /** The one file the SCHEMA_MERGE delivery policy claims (spec
  *  2026-10-31-workspace-schema-merge-delivery-design §3): docs/workspace-schema.json —

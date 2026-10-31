@@ -3,10 +3,10 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
-- **Version**: 1.6.1
+- **Version**: 1.6.2
 - **Owner**: pm
 - **Created**: 2026-07-31
-- **Last Updated**: 2026-10-26 (Version 1.6.0 → 1.6.1: citation-only correction in the SKILL.md provenance text — spec docs/designs/2026-10-26-project-review-remediation-design.md R4; no behavior change. Previous: 2026-10-08 Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
+- **Last Updated**: 2026-10-31 (Version 1.6.1 → 1.6.2: TEMPLATE TREE SYNC row documents the trail-migration tolerance rules — JSON_MERGE hook-entry path guard and the `.trail/`-marker SEED_SKIP (retired-surface) seed retirement — per design 2026-10-31-graft-trail-migration, U-20261031-009. Previous: 2026-10-26 Version 1.6.0 → 1.6.1: citation-only correction in the SKILL.md provenance text — spec docs/designs/2026-10-26-project-review-remediation-design.md R4; no behavior change. Previous: 2026-10-08 Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
 
 ## Description
 Upgrades an existing L2/L3 project to the current template version: syncs template improvements into a variant-based project's scripts, agents, skills, docs, and commands through the policy-driven TEMPLATE TREE SYNC engine (`scripts/upgrade-project.ts`, backed by `lib/upgrade-policy.ts`), with country-aware .env.sample delivery and conflict warnings for locally-modified files.

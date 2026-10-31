@@ -7486,8 +7486,8 @@
       "name": "adopt-project",
       "scope": "root",
       "capability": "adopt-project",
-      "content_hash": "e8104414d043d151",
-      "version": "1.1.0",
+      "content_hash": "e4a8ce9944bda5d3",
+      "version": "1.1.1",
       "mirrors": [
         "skills/adopt-project/SKILL.md",
         ".claude/skills/adopt-project/SKILL.md",
@@ -7579,8 +7579,8 @@
       "name": "create-variant",
       "scope": "root",
       "capability": "create-variant",
-      "content_hash": "27bda06a5cea4321",
-      "version": "1.4.2",
+      "content_hash": "778456881ddaeede",
+      "version": "1.4.3",
       "mirrors": [
         "skills/create-variant/SKILL.md",
         ".claude/skills/create-variant/SKILL.md",
@@ -7718,19 +7718,6 @@
         ".agents/skills/gateguard/SKILL.md",
         ".codex/skills/gateguard/SKILL.md",
         ".hermes/skills/gateguard/SKILL.md"
-      ]
-    },
-    {
-      "id": "skill:root/graft",
-      "type": "skill",
-      "layer": "L0",
-      "name": "graft",
-      "scope": "root",
-      "capability": "graft",
-      "content_hash": "efaae647fd9c7cb9",
-      "version": "1.0.0",
-      "mirrors": [
-        "skills/graft/SKILL.md"
       ]
     },
     {
@@ -8196,6 +8183,19 @@
       ]
     },
     {
+      "id": "skill:root/trail",
+      "type": "skill",
+      "layer": "L0",
+      "name": "trail",
+      "scope": "root",
+      "capability": "trail",
+      "content_hash": "b66e87ebb8635306",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/trail/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:root/translate",
       "type": "skill",
       "layer": "L0",
@@ -8258,8 +8258,8 @@
       "name": "upgrade-project",
       "scope": "root",
       "capability": "upgrade-project",
-      "content_hash": "88a42ca598e8f7b6",
-      "version": "1.6.1",
+      "content_hash": "8961b3065ea92e76",
+      "version": "1.6.2",
       "mirrors": [
         "skills/upgrade-project/SKILL.md",
         ".claude/skills/upgrade-project/SKILL.md",
@@ -9632,12 +9632,6 @@
       "type": "references",
       "from": "adr:0075",
       "to": "skill:co-safety/psm-moc",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "adr:0076",
-      "to": "skill:root/graft",
       "source": "prose"
     },
     {

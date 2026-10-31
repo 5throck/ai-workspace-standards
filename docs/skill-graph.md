@@ -203,12 +203,12 @@
 | `common/sync` | common | 1.8.0 | — | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
-| `root/adopt-project` | L0 | 1.1.0 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
+| `root/adopt-project` | L0 | 1.1.1 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.3.1 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-work/technical-writer | — | — | — | — |
 | `root/ci-triage` | L0 | 0.2.0 | — | — | — | — | — |
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
-| `root/create-variant` | L0 | 1.4.2 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
+| `root/create-variant` | L0 | 1.4.3 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
 | `root/decision-write-integrity` | L0 | 1.0.0 | — | — | root/meeting-facilitation | — | — |
 | `root/design-foundation` | L0 | 1.1.0 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
@@ -216,7 +216,6 @@
 | `root/explain-me` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/finishing-a-development-branch` | L0 | 1.0.1 | — | — | — | — | — |
 | `root/gateguard` | L0 | 1.0.2 | — | — | root/sync | — | — |
-| `root/graft` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/meeting-facilitation` | L0 | 1.4.4 | — | — | — | — | — |
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |
 | `root/model-migration` | L0 | 1.0.0 | — | — | — | — | — |
@@ -241,10 +240,11 @@
 | `root/team-builder` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/ticket-run` | L0 | 1.0.0 | — | — | root/sync | — | — |
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
+| `root/trail` | L0 | 1.1.0 | — | — | — | — | — |
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | — | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
-| `root/upgrade-project` | L0 | 1.6.1 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
+| `root/upgrade-project` | L0 | 1.6.2 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
 | `root/zod-contract-gate` | L0 | 1.0.2 | — | — | root/security-scan | — | — |
 
@@ -384,7 +384,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0073` | adr | — | root/upgrade-project | — |
 | `adr:0074` | adr | — | root/upgrade-project | — |
 | `adr:0075` | adr | — | co-safety/gmp-change-control, co-safety/gmp-deviation-capa, co-safety/gmp-qrm, co-safety/psm-loto, co-safety/psm-moc | — |
-| `adr:0076` | adr | — | root/graft | — |
+| `adr:0076` | adr | — | — | — |
 | `adr:0077` | adr | — | — | — |
 | `adr:0078` | adr | — | — | — |
 | `adr:0079` | adr | — | — | — |
@@ -804,10 +804,10 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Type | Count | Nodes |
 |------|-------|-------|
-| adr | 54 | (expected until docs `references` edges are mined) |
+| adr | 55 | (expected until docs `references` edges are mined) |
 | agent | 12 | co-abap/i18n-specialist, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
 | decision | 14 | (expected until docs `references` edges are mined) |
-| skill | 2 | common/gateguard, root/standup-synthesizer |
+| skill | 3 | common/gateguard, root/standup-synthesizer, root/trail |
 
 ## Skills Without `used_by` (G6)
 

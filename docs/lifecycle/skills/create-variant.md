@@ -38,7 +38,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.4.2
+- **Version**: 1.4.3
 - **Owner**: pm
-- **Last Updated**: 2026-09-21
+- **Last Updated**: 2026-10-31 (Version 1.4.2 → 1.4.3: graft/trail naming prose — surface checklist, managed-block note, and index-build step reworded to trail-era naming with graft-era alias notes per design 2026-10-31-graft-trail-migration, U-20261031-009; no workflow change)
 - **Last Reviewer**: pm
