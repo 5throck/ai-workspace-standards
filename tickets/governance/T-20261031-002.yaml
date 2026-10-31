@@ -13,12 +13,36 @@ title: >-
   relocation; (4) templates/common/scripts/lib/language-guard.ts comment says
   'context.md §3' vs repo copy 'CONSTITUTION.md §3' — align on next touch
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-31T01:40:36.452+09:00'
 history:
   - at: '2026-10-31T01:40:36.452+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-31T10:46:19.924+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T10:46:19.940+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T10:46:19.958+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T10:46:19.973+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered (E3, DEC-20261031-01 ruling 6), PR #1767 merged. (1) counts
+  convention: sync-commit subject file counts composed from the post-merge diff
+  going forward; landed commits not amended (memory log 2026-10-31). (2)
+  lifecycle footers: 8 records lifecycle-manager -> pm (ticket overcounted 9;
+  i18n-specialist + skill-graph-analyst were already correct; all 8 verified
+  against the pm-authored 2026-10-28 backfill rows). (3) CONSTITUTION.md 4.1:
+  ghost twin paths removed - prose now names only live files (README.md,
+  docs/README.md, root README_ko.md), with docs/user-guide.md /
+  docs/README_ko.md / docs/user-guide_ko.md marked dormant perimeter patterns
+  per validate-md-language.ts code truth. (4)
+  templates/common/scripts/lib/language-guard.ts citation context.md ->
+  CONSTITUTION.md, byte-identical copy verified (SHA-256).
 error: null

@@ -14,12 +14,33 @@ title: >-
   §2-5; scripts/co-newbiz/scheduler-core.ts:121-128; schedule-tick.ts:56-65;
   db/lib/secret-scrubber.ts. Step 2f 2026-10-30
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-30T02:12:50.106+09:00'
 history:
   - at: '2026-10-30T02:12:50.106+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-31T10:45:35.979+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T10:45:35.993+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T10:45:36.008+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T10:45:36.023+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in PR #1772 (merged): docs/patterns/README.md charter +
+  docs/patterns/scheduled-jobs-runtime-pattern.md v1.0.0 - the 7-mechanism
+  co-newbiz ADR-0189 runtime pattern (minute-tick dispatcher, DB-resident cron,
+  CAS fire-once, expired-lease takeover, heartbeat, detached run-job 0/1/124/125
+  exit contract, secret-scrubbed output), all file:line citations re-verified
+  incl. the db/lib/secret-scrubber.ts path correction. Promotion deferral
+  binding: no template/code promotion; triggers (second variant demand or P2+
+  stabilization) recorded in-doc. docs/README.md patterns row +
+  validate-doc-folder ALLOWED_DIRS extended per gate requirements.
 error: null
