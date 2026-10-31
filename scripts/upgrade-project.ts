@@ -1,5 +1,29 @@
 #!/usr/bin/env bun
-// @version 1.84.0
+// @version 1.85.0
+// v1.85.0 (2026-10-31, spec
+//          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md):
+//          SCHEMA_MERGE delivery policy for docs/workspace-schema.json — the
+//          co-price 0.22.1→0.25.0 / co-architect 0.23.0→0.25.0 upgrade halts.
+//          The TEMPLATE TREE SYNC pass gains a dedicated branch (modeled on
+//          JSON_MERGE) that merge-delivers the schema instead of the
+//          whole-content SYNC copy + conflict-skip path: template-owned blocks
+//          (platform_surfaces, routeAudit — absent from the project) and the
+//          metadata scalars ($schema/version/description) land verbatim via
+//          mergeWorkspaceSchemaJson (lib v1.32.0); project-owned blocks are
+//          preserved; shared blocks leaf-merge project-wins with arrays atomic
+//          (never unioned). The content-level evolvedDeliveryGuard CONFLICT
+//          (ERROR) is bypassed on this path by design — committed project
+//          evolution is exactly what the merge absorbs; the uncommitted-local-
+//          modifications CONFLICT (WARN) guard stays (pre-upgrade stash covers
+//          rollback). Every withheld template change (a shared leaf whose
+//          project value won) logs a TEMPLATE_DELTA decision row (WARN for
+//          scalar/array divergences, INFO otherwise) — the decision log owns
+//          visibility of what did not land, the upgrade stays green.
+//          --disposition adopt-template=docs/workspace-schema.json remains the
+//          wholesale-adopt escape hatch (ADOPT row + template bytes verbatim).
+//          Malformed JSON on either side hard-SKIPs with an explicit error.
+//          Dry-run parity is inherent: both sides are read from disk, nothing
+//          is written, and the MERGE verdict lists landed/preserved/withheld.
 // v1.84.0 (2026-10-29, spec
 //          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md,
 //          DEC-20261029-01 — PR1 of five): delivery bookkeeping engine, four
@@ -951,6 +975,7 @@ import {
   censusInstructionRegions,
   spanCarriesProjectAuthoredLines,
   mergeSettingsJson,
+  mergeWorkspaceSchemaJson,
   normalizeAgentTierFrontmatter,
   resolveClaim,
   resolveDisposition,
@@ -3947,6 +3972,12 @@ console.log('');
 //                add-if-missing only, never overwrite, never prune.
 //   JSON_MERGE — platform settings: deep merge, template wins conflicts, arrays unioned so
 //                project-only entries (e.g. permissions.allow grants) survive.
+//   SCHEMA_MERGE — docs/workspace-schema.json (spec 2026-10-31-workspace-schema-merge-
+//                delivery-design): merge-aware delivery via mergeWorkspaceSchemaJson —
+//                template-owned blocks + metadata scalars land verbatim, project-owned
+//                blocks preserved, shared blocks leaf-merge project-wins (arrays atomic);
+//                withheld template changes log TEMPLATE_DELTA rows; wholesale adoption via
+//                --disposition adopt-template=<glob>.
 console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) ---');
 {
   const variantTplDir = existsSync(templatesDir) ? templatesDir : null;
@@ -3989,6 +4020,73 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
         }
       }
       treeChanged++;
+      continue;
+    }
+
+    if (claim.policy === 'SCHEMA_MERGE') {
+      // Merge-aware delivery for docs/workspace-schema.json (spec
+      // 2026-10-31-workspace-schema-merge-delivery-design): the generic SYNC path here is
+      // whole-content, conflict-or-overwrite — it clobbered project-evolved designLint
+      // gate config (co-price's 131-entry allowlist + tokenSources) and the conflict skip
+      // blocked the 0.25.0 upgrades entirely. The merge absorbs committed project
+      // evolution, so the evolvedDeliveryGuard CONFLICT (ERROR) is bypassed on this path
+      // by design; the uncommitted-local-modifications CONFLICT (WARN) guard stays below.
+      if (!existsSync(dest)) {
+        // Same D2 tombstone guard as the JSON_MERGE seed path above.
+        if (tombstoneSkip(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS)) continue;
+        console.log(`  NEW    ${rel}`);
+        if (!dryRun) { mkdirSync(dirname(dest), { recursive: true }); copyFileSync(abs, dest); }
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'NEW', 'seeded (project copy absent)');
+        noteDelivered(rel);
+        console.log(`  ${dryTag}COPIED: ${rel}`);
+        treeChanged++;
+        continue;
+      }
+      // Escape hatch (design §4): --disposition adopt-template[=glob] takes the template
+      // file wholesale — the explicit, decision-logged clobber for the "template reshape
+      // should propagate to a project that never customized the block" case.
+      if (dispositionAdopts(rel)) {
+        console.log(`  ✅ DISPOSITION (adopt-template): ${rel} — schema wholesale-adopted from the template (SCHEMA_MERGE escape hatch; decision recorded; baseline refreshed at manifest write)`);
+        if (!dryRun) { copyFileSync(abs, dest); noteDelivered(rel); }
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'ADOPT', 'wholesale template adoption via explicit --disposition adopt-template (SCHEMA_MERGE escape hatch — the merge is bypassed; any project-only schema content is discarded)', priorBaselines[rel]);
+        treeChanged++;
+        continue;
+      }
+      try {
+        const result = mergeWorkspaceSchemaJson(dest, abs);
+        if (!result.changed) {
+          console.log(`  OK     ${rel}  (schema merge — in sync)`);
+          continue;
+        }
+        const withheld = result.templateDeltas;
+        const landedList = result.landed.join(', ') || '—';
+        const preservedList = result.preserved.join(', ') || '—';
+        console.log(`  MERGE  ${rel}  (landed: ${landedList}; preserved: ${preservedList}; withheld template changes: ${withheld.length})`);
+        for (const delta of withheld) {
+          console.log(`      TEMPLATE_DELTA ${delta.path}  project ${delta.project} vs template ${delta.template}`);
+        }
+        // House CONFLICT (WARN) guard: uncommitted local modifications survive only via the
+        // pre-upgrade stash — the merge applies over them, visibly.
+        if (isLocallyModified(dest)) {
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'CONFLICT', 'uncommitted local modifications — schema merge applied over them (pre-upgrade stash covers rollback)', priorBaselines[rel], 'WARN');
+        }
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', `schema merge — landed: ${landedList}; preserved: ${preservedList}; template changes withheld (project-wins): ${withheld.length}`);
+        if (!dryRun) writeFileSync(dest, result.merged, 'utf8');
+        noteDelivered(rel);
+        // One TEMPLATE_DELTA row per withheld template change (design §4): the decision
+        // log owns visibility of what did not land; the upgrade stays green.
+        for (const delta of withheld) {
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'TEMPLATE_DELTA', `template change withheld (project-wins): ${delta.path} — project ${delta.project} vs template ${delta.template}`, undefined, delta.severity);
+        }
+        console.log(`  ${dryTag}WROTE: ${rel}`);
+        treeChanged++;
+      } catch (err) {
+        // Hard skip (design §4): malformed JSON on either side is an explicit, logged
+        // skip — never a silent fallback to the whole-content copy.
+        console.log(`  ⚠️  SKIP   ${rel}  (schema merge failed: ${(err as Error).message})`);
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SKIP', `schema merge hard-skip (malformed JSON or non-object input; no fallback): ${(err as Error).message}`);
+        continue;
+      }
       continue;
     }
 
