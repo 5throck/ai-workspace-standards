@@ -1,7 +1,7 @@
 # upgrade-decision-log test budget — split, dedupe, and the re-inflation guard (T-20261030-002)
 
-- **Status**: Approved (2026-10-31, user gate) — pending implementation
-- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when the implementation PR lands and registers at its own /sync.
+- **Status**: Approved (2026-10-31, user gate) — stage 1 of 2 delivered (PR 1: pure-helper split, per-shape fixture dedupe, re-inflation guard; budget held at 600 s); stage 2 (600 s → 300 s) pending its evidence gate.
+- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when stage 2 lands and registers at its own /sync (stage 1 alone is partial delivery by this design's own §4 sequencing, so the registry stays `approved` until then).
 - **Date**: 2026-10-31
 - **Owner**: automation-engineer (PM Gateway dispatch, after user approval)
 - **Ticket**: T-20261030-002 (`kind: manual`, priority low) — test-suite
