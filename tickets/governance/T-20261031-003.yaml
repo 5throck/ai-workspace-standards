@@ -22,12 +22,34 @@ title: >-
   co-newbiz #779 records); co-architect/co-price delivery-deferred (schema/CI
   conflicts, prior tickets). 0.24.0+0.25.0 ride the next cycle after this lands
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-10-31T02:59:18.392+09:00'
 history:
   - at: '2026-10-31T02:59:18.392+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-10-31T08:56:03.727+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T08:56:03.743+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T08:56:03.759+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T08:56:03.774+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered: scripts/changelog-normalize.ts v1.0.0 (L0+L1) + dev-sync v1.36.0
+  fail-then-heal loop in the changelog gate (detector findings -> normalize
+  write-mode -> re-stage -> detector-zero assert). PR #1768 MERGED (CI 8/8 green
+  after rebase onto 69a339728). Tests: 18/18 new suite, full test:unit green,
+  typecheck 0 errors. Golden-validated against the live co-news legacy shape;
+  idempotent (second run byte-untouched no-op). Spec
+  2026-10-31-changelog-normalize-design flips to implemented in the next PR.
+  Live healing of the 6 reverted projects
+  (co-game/co-hr/co-learning/co-news/co-deck/co-newbiz) validates at the next
+  daily resync wave per design section 8.
 error: null
