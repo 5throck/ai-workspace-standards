@@ -1,4 +1,14 @@
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-10-31, spec docs/designs/2026-10-31-template-security-hardening-design.md
+//           R2.1, U-20261031-001): input handling hardening — (1) touched skill names must
+//           match SKILL_NAME_RE (^[A-Za-z0-9][A-Za-z0-9._-]*$); non-conforming names are
+//           WARN-skipped and never reach any downstream check; (2) the metadata.triggers
+//           `bun -e` payload is a constant (TRIGGERS_READ_PAYLOAD) — the SKILL.md path now
+//           arrives as a positional argv element instead of being interpolated into the JS
+//           string (a `'` in a name previously broke out of the JS literal and executed);
+//           (3) manifestVersion() regex-escapes the name (defense in depth). CLI surface
+//           and behavior for conforming names unchanged; main flow wrapped in
+//           import.meta.main so the helpers are importable for tests.
 // v1.2.0 (2026-10-08, skill-graph v2 E3, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md):
 //           parseSkillsUsed/SkillEvidence/USAGES/OUTCOMES extracted verbatim to scripts/lib/skills-used.ts
 //           (shared with generate-skill-graph.ts); this script imports them. No behaviour change.
@@ -38,7 +48,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { parseSkillsUsed, type SkillEvidence } from './lib/skills-used.ts';
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const GREEN = '\x1b[32m';
 const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
@@ -134,6 +144,23 @@ function deriveSymptoms(evidence: SkillEvidence[]): Map<string, ReviewRecord> {
 }
 
 // ── 3. Structural checks on skills modified this session ────────────────────
+
+// U-20261031-001 (design R2.1): touched skill names come from `git status`
+// output — a hostile working-tree directory name (quotes, `$()`, whitespace)
+// must never reach a command string or regex. The allowlist accepts exactly
+// what legitimate skill directory names in this workspace look like:
+// kebab-case ASCII (dots, underscores, dashes allowed after the first char).
+// A failing name is WARN-skipped and excluded from every downstream check.
+export const SKILL_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+// U-20261031-001 (design R2.1): the JavaScript executed by `bun -e` is a
+// CONSTANT — no part of a skill name is ever interpolated into it. The
+// SKILL.md path is passed as a positional argument and read from
+// process.argv[1] inside the payload (Bun `$` passes the interpolated chunk
+// as one shell-escaped argv element).
+export const TRIGGERS_READ_PAYLOAD =
+    "const m=require('js-yaml');const f=require('fs');const p=process.argv[1];const t=f.readFileSync(p,'utf8');const fm=t.split('---')[1];const y=m.load(fm);console.log(JSON.stringify((y.metadata&&y.metadata.triggers)||[]))";
+
 async function touchedSkills(): Promise<string[]> {
     const res = await $`git status --porcelain`.quiet().nothrow();
     const names = new Set<string>();
@@ -152,16 +179,26 @@ function readFrontmatterField(skill: string, field: string): string | null {
     return m ? m[1].trim() : null;
 }
 
-function manifestVersion(skill: string): string | null {
+export function manifestVersion(skill: string): string | null {
     const p = path.join(import.meta.dir, '..', 'docs', 'VERSION_MANIFEST.md');
     if (!fs.existsSync(p)) return null;
-    const m = new RegExp(`^\\|\\s*${skill}\\s*\\|\\s*([0-9.]+)\\s*\\|`, 'm').exec(fs.readFileSync(p, 'utf-8'));
+    // U-20261031-001 (design R2.1, defense in depth): the name is allowlisted
+    // before this point, but escape it anyway so a future caller cannot turn
+    // this into a regex injection.
+    const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = new RegExp(`^\\|\\s*${escaped}\\s*\\|\\s*([0-9.]+)\\s*\\|`, 'm').exec(fs.readFileSync(p, 'utf-8'));
     return m ? m[1] : null;
 }
 
-async function runStructuralChecks(skills: string[]): Promise<string[]> {
+export async function runStructuralChecks(skills: string[]): Promise<string[]> {
     const findings: string[] = [];
     for (const skill of skills) {
+        // U-20261031-001 (design R2.1): strict name allowlist — reject before
+        // any downstream use (fs paths, `bun -e`, new RegExp, subprocess args).
+        if (!SKILL_NAME_RE.test(skill)) {
+            findings.push(`WARN ${skill}: skipped — skill directory name contains characters outside [A-Za-z0-9._-]`);
+            continue;
+        }
         const fmVersion = readFrontmatterField(skill, 'version');
         const manifestV = manifestVersion(skill);
         if (fmVersion && manifestV && fmVersion !== manifestV) {
@@ -177,7 +214,9 @@ async function runStructuralChecks(skills: string[]): Promise<string[]> {
             findings.push(`WARN ${skill}: no governance record at docs/lifecycle/skills/${skill}.md`);
         }
         const description = (readFrontmatterField(skill, 'description') ?? '').toLowerCase();
-        const triggers = await $`bun -e "const m=require('js-yaml');const f=require('fs');const t=f.readFileSync('skills/${skill}/SKILL.md','utf8');const fm=t.split('---')[1];const y=m.load(fm);console.log(JSON.stringify((y.metadata&&y.metadata.triggers)||[]))"`
+        // U-20261031-001 (design R2.1): payload is the constant TRIGGERS_READ_PAYLOAD;
+        // the skill's SKILL.md path travels as one shell-escaped argv element.
+        const triggers = await $`bun -e "${TRIGGERS_READ_PAYLOAD}" "${path.join('skills', skill, 'SKILL.md')}"`
             .quiet().nothrow();
         try {
             const triggersArr: string[] = JSON.parse(triggers.stdout.toString().trim() || '[]');
@@ -259,60 +298,64 @@ function renderMarkdown(records: Map<string, ReviewRecord>, evidence: SkillEvide
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-const memoryFile = path.join(import.meta.dir, '..', 'memory', `${date}.md`);
-let evidence: SkillEvidence[] = [];
-if (fs.existsSync(memoryFile)) {
-    evidence = parseSkillsUsed(fs.readFileSync(memoryFile, 'utf-8'));
-}
+// v1.3.0: CLI dispatch is guarded by import.meta.main so the structural-check
+// helpers stay importable for unit tests (same pattern as lifecycle-sync-audit).
+if (import.meta.main) {
+    const memoryFile = path.join(import.meta.dir, '..', 'memory', `${date}.md`);
+    let evidence: SkillEvidence[] = [];
+    if (fs.existsSync(memoryFile)) {
+        evidence = parseSkillsUsed(fs.readFileSync(memoryFile, 'utf-8'));
+    }
 
-const records = deriveSymptoms(evidence);
-const touched = await touchedSkills();
-const findings = touched.length > 0 ? await runStructuralChecks(touched) : [];
+    const records = deriveSymptoms(evidence);
+    const touched = await touchedSkills();
+    const findings = touched.length > 0 ? await runStructuralChecks(touched) : [];
 
-if (!JSON_MODE) {
-    console.log(`${CYAN}📋 Skill Session Review (${date})${RESET}`);
-    console.log(`   Evidence entries: ${evidence.length}, review records: ${records.size}, touched skills: ${touched.length}`);
-    for (const e of evidence) {
-        for (const w of e.schemaWarnings) {
-            console.log(`${YELLOW}   ⚠️  ${e.skill}: ${w}${RESET}`);
+    if (!JSON_MODE) {
+        console.log(`${CYAN}📋 Skill Session Review (${date})${RESET}`);
+        console.log(`   Evidence entries: ${evidence.length}, review records: ${records.size}, touched skills: ${touched.length}`);
+        for (const e of evidence) {
+            for (const w of e.schemaWarnings) {
+                console.log(`${YELLOW}   ⚠️  ${e.skill}: ${w}${RESET}`);
+            }
+        }
+        for (const f of findings) console.log(`${YELLOW}   ⚠️  ${f}${RESET}`);
+        if (records.size === 0) {
+            console.log(`${GREEN}   ✓ No symptoms to record (no Skills Used evidence or no classifiable observations)${RESET}`);
         }
     }
-    for (const f of findings) console.log(`${YELLOW}   ⚠️  ${f}${RESET}`);
-    if (records.size === 0) {
-        console.log(`${GREEN}   ✓ No symptoms to record (no Skills Used evidence or no classifiable observations)${RESET}`);
-    }
-}
 
-const markdown = renderMarkdown(records, evidence, findings);
-if (!DRY_RUN) {
-    const reviewDir = path.join(import.meta.dir, '..', 'memory', 'skill-review');
-    if (!fs.existsSync(reviewDir)) fs.mkdirSync(reviewDir, { recursive: true });
-    const reviewFile = path.join(reviewDir, `${date}.md`);
-    // Merge: if the file exists, replace only the auto-generated sections —
-    // manually triaged diagnosis/candidate content in existing entries persists
-    // via append-with-separator (entries are keyed by heading, dedup at triage).
-    const separator = fs.existsSync(reviewFile) ? '\n---\n\n' : '';
-    // A zero-observation run appends at most one block per day: repeat runs with
-    // no records must not stack identical blocks (2026-10-08 accumulated 20).
-    const dayHeading = `# Skill Session Review — ${date}`;
-    const alreadyRecordedToday = fs.existsSync(reviewFile)
-        && fs.readFileSync(reviewFile, 'utf8').includes(dayHeading);
-    if (records.size === 0 && alreadyRecordedToday) {
-        if (!JSON_MODE) console.log(`${GREEN}✓ Zero-observation run skipped — a block is already present for ${date}${RESET}`);
-    } else {
-        fs.appendFileSync(reviewFile, separator + markdown, 'utf8');
-        if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
+    const markdown = renderMarkdown(records, evidence, findings);
+    if (!DRY_RUN) {
+        const reviewDir = path.join(import.meta.dir, '..', 'memory', 'skill-review');
+        if (!fs.existsSync(reviewDir)) fs.mkdirSync(reviewDir, { recursive: true });
+        const reviewFile = path.join(reviewDir, `${date}.md`);
+        // Merge: if the file exists, replace only the auto-generated sections —
+        // manually triaged diagnosis/candidate content in existing entries persists
+        // via append-with-separator (entries are keyed by heading, dedup at triage).
+        const separator = fs.existsSync(reviewFile) ? '\n---\n\n' : '';
+        // A zero-observation run appends at most one block per day: repeat runs with
+        // no records must not stack identical blocks (2026-10-08 accumulated 20).
+        const dayHeading = `# Skill Session Review — ${date}`;
+        const alreadyRecordedToday = fs.existsSync(reviewFile)
+            && fs.readFileSync(reviewFile, 'utf8').includes(dayHeading);
+        if (records.size === 0 && alreadyRecordedToday) {
+            if (!JSON_MODE) console.log(`${GREEN}✓ Zero-observation run skipped — a block is already present for ${date}${RESET}`);
+        } else {
+            fs.appendFileSync(reviewFile, separator + markdown, 'utf8');
+            if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
+        }
     }
-}
 
-if (JSON_MODE) {
-    console.log(JSON.stringify({
-        date,
-        evidence_entries: evidence.length,
-        schema_warnings: evidence.flatMap(e => e.schemaWarnings.map(w => ({ skill: e.skill, warning: w }))),
-        records: [...records.values()],
-        touched_skills: touched,
-        structural_findings: findings,
-        dry_run: DRY_RUN,
-    }, null, 2));
+    if (JSON_MODE) {
+        console.log(JSON.stringify({
+            date,
+            evidence_entries: evidence.length,
+            schema_warnings: evidence.flatMap(e => e.schemaWarnings.map(w => ({ skill: e.skill, warning: w }))),
+            records: [...records.values()],
+            touched_skills: touched,
+            structural_findings: findings,
+            dry_run: DRY_RUN,
+        }, null, 2));
+    }
 }

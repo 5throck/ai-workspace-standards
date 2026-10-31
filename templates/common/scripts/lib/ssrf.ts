@@ -25,7 +25,14 @@
  * instead (verified empirically: fetch()'s `dns` init option is silently
  * ignored, while http(s).request()'s `lookup` option is honored).
  *
- * @version 1.1.0
+ * @version 1.1.1
+ * v1.1.1 (2026-10-31, spec docs/designs/2026-10-31-template-security-hardening-design.md
+ *          R2.3, U-20261031-003): BLOCKED_CIDRS corrections — current-network ends at
+ *          0x00ffffffn (0.0.0.0/8, was 0x0fffffffn) and private-10 ends at 0x0affffffn
+ *          (10.0.0.0/8, was 0x0fffffffn); the old ends over-blocked public 1.x–15.x
+ *          addresses (8.8.8.8 was refused as "current-network"). Strictly widens
+ *          availability for public IPs; private/loopback/metadata coverage unchanged.
+ *          isBlockedIp exported for pin tests.
  * @security Production hardening — TOCTOU DNS rebinding mitigation
  */
 
@@ -44,9 +51,14 @@ const BLOCKED_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string 
   // Loopback (127.0.0.0/8)
   { start: 0x7f000000n, end: 0x7fffffffn, reason: 'loopback' },
   // Current network (0.0.0.0/8)
-  { start: 0x00000000n, end: 0x0fffffffn, reason: 'current-network' },
+  // U-20261031-003: end corrected 0x0fffffffn → 0x00ffffffn — the old value
+  // spanned 0.0.0.0–15.255.255.255, blocking public 1.x–15.x addresses
+  // (e.g. 8.8.8.8) as fail-open "availability" collateral.
+  { start: 0x00000000n, end: 0x00ffffffn, reason: 'current-network' },
   // Private (10.0.0.0/8)
-  { start: 0x0a000000n, end: 0x0fffffffn, reason: 'private-10' },
+  // U-20261031-003: end corrected 0x0fffffffn → 0x0affffffn — the old value
+  // spanned 10.0.0.0–15.255.255.255, blocking public 11.x–15.x addresses.
+  { start: 0x0a000000n, end: 0x0affffffn, reason: 'private-10' },
   // Private (172.16.0.0/12)
   { start: 0xac100000n, end: 0xac1fffffn, reason: 'private-172' },
   // Private (192.168.0.0/16)
@@ -265,7 +277,7 @@ export async function safeFetch(targetUrl: string, init: { signal?: AbortSignal 
  * Check if an IP address falls within any blocked CIDR range.
  * @returns The reason string if blocked, or null if allowed.
  */
-function isBlockedIp(ip: string): string | null {
+export function isBlockedIp(ip: string): string | null {
   let ipNum: bigint;
 
   if (net.isIPv4(ip)) {
