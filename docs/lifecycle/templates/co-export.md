@@ -31,4 +31,4 @@
 - **Current Phase**: beta
 - **Owner**: pm
 - **Last Updated**: 2026-10-06
-- **Last Reviewer**: lifecycle-manager
+- **Last Reviewer**: pm
