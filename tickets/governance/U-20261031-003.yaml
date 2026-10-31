@@ -1,0 +1,69 @@
+schemaVersion: 1
+id: U-20261031-003
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:32.017+09:00'
+history:
+  - at: '2026-10-31T10:24:32.017+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T17:03:27.542+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T18:28:45.323+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.323+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    scripts/lib/ssrf.ts BLOCKED_CIDRS table has two wrong range end values: the
+    current-network entry spans 0x00000000n-0x0fffffffn (0.0.0.0-15.255.255.255)
+    where it should end at 0x00ffffff (0.0.0.0/8), and the private-10 entry
+    spans 0x0a000000n-0x0fffffffn where it should end at 0x0affffff
+    (10.0.0.0/8). As a result safeFetch refuses public IP ranges
+    1.0.0.0-15.255.255.255 (including 8.8.8.8 and 13.x Azure). Fail-closed
+    availability bug, not exploitable. Template-managed file, affects all
+    variant instances.
+  affected_paths:
+    - scripts/lib/ssrf.ts
+  identity_source: cwd
+  repro: >-
+    1. Call safeFetch('http://8.8.8.8/') (or any host resolving into
+    1.0.0.0-15.255.255.255). 2. isBlockedIp matches the current-network entry
+    spanning 0x00000000n-0x0fffffffn and rejects the request. 3. Correct
+    behavior: only 0.0.0.0/8 (end 0x00ffffff) is reserved; 1.x-15.x are public.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/lib/ssrf.ts=false
+  dedupe_key: 2f8091279adad1020ef7a2886998cbe17f00663876e351a8a4e9fa84c41395b4
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:32.017+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

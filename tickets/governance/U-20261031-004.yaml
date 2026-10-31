@@ -1,0 +1,59 @@
+schemaVersion: 1
+id: U-20261031-004
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:32.029+09:00'
+history:
+  - at: '2026-10-31T10:24:32.029+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-31T18:28:45.339+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.339+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/.claude/settings.json allow list ships WebFetch(*) with no
+    domain restriction. Every variant project instance inherits an unrestricted
+    fetch allow: any instruction injected via repo content or fetched pages can
+    POST/GET arbitrary URLs (egress of repo content, ingestion of
+    attacker-controlled instructions) without a permission prompt. Fix
+    direction: enumerate the domains the projects actually reference (docs
+    hosts, github.com, raw.githubusercontent.com) instead of the wildcard.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .claude/settings.json=false
+  dedupe_key: 32feb1daf0ceb6e5b4775297fb54ebdb7d0d7b8debfc1b8d95f07ef72abeb8d7
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:32.029+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

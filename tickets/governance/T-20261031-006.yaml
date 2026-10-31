@@ -1,0 +1,55 @@
+schemaVersion: 1
+id: T-20261031-006
+kind: manual
+title: >-
+  [Governance] zai reasoning-level policy change: declare reasoning level HIGH
+  explicitly for zai models (GLM-5.3 / GLM-5.3-Flash) in dispatch guidance,
+  replacing the current rely-on-platform-default-max posture. Verified
+  2026-10-31: high is a valid level on the host platform contract (ListModels -
+  every zai plan row supports low/high/max, default max, for both GLM-5.3 and
+  GLM-5.3-Flash). Current state: no machine gate reads reasoning levels; the
+  posture lives only in prose stating low/high/max (default max) - AGENTS.md
+  section 3.6 note, docs/constitution/05-multi-agent-architecture.md,
+  docs/governance/agents/execution-plan-templates.md. Scope: L0 = those 3 files.
+  L1/L2 = 16 template files (14 variant AGENTS.md + templates/common/AGENTS.md +
+  templates/common/docs/governance/agents/execution-plan-templates.md,
+  COMMON-AGENTS propagated). L3 = 33 files across 16 delivered Projects/co-*
+  (AGENTS.md + docs/governance/agents/execution-plan-templates.md copies) -
+  converge via upgrade visits per the TIER NORMALIZED precedent, never
+  hand-edit. Design-gate decisions needed: (a) whether high applies uniformly to
+  high/medium/low tiers or per-tier levels; (b) whether to add machine
+  enforcement (e.g. a validate arm or dispatch-gate check) or keep advisory
+  prose; (c) session-hosted PM reasoning level remains owner-selected - floor
+  semantics (tier_semantics: floor) unaffected. Historical records
+  (CHANGELOG.md, docs/designs/2026-10-23-zai-tier-floor-support-design.md,
+  docs/decisions/DEC-20261023-01.md) carry the old phrase - do not retro-edit.
+  Gates: bun scripts/validate-templates.ts (COMMON-AGENTS parity), repo grep for
+  the updated phrase. Related: T-20261031-005 (GPT-6.x registry rebase) touches
+  the same section 3.6 note surface - consider one shared design cycle.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:29:40.232+09:00'
+history:
+  - at: '2026-10-31T10:29:40.232+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T22:13:47.832+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T22:13:47.847+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T22:13:47.862+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T22:13:47.878+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in registry/platform vocabulary batch (design
+  2026-10-31-registry-platform-vocabulary-design, PR #1777). L3 convergence (14
+  variants + 16 delivered projects) proceeds via standing upgrade visits - never
+  hand-edit; follow-up cleanup ticket for MM-01 gpt-5.6 alternation retirement
+  post-convergence noted in PR body.
+error: null

@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: U-20261031-007
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:43.949+09:00'
+history:
+  - at: '2026-10-31T10:24:43.949+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-31T18:28:45.388+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.388+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/.claude/settings.json allow list ships Bash(npx graft:*)
+    and Bash(node dist/cli.js:*). npx graft:* resolves the graft package
+    remotely at run time, so a registry compromise or typosquat resolution
+    change executes unprompted code with user privileges (supply chain, ATT&CK
+    T1195.002). node dist/cli.js:* auto-runs whatever is currently built in
+    dist/, so a tampered build is silently executed. Fix direction: install
+    graft as a pinned devDependency and allow its local binary subcommands; drop
+    the npx-mediated entry; scope dist execution to the specific subcommands
+    actually used.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .claude/settings.json=false
+  dedupe_key: 2a837b05d5531d274c6acfb463ef3a431c4dfa2c467f5b20deeae4a090821384
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:43.949+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

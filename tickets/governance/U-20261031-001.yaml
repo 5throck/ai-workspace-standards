@@ -1,0 +1,77 @@
+schemaVersion: 1
+id: U-20261031-001
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:31.986+09:00'
+history:
+  - at: '2026-10-31T10:24:31.986+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T17:03:27.523+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T18:28:45.289+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.289+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Skill-directory names are embedded unsanitized into a bun -e JavaScript
+    payload in scripts/skill-session-review.ts (line ~180): const triggers =
+    await $`bun -e "const
+    m=require('js-yaml');...readFileSync('skills/${skill}/SKILL.md','utf8')..."`.
+    The skill value comes from parsing git status --porcelain output
+    (touchedSkills(), lines ~137-146) where the segment regex [^/]+ accepts
+    quotes and $() sequences, so a maliciously-named working-tree directory
+    under skills/ breaks out of the string literal and executes arbitrary
+    JavaScript during /sync. Secondary issue at line ~158: new
+    RegExp(`...${skill}...`) is regex-injection from the same source. This
+    affects every variant project instance since the file is template-managed.
+  affected_paths:
+    - scripts/skill-session-review.ts
+  identity_source: cwd
+  repro: >-
+    1. Create a working-tree directory
+    skills/x'-require('node:child_process').execSync('id >
+    /tmp/pwned');'\/SKILL.md (regex
+    ^(?:skills|\.agents\/skills)\/([^/]+)\/SKILL\.md$ admits quotes and
+    metacharacters via [^/]+). 2. Run bun scripts/skill-session-review.ts
+    (invoked from scripts/dev-sync.ts during /sync). 3. The directory name is
+    interpolated into the bun -e JavaScript payload and executes on the
+    developer workstation with full local privileges.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - first_request_from_project
+    - info:in_last_delivery scripts/skill-session-review.ts=false
+  dedupe_key: 3d5c75a4b3915be1b731ad8ed34f228ea2af311fdc483a807c2a6a542e8968d4
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:31.986+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

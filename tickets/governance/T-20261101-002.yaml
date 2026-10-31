@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261101-002
+kind: manual
+title: >-
+  CODEX.md + HERMES.md still carry graft-era managed blocks after the L0 trail
+  migration (design 2026-10-31-graft-trail-migration-design R2.5 follow-up): the
+  trail init rewrote AGENTS.md/CLAUDE.md/GEMINI.md blocks but the vendor flip
+  for CODEX/HERMES surfaces awaits its own pass — flip the two files' graft
+  blocks to trail markers (or document the sanctioned graft-alias state per the
+  D2 design), reconcile templates/common copies via governance-l1, and verify
+  the transform-parity gate (PR #1782) stays green. Evidence: PR #1783 report
+  ('CODEX.md/HERMES.md deliberately retain graft blocks — design R2.5 follow-up
+  ticket')
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-01T01:16:48.187+09:00'
+history:
+  - at: '2026-11-01T01:16:48.187+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
