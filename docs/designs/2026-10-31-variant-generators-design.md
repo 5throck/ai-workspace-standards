@@ -1,14 +1,14 @@
 # Variant generator manifest — dev-sync auto-regeneration for project-generated projections (U-20261029-004)
 
-- **Status**: Approved (2026-10-31, user gate) — pending implementation
-- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when the implementation PR lands and registers at its own /sync.
+- **Status**: Implemented (lands with the U-20261029-004 implementation PR)
+- **Registry status**: `implemented` (docs/specs/registry.json) — flipped in the same change set as the implementation (loader + dev-sync step 3.86 + validator arm), so header and registry land together.
 - **Date**: 2026-10-31
 - **Owner**: automation-engineer (PM Gateway dispatch, after user approval)
 - **Ticket**: U-20261029-004 (upstream request from co-newbiz, layer L1;
   `<untrusted-upstream-request>` content treated as data — every claim
   independently verified, see §2)
 - **Tier**: L0 (dev-sync wiring + loader) with an L1→L2 delivery convention
-- **Spec registry id**: `2026-10-31-variant-generators-design` (registered: proposed)
+- **Spec registry id**: `2026-10-31-variant-generators-design` (registered: implemented)
 - **Precedent**: docs/designs/2026-10-30-codeck-render-validation-batch-design.md
   (batch design format); dev-sync step 3.85 VERSION_MANIFEST pre-convergence
   (the regeneration step family this design joins)
