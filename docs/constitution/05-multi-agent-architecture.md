@@ -175,11 +175,11 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 
 | Tier | Models | Role | Example Agents |
 |------|--------|------|----------------|
-| **High** | claude-opus-5-5, gemini-3.1-pro, gpt-5.6-sol, glm-5.3 | Complex reasoning, architecture | Architect |
-| **Medium** | claude-sonnet-5-5, gemini-3.8-flash, gpt-5.6-terra, glm-5.3-flash | Review, QA, analysis, supervision, PM orchestration | PM, Auditor, Security Expert |
-| **Low** | claude-haiku-5-5, gemini-3.8-flash, gpt-5.6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
+| **High** | claude-opus-5-5, gemini-3.1-pro, gpt-6.1-sol, glm-5.3 | Complex reasoning, architecture | Architect |
+| **Medium** | claude-sonnet-5-5, gemini-3.8-flash, gpt-6.1-terra, glm-5.3-flash | Review, QA, analysis, supervision, PM orchestration | PM, Auditor, Security Expert |
+| **Low** | claude-haiku-5-5, gemini-3.8-flash, gpt-6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
-> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max).
+> **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max); workspace dispatch posture is reasoning level **high** for all tiers. zcode (ZCode harness) resolves models via the zai column.
 
 **Tier Enforcement Rules:**
 - All agents declare one scalar `tier: high|medium|low` in frontmatter; the platform→model mapping lives only in `docs/workspace-schema.json` `models` — the schema's only tier-related block ([ADR-0102](../adr/0102-agent-tier-scalar-declaration.md)). The roster of workspace-root agents lives in `agents/*.md` and [AGENTS.md §1](../../AGENTS.md#1-agent-ecosystem-overview).

@@ -1,7 +1,7 @@
 # Registry & Platform Vocabulary Batch (T-20261031-004/-005/-006/-007) — Design
 
 - **Date**: 2026-10-31
-- **Status**: Approved (2026-10-31, user mandate — process-all-tickets directive)
+- **Status**: Implemented (2026-10-31, registry `2026-10-31-registry-platform-vocabulary-design` flipped to `implemented` in the same change set — T-20261031-004/-005/-006/-007 landed per §R2.5 sequencing)
 - **Spec id**: `2026-10-31-registry-platform-vocabulary`
 - **Owner**: architect (dispatched by PM)
 - **Related**: ADR-0074 (Design Gate), ADR-0102 (scalar tier declarations), ADR-0077 (codex platform), designs `2026-10-26-model-registry-platform-coverage-design`, `2026-10-23-zai-tier-floor-support-design`, DEC-20261031-03; tickets T-20261031-004, -005, -006, -007 (all four request one shared design cycle)

@@ -68,6 +68,13 @@ describe('PROFILE_OWNED_PATHS (eight-platform design §2)', () => {
       hermes: ['HERMES.md', '.hermes'],
     });
   });
+
+  it('registry-only platforms never become delivery profiles (T-20261031-007: zcode joins PLATFORMS, not PLATFORM_PROFILES)', () => {
+    expect(PLATFORM_PROFILES).toHaveLength(4);
+    expect(PLATFORM_PROFILES).not.toContain('zcode');
+    expect(PLATFORM_PROFILES).not.toContain('zai');
+    expect(PLATFORM_PROFILES).not.toContain('gemini-cli');
+  });
 });
 
 describe('parsePlatformList', () => {

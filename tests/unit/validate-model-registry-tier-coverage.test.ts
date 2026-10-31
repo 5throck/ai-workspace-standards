@@ -1,6 +1,16 @@
 /**
- * validate-model-registry.ts v2.1.0 tier-coverage tests
- * (ADR-0102 §5 post-soak flip / T-20261027-003, design §8.3 step 11)
+ * validate-model-registry.ts tier-coverage tests
+ * (ADR-0102 §5 post-soak flip / T-20261027-003, design §8.3 step 11;
+ *  recursive arm T-20261031-004 — spec
+ *  docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.1)
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-10-31, T-20261031-004/-005/-007): the MODELS fixture rebases
+ * codex to the GPT-6.x ids and gains the zcode row (8 platforms, mirroring
+ * docs/workspace-schema.json 1.8.0); the recursive-walk fixtures pin the
+ * v2.3.0 delivered-side scan — nested legacy map-form blocks FAIL with kind
+ * `legacy-block` at any depth ≤ 6, nested scalar files pass, README files are
+ * excluded at every level, and the depth cap + `_legacy`/hidden-dir skips hold.
  *
  * Covers the tier-coverage classification and the full validation run
  * against /tmp fixtures so no tracked file is touched: scalar valid/invalid,
@@ -21,7 +31,7 @@
  */
 
 import { describe, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -29,20 +39,22 @@ import {
   extractFrontmatter,
   printReport,
   runModelRegistryValidation,
+  walkAgentTree,
   type ModelRegistryReport,
 } from '../../scripts/validate-model-registry.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
 
-/** The real registry models block (7 platforms) — copied into every fixture. */
+/** The real registry models block (8 platforms) — copied into every fixture. */
 const MODELS = {
   claude: { high: 'claude-opus-5-5', medium: 'claude-sonnet-5-5', low: 'claude-haiku-5-5' },
   gemini: { high: 'gemini-3.1-pro', medium: 'gemini-3.8-flash', low: 'gemini-3.8-flash' },
   antigravity: { high: 'gemini-3.1-pro', medium: 'gemini-3.8-flash', low: 'gemini-3.8-flash' },
   'gemini-cli': { high: 'gemini-3.1-pro', medium: 'gemini-3.8-flash', low: 'gemini-3.8-flash' },
-  codex: { high: 'gpt-5.6-sol', medium: 'gpt-5.6-terra', low: 'gpt-5.6-luna' },
+  codex: { high: 'gpt-6.1-sol', medium: 'gpt-6.1-terra', low: 'gpt-6-luna' },
   hermes: { high: 'claude-opus-5-5', medium: 'claude-sonnet-5-5', low: 'claude-haiku-5-5' },
   zai: { high: 'glm-5.3', medium: 'glm-5.3-flash', low: 'glm-5.3-flash' },
+  zcode: { high: 'glm-5.3', medium: 'glm-5.3-flash', low: 'glm-5.3-flash' },
 };
 const KNOWN_PLATFORMS = Object.keys(MODELS);
 
@@ -273,6 +285,102 @@ describe('runModelRegistryValidation v2.1.0 severity matrix (post-soak flip)', (
       const report = runModelRegistryValidation(root);
       expect(report.agentFilesChecked).toBe(1);
       expect(report.coverageFails).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+// ── Recursive arm (v2.3.0, T-20261031-004): nested trees are scanned ─────────
+
+/** Build a fixture root from a map of agents/-relative paths → file bodies. */
+function makeTreeFixture(files: Record<string, string>, opts?: { l0?: boolean }): string {
+  const root = mkdtempSync(join(tmpdir(), 'vmr-tree-'));
+  mkdirSync(join(root, 'docs'), { recursive: true });
+  writeFileSync(join(root, 'docs', 'workspace-schema.json'), JSON.stringify({ models: MODELS }), 'utf-8');
+  for (const [rel, body] of Object.entries(files)) {
+    const abs = join(root, 'agents', rel);
+    mkdirSync(join(abs, '..'), { recursive: true });
+    writeFileSync(abs, body, 'utf-8');
+  }
+  if (opts?.l0) writeFileSync(join(root, 'CONSTITUTION.md'), 'L0 marker\n', 'utf-8');
+  return root;
+}
+
+// The exact defect shape T-004 reported: Projects/co-safety agents/domains/**
+// carried map-form tier blocks + a stale `model:` field while the template was
+// scalarized. The legacy block mirrors that shape (claude/gemini-cli/antigravity).
+const CO_SAFETY_LEGACY =
+  '---\nname: biotech-agent\ntier:\n  claude: medium\n  gemini-cli: medium\n  antigravity: medium\nmodel: sonnet\n---\nbody\n';
+
+describe('recursive agent scan (v2.3.0 arm, design §R2.1)', () => {
+  test('nested legacy map-form block → FAIL kind legacy-block (delivered context)', () => {
+    const root = makeTreeFixture({ 'domains/industry/biotech/biotech-agent.md': CO_SAFETY_LEGACY });
+    try {
+      const report = runModelRegistryValidation(root);
+      expect(report.isWorkspaceRoot).toBe(false);
+      expect(report.agentFilesChecked).toBe(1);
+      expect(report.coverageFails).toHaveLength(1);
+      expect(report.coverageFails[0].kind).toBe('legacy-block');
+      expect(report.coverageFails[0].relFile).toBe('agents/domains/industry/biotech/biotech-agent.md');
+      expect(report.coverageFails[0].message).toContain("normalize to 'tier: medium'");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('nested scalar file at the depth-6 boundary → clean run', () => {
+    const root = makeTreeFixture({
+      'a/b/c/d/e/leaf.md': '---\ntier: low\n---\n',
+    });
+    try {
+      const report = runModelRegistryValidation(root);
+      expect(report.agentFilesChecked).toBe(1);
+      expect(report.coverageFails).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('files beyond the depth-6 cap are not scanned', () => {
+    const root = makeTreeFixture({
+      'a/b/c/d/e/f/g/too-deep.md': CO_SAFETY_LEGACY, // 7 dir levels — outside the cap
+      'a/b/c/scalar.md': '---\ntier: high\n---\n', // depth 3 — inside
+    });
+    try {
+      const report = runModelRegistryValidation(root);
+      expect(report.agentFilesChecked).toBe(1);
+      expect(report.coverageFails).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('README files are excluded at nested levels; _legacy and dot-dirs are skipped', () => {
+    const root = makeTreeFixture({
+      'domains/industry/README.md': '---\ntier:\n  claude: low\n---\n', // excluded by name
+      'domains/_legacy/old-agent.md': CO_SAFETY_LEGACY, // skipped dir
+      'domains/.hidden/secret-agent.md': CO_SAFETY_LEGACY, // skipped dot-dir
+      'domains/industry/steel/steel-agent.md': '---\ntier: medium\n---\n',
+    });
+    try {
+      const report = runModelRegistryValidation(root);
+      expect(report.agentFilesChecked).toBe(1);
+      expect(report.coverageFails).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('walkAgentTree sorts deterministically and skips symlinks', () => {
+    const root = mkdtempSync(join(tmpdir(), 'vmr-walk-'));
+    mkdirSync(join(root, 'zeta'), { recursive: true });
+    mkdirSync(join(root, 'alpha'), { recursive: true });
+    writeFileSync(join(root, 'zeta', 'b.md'), 'x\n');
+    writeFileSync(join(root, 'alpha', 'a.md'), 'x\n');
+    symlinkSync(join(root, 'zeta', 'b.md'), join(root, 'alpha', 'link.md'));
+    try {
+      expect(walkAgentTree(root)).toEqual([join(root, 'alpha', 'a.md'), join(root, 'zeta', 'b.md')]);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

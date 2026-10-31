@@ -5,7 +5,25 @@
  * docs/workspace-schema.json `models`, and that the tier→model mapping prose
  * in AGENTS.md §3.6 / CLAUDE.md / GEMINI.md / CODEX.md names exactly the
  * models the registry declares for each tier.
- * Level: L0 | Status: active | @version 2.2.0
+ * Level: L0 | Status: active | @version 2.3.0
+ *
+ * v2.3.0 (2026-10-31, T-20261031-004 + T-20261031-007 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.1
+ *          + §R2.4): two vocabulary changes. (1) The delivered-side agent scan
+ *          (Step 2 of runModelRegistryValidation) is now a bounded recursive
+ *          walk (depth cap 6, `_legacy/`/node_modules/dot-dirs/symlinks
+ *          skipped, README excluded at every level) so legacy map-form tier
+ *          blocks in nested agent trees (e.g. Projects/co-safety
+ *          agents/domains/**) FAIL with kind `legacy-block` — the same closed
+ *          v2.1.0 matrix, no new WARN class and no transition period; the
+ *          template-side equivalent has been recursive since validate-templates
+ *          `agent-quality-recursive` (v1.61.0, T-20261027-001), and
+ *          upgrade-project's TIER NORMALIZED pass (v1.75.0, T-20261027-005)
+ *          remains the sanctioned healer at the next upgrade visit. (2) zcode
+ *          joins PLATFORMS (7 → 8) as a registry-only platform (zai/gemini-cli
+ *          precedent): models.zcode mirrors the zai GLM ids (the ZCode harness
+ *          resolves models via the zai column), no delivery profile, no
+ *          ZCODE.md proseTarget — platform vocabulary per design §R2.4.
  *
  * v2.2.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
  *          DEC-20261028-06): PLATFORMS is exported — the platform_surfaces
@@ -78,7 +96,7 @@ const WORKSPACE_ROOT = fileURLToPath(new URL("..", import.meta.url))
 // Exported since v2.2.0: the platform-vocabulary SSOT consumed by the
 // platform_surfaces registry consumers (sync-agent-mirrors coverage guard,
 // validate-templates shape check, registry unit tests).
-export const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai"] as const;
+export const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai", "zcode"] as const;
 type Platform = typeof PLATFORMS[number];
 
 export const VALID_TIERS = ["high", "medium", "low"] as const;
@@ -319,6 +337,40 @@ export const proseTargets: ProseTarget[] = [
   },
 ];
 
+// ── Recursive agent-tree walk (v2.3.0, T-20261031-004) ───────────────────────
+
+/** Depth cap for the recursive agent scan (relative to agents/, inclusive). */
+export const AGENT_WALK_MAX_DEPTH = 6;
+
+/** Directory names never descended into during the agent scan. */
+const AGENT_WALK_SKIP_DIRS = new Set(["_legacy", "node_modules"]);
+
+/**
+ * Collect every `*.md` file under `agents/` (README* excluded at every level)
+ * with a bounded recursive walk: depth cap 6, `_legacy`/node_modules/dot-dirs
+ * skipped, symlinks never followed (cycle safety). Exported for tests.
+ * Throws when the root directory is unreadable (caller maps that to `fatal`).
+ */
+export function walkAgentTree(agentsDir: string): string[] {
+  const files: string[] = [];
+  const walk = (dir: string, depth: number): void => {
+    if (depth > AGENT_WALK_MAX_DEPTH) return;
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isSymbolicLink()) continue;
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith(".") || AGENT_WALK_SKIP_DIRS.has(entry.name)) continue;
+        walk(full, depth + 1);
+      } else if (entry.isFile() && entry.name.endsWith(".md") && !entry.name.startsWith("README")) {
+        files.push(full);
+      }
+    }
+  };
+  walk(agentsDir, 0);
+  return files.sort();
+}
+
 /**
  * Full validation run against a workspace root. Import-safe and exit-free:
  * returns the structured report; main() owns printing and the exit code.
@@ -360,13 +412,15 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
   const models = schema.models as ModelsBlock;
   const knownPlatforms = Object.keys(models);
 
-  // Step 2: Read all agents/*.md files (README excluded — not an agent).
+  // Step 2: Read all agents/**/*.md files (v2.3.0, T-20261031-004 — recursive
+  // arm). Bounded walk, depth cap 6 below agents/; `_legacy/`, node_modules,
+  // dot-directories and symlinks are skipped; README* is excluded at every
+  // level (not an agent). Nested legacy map-form tier blocks now FAIL with the
+  // same closed v2.1.0 matrix as top-level files.
   const agentsDir = join(workspaceRoot, "agents");
   let agentFiles: string[];
   try {
-    agentFiles = readdirSync(agentsDir)
-      .filter((f) => f.endsWith(".md") && !f.startsWith("README"))
-      .map((f) => join(agentsDir, f));
+    agentFiles = walkAgentTree(agentsDir);
   } catch (err) {
     report.fatal = `Could not read agents directory at ${agentsDir} (${(err as Error).message})`;
     return report;

@@ -395,13 +395,13 @@ If a user request contains trigger keywords matching **two or more modules**, ac
 When leading execution and improvement tasks, PM MUST use the 3-Tier model strategy:
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-5.6-sol / glm-5.3)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-5.6-terra / glm-5.3-flash)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-5.6-luna / glm-5.3-flash)
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-6.1-sol / glm-5.3)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-6.1-terra / glm-5.3-flash)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-6-luna / glm-5.3-flash)
 <!-- /WORKSPACE-MANAGED -->
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
-> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max).
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max); workspace dispatch posture is reasoning level **high** for all tiers. zcode (ZCode harness) resolves models via the zai column.
 <!-- /WORKSPACE-MANAGED -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
@@ -574,4 +574,4 @@ Same rules on every platform; only the config file differs. Enforcement tiering 
 
 ---
 
-*Last Updated: 2026-10-29 (co-abap v1.0.0)*
+*Last Updated: 2026-10-31 (co-abap v1.0.0)*

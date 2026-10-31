@@ -141,7 +141,7 @@ For the **4-level enforcement model**, **mandatory criteria**, **execution plan 
 
 **Execution Plan Boilerplate**: the table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in [Execution Plan Templates §5.1](docs/governance/agents/execution-plan-templates.md#51-standard-execution-plan-template) and [§5.1.1](docs/governance/agents/execution-plan-templates.md#511-design-gate-exemptions).
 
-> **Note (Codex-specific)**: Use the literal model ID (e.g. `gpt-5.6-sol`) in the `Model` column, not a Claude-style short alias. With no native subagent tool, each plan row is executed sequentially in-session under the row's named specialist role.
+> **Note (Codex-specific)**: Use the literal model ID (e.g. `gpt-6.1-sol`) in the `Model` column, not a Claude-style short alias. With no native subagent tool, each plan row is executed sequentially in-session under the row's named specialist role.
 
 ### 6. Execution Mechanics (Plan Mode, Task Tracking, 3-Tier)
 
@@ -151,9 +151,9 @@ For the **4-level enforcement model**, **mandatory criteria**, **execution plan 
 
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Codex's model-ID mapping:
-- **High-tier** → `gpt-5.6-sol`
-- **Medium-tier** → `gpt-5.6-terra`
-- **Low-tier** → `gpt-5.6-luna`
+- **High-tier** → `gpt-6.1-sol`
+- **Medium-tier** → `gpt-6.1-terra`
+- **Low-tier** → `gpt-6-luna`
 
 ### 7. Project Boundary Policy
 

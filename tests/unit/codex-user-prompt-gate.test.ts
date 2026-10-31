@@ -185,7 +185,7 @@ describe('pm-role-bootstrap marker chain under Codex-shaped payloads (integratio
         session_id: sessionId,
         // Codex-specific common input fields the writer must tolerate
         cwd: WORKSPACE_ROOT,
-        model: 'gpt-5.6-sol',
+        model: 'gpt-6.1-sol',
         permission_mode: 'default',
         turn_id: 'turn_1',
         source: 'startup',

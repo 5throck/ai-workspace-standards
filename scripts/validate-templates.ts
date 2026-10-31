@@ -1,7 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.66.0
+ * @version 1.67.0
+ *
+ * v1.67.0 (2026-10-31, T-20261031-005 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2 surface 6): MM-01 LITERAL alternation gains the GPT-6.x ids
+ *          (`gpt-6\.1-(?:sol|terra)` + `gpt-6-luna`) so the codex column
+ *          rebase keeps matching; the `gpt-5\.6` alternatives are KEPT through
+ *          the L3 convergence window — delivered-side stragglers keep FAILing
+ *          loudly (visible, not silent) until their upgrade visit normalizes
+ *          them. No other check changes.
  *
  * v1.66.0 (2026-10-31, U-20261029-004 — spec
  *          docs/designs/2026-10-31-variant-generators-design.md §6.3):
@@ -4634,7 +4643,13 @@ function extractMarkedSections(content: string, markerName: string): Array<{head
 // A literal outside a managed section silently stalls at its layer on the next model refresh.
 function checkModelLiteralPlacement(): void {
   if (!JSON_MODE) console.log(`\n=== Check MM-01: Model literal placement (instruction twins) ===`);
-  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  // T-20261031-005 (spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+  // §R2.2): the GPT-6.x ids (gpt-6.1-sol/terra, gpt-6-luna) join the alternation;
+  // the gpt-5.6 alternatives are KEPT through the L3 convergence window so
+  // delivered-side stragglers keep FAILing loudly (visible, not silent) until
+  // their upgrade visit normalizes them. A follow-up cleanup ticket retires the
+  // old alternation after one full upgrade cycle.
+  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
   const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
   const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
   const files = [
