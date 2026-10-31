@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.85.0
+// @version 1.86.0
+// v1.86.0 (2026-10-31, spec
+//          docs/designs/2026-10-31-template-security-hardening-design.md R2.6
+//          arm 1, U-20261031-008): the JSON_MERGE pass now collapses
+//          exact-duplicate (event, matcher, command) hook entries in
+//          .claude/settings.json via lib/hook-dedupe.ts (dedupeClaudeSettingsHooks)
+//          before the merged payload lands — the array-union merge previously
+//          accumulated variant graft-install hook blocks (co-consult/co-deck
+//          5-SessionStart drift). The normalization applies even when the merge
+//          itself is a no-op, so already-accumulated project copies heal on
+//          their next upgrade visit; first occurrence wins, distinct commands
+//          preserved, cross-event repeats untouched. All other passes untouched.
 // v1.85.0 (2026-10-31, spec
 //          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md):
 //          SCHEMA_MERGE delivery policy for docs/workspace-schema.json — the
@@ -945,6 +956,7 @@ import { scanLocalPatches } from './helpers/local-patch-scan.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
+import { dedupeClaudeSettingsHooks } from './lib/hook-dedupe.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -4006,12 +4018,30 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       } else {
         try {
           const result = mergeSettingsJson(dest, abs);
-          if (!result.changed) { console.log(`  OK     ${rel}  (json merge — in sync)`); continue; }
+          // U-20261031-008 (spec docs/designs/2026-10-31-template-security-hardening-design.md
+          // R2.6 arm 1): the array-union merge above appends template hook entries without
+          // deduping — variant graft installs accumulated exact-duplicate (event, matcher,
+          // command) hook entries (co-consult / co-deck carried 5 SessionStart entries vs the
+          // template's 2). Collapse exact duplicates (first occurrence wins, distinct commands
+          // preserved) before the merged payload lands, and apply the normalization even when
+          // the merge itself is a no-op so already-accumulated files heal on their next
+          // upgrade visit.
+          const deduped = dedupeClaudeSettingsHooks(JSON.parse(result.merged));
+          const merged = deduped.removed.length > 0
+            ? `${JSON.stringify(deduped.settings, null, 2)}\n`
+            : result.merged;
+          const changed = merged !== readFileSync(dest, 'utf8');
+          if (!changed) { console.log(`  OK     ${rel}  (json merge — in sync)`); continue; }
           console.log(`  MERGE  ${rel}${result.preserved.length > 0 ? `  (preserved project-only: ${result.preserved.join(', ')})` : ''}`);
-          if (!dryRun) writeFileSync(dest, result.merged, 'utf8');
-          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', result.preserved.length > 0
-            ? `settings deep-merged — project-only entries preserved: ${result.preserved.join(', ')}`
-            : 'settings deep-merged (template keys arrived, no project-only entries to preserve)');
+          if (deduped.removed.length > 0) {
+            console.log(`  DEDUPE ${rel}  (collapsed ${deduped.removed.length} duplicate hook command(s): ${[...new Set(deduped.removed.map((r) => r.command))].join(', ')})`);
+          }
+          if (!dryRun) writeFileSync(dest, merged, 'utf8');
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', deduped.removed.length > 0
+            ? `settings deep-merged — ${deduped.removed.length} duplicate hook command(s) collapsed (U-20261031-008)`
+            : result.preserved.length > 0
+              ? `settings deep-merged — project-only entries preserved: ${result.preserved.join(', ')}`
+              : 'settings deep-merged (template keys arrived, no project-only entries to preserve)');
           noteDelivered(rel);
           console.log(`  ${dryTag}WROTE: ${rel}`);
         } catch (err) {

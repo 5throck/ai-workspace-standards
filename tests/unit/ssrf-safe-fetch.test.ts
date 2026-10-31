@@ -14,7 +14,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import * as http from 'node:http';
-import { safeFetch, SSRFBlockedError } from '../../scripts/lib/ssrf.ts';
+import { safeFetch, SSRFBlockedError, isBlockedIp } from '../../scripts/lib/ssrf.ts';
 
 function startLocalServer(handler: http.RequestListener): Promise<{ server: http.Server; port: number }> {
     return new Promise((resolve) => {
@@ -91,5 +91,37 @@ describe('safeFetch', () => {
         } finally {
             server.close();
         }
+    });
+});
+
+describe('isBlockedIp CIDR pins (U-20261031-003)', () => {
+    // U-20261031-003 (spec docs/designs/2026-10-31-template-security-hardening-design.md
+    // R2.3): BLOCKED_CIDRS' current-network entry ended at 0x0fffffffn (spanning
+    // 0.0.0.0–15.255.255.255) and the private-10 entry shared that end — both
+    // over-blocked public 1.x–15.x addresses (8.8.8.8 was refused as
+    // "current-network"). These pins hold the corrected /8 ends and the
+    // surrounding public space so the over-blocking cannot regress.
+    test('corrected ends: 0.0.0.0/8 and 10.0.0.0/8 exactly', () => {
+        expect(isBlockedIp('0.1.2.3')).toBe('current-network');
+        expect(isBlockedIp('0.255.255.255')).toBe('current-network'); // last address of 0.0.0.0/8
+        expect(isBlockedIp('10.1.2.3')).toBe('private-10');
+        expect(isBlockedIp('10.255.255.255')).toBe('private-10'); // last address of 10.0.0.0/8
+    });
+
+    test('public 1.x–15.x space is allowed again', () => {
+        expect(isBlockedIp('8.8.8.8')).toBeNull();
+        expect(isBlockedIp('1.1.1.1')).toBeNull();
+        expect(isBlockedIp('11.0.0.1')).toBeNull();
+        expect(isBlockedIp('15.255.255.255')).toBeNull();
+        expect(isBlockedIp('9.0.0.1')).toBeNull(); // between the two corrected /8s
+        expect(isBlockedIp('16.0.0.1')).toBeNull(); // just above the old (wrong) end
+    });
+
+    test('unrelated private/metadata ranges stay blocked', () => {
+        expect(isBlockedIp('172.16.0.1')).toBe('private-172');
+        expect(isBlockedIp('192.168.1.1')).toBe('private-192');
+        expect(isBlockedIp('127.0.0.1')).toBe('loopback');
+        expect(isBlockedIp('169.254.169.254')).toBe('link-local-metadata');
+        expect(isBlockedIp('100.64.0.1')).toBe('carrier-grade-nat');
     });
 });

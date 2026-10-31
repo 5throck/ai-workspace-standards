@@ -15,13 +15,32 @@
  *          scripts/<name>.ts (same source Check A uses: the SCRIPTS.md row the
  *          @version header is validated against); plus a coverage arm —
  *          versioned scripts with no record are one aggregated WARNING (v1.15.0)
+ * Check I: .claude/settings.json hook drift (v1.20.0) — within-event
+ *          exact-duplicate (matcher, command) pairs and per-event entry counts
+ *          exceeding templates/common/.claude/settings.json, WARN-first
  *
  * Usage:
  *   bun scripts/lifecycle-sync-audit.ts
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.19.0
+ * @version 1.20.0
+ * v1.20.0 (2026-10-31, spec
+ *          docs/designs/2026-10-31-template-security-hardening-design.md R2.6
+ *          arm 2, U-20261031-008): new Check I — hook drift in
+ *          .claude/settings.json. Parses `hooks` from the workspace/project
+ *          settings file and WARNs when an event carries (a) an
+ *          exact-duplicate (matcher, command) pair, or (b) an entry count
+ *          exceeding templates/common/.claude/settings.json's count for that
+ *          event (arm (b) skipped where the template file is absent — L1
+ *          context). Targets variant-side accumulation: graft install appends
+ *          hook entries and the upgrade JSON_MERGE pass did not dedupe
+ *          (co-consult / co-deck 5-SessionStart). Dedup/drift semantics are
+ *          shared with the upgrade path via lib/hook-dedupe.ts; dedup is
+ *          WITHIN-EVENT only (the cross-event pairs — SessionStart vs
+ *          WorktreeCreate `git config core.hooksPath`, PostToolUse vs
+ *          TeammateIdle post-write-lifecycle-check — are intentional and never
+ *          flagged). WARN-first per ADR-0055. Runs in both L0 and L1 contexts.
  * v1.19.0 (2026-10-26, ADR-0102 / T-20261026-018, design
  *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
  *          §7 row 2 + user ruling 2): the frontmatter comparison accepts the
@@ -165,6 +184,7 @@ import { createHash } from 'node:crypto';
 import { load as loadYaml } from 'js-yaml';
 import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import { parseIntentionalDuplicateLine } from './helpers/markers.ts';
+import { analyzeClaudeHookDrift } from './lib/hook-dedupe.ts';
 
 // ANSI colors for terminal output
 const colors = {
@@ -1060,6 +1080,82 @@ export function runCheckH(): SyncIssue[] {
 }
 
 /**
+ * Check I: .claude/settings.json hook drift (v1.20.0, U-20261031-008).
+ *
+ * Parses `hooks` from the workspace/project .claude/settings.json and WARNs
+ * when an event carries (a) an exact-duplicate (matcher, command) pair, or
+ * (b) an entry count exceeding templates/common/.claude/settings.json's count
+ * for that event. Arm (b) runs only where the template file exists (L0 root;
+ * a scaffolded L1 project has no templates/ tree — there only arm (a) runs).
+ * Targets variant-side accumulation (graft install appends hook entries; the
+ * upgrade JSON_MERGE pass historically did not dedupe — co-consult / co-deck
+ * carried 5 SessionStart entries vs the template's 2). Cross-event repeats are
+ * intentional and never flagged: dedup/drift comparison is WITHIN-EVENT only
+ * (SessionStart vs WorktreeCreate `git config core.hooksPath .githooks`;
+ * PostToolUse vs TeammateIdle post-write-lifecycle-check). Detection-only,
+ * WARN-first per ADR-0055; semantics shared with the upgrade JSON_MERGE dedupe
+ * via scripts/lib/hook-dedupe.ts (analyzeClaudeHookDrift). Fix: rerun
+ * upgrade-project (the JSON_MERGE pass now collapses exact duplicates) or
+ * remove the excess entries manually.
+ */
+export function runCheckI(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+
+  const settingsPath = join(ROOT, '.claude', 'settings.json');
+  if (!existsSync(settingsPath)) return issues;
+
+  let local: unknown;
+  try {
+    local = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+  } catch {
+    issues.push({
+      level: 'warning',
+      file: '.claude/settings.json',
+      message: 'Check I: .claude/settings.json is not parseable JSON — hook drift unverifiable',
+      fix: 'Repair the JSON (settings.json is platform-managed; compare against templates/common/.claude/settings.json)',
+    });
+    return issues;
+  }
+
+  const templateSettingsPath = join(ROOT, 'templates', 'common', '.claude', 'settings.json');
+  let template: unknown | null = null;
+  if (existsSync(templateSettingsPath)) {
+    try {
+      template = JSON.parse(readFileSync(templateSettingsPath, 'utf-8'));
+    } catch {
+      template = null; // unparseable template — arm (b) skipped, arm (a) still runs
+    }
+  }
+
+  const report = analyzeClaudeHookDrift(local, template);
+
+  for (const dup of report.duplicates) {
+    issues.push({
+      level: 'warning',
+      file: '.claude/settings.json',
+      message: `Check I: hooks.${dup.event} carries duplicated hook command(s): ${dup.commands.map((c) => `"${c}"`).join(', ')}`,
+      fix: 'Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the duplicate entries manually — first occurrence wins',
+    });
+  }
+  for (const oc of report.overCount) {
+    issues.push({
+      level: 'warning',
+      file: '.claude/settings.json',
+      message: `Check I: hooks.${oc.event} has ${oc.localCount} entr(ies) vs ${oc.templateCount} in templates/common/.claude/settings.json${oc.excessCommands.length > 0 ? ` — excess command(s): ${oc.excessCommands.map((c) => `"${c}"`).join(', ')}` : ''}`,
+      fix: 'Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the excess hook entries manually',
+    });
+  }
+
+  if (!jsonMode) {
+    console.log(
+      `${colors.dim}Check I: .claude/settings.json hook drift — ${issues.length} finding(s)${issues.length > 0 ? '' : ', hooks clean'}${colors.reset}`,
+    );
+  }
+
+  return issues;
+}
+
+/**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
  * templates/common/scripts/SCRIPTS.md. Uses the layer column to decide
  * whether each script should be present in templates/common/:
@@ -1578,6 +1674,9 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     console.log(
       `${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`,
     );
+    console.log(
+      `${colors.dim}Check I: .claude/settings.json hook drift${colors.reset}`,
+    );
     console.log('');
   }
 
@@ -1590,6 +1689,7 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
   const checkFIssues = runCheckF();
   const checkGIssues = runCheckG();
   const checkHIssues = runCheckH();
+  const checkIIssues = runCheckI();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -1615,6 +1715,7 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     ...checkFIssues.filter((i) => i.level === 'error'),
     ...checkGIssues.filter((i) => i.level === 'error'),
     ...checkHIssues.filter((i) => i.level === 'error'),
+    ...checkIIssues.filter((i) => i.level === 'error'),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === 'warning'),
@@ -1626,10 +1727,11 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     ...checkFIssues.filter((i) => i.level === 'warning'),
     ...checkGIssues.filter((i) => i.level === 'warning'),
     ...checkHIssues.filter((i) => i.level === 'warning'),
+    ...checkIIssues.filter((i) => i.level === 'warning'),
   ];
 
   return {
-    checksRun: 10,
+    checksRun: 11,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

@@ -58,10 +58,17 @@ fi
 # pipe never scanned the commit — since gitleaks 8.x, `detect --no-git` ignores
 # stdin and scans the current directory instead, so the verdict came from the
 # working tree (blocking every rebase) rather than from the commits. Repo mode
-# with --log-opts scans the real commit diffs and honors the repo's
-# .gitleaks.toml allowlist.
+# with --log-opts scans the real commit diffs. U-20261031-002: the repo's
+# .gitleaks.toml is passed explicitly when present (existsSync-guarded, same
+# shape as scripts/hooks/pre-commit.ts and pre-push.ts and ci.yml) — implicit
+# default-path discovery can miss the dot-named file and silently deviate from
+# the reviewed allowlist.
+GITLEAKS_ARGS=(detect --no-banner)
+if [ -f .gitleaks.toml ]; then
+    GITLEAKS_ARGS+=(--config .gitleaks.toml)
+fi
 if [ -n "$RANGE" ]; then
-    if gitleaks detect --no-banner --log-opts="--no-merges $RANGE"; then
+    if gitleaks "${GITLEAKS_ARGS[@]}" --log-opts="--no-merges $RANGE"; then
         echo "✅ No secrets found in $RANGE - rebase can proceed"
         exit 0
     else
@@ -71,7 +78,7 @@ if [ -n "$RANGE" ]; then
     fi
 else
     # Root-rebase form: the full history is being rewritten — scan all of it.
-    if gitleaks detect --no-banner --log-opts="--no-merges"; then
+    if gitleaks "${GITLEAKS_ARGS[@]}" --log-opts="--no-merges"; then
         echo "✅ No secrets found in the full history (root rebase) - rebase can proceed"
         exit 0
     else
