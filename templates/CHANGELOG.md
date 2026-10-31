@@ -4,6 +4,13 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-11-01
+### Changed
+- **[2026-11-01]**: Security hardening batch (PR #1776, design 2026-10-31-template-security-hardening-design, U-20261031-001..008): delivered-side settings permission reductions, SSRF fix, hook fixes, hook-dedupe and upgrade-project v1.86.0.
+- **[2026-11-01]**: Registry/platform vocabulary batch (PR #1777, design 2026-10-31-registry-platform-vocabulary-design, T-20261031-004..007): workspace schema v1.8.0 registers the zcode platform, validate-model-registry v2.3.0 adds recursive tier scanning, model rows rebase to GPT-6.x, zai reasoning posture pinned to HIGH.
+- **[2026-11-01]**: Graft-to-Trail migration policy (PR #1780, design 2026-10-31-graft-trail-migration-design, U-20261031-009; L0 rollout PR #1783): skill SSOT renamed graft to trail (v1.1.0), upgrade-project v1.87.0 tolerance rules (JSON_MERGE hook-entry guard, retired-seed guard) let delivered projects converge at their own upgrade visits.
+- **[2026-11-01]**: Transform-aware L0-to-L1 parity gate (PR #1782, design 2026-10-31-platform-parity-transform-check-design): platform instruction files are compared by content transform instead of existence-only semantics.
+
 ## [0.25.0] - 2026-10-30
 ### Changed
 - **[2026-10-31]**: auto-release 2026-10-31: 39 delivered paths (A 3 / M 36 / D 0 / R 0)
