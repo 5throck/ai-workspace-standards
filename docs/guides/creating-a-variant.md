@@ -138,6 +138,37 @@ templates/co-<variant>/
 ```
 `merge-package-scripts.ts` will inject `audit`/`dev-sync`/`sync-md` automatically at scaffold time.
 
+### Declared generators (optional — dev-sync auto-regeneration)
+
+If your variant generates derived projections from authored sources (glossary YAML, docs, wiki pages), you can declare the generators so `/sync` runs them for you before the audit gate, instead of an operator running each one by hand after a drift failure. The declaration is a **project-authored manifest file** at `scripts/<variant>/generators.json` in your project repo — it is never delivered by the template (absence is the default and must stay valid).
+
+```json
+{
+  "version": 1,
+  "generators": [
+    {
+      "name": "glossary-data",
+      "command": ["bun", "scripts/<variant>/generate-glossary-data.ts"],
+      "outputs": ["app/web-next/lib/glossary-data.generated.ts"],
+      "sources": ["glossary/business.yaml"]
+    }
+  ]
+}
+```
+
+**Rules** (enforced by `scripts/lib/generator-manifest.ts`, validated by `bun scripts/validate-templates.ts` in template trees and by dev-sync step 3.86 in projects):
+
+- `command` is an **argv array** (never a shell string); argv[0] must be exactly `bun`. It is executed with the working directory pinned to the project root; the child inherits the pipeline environment (nothing is added).
+- `outputs` are **project-relative** paths that must exist after a successful run; dev-sync verifies them and stages each via `git add` as pipeline-generated files. Absolute paths and `..` traversal are rejected; the script path must resolve inside the project root (symlink escapes rejected).
+- `sources` are **advisory documentation only** — not a dependency tracker (selective re-runs are a future feature).
+- Bounds: at most 16 generators per manifest, 8 outputs per generator, and generator names must be unique (they label the pipeline's `[generator:<name>]` log rows).
+- A generator that exits non-zero fails `/sync` loudly with a `[generator:<name>]` FAIL row (last 20 lines of output, with secret-looking assignments scrubbed); no outputs are staged from a failed generator.
+
+**Semantics you must keep in mind**:
+
+- **The no-op default**: no manifest, an empty `{}` manifest, or `"generators": []` means dev-sync behaves exactly as before. Projects adopt the convention by committing one file to their own repo — no template upgrade required.
+- **`--check` stays the drift gate**: keep your generator's `--check` form wired into `scripts/<variant>/audit-variant.ts` (or the audit hook). The dev-sync step *regenerates*; it never weakens a gate. A generator that lies (writes nothing while claiming success) still fails its own drift check at the audit gate.
+
 ---
 
 ## Step 4 — Update AGENTS.md Phase Summary

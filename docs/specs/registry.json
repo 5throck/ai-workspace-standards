@@ -2762,7 +2762,7 @@
       "id": "2026-10-31-changelog-normalize-design",
       "title": "changelog normalize design",
       "file": "docs/designs/2026-10-31-changelog-normalize-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "architect",
       "created": "2026-10-30",
       "last_updated": "2026-10-30"
@@ -2789,10 +2789,10 @@
       "id": "2026-10-31-variant-generators-design",
       "title": "variant generators design",
       "file": "docs/designs/2026-10-31-variant-generators-design.md",
-      "status": "approved",
+      "status": "implemented",
       "source": "architect",
       "created": "2026-10-30",
-      "last_updated": "2026-10-30"
+      "last_updated": "2026-10-31"
     },
     {
       "id": "skillhygiene",

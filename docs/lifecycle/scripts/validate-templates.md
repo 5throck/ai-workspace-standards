@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.65.0
+- **Version**: 1.66.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-29
+- **Last Updated**: 2026-10-31
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-10-31 | production | production | v1.65.0 → v1.66.0 (U-20261029-004, spec docs/designs/2026-10-31-variant-generators-design.md §6.3): additive generator-manifest arm — when a variant template declares `scripts/<variant>/generators.json`, validate shape + containment through lib/generator-manifest.ts (strict parse, `bun` argv[0], project-relative traversal-free outputs/sources, size caps, script existence + symlink containment vs the variant root); absent file → no check (the manifest is project-authored and optional — absence must never become a template-validation failure). Check id `generator-manifest`, beside B-10. | automation-engineer |
 | 2026-10-29 | production | production | v1.64.0 → v1.65.0 (U-20261028-014, spec docs/designs/2026-10-29-owner-decision-batch-design.md §2): Check 2 gains the variant-designlint shape check — a variant.json `designLint` block must be {enabled: boolean (required), scanRoots?/allowlist?: string[]}, the same rule the audit gate enforces via helpers/design-lint-roots.ts v1.1.0 validateDesignLintOverride (restated inline; absent block stays valid — the override is opt-in per variant). | automation-engineer |
 | 2026-10-28 | production | production | v1.62.0 → v1.63.0 (spec docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md, DEC-20261028-05): workspace-schema.json L0↔L1 parity checks (schema-hash-parity / ws-schema-l1-parity) normalize the single sanctioned L1 divergence — L1 drops the stale rootAllowlist entry for the non-propagating workspace constitution marker (§7.5) and records _notes.root_allowlist_divergence; the pair is hand-maintained (ADR-0069, the T-20261026-017 propagation premise was wrong); any other divergence still fails. | automation-engineer |
 | 2026-10-27 | production | production | v1.61.0 → v1.62.0 (T-20261027-002): new Error check C-CM-06 — forward path-existence for every declared common_commands/common_platform_skills `*_source` path: a `.`-prefixed value must resolve under templates/common/ (2026-10-27 project-review slot D found 13 of 154 declarations pointing at non-existent mirrors — `.gemini/commands/<n>.md` vs the rendered `.toml` mirrors, `.agents/commands/<n>.md` vs the L0-resident surface with no L1 mirror — while entries carried propagated_to_common:true); non-`.` values are exclusion prose records (gateguard precedent) and skip. | automation-engineer |

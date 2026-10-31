@@ -1,4 +1,27 @@
-// @version 1.36.0
+// @version 1.37.0
+// v1.37.0 (2026-10-31, U-20261029-004 — spec
+//          docs/designs/2026-10-31-variant-generators-design.md §4-§5): new
+//          step 3.86 — declared generator pre-convergence. A variant project
+//          may declare derived-projection generators in a project-authored
+//          `scripts/<variant>/generators.json` manifest; before the audit gate
+//          (the step-3.85 regeneration family precedent) dev-sync now runs
+//          every declared generator array-form via Bun.spawnSync (argv[0] must
+//          be `bun`, cwd pinned to the project root, no env fabrication —
+//          design §7), verifies every declared output exists on exit 0, and
+//          stages the outputs as pipeline-generated files. Manifest parsing,
+//          caps (≤ 16 generators, ≤ 8 outputs), path containment (absolute
+//          paths, `..` traversal, symlink escape) and duplicate-name rejection
+//          live in scripts/lib/generator-manifest.ts v1.0.0 (pure parse +
+//          fs-bound loader + runner, unit-pinned by
+//          tests/unit/generator-manifest.test.ts). Absent or empty manifest =
+//          documented zero-behavior-change no-op. Generator failure = loud
+//          `[generator:<name>]` FAIL with the last 20 lines of combined output
+//          secret-scrubbed (key|token|secret|password|credential value
+//          assignments elided), no partial staging, later generators never run.
+//          The generator's --check form REMAINS the audit's drift gate
+//          (audit-variant.ts): this step regenerates; it does not weaken any
+//          gate. A generator that lies (writes nothing) still fails its own
+//          drift gate at the audit.
 // v1.36.0 (2026-10-31, T-20261031-003 — spec
 //          docs/designs/2026-10-31-changelog-normalize-design.md §4): step 3b
 //          gains the fail-then-heal loop — when the CHANGELOG structural-duplicate
@@ -275,6 +298,7 @@ import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
 import { changelogGateFindings } from './helpers/changelog-duplicates.ts';
+import { runDeclaredGenerators } from './lib/generator-manifest.ts';
 import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
 
 const GREEN = '\x1b[32m';
@@ -757,6 +781,26 @@ if (fs.existsSync(preGenManifestTs)) {
     } else {
         console.log('📋 Step 3.85: VERSION_MANIFEST pre-converged for the 3.9 audit');
     }
+}
+
+// 3.86 Declared generator pre-convergence (v1.37.0, U-20261029-004 — spec
+//     docs/designs/2026-10-31-variant-generators-design.md §4-§5). Joins the
+//     regeneration step family: after final source edits, before the audit
+//     gate. Runs every project-authored `scripts/<variant>/generators.json`
+//     manifest (array-form spawn, argv[0]=bun, cwd pinned, no env fabrication;
+//     outputs verified then staged as pipeline-generated files; failure = loud
+//     `[generator:<name>]` FAIL with secret-scrubbed output, no partial
+//     staging). Absent/empty manifest = documented no-op (zero behavior
+//     change). The generator's --check form REMAINS the audit's drift gate —
+//     this step regenerates; it does not weaken any gate.
+const generatorRun = runDeclaredGenerators({ projectRoot: process.cwd() });
+if (generatorRun.ran > 0) {
+    console.log(`🛠️  Step 3.86: ${generatorRun.ran} declared generator(s) processed, ${generatorRun.staged.length} output(s) staged`);
+}
+if (!generatorRun.ok) {
+    console.error(`${RED}✗ Step 3.86: declared generator(s) FAILED — /sync aborted (see the [generator:<name>] rows above)${RESET}`);
+    console.error('  Fix: run the failing generator by hand to inspect the full (unredacted) failure, then re-run /sync.');
+    if (import.meta.main) process.exit(1);
 }
 
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check

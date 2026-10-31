@@ -1,7 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.65.0
+ * @version 1.66.0
+ *
+ * v1.66.0 (2026-10-31, U-20261029-004 — spec
+ *          docs/designs/2026-10-31-variant-generators-design.md §6.3):
+ *          additive generator-manifest arm — when a variant template declares
+ *          `scripts/<variant>/generators.json`, validate it through the shared
+ *          loader library (lib/generator-manifest.ts: strict parse, name
+ *          uniqueness, array-form command with `bun` as argv[0],
+ *          outputs/sources project-relative and traversal-free, size caps,
+ *          script-path existence + symlink containment against the variant
+ *          root). Absent file → no check (the manifest is project-authored
+ *          and optional; absence must never become a template-validation
+ *          failure for existing variants). Runs beside Check B-10 in the
+ *          stable-variant loop as check id 'generator-manifest'.
  *
  * v1.65.0 (2026-10-29, U-20261028-014 — spec
  *          docs/designs/2026-10-29-owner-decision-batch-design.md §2):
@@ -440,6 +453,7 @@ import { PLATFORMS } from './validate-model-registry.ts';
 import { PLATFORM_AGENT_ADAPTERS } from './sync-agent-mirrors.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
+import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
@@ -2258,6 +2272,41 @@ function checkVariantSkills(variant: string): void {
 //   - every .ts inside carries an @version header and is registered in the variant's
 //     scripts/SCRIPTS.md registry when that registry exists.
 // Adopted 2026-08-28 (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md).
+// v1.66.0 (U-20261029-004 — spec docs/designs/2026-10-31-variant-generators-design.md
+// §6.3): additive generator-manifest arm — when a variant template declares
+// scripts/<variant>/generators.json, validate shape + containment through the
+// shared loader library (strict parse, name uniqueness, array-form command
+// with `bun` as argv[0], outputs/sources project-relative and traversal-free,
+// size caps, script-path existence + symlink containment against the variant
+// root). Absent file → no check (the manifest is project-authored and
+// optional; absence must never become a template-validation failure).
+function checkVariantGeneratorManifest(variant: string): void {
+  const manifestPath = join(TEMPLATES_DIR, variant, 'scripts', variant, 'generators.json');
+  if (!existsSync(manifestPath)) return; // absent = skip cleanly
+  const variantRoot = join(TEMPLATES_DIR, variant);
+  let content: string;
+  try {
+    content = readFileSync(manifestPath, 'utf-8');
+  } catch (err) {
+    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json unreadable: ${err instanceof Error ? err.message : String(err)}`);
+    return;
+  }
+  const parsed = parseGeneratorManifest(content);
+  if (!parsed.ok) {
+    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json: ${parsed.error}`,
+      'See the "Declared generators" section in docs/guides/creating-a-variant.md');
+    return;
+  }
+  const rootErrors = validateManifestAgainstRoot(variantRoot, parsed.manifest);
+  for (const e of rootErrors) {
+    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json: ${e}`,
+      'Command scripts and outputs must be project-relative, traversal-free, and resolve inside the variant root');
+  }
+  if (rootErrors.length === 0) {
+    pass(`templates/${variant}/scripts/${variant}/generators.json: valid (${parsed.manifest.generators.length} generator(s))`);
+  }
+}
+
 function checkVariantScriptsLayout(variant: string): void {
   const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts', variant);
   if (!existsSync(variantScriptsDir)) {
@@ -6108,6 +6157,7 @@ function main(): number {
     checkSecurityGateSkills(variant);          // B-03
     checkVariantSkills(variant);               // B-09: presence-driven skill lifecycle
     checkVariantScriptsLayout(variant);        // B-10: scripts/<variant>/ layout convention
+    checkVariantGeneratorManifest(variant);    // v1.66.0: declared generators.json arm (absent = skip)
     checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
     checkPlatformSettingsParity(variant);      // VA-04: run for stable and beta/draft so bad platform keys cannot hide
 

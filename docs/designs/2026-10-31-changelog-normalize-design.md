@@ -1,7 +1,7 @@
 # Changelog normalizer — gate-carried migration for legacy CHANGELOG structures (T-20261031-003)
 
-- **Status**: Approved (2026-10-31, user gate) — pending implementation
-- **Registry status**: `approved` (docs/specs/registry.json) — flips to `implemented` when the implementation PR lands and registers at its own /sync.
+- **Status**: Implemented (PR #1768)
+- **Registry status**: `implemented` (docs/specs/registry.json) — flipped when PR #1768 landed; the registry flip rides the 2026-10-31 variant-generator-manifest PR (spec header kept equal to registry per the audit gate).
 - **Date**: 2026-10-31
 - **Owner**: automation-engineer (PM Gateway dispatch, after user approval)
 - **Ticket**: T-20261031-003 (`kind: manual`, priority high) — wave-halt summary,
