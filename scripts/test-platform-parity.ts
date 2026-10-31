@@ -5,10 +5,22 @@
  * Validates platform parity between L0 workspace files and their L1/L2 counterparts.
  * Enforces ADR-0033 platform parity rules.
  *
- * @version 0.4.0
+ * @version 0.5.0
  * @author automation-engineer
  * @license MIT
  *
+ * v0.5.0 (2026-10-31, spec
+ *  docs/designs/2026-10-31-platform-parity-transform-check-design.md):
+ *  the four platform instruction files (CLAUDE/GEMINI/CODEX/HERMES.md) switch
+ *  from existence-only L0→L1 checks to transform-aware parity — the checker
+ *  recomputes the publisher's own applyGovernanceTransforms (propagate-to-
+ *  templates.ts --governance-l1, ADR-0077 D11) on the L0 content and requires
+ *  the L1 copy to match byte-for-byte (volatile-marker tolerance: the
+ *  `Last Updated: <date>` stamp the pre-commit hook re-dates one-sidedly).
+ *  Closes the spec 2026-09-25-verifier-platform-expansion-design D3.5
+ *  CODEX/HERMES section-parity deferral and the ADR-0093 informational-only
+ *  gap; the dead PARITY_RULES entries for CLAUDE.md/GEMINI.md are removed
+ *  (nothing consumed them at this path).
  * v0.4.0 (2026-09-27, ADR-0093 — spec
  *  docs/designs/2026-09-27-hermes-md-instruction-file-design.md):
  *  FILE_MAPPINGS gains HERMES.md (L0→L1, informational existence check —
@@ -28,6 +40,11 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
+// Import-safe: propagate-to-templates.ts is a top-level executable whose run
+// path sits behind import.meta.main (proven by tests/unit/governance-boundary-
+// l1.test.ts, which imports the same export). No cycle: the publisher never
+// imports this checker (audit.ts runs both as separate subprocesses).
+import { applyGovernanceTransforms } from './propagate-to-templates.ts';
 
 interface ParityRule {
   /** Section identifier in the file */
@@ -61,122 +78,12 @@ interface ParityDiscrepancy {
 // ============================================================================
 // PARITY RULES CONFIGURATION (ADR-0033)
 // ============================================================================
+// v0.5.0: the CLAUDE.md / GEMINI.md rule sets were removed — they were dead
+// config at this path (those files are checked against the publisher transform,
+// not section rules) and no consumer existed outside this file. The
+// agents/pm.md rules below remain load-bearing for the extends/section logic.
 
 const PARITY_RULES: Record<string, ParityRule[]> = {
-  'CLAUDE.md': [
-    {
-      section: 'Project Overview',
-      tier: 'shared',
-      description: 'General project description and workspace structure',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Development Guidelines',
-      tier: 'shared',
-      description: 'Core principles, workflow standards, and code review standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'File Management',
-      tier: 'shared',
-      description: 'Tool preferences and file handling rules',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Language Policy',
-      tier: 'shared',
-      description: 'Documentation language requirements',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Git Practices',
-      tier: 'shared',
-      description: 'Git workflow and commit standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Claude Code-Specific Behaviors',
-      tier: 'shared',
-      description: 'Shared configuration sections (hooks, commands, MCP)',
-      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Agent Dispatch Rules',
-      tier: 'shared',
-      description: 'PM Gateway and multi-agent workflow',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Antigravity Security Configuration',
-      tier: 'gemini-only',
-      description: 'Antigravity-specific settings (only in GEMINI.md)',
-    },
-    {
-      section: 'teammateMode',
-      tier: 'claude-only',
-      description: 'Claude Code Agent Teams execution mode',
-    },
-    {
-      section: 'hooks.TeammateIdle',
-      tier: 'claude-only',
-      description: 'Claude Code-specific lifecycle hooks',
-    },
-    {
-      section: 'hooks.TaskCompleted',
-      tier: 'claude-only',
-      description: 'Claude Code-specific lifecycle hooks',
-    },
-  ],
-  'GEMINI.md': [
-    // Share identical rules with CLAUDE.md for shared sections
-    {
-      section: 'Project Overview',
-      tier: 'shared',
-      description: 'General project description and workspace structure',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Development Guidelines',
-      tier: 'shared',
-      description: 'Core principles, workflow standards, and code review standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'File Management',
-      tier: 'shared',
-      description: 'Tool preferences and file handling rules',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Language Policy',
-      tier: 'shared',
-      description: 'Documentation language requirements',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Git Practices',
-      tier: 'shared',
-      description: 'Git workflow and commit standards',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Claude Code-Specific Behaviors',
-      tier: 'shared',
-      description: 'Shared configuration sections (hooks, commands, MCP)',
-      skipPatterns: ['Desktop App limitation', 'hooks do not fire', 'CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Agent Dispatch Rules',
-      tier: 'shared',
-      description: 'PM Gateway and multi-agent workflow',
-      skipPatterns: ['CONSTITUTION.md', 'workspace standards'],
-    },
-    {
-      section: 'Antigravity Security Configuration',
-      tier: 'gemini-only',
-      description: 'Antigravity-specific settings',
-    },
-  ],
   'agents/pm.md': [
     // Shared sections - must be identical L0→L1
     {
@@ -314,14 +221,16 @@ const FILE_MAPPINGS = {
     L1: 'templates/common/CODEX.md',
     // L2 variants use L1 common files - no need to check individual L2 files
     // (spec 2026-09-25-verifier-platform-expansion-design site 11: the distributor
-    // publishes all four root docs; the verifier half must check all four)
+    // publishes all four root docs; the verifier half must check all four.
+    // v0.5.0: verified against the publisher transform — the D3.5 deferral is closed)
   },
   'HERMES.md': {
     L1: 'templates/common/HERMES.md',
     // L2 variants use L1 common files - no need to check individual L2 files
     // (ADR-0093: the Hermes instruction file joins the root doc set; the L2
     // copies ride the deny-list fallback claim and are checked by
-    // validate-templates, not here)
+    // validate-templates, not here. v0.5.0: L1 is transform-verified, closing
+    // the informational-only gap)
   },
   'agents/pm.md': {
     L1: 'templates/common/agents/pm.md',
@@ -338,6 +247,135 @@ const FILE_MAPPINGS = {
 // ============================================================================
 // CORE FUNCTIONS
 // ============================================================================
+
+/**
+ * Volatile-marker normalization (v0.5.0 tolerance, spec
+ * docs/designs/2026-10-31-platform-parity-transform-check-design.md §2 D2).
+ *
+ * The governance transforms emit no stamps, but each platform doc carries a
+ * human-maintained `*Last Updated: <date> — …*` line that flows L0→L1
+ * verbatim, and the pre-commit hook (scripts/hooks/pre-commit.ts:92-101)
+ * re-dates `Last Updated: <date>` tokens to the commit day in every committed
+ * file — so a commit that touches only one side of the pair desynchronizes the
+ * DATE while the annotation text stays equal (observed at HEAD on 2026-10-31:
+ * GEMINI.md L0 2026-10-26 vs L1 2026-10-31, otherwise byte-equal). Normalize
+ * the date token on BOTH sides; the annotation text after it stays verified.
+ */
+export function normalizeVolatileMarkers(content: string): string {
+  return content.replace(/Last Updated: \d{4}-\d{2}-\d{2}/g, 'Last Updated: <date>');
+}
+
+/**
+ * Locate the first divergent line between two (already normalized) strings.
+ * Returns null when equal; otherwise the 1-based line number plus both
+ * single-line excerpts (for the concise mismatch summary — never a full diff).
+ */
+function firstDivergence(
+  expected: string,
+  actual: string
+): { line: number; expectedExcerpt: string; actualExcerpt: string } | null {
+  const a = expected.split('\n');
+  const b = actual.split('\n');
+  const n = Math.min(a.length, b.length);
+  let i = 0;
+  while (i < n && a[i] === b[i]) i++;
+  if (i >= n && a.length === b.length) return null;
+  const excerpt = (s: string | undefined) => (s ?? '<end of file>').slice(0, 120);
+  return {
+    line: i + 1,
+    expectedExcerpt: excerpt(a[i]),
+    actualExcerpt: excerpt(b[i]),
+  };
+}
+
+/**
+ * Transform-aware L0→L1 parity for a platform instruction file (v0.5.0).
+ *
+ * Recomputes the publisher's own transform (applyGovernanceTransforms — the
+ * same function `propagate-to-templates.ts --governance-l1` writes L1 with)
+ * on the L0 content and requires the actual L1 file to match after
+ * volatile-marker normalization. Byte-equal = pass; a mismatch = FAIL with a
+ * concise diff summary (first divergent line + lengths, NOT the full diff).
+ *
+ * Exported pure (paths in, ParityCheckResult out) so the unit tests can drive
+ * it against temp-dir fixtures without touching repo files.
+ *
+ * Note: if the L0 structure drifts so far that a post-transform fatal guard
+ * inside applyGovernanceTransforms fires (die() → process.exit(1)), this
+ * subprocess exits 1 with the guard message on stderr — a loud, correct
+ * failure; the checker intentionally does not swallow it.
+ */
+export function checkTransformParity(
+  sourceFile: string,
+  targetFile: string,
+  filename: string
+): ParityCheckResult {
+  const base = {
+    file: filename,
+    tier: 'L0→L1' as const,
+    sourcePath: sourceFile,
+    targetPath: targetFile,
+  };
+
+  if (!existsSync(sourceFile)) {
+    return {
+      ...base,
+      status: 'fail',
+      discrepancies: [{
+        rule: 'file-exists',
+        section: 'source',
+        expected: sourceFile,
+        actual: '<file not found>',
+        severity: 'error',
+      }],
+    };
+  }
+
+  if (!existsSync(targetFile)) {
+    return {
+      ...base,
+      status: 'fail',
+      discrepancies: [{
+        rule: 'file-exists',
+        section: 'target',
+        expected: targetFile,
+        actual: '<file not found>',
+        severity: 'error',
+      }],
+    };
+  }
+
+  const sourceContent = readFileSync(sourceFile, 'utf-8');
+  const targetContent = readFileSync(targetFile, 'utf-8');
+  // targetPath is passed through to the transform (the publisher does the
+  // same) — constitution-scrub rules may key on it.
+  const expected = applyGovernanceTransforms(sourceContent, filename, targetFile);
+  const expectedNorm = normalizeVolatileMarkers(expected);
+  const actualNorm = normalizeVolatileMarkers(targetContent);
+
+  if (expectedNorm === actualNorm) {
+    return { ...base, status: 'pass', discrepancies: [] };
+  }
+
+  const div = firstDivergence(expectedNorm, actualNorm) ?? {
+    line: 0,
+    expectedExcerpt: '<equal prefixes, differing lengths>',
+    actualExcerpt: '<equal prefixes, differing lengths>',
+  };
+
+  return {
+    ...base,
+    status: 'fail',
+    discrepancies: [{
+      rule: 'governance-transform',
+      section: 'L0→L1 content',
+      expected: `transform(L0) [${expected.length} chars] line ${div.line}: ${div.expectedExcerpt}`,
+      actual: `L1 copy [${targetContent.length} chars] line ${div.line}: ${div.actualExcerpt}`,
+      line: div.line,
+      severity: 'error',
+    }],
+  };
+}
 
 /**
  * Check if a file is pre-resolved (has # @resolved-from: header).
@@ -640,41 +678,21 @@ async function main() {
     // Check L1
     const l1Path = join(process.cwd(), mappings.L1);
 
-    // For CLAUDE.md, GEMINI.md and CODEX.md, L0→L1 check is informational only
-    // (L1 has intentional CONSTITUTION.md → workspace standards transformation).
-    // CODEX.md joins per spec 2026-09-25-verifier-platform-expansion-design site
-    // 11 (D11); CODEX.md section parity stays deferred per that spec's D3.5 —
-    // no PARITY_RULES entry is invented for it.
-    // HERMES.md joins per ADR-0093 (same informational-only treatment — no
-    // PARITY_RULES entry is invented for it either).
+    // For the four platform instruction files, L0→L1 parity is transform-aware
+    // (v0.5.0, spec docs/designs/2026-10-31-platform-parity-transform-check-
+    // design.md): the checker recomputes the publisher's own
+    // applyGovernanceTransforms on the L0 content and requires the L1 copy to
+    // match (volatile-marker tolerance applies — see normalizeVolatileMarkers).
+    // This closes the spec 2026-09-25-verifier-platform-expansion-design D3.5
+    // CODEX/HERMES section-parity deferral and the ADR-0093 informational-only
+    // gap: instead of hand-written section rules (the dead PARITY_RULES
+    // approach removed in v0.5.0), there is exactly one definition of a
+    // correct L1 — the function that produces it.
     if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md' || sourceFile === 'CODEX.md' || sourceFile === 'HERMES.md') {
-      // Just verify L1 file exists, don't compare content
-      if (!existsSync(l1Path)) {
-        results.push({
-          file: sourceFile,
-          tier: 'L0→L1',
-          sourcePath: sourcePath,
-          targetPath: l1Path,
-          status: 'fail',
-          discrepancies: [{
-            rule: 'file-exists',
-            section: 'target',
-            expected: l1Path,
-            actual: '<file not found>',
-            severity: 'error',
-          }],
-        });
-        totalErrors += 1;
-      } else {
-        results.push({
-          file: sourceFile,
-          tier: 'L0→L1',
-          sourcePath: sourcePath,
-          targetPath: l1Path,
-          status: 'pass',
-          discrepancies: [],
-        });
-      }
+      const l1Result = checkTransformParity(sourcePath, l1Path, sourceFile);
+      results.push(l1Result);
+      if (l1Result.status === 'fail') totalErrors += l1Result.discrepancies.filter(d => d.severity === 'error').length;
+      if (l1Result.status === 'warning') totalWarnings += l1Result.discrepancies.filter(d => d.severity === 'warning').length;
     } else if (sourceFile === 'agents/pm.md') {
       // For agents/pm.md, check if L1 uses extends mechanism
       const l1Extends = usesExtends(l1Path);
@@ -925,9 +943,12 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-  if (import.meta.main) {
+// v0.5.0: run only as the entry script. The module is now also imported (by
+// tests/unit/platform-parity-transform.test.ts) for checkTransformParity —
+// an unguarded main() would execute the whole check on import.
+if (import.meta.main) {
+  main().catch(err => {
+    console.error('Fatal error:', err);
     process.exit(1);
-  }
-});
+  });
+}
