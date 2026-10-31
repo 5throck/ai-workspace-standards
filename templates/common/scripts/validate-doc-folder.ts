@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.2.1
+ * @version 1.2.2
+ * v1.2.2 (2026-10-31, spec 2026-10-31-learning-extraction-design Decision 0d-2):
+ *           allowlist gains `patterns/` — the new docs/ genre for variant-proven
+ *           reusable runtime shapes (docs/README.md §2 row is the contract).
  * v1.2.1 (2026-10-04): allowlist aligned with the docs consolidation (guides/ added;
  *           analysis/audits/superpowers removed from the manifest and the gate).
  * v1.2.0 (2026-10-04, spec 2026-10-04-docs-folder-manifest-design): --workspace mode —
@@ -43,7 +46,7 @@ const OPTIONAL_FOLDERS = [
 const ALLOWED_DIRS: ReadonlySet<string> = new Set([
   'adr', 'architecture', 'archive', 'constitution', 'decisions',
   'designs', 'evidence', 'examples', 'governance', 'graph-deltas', 'guides', 'lifecycle',
-  'reports', 'security', 'specs', 'standards', 'templates',
+  'patterns', 'reports', 'security', 'specs', 'standards', 'templates',
 ]);
 
 /** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the
