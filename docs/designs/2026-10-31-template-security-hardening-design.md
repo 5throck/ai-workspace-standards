@@ -236,6 +236,19 @@ L2/L3: variant instances converge via upgrade visits (settings.json and hook
 dedupe land through the normal propagation + JSON_MERGE path). No hand-edits
 in `Projects/co-*`.
 
+> **Implementation addendum (2026-10-31, automation-engineer):** the U-005 fix
+> surface is BOTH `.gemini/settings.json` copies — the propagation map's
+> `gemini-settings` domain (scripts/propagation-map.json) treats the L0 root
+> file as the shared-surface SSOT and overwrite-publishes it to
+> `templates/common/.gemini/settings.json` during dev-sync's propagate steps
+> (observed: a template-only edit was reverted to the L0 root's `Auto` within
+> the first sync run). The hardened values (Manual policy, 50-entry denylist,
+> `general.defaultApprovalMode`, `security.disableYoloMode`) are therefore
+> landed identically in `.gemini/settings.json` (L0) and the template, keeping
+> the shared surface identical across tiers per the domain contract. VA-04
+> checks shared-key presence only, and the added keys are not `claude_only`
+> (co-abap already carries them), so no variant gate is affected.
+
 ## R4 — Platform Impact
 
 | Platform | Impact | Files Affected |
