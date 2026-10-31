@@ -1,0 +1,110 @@
+schemaVersion: 1
+id: U-20261031-009
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:45:42.618+09:00'
+history:
+  - at: '2026-10-31T10:45:42.618+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T17:03:27.591+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T22:50:44.579+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T22:50:44.579+09:00'
+    from: review
+    to: done
+result: >-
+  L0/L1 migration policy landed (design 2026-10-31-graft-trail-migration-design,
+  PR #1780): skill SSOT renamed skills/graft -> skills/trail (registries +
+  lifecycle record), .gitignore trail-era paths (graft lines kept as legacy),
+  self-managed-surfaces carries both generations, upgrade-pass tolerance rules
+  (JSON_MERGE missing-helper hook pre-filter; .trail/-marker SEED_SKIP
+  retired-surface guard in upgrade-project v1.87.0). No fleet-wide trail init;
+  AGENTS.md graft block is tool-managed and untouched. Projects migrating via
+  trail init will no longer fight the pipeline on upgrade visits. L0 root's own
+  flip awaits its trail init (standing annotated WARNs).
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.25.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    graft 0.25 -> 0.28 renames the tool to Trail (@trailhq/trail-code) and
+    `graft upgrade` auto-runs `trail init`, which rewrites tracked repo surfaces
+    outside agent control: the AGENTS.md WORKSPACE-MANAGED graft block is
+    rewritten in place to trail markers (graft/ index path becomes
+    .trail/cache/, all graft commands become trail), opencode.json MCP entry
+    graft->trail, .claude/settings.json graft hooks swapped for .trail/hook.cjs,
+    tracked .mcp.json deleted, tracked
+    .claude/helpers/graft-{hooks,statusline}.cjs deleted, new .trail/ dir
+    created (cache self-gitignored, learnings committable). Template-managed
+    surfaces still carry graft-era references: the L0 skills/graft SSOT, the
+    .gitignore WORKSPACE-MANAGED graft-mirror block, and platform skill mirrors.
+    Every project that runs graft upgrade will produce this same working-tree
+    diff, and template reconciliation (l3-to-variant-pipeline / dev-sync
+    managed-block checks) may flag the rewritten managed blocks as drift. Needs
+    a coordinated L0/L1 decision: rename the skill SSOT to trail (or keep graft
+    with a trail-alias note), update the gitignore block for trail-era paths
+    (.trail/cache is self-managed via .trail/.gitignore), and define the mirror
+    policy after migration. Observed in co-develop on 2026-10-31; co-work,
+    co-export, co-game, co-price carry the same graft surfaces and will hit this
+    on upgrade.
+  affected_paths:
+    - .gitignore
+    - AGENTS.md
+    - opencode.json
+    - .claude/settings.json
+    - .mcp.json
+    - .claude/helpers/graft-hooks.cjs
+    - .claude/helpers/graft-statusline.cjs
+    - skills/graft/SKILL.md
+  identity_source: cwd
+  repro: >-
+    In any project with graft surfaces installed: run `graft upgrade` (0.25.x ->
+    0.28.1). The upgrade auto-runs `trail init --agents agents antigravity
+    claude hermes` and rewrites tracked files without an agent in the loop. `git
+    status` afterwards shows the deletion/modification set above. Then `bun
+    scripts/audit.ts` still passes, but the four remaining platform skill
+    mirrors reference pre-migration paths.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: .claude/helpers/graft-hooks.cjs'
+    - 'path_not_template_managed: .claude/helpers/graft-statusline.cjs'
+    - info:in_last_delivery .gitignore=false
+    - info:in_last_delivery AGENTS.md=false
+    - info:in_last_delivery opencode.json=false
+    - info:in_last_delivery .claude/settings.json=false
+    - info:in_last_delivery .mcp.json=false
+    - info:in_last_delivery .claude/helpers/graft-hooks.cjs=false
+    - info:in_last_delivery .claude/helpers/graft-statusline.cjs=false
+    - info:l0_origin skills/graft/SKILL.md <- skills/graft/SKILL.md
+    - info:in_last_delivery skills/graft/SKILL.md=false
+  dedupe_key: e4b408744e6acd9c2d906ecfd78d0b9bf736339228603a3ddeba8ae3157067fe
+  duplicates:
+    - project: co-develop
+      at: '2026-10-31T10:45:42.618+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1780
+    template_version: unreleased
+    summary: >-
+      L0/L1 migration policy landed (design
+      2026-10-31-graft-trail-migration-design, PR #1780): skill SSOT renamed
+      skills/graft -> skills/trail (registries + lifecycle record), .gitignore
+      trail-era paths (graft lines kept as legacy), self-managed-surfaces
+      carries both generations, upgrade-pass tolerance rules (JSON_MERGE
+      missing-helper hook pre-filter; .trail/-marker SEED_SKIP retired-surface
+      guard in upgrade-project v1.87.0). No fleet-wide trail init; AGENTS.md
+      graft block is tool-managed and untouched. Projects migrating via trail
+      init will no longer fight the pipeline on upgrade visits. L0 root's own
+      flip awaits its trail init (standing annotated WARNs).

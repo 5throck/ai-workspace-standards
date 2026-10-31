@@ -1,0 +1,66 @@
+schemaVersion: 1
+id: U-20261031-008
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:43.964+09:00'
+history:
+  - at: '2026-10-31T10:24:43.964+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-31T18:28:45.405+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.405+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/.claude/settings.json (and its variant copies) carry
+    duplicated hook entries: two identical SessionStart blocks running "git
+    config core.hooksPath .githooks" and two identical TaskCompleted blocks
+    running "bun scripts/audit.ts", causing duplicate hook execution, audit
+    noise, and drift between instances (co-consult and co-deck instances have
+    accumulated 5 SessionStart entries, exceeding their templates). A
+    template-level dedupe plus a sync-audit check (lifecycle-sync-audit.ts is
+    the natural home) would stop the drift.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: cwd
+  repro: >-
+    1. Read .claude/settings.json hooks in any variant instance and count
+    SessionStart entries (duplicate "git config core.hooksPath .githooks"
+    blocks) and TaskCompleted entries (duplicate "bun scripts/audit.ts" blocks).
+    2. co-consult and co-deck instances carry 5 SessionStart entries, exceeding
+    the template count.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .claude/settings.json=false
+  dedupe_key: 37cf053f0ce082dc8c81452922563df86fea967f49ff41ee0f3ee91f555e02d9
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:43.964+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

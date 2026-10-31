@@ -1,0 +1,54 @@
+schemaVersion: 1
+id: T-20261031-005
+kind: manual
+title: >-
+  [Governance] Rebase codex/OpenAI column of the 3-tier model registry to
+  GPT-6.x generation: high gpt-5.6-sol -> gpt-6.1-sol, medium gpt-5.6-terra ->
+  gpt-6.1-terra, low gpt-5.6-luna -> gpt-6-luna. Model IDs VERIFIED 2026-10-31
+  against developers.openai.com/api/docs/models (gpt-6.1-sol: near-Astra
+  performance at lower cost; gpt-6.1-terra: fast efficient visual reasoning and
+  computer use; gpt-6-luna: most efficient for high-volume tasks; note
+  gpt-6-astra is the flagship above sol - owner selected the standing
+  sol/terra/luna tier pattern). Scope: L0 = docs/workspace-schema.json
+  models.codex block, AGENTS.md section 3.6 WORKSPACE-MANAGED
+  tier-model-mapping, CODEX.md 3-Tier prose,
+  scripts/lib/model-literal-patterns.ts,
+  docs/constitution/05-multi-agent-architecture.md prose, 3 unit tests
+  (codex-user-prompt-gate, skill-lifecycle-audit-model-literals,
+  validate-model-registry-tier-coverage). L1/L2 = 18 template files (14 variant
+  AGENTS.md + templates/common AGENTS.md, CODEX.md, docs/workspace-schema.json,
+  scripts/lib/model-literal-patterns.ts). L3 = 65 files across 16 delivered
+  Projects/co-* (project-owned AGENTS.md/CODEX.md + delivered schema and pattern
+  snapshots) - converge via upgrade visits per TIER NORMALIZED precedent
+  (upgrade-project v1.75.0), never hand-edit. Gates: bun
+  scripts/validate-model-registry.ts (prose targets vs registry), bun
+  scripts/validate-templates.ts, unit tests. Per ADR-0074 this lands through a
+  design doc before implementation. Related: T-20261031-004 (recursive
+  tier-audit blind spot) shares the registry surface.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:26:32.223+09:00'
+history:
+  - at: '2026-10-31T10:26:32.223+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T22:13:47.771+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T22:13:47.786+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T22:13:47.801+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T22:13:47.816+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in registry/platform vocabulary batch (design
+  2026-10-31-registry-platform-vocabulary-design, PR #1777). L3 convergence (14
+  variants + 16 delivered projects) proceeds via standing upgrade visits - never
+  hand-edit; follow-up cleanup ticket for MM-01 gpt-5.6 alternation retirement
+  post-convergence noted in PR body.
+error: null

@@ -1,0 +1,66 @@
+schemaVersion: 1
+id: U-20261031-005
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:43.920+09:00'
+history:
+  - at: '2026-10-31T10:24:43.920+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T17:03:27.558+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T18:28:45.356+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.356+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    templates/common/.gemini/settings.json ships terminal.executionPolicy "Auto"
+    with a 10-entry denylist (rm -rf, git push --force, reboot, etc.). A
+    denylist-only guard fails open: curl, wget, osascript, security, ssh,
+    non-force git push, bun add of a typosquat, and bash script.sh all execute
+    without confirmation under the user's privileges. The co-abap instance ships
+    a hardened profile (executionPolicy "Off" plus a 78-entry deny list covering
+    .env reads, node -e/bun -e/python -c eval, and self-modification of
+    settings/.mcp.json) that the common template could adopt, at minimum
+    switching "Auto" to "Manual" and expanding the denylist. Affects 15 of 16
+    variant instances.
+  affected_paths:
+    - .gemini/settings.json
+  identity_source: cwd
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery .gemini/settings.json=false
+  dedupe_key: 0250c9ec6129744bdd0db6304809a967707bf8d15c362d10f5b5eedd96c72fd5
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:43.920+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

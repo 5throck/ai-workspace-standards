@@ -1,0 +1,67 @@
+schemaVersion: 1
+id: T-20261031-007
+kind: manual
+title: >-
+  [Governance] Add zcode (ZCode harness) as a first-class platform in the
+  model/tier registry vocabulary. Current state verified 2026-10-31: the
+  registry has 7 platforms (claude, gemini, antigravity, gemini-cli, codex,
+  hermes, zai - PLATFORMS in validate-model-registry.ts, mirrored by the models
+  and platform_surfaces keys in docs/workspace-schema.json); zcode is absent,
+  and zcode sessions today run under zai model ids via the host contract
+  (ListModels: account:zai-* plans expose GLM-5.3 and GLM-5.3-Flash at reasoning
+  levels low/high/max, default max). Four distinct platform vocabulary surfaces
+  exist and must stay in lockstep: (1) PLATFORMS in validate-model-registry.ts,
+  (2) models + platform_surfaces in docs/workspace-schema.json, (3)
+  PLATFORM_PROFILES delivery profiles in scripts/lib/platforms.ts
+  (claude/antigravity/codex/hermes only - registry-only platforms gemini-cli and
+  zai are NOT delivery profiles, a direct precedent), (4) PLATFORM_SKILL_BASES /
+  PLATFORM_MIRROR_DIRS (skills/ + .claude/.gemini/.agents/.codex/.hermes). ZCode
+  surface facts for evidence: agent definitions live at .zcode/agents/*.md
+  (harness frontmatter carries model + reasoning level + tools); skills already
+  load from the shared .agents/skills mirror; the harness loads AGENTS.md
+  section 0 bootstrap directly and no ZCODE.md exists today. Note: the zcode
+  string in docs/workspace-schema.json is only .zcodeignore in an ignore list,
+  not a platform. Scope: L0 = validate-model-registry.ts (PLATFORMS, possible
+  ZCODE.md proseTarget), docs/workspace-schema.json (models.zcode +
+  platform_surfaces row), AGENTS.md section 3.6 note + docs/constitution/05
+  prose (platform enumerations; the distinct tier-model set may not change if
+  zcode mirrors zai GLM ids), scripts/lib/platform-delivery.ts only if profile
+  status is granted, new ZCODE.md per the HERMES.md precedent (decision), unit
+  tests (platforms.test.ts, validate-model-registry-tier-coverage.test.ts).
+  L1/L2 = templates/common schema + scripts + AGENTS.md copies via managed
+  propagation. L3 = 16 delivered Projects/co-* via upgrade visits, never
+  hand-edit. Design-gate decisions: (a) zcode tier-to-model mapping (mirror zai
+  GLM ids vs distinct), (b) registry-only platform vs full delivery profile
+  (PLATFORM_PROFILES + PROFILE_OWNED_PATHS + ZCODE.md + scaffold --platform
+  selection), (c) platform_surfaces row values with evidence per surface, (d)
+  reasoning-level documentation alignment with T-20261031-006. Gates: bun
+  scripts/validate-model-registry.ts (coverage guard lockstep), bun
+  scripts/validate-templates.ts, unit tests. Related: T-20261031-004,
+  T-20261031-005, T-20261031-006 - consider one shared design cycle.
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:33:12.158+09:00'
+history:
+  - at: '2026-10-31T10:33:12.158+09:00'
+    from: null
+    to: backlog
+  - at: '2026-10-31T22:13:47.893+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-10-31T22:13:47.908+09:00'
+    from: waiting
+    to: running
+  - at: '2026-10-31T22:13:47.924+09:00'
+    from: running
+    to: review
+  - at: '2026-10-31T22:13:47.939+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in registry/platform vocabulary batch (design
+  2026-10-31-registry-platform-vocabulary-design, PR #1777). L3 convergence (14
+  variants + 16 delivered projects) proceeds via standing upgrade visits - never
+  hand-edit; follow-up cleanup ticket for MM-01 gpt-5.6 alternation retirement
+  post-convergence noted in PR body.
+error: null

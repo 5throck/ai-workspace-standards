@@ -1,0 +1,66 @@
+schemaVersion: 1
+id: U-20261031-002
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-10-31T10:24:32.004+09:00'
+history:
+  - at: '2026-10-31T10:24:32.004+09:00'
+    from: null
+    to: waiting
+  - at: '2026-10-31T18:28:45.306+09:00'
+    from: waiting
+    to: review
+  - at: '2026-10-31T18:28:45.306+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in template security hardening batch (design
+  2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+  per-ticket fix evidence; settings permission-surface reductions are
+  fail-closed.
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.25.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    .githooks/pre-rebase invokes gitleaks detect --no-banner --log-opts=...
+    without an explicit --config .gitleaks.toml flag, inconsistent with the
+    fleet-wide fix applied in pre-commit.ts (~line 470), pre-push.ts v1.7.0
+    (~line 209, U-20261028-018), and ci.yml (~line 96). The file's own comment
+    claims it honors the repo's .gitleaks.toml allowlist, but without --config
+    gitleaks can miss the dot-named file and silently run default rules,
+    dropping project-specific rules and allowlists during rebase scans. Affects
+    all variant instances (template-managed file).
+  affected_paths:
+    - .githooks/pre-rebase
+  identity_source: cwd
+  repro: >-
+    1. Add a file matching a project allowlist stopword in .gitleaks.toml to git
+    history. 2. Run .githooks/pre-rebase across that range. 3. gitleaks runs
+    without --config .gitleaks.toml (no existsSync guard), so the project
+    allowlist is ignored during rebase scans, unlike pre-commit/pre-push/ci.yml
+    which pass it explicitly.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .githooks/pre-rebase=false
+  dedupe_key: 3bc3a264076cddfa73d6d65bcc1985193a9a34564b6bcc793d91e32e3b237af1
+  duplicates:
+    - project: co-security
+      at: '2026-10-31T10:24:32.004+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1776
+    template_version: unreleased
+    summary: >-
+      Fixed in template security hardening batch (design
+      2026-10-31-template-security-hardening-design, PR #1776): see PR body for
+      per-ticket fix evidence; settings permission-surface reductions are
+      fail-closed.

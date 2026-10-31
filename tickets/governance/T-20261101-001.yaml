@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261101-001
+kind: manual
+title: >-
+  co-develop: restore 3 project-adopted skills silently deleted by the 0.26.0
+  upgrade visit (sarif-exporter, stride-threat-matrix, mece-logic-auditor) —
+  upgrade decision log said PRESERVE ('project-only skill — no template
+  counterpart, preserved') while the delivery removed primary + all 5 mirrors
+  and rewrote registries coherently; finding-reconciliation frontmatter was left
+  with a dangling relates_to: sarif-exporter (healed in PR #197). Restoration
+  needs a proper decision + registry-consistent re-adoption, NOT a hand-edit
+  (regenerated registries would fight it). Also adjudicate the upgrade-engine
+  contradiction: silent deletion despite PRESERVE verdicts is a candidate
+  upgrade-project bug beyond U-20261101-001. Evidence: Projects/co-develop PR
+  #197, wave batch B report 2026-11-01
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-01T01:16:48.173+09:00'
+history:
+  - at: '2026-11-01T01:16:48.173+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

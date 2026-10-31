@@ -1,0 +1,51 @@
+schemaVersion: 1
+id: U-20261101-001
+kind: manual
+title: Upstream request from co-news
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-01T00:48:10.350+09:00
+history:
+  - at: 2026-11-01T00:48:10.350+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-news
+  variant: co-news
+  template_version: 0.26.0
+  source: project/co-news
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'Template 0.26.0 upgrade leaves delivered projects in a state that hard-fails the Model registry gate (audit.ts / validate-model-registry.ts §3.6 tier-model-mapping + 3-Tier mapping checks). Reproduced on the wave canary (Projects/co-news, 0.25.0 -> 0.26.0, upgrade-project.ts v1.87.0): the MERGE pass stamps template-authoritative gpt-6.1-sol/terra/luna prose into AGENTS.md §3.6 WORKSPACE-MANAGED tier-model-mapping and CODEX.md 3-Tier mapping, but the SCHEMA_MERGE pass (mergeWorkspaceSchemaData, project-wins on existing leaves, scripts/lib/upgrade-policy.ts v1.33.0) withholds the matching docs/workspace-schema.json models.codex change as TEMPLATE_DELTA WARN rows (models.codex.high/medium/low: project gpt-5.6-* vs template gpt-6.1-*). The prose-registry comparison is exact-string equality with no convergence-window tolerance, so all six checks ERROR and the commit is blocked. Expected per docs/designs/2026-10-31-registry-platform-vocabulary-design.md R2.2: L3 registry convergence happens ''via upgrade visits ... never hand-edit'', i.e. the upgrade visit itself should land surface #1 (models.codex three id values). The two same-day designs are in structural conflict: SCHEMA_MERGE project-wins (2026-10-31-workspace-schema-merge-delivery-design.md §4) makes that convergence unreachable for any project whose registry predates the vocabulary rebase — which is all 16 wave projects.'
+  affected_paths:
+    - scripts/upgrade-project.ts
+    - scripts/lib/upgrade-policy.ts
+    - scripts/validate-model-registry.ts
+    - templates/common/docs/workspace-schema.json
+    - templates/common/AGENTS.md
+    - templates/common/CODEX.md
+  identity_source: self_declared
+  repro: '1. On any delivered project with docs/workspace-schema.json models.codex = gpt-5.6-* (pre-0.26.0 state) on a clean main at 0.25.0. 2. bun scripts/upgrade-project.ts . --dry-run — passes except ci.yml MIGRATION_UNSAFE. 3. bun scripts/upgrade-project.ts . --yes --accept-ci-perm-diff — completes, decision log ERROR 0, TEMPLATE_DELTA WARN rows for models.codex.*. 4. git add -A && bun scripts/dev-sync.ts ... — Step 3.9 spec-check FAILs: 6x ERROR model registry gate (AGENTS.md x3 distinct-set mismatch, CODEX.md x3 codex mismatch), ''Fix before committing''. Verified live on Projects/co-news 2026-11-01.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - 'path_not_template_managed: templates/common/docs/workspace-schema.json'
+    - 'path_not_template_managed: templates/common/AGENTS.md'
+    - 'path_not_template_managed: templates/common/CODEX.md'
+    - first_request_from_project
+    - info:l0_origin scripts/upgrade-project.ts <- scripts/upgrade-project.ts
+    - info:in_last_delivery scripts/upgrade-project.ts=false
+    - info:in_last_delivery scripts/lib/upgrade-policy.ts=true
+    - info:in_last_delivery scripts/validate-model-registry.ts=true
+    - info:in_last_delivery templates/common/docs/workspace-schema.json=false
+    - info:in_last_delivery templates/common/AGENTS.md=false
+    - info:in_last_delivery templates/common/CODEX.md=false
+  dedupe_key: 20743cbd7bece7ee91e2eaae39fe901c015a70904899e9081981d2af37622037
+  duplicates:
+    - project: co-news
+      at: 2026-11-01T00:48:10.350+09:00
