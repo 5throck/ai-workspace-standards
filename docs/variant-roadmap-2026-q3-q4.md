@@ -223,3 +223,14 @@ bun scripts/validate-templates.ts
 - **Language Requirement**: All documentation, code comments, and error messages in this roadmap and associated implementations MUST be written in **English** per [CONSTITUTION.md](../CONSTITUTION.md).
 - **Cross-Referencing & Specification Alignment**: All relative links within `docs/` must remain valid and fully aligned with [VERSION_MANIFEST.md](VERSION_MANIFEST.md), [Variant Contract](governance/variant-contract.md), [Variant Registry Architecture](designs/variant-registry-architecture-design.md), and [Variant Templates Advancement Design](designs/variant-templates-advancement-design.md).
 - **Template Inheritance Architecture (`template-v0.6.0`)**: All variant templates strictly inherit from the `template-v0.6.0` L0 -> L1 -> L2 model. Any core helper scripts or shared tools (`dev-sync.ts` v1.5.0, `test-runner.ts` v1.1.0, `validate-templates.ts`) introduced or modified in this roadmap must be tracked in `script_manifest` within `variant.json` and registered for synchronized downstream updates via `upgrade-project.ts`.
+
+---
+
+## 6. Topology Markers (post-roadmap, hub-and-spoke v2)
+
+### 6.1 Hub-and-Spoke v2 Topology Wave — 🔄 **In Progress** (2026-11-02)
+- **Marker 6.1.1: Phase 1 Complete — 3 Hubs Canonical, 71-Entry `hub_topology` Registry, `co-architect` Template Beta** — ✅ delivered
+  - Hubs pinned: `co-develop`, `co-design`, `co-security` (canonical domain-asset owners); static `hub_topology` registry (71 entries) live in `docs/workspace-schema.json` with validator legs; `co-architect` template promoted to beta (spec `2026-11-01-hub-consolidation-design`; Phase 1 batches merged through PR #1804).
+  - Boundary protocol (hub = service provider, local quality gates, hub escalation + SEV1–SEV3 incident tiers, workspace-root PM final adjudication) authored into the L1 COMMON-AGENTS zone in Phase 2 step 0 for one-pass delivery in the upgrade wave.
+- **Marker 6.1.2: Phase 2 — Fleet Upgrade Wave** — 🔄 starting (per-repo dry-run gates; delivers the boundary protocol to all 15 variant AGENTS.md files in one pass)
+- **Marker 6.1.3: Phase 3 — Spoke→Hub Delegation Channel** — ⏸ behind Checkpoint B (user adoption-evidence review; until activation the upstream-request path carries hub escalation)

@@ -3,6 +3,8 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Added
+- **[2026-11-02]**: Hub-and-spoke v2 boundary protocol (spec `2026-11-01-hub-consolidation-design`, Phase 2 step 0) — `templates/common/AGENTS.md` COMMON-AGENTS zone gains a "Hub-and-Spoke Topology" section: hubs (`co-develop`/`co-design`/`co-security`) are service providers, not superior organizations; routine quality gates stay local through each project's PM Gateway; hard problems escalate to the hub via delegation (Phase 3 channel; upstream-request path until then); SEV1–SEV3 incident tiers triggerable locally without pre-authorization; workspace-root PM holds final adjudication. Reaches every variant's `AGENTS.md` through the COMMON-AGENTS marker-inject domain (propagation-map `governance-agents`, 15 variants re-injected this batch); the Phase 2 upgrade wave delivers it to projects. Phase 1 hub state included for wave consumers: `hub_topology` registry (71 entries) in the workspace-schema pair and the `co-architect` template (beta).
 
 ## [0.27.0] - 2026-11-01
 ### Changed
