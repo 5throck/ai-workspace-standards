@@ -201,6 +201,10 @@ PM owns team composition and skill-change rulings. Hiring and firing: PM decides
 
 The tier of a dispatched subagent selects the model that the platform dispatch mechanism uses for that subagent. The tier of a session-hosted agent (the PM) is a minimum capability floor, because the user selects the session model. A higher model is allowed. A model below the floor is a warning. The rule applies on every platform. The PM states its model in one line, `PM running on: <model>`, in the header of its execution plan. Full decision: design 2026-09-29-pm-tier-capability-floor-design in the workspace root docs/designs/.
 
+## Hub-and-Spoke Topology
+
+Hubs (co-develop, co-design, co-security) own their domain doctrine and tools as SERVICE PROVIDERS to variant projects, not as superior organizations. Routine quality gates (code review, security scan, local QA) run LOCALLY through each project's own PM Gateway. Hard problems in dev/design/security domains escalate to the hub via delegation (the channel activates in Phase 3; until then use the upstream-request path per the governance workflow, docs/governance/agents/workflows.md). Security incidents are classified locally without pre-authorization: SEV1 = confirmed secret/credential exposure in a tracked repo → notify hub security PM + user immediately and block pushes; SEV2 = exploitable shared-infrastructure vulnerability → same-day hub report; SEV3 = routine finding → normal tickets. Final adjudication for any hub-spoke conflict: workspace-root PM.
+
 <!-- COMMON-AGENTS:END -->
 
 ## §4: Other Workflows
