@@ -279,3 +279,77 @@ in `Projects/co-*`.
 - No co-abap (or co-security) profile relaxation — projects keep stricter settings.
 - No graft devDependency pinning (deferred; see R2.4.3).
 - No retro-edit of co-security's ticket text where this design recorded corrections (U-005 count, U-007 surface, U-008 template claim) — the corrections live here.
+
+## Addendum (2026-11-01): overlay propagation gap
+
+**Found by fleet exploration, 2026-11-01. Same spec id
+(`2026-10-31-template-security-hardening`) — no new registration.**
+
+### The finding
+
+The R2.5 fix landed in `templates/common/.gemini/settings.json` + the L0 root
+copy only (PR #1776). Every variant template also carries an overlay
+`templates/co-*/.gemini/settings.json` that WINS over common in the effective
+template tree — and the R2.5 floor never reached it. Verified counts
+(re-verified 2026-11-01, supersedes the R1.1 row's instance-level counting):
+
+- All **14** variant templates carry a gemini overlay. **13 of 14** pinned
+  `terminal.executionPolicy: "Auto"` + a 10-entry denylist (a pure subset of
+  the floor's 50 — replacement is lossless, verified programmatically).
+  R2.5's floor was therefore a common-only fact at the template layer.
+- **co-abap**: `Off` + 78 entries — exempt by superiority, untouched (R6
+  already protects it; it exceeds the floor on both axes).
+- **co-architect** has no variant template at all — as an overlay-less
+  project it received common's `Manual` + 50 directly. This is why the wave
+  appeared to deliver: the only overlay-less instance was the one that got
+  the floor.
+- **co-security regressed Manual→Auto.** Its project copy had been manually
+  hardened to `Manual` + 63 entries (recorded in R1.1 as already hardened).
+  The wave re-delivered its overlay's `Auto` policy line over the hardened
+  scalar (the 63-entry denylist survived the merge). Observed state
+  2026-11-01: `policy=Auto, denyList=63` — the denylist of a Manual-era
+  hardening under an Auto policy. The design's own R1.1 record vs. today's
+  observed state is the regression evidence (project copies are gitignored,
+  so no commit hash is citable for the flip).
+
+### The fix (landed 2026-11-01)
+
+Overlays are raised to the floor: for every
+`templates/co-*/.gemini/settings.json` whose `terminal.executionPolicy` ranks
+below common's (`Auto` < `Manual` < `Off`), set the policy to `Manual` and
+replace `terminal.denyList` with the template's 50-entry list. Only the two
+policy keys are touched — overlay-specific hooks, `mcpServers`, `_comment`,
+`artifact.reviewPolicy`, and `mcp.toolApproval` are preserved. Stricter
+overlays stay verbatim: co-abap (`Off` + 78) is the only one today; any
+future overlay already at-or-above the floor is skipped by the same rule.
+
+**co-security regression: healed by this change at its next upgrade visit.**
+Mechanism (verified in `scripts/lib/upgrade-policy.ts` `mergeSettingsData`):
+scalars are template-wins — the overlay's `Manual` overwrites the regressed
+`Auto`; arrays are unioned — the overlay's 50 entries merge with the
+project's 63 (a superset), so the stricter local list survives. No
+de-hardening, no hand-edit in `Projects/co-security`.
+
+**Validator arm**: `validate-templates.ts` v1.68.0 adds a WARN-level floor
+check (`gemini-execution-policy-floor`) inside the existing VA-04 platform
+settings parity pass — a variant overlay's `terminal.executionPolicy` must
+not rank weaker than common's (`Off` > `Manual` > `Auto`). Natural home: VA-04
+already parses every variant overlay's gemini settings against common.
+
+### The `Off` decision: formally deferred, with soak criteria
+
+R2.5 deferred going full `Off` "after one soak cycle" — stated plainly, that
+deferral had **no criteria and the treatment never reached the population**:
+13 of 14 overlays kept pinning `Auto`, so no soak of `Manual` at the template
+layer ever occurred. The deferral is hereby formalized:
+
+- **Duration**: ≥ 2 weeks after this overlay fix lands fleet-wide
+  (i.e., after upgrade visits actually deliver `Manual` to overlay-carrying
+  projects — template-layer landing alone does not start the clock).
+- **Signals collected during soak**: prompt-frequency complaints (Manual
+  prompting too disruptive), blocked-command hits (denyList false positives),
+  incidents (any security event where Manual/Auto policy was a factor).
+- **Decider**: PM + user, jointly. No auto-revert, no auto-tighten.
+
+Counts corrected en passant: the wave-era brief said "11-entry" overlay
+denylists — actual is 10; co-abap is 78 entries (R1.1's own count), not 79.
