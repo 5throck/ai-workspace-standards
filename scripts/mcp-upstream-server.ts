@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
+//          Phase 3a kanban core): upstream_request_status gains `priority` (and `sev`
+//          when set) per request; NEW read-limited tool upstream_request_reprioritize
+//          {id, priority} — priority-only writes (never status/content/triage), alias
+//          mapping through docs/templates/hub-kanban-aliases.json, the actor recorded
+//          in the ticket's history[] as spoke-pm:<project> with the GATEWAY-DERIVED
+//          identity (cwd > client_roots; self_declared callers are refused — identity
+//          is never client-asserted for a write), ownership checked against
+//          upstream.project, spoke caps +1 level per ticket per 24h enforced via
+//          helpers/reprioritize.ts, cap violations feeding the 3-strike counter
+//          (.pipeline-state/hub-reprioritize-strikes.json), and P0/urgent impossible
+//          via MCP (typed error: P0 requires user action via ticket.ts).
 // v1.11.0 (2026-10-26, T-20261026-009, finding #29): ticket-id allocation no longer
 //           double-increments on retry. The loop re-ran nextSeqForToday() on every
 //           attempt AND added the attempt counter, so a retry that followed a
@@ -101,15 +113,16 @@ import { join, dirname, resolve, basename, isAbsolute, sep } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
-import { withTicketLock } from './helpers/ticket-store.ts';
+import { withTicketLock, readTicket, reprioritizeTicket, loadKanbanAliases } from './helpers/ticket-store.ts';
 import { kstDate, kstIso } from './helpers/kst-time.ts';
-import { upstreamIdentitySource, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
+import { upstreamIdentitySource, resolvePriorityInput, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
+import { ReprioritizeRefusedError } from './helpers/reprioritize.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.11.0';
+export const SERVER_VERSION = '1.12.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -1085,6 +1098,10 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
     .filter(({ ticket }) => ticket.upstream.project === project && (p.id === undefined || ticket.id === p.id))
     .map(({ ticket }) => ({
       id: ticket.id, status: ticket.status, triage: ticket.upstream.triage, created_at: ticket.created_at,
+      // v1.12.0 (hub-consolidation §5.3): read-only priority (and sev when set) join
+      // the status payload for the delegation kanban view.
+      priority: ticket.priority,
+      ...(ticket.sev !== undefined ? { sev: ticket.sev } : {}),
       resolution: declared ? undefined : (ticket.upstream.resolution ?? null),
     }))
     .sort((a, b) => b.id.localeCompare(a.id))
@@ -1093,6 +1110,70 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
   // Same answer for "does not exist" and "belongs to another project".
   if (p.id !== undefined && mine.length === 0) return { error: { code: -32602, message: 'not found' } };
   return { result: { requests: mine } };
+}
+
+// ---------------------------------------------------------------------------------------
+// v1.12.0 — upstream_request_reprioritize (hub-consolidation design §5.3). Read-limited
+// write: priority-only, riding the existing identity/lock/audit machinery.
+// ---------------------------------------------------------------------------------------
+
+function handleReprioritizeRequest(params: unknown, identity: IdentityResult): Outcome {
+  // Identity tiers reused verbatim (cwd > client_roots > self_declared) — the actor is
+  // GATEWAY-DERIVED, never client-asserted. A self-declared project_root is fine for
+  // filing a flagged ticket, but an unattested caller cannot WRITE priority.
+  if (!identity.ok) return { error: identity.error };
+  const resolvedId = identity.id;
+  if (resolvedId.source === 'self_declared') {
+    return { error: { code: -32602, message: 'reprioritize requires an attested identity (working directory or client workspace roots) — self-declared project_root callers cannot write priority' } };
+  }
+  const project = resolvedId.project.name;
+
+  const p = (params ?? {}) as Record<string, unknown>;
+  if (typeof p !== 'object' || Array.isArray(p)) return { error: { code: -32602, message: 'invalid params: arguments must be an object' } };
+  for (const key of Object.keys(p)) {
+    if (key !== 'id' && key !== 'priority') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
+  }
+  if (typeof p.id !== 'string' || !/^U-\d{8}-\d{3,4}$/.test(p.id)) return { error: { code: -32602, message: 'invalid params: id' } };
+  if (typeof p.priority !== 'string') return { error: { code: -32602, message: 'invalid params: priority' } };
+
+  // Alias mapping through the kanban alias table (P0-P3 or the canonical enum).
+  const aliases = loadKanbanAliases(WORKSPACE_ROOT);
+  const to = resolvePriorityInput(p.priority, aliases);
+  if (!to) {
+    return { error: { code: -32602, message: `invalid params: priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join('|')}) or a canonical priority (got: ${p.priority})` } };
+  }
+  // P0 is impossible via MCP by design (design §5.2): typed error, no strike recorded.
+  if (to === 'urgent') {
+    return { error: { code: -32602, message: 'P0 requires user action via ticket.ts — upstream_request_reprioritize cannot set urgent' } };
+  }
+
+  // Ownership: "not found" for a missing ticket AND for another project's ticket
+  // (same answer-for-both semantics as status); reprioritizeTicket re-checks under
+  // the ticket lock via ownerProject.
+  let before: ReturnType<typeof readTicket>;
+  try {
+    before = readTicket(ticketsDir(), p.id);
+  } catch {
+    return { error: { code: -32602, message: 'not found' } };
+  }
+
+  try {
+    const t = reprioritizeTicket(ticketsDir(), p.id, to, `spoke-pm:${project}`, {
+      stateDir: join(WORKSPACE_ROOT, '.pipeline-state'),
+      ownerProject: project,
+    });
+    appendAuditLog({ project, outcome: 'reprioritize', id: t.id, from: before.priority, to, priority_from: before.priority, priority_to: t.priority, ...identityAuditFields(resolvedId) });
+    return { result: { id: t.id, priority: t.priority, status: t.status } };
+  } catch (err) {
+    if (err instanceof ReprioritizeRefusedError) {
+      // Typed policy refusal (cap / raise-window / frozen). Refusals are audit-logged
+      // via the capped reject path; cap violations were already recorded in the
+      // 3-strike ledger by the store.
+      appendRejectAudit(project, { project, outcome: 'reject_reprioritize', id: p.id, code: err.code, reason: err.message });
+      return { error: { code: -32602, message: err.message } };
+    }
+    throw err;
+  }
 }
 
 interface JsonRpcMessage {
@@ -1176,6 +1257,17 @@ function getTools() {
         },
       },
     },
+    {
+      name: 'upstream_request_reprioritize',
+      description: 'Change ONLY the priority (P0-P3 alias or low|normal|high|urgent) of one of this project\'s upstream requests — never status, content or triage; every change is appended to the ticket history with the server-derived caller identity. Kanban aliases: P0=urgent, P1=high, P2=normal, P3=low. Spoke callers are capped at +1 level per ticket per 24h and can never set urgent; P0 requires user action via ticket.ts.',
+      inputSchema: {
+        type: 'object', additionalProperties: false, required: ['id', 'priority'],
+        properties: {
+          id: { type: 'string', pattern: '^U-\\d{8}-\\d{3,4}$', description: 'The upstream request id (from upstream_request_status).' },
+          priority: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3', 'low', 'normal', 'high', 'urgent'] },
+        },
+      },
+    },
   ];
 }
 
@@ -1187,6 +1279,7 @@ async function dispatchToolCall(params: unknown): Promise<Outcome> {
     return handleCreateRequest(toolParams.arguments, cwd, await resolveIdentity(toolParams.arguments, cwd));
   }
   if (toolName === 'upstream_request_status') return handleStatusRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
+  if (toolName === 'upstream_request_reprioritize') return handleReprioritizeRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
   return { error: { code: -32602, message: `unknown tool: ${String(toolName)}` } };
 }
 

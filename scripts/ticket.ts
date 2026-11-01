@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
+//          Phase 3a kanban core): delegation kanban alias layer — create gains
+//          --priority-alias P0|P1|P2|P3 (maps through docs/templates/
+//          hub-kanban-aliases.json; mutually exclusive with --priority); new
+//          `reprioritize <id> --priority <alias-or-enum> --actor <user|hub-pm|
+//          spoke-pm:NAME>` command (P0 user-only hard error; spoke +1 level per
+//          ticket per 24h; violations feed the 3-strike counter in the gitignored
+//          .pipeline-state/hub-reprioritize-strikes.json — a frozen project's raises
+//          are refused with a typed error); triage bypasses the human inbox step for
+//          sev=SEV1 upstream tickets (auto-ready + history[] marker; SEV2/no-sev do
+//          NOT bypass — negative-tested). Store: helpers/reprioritize.ts v1.0.0.
 // v1.12.0 (2026-10-29, T-20261029-001): doctor arms the prose-fragment lint —
 //          scans every ticket's result + upstream.resolution.summary with the
 //          report-only corruptedProseFinding() detector (ticket-schema v1.9.0)
@@ -47,11 +58,12 @@ import {
   createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
   resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
   archiveDirFor, archiveCandidates, archiveTickets, restoreTicket, DEFAULT_ARCHIVE_DAYS,
-  repairTicketHistory,
+  repairTicketHistory, loadKanbanAliases, reprioritizeTicket, autoReadySev1Ticket,
 } from './helpers/ticket-store.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
-import { PRIORITIES, corruptedProseFinding } from './helpers/ticket-schema.ts';
+import { PRIORITIES, corruptedProseFinding, resolvePriorityInput } from './helpers/ticket-schema.ts';
+import { parseActor, ReprioritizeRefusedError } from './helpers/reprioritize.ts';
 
 // Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
 // subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
@@ -165,7 +177,23 @@ try {
       if (priorityFlag !== undefined && !(PRIORITIES as readonly string[]).includes(String(priorityFlag))) {
         fail(`--priority must be one of ${PRIORITIES.join('|')} (got: ${priorityFlag})`);
       }
-      const priority = (priorityFlag as Priority) ?? 'normal';
+      // v1.13.0 (hub-consolidation §5.1): delegation kanban alias on create —
+      // P0|P1|P2|P3 maps through docs/templates/hub-kanban-aliases.json onto the
+      // canonical enum. Mutually exclusive with --priority (one input, one surface).
+      // The CLI is the user's surface, so P0 is allowed here (agent actors must use
+      // reprioritize, where P0 is a hard error).
+      const aliasFlag = flags['priority-alias'];
+      let aliasPriority: Priority | undefined;
+      if (aliasFlag !== undefined) {
+        if (priorityFlag !== undefined) fail('--priority and --priority-alias are mutually exclusive — pass one');
+        const aliases = loadKanbanAliases(workspaceRoot);
+        const mapped = aliases.priorityAliases[String(aliasFlag)];
+        if (mapped === undefined) {
+          fail(`--priority-alias must be one of ${Object.keys(aliases.priorityAliases).join('|')} (got: ${aliasFlag})`);
+        }
+        aliasPriority = mapped;
+      }
+      const priority = aliasPriority ?? ((priorityFlag as Priority | undefined) ?? 'normal');
       const notBeforeFlag = flags['not-before'];
       if (notBeforeFlag !== undefined) {
         const v = String(notBeforeFlag);
@@ -183,12 +211,12 @@ try {
       const notBefore = notBeforeFlag as string | undefined;
       if (flags.manual) {
         const title = positional[0];
-        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--not-before YYYY-MM-DD]');
+        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD]');
         const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore });
         console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}`);
       } else {
         const serviceId = positional[0];
-        if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--inputs \'{"k":"v"}\']');
+        if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--priority-alias P0|P1|P2|P3] [--inputs \'{"k":"v"}\']');
         const catalog = loadCatalog(catalogPath);
         if (!catalog.services.some(s => s.id === serviceId)) fail(`unknown service id: ${serviceId} (see services.yaml)`);
         let inputs: Record<string, string> | undefined;
@@ -291,6 +319,8 @@ try {
       console.log(`   Status: ${ticket.status}`);
       console.log(`   Kind: ${ticket.kind}`);
       console.log(`   Priority: ${ticket.priority}`);
+      if (ticket.sev) console.log(`   Sev: ${ticket.sev}`);
+      if (ticket.blocked_reason) console.log(`   Blocked: ${ticket.blocked_reason}`);
       if (ticket.kind === 'service') {
         console.log(`   Service: ${ticket.service}`);
       } else {
@@ -313,8 +343,50 @@ try {
         fail('usage: ticket.ts triage <U-id> <inbox|ready> [--confirm-reviewed] — ready on a flagged ticket requires --confirm-reviewed');
       }
       const { dir, id: bareId } = resolveTicketDir(id);
+      // v1.13.0 (hub-consolidation §5.1): SEV1 bypass-triage — an SEV1 upstream ticket
+      // is auto-ready, skipping the human inbox step (history[] marker records the
+      // bypass). NEGATIVE rule: sev=SEV2/SEV3 or no sev never bypasses — the normal
+      // human triage path below is the only route to ready for those.
+      const peek = readTicket(dir, bareId);
+      if (peek.sev === 'SEV1') {
+        const t = autoReadySev1Ticket(dir, bareId);
+        console.log(`✅ ${id}: sev=SEV1 bypass-triage — upstream.triage=ready (auto), status=${t.status}`);
+        break;
+      }
       const t = setUpstreamTriage(dir, bareId, verdict, { confirmReviewed: flags['confirm-reviewed'] === true });
       console.log(`✅ ${id}: upstream.triage=${verdict}, status=${t.status}`);
+      break;
+    }
+    case 'reprioritize': {
+      // v1.13.0 (hub-consolidation §5.2) — priority-only change with governance:
+      // P0/urgent is user-only (hard error for agents); spoke actors are capped at
+      // +1 level per ticket per 24h; cap violations feed the 3-strike counter
+      // (.pipeline-state/hub-reprioritize-strikes.json, gitignored) and a frozen
+      // project's raises are refused with a typed error pending user review.
+      const { positional, flags } = parseFlags(rest);
+      const id = positional[0];
+      const priorityArg = flags.priority;
+      const actorArg = flags.actor;
+      if (!id || priorityArg === undefined || actorArg === undefined) {
+        fail('usage: ticket.ts reprioritize <id> --priority <P0|P1|P2|P3|low|normal|high|urgent> --actor <user|hub-pm|spoke-pm:NAME>');
+      }
+      const actor = parseActor(String(actorArg));
+      if (!actor) fail(`--actor must be user | hub-pm | spoke-pm:NAME (got: ${actorArg})`);
+      const aliases = loadKanbanAliases(workspaceRoot);
+      const to = resolvePriorityInput(String(priorityArg), aliases);
+      if (!to) {
+        fail(`--priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join('|')}) or a canonical priority (${PRIORITIES.join('|')}) (got: ${priorityArg})`);
+      }
+      const { dir, id: bareId } = resolveTicketDir(id);
+      try {
+        const t = reprioritizeTicket(dir, bareId, to, actor, { stateDir: join(workspaceRoot, '.pipeline-state') });
+        console.log(`✅ ${id}: priority ${t.priority} (actor ${actor})`);
+      } catch (err) {
+        if (err instanceof ReprioritizeRefusedError) {
+          fail(`reprioritize refused [${err.code}]: ${err.message}`);
+        }
+        throw err;
+      }
       break;
     }
     case 'resolve': {
@@ -499,7 +571,7 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       break;
     }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|board|doctor|archive|repair-history> ...');
+      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|reprioritize|board|doctor|archive|repair-history> ...');
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {

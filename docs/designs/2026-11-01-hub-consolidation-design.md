@@ -190,6 +190,7 @@ SEV (incident severity, SEV1–SEV3) is a **separate ticket field**, not a prior
 - **P0 is settable by USER only.** Agents (spoke PMs, hub PMs) can set P1–P3.
 - **Spoke-initiated raises are capped at 1 level per ticket per 24h** (P3→P2 today, P2→P1 tomorrow at the earliest).
 - **Violations feed the 3-strike counter** (the 2026-10-31 trust-model rule): three cap violations freeze the offending spoke's priority-raising for the hub (auto-P3 submissions) pending user review.
+- **Implementation pointer (Phase 3a)**: the machine-readable alias table lives at `docs/templates/hub-kanban-aliases.json` (shape-validated by `validateKanbanAliases` in `scripts/helpers/ticket-schema.ts`); the 3-strike counter is the gitignored `.pipeline-state/hub-reprioritize-strikes.json`, keyed by requesting project and written by `scripts/helpers/reprioritize.ts` (no reader UI — inspect the file directly).
 
 ### 5.3 Upstream MCP extension (minimal)
 

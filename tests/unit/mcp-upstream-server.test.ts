@@ -16,7 +16,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { load, JSON_SCHEMA } from 'js-yaml';
+import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import { validateTicket, upstreamIdentitySource } from '../../scripts/helpers/ticket-schema.ts';
 import { listTickets, nextServiceTicket } from '../../scripts/helpers/ticket-store.ts';
 import { kstDate } from '../../scripts/helpers/kst-time.ts';
@@ -225,7 +225,7 @@ describe('protocol', () => {
     s.raw(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }));
     const [a, b] = await Promise.all([s.send('initialize', INIT_PARAMS), s.send('tools/list')]);
     expect(a.error).toBeUndefined();
-    expect(b.result.tools.length).toBe(2);
+    expect(b.result.tools.length).toBe(3);
   });
 
   test('internal failure answers -32603 instead of staying silent', async () => {
@@ -252,7 +252,7 @@ describe('13.1 initialize / tools', () => {
     expect(init.result.instructions.length).toBeGreaterThan(50);
     expect(init.result.instructions).toContain('LOCAL-PATCH(upstream-request:');
     const list = await s.send('tools/list');
-    expect(list.result.tools.map((t: any) => t.name).sort()).toEqual(['upstream_request_create', 'upstream_request_status']);
+    expect(list.result.tools.map((t: any) => t.name).sort()).toEqual(['upstream_request_create', 'upstream_request_reprioritize', 'upstream_request_status']);
     for (const t of list.result.tools) expect(t.inputSchema.additionalProperties).toBe(false);
   });
 });
@@ -1078,7 +1078,7 @@ describe('13.11 status', () => {
     expect(listB.body.requests.map((x: any) => x.id)).toEqual([rb.body.id]);
     expect(JSON.stringify(listA.body)).not.toContain('secret-B');
     expect(JSON.stringify(listB.body)).not.toContain('secret-A');
-    expect(Object.keys(listA.body.requests[0]).sort()).toEqual(['created_at', 'id', 'resolution', 'status', 'triage']);
+    expect(Object.keys(listA.body.requests[0]).sort()).toEqual(['created_at', 'id', 'priority', 'resolution', 'status', 'triage']);
 
     const cross = await sb.status({ id: ra.body.id });
     const missing = await sb.status({ id: 'U-20990101-999' });
@@ -1164,7 +1164,7 @@ describe('13.12 audit log', () => {
     expect(c.body.marker).toBe(`LOCAL-PATCH(upstream-request: ${c.body.id})`);
     expect(c.rpc.result.isError).toBe(false);
     const st = await s.status({ id: c.body.id });
-    expect(st.body.requests).toEqual([{ id: c.body.id, status: 'backlog', triage: 'inbox', created_at: expect.any(String), resolution: null }]);
+    expect(st.body.requests).toEqual([{ id: c.body.id, status: 'backlog', triage: 'inbox', created_at: expect.any(String), priority: 'normal', resolution: null }]);
   });
 });
 
@@ -1739,5 +1739,148 @@ describe('T-20261001-017 intake hardening (lock + retention)', () => {
     await s.send('initialize', {});
     expect(existsSync(join(ws.logsDir, `${oldDay}.jsonl`))).toBe(false);
     expect(existsSync(join(ws.logsDir, 'known-projects.json'))).toBe(true);
+  });
+});
+
+// =====================================================================
+// v1.12.0 — upstream_request_reprioritize (design 2026-11-01-hub-consolidation §5)
+// =====================================================================
+describe('kanban reprioritize (design 2026-11-01 §5)', () => {
+  function strikesPath(): string { return join(ws.root, '.pipeline-state', 'hub-reprioritize-strikes.json'); }
+
+  test('3 tools are listed; the reprioritize tool requires id+priority and closes additionalProperties', async () => {
+    const s = open(ws.root);
+    await s.send('initialize', INIT_PARAMS);
+    const list = await s.send('tools/list');
+    const tool = list.result.tools.find((t: any) => t.name === 'upstream_request_reprioritize');
+    expect(tool).toBeDefined();
+    expect(tool.inputSchema.required).toEqual(['id', 'priority']);
+    expect(tool.inputSchema.additionalProperties).toBe(false);
+  });
+
+  test('status gains priority (and sev when the ticket carries one)', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    const f = join(ws.ticketsDir, `${r.body.id}.yaml`);
+    const t = readTicketYaml(r.body.id);
+    t.sev = 'SEV2';
+    writeFileSync(f, dump(t, { schema: JSON_SCHEMA }));
+    const st = await s.status({ id: r.body.id });
+    expect(st.body.requests[0].priority).toBe('normal');
+    expect(st.body.requests[0].sev).toBe('SEV2');
+    // a ticket without sev omits the field entirely (schema tolerance)
+    const r2 = await s.create(good());
+    const st2 = await s.status({ id: r2.body.id });
+    expect(st2.body.requests[0].priority).toBe('normal');
+    expect(st2.body.requests[0].sev).toBeUndefined();
+  });
+
+  test('reprioritize via alias: P1 -> high, priority-only, history actor is the gateway-derived identity', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    const rep = await s.tool('upstream_request_reprioritize', { id: r.body.id, priority: 'P1' });
+    expect(rep.error).toBeUndefined();
+    const body = JSON.parse(rep.result.content[0].text);
+    expect(body).toEqual({ id: r.body.id, priority: 'high', status: r.body.status });
+    const t = readTicketYaml(r.body.id);
+    expect(t.priority).toBe('high');
+    expect(t.status).toBe(r.body.status); // priority-only: status untouched
+    const last = t.history[t.history.length - 1];
+    expect(last).toMatchObject({ action: 'reprioritize', actor: 'spoke-pm:co-test', from: 'normal', to: 'high' });
+    const repAudit = auditLines().find((l) => l.outcome === 'reprioritize');
+    expect(repAudit).toMatchObject({ project: 'co-test', id: r.body.id, from: 'normal', to: 'high' });
+    expect(existsSync(strikesPath())).toBe(false); // no violation, no ledger
+  });
+
+  test('P0 is impossible via MCP: typed error, no strike recorded', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    for (const priority of ['P0', 'urgent']) {
+      const rep = await s.tool('upstream_request_reprioritize', { id: r.body.id, priority });
+      expect(rep.error?.code).toBe(-32602);
+      expect(rep.error?.message).toBe('P0 requires user action via ticket.ts — upstream_request_reprioritize cannot set urgent');
+    }
+    expect(readTicketYaml(r.body.id).priority).toBe('normal');
+    expect(existsSync(strikesPath())).toBe(false);
+  });
+
+  test('a second raise within 24h is refused (raise-window) and feeds the 3-strike counter', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    expect((await s.tool('upstream_request_reprioritize', { id: r.body.id, priority: 'P1' })).error).toBeUndefined();
+    // demote back to normal by hand (a PM write), then raise again as the spoke:
+    const f = join(ws.ticketsDir, `${r.body.id}.yaml`);
+    const t = readTicketYaml(r.body.id);
+    t.priority = 'normal';
+    writeFileSync(f, dump(t, { schema: JSON_SCHEMA }));
+    const rep = await s.tool('upstream_request_reprioritize', { id: r.body.id, priority: 'P1' });
+    expect(rep.error?.code).toBe(-32602);
+    expect(rep.error?.message).toMatch(/capped at 1 level per ticket per 24h/);
+    const strikes = JSON.parse(readFileSync(strikesPath(), 'utf-8'));
+    expect(strikes.projects['co-test'].violations).toBe(1);
+    expect(strikes.projects['co-test'].frozen).toBe(false);
+  });
+
+  test('three violations freeze the project: raises are refused with the frozen typed error', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    mkdirSync(join(ws.root, '.pipeline-state'), { recursive: true });
+    writeFileSync(strikesPath(), JSON.stringify({
+      version: 1, frozenThreshold: 3,
+      projects: { 'co-test': { violations: 3, frozen: true, updated_at: '2026-11-02T09:00:00+09:00', history: [] } },
+    }));
+    const rep = await s.tool('upstream_request_reprioritize', { id: r.body.id, priority: 'P1' });
+    expect(rep.error?.code).toBe(-32602);
+    expect(rep.error?.message).toMatch(/frozen after 3 cap violations/);
+    expect(readTicketYaml(r.body.id).priority).toBe('normal');
+  });
+
+  test('ownership: another project\'s ticket (and an unknown id) answer "not found"', async () => {
+    seedKnown(ws, 'co-test', 'co-other');
+    const a = ws.project('co-test');
+    const b = ws.project('co-other');
+    const sa = open(a);
+    const ra = await sa.create(good());
+    const sb = open(b);
+    const cross = await sb.tool('upstream_request_reprioritize', { id: ra.body.id, priority: 'P1' });
+    expect(cross.error?.code).toBe(-32602);
+    expect(cross.error?.message).toBe('not found');
+    const missing = await sb.tool('upstream_request_reprioritize', { id: 'U-20990101-999', priority: 'P1' });
+    expect(missing.error?.message).toBe('not found');
+    expect(readTicketYaml(ra.body.id).priority).toBe('normal');
+  });
+
+  test('input validation: extra keys, bad id, bad priority are -32602', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    const r = await s.create(good());
+    for (const args of [{ id: r.body.id, priority: 'P1', extra: 1 }, { id: 'U-1', priority: 'P1' }, { id: r.body.id, priority: 'P9' }, { id: r.body.id }, { priority: 'P1' }]) {
+      const rep = await s.tool('upstream_request_reprioritize', args);
+      expect(rep.error?.code).toBe(-32602);
+    }
+  });
+
+  test('identity: a self-declared project_root caller cannot write priority (gateway-derived identity only)', async () => {
+    seedKnown(ws, 'co-other');
+    const b = ws.project('co-other');
+    // cwd is the workspace root (unregistered); project_root falls through to the
+    // self_declared tier — fine for filing a flagged ticket, refused for a write.
+    const s = open(ws.root);
+    const rep = await s.tool('upstream_request_reprioritize', { id: 'U-20261102-001', priority: 'P1', project_root: b });
+    expect(rep.error?.code).toBe(-32602);
+    expect(rep.error?.message).toMatch(/attested identity/);
+    const unregistered = await open(ws.root).tool('upstream_request_reprioritize', { id: 'U-20261102-001', priority: 'P1' });
+    expect(unregistered.error?.code).toBe(-32602);
   });
 });

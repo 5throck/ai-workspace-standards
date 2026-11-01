@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
+//          Phase 3a kanban core): reprioritizeTicket — priority-only mutation under
+//          the shared ticket lock, governed by helpers/reprioritize.ts (actor caps,
+//          P0 user-only, 3-strike ledger in .pipeline-state/hub-reprioritize-strikes.json)
+//          with an opts.ownerProject ownership check for the MCP gateway path; every
+//          change appends a history[] action entry {action: reprioritize, actor, from, to}.
+//          autoReadySev1Ticket — the SEV1 bypass-triage: an SEV1 upstream ticket is
+//          auto-readied (triage=ready, backlog moves to waiting) with a history[]
+//          marker; SEV2/SEV3/no-sev tickets are refused (negative-tested). Also
+//          loadKanbanAliases (docs/templates/hub-kanban-aliases.json loader with the
+//          schema-validated shape) and repair-history action-entry transparency.
 // v1.12.0 (2026-10-08, ticket KST unification): ids, created_at, history.at and
 //          not_before read as Korea Standard Time via helpers/kst-time.ts; existing
 //          UTC 'Z' timestamps stay valid. The --next sort compares Date.parse values
@@ -45,14 +56,30 @@ import {
   CURRENT_SCHEMA_VERSION,
   canTransition,
   validateCatalog,
+  validateKanbanAliases,
   validateTicket,
+  DEFAULT_KANBAN_ALIASES,
   type Catalog,
+  type KanbanAliases,
+  type HistoryEntry,
   type Kind,
   type Priority,
   type Status,
   type Ticket,
   type UpstreamBlock,
+  isActionEntry,
 } from './ticket-schema.ts';
+import {
+  checkReprioritize,
+  isFrozen,
+  loadStrikes,
+  recordStrike,
+  strikeKeyFor,
+  ReprioritizeRefusedError,
+  FROZEN_THRESHOLD,
+  PRIORITY_LEVEL,
+  type ReprioritizeActor,
+} from './reprioritize.ts';
 import { kstDate, kstIso } from './kst-time.ts';
 
 const MAX_YAML_BYTES = 64 * 1024;
@@ -516,10 +543,136 @@ export function setUpstreamResolution(
   });
 }
 
+// ── v1.13.0: delegation kanban alias layer (hub-consolidation design §5) ──────
+
+/** Relative path of the machine-readable alias table (design §5.1). */
+export const KANBAN_ALIASES_RELATIVE_PATH = join('docs', 'templates', 'hub-kanban-aliases.json');
+
+/** Loads and shape-validates the delegation kanban alias table. A missing file (unit-test
+ * temp workspaces) falls back to DEFAULT_KANBAN_ALIASES; a PRESENT file that fails
+ * validation throws — production drift must fail loudly, not silently. */
+export function loadKanbanAliases(workspaceRoot: string): KanbanAliases {
+  const path = join(workspaceRoot, KANBAN_ALIASES_RELATIVE_PATH);
+  if (!existsSync(path)) return DEFAULT_KANBAN_ALIASES;
+  const raw: unknown = JSON.parse(readFileSync(path, 'utf-8'));
+  validateKanbanAliases(raw);
+  return raw;
+}
+
+/** `at` of the most recent reprioritize action entry on the ticket, if any — the
+ * anchor for the spoke +1-level-per-24h window. Only upward moves count as raises. */
+function lastRaiseAtOf(ticket: Ticket): string | undefined {
+  for (let i = ticket.history.length - 1; i >= 0; i--) {
+    const e = ticket.history[i];
+    if (!isActionEntry(e) || e.action !== 'reprioritize') continue;
+    const from = PRIORITY_LEVEL[e.from as Priority];
+    const to = PRIORITY_LEVEL[e.to as Priority];
+    if (from !== undefined && to !== undefined && to > from) return e.at;
+  }
+  return undefined;
+}
+
+export interface ReprioritizeOptions {
+  /** Strike-ledger directory (the gitignored .pipeline-state). Omitting it skips
+   * strike recording/freeze checks — pure-cap unit tests; production callers pass
+   * `<workspaceRoot>/.pipeline-state`. */
+  stateDir?: string;
+  /** Ownership check for the MCP gateway path: when set, the ticket's upstream.project
+   * must equal it, otherwise the call is refused as not-found (a caller can never
+   * read or reprioritize another project's ticket). */
+  ownerProject?: string;
+  /** Test seam for the 24h window (Date.now() otherwise). */
+  nowMs?: number;
+}
+
+/** v1.13.0 — priority-only mutation (design §5.2/§5.3). NEVER touches status, content
+ * or triage; every change appends a history[] action entry {action: 'reprioritize',
+ * actor, from, to} (the existing audit trail). Governance lives in
+ * helpers/reprioritize.ts: user unrestricted; hub-pm unrestricted except urgent/P0;
+ * spoke-pm +1 level per ticket per 24h, never urgent/P0; violations feed the 3-strike
+ * ledger; a frozen project's raises are refused with a typed error. */
+export function reprioritizeTicket(
+  dir: string,
+  id: string,
+  to: Priority,
+  actor: ReprioritizeActor,
+  opts: ReprioritizeOptions = {},
+): Ticket {
+  return withTicketLock(dir, `reprioritize:${id}`, () => {
+    const ticket = readTicket(dir, id);
+    if (opts.ownerProject !== undefined) {
+      if (!ticket.upstream || ticket.upstream.project !== opts.ownerProject) {
+        throw new ReprioritizeRefusedError('not found', 'no-op', false);
+      }
+    }
+    const from = ticket.priority;
+    const key = strikeKeyFor(actor);
+    const raise = PRIORITY_LEVEL[to] - PRIORITY_LEVEL[from];
+    // Frozen gate first: a project at 3 violations is refused before any further
+    // cap evaluation (and the refused call does not deepen the ledger).
+    if (opts.stateDir !== undefined && key !== null && raise > 0) {
+      const state = loadStrikes(opts.stateDir);
+      if (isFrozen(state, key)) {
+        throw new ReprioritizeRefusedError(
+          `priority raises from '${key}' are frozen after ${FROZEN_THRESHOLD} cap violations — pending user review (P0 requires user action via ticket.ts; user review lifts the freeze)`,
+          'frozen',
+          false,
+        );
+      }
+    }
+    const verdict = checkReprioritize(actor, from, to, { nowMs: opts.nowMs, lastRaiseAt: lastRaiseAtOf(ticket) });
+    if (!verdict.allowed) {
+      if (verdict.violation && key !== null && opts.stateDir !== undefined) {
+        recordStrike(opts.stateDir, key, { at: kstIso(), actor, attempted: `${from} -> ${to}`, reason: verdict.reason });
+      }
+      throw new ReprioritizeRefusedError(verdict.reason, verdict.code, verdict.violation);
+    }
+    ticket.priority = to;
+    ticket.history.push({ at: kstIso(), action: 'reprioritize', actor, from, to });
+    // Validate the mutated ticket BEFORE the atomic write (v1.11.0 precedent).
+    validateTicket(ticket);
+    writeTicketAtomic(dir, ticket);
+    return readTicket(dir, id);
+  });
+}
+
+/** v1.13.0 — SEV1 bypass-triage (design §5.1): an SEV1 upstream ticket is auto-ready —
+ * triage jumps to ready without the human inbox step, backlog moves to waiting in the
+ * same atomic write, and a history[] action marker records the bypass. Negative-tested:
+ * SEV2/SEV3/no-sev tickets are refused. Guarded like setUpstreamTriage: done tickets are
+ * never re-triaged, and a failed ticket must re-enter through the retry budget (move).
+ * Idempotent: an already-ready SEV1 ticket is returned unchanged. */
+export function autoReadySev1Ticket(dir: string, id: string): Ticket {
+  return withTicketLock(dir, `sev1-auto-ready:${id}`, () => {
+    const ticket = readTicket(dir, id);
+    if (ticket.sev !== 'SEV1') {
+      throw new Error(`[ticket-store] ${id} is not SEV1 — only sev=SEV1 tickets bypass triage (negative rule, design 2026-11-01 §5.1)`);
+    }
+    if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
+    if (ticket.status === 'done') {
+      throw new Error(`[ticket-store] ${id} is done — a closed request is never re-triaged`);
+    }
+    if (ticket.status === 'failed') {
+      throw new Error(`[ticket-store] ${id} is failed — re-enter through the retry budget (ticket.ts move) before the SEV1 bypass applies`);
+    }
+    if (ticket.upstream.triage === 'ready') return ticket;
+    const now = kstIso();
+    ticket.history.push({ at: now, action: 'sev1-auto-ready', actor: 'sev-policy', from: ticket.upstream.triage, to: 'ready' });
+    ticket.upstream.triage = 'ready';
+    if (ticket.status === 'backlog') {
+      // triage↔status invariant: ready ⇒ waiting|running|review|done.
+      ticket.history.push({ at: now, from: 'backlog', to: 'waiting' });
+      ticket.status = 'waiting';
+    }
+    validateTicket(ticket);
+    writeTicketAtomic(dir, ticket);
+    return readTicket(dir, id);
+  });
+}
+
 /** Pulls the highest-priority waiting service ticket (urgent > high > normal > low,
  * then creation order) and atomically moves it to `running`. Never returns a manual ticket. */
-export function nextServiceTicket(dir: string): Ticket | null {
-  const candidates = listTickets(dir, { status: 'waiting', kind: 'service' })
+export function nextServiceTicket(dir: string): Ticket | null {  const candidates = listTickets(dir, { status: 'waiting', kind: 'service' })
     .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || Date.parse(a.created_at) - Date.parse(b.created_at));
   if (candidates.length === 0) return null;
   return moveTicket(dir, candidates[0].id, 'running', { force: false });
@@ -697,13 +850,26 @@ export function repairTicketHistory(
     // earliest subsequent event when its own stamp postdates real activity
     // (the retroactive-import shape). Everything else must chain.
     const creationIdx = sorted.findIndex((e) => e.from === null);
-    let creation = creationIdx >= 0 ? { ...sorted[creationIdx] } : null;
+    // The creation edge is by definition a status entry (from: null — action entries
+    // carry a string `from`), so the cast is sound (v1.13.0 action-entry support).
+    let creation = creationIdx >= 0 ? ({ ...sorted[creationIdx] } as HistoryEntry) : null;
     const rest = sorted.filter((e, i) => i !== creationIdx);
     const kept: Ticket['history'] = [];
     const dropped: HistoryRepairPlan['dropped'] = [];
     for (const e of rest) {
-      const last = kept[kept.length - 1] ?? null;
-      const prevTo = last ? last.to : creation?.to ?? null;
+      // v1.13.0: action entries are transparent to the chain — sorted and kept as-is;
+      // chaining is evaluated against the last STATUS entry only.
+      if (isActionEntry(e)) {
+        kept.push(e);
+        continue;
+      }
+      let prevTo: Status | null = creation?.to ?? null;
+      for (let i = kept.length - 1; i >= 0; i--) {
+        const k = kept[i];
+        if (isActionEntry(k)) continue;
+        prevTo = k.to;
+        break;
+      }
       if (prevTo !== null && e.from !== prevTo) {
         dropped.push({ at: e.at, from: e.from, to: e.to });
         continue;
