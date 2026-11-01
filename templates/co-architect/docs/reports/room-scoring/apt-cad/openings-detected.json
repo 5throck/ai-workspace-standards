@@ -1,0 +1,148 @@
+{
+ "doors": [
+  {
+   "kind": "arc",
+   "layer": "DOR",
+   "hinge": [
+    110046,
+    16518
+   ],
+   "leaf": 910,
+   "swing_deg": [
+    180,
+    270
+   ],
+   "needs_confirmation": false,
+   "reason": ""
+  },
+  {
+   "kind": "arc",
+   "layer": "DOR",
+   "hinge": [
+    108636,
+    18888
+   ],
+   "leaf": 810,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "needs_confirmation": false,
+   "reason": ""
+  },
+  {
+   "kind": "arc",
+   "layer": "DOR",
+   "hinge": [
+    111906,
+    17898
+   ],
+   "leaf": 810,
+   "swing_deg": [
+    0,
+    90
+   ],
+   "needs_confirmation": false,
+   "reason": ""
+  },
+  {
+   "kind": "arc",
+   "layer": "DOR",
+   "hinge": [
+    108636,
+    16813
+   ],
+   "leaf": 710,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "needs_confirmation": false,
+   "reason": ""
+  },
+  {
+   "kind": "arc",
+   "layer": "DOR",
+   "hinge": [
+    107866,
+    13338
+   ],
+   "leaf": 610,
+   "swing_deg": [
+    180,
+    270
+   ],
+   "needs_confirmation": false,
+   "reason": ""
+  },
+  {
+   "kind": "jamb",
+   "orient": "V",
+   "pos": 113996,
+   "range": [
+    16708,
+    17888
+   ],
+   "width": 1180,
+   "needs_confirmation": true,
+   "reason": "jamb-only opening, no arc (R07)"
+  }
+ ],
+ "windows": [
+  {
+   "orient": "H",
+   "pos": 13398,
+   "range": [
+    108383,
+    110099
+   ],
+   "width": 1716,
+   "type": "window",
+   "room": "침실-1"
+  },
+  {
+   "orient": "H",
+   "pos": 13562,
+   "range": [
+    110954,
+    113279
+   ],
+   "width": 2325,
+   "type": "window",
+   "room": "거실"
+  },
+  {
+   "orient": "H",
+   "pos": 20757,
+   "range": [
+    112006,
+    113916
+   ],
+   "width": 1910,
+   "type": "window",
+   "room": "침실-3"
+  },
+  {
+   "orient": "H",
+   "pos": 21318,
+   "range": [
+    107181,
+    108597
+   ],
+   "width": 1416,
+   "type": "window",
+   "room": "침실-2"
+  },
+  {
+   "orient": "H",
+   "pos": 21354,
+   "range": [
+    108846,
+    110274
+   ],
+   "width": 1428,
+   "type": "window",
+   "room": "주방/식당"
+  }
+ ]
+}

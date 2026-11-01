@@ -1,90 +1,91 @@
 {
-  "version": "1.3.0",
-  "status": "stable",
-  "lastUpdated": "2026-09-12",
-  "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
-  "propagatedTo": [
-    "co-abap",
-    "co-consult",
-    "co-deck",
-    "co-design",
-    "co-develop",
-    "co-export",
-    "co-game",
-    "co-hr",
-    "co-learning",
-    "co-news",
-    "co-price",
-    "co-safety",
-    "co-security",
-    "co-work"
-  ],
-  "propagated_skills": {
-    "description": "Tracks current common_skills from common-contract.json that every co-* variant inherits through templates/common.",
-    "skills": {
-      "accessibility-audit": {},
-      "agent-lifecycle-manager": {},
-      "api-documentation": {},
-      "ci-triage": {},
-      "decision-record": {},
-      "documentation-writing": {},
-      "evidence-ledger": {},
-      "explain-me": {},
-      "gateguard": {},
-      "handbook": {},
-      "handbook-sync-audit": {},
-      "i18n-audit": {},
-      "i18n-formatting": {},
-      "i18n-layout": {},
-      "i18n-locale-config": {},
-      "meeting-facilitation": {},
-      "project-review": {},
-      "research-analysis": {},
-      "script-lifecycle-manager": {},
-      "security-scan": {},
-      "skill-lifecycle-manager": {},
-      "source-command-commit-push-pr": {},
-      "standup-synthesizer": {},
-      "sync": {},
-      "team-builder": {},
-      "token-usage-lint": {},
-      "translate": {},
-      "ui-ux-design-intelligence": {},
-      "update-bun-packages": {},
-      "zod-contract-gate": {}
-    },
-    "note": "All 30 common_skills are inherited by all 13 co-* variants through the common layer unless a variant explicitly documents an exclusion."
+ "version": "1.3.0",
+ "status": "stable",
+ "lastUpdated": "2026-11-01",
+ "description": "Lifecycle state for templates/common — the L1 base layer propagated to all co-* variants",
+ "propagatedTo": [
+  "co-abap",
+  "co-architect",
+  "co-consult",
+  "co-deck",
+  "co-design",
+  "co-develop",
+  "co-export",
+  "co-game",
+  "co-hr",
+  "co-learning",
+  "co-news",
+  "co-price",
+  "co-safety",
+  "co-security",
+  "co-work"
+ ],
+ "propagated_skills": {
+  "description": "Tracks current common_skills from common-contract.json that every co-* variant inherits through templates/common.",
+  "skills": {
+   "accessibility-audit": {},
+   "agent-lifecycle-manager": {},
+   "api-documentation": {},
+   "ci-triage": {},
+   "decision-record": {},
+   "documentation-writing": {},
+   "evidence-ledger": {},
+   "explain-me": {},
+   "gateguard": {},
+   "handbook": {},
+   "handbook-sync-audit": {},
+   "i18n-audit": {},
+   "i18n-formatting": {},
+   "i18n-layout": {},
+   "i18n-locale-config": {},
+   "meeting-facilitation": {},
+   "project-review": {},
+   "research-analysis": {},
+   "script-lifecycle-manager": {},
+   "security-scan": {},
+   "skill-lifecycle-manager": {},
+   "source-command-commit-push-pr": {},
+   "standup-synthesizer": {},
+   "sync": {},
+   "team-builder": {},
+   "token-usage-lint": {},
+   "translate": {},
+   "ui-ux-design-intelligence": {},
+   "update-bun-packages": {},
+   "zod-contract-gate": {}
   },
-  "history": [
-    {
-      "date": "2026-05-28",
-      "event": "initial",
-      "note": "Lifecycle tracking established for templates/common at v1.0.0"
-    },
-    {
-      "date": "2026-06-02",
-      "event": "skill-contract-expansion",
-      "note": "common-contract.json updated: 3 skills added (simulate-project-creation, translate, ui-ux-pro-max)"
-    },
-    {
-      "date": "2026-06-06",
-      "event": "layer-governance-framework",
-      "note": "ADR-0032 Layer Governance Framework adopted; scripts reclassified into L0/L1/L2 layers; layer-filter.ts helper added; publish-to-template.ts v1.5.0, create-l2-scaffold.ts v1.4.0, validate-templates.ts v1.5.0, new-project.sh v1.4.2"
-    },
-    {
-      "date": "2026-08-24",
-      "event": "common-contract-expansion",
-      "note": "common-contract.json updated: 2 skills added (evidence-ledger, decision-record) and pm agent gate-moment rule added per ADR-0061 decision-chain standard"
-    },
-    {
-      "date": "2026-08-24",
-      "event": "common-contract-expansion",
-      "note": "common-contract.json updated: 3 skills added (i18n-locale-config, i18n-formatting, i18n-layout) and i18n-specialist agent added per constitution §4.4 i18n asset suite (5-part design PR5)"
-    },
-    {
-      "date": "2026-09-12",
-      "event": "project-review-reconciliation",
-      "note": "Aligned propagatedTo with all inheriting co-* variants and refreshed propagated_skills from common-contract.json."
-    }
-  ]
+  "note": "All 30 common_skills are inherited by all 13 co-* variants through the common layer unless a variant explicitly documents an exclusion."
+ },
+ "history": [
+  {
+   "date": "2026-05-28",
+   "event": "initial",
+   "note": "Lifecycle tracking established for templates/common at v1.0.0"
+  },
+  {
+   "date": "2026-06-02",
+   "event": "skill-contract-expansion",
+   "note": "common-contract.json updated: 3 skills added (simulate-project-creation, translate, ui-ux-pro-max)"
+  },
+  {
+   "date": "2026-06-06",
+   "event": "layer-governance-framework",
+   "note": "ADR-0032 Layer Governance Framework adopted; scripts reclassified into L0/L1/L2 layers; layer-filter.ts helper added; publish-to-template.ts v1.5.0, create-l2-scaffold.ts v1.4.0, validate-templates.ts v1.5.0, new-project.sh v1.4.2"
+  },
+  {
+   "date": "2026-08-24",
+   "event": "common-contract-expansion",
+   "note": "common-contract.json updated: 2 skills added (evidence-ledger, decision-record) and pm agent gate-moment rule added per ADR-0061 decision-chain standard"
+  },
+  {
+   "date": "2026-08-24",
+   "event": "common-contract-expansion",
+   "note": "common-contract.json updated: 3 skills added (i18n-locale-config, i18n-formatting, i18n-layout) and i18n-specialist agent added per constitution §4.4 i18n asset suite (5-part design PR5)"
+  },
+  {
+   "date": "2026-09-12",
+   "event": "project-review-reconciliation",
+   "note": "Aligned propagatedTo with all inheriting co-* variants and refreshed propagated_skills from common-contract.json."
+  }
+ ]
 }

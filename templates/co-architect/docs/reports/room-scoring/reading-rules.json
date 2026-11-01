@@ -1,0 +1,555 @@
+{
+  "_meta": {
+    "title": "Vision-first plan reading rules (ADR-018 step ②)",
+    "version": "2.0",
+    "date": "2026-09-25",
+    "source": "Learned from user reviews of tests/아파트 평면도.dwg and tests/32평형아파트.dwg",
+    "use": "Inject into the vision-proposal prompt; rules marked needs_confirmation become human-review items, not auto-decisions",
+    "ontology": "applies_to -> src/cad_intelligence/ontology/concepts.yaml; checked by cad_intelligence.ontology.validate() (ADR-020)",
+    "graph_checks": "cad_intelligence.rules.plan_reading.check_plan(facts graph) checks R10/R13/R22/R24 on the recognised result (ADR-020 step 3)"
+  },
+  "rules": [
+    {
+      "id": "R01",
+      "topic": "room vs non-room",
+      "rule": "Balconies, 화단 (planter), WET ZONE, PD/AD shafts, elevator, stair and 홀 are non-rooms; still recognise and label them.",
+      "evidence": [
+        "아파트 평면도 WET ZONE×2",
+        "32평형 발코니1-4, 화단, core"
+      ],
+      "applies_to": [
+        "NonRoom",
+        "Balcony",
+        "Planter",
+        "WetZone",
+        "Core",
+        "Circulation"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.proposal_spaces:categorize",
+        "cad_intelligence.common.space_category:SpaceCategory"
+      ]
+    },
+    {
+      "id": "R02",
+      "topic": "expanded balcony",
+      "rule": "If a balcony has no wall between it and the room (only sill/window lines), merge it into the room (확장형).",
+      "evidence": [
+        "아파트 평면도 X1–X2 strip, living balcony"
+      ],
+      "applies_to": [
+        "Balcony",
+        "Room"
+      ],
+      "depends_on": [
+        "R01"
+      ],
+      "enforced_by": "prompt",
+      "implemented_by": []
+    },
+    {
+      "id": "R03",
+      "topic": "open notches",
+      "rule": "Wall-less leftover spaces adjoining a room belong to that room (e.g. living-room notches in front of bedroom doors).",
+      "evidence": [
+        "32평형 거실 top-left/right notches",
+        "아파트 평면도 거실 up to Y3a"
+      ],
+      "applies_to": [
+        "Space",
+        "Room"
+      ],
+      "depends_on": [],
+      "enforced_by": "prompt",
+      "implemented_by": []
+    },
+    {
+      "id": "R04",
+      "topic": "window-line split",
+      "rule": "An interior window line can separate two spaces; the space beyond the kitchen window is 다용도실.",
+      "evidence": [
+        "32평형 W06 at x≈20464"
+      ],
+      "applies_to": [
+        "Window",
+        "WetZone"
+      ],
+      "depends_on": [],
+      "enforced_by": "prompt",
+      "implemented_by": []
+    },
+    {
+      "id": "R05",
+      "topic": "door-line boundaries",
+      "rule": "A bathroom / entrance boundary follows the door line, not the grid beyond it.",
+      "evidence": [
+        "아파트 평면도 공용욕실 & 현관 at Y5"
+      ],
+      "applies_to": [
+        "Door",
+        "Circulation",
+        "Room"
+      ],
+      "depends_on": [],
+      "enforced_by": "prompt",
+      "implemented_by": []
+    },
+    {
+      "id": "R06",
+      "topic": "window-layer lines on walls",
+      "rule": "Double window-layer lines on an interior wall MAY be a sliding door/opening or NOT a door at all → always needs_confirmation.",
+      "needs_confirmation": true,
+      "evidence": [
+        "32평형 D08 = door",
+        "32평형 former D09 = not a door"
+      ],
+      "applies_to": [
+        "GlazingRun",
+        "Door",
+        "Layer"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:classify_glazing"
+      ]
+    },
+    {
+      "id": "R07",
+      "topic": "mis-layered / missing door evidence",
+      "rule": "Door arcs can sit on furniture layers; entrance doors may have jambs only; some doors are not drawn — look for jambs/frames and ask.",
+      "needs_confirmation": true,
+      "evidence": [
+        "아파트 평면도 D06 on 6fur, D09 jambs only, D10 undrawn",
+        "32평형 D08 undrawn arc"
+      ],
+      "applies_to": [
+        "SwingDoor",
+        "JambDoor",
+        "Layer"
+      ],
+      "depends_on": [
+        "R19"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:detect_arc_doors",
+        "cad_intelligence.geometry.plan_evidence:detect_jamb_doors"
+      ]
+    },
+    {
+      "id": "R08",
+      "topic": "windows only where glazing is",
+      "rule": "Do not assume windows on every exterior edge; place windows only where glazing runs exist (≥2 parallel window lines).",
+      "evidence": [
+        "아파트 평면도: no windows on X5/Y6/Y7"
+      ],
+      "applies_to": [
+        "Window",
+        "GlazingRun"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:detect_glazing_runs"
+      ]
+    },
+    {
+      "id": "R09",
+      "topic": "stray outlines",
+      "rule": "Not every enclosed outline is a space; leftover bays may stay unassigned.",
+      "needs_confirmation": true,
+      "evidence": [
+        "32평형 lower-left bay under 발코니2"
+      ],
+      "applies_to": [
+        "Void"
+      ],
+      "depends_on": [],
+      "enforced_by": "review",
+      "implemented_by": []
+    },
+    {
+      "id": "R10",
+      "topic": "multi-unit plans",
+      "rule": "Detect mirror/repeat units (symmetric wall mass) and recognise every unit; shared cores are recognised once.",
+      "evidence": [
+        "32평형 mirror at x=26423.6, core shared"
+      ],
+      "applies_to": [
+        "Unit",
+        "MirrorAxis",
+        "Core",
+        "Opening"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:detect_mirror_axis",
+        "cad_intelligence.geometry.proposal_spaces:spaces_from_proposal",
+        "cad_intelligence.rules.plan_reading:mirror_consistent_placement"
+      ]
+    },
+    {
+      "id": "R11",
+      "topic": "labels",
+      "rule": "Room names may sit in finish-tag boxes outside the plan — use the leader start point as the seed; normalise whitespace (욕   실).",
+      "evidence": [
+        "아파트 평면도 7TXT tags"
+      ],
+      "applies_to": [
+        "Label"
+      ],
+      "depends_on": [],
+      "enforced_by": "prompt",
+      "implemented_by": []
+    },
+    {
+      "id": "R12",
+      "topic": "image source",
+      "rule": "Render the image from DWG entities (exact px↔mm transform) instead of a screen capture.",
+      "evidence": [
+        "PoC: screenshot proposal 4/9 vs DWG-render proposal 7/8"
+      ],
+      "applies_to": [
+        "PlanImage"
+      ],
+      "depends_on": [
+        "R19"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.cad_io.plan_evidence_com:extract_evidence"
+      ]
+    },
+    {
+      "id": "R13",
+      "topic": "glazing between room and non-room",
+      "rule": "Glazing between a room and a circulation zone (현관, 복도, 홀) is not a window; toward a utility zone (다용도실, WET ZONE) it is a window.",
+      "evidence": [
+        "32평형 ex-D09 (거실↔현관) vs W06 (주방↔다용도실)"
+      ],
+      "applies_to": [
+        "Window",
+        "GlazingRun",
+        "Circulation",
+        "WetZone"
+      ],
+      "depends_on": [
+        "R01"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:classify_glazing",
+        "cad_intelligence.rules.plan_reading:window_not_toward_circulation"
+      ]
+    },
+    {
+      "id": "R14",
+      "topic": "qualified labels",
+      "rule": "A balcony label qualified by a room name ('발코니 (침실1 앞)') is a balcony: check non-room keywords before room keywords.",
+      "evidence": [
+        "32평형 W01 misread as a door candidate in the live run"
+      ],
+      "applies_to": [
+        "Balcony",
+        "Label"
+      ],
+      "depends_on": [
+        "R01"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.proposal_spaces:categorize"
+      ]
+    },
+    {
+      "id": "R15",
+      "topic": "glazing run position",
+      "rule": "Compute a glazing run's position only from its own lines; parallel lines elsewhere on the same axis (sliding-door tracks) must not shift it.",
+      "evidence": [
+        "아파트 평면도 W11 shifted 227 mm"
+      ],
+      "applies_to": [
+        "GlazingRun",
+        "Window"
+      ],
+      "depends_on": [
+        "R08"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:glazing_segment",
+        "cad_intelligence.geometry.plan_evidence:split_runs_at_walls"
+      ]
+    },
+    {
+      "id": "R16",
+      "topic": "kitchen/dining ↔ living",
+      "rule": "Kitchen/dining and living are one connected space; a jamb-only gap between them is an open connection, never a door. This holds across all reference plans.",
+      "evidence": [
+        "아파트캐드평면도 former D06 (user 2026-09-25)",
+        "32평형 and 아파트 평면도 have the same wall-less layout"
+      ],
+      "applies_to": [
+        "OpenPlanSpace",
+        "Room"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:_is_kitchen_living_gap",
+        "cad_intelligence.geometry.room_metadata:connected_spaces"
+      ]
+    },
+    {
+      "id": "R17",
+      "topic": "unlabelled small cells",
+      "rule": "A small enclosed cell with its own door but no label can still be a room (e.g. a second bathroom); ask for its use instead of leaving it unassigned.",
+      "needs_confirmation": true,
+      "evidence": [
+        "아파트캐드평면도 욕실-2 below 침실-1"
+      ],
+      "applies_to": [
+        "Room",
+        "Door",
+        "Void"
+      ],
+      "depends_on": [
+        "R22"
+      ],
+      "enforced_by": "review",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:unassigned_door_targets"
+      ]
+    },
+    {
+      "id": "R18",
+      "topic": "leftover strips",
+      "rule": "A wall-less leftover strip belongs to the room it is open to, which may be the living room rather than the room first guessed (R03 refinement).",
+      "needs_confirmation": true,
+      "evidence": [
+        "아파트캐드평면도 strip between 침실-3 and 현관 → 거실"
+      ],
+      "applies_to": [
+        "Void",
+        "Space"
+      ],
+      "depends_on": [
+        "R03",
+        "R22"
+      ],
+      "enforced_by": "review",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:enclosed_gaps"
+      ]
+    },
+    {
+      "id": "R19",
+      "topic": "blocks",
+      "rule": "Doors, windows and whole cores are often block inserts. Always explode blocks (with scale, rotation, AND the insert normal: sx=-1 with normal -Z is NOT mirrored) before saying something is 'not drawn'.",
+      "evidence": [
+        "아파트캐드평면도 core + entrance doors = block CO1",
+        "아파트 평면도 W02 = PW2400, D09 = D1000, D10 = D900"
+      ],
+      "applies_to": [
+        "Block"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.cad_io.plan_evidence_com:extract_evidence"
+      ]
+    },
+    {
+      "id": "R20",
+      "topic": "floor-pattern layers",
+      "rule": "Tile / pattern layers are paired linework but not walls; exclude them from wall evidence (they cut glazing runs into pieces).",
+      "evidence": [
+        "아파트캐드평면도 TILE → 0 windows until excluded"
+      ],
+      "applies_to": [
+        "Layer",
+        "Wall"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:classify_wall_layers"
+      ]
+    },
+    {
+      "id": "R21",
+      "topic": "frame-only doors",
+      "rule": "Two small door-layer frame stubs facing each other across 600–1,300 mm, with no arc hinged on that gap, are a door whose leaf is not drawn. Always ask for confirmation.",
+      "needs_confirmation": true,
+      "evidence": [
+        "아파트 평면도 D11 (MAIN ROOM ↔ 파우더)"
+      ],
+      "applies_to": [
+        "FrameDoor"
+      ],
+      "depends_on": [
+        "R07",
+        "R19"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:detect_frame_doors"
+      ]
+    },
+    {
+      "id": "R22",
+      "topic": "coverage checks",
+      "rule": "Before review, report every door that swings into no proposed space (a missing room) and every hole enclosed by proposed spaces (a leftover strip). These are questions for the user, not decisions.",
+      "evidence": [
+        "아파트캐드평면도 blind proposal: 욕실-2 via D05, strip between 침실-3 and 현관"
+      ],
+      "applies_to": [
+        "Door",
+        "Void",
+        "Opening"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.plan_evidence:unassigned_door_targets",
+        "cad_intelligence.geometry.plan_evidence:enclosed_gaps",
+        "cad_intelligence.rules.plan_reading:door_connects_two_spaces",
+        "cad_intelligence.rules.plan_reading:opening_is_placed"
+      ]
+    },
+    {
+      "id": "R23",
+      "topic": "open-plan elevations",
+      "rule": "Unfold kitchen/dining + living as one space (clockwise, NKBA). Mark the space boundary along a continuous wall with a dash-dot line and both names, and mark wall-less stretches 'OPEN TO <space>'.",
+      "evidence": [
+        "User question 2026-09-25",
+        "NKBA Interior Elevations ch. 12",
+        "Iowa State VGC ch. 4 (OPEN TO labels)"
+      ],
+      "applies_to": [
+        "OpenPlanSpace",
+        "Face"
+      ],
+      "depends_on": [
+        "R16"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.room_metadata:connected_spaces",
+        "cad_intelligence.geometry.room_metadata:_annotate_open_and_zones"
+      ]
+    },
+    {
+      "id": "R24",
+      "topic": "sunken-floor door levels",
+      "rule": "Where a space sits below its neighbour (욕실, 현관, 베란다, WET ZONE), the door threshold = neighbour F.L − room F.L and the door head = min(threshold + 2,100, C.H − 200). Elevations show F.L on the floor line and the threshold as a dashed line.",
+      "evidence": [
+        "User review 2026-09-25: the 욕실 door looked too tall",
+        "대한경제 2014 (bathroom threshold 50–60 mm in design drawings)"
+      ],
+      "applies_to": [
+        "Door",
+        "Space",
+        "Face"
+      ],
+      "depends_on": [],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.room_metadata:_door_levels",
+        "cad_intelligence.geometry.room_metadata:_space_fl",
+        "cad_intelligence.rules.plan_reading:sunken_door_levels"
+      ]
+    },
+    {
+      "id": "R25",
+      "topic": "strip between two walls",
+      "rule": "A narrow strip (about 400 mm or less) enclosed between two parallel walls is a wall cavity, not a space. Leave it unassigned and end each room on the centerline of its own wall, not the far wall.",
+      "evidence": [
+        "아파트캐드평면도: ~260 mm strip between 욕실-1 and 침실-2 (y 18,423–18,683) was wrongly inside 침실-2 (user 2026-09-25)"
+      ],
+      "applies_to": [
+        "WallCavity",
+        "Space",
+        "Wall"
+      ],
+      "depends_on": [
+        "R09"
+      ],
+      "enforced_by": "review",
+      "implemented_by": []
+    },
+    {
+      "id": "R26",
+      "topic": "internal and unmodelled-side doors",
+      "rule": "A door inside one space (shower screen) is internal: it joins no second space and is not drawn on an elevation. A confirmed door whose far side is a space not modelled yet is marked unmodelled_side. Both need the user's confirmation; otherwise R22 asks.",
+      "evidence": [
+        "아파트 평면도 D04 (shower screen) and D08 (inner utility space), confirmed by the user 2026-09-25 after the R22 graph check"
+      ],
+      "applies_to": [
+        "Door",
+        "InternalDoor"
+      ],
+      "depends_on": [
+        "R22"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.rules.plan_reading:door_connects_two_spaces",
+        "cad_intelligence.rules.plan_reading:opening_is_placed",
+        "cad_intelligence.ontology.facts:build_facts"
+      ]
+    },
+    {
+      "id": "R27",
+      "topic": "elevation sheets define the rooms",
+      "rule": "When a drawing carries interior-elevation sheets, the spaces those sheets unfold are the rooms. Read the key plan: every marker pair (A/A' …) and its coloured section line names the space and the walls of one elevation. Every other space of a shared core is a non-room.",
+      "evidence": [
+        "AI 작업용 공용홀: elevations A–C = elevator hall, D = 비품 창고, E = passage below ST-3/4, F = ST-1 (user 2026-09-26)"
+      ],
+      "applies_to": [
+        "ElevationSheet",
+        "ElevatorHall",
+        "Face",
+        "KeyPlan",
+        "Room",
+        "SectionMarker"
+      ],
+      "depends_on": [
+        "R01"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.elevation_scoring:read_sheet_elevation",
+        "cad_intelligence.geometry.elevation_scoring:score_drawing"
+      ]
+    },
+    {
+      "id": "R28",
+      "topic": "elevations are drawn from the plan",
+      "rule": "Interior elevations are drawn from the plan sheet. Each one unfolds the walls of one plan space and is dimensioned to the finished wall surface (the structural face minus the finish thickness, e.g. 20 mm). A drawing is consistent when every elevation reconciles with its plan space: unfolded length within 100 mm, and every sheet door matched in position (260 mm) and width. Differences are review items; a real plan-vs-sheet drafting difference is recorded, not forced.",
+      "evidence": [
+        "AI 작업용 공용홀: sheet 1 (plan) is the source of sheets 2-3 (elevations A-F); lobby 2,350 at the concrete face vs 2,310 on the sheet; elevator door spacing 2,700 in the plan vs 2,600/2,635 on the sheet (user 2026-09-26)"
+      ],
+      "applies_to": [
+        "ElevationSheet",
+        "PlanSheet",
+        "Face",
+        "Wall"
+      ],
+      "depends_on": [
+        "R27",
+        "R23"
+      ],
+      "enforced_by": "code",
+      "implemented_by": [
+        "cad_intelligence.geometry.elevation_scoring:score_drawing",
+        "cad_intelligence.geometry.elevation_scoring:score_elevation",
+        "cad_intelligence.geometry.room_metadata:unfolded_faces"
+      ]
+    }
+  ]
+}

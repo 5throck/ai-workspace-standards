@@ -1,0 +1,542 @@
+{
+ "spaces": [
+  {
+   "label": "엘리베이터 홀",
+   "polygon": [
+    [
+     7541,
+     273871
+    ],
+    [
+     21641,
+     273871
+    ],
+    [
+     21641,
+     271761
+    ],
+    [
+     9281,
+     271761
+    ],
+    [
+     9281,
+     268891
+    ],
+    [
+     7541,
+     268891
+    ]
+   ],
+   "area_m2": 34.74
+  },
+  {
+   "label": "비상용 엘리베이터 대기공간",
+   "polygon": [
+    [
+     12231,
+     276741
+    ],
+    [
+     14831,
+     276741
+    ],
+    [
+     14831,
+     273891
+    ],
+    [
+     12231,
+     273891
+    ]
+   ],
+   "area_m2": 7.41
+  },
+  {
+   "label": "ST-1",
+   "polygon": [
+    [
+     14831,
+     278171
+    ],
+    [
+     16411,
+     278171
+    ],
+    [
+     16411,
+     273891
+    ],
+    [
+     14831,
+     273891
+    ]
+   ],
+   "area_m2": 6.76
+  },
+  {
+   "label": "통로 (ST-3/4 아래)",
+   "polygon": [
+    [
+     9281,
+     270471
+    ],
+    [
+     11781,
+     270471
+    ],
+    [
+     11781,
+     268891
+    ],
+    [
+     9281,
+     268891
+    ]
+   ],
+   "area_m2": 3.95
+  },
+  {
+   "label": "계단실-1",
+   "polygon": [
+    [
+     9281,
+     279591
+    ],
+    [
+     14831,
+     279591
+    ],
+    [
+     14831,
+     276741
+    ],
+    [
+     9281,
+     276741
+    ]
+   ],
+   "area_m2": 15.82
+  },
+  {
+   "label": "계단실-2",
+   "polygon": [
+    [
+     10411,
+     268871
+    ],
+    [
+     15961,
+     268871
+    ],
+    [
+     15961,
+     266041
+    ],
+    [
+     10411,
+     266041
+    ]
+   ],
+   "area_m2": 15.71
+  },
+  {
+   "label": "PIT-1",
+   "polygon": [
+    [
+     9281,
+     279591
+    ],
+    [
+     11210,
+     281262
+    ],
+    [
+     13157,
+     281262
+    ],
+    [
+     14831,
+     279591
+    ]
+   ],
+   "area_m2": 6.26
+  },
+  {
+   "label": "화물용 엘리베이터",
+   "polygon": [
+    [
+     9281,
+     276741
+    ],
+    [
+     12231,
+     276741
+    ],
+    [
+     12231,
+     273891
+    ],
+    [
+     9281,
+     273891
+    ]
+   ],
+   "area_m2": 8.41
+  },
+  {
+   "label": "ST-2",
+   "polygon": [
+    [
+     16411,
+     275561
+    ],
+    [
+     17661,
+     275561
+    ],
+    [
+     17661,
+     273891
+    ],
+    [
+     16411,
+     273891
+    ]
+   ],
+   "area_m2": 2.09
+  },
+  {
+   "label": "EPS/TPS",
+   "polygon": [
+    [
+     17661,
+     275561
+    ],
+    [
+     19061,
+     276828
+    ],
+    [
+     19061,
+     273891
+    ],
+    [
+     17661,
+     273891
+    ]
+   ],
+   "area_m2": 3.23
+  },
+  {
+   "label": "PIT-2",
+   "polygon": [
+    [
+     19061,
+     276761
+    ],
+    [
+     21641,
+     273891
+    ],
+    [
+     19061,
+     273891
+    ]
+   ],
+   "area_m2": 3.7
+  },
+  {
+   "label": "ST-3",
+   "polygon": [
+    [
+     9281,
+     271761
+    ],
+    [
+     10401,
+     271761
+    ],
+    [
+     10401,
+     270471
+    ],
+    [
+     9281,
+     270471
+    ]
+   ],
+   "area_m2": 1.44
+  },
+  {
+   "label": "ST-4",
+   "polygon": [
+    [
+     10401,
+     271741
+    ],
+    [
+     11781,
+     271741
+    ],
+    [
+     11781,
+     270471
+    ],
+    [
+     10401,
+     270471
+    ]
+   ],
+   "area_m2": 1.75
+  },
+  {
+   "label": "엘리베이터 (3대)",
+   "polygon": [
+    [
+     11781,
+     271741
+    ],
+    [
+     20031,
+     271741
+    ],
+    [
+     20031,
+     268891
+    ],
+    [
+     11781,
+     268891
+    ]
+   ],
+   "area_m2": 23.51
+  },
+  {
+   "label": "AV",
+   "polygon": [
+    [
+     20031,
+     271741
+    ],
+    [
+     23429,
+     271741
+    ],
+    [
+     20878,
+     268891
+    ],
+    [
+     20031,
+     268891
+    ]
+   ],
+   "area_m2": 6.05
+  }
+ ],
+ "reports": [
+  {
+   "code": "PROPOSAL_EDGE_UNSNAPPED",
+   "severity": "warning",
+   "message": "PIT-1: 4 coordinate(s) had no CAD evidence within 400 mm.",
+   "context": {
+    "label": "PIT-1",
+    "unsnapped": [
+     "x@2",
+     "y@2",
+     "x@3",
+     "y@3"
+    ]
+   },
+   "suggested_action": "Confirm this boundary with the user (cad-space-recognition Phase D)."
+  },
+  {
+   "code": "PROPOSAL_EDGE_UNSNAPPED",
+   "severity": "warning",
+   "message": "EPS/TPS: 1 coordinate(s) had no CAD evidence within 400 mm.",
+   "context": {
+    "label": "EPS/TPS",
+    "unsnapped": [
+     "y@1"
+    ]
+   },
+   "suggested_action": "Confirm this boundary with the user (cad-space-recognition Phase D)."
+  },
+  {
+   "code": "PROPOSAL_EDGE_UNSNAPPED",
+   "severity": "warning",
+   "message": "PIT-2: 1 coordinate(s) had no CAD evidence within 400 mm.",
+   "context": {
+    "label": "PIT-2",
+    "unsnapped": [
+     "y@0"
+    ]
+   },
+   "suggested_action": "Confirm this boundary with the user (cad-space-recognition Phase D)."
+  },
+  {
+   "code": "PROPOSAL_EDGE_UNSNAPPED",
+   "severity": "warning",
+   "message": "AV: 2 coordinate(s) had no CAD evidence within 400 mm.",
+   "context": {
+    "label": "AV",
+    "unsnapped": [
+     "x@1",
+     "x@2"
+    ]
+   },
+   "suggested_action": "Confirm this boundary with the user (cad-space-recognition Phase D)."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-92971f47 (엘리베이터 홀): 7.4% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-92971f47",
+    "intrusion_ratio": 0.0743
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-94b86f0f (비상용 엘리베이터 대기공간): 14.3% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-94b86f0f",
+    "intrusion_ratio": 0.1433
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-cd344889 (ST-1): 11.1% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-cd344889",
+    "intrusion_ratio": 0.1114
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-8a516e69 (통로 (ST-3/4 아래)): 11.4% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-8a516e69",
+    "intrusion_ratio": 0.1142
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-e428ac1b (계단실-1): 10.3% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-e428ac1b",
+    "intrusion_ratio": 0.1035
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-d1ff4755 (계단실-2): 10.9% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-d1ff4755",
+    "intrusion_ratio": 0.1092
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-5e8c736e (PIT-1): 17.9% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-5e8c736e",
+    "intrusion_ratio": 0.1791
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-ab85057b (화물용 엘리베이터): 14.0% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-ab85057b",
+    "intrusion_ratio": 0.1405
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-be567815 (ST-2): 31.1% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-be567815",
+    "intrusion_ratio": 0.3108
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-a37260b3 (EPS/TPS): 6.6% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-a37260b3",
+    "intrusion_ratio": 0.066
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-8ba27c17 (PIT-2): 10.2% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-8ba27c17",
+    "intrusion_ratio": 0.1015
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-e0a9c8c3 (ST-3): 36.9% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-e0a9c8c3",
+    "intrusion_ratio": 0.3695
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-776cdbfc (ST-4): 26.6% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-776cdbfc",
+    "intrusion_ratio": 0.266
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-1c0370f7 (엘리베이터 (3대)): 7.3% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-1c0370f7",
+    "intrusion_ratio": 0.0727
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  },
+  {
+   "code": "ROOM_CROSSES_WALL",
+   "severity": "warning",
+   "message": "Room-c98aa2ff (AV): 9.4% of the room overlaps walls.",
+   "context": {
+    "auto_id": "Room-c98aa2ff",
+    "intrusion_ratio": 0.0937
+   },
+   "suggested_action": "A wall/opening is likely missing or the room spans two spaces."
+  }
+ ]
+}

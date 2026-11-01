@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git config core.hooksPath .githooks",
+            "statusMessage": "Configuring git hooks..."
+          }
+        ]
+      }
+    ]
+  }
+}

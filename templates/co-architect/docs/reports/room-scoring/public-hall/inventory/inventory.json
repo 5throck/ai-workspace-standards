@@ -1,0 +1,700 @@
+{
+  "doc": "AI 작업용 공용홀.dwg",
+  "block_references": 238,
+  "sheets": [
+    {
+      "sheet": 1,
+      "frame_block": "HEOH",
+      "bbox": [
+        0,
+        261385,
+        33600,
+        285145
+      ],
+      "titles": [
+        {
+          "text": "101동 지하4층 평면도",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "1",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "(102,103동 동일적용)",
+          "layer": "A2-TITLE",
+          "height": 144
+        },
+        {
+          "text": "축척:1/80",
+          "layer": "A2-TITLE",
+          "height": 136
+        }
+      ],
+      "thumbnail": "sheet-1.png",
+      "lines": 2356,
+      "skipped_blocks": []
+    },
+    {
+      "sheet": 2,
+      "frame_block": "HEOH",
+      "bbox": [
+        33600,
+        261385,
+        67200,
+        285145
+      ],
+      "titles": [
+        {
+          "text": "101동 지하4층 입면전개도-C",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "3",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "101동 지하4층 입면전개도-A",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "1",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "101동 지하4층 입면전개도-B",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "2",
+          "layer": "A2-TITLE",
+          "height": 280
+        }
+      ],
+      "thumbnail": "sheet-2.png",
+      "lines": 928,
+      "skipped_blocks": [
+        {
+          "name": "12112지하1층",
+          "layer": "0",
+          "entities": 69790,
+          "bbox": [
+            -3183,
+            269359,
+            68998,
+            296969
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": 3,
+      "frame_block": "HEOH",
+      "bbox": [
+        67200,
+        261385,
+        100800,
+        285145
+      ],
+      "titles": [
+        {
+          "text": "3",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "101동 지하4층 입면전개도-F",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "2",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "101동 지하4층 입면전개도-D",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "1",
+          "layer": "A2-TITLE",
+          "height": 280
+        },
+        {
+          "text": "101동 지하4층 입면전개도-E",
+          "layer": "A2-TITLE",
+          "height": 280
+        }
+      ],
+      "thumbnail": "sheet-3.png",
+      "lines": 679,
+      "skipped_blocks": [
+        {
+          "name": "12112지하1층",
+          "layer": "0",
+          "entities": 69790,
+          "bbox": [
+            30417,
+            269379,
+            102598,
+            296989
+          ]
+        }
+      ]
+    }
+  ],
+  "large_or_clipped_blocks": [
+    {
+      "name": "12112지하1층",
+      "handle": "4709C1",
+      "layer": "0",
+      "entities": 69790,
+      "bbox": [
+        30417,
+        269379,
+        102598,
+        296989
+      ],
+      "scale": 0.3,
+      "rotation_deg": 90.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "12112지하1층",
+      "handle": "47082A",
+      "layer": "0",
+      "entities": 69790,
+      "bbox": [
+        -3183,
+        269359,
+        68998,
+        296969
+      ],
+      "scale": 0.3,
+      "rotation_deg": 90.0,
+      "xclip": false,
+      "xref_bound": false,
+      "in_sheets": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "2312saasdAUTOBLOCK_002",
+      "handle": "47AD6F",
+      "layer": "REV-CD",
+      "entities": 285,
+      "bbox": [
+        -528,
+        253284,
+        38069,
+        292267
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "47B81E",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        77636,
+        279297,
+        78736,
+        281517
+      ],
+      "scale": -1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        3
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "470A1F",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        79656,
+        264726,
+        80756,
+        266946
+      ],
+      "scale": -1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        3
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "470A15",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        75496,
+        264726,
+        76596,
+        266946
+      ],
+      "scale": -1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        3
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "4709EE",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        72546,
+        272266,
+        73646,
+        274486
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        3
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "4709E9",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        70106,
+        272266,
+        71206,
+        274486
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        3
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "47096A",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        42386,
+        272266,
+        43486,
+        274486
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        2
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "470889",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        44086,
+        272266,
+        45186,
+        274486
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        2
+      ]
+    },
+    {
+      "name": "11X22",
+      "handle": "47085C",
+      "layer": "0",
+      "entities": 15,
+      "bbox": [
+        38046,
+        279297,
+        39146,
+        281517
+      ],
+      "scale": -1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        2
+      ]
+    },
+    {
+      "name": "1.2x2.2",
+      "handle": "470866",
+      "layer": "A2-CELLING-AL",
+      "entities": 8,
+      "bbox": [
+        44393,
+        279297,
+        45594,
+        281517
+      ],
+      "scale": 1.0,
+      "rotation_deg": 0.0,
+      "xclip": true,
+      "xref_bound": false,
+      "in_sheets": [
+        2
+      ]
+    }
+  ],
+  "far_away_blocks": [
+    {
+      "name": "525AX-B1$0$FAN-SS6",
+      "count": 25,
+      "entities": 18,
+      "bbox": [
+        1519105,
+        -65292,
+        2011330,
+        141023
+      ]
+    },
+    {
+      "name": "525AX-B1$0$A$Cca0f4456",
+      "count": 8,
+      "entities": 33,
+      "bbox": [
+        565613,
+        -512762,
+        2038493,
+        187605
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$A$C0E494E6C",
+      "count": 36,
+      "entities": 4,
+      "bbox": [
+        521164,
+        -547786,
+        542326,
+        162126
+      ]
+    },
+    {
+      "name": "X-B1$0$A$Cca0f4456",
+      "count": 4,
+      "entities": 33,
+      "bbox": [
+        1004553,
+        125936,
+        1313611,
+        704160
+      ]
+    },
+    {
+      "name": "X-PLAN-1F$0$A$C28bac92b",
+      "count": 2,
+      "entities": 64,
+      "bbox": [
+        662930,
+        230823,
+        1591776,
+        1463856
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$AW 12X11.4",
+      "count": 24,
+      "entities": 4,
+      "bbox": [
+        530839,
+        -536644,
+        535483,
+        -10363
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 11X22",
+      "count": 22,
+      "entities": 4,
+      "bbox": [
+        525781,
+        -529923,
+        537016,
+        162645
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 6X18",
+      "count": 19,
+      "entities": 4,
+      "bbox": [
+        523786,
+        -32604,
+        546267,
+        174228
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$동평면도 주기공통(231004)",
+      "count": 8,
+      "entities": 8,
+      "bbox": [
+        552026,
+        -564694,
+        558050,
+        115457
+      ]
+    },
+    {
+      "name": "525AX-B1$0$FAN-SS5A",
+      "count": 3,
+      "entities": 21,
+      "bbox": [
+        1540059,
+        -64172,
+        1560472,
+        139833
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$출입구",
+      "count": 6,
+      "entities": 7,
+      "bbox": [
+        528156,
+        -22730,
+        538085,
+        154812
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 12X22",
+      "count": 7,
+      "entities": 4,
+      "bbox": [
+        520731,
+        49111,
+        537176,
+        154261
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FGD 12X22",
+      "count": 6,
+      "entities": 4,
+      "bbox": [
+        523825,
+        -28935,
+        535471,
+        160043
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$AG 12X12",
+      "count": 5,
+      "entities": 4,
+      "bbox": [
+        525683,
+        -529904,
+        537005,
+        -499876
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$ASD 26X25",
+      "count": 4,
+      "entities": 4,
+      "bbox": [
+        522598,
+        58537,
+        523973,
+        155678
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 15X20",
+      "count": 3,
+      "entities": 4,
+      "bbox": [
+        525772,
+        -30938,
+        527178,
+        138375
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 8X20",
+      "count": 3,
+      "entities": 4,
+      "bbox": [
+        522414,
+        -12772,
+        529695,
+        165272
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$동평면도 주기공통(231004)-1F",
+      "count": 1,
+      "entities": 9,
+      "bbox": [
+        551226,
+        -60694,
+        558050,
+        -52543
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 9X20",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        528416,
+        -455230,
+        530380,
+        -430395
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$ASD 51.3X54",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        537887,
+        -112902,
+        539262,
+        -27527
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$ASD 57X54",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        532228,
+        -85978,
+        533603,
+        -603
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 20X21",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        517129,
+        52698,
+        542276,
+        85531
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$AG 4.5X8",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        523786,
+        134535,
+        525261,
+        165272
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 9X21",
+      "count": 2,
+      "entities": 4,
+      "bbox": [
+        527676,
+        146833,
+        529051,
+        151361
+      ]
+    },
+    {
+      "name": "525AX-B1$0$A$C9210d376",
+      "count": 2,
+      "entities": 3,
+      "bbox": [
+        667292,
+        -429569,
+        1567898,
+        -7009
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$FSD 10X21",
+      "count": 1,
+      "entities": 4,
+      "bbox": [
+        531192,
+        84085,
+        532567,
+        85460
+      ]
+    },
+    {
+      "name": "A-561~569 1014동 평면도$0$AG 19X17",
+      "count": 1,
+      "entities": 4,
+      "bbox": [
+        517746,
+        88175,
+        519121,
+        89550
+      ]
+    },
+    {
+      "name": "X-B1$0$A$C9210d376",
+      "count": 1,
+      "entities": 3,
+      "bbox": [
+        1199167,
+        227615,
+        1230419,
+        233565
+      ]
+    }
+  ]
+}

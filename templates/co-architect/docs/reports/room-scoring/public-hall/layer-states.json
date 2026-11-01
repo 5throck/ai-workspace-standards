@@ -1,0 +1,1054 @@
+{
+"0": {
+"on": true,
+"frozen": false
+},
+"HEOHFORM": {
+"on": true,
+"frozen": false
+},
+"A2-DEFPOINT": {
+"on": true,
+"frozen": false
+},
+"DEFPOINTS": {
+"on": true,
+"frozen": false
+},
+"A2-250": {
+"on": true,
+"frozen": false
+},
+"A2-251": {
+"on": true,
+"frozen": false
+},
+"A2-252": {
+"on": true,
+"frozen": false
+},
+"A2-253": {
+"on": true,
+"frozen": false
+},
+"DIM": {
+"on": true,
+"frozen": false
+},
+"A2-255": {
+"on": true,
+"frozen": false
+},
+"A2-155": {
+"on": true,
+"frozen": false
+},
+"A2-PLAN-TILE": {
+"on": true,
+"frozen": false
+},
+"A2-PLAN-PIPE": {
+"on": true,
+"frozen": false
+},
+"A2-ELE2": {
+"on": true,
+"frozen": false
+},
+"A2-DIM": {
+"on": true,
+"frozen": false
+},
+"A2-TITLE": {
+"on": true,
+"frozen": false
+},
+"A2-MARK": {
+"on": true,
+"frozen": false
+},
+"A2-줄눈": {
+"on": true,
+"frozen": false
+},
+"A2-TEXT": {
+"on": true,
+"frozen": false
+},
+"A2-LEAD": {
+"on": true,
+"frozen": false
+},
+"A-TEXT-실명": {
+"on": true,
+"frozen": false
+},
+"CEN": {
+"on": true,
+"frozen": false
+},
+"4": {
+"on": true,
+"frozen": false
+},
+"A2-FORM": {
+"on": true,
+"frozen": false
+},
+"A2-석재4": {
+"on": true,
+"frozen": false
+},
+"I-text": {
+"on": true,
+"frozen": false
+},
+"XREF-A-108B$0$AA-ETC": {
+"on": true,
+"frozen": false
+},
+"A-561~569 1014동 평면도$0$AA-TEXT": {
+"on": true,
+"frozen": true
+},
+"A-561~569 1014동 평면도$0$AA-CEN": {
+"on": true,
+"frozen": true
+},
+"A-561~569 1014동 평면도$0$AA-SYM": {
+"on": true,
+"frozen": true
+},
+"A-561~569 1014동 평면도$0$AA-STA-SYM": {
+"on": true,
+"frozen": true
+},
+"A-561~569 1014동 평면도$0$WINSYMBOL-D": {
+"on": true,
+"frozen": true
+},
+"AA-XXXX-TEXT": {
+"on": true,
+"frozen": false
+},
+"AA-XXXX-SYMB": {
+"on": true,
+"frozen": false
+},
+"A-CEN": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$ROM": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-SYM": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$defpoint": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-CON": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-FIN": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-WALL": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-DWXM-WIND": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-CEN": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$A-STA": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-XXXX-FINL": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-DOOR": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$X-1F-FUN-HID": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-XXXX-PAT": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-STA-ELE": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$점형블록": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-DOR-ELE": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-DOR": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-EL-PCN9": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-ELE7": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-XXXX-253": {
+"on": true,
+"frozen": false
+},
+"wid": {
+"on": true,
+"frozen": false
+},
+"TEXT-실명": {
+"on": true,
+"frozen": false
+},
+"LEVEL": {
+"on": true,
+"frozen": false
+},
+"252": {
+"on": true,
+"frozen": false
+},
+"AA-XXXX-TABL": {
+"on": true,
+"frozen": false
+},
+"LEADER": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-XXXX-ELEV": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-WIN": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$REV-CD": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$A-OPEN": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$TEXT": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$##재활용품 레아이웃": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$defpoint": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-CEN(아파트)": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$0-COL": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-CON": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-CEN(PARKING)": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-CEN-2": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$hidden": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-TP구간": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$AA-XXXX-253": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$0_STR_COL_NAME": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$기둥": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$0_STR_전이기둥NO": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$AA-XXXX-251": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$A-HID": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$APT-DEF": {
+"on": true,
+"frozen": false
+},
+"X-B-구조base$0$AA-XXXX-HAT": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$AA-XXXX-PARK-장애인주차": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$I-F-DOOR": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$PIT 점검구": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$설비관련": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-INS": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-ELE8": {
+"on": true,
+"frozen": false
+},
+"6": {
+"on": true,
+"frozen": false
+},
+"250": {
+"on": true,
+"frozen": false
+},
+"A2-CELLING-AL": {
+"on": true,
+"frozen": false
+},
+"IN-C-lighting": {
+"on": true,
+"frozen": false
+},
+"DI-OL-2": {
+"on": true,
+"frozen": false
+},
+"254": {
+"on": true,
+"frozen": false
+},
+"HAT": {
+"on": true,
+"frozen": false
+},
+"08-문자재료명": {
+"on": true,
+"frozen": false
+},
+"3": {
+"on": true,
+"frozen": false
+},
+"DIM-지시선": {
+"on": true,
+"frozen": false
+},
+"OPN": {
+"on": true,
+"frozen": false
+},
+"EL-DOOR": {
+"on": true,
+"frozen": false
+},
+"AA-DWXM-WIND": {
+"on": true,
+"frozen": false
+},
+"ELE4": {
+"on": true,
+"frozen": false
+},
+"A-HAT": {
+"on": true,
+"frozen": false
+},
+"A-TXT-3": {
+"on": true,
+"frozen": false
+},
+"S-DIM": {
+"on": true,
+"frozen": false
+},
+"A2-35": {
+"on": true,
+"frozen": false
+},
+"ELE": {
+"on": true,
+"frozen": false
+},
+"Layer 1": {
+"on": true,
+"frozen": false
+},
+"ARCH": {
+"on": true,
+"frozen": false
+},
+"ELE 6": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$defpoint": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$AA-XXXX-PARK-확장형주차": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-CEN": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-STA": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-EL-PCN4": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-DOR-ELE": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-DOR": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PARK-일반형주차": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PARK-전기형주차": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-STA-ELE": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-TOL": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-SYM": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-ELE-8": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-WIN": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$점형블록": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-INSL": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PARK-경형": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-상부마감선": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-TP구간": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$A-세대창고 동선표현": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$AA-XXXX-PARK-회차 및 조업주차": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-세대창고": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$TEXT": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$보행안전통로": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-ELE": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-무인택배": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$재활용품 집하시설": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PAT": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$I-F-TOILET": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-HID": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PARK-장애인주차": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$elev": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$보일러실 장비": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-WALL-BLOCK": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$트렌치": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-WALL-BRICK": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-PAT-BLOCK": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-PAT-BRICK": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$장비": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$AA-XXXX-FINL": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-OPEN": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-DRY": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$PIT 점검구": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$PAD": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$land-line": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$I-헬스기구": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$Defpoint_text": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$STEEL": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-HAT-251": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-TILE": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-주차 차단기": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$AA-XXXX-PARK-hatch": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$0-도로-1": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$I-FUR-FIX": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-HAT-252": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-CEN2": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$+++++20240214 이후수정사항": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$A-FUN": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-FUR": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$F-FUR-M": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$I-F-FUR-FIX": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$설비관련": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-INS": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$--TP_LINE": {
+"on": true,
+"frozen": false
+},
+"--OPEN": {
+"on": true,
+"frozen": false
+},
+"LA-plan-pav1": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-PIT-253": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$X-평면도(확장형)$0$A-DOR-ELE": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$X-평면도(확장형)$0$A-DOR": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$'US-S-명칭": {
+"on": true,
+"frozen": true
+},
+"X-B1$0$'US-lut3": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$'US-S-(휴게)": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$'US-FAT": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A_FIN": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$M_장비패드": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$A-인통구": {
+"on": true,
+"frozen": false
+},
+"REV-CD": {
+"on": true,
+"frozen": false
+},
+"X-B1$0$오픈트렌치 w200": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$251": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$'US-Dep": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$'US-자전거보관소": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$'US-시설(dep)": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$'DEP": {
+"on": true,
+"frozen": true
+},
+"X-PLAN-1F$0$A-문주": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$Mark": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$XR-Unit$0$Door": {
+"on": true,
+"frozen": false
+},
+"X-PLAN-1F$0$A-인통구": {
+"on": true,
+"frozen": false
+},
+"X-평면도(기본형)$0$A-CEN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$defpoint": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-DRY": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-MC": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-CON": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-FFXM-FURN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-FIN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-OPN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-INS": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-WALL": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-ELE-7": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-DWXM-WIND": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-253": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-LEVEL": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-CEN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$설비": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$HID-커튼박스": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-FFXM-OTHR": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-ELEV": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-STA": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-FINL": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$HAT": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-PAT": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-STA-ELE": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$점형블록": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-DOR-ELE": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$Mark": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$설비관련": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-SYM": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$HID-결로": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-OPEN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-FFXM-SANI": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-확장부분": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$DOOR": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-DOORFRAME": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-DOOR": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-DOOR-FR": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$IN-F-도어": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$IN-F-도어프레임": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-FIN": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$F-HAT": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$AA-XXXX-251": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-TILE": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$PIT 점검구": {
+"on": true,
+"frozen": false
+},
+"X-평면도(확장형)$0$A-인통구": {
+"on": true,
+"frozen": false
+},
+"XREF 배치도(동딱지)$0$Defpoint": {
+"on": true,
+"frozen": false
+},
+"A2-KEYPLAN": {
+"on": true,
+"frozen": false
+},
+"XREF 배치도(동딱지)$0$T": {
+"on": true,
+"frozen": true
+},
+"XREF 배치도(동딱지)$0$A-ELE2": {
+"on": true,
+"frozen": false
+},
+"XREF 배치도(동딱지)$0$필로티(입면선)": {
+"on": true,
+"frozen": false
+},
+"11": {
+"on": true,
+"frozen": false
+},
+"I-DIM": {
+"on": true,
+"frozen": false
+},
+"0-0-sheet": {
+"on": true,
+"frozen": false
+},
+"IN-E-HAT": {
+"on": true,
+"frozen": false
+},
+"IN-DETAIL": {
+"on": true,
+"frozen": false
+},
+"04-DIM-EL": {
+"on": true,
+"frozen": false
+},
+"FORM$0$HN FORM": {
+"on": true,
+"frozen": false
+},
+"L2_sheet": {
+"on": true,
+"frozen": false
+},
+"A-FNS": {
+"on": true,
+"frozen": false
+},
+"IN-F-ELEV(JAM)": {
+"on": true,
+"frozen": false
+},
+"xr-b3$0$CON": {
+"on": true,
+"frozen": false
+},
+"C-84A-C$0$CON": {
+"on": true,
+"frozen": false
+},
+"C-84A-C$0$ELEV": {
+"on": true,
+"frozen": false
+},
+"IN-E-SYM": {
+"on": true,
+"frozen": false
+},
+"A2-입면도 작성 영역": {
+"on": true,
+"frozen": false
+}
+}

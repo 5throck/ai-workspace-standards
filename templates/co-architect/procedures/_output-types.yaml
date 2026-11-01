@@ -1,0 +1,19 @@
+schema_version: "1.0"
+variant: co-architect
+output_types:
+  evidence_pack:
+    description: "Registered procedure output type"
+  draft_document:
+    description: "Registered procedure output type"
+  narrative_review:
+    description: "Registered procedure output type"
+  final_document:
+    description: "Registered procedure output type"
+  angle_options:
+    description: "Registered procedure output type"
+  narrative_outline:
+    description: "Registered procedure output type"
+  integrated_document:
+    description: "Registered procedure output type"
+  closure_record:
+    description: "Registered procedure output type"

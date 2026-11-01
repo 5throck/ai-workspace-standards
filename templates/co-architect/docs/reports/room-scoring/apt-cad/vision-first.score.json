@@ -1,0 +1,207 @@
+{
+  "drawing": "tests/아파트캐드평면도.dwg",
+  "rooms_total": 14,
+  "rooms_passed": 12,
+  "rooms_matched": 12,
+  "mean_iou": 0.843,
+  "matches": [
+    {
+      "gt_id": "R01",
+      "label": "침실-2",
+      "detected_id": "Room-06cbb92c",
+      "detected_name": "침실-2",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R02",
+      "label": "주방/식당",
+      "detected_id": "Room-df30b21f",
+      "detected_name": "주방/식당",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R03",
+      "label": "침실-3",
+      "detected_id": "Room-f568aaa3",
+      "detected_name": "침실-3",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R04",
+      "label": "욕실-1",
+      "detected_id": "Room-91854582",
+      "detected_name": "욕실-1",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R05",
+      "label": "침실-1",
+      "detected_id": "Room-6a8ab761",
+      "detected_name": "침실-1",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R06",
+      "label": "거실",
+      "detected_id": "Room-c6b2ce34",
+      "detected_name": "거실",
+      "iou": 0.903,
+      "centroid_offset_mm": 205.1,
+      "area_ratio": 0.903,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R07",
+      "label": "욕실-2",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "no detection overlaps this room"
+    },
+    {
+      "gt_id": "R01R",
+      "label": "침실-2_R",
+      "detected_id": "Room-0064ca8a",
+      "detected_name": "침실-2_R",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R02R",
+      "label": "주방/식당_R",
+      "detected_id": "Room-838ef95e",
+      "detected_name": "주방/식당_R",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R03R",
+      "label": "침실-3_R",
+      "detected_id": "Room-858f4bae",
+      "detected_name": "침실-3_R",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R04R",
+      "label": "욕실-1_R",
+      "detected_id": "Room-6e2a983a",
+      "detected_name": "욕실-1_R",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R05R",
+      "label": "침실-1_R",
+      "detected_id": "Room-81029d2f",
+      "detected_name": "침실-1_R",
+      "iou": 1.0,
+      "centroid_offset_mm": 0.0,
+      "area_ratio": 1.0,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R06R",
+      "label": "거실_R",
+      "detected_id": "Room-8d143751",
+      "detected_name": "거실_R",
+      "iou": 0.903,
+      "centroid_offset_mm": 205.1,
+      "area_ratio": 0.903,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R07R",
+      "label": "욕실-2_R",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "no detection overlaps this room"
+    }
+  ],
+  "merged": [],
+  "non_room_hits": [
+    {
+      "detected_id": "Room-777f10a5",
+      "label": "현관",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-5f4d8c47",
+      "label": "현관_R",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-f53b7973",
+      "label": "발코니-1",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-b5902f1b",
+      "label": "발코니-1_R",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-a96fc4fc",
+      "label": "발코니-2",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-4e7e25bc",
+      "label": "발코니-2_R",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-a8bafec9",
+      "label": "발코니-3",
+      "iou": 1.0
+    },
+    {
+      "detected_id": "Room-ebf87b93",
+      "label": "발코니-3_R",
+      "iou": 1.0
+    }
+  ],
+  "unmatched_detections": []
+}

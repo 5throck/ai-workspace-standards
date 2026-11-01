@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "drawing": "tests/32평형아파트.dwg",
+    "source": "Rendered plan.svg (DWG entities, exact transform), read by Claude on 2026-09-25 with the semantic rules below. No polygon ground truth existed at proposal time.",
+    "units": "screenshot pixels of plan.svg (744x754 view of 1400x1420 svg), y down",
+    "anchor_px_bbox": [0, 120, 743.4, 874.0],
+    "anchor_mm_bbox": [13800, 10300, 27800, 24500],
+    "rules": ["balconies (발코니1-4), 화단 are non-rooms", "홀/ELEV/stairs are common core", "반침 is a closet, 현관 is entry: excluded from the 8-room target list",
+              "open living/kitchen split at the wall ends (y≈467 px)"]
+  },
+  "rooms": [
+    {"label": "침실1",     "px": [[38,540],[250,540],[250,720],[38,720]]},
+    {"label": "거실",      "px": [[258,467],[498,467],[498,720],[258,720]]},
+    {"label": "주방&식당", "px": [[288,240],[480,240],[480,467],[288,467]]},
+    {"label": "침실2",     "px": [[507,540],[667,540],[667,720],[507,720]]},
+    {"label": "욕실1",     "px": [[583,390],[667,390],[667,530],[583,530]]},
+    {"label": "침실3",     "px": [[133,300],[278,300],[278,463],[133,463]]},
+    {"label": "욕실2",     "px": [[38,300],[122,300],[122,430],[38,430]]},
+    {"label": "드레스실",  "px": [[38,436],[128,436],[128,538],[38,538]]}
+  ],
+  "non_rooms": [
+    {"label": "현관", "px": [[487,390],[578,390],[578,465],[487,465]]},
+    {"label": "반침", "px": [[133,470],[192,470],[192,538],[133,538]]}
+  ]
+}

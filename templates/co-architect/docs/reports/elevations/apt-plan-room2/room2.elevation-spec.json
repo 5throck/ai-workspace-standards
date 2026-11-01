@@ -1,0 +1,71 @@
+{
+  "room": "아파트 평면도 · ROOM #2",
+  "ceiling": 2300,
+  "floor_level": "±0",
+  "source": {
+    "ground_truth": "memory/drawings/아파트 평면도.ground-truth.json (R04)",
+    "inner_faces": {
+      "west": 11171,
+      "east": 15681,
+      "south": 16661,
+      "north": 19381
+    }
+  },
+  "faces": [
+    {
+      "name": "북 (N)",
+      "width": 4510,
+      "left": "서",
+      "right": "동",
+      "openings": []
+    },
+    {
+      "name": "동 (E)",
+      "width": 2720,
+      "left": "북",
+      "right": "남",
+      "openings": [
+        {
+          "id": "D01",
+          "type": "door",
+          "offset": 1820,
+          "width": 900,
+          "sill": 0,
+          "head": 2100,
+          "hinge": "right",
+          "note": "hinge at the south end (15788,16588); swings into the room"
+        }
+      ]
+    },
+    {
+      "name": "남 (S)",
+      "width": 4510,
+      "left": "동",
+      "right": "서",
+      "openings": []
+    },
+    {
+      "name": "서 (W)",
+      "width": 2720,
+      "left": "남",
+      "right": "북",
+      "openings": [
+        {
+          "id": "W07",
+          "type": "window",
+          "offset": 0,
+          "width": 2120,
+          "sill": 900,
+          "head": 2100,
+          "note": "glazing y16661-18781 on X1 (expanded balcony)"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "• 실 크기: 벽 안쪽 면 기준 4,510 × 2,720 (통심 기준 4,750 × 2,900) — 원본 벽선에서 측정",
+    "• D01: 폭 900(문짝 959에서 문틀 제외 추정), 높이 2,100 — 경첩은 남쪽 끝, 실내 쪽으로 열림",
+    "• W07: 폭 2,120(원본 창 선), 창대 높이 900·창 윗높이 2,100은 원본에 없는 값이라 추정 — 확인 필요",
+    "• 기존 walls.json 값(C.H 2,800, 창 높이 1,500)은 실 태그 C.H 2,300과 맞지 않아 사용하지 않음"
+  ]
+}

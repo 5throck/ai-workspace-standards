@@ -1,0 +1,392 @@
+{
+  "version": "1.0.0",
+  "specs": [
+    {
+      "id": "2026-08-29-co-architect-identity-separation-design",
+      "title": "co architect identity separation design",
+      "file": "docs/designs/2026-08-29-co-architect-identity-separation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-08-29-recursive-variant-scripts-design",
+      "title": "recursive variant scripts design",
+      "file": "docs/designs/2026-08-29-recursive-variant-scripts-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "2026-09-25-agents-md-section6-alignment-design",
+      "title": "agents md section6 alignment design",
+      "file": "docs/designs/2026-09-25-agents-md-section6-alignment-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-25",
+      "last_updated": "2026-10-31"
+    },
+    {
+      "id": "2026-09-26-version-manifest-drift-warnings-design",
+      "title": "version manifest drift warnings design",
+      "file": "docs/designs/2026-09-26-version-manifest-drift-warnings-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
+    },
+    {
+      "id": "2026-10-07-registry-provenance-normalization-design",
+      "title": "registry provenance normalization design",
+      "file": "docs/designs/2026-10-07-registry-provenance-normalization-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-07",
+      "last_updated": "2026-10-07"
+    },
+    {
+      "id": "2026-10-23-workspace-upgrade",
+      "title": "workspace upgrade design",
+      "file": "docs/designs/2026-10-23-workspace-upgrade-design.md",
+      "status": "implemented",
+      "source": "pm",
+      "created": "2026-10-23",
+      "last_updated": "2026-10-23"
+    },
+    {
+      "id": "2026-10-31-dependency-cve-remediation-design",
+      "title": "dependency cve remediation design",
+      "file": "docs/designs/2026-10-31-dependency-cve-remediation-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-10-31",
+      "last_updated": "2026-10-31"
+    },
+    {
+      "id": "ai-002-graph-driven-rendering-design",
+      "title": "AI 002 graph driven rendering design",
+      "file": "docs/designs/AI-002-graph-driven-rendering-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "ai-003-v1-to-v3-migration-design",
+      "title": "AI 003 v1 to v3 migration design",
+      "file": "docs/designs/AI-003-v1-to-v3-migration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "api-001-design",
+      "title": "API 001 design",
+      "file": "docs/designs/API-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "axis-001-design",
+      "title": "AXIS 001 design",
+      "file": "docs/designs/AXIS-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "benchmark-002-design",
+      "title": "BENCHMARK 002 design",
+      "file": "docs/designs/BENCHMARK-002-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "boundary-001-design",
+      "title": "BOUNDARY 001 design",
+      "file": "docs/designs/BOUNDARY-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "cad-recognition-hardening-001",
+      "title": "CAD RECOGNITION HARDENING 001 design",
+      "file": "docs/designs/CAD-RECOGNITION-HARDENING-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-13",
+      "last_updated": "2026-09-13"
+    },
+    {
+      "id": "ceil-001-design",
+      "title": "CEIL 001 design",
+      "file": "docs/designs/CEIL-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "closed-loop-001-design",
+      "title": "CLOSED LOOP 001 design",
+      "file": "docs/designs/CLOSED-LOOP-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "docs-001-design",
+      "title": "DOCS 001 design",
+      "file": "docs/designs/DOCS-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "elev-001-design",
+      "title": "ELEV 001 design",
+      "file": "docs/designs/ELEV-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "elev-002-design",
+      "title": "ELEV 002 design",
+      "file": "docs/designs/ELEV-002-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "elev-003-elevation-pipeline-refactor",
+      "title": "ELEV 003 elevation pipeline refactor",
+      "file": "docs/designs/ELEV-003-elevation-pipeline-refactor.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "facade-001-facade-mesh-pipeline",
+      "title": "FACADE 001 facade mesh pipeline",
+      "file": "docs/designs/FACADE-001-facade-mesh-pipeline.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "facade-002-multi-floor-facade",
+      "title": "FACADE 002 multi floor facade",
+      "file": "docs/designs/FACADE-002-multi-floor-facade.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-10-07"
+    },
+    {
+      "id": "facade-003-pattern-decomposition-design",
+      "title": "FACADE 003 pattern decomposition design",
+      "file": "docs/designs/FACADE-003-pattern-decomposition-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "golden-001-design",
+      "title": "GOLDEN 001 design",
+      "file": "docs/designs/GOLDEN-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "graph-001-design",
+      "title": "GRAPH 001 design",
+      "file": "docs/designs/GRAPH-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "llmcfg-001-design",
+      "title": "LLMCFG 001 design",
+      "file": "docs/designs/LLMCFG-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
+    },
+    {
+      "id": "locale-001-design",
+      "title": "LOCALE 001 design",
+      "file": "docs/designs/LOCALE-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-25",
+      "last_updated": "2026-09-25"
+    },
+    {
+      "id": "mcp-001-cad-compliance-integration-design",
+      "title": "MCP 001 cad compliance integration design",
+      "file": "docs/designs/MCP-001-cad-compliance-integration-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "monitoring-001-design",
+      "title": "MONITORING 001 design",
+      "file": "docs/designs/MONITORING-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "packaging-001-design",
+      "title": "PACKAGING 001 design",
+      "file": "docs/designs/PACKAGING-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "pipeline-001-design",
+      "title": "PIPELINE 001 design",
+      "file": "docs/designs/PIPELINE-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "pkg-001-cad-intelligence-restructure-design",
+      "title": "PKG 001 cad intelligence restructure design",
+      "file": "docs/designs/PKG-001-cad-intelligence-restructure-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "review-agent-001-design",
+      "title": "REVIEW AGENT 001 design",
+      "file": "docs/designs/REVIEW-AGENT-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "rooms-json-seed-001",
+      "title": "ROOMS JSON SEED 001 design",
+      "file": "docs/designs/ROOMS-JSON-SEED-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-13",
+      "last_updated": "2026-09-13"
+    },
+    {
+      "id": "sched-001-design",
+      "title": "SCHED 001 design",
+      "file": "docs/designs/SCHED-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "sect-001-design",
+      "title": "SECT 001 design",
+      "file": "docs/designs/SECT-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "space-001-design",
+      "title": "SPACE 001 design",
+      "file": "docs/designs/SPACE-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "space-info-seed-001",
+      "title": "SPACE INFO SEED 001 design",
+      "file": "docs/designs/SPACE-INFO-SEED-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-13",
+      "last_updated": "2026-09-14"
+    },
+    {
+      "id": "takeoff-001-design",
+      "title": "TAKEOFF 001 design",
+      "file": "docs/designs/TAKEOFF-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "test-001-design",
+      "title": "TEST 001 design",
+      "file": "docs/designs/TEST-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "transaction-001-design",
+      "title": "TRANSACTION 001 design",
+      "file": "docs/designs/TRANSACTION-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    },
+    {
+      "id": "vision-first-001",
+      "title": "VISION FIRST 001 design",
+      "file": "docs/designs/VISION-FIRST-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-24",
+      "last_updated": "2026-09-24"
+    },
+    {
+      "id": "workflow-001-design",
+      "title": "WORKFLOW 001 design",
+      "file": "docs/designs/WORKFLOW-001-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-09-12",
+      "last_updated": "2026-09-12"
+    }
+  ]
+}

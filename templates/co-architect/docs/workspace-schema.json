@@ -1,0 +1,919 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12",
+  "version": "1.8.0",
+  "description": "Single Source of Truth for workspace-wide invariants. All dependent documents must match these values. Validated by scripts/validate-templates.ts at pre-commit.",
+  "workflow": {
+    "phases": {
+      "canonical": [
+        "0",
+        "1-2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "count": 6,
+      "pm_owned": [
+        "0",
+        "1-2",
+        "5"
+      ],
+      "autonomous": [
+        "3",
+        "4",
+        "6"
+      ],
+      "definitions": {
+        "0": "Project Initiation",
+        "3": "Design Handoff",
+        "4": "Execution",
+        "5": "Lifecycle Finalization",
+        "6": "Quality Assurance & Finalization",
+        "1-2": "Planning & Architecture"
+      }
+    }
+  },
+  "models": {
+    "claude": {
+      "high": "claude-opus-5-5",
+      "medium": "claude-sonnet-5-5",
+      "low": "claude-haiku-5-5"
+    },
+    "gemini": {
+      "high": "gemini-3.1-pro",
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
+    },
+    "antigravity": {
+      "high": "gemini-3.1-pro",
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
+    },
+    "gemini-cli": {
+      "high": "gemini-3.1-pro",
+      "medium": "gemini-3.8-flash",
+      "low": "gemini-3.8-flash"
+    },
+    "codex": {
+      "high": "gpt-6.1-sol",
+      "medium": "gpt-6.1-terra",
+      "low": "gpt-6-luna"
+    },
+    "hermes": {
+      "high": "claude-opus-5-5",
+      "medium": "claude-sonnet-5-5",
+      "low": "claude-haiku-5-5"
+    },
+    "zai": {
+      "high": "glm-5.3",
+      "medium": "glm-5.3-flash",
+      "low": "glm-5.3-flash"
+    },
+    "zcode": {
+      "high": "glm-5.3",
+      "medium": "glm-5.3-flash",
+      "low": "glm-5.3-flash"
+    }
+  },
+  "variant_lifecycle": {
+    "description": "Governance rules for variant lifecycle transitions",
+    "beta_engagement_criteria_required": true,
+    "engagement_criteria_schema": {
+      "evaluation_start": "YYYY-MM-DD",
+      "evaluation_period_days": 14,
+      "green_threshold": "description of success condition",
+      "yellow_action": "action if no engagement within period",
+      "red_trigger": "condition for immediate beta cancellation",
+      "current_status": "green|yellow|red"
+    }
+  },
+  "_notes": {
+    "variant_specific": "Variant-specific phase numbering and names are declared in each variant's docs/phase-definitions.md and docs/<variant>.context.md workflow table (ADR-0096); this canonical list is the workspace-root schema and is not a per-variant naming rule",
+    "variant_agents": "Variant-specific agent tiers are declared in each variant agent's frontmatter tier block (templates/<variant>/agents/*.md); variant.json carries only the agent roster (name/file pairs), not tiers",
+    "root_allowlist_divergence": "This L1 copy intentionally diverges from the workspace-root docs/workspace-schema.json: CONSTITUTION.md is absent from rootAllowlist.files here because no scaffolded project carries that file (CONSTITUTION.md §7.5 non-propagation), while the L0 copy must keep the entry for its own stray-root check — intentional per spec 2026-10-28-l0-only-governance-doc-cleanup (DEC-20261028-05); the pair is hand-maintained (ADR-0069), each copy is validated against its own repo."
+  },
+  "i18n": {
+    "description": "Internationalization policy. locale_codes defines all language codes recognized as valid translation zones. Files inside <lang-code>/ or locales/<lang-code>/ directories, and *_<lang-code> suffix files (e.g. README_ko.md, tracked by hash-sync), are exempt from the English-only documentation rule. en is the source language, not a translation-zone target.",
+    "locale_codes": [
+      "ko",
+      "ja",
+      "zh-CN",
+      "zh-TW",
+      "de",
+      "es",
+      "fr",
+      "pt",
+      "vi",
+      "ms",
+      "id",
+      "th",
+      "ru",
+      "it",
+      "ar",
+      "en"
+    ],
+    "translation_zone_patterns": [
+      "<lang-code>/",
+      "locales/<lang-code>/",
+      "*_<lang-code>.md",
+      "*_<lang-code>.yaml"
+    ],
+    "note": "audit.ts and validate-md-language.ts must read locale_codes from this file — do NOT hardcode language codes in scripts."
+  },
+  "country_scoped_assets": {
+    "description": "Skills, scripts, env keys, and variant asset directories whose function is specific to one country/region because they access that country's data systems (NOT language-based). Pruned from generated projects/L3 drafts at scaffold time unless the project's target country matches. Registry-only SSOT — do not mark skills in SKILL.md frontmatter. Never register language skills (translate etc.) here.",
+    "skills": {
+      "k-law": "KR",
+      "k-dart": "KR",
+      "k-kosis": "KR",
+      "k-opendata": "KR",
+      "k-ecos": "KR",
+      "k-krx": "KR"
+    },
+    "scripts": {},
+    "env": {
+      "DART_API_KEY": "KR",
+      "LAW_API_OC": "KR",
+      "KOSIS_API_KEY": "KR",
+      "DATA_GO_KR_API_KEY": "KR",
+      "ECOS_API_KEY": "KR",
+      "KRX_API_KEY": "KR"
+    },
+    "dirs": {
+      "regulations/KR": "KR"
+    }
+  },
+  "variant_scoped_skills": {
+    "description": "Skills whose function is exclusive to ONE variant. Registry-only SSOT (owner-curated — heuristics cannot distinguish these from genuinely common skills). If such a skill is found in templates/common/skills/ it is a promotion mistake: validate-templates FAILs and upgrade-project prunes it from projects whose variant does not own it (skills/ + .claude/.gemini/.agents mirrors). sound-synth (co-game) leaked this way on 2026-08-06 into 10 of 11 projects.",
+    "co-game": [
+      "sound-synth"
+    ],
+    "co-design": [],
+    "co-consult": [
+      "mece-logic-auditor"
+    ],
+    "co-deck": [
+      "presenter-mode"
+    ],
+    "co-security": [
+      "sarif-exporter",
+      "stride-threat-matrix"
+    ],
+    "co-develop": [
+      "swe-solve"
+    ],
+    "co-learning": [
+      "exam-bank-operations"
+    ]
+  },
+  "rootAllowlist": {
+    "description": "Whitelist of files and directories permitted in the workspace root. Anything not in these lists triggers a stray-artifact audit failure.",
+    "files": [
+      ".git",
+      "package.json",
+      "bunfig.toml",
+      "package-lock.json",
+      "bun.lockb",
+      "bun.lock",
+      "tsconfig.json",
+      ".gitignore",
+      ".gitattributes",
+      ".gitmodules",
+      ".editorconfig",
+      ".gitleaks.toml",
+      "README.md",
+      "README_ko.md",
+      "README_es.md",
+      "README_ja.md",
+      "CLAUDE.md",
+      "GEMINI.md",
+      "CODEX.md",
+      "HERMES.md",
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "LICENSE",
+      "NOTICES",
+      ".mcp.json",
+      ".sync_context.tmp",
+      "propagation-map.json",
+      "services.yaml",
+      "fix.mjs",
+      ".DS_Store",
+      ".zcodeignore",
+      ".cursorrules",
+      ".clauderules",
+      ".ignore",
+      "opencode.json"
+    ],
+    "dirs": [
+      ".git",
+      "scripts",
+      "tests",
+      "agents",
+      "skills",
+      "docs",
+      "memory",
+      "templates",
+      "tickets",
+      "schemas",
+      ".claude",
+      ".gemini",
+      ".githooks",
+      ".git",
+      "node_modules",
+      ".antigravitycli",
+      ".codex",
+      ".hermes",
+      ".github",
+      "Projects",
+      "services",
+      ".pipeline-state",
+      "co-develop",
+      ".agent",
+      ".agents",
+      ".opencode",
+      ".openchrome",
+      ".playwright-mcp",
+      ".understand-anything",
+      "abap_coding_mig",
+      "abap_vibe_coding",
+      "abap_vibe_coding_mig",
+      "abap_vibe_coding_plugin",
+      "artifacts",
+      "Crypto-Agent",
+      "daniel-lightrag-mcp",
+      "dart-mcp",
+      "demo",
+      "mcp-server-datahub",
+      "notebooklm-mcp-cli",
+      "PDF-Viewer",
+      "Pricing-Mgmt-Simulation",
+      "Product-Planning",
+      "quickdl",
+      "scratch",
+      "vibing-steampunk"
+    ]
+  },
+  "variant_extensions": {
+    "description": "Optional top-level keys allowed in variant.json beyond the base contract. Validated by validate-templates.ts.",
+    "_shared": {
+      "_note": "Documentation-only cross-reference. $ref values here are NOT machine-validated JSON Schema refs. For standard JSON Schema, use $defs pattern instead.",
+      "agent_manifest": {
+        "description": "Agent roster metadata and optional pipeline configuration. Available in all variants.",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order",
+          "retry_policy"
+        ],
+        "notes": "pipeline_order: omit or use [] for variants with parallel/free-form agent dispatch. retry_policy: declares on_fail routing and max_retries per agent. optional[]: agents that can be skipped by PM."
+      },
+      "country_config": {
+        "description": "Country/jurisdiction profile configuration. supported[] lists ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN; pattern ^[A-Z]{2,4}$) for profiles shipped under profiles_dir. default MUST be null (region-neutral) — a non-null default region-locks the variant and triggers a validator warning.",
+        "required_fields": [
+          "profiles_dir",
+          "supported"
+        ],
+        "notes": "profiles_dir is 'docs/countries' in all current variants. Each supported code must have <profiles_dir>/<CODE>.md with frontmatter code/name/status/last_verified. Profiles are advisory jurisdiction knowledge (loaded at engagement start), never auto-executed. Country != language — language policy remains i18n.locale_codes."
+      }
+    },
+    "co-abap": {
+      "agent_manifest": {
+        "description": "SAP ABAP development pipeline with optional SAP module analysts and technical execution agents",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "pipeline_order defines the 6-step harness lifecycle. optional[] lists agents dispatched by PM as needed. Module analysts (SD/MM/FI/CO/PP/LE) activate on matching trigger keywords."
+      },
+      "skill_manifest": {
+        "description": "Variant-specific skills manifest with ABAP and SAP module skills",
+        "required_fields": [
+          "variant_specific"
+        ],
+        "notes": "Each entry declares name, layer, used_by_agents, phases, and platform_parity."
+      },
+      "script_manifest": {
+        "description": "Variant-specific scripts for VSP (VS Code ABAP) task execution and ABAP project lifecycle",
+        "required_fields": [
+          "variant_scripts_dir",
+          "local",
+          "external"
+        ],
+        "notes": "local[] lists variant-only scripts. external[] reserved for future third-party integrations."
+      }
+    },
+    "co-consult": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-design": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-develop": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-export": {
+      "agent_manifest": {
+        "description": "Import/export trade consulting agent roster with flat dispatch and no strict sequential dependency",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "Agents dispatched by PM based on trade-consulting engagement phase. pipeline_order is empty for free-form dispatch."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "engagement_methodology": {
+        "description": "Variant-specific engagement methodology description",
+        "required_fields": [],
+        "notes": "Free-text field describing the structured engagement phases and client sign-off gates."
+      },
+      "deliverable_template": {
+        "description": "Standard deliverable template descriptions per engagement phase",
+        "required_fields": [],
+        "notes": "Free-text field listing deliverable types and their phase mapping."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      }
+    },
+    "co-hr": {
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "engagement_methodology": {
+        "description": "Variant-specific engagement methodology description",
+        "required_fields": [],
+        "notes": "Free-text field describing the structured engagement phases and client sign-off gates."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "skill_manifest": {
+        "description": "Variant-specific skills manifest (e.g., k-law for Korean labor law compliance)",
+        "required_fields": [
+          "variant_specific"
+        ],
+        "notes": "Each entry declares name, used_by_agents, and phases."
+      },
+      "phaseAComplete": {
+        "description": "Flag indicating Phase A (prototype) completion status",
+        "required_fields": [],
+        "notes": "Boolean. true when all PROMOTION_CHECKLIST criteria have been met."
+      },
+      "promotionChecklist": {
+        "description": "Path to the promotion checklist file",
+        "required_fields": [],
+        "notes": "Relative path from variant root to the PROMOTION_CHECKLIST.md file."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      }
+    },
+    "co-news": {
+      "agent_manifest": {
+        "description": "Business/finance newsroom agent roster with flat dispatch and fact-checker sign-off gate",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "Agents dispatched by PM based on newsroom workflow phase. Fact-checker sign-off gate before publish."
+      },
+      "displayName": {
+        "description": "Human-readable variant display name",
+        "required_fields": [],
+        "notes": "Used in UI and documentation rendering."
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      },
+      "phaseAComplete": {
+        "description": "Flag indicating Phase A (prototype) completion status",
+        "required_fields": [],
+        "notes": "Boolean. true when all PROMOTION_CHECKLIST criteria have been met."
+      },
+      "promotionChecklist": {
+        "description": "Path to the promotion checklist file",
+        "required_fields": [],
+        "notes": "Relative path from variant root to the PROMOTION_CHECKLIST.md file."
+      }
+    },
+    "co-work": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-security": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      }
+    },
+    "co-game": {
+      "agent_manifest": {
+        "description": "Game development pipeline order with optional and skippable agents",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order"
+        ],
+        "notes": "pipeline_order defines the sequential game development workflow. optional[] lists agents that can be omitted depending on genre (arcade, puzzle, etc.)."
+      },
+      "betaLifecycleSummary": {
+        "description": "Beta variant lifecycle tracking fields",
+        "required_fields": [
+          "betaEngagements",
+          "betaBugs",
+          "betaAgeInMonths",
+          "promotionEligible",
+          "missingCriteria",
+          "lastSynced"
+        ]
+      }
+    },
+    "co-deck": {
+      "agent_manifest": {
+        "description": "Strict pipeline order, optional flags, skippable flags, and retry policy for lecture workflow agents",
+        "required_fields": [
+          "variant_agents_dir",
+          "optional",
+          "notes"
+        ],
+        "optional_fields": [
+          "pipeline_order",
+          "retry_policy"
+        ],
+        "sub_fields": {
+          "retry_policy": {
+            "description": "Per-agent failure routing. on_fail names the agent to return to. max_retries caps loops. failure_condition is an expression evaluated by PM.",
+            "example": {
+              "source-verifier": {
+                "on_fail": "research",
+                "max_retries": 2,
+                "failure_condition": "trust_score < 0.9 OR core_message_source_failed"
+              }
+            }
+          },
+          "optional": "Agent names that can be entirely omitted from the workflow run.",
+          "skippable": "Agent names that run but whose failure is non-blocking (--skip-verify pattern)."
+        },
+        "notes": "optional[] = omit entirely. skippable[] = run but ignore failure. retry_policy = fail-and-loop-back."
+      },
+      "theme_manifest": {
+        "description": "HTML theme definitions for lecture slides",
+        "required_fields": [
+          "themes_dir",
+          "base_css",
+          "available",
+          "default",
+          "overrides_dir"
+        ],
+        "notes": "CSS variable override themes. DOM structure immutable across all themes. overrides_dir accepts either on-disk layout per theme: flat (<overrides_dir>/<theme>.css) or nested (<overrides_dir>/<theme>/style.css, e.g. co-deck's shared styles/ pool) — validate-templates.ts B-04 checks both before failing."
+      },
+      "lecture_profile": {
+        "description": "Lecture profile template metadata",
+        "required_fields": [
+          "template_path",
+          "required_fields"
+        ],
+        "notes": "Scaffolded on new-project creation. Agents load this file at stage start."
+      }
+    },
+    "co-price": {
+      "agent_manifest": {
+        "$ref": "_shared.agent_manifest"
+      },
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "skill_manifest": {
+        "description": "Optional variant skill manifest: named skill groups with descriptions and keepInVariant/prune hints consumed by the variant-ization and upgrade pipelines",
+        "required_fields": [
+          "name",
+          "skills"
+        ],
+        "notes": "skills entries carry {name, description}; keepInVariant lists template-shipped skill dirs preserved during promotion pruning"
+      },
+      "promotionChecklist": {
+        "description": "Phase B promotion checklist persisted on the variant: ordered promotion steps with completion state, consumed by promote-variant and project-to-variant gating",
+        "required_fields": [
+          "items"
+        ],
+        "notes": "items[] carry {step, description, completed}; absence is valid — checklist surfaces only after a Phase A/B promotion records progress"
+      }
+    },
+    "co-safety": {
+      "agent_overrides": {
+        "description": "Per-agent additive or replacing overrides with reason, review tracking, and affected aspects",
+        "required_fields": [
+          "type",
+          "reason",
+          "since",
+          "reviewed_by",
+          "overrides"
+        ],
+        "notes": "type: additive | replacing. overrides[]: list of aspects this override affects (agent-roster, governance-workflow, dispatch-protocol, etc.)."
+      },
+      "script_manifest": {
+        "description": "Variant-local script declarations (scripts/<variant>/ helpers plus local harness entry points) validated by validate-templates B-03",
+        "required_fields": [
+          "local"
+        ],
+        "optional_fields": [
+          "hooks"
+        ],
+        "notes": "local maps script names to script_manifest entries; every declared path must exist and carry an @version header"
+      },
+      "skill_manifest": {
+        "description": "Optional variant skill manifest: named skill groups with descriptions and keepInVariant/prune hints consumed by the variant-ization and upgrade pipelines",
+        "required_fields": [
+          "name",
+          "skills"
+        ],
+        "notes": "skills entries carry {name, description}; keepInVariant lists template-shipped skill dirs preserved during promotion pruning"
+      },
+      "promotionChecklist": {
+        "description": "Phase B promotion checklist persisted on the variant: ordered promotion steps with completion state, consumed by promote-variant and project-to-variant gating",
+        "required_fields": [
+          "items"
+        ],
+        "notes": "items[] carry {step, description, completed}; absence is valid — checklist surfaces only after a Phase A/B promotion records progress"
+      }
+    }
+  },
+  "designLint": {
+    "enabled": true,
+    "scanRoots": [
+      "templates/co-design/playground/src"
+    ],
+    "allowlist": [
+      "#059669",
+      "#06070b",
+      "#06b6d4",
+      "#0891b2",
+      "#0a0b12",
+      "#10b981",
+      "#25283d",
+      "#2563eb",
+      "#34d399",
+      "#3b82f6",
+      "#4f46e5",
+      "#6366f1",
+      "#6b7280",
+      "#7c3aed",
+      "#8b5cf6",
+      "#9ca3af",
+      "#a5b4fc",
+      "#d1d5db",
+      "#d97706",
+      "#dc2626",
+      "#e5e7eb",
+      "#ec4899",
+      "#ef4444",
+      "#f3f4f6",
+      "#f59e0b",
+      "#f87171",
+      "#fbbf24",
+      "#fff",
+      "#ffffff",
+      "0.5px",
+      "1024px",
+      "10px",
+      "11px",
+      "12px",
+      "1300px",
+      "13px",
+      "14px",
+      "15px",
+      "160px",
+      "16px",
+      "180px",
+      "18px",
+      "20px",
+      "240px",
+      "250px",
+      "25px",
+      "260px",
+      "2px",
+      "3px",
+      "400px",
+      "40px",
+      "45px",
+      "4px",
+      "500px",
+      "55px",
+      "5px",
+      "60px",
+      "640px",
+      "65px",
+      "6px",
+      "80px",
+      "8px",
+      "9999px",
+      "999px",
+      "rgba(0, 0, 0, 0.5)",
+      "rgba(0,0,0,0.3)",
+      "rgba(10,11,18,0.4)",
+      "rgba(10,11,18,0.6)",
+      "rgba(10,11,18,0.8)",
+      "rgba(13, 14, 24, 0.7)",
+      "rgba(139, 92, 246, 0.08)",
+      "rgba(139, 92, 246, 0.1)",
+      "rgba(139, 92, 246, 0.2)",
+      "rgba(139, 92, 246, 0.4)",
+      "rgba(139,92,246,0.4)",
+      "rgba(16, 185, 129, 0.06)",
+      "rgba(16, 185, 129, 0.1)",
+      "rgba(16, 185, 129, 0.25)",
+      "rgba(16, 185, 129, 0.4)",
+      "rgba(16,185,129,0.4)",
+      "rgba(22, 23, 39, 0.45)",
+      "rgba(239, 68, 68, 0.1)",
+      "rgba(239, 68, 68, 0.15)",
+      "rgba(239, 68, 68, 0.2)",
+      "rgba(239, 68, 68, 0.4)",
+      "rgba(239,68,68,0.15)",
+      "rgba(239,68,68,0.4)",
+      "rgba(245, 158, 11, 0.06)",
+      "rgba(245, 158, 11, 0.1)",
+      "rgba(245, 158, 11, 0.15)",
+      "rgba(245, 158, 11, 0.2)",
+      "rgba(245, 158, 11, 0.25)",
+      "rgba(245, 158, 11, 0.3)",
+      "rgba(245, 158, 11, 0.5)",
+      "rgba(245,158,11,0.4)",
+      "rgba(248, 113, 113, 0.4)",
+      "rgba(255, 255, 255, 0.02)",
+      "rgba(255, 255, 255, 0.03)",
+      "rgba(255, 255, 255, 0.05)",
+      "rgba(255, 255, 255, 0.08)",
+      "rgba(255, 255, 255, 0.1)",
+      "rgba(255, 255, 255, 0.15)",
+      "rgba(255, 255, 255, 0.2)",
+      "rgba(255, 255, 255, 0.3)",
+      "rgba(255,255,255,0.03)",
+      "rgba(255,255,255,0.1)",
+      "rgba(52, 211, 153, 0.4)",
+      "rgba(52,211,153,0.15)",
+      "rgba(52,211,153,0.2)",
+      "rgba(52,211,153,0.4)",
+      "rgba(59,130,246,0.4)",
+      "rgba(6, 7, 11, 0.95)",
+      "rgba(6, 7, 11, 1)",
+      "rgba(6,182,212,0.4)",
+      "rgba(99, 102, 241, 0.05)",
+      "rgba(99, 102, 241, 0.08)",
+      "rgba(99, 102, 241, 0.12)",
+      "rgba(99, 102, 241, 0.15)",
+      "rgba(99, 102, 241, 0.3)",
+      "rgba(99, 102, 241, 0.4)",
+      "rgba(99,102,241,0.15)",
+      "rgba(99,102,241,0.4)"
+    ],
+    "description": "Design-lint gate config (audit.ts checkDesignLint): token SSOT compliance scan roots for UI source. Allowlist = committed project token-debt mitigation (T-20261028-011 class), re-applied after the adopt-template port (DEC-20261028-05 phase-2 mechanics precedent)."
+  },
+  "platform_surfaces": {
+    "description": "Per-platform capability and adapter SSOT for agent-persona mirrors (design 2026-10-28-platform-agent-mirror, DEC-20261028-06). `agents.supported: true` rows MUST have a generator adapter in scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS; the coverage guard fails loud on a mismatch (registry row without adapter, adapter without a supported row). Every `supported: false` row carries an `evidence` string so the matrix cannot silently rot back to oral tradition. Skills/commands/hooks rows are descriptive today (machinery: sync-skills.ts); agents rows are enforced. The platform set is pinned by validate-model-registry.ts PLATFORMS; directory-name constants stay in scripts/lib/platforms.ts — this registry owns capabilities and formats, not paths.",
+    "platforms": {
+      "claude": {
+        "agents": {
+          "supported": true,
+          "mirror_dir": ".claude/agents",
+          "allowed_fields": [
+            "name",
+            "description",
+            "model"
+          ],
+          "model_format": "alias",
+          "model_source": "models.claude"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": true
+        },
+        "hooks": {
+          "supported": true
+        }
+      },
+      "gemini": {
+        "agents": {
+          "supported": false,
+          "evidence": "subagents are defined at runtime via define_subagent/invoke_subagent (JSON config, not files); no .gemini/agents convention exists in this workspace (GEMINI.md, design §3 KNOWN)"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": true
+        },
+        "hooks": {
+          "supported": true
+        }
+      },
+      "gemini-cli": {
+        "agents": {
+          "supported": false,
+          "evidence": "shares Gemini CLI runtime subagent mechanics (define_subagent/invoke_subagent); no file-based agent surface"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": true
+        },
+        "hooks": {
+          "supported": true
+        }
+      },
+      "antigravity": {
+        "agents": {
+          "supported": false,
+          "evidence": "shares Gemini CLI runtime subagent mechanics (invoke_subagent, GEMINI.md); no file-based agent-dir evidence"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": false,
+          "evidence": "no command-surface evidence in-tree (design 2026-10-28-platform-agent-mirror §3)"
+        },
+        "hooks": {
+          "supported": false,
+          "evidence": "no hook-surface evidence in-tree (design 2026-10-28-platform-agent-mirror §3)"
+        }
+      },
+      "codex": {
+        "agents": {
+          "supported": false,
+          "evidence": "no native subagent tool — each plan row is executed sequentially in-session (CODEX.md execution mechanics, explicit)"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": true,
+          "note": "prompts analog: .claude/commands → .codex/prompts (ADR-0077 D4)"
+        },
+        "hooks": {
+          "supported": true
+        }
+      },
+      "hermes": {
+        "agents": {
+          "supported": false,
+          "evidence": "no agent-definition surface found; ASSUMED none — verification trigger: hermes-agent source inspection at any adoption attempt"
+        },
+        "skills": {
+          "supported": true
+        },
+        "commands": {
+          "supported": false,
+          "evidence": "no Phase 1b commands analog exists (sync-skills v1.9.0)"
+        },
+        "hooks": {
+          "supported": false,
+          "evidence": "no hook system; advisory enforcement only (ADR-0088, MCP-governance design)"
+        }
+      },
+      "zai": {
+        "agents": {
+          "supported": false,
+          "evidence": "no file-based agent surface; Z.AI models map via models.zai tier resolution"
+        },
+        "skills": {
+          "supported": false,
+          "evidence": "no .zai skills mirror; Z.AI runs as a session model, not a skill-mirror platform"
+        },
+        "commands": {
+          "supported": false,
+          "evidence": "no .zai command surface in-tree"
+        },
+        "hooks": {
+          "supported": false,
+          "evidence": "no .zai hook surface in-tree"
+        }
+      },
+      "zcode": {
+        "agents": {
+          "supported": false,
+          "evidence": "no file-based agent-definition surface in this workspace (project .zcode/ holds session plans only; no .zcode/agents/ exists) — ASSUMED none; verification trigger: harness agent-file support at any adoption attempt"
+        },
+        "skills": {
+          "supported": true,
+          "evidence": "harness loads the shared .agents/skills mirror directly (verified 2026-10-31 in-session); no .zcode/skills mirror exists"
+        },
+        "commands": {
+          "supported": false,
+          "evidence": "slash-command surface not observed; skills are invoked via the Skill tool"
+        },
+        "hooks": {
+          "supported": false,
+          "evidence": "no .zcode hook surface in-tree; harness settings live outside the repo"
+        }
+      }
+    }
+  },
+  "routeAudit": {
+    "auditTokenPatterns": [
+      "\\bappendAudit\\s*\\(",
+      "\\bauditTokenUse\\s*\\(",
+      "\\baudit\\s*\\(",
+      "INTO\\s+audit_log\\b"
+    ],
+    "allowlist": {},
+    "description": "Write-route audit tripwire config (scripts/route-audit-scan.ts, T-20261029-005, generalized from co-newbiz PR #742 FR-SEC-07): every route.ts exporting POST/PUT/PATCH/DELETE must reach an auditTokenPatterns match within its local import graph (depth-3) or carry an allowlist entry with a >= 10-char reason. auditTokenPatterns are regex sources (here: the documented co-newbiz defaults verbatim — a host project with different audit-token names declares its own); allowlist keys are root-relative POSIX route.ts paths; optional sharedInfra (string[]) lists basenames whose audit tokens never count as route-level audit. Not yet wired into audit.ts/dev-sync — wiring follows host adoption. A present-but-malformed block is a hard error; a missing block falls back to the script's co-newbiz defaults."
+  }
+}

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-01T14:09:12.724Z
+**Generated**: 2026-11-01T16:28:49.610Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -183,7 +183,7 @@
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
 | sync-agent-mirrors.ts | 1.3.0 | scripts/sync-agent-mirrors.ts | js-yaml |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
-| sync-model-registry.ts | 1.2.0 | scripts/sync-model-registry.ts | N/A |
+| sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | N/A |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |

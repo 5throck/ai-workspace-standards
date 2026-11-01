@@ -1,5 +1,5 @@
 ---
-translated_from_hash: 18fc2968818077f6d2b760c419fa1ea9a9e9fd33f8be05e9bcbbde29d3466c5c
+translated_from_hash: add2d95a5d5f4a3f9a00fdbdf5a6a78e801f05eb3cf00788fcd769b489e69c1f
 sync_version: 4
 lang: ko
 lang_reason: source-material
@@ -237,7 +237,8 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
     ├── co-abap/             # ✅ Stable — SAP ABAP 개발 에이전트 팀
     ├── co-hr/               # 🔶 Beta — 노무/HR 컨설팅 에이전트 팀 (KR 국가 프로필 포함)
     ├── co-safety/           # 🔶 Beta — EHS/GxP 컴플라이언스 플랫폼 에이전트 팀 (KR 국가 프로필 포함)
-    └── co-price/            # 🔶 Beta — 가격 관리 및 컨설팅 시뮬레이터 (K-Beauty 샘플 데이터셋, KR 국가 프로필 포함)
+    ├── co-price/            # 🔶 Beta — 가격 관리 및 컨설팅 시뮬레이터 (K-Beauty 샘플 데이터셋, KR 국가 프로필 포함)
+    └── co-architect/        # 🔶 Beta — 건축사사무소 협업 에이전트 팀 (KR 국가 프로필 포함)
 ```
 
 각 하위 프로젝트는 자체 디렉토리 및 개별 Git 저장소로 관리됩니다:
@@ -296,6 +297,7 @@ C:\git\
 - **co-hr**: 인게이지먼트 인테이크, 대상 관할권의 노동법 컴플라이언스 점검(docs/countries/ 하위 국가 프로필 — KR 프로필 기본 포함), HRM/HRD 설계, 조직 재설계/변화관리를 아우르는 4단계 노무/HR 컨설팅 워크플로 — k-law/k-kosis 규제 리서치 연동(KR 스코프 스킬, KR 국가 프로젝트에만 배포), 12개 에이전트 로스터(PM + 전문가 11인)
 - **co-safety**: 한국 산업안전(OSHA-KR, SAPA), 공정안전관리(PSM), GxP 의약품 품질(GMP/GLP/GDP/GCP/GVP), 의료기기 안전(KGMP-MD, ISO 13485), 15개 산업 도메인(화학, 건설, 반도체, 배터리, 조선, 제철 등)을 40명 이상 전문 에이전트로 다루는 6단계 EHS/GxP 컴플라이언스 워크플로 — 관할권 콘텐츠는 docs/countries/의 국가 프로필로 연결됩니다 (KR 프로필 포함)
 - **co-price**: 가격 전략, 재무 전략, CPA 감사, 시장 인텔리전스, 인게이지먼트 디렉션을 15개 에이전트 로스터로 아우르는 다산업 가격 관리·컨설팅 시뮬레이터 워크플로 — K-Beauty 샘플 데이터셋과 docs/countries/의 KR 국가 프로필 포함
+- **co-architect**: 디자인(UI/UX, 서비스 디자인, 프로토타이핑), 리서치(분석, 콘텐츠), 프로젝트 코디네이션(일정, 수주), 엔지니어링(SketchUp 3D 모델링, ZWCAD 2D 도면, 구조/MEP 검토)을 24개 에이전트 5팀 로스터로 통합한 건축사사무소 협업 워크플로 — market-research부터 interior-execution까지 6개 이름 워크플로 제공, docs/countries/의 KR 국가 프로필 포함
 
 **💡 Workflow 상세 정보 확인 방법**
 구체적인 에이전트 명단(Roster)과 거버넌스 단계는 프로젝트 생성 후 해당 프로젝트 폴더 내의 다음 문서들에서 관리 및 확인할 수 있습니다:
@@ -323,6 +325,7 @@ C:\git\
 | `co-hr` | 🔶 Beta | 노무/HR 컨설팅 워크플로 — PM, 노동 컴플라이언스 애널리스트, 노사관계 전문가, 안전보건 담당관, 채용 전문가, 보상·복지 애널리스트, 성과관리 컨설턴트, L&D 전문가, 경력·계승 컨설턴트, 조직설계 컨설턴트, 변화관리 파트너, 데이터 애널리스트. 노동법 적용 범위는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-safety` | 🔶 Beta | EHS/GxP 컴플라이언스 플랫폼 워크플로우 — PM/CSO, 40개 이상 전문 에이전트 (비상대응, 컴플라이언스, 법률, 교육, PSM, 리스크, 감사, 15개 산업 도메인, 5개 GxP 도메인), k-law 규제 연구 통합 (KR 전용). 관할권 콘텐츠는 국가 프로필로 연결 (KR 프로필 포함) |
 | `co-price` | 🔶 Beta | 다산업 가격 관리·컨설팅 시뮬레이터 — PM, Finance Strategy Lead, CPA Auditor, Pricing Strategist, Market Intelligence Analyst, Engagement Director, K-Beauty 샘플 데이터셋 포함. KR 국가 프로필 포함 |
+| `co-architect` | 🔶 Beta | 건축사사무소 협업 워크플로우 — 디자인·리서치·프로젝트 코디네이션·엔지니어링·플랫폼 엔지니어링 5개 팀 24개 에이전트로 UI/UX 디자인, SketchUp 3D 모델링, ZWCAD 2D 도면, 구조/MEP 검토와 market-research~interior-execution 6개 이름 워크플로를 커버. KR 국가 프로필 포함 |
 
 ### 버전 및 Variant 선택
 
@@ -405,4 +408,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-01*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-02*

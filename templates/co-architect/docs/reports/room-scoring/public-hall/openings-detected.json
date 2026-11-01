@@ -1,0 +1,186 @@
+{
+ "doors": [
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    4931,
+    266696
+   ],
+   "leaf": 920,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    4931,
+    264856
+   ],
+   "leaf": 920,
+   "swing_deg": [
+    0,
+    90
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    4931,
+    280976
+   ],
+   "leaf": 920,
+   "swing_deg": [
+    0,
+    90
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    16271,
+    273961
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    14761,
+    276901
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    14571,
+    273961
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    10572,
+    268820
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    9352,
+    270330
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    7626,
+    273706
+   ],
+   "leaf": 1100,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    7626,
+    273706
+   ],
+   "leaf": 1100,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    21465,
+    271852
+   ],
+   "leaf": 938,
+   "swing_deg": [
+    149,
+    179
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  },
+  {
+   "layer": "X-B1$0$A-DOR-ELE",
+   "hinge": [
+    18981,
+    273782
+   ],
+   "leaf": 745,
+   "swing_deg": [
+    181,
+    211
+   ],
+   "note": "arc on a non-door layer (rule R07): confirm"
+  }
+ ],
+ "windows": [
+  {
+   "orient": "H",
+   "pos": 273826,
+   "range": [
+    8536,
+    9056
+   ],
+   "width": 520,
+   "nearest_zone": "엘리베이터 홀",
+   "dist_mm": 60,
+   "on_boundary": true
+  },
+  {
+   "orient": "V",
+   "pos": 4807,
+   "range": [
+    272806,
+    275092
+   ],
+   "width": 2286,
+   "nearest_zone": "엘리베이터 홀",
+   "dist_mm": 2855,
+   "on_boundary": false
+  }
+ ]
+}

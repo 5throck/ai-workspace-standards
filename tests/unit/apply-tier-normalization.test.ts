@@ -11,7 +11,7 @@
  */
 import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   collectTargets,
@@ -287,7 +287,7 @@ describe('apply-tier-normalization — collectTargets (real tree shape)', () => 
     const { all, rootCount, l1Count, variantCount, projectCount } = collectTargets(REPO_ROOT);
     expect(rootCount).toBe(9);
     expect(l1Count).toBe(2); // pm.md + i18n-specialist.md; _COMMON.md excluded
-    expect(variantCount).toBe(148);
+    expect(variantCount).toBe(172); // 148 + 24 co-architect agents (15th variant)
     expect(projectCount).toBe(0);
     expect(all).toContain('agents/pm.md');
     expect(all).toContain('templates/common/agents/pm.md');
@@ -317,7 +317,11 @@ describe('apply-tier-normalization — collectTargets (real tree shape)', () => 
 
   test('--only accepts a glob', () => {
     const { all } = collectTargets(REPO_ROOT, { only: 'templates/co-*/agents/pm.md' });
-    expect(all.length).toBe(14); // one pm.md per living variant
+    // One pm.md per living variant — derived from the tree so the assertion
+    // tracks fleet growth instead of re-pinning a stale count.
+    const livingVariants = readdirSync(join(REPO_ROOT, 'templates'), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && e.name.startsWith('co-')).length;
+    expect(all.length).toBe(livingVariants);
     expect(all.every((rel) => rel.endsWith('/agents/pm.md'))).toBe(true);
   });
 });

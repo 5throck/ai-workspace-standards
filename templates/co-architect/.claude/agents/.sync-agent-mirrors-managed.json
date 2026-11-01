@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generated": [
+    "analyst",
+    "architect",
+    "automation-engineer",
+    "bylaw-expert",
+    "content-writer",
+    "design-lead",
+    "design-storyteller",
+    "drafting-architect",
+    "interior-designer",
+    "mep-engineer",
+    "ms365-expert",
+    "pm",
+    "project-coordinator",
+    "prototype-engineer",
+    "service-designer",
+    "sketchup-modeler",
+    "storyteller",
+    "structural-engineer",
+    "technical-writer",
+    "typography-expert",
+    "ux-researcher",
+    "visual-designer",
+    "visualization-expert",
+    "zwcad-drafter"
+  ]
+}

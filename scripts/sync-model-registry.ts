@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-02, co-architect fleet addition): SURFACES gains
+//           templates/co-architect/CODEX.md (tier table carries gpt-6.x
+//           literals, same class as templates/common/CODEX.md) and
+//           templates/co-architect/docs/workspace-schema.json (the only
+//           variant shipping its own registry copy — it must track the sweep
+//           so scaffolded projects never receive a retired ID).
 // v1.2.0 (2026-10-26, ADR-0102 scalar tier / design
 //           2026-10-26-model-registry-platform-coverage-design §7): SURFACES
 //           drops the 9 root agents/*.md entries — root agents now declare one
@@ -77,6 +83,8 @@ export const SURFACES: readonly string[] = [
   'templates/common/docs/variants/pm-yaml-schema.md',
   'templates/common/docs/governance/agents/execution-plan-templates.md',
   // Variant docs that name concrete models in dispatch tables
+  'templates/co-architect/CODEX.md',
+  'templates/co-architect/docs/workspace-schema.json',
   'templates/co-game/docs/phase-definitions.md',
   'templates/co-game/docs/designs/specs/2026-06-26-pacman-agent-team-design.md',
   'templates/co-safety/docs/co-safety.context.md',

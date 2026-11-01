@@ -1127,6 +1127,204 @@
           ]
         },
         {
+          "asset": "design-lead",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/design-lead.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "prototype-engineer",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases, dropped required-skills pin (token-usage-lint)) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/prototype-engineer.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "service-designer",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/service-designer.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "typography-expert",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/typography-expert.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "ux-researcher",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/ux-researcher.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "visual-designer",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); registry-only hub-doctrine declaration (batch E⑤) — co-design copy is the superset canonical (v1.1.1; adds the Responsibilities/Output Format/Constraints doctrine sections and versioned frontmatter); the co-architect copy is a stale unversioned adaptation (variant-name substitution, renumbered variant phases) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-design/agents/visual-designer.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "analyst",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave; co-architect copy carries a local capabilities frontmatter tag (knowledge-sharing) absent from the canonical",
+          "canonical_path": "templates/co-work/agents/analyst.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "content-writer",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-work/agents/content-writer.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "ms365-expert",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-work/agents/ms365-expert.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "project-coordinator",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name; adds the connector-schemas Automation-Contracts citation duty); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "canonical_path": "templates/co-work/agents/project-coordinator.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
+          "asset": "technical-writer",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave; co-architect copy carries a local capabilities frontmatter tag (documentation) absent from the canonical",
+          "canonical_path": "templates/co-work/agents/technical-writer.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        },
+        {
           "asset": "change-management-partner",
           "domain": "co-consult",
           "hub_variant": "co-consult",

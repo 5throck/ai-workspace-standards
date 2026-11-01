@@ -26,7 +26,8 @@ templates/
 ├── co-news/             # business/finance journalism variant (beta)
 ├── co-abap/             # SAP ABAP development variant (stable)
 ├── co-hr/               # HR & labor-relations consulting variant (beta)
-└── co-safety/           # EHS/GxP compliance platform variant (beta, KR country profile included)
+├── co-safety/           # EHS/GxP compliance platform variant (beta, KR country profile included)
+└── co-architect/        # Architecture-firm collaboration variant (beta, KR country profile included)
 ```
 
 **How it works:** When scaffolding a new project, the script first copies `templates/common/` (shared infrastructure), then overlays the selected variant (variant-specific files override common files).
@@ -51,6 +52,7 @@ templates/
 | [`co-abap`](co-abap/) | ✅ Stable | SAP ABAP development with 20 agents (6 SAP module analysts, 12 technical specialists, pm) and ABAP-specific skills (post-write chain, performance tuning, dump monitoring) |
 | [`co-hr`](co-hr/) | 🔶 Beta | HR & labor-relations consulting with 12 agents (pm + 11 specialists: labor compliance, labor relations, safety & health, talent acquisition, compensation & benefits, performance management, L&D, career & succession, org design, change management, data analyst) and k-law/k-kosis regulatory research integration (k-law/k-kosis are KR-scoped skills - KR-target projects only) |
 | [`co-safety`](co-safety/) | 🔶 Beta | EHS/GxP compliance platform with 40+ agents (PM/CSO, emergency, compliance, legal, training, PSM, risk, incident investigation, audit, 15 industry domains, 5 GxP domains) and k-law regulatory research integration (Korea-only) |
+| [`co-architect`](co-architect/) | 🔶 Beta | Architecture-firm collaboration with 24 agents across 5 teams (design, research, project coordination, engineering, platform engineering), ZWCAD/SketchUp CAD skills, and 6 named workflows (market-research to interior-execution); KR country profile included |
 
 ## Phase 1, 2 & 3 Advancements
 
@@ -116,4 +118,4 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Minor** bump: new agents, new variants going stable, structural section changes
 - **Patch** bump: documentation and description updates
 
-*Last Updated: 2026-10-10*
+*Last Updated: 2026-11-02*

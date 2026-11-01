@@ -717,6 +717,318 @@
       ]
     },
     {
+      "id": "agent:co-architect/analyst",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "analyst",
+      "scope": "co-architect",
+      "capability": "analyst",
+      "content_hash": "f0c91d5beeddbb49",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/analyst.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/architect",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "architect",
+      "scope": "co-architect",
+      "capability": "architect",
+      "content_hash": "b7fe7bb2a565984e",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/architect.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/automation-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "automation-engineer",
+      "scope": "co-architect",
+      "capability": "automation-engineer",
+      "content_hash": "5b37a0dad2ba6526",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/automation-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/bylaw-expert",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "bylaw-expert",
+      "scope": "co-architect",
+      "capability": "bylaw-expert",
+      "content_hash": "0c8b0b59b1790549",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/bylaw-expert.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/content-writer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "content-writer",
+      "scope": "co-architect",
+      "capability": "content-writer",
+      "content_hash": "5c4297a811ba5eae",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/content-writer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/design-lead",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "design-lead",
+      "scope": "co-architect",
+      "capability": "design-lead",
+      "content_hash": "997214dadf8a33f3",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/design-lead.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/design-storyteller",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "design-storyteller",
+      "scope": "co-architect",
+      "capability": "design-storyteller",
+      "content_hash": "b9650449b02a8bc0",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/design-storyteller.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/drafting-architect",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "drafting-architect",
+      "scope": "co-architect",
+      "capability": "drafting-architect",
+      "content_hash": "b6f844823facdee7",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/drafting-architect.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/interior-designer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "interior-designer",
+      "scope": "co-architect",
+      "capability": "interior-designer",
+      "content_hash": "bb634f8309867b42",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/interior-designer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/mep-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "mep-engineer",
+      "scope": "co-architect",
+      "capability": "mep-engineer",
+      "content_hash": "f9382d539ec97efb",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/mep-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/ms365-expert",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "ms365-expert",
+      "scope": "co-architect",
+      "capability": "ms365-expert",
+      "content_hash": "fbb2bafc0ba3a667",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/ms365-expert.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/pm",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "pm",
+      "scope": "co-architect",
+      "capability": "pm",
+      "content_hash": "ed1b187f70721160",
+      "version": "1.2.0",
+      "mirrors": [
+        "templates/co-architect/agents/pm.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/project-coordinator",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "project-coordinator",
+      "scope": "co-architect",
+      "capability": "project-coordinator",
+      "content_hash": "636e248ed9f9a6a9",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/project-coordinator.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/prototype-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "prototype-engineer",
+      "scope": "co-architect",
+      "capability": "prototype-engineer",
+      "content_hash": "7983a3e09b393507",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/prototype-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/service-designer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "service-designer",
+      "scope": "co-architect",
+      "capability": "service-designer",
+      "content_hash": "ff99987cf3525a14",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/service-designer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/sketchup-modeler",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "sketchup-modeler",
+      "scope": "co-architect",
+      "capability": "sketchup-modeler",
+      "content_hash": "9e4810bc28b196ca",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/sketchup-modeler.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/storyteller",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "storyteller",
+      "scope": "co-architect",
+      "capability": "storyteller",
+      "content_hash": "370130d805335e8c",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/storyteller.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/structural-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "structural-engineer",
+      "scope": "co-architect",
+      "capability": "structural-engineer",
+      "content_hash": "67732893ffb3d46b",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/structural-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/technical-writer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "technical-writer",
+      "scope": "co-architect",
+      "capability": "technical-writer",
+      "content_hash": "b1552a476a4411d3",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/technical-writer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/typography-expert",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "typography-expert",
+      "scope": "co-architect",
+      "capability": "typography-expert",
+      "content_hash": "67ddde79aaa1a6c4",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/typography-expert.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/ux-researcher",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "ux-researcher",
+      "scope": "co-architect",
+      "capability": "ux-researcher",
+      "content_hash": "1bc28048e1a8da22",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/ux-researcher.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/visual-designer",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "visual-designer",
+      "scope": "co-architect",
+      "capability": "visual-designer",
+      "content_hash": "ae1be86dda33a946",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/visual-designer.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/visualization-expert",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "visualization-expert",
+      "scope": "co-architect",
+      "capability": "visualization-expert",
+      "content_hash": "97af7707cc30925e",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/visualization-expert.md"
+      ]
+    },
+    {
+      "id": "agent:co-architect/zwcad-drafter",
+      "type": "agent",
+      "layer": "variant:co-architect",
+      "name": "zwcad-drafter",
+      "scope": "co-architect",
+      "capability": "zwcad-drafter",
+      "content_hash": "1f1339f831563ce7",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/agents/zwcad-drafter.md"
+      ]
+    },
+    {
       "id": "agent:co-consult/change-management-partner",
       "type": "agent",
       "layer": "variant:co-consult",
@@ -2479,6 +2791,31 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "doc:co-architect/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/bylaw-expert.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/pm.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/docs/co-architect.context.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/README.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
       "id": "doc:co-consult/AGENTS.md",
       "type": "doc",
       "layer": "variant:co-consult"
@@ -3276,7 +3613,7 @@
     {
       "id": "output_type.angle_options",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.approved_implementation_plan",
@@ -3371,7 +3708,7 @@
     {
       "id": "output_type.closure_record",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.communication_plan",
@@ -3481,7 +3818,7 @@
     {
       "id": "output_type.draft_document",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.drawback_positioning",
@@ -3511,7 +3848,7 @@
     {
       "id": "output_type.evidence_pack",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.exploitation_notes",
@@ -3551,7 +3888,7 @@
     {
       "id": "output_type.final_document",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.final_verification",
@@ -3661,7 +3998,7 @@
     {
       "id": "output_type.integrated_document",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.interface_design",
@@ -3756,12 +4093,12 @@
     {
       "id": "output_type.narrative_outline",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.narrative_review",
       "type": "output_type",
-      "layer": "variant:co-work"
+      "layer": "variant:co-architect"
     },
     {
       "id": "output_type.org_design_options",
@@ -4486,6 +4823,26 @@
       "layer": "variant:co-abap"
     },
     {
+      "id": "procedure.co-architect.distribution-integration",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.document-production",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.narrative-design",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.project-intake-analysis",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
       "id": "procedure.co-consult.current-state-diagnosis",
       "type": "procedure",
       "layer": "variant:co-consult"
@@ -5027,6 +5384,84 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-abap/skills/source-command-celebrate/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/cad-server-manager",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "cad-server-manager",
+      "scope": "co-architect",
+      "capability": "cad-server-manager",
+      "content_hash": "99c21b844c36983e",
+      "version": "1.2.0",
+      "mirrors": [
+        "templates/co-architect/skills/cad-server-manager/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/cad-space-recognition",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "cad-space-recognition",
+      "scope": "co-architect",
+      "capability": "cad-space-recognition",
+      "content_hash": "1c4b9132007f80c3",
+      "version": "1.6.0",
+      "mirrors": [
+        "templates/co-architect/skills/cad-space-recognition/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/cad-svg-preview",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "cad-svg-preview",
+      "scope": "co-architect",
+      "capability": "cad-svg-preview",
+      "content_hash": "64bd914458f2bea1",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-architect/skills/cad-svg-preview/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/generate-room-elevation",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "generate-room-elevation",
+      "scope": "co-architect",
+      "capability": "generate-room-elevation",
+      "content_hash": "29e8022155130208",
+      "version": "1.2.0",
+      "mirrors": [
+        "templates/co-architect/skills/generate-room-elevation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/standup-synthesizer",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "standup-synthesizer",
+      "scope": "co-architect",
+      "capability": "standup-synthesizer",
+      "content_hash": "75a2f0bbbd8aae79",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-architect/skills/standup-synthesizer/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-architect/zwcad-ai-drawing",
+      "type": "skill",
+      "layer": "variant:co-architect",
+      "name": "zwcad-ai-drawing",
+      "scope": "co-architect",
+      "capability": "zwcad-ai-drawing",
+      "content_hash": "c317d95938b0af96",
+      "version": "1.3.0",
+      "mirrors": [
+        "templates/co-architect/skills/zwcad-ai-drawing/SKILL.md"
       ]
     },
     {
@@ -9847,6 +10282,24 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-architect/bylaw-expert",
+      "to": "skill:common/k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/pm",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/pm",
+      "to": "skill:root/upgrade-project",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-consult/delivery-manager",
       "to": "procedure.co-consult.engagement-closeout",
@@ -11020,6 +11473,420 @@
       "type": "cites_skill",
       "from": "doc:co-abap/README.md",
       "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/decision-record",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/evidence-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:common/sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/create-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/promote-variant",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/simulate-pipeline",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/AGENTS.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/bylaw-expert.md",
+      "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/pm.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/pm.md",
+      "to": "skill:root/upgrade-project",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/cad-server-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/cad-space-recognition",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/generate-room-elevation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/standup-synthesizer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:common/decision-record",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:common/evidence-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:root/design-foundation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:root/explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/cad-server-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/cad-space-recognition",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/generate-room-elevation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/standup-synthesizer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/decision-record",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/evidence-ledger",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/i18n-formatting",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/i18n-layout",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:common/i18n-locale-config",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/accessibility-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/api-documentation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/ci-triage",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/design-foundation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/documentation-writing",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/finishing-a-development-branch",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/research-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/script-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/service-design",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/team-builder",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/token-usage-lint",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/update-bun-packages",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/zod-contract-gate",
       "source": "workflow-doc"
     },
     {
@@ -15657,6 +16524,159 @@
       "from": "procedure.co-abap.transport-release",
       "to": "stage.co-abap.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "agent:co-architect/ms365-expert",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "agent:co-architect/project-coordinator",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "output_type.integrated_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "procedure.co-architect.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "skill:co-architect/standup-synthesizer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "skill:root/documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "agent:co-architect/analyst",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "agent:co-architect/content-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "agent:co-architect/storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "agent:co-architect/technical-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.document-production",
+      "to": "output_type.final_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "skill:common/decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "skill:common/evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "skill:root/documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "agent:co-architect/storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "output_type.narrative_outline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "procedure.co-architect.project-intake-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "skill:common/decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "agent:co-architect/analyst",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "agent:co-architect/storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "procedure.co-architect.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "skill:common/evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "skill:root/research-analysis",
+      "source": "procedure_schema"
     },
     {
       "type": "step_by_agent",
@@ -20344,6 +21364,135 @@
       "from": "skill:co-abap/source-command-celebrate",
       "to": "phase:co-abap/6",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-server-manager",
+      "to": "skill:co-architect/cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-server-manager",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-server-manager",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-space-recognition",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-space-recognition",
+      "to": "skill:co-architect/generate-room-elevation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-space-recognition",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-svg-preview",
+      "to": "skill:co-architect/cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-svg-preview",
+      "to": "skill:co-architect/generate-room-elevation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/cad-svg-preview",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-architect/generate-room-elevation",
+      "to": "agent:co-architect/interior-designer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/interior-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/generate-room-elevation",
+      "to": "skill:co-architect/cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/generate-room-elevation",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/generate-room-elevation",
+      "to": "skill:co-architect/zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-architect/standup-synthesizer",
+      "to": "output_type.closure_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-architect/zwcad-ai-drawing",
+      "to": "agent:co-architect/drafting-architect",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/drafting-architect.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-architect/zwcad-ai-drawing",
+      "to": "agent:co-architect/zwcad-drafter",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/zwcad-drafter.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/zwcad-ai-drawing",
+      "to": "skill:co-architect/cad-server-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/zwcad-ai-drawing",
+      "to": "skill:co-architect/cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-architect/zwcad-ai-drawing",
+      "to": "skill:co-architect/generate-room-elevation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -29204,6 +30353,17 @@
     {
       "type": "used_by",
       "from": "skill:root/api-documentation",
+      "to": "agent:co-architect/technical-writer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/technical-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/api-documentation",
       "to": "agent:co-work/technical-writer",
       "source": "required_skills",
       "provenance": {
@@ -29426,6 +30586,28 @@
       "from": "skill:root/design-token-adoption",
       "to": "skill:root/token-usage-lint",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/documentation-writing",
+      "to": "agent:co-architect/content-writer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/content-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/documentation-writing",
+      "to": "agent:co-architect/technical-writer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/technical-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -29693,6 +30875,17 @@
     {
       "type": "used_by",
       "from": "skill:root/research-analysis",
+      "to": "agent:co-architect/analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/research-analysis",
       "to": "agent:co-work/analyst",
       "source": "required_skills",
       "provenance": {
@@ -29735,6 +30928,28 @@
       "from": "skill:root/security-scan",
       "to": "skill:root/update-bun-packages",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/service-design",
+      "to": "agent:co-architect/design-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/service-design",
+      "to": "agent:co-architect/service-designer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/service-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
@@ -29943,6 +31158,28 @@
       "provenance": {
         "file": "skills/translate/SKILL.md",
         "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/ui-ux-design-intelligence",
+      "to": "agent:co-architect/design-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/ui-ux-design-intelligence",
+      "to": "agent:co-architect/visual-designer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-architect/agents/visual-designer.md",
+        "field": "required_skills",
         "index": 0
       }
     },

@@ -1,0 +1,223 @@
+{
+  "name": "co-architect",
+  "description": "Architecture firm collaboration variant integrating design (UI/UX, service design, prototyping), research (analysis, content), project coordination (scheduling, acquisition), and engineering (SketchUp, ZWCAD) into a unified 5-team workspace with 6 named workflows.",
+  "variant_type": "collaboration",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-11-01T00:00:00.000Z",
+  "lifecycle": {
+    "statusSince": "2026-11-01",
+    "lastTransition": "Promoted from Projects/co-architect (L3) to beta template via l3-to-variant-pipeline.ts on 2026-11-01 (Phase 1 Batch E⑤, spec 2026-11-01-hub-consolidation-design §6.3); promotionHold released on user ratification (2026-10-31/2026-11-01 reviews)",
+    "stablePromotedOn": null,
+    "betaEngagements": []
+  },
+  "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "technical-writer",
+      "file": "agents/technical-writer.md"
+    },
+    {
+      "name": "design-lead",
+      "file": "agents/design-lead.md"
+    },
+    {
+      "name": "automation-engineer",
+      "file": "agents/automation-engineer.md"
+    },
+    {
+      "name": "zwcad-drafter",
+      "file": "agents/zwcad-drafter.md"
+    },
+    {
+      "name": "content-writer",
+      "file": "agents/content-writer.md"
+    },
+    {
+      "name": "architect",
+      "file": "agents/architect.md"
+    },
+    {
+      "name": "analyst",
+      "file": "agents/analyst.md"
+    },
+    {
+      "name": "project-coordinator",
+      "file": "agents/project-coordinator.md"
+    },
+    {
+      "name": "mep-engineer",
+      "file": "agents/mep-engineer.md"
+    },
+    {
+      "name": "drafting-architect",
+      "file": "agents/drafting-architect.md"
+    },
+    {
+      "name": "design-storyteller",
+      "file": "agents/design-storyteller.md"
+    },
+    {
+      "name": "sketchup-modeler",
+      "file": "agents/sketchup-modeler.md"
+    },
+    {
+      "name": "ux-researcher",
+      "file": "agents/ux-researcher.md"
+    },
+    {
+      "name": "bylaw-expert",
+      "file": "agents/bylaw-expert.md"
+    },
+    {
+      "name": "typography-expert",
+      "file": "agents/typography-expert.md"
+    },
+    {
+      "name": "visualization-expert",
+      "file": "agents/visualization-expert.md"
+    },
+    {
+      "name": "storyteller",
+      "file": "agents/storyteller.md"
+    },
+    {
+      "name": "prototype-engineer",
+      "file": "agents/prototype-engineer.md"
+    },
+    {
+      "name": "interior-designer",
+      "file": "agents/interior-designer.md"
+    },
+    {
+      "name": "visual-designer",
+      "file": "agents/visual-designer.md"
+    },
+    {
+      "name": "structural-engineer",
+      "file": "agents/structural-engineer.md"
+    },
+    {
+      "name": "ms365-expert",
+      "file": "agents/ms365-expert.md"
+    },
+    {
+      "name": "service-designer",
+      "file": "agents/service-designer.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "cad-server-manager",
+      "file": "skills/cad-server-manager/SKILL.md"
+    },
+    {
+      "name": "cad-space-recognition",
+      "file": "skills/cad-space-recognition/SKILL.md"
+    },
+    {
+      "name": "cad-svg-preview",
+      "file": "skills/cad-svg-preview/SKILL.md"
+    },
+    {
+      "name": "generate-room-elevation",
+      "file": "skills/generate-room-elevation/SKILL.md"
+    },
+    {
+      "name": "standup-synthesizer",
+      "file": "skills/standup-synthesizer/SKILL.md"
+    },
+    {
+      "name": "zwcad-ai-drawing",
+      "file": "skills/zwcad-ai-drawing/SKILL.md"
+    }
+  ],
+  "derivedFrom": "Projects/co-architect (L3 project; itself scaffolded from co-work v0.5.3 and managed as a distinct variant since 2026-08-29)",
+  "workflows": [
+    "market-research",
+    "design-exploration",
+    "project-acquisition",
+    "design-delivery",
+    "permit-compliance",
+    "interior-execution"
+  ],
+  "teams": [
+    {
+      "name": "design",
+      "lead": "design-lead",
+      "members": [
+        "ux-researcher",
+        "visual-designer",
+        "prototype-engineer",
+        "service-designer",
+        "typography-expert",
+        "design-storyteller",
+        "visualization-expert",
+        "interior-designer"
+      ]
+    },
+    {
+      "name": "research",
+      "lead": "analyst",
+      "members": [
+        "content-writer",
+        "storyteller",
+        "bylaw-expert"
+      ]
+    },
+    {
+      "name": "project",
+      "lead": "project-coordinator",
+      "members": [
+        "technical-writer",
+        "ms365-expert"
+      ]
+    },
+    {
+      "name": "engineering",
+      "lead": "sketchup-modeler",
+      "members": [
+        "zwcad-drafter",
+        "drafting-architect",
+        "structural-engineer",
+        "mep-engineer"
+      ]
+    },
+    {
+      "name": "platform-engineering",
+      "lead": "architect",
+      "members": [
+        "automation-engineer"
+      ]
+    }
+  ],
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": [
+      "KR"
+    ],
+    "default": null
+  },
+  "betaLifecycleSummary": {
+    "betaEngagements": 0,
+    "betaBugs": 0,
+    "betaAgeInMonths": 0,
+    "promotionEligible": false,
+    "missingCriteria": [],
+    "lastSynced": "2026-11-01T14:33:01.277Z"
+  },
+  "hub": {
+    "role": "consumer",
+    "consumes": [
+      {
+        "domain": "co-design",
+        "minimum_version": "1.0.0"
+      }
+    ]
+  }
+}
