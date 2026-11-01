@@ -13230,6 +13230,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/README.md",
+      "to": "skill:co-design/design-foundation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
+      "to": "skill:co-design/design-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
       "to": "skill:co-design/token-usage-lint",
       "source": "workflow-doc"
     },

@@ -501,7 +501,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
 | `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
 | `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
-| `doc:co-design/README.md` | doc | `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
+| `doc:co-design/README.md` | doc | `co-design/design-foundation`, `co-design/design-review`, `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-develop/agents/designer.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/ui-ux-design-intelligence` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
