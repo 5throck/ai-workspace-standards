@@ -134,6 +134,18 @@ function numOr0(value: string | undefined): number {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 }
 
+/** Port semantics (design 2026-11-01-coworkspace-ephemeral-port-design): unset (or empty —
+ * compose interpolation, same convention as CO_WORKSPACE_API_KEYS) → default 9030;
+ * "0" is MEANINGFUL = bind an ephemeral port (Bun.serve reports the actual via server.port);
+ * junk or negative → fallback 9030. Previously 0 was rejected by `num`, which is why the
+ * test suite drew random ports and hit birthday-collision EADDRINUSE flakes in CI. */
+function parsePort(value: string | undefined, fallback: number): number {
+  const raw = (value ?? "").trim();
+  if (raw === "") return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 /** Parse a key list: comma-separated (env style) or line-per-key (file style, `#` comments). */
 export function parseKeyList(text: string, separator: "," | "lines" = ","): string[] {
   const parts = separator === "," ? text.split(",") : text.split(/\r?\n/);
@@ -245,7 +257,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   apiKeys = [...new Set([...apiKeys, ...readKeysFile(apiKeysFile)])];
   const cfg: GatewayConfig = {
     host: env.CO_WORKSPACE_HOST ?? "127.0.0.1",
-    port: num(env.CO_WORKSPACE_PORT, 9030),
+    // 0 = ephemeral bind (tests); unset/empty/junk = default 9030 — see parsePort.
+    port: parsePort(env.CO_WORKSPACE_PORT, 9030),
     dataDir: resolve(env.CO_WORKSPACE_DATA_DIR ?? resolve(SERVICE_ROOT, "data")),
     workspaceDir: resolve(env.CO_WORKSPACE_WORKSPACE_DIR ?? resolve(SERVICE_ROOT, "..", "..")),
     variants: resolveVariants(env.CO_WORKSPACE_VARIANTS ?? "co-consult", resolve(

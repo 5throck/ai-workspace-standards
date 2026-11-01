@@ -101,7 +101,7 @@ console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"
   process.env.HERMES_FAKE_LOG = join(dataDir, "agy-args.log");
   const cfg = loadConfig({
     CO_WORKSPACE_HOST: "127.0.0.1",
-    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_PORT: "0",
     CO_WORKSPACE_DATA_DIR: dataDir,
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     CO_WORKSPACE_VARIANTS: "co-consult",

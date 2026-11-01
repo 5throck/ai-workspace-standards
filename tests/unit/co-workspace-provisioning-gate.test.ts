@@ -30,7 +30,7 @@ function sandbox(label: string, env: Record<string, string> = {}) {
   mkdirSync(join(wsDir, "Projects"), { recursive: true });
   const cfg = loadConfig({
     CO_WORKSPACE_HOST: "127.0.0.1",
-    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_PORT: "0",
     CO_WORKSPACE_DATA_DIR: tmp(`${label}-data`),
     CO_WORKSPACE_WORKSPACE_DIR: wsDir,
     CO_WORKSPACE_VARIANTS: "co-consult",
