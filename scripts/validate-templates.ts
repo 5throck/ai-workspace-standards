@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.68.0
+ * @version 1.69.0
+ *
+ * v1.69.0 (2026-11-01, T-20261101-003 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2): MM-01 LITERAL alternation retires the retained
+ *          `gpt-5\.6-(?:sol|terra|luna)` alternatives — the L3 tier-vocabulary
+ *          convergence window closed 2026-11-01 (all 16 projects at 0.26.0,
+ *          0 gpt-5.6 literals in delivered md surfaces), so the old ids now
+ *          FAIL loudly outside managed sections instead of being tolerated.
+ *          The generalized Codex family arm `gpt-\d+(?:\.\d+)?-` in
+ *          lib/model-literal-patterns.ts (Check MM / sync side) is unchanged.
+ *          No other check changes.
  *
  * v1.68.0 (2026-11-01, spec docs/designs/2026-10-31-template-security-hardening-design.md
  *          Addendum 2026-11-01): new WARN arm `gemini-execution-policy-floor`, run inside
@@ -18,10 +29,11 @@
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
  *          §R2.2 surface 6): MM-01 LITERAL alternation gains the GPT-6.x ids
  *          (`gpt-6\.1-(?:sol|terra)` + `gpt-6-luna`) so the codex column
- *          rebase keeps matching; the `gpt-5\.6` alternatives are KEPT through
- *          the L3 convergence window — delivered-side stragglers keep FAILing
- *          loudly (visible, not silent) until their upgrade visit normalizes
- *          them. No other check changes.
+ *          rebase keeps matching; the `gpt-5\.6` alternatives were KEPT through
+ *          the L3 convergence window — delivered-side stragglers kept FAILing
+ *          loudly (visible, not silent) until their upgrade visit normalized
+ *          them (retired 2026-11-01 post-convergence, T-20261101-003, in
+ *          v1.69.0). No other check changes.
  *
  * v1.66.0 (2026-10-31, U-20261029-004 — spec
  *          docs/designs/2026-10-31-variant-generators-design.md §6.3):
@@ -4696,13 +4708,13 @@ function extractMarkedSections(content: string, markerName: string): Array<{head
 // A literal outside a managed section silently stalls at its layer on the next model refresh.
 function checkModelLiteralPlacement(): void {
   if (!JSON_MODE) console.log(`\n=== Check MM-01: Model literal placement (instruction twins) ===`);
-  // T-20261031-005 (spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md
-  // §R2.2): the GPT-6.x ids (gpt-6.1-sol/terra, gpt-6-luna) join the alternation;
-  // the gpt-5.6 alternatives are KEPT through the L3 convergence window so
-  // delivered-side stragglers keep FAILing loudly (visible, not silent) until
-  // their upgrade visit normalizes them. A follow-up cleanup ticket retires the
-  // old alternation after one full upgrade cycle.
-  const LITERAL = /\b(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  // T-20261101-003 (spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+  // §R2.2): the gpt-5.6-(sol|terra|luna) alternatives added at T-20261031-005 as a
+  // convergence-window retention were retired 2026-11-01 post-convergence —
+  // the L3 tier-vocabulary convergence is achieved (all 16 projects at 0.26.0,
+  // 0 gpt-5.6 literals in delivered md surfaces), so any future gpt-5.6
+  // literal outside a managed section FAILs loudly again.
+  const LITERAL = /\b(?:gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
   const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
   const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
   const files = [

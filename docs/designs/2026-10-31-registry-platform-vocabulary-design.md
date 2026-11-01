@@ -90,6 +90,12 @@ stragglers keep FAILING loudly (visible, not silent) until converged; a
 follow-up cleanup ticket retires the old alternation after one full upgrade
 cycle.
 
+Addendum (2026-11-01, T-20261101-003): convergence window closed 2026-11-01 —
+all 16 projects verified at 0.26.0 with 0 gpt-5.6 literals in delivered md
+surfaces; the retained MM-01 `gpt-5.6` alternation retired in
+validate-templates v1.69.0 (old ids fail loudly outside managed sections
+again).
+
 ### R2.3 — T-006: zai reasoning-level declaration
 
 Decisions:
