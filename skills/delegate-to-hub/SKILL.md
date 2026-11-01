@@ -13,9 +13,6 @@ status: active
 owner: pm
 last_reviewed: 2026-11-02
 prerequisites: none
-relates_to:
-  - skill: verify-authorization
-    type: follows
 metadata:
   type: process
   triggers:

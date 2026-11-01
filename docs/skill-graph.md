@@ -218,7 +218,7 @@
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
 | `root/create-variant` | L0 | 1.4.3 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
 | `root/decision-write-integrity` | L0 | 1.0.0 | — | — | root/meeting-facilitation | — | — |
-| `root/delegate-to-hub` | L0 | 1.0.0 | — | — | co-security/verify-authorization (follows) | — | — |
+| `root/delegate-to-hub` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/design-foundation` | L0 | 1.1.0 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |

@@ -8088,7 +8088,7 @@
       "name": "delegate-to-hub",
       "scope": "root",
       "capability": "delegate-to-hub",
-      "content_hash": "ce4d0e0b4c1486a2",
+      "content_hash": "1e814a61d651fc0d",
       "version": "1.0.0",
       "mirrors": [
         "skills/delegate-to-hub/SKILL.md",
@@ -30530,17 +30530,6 @@
       "source": "relates_to",
       "provenance": {
         "file": "skills/decision-write-integrity/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "follows",
-      "from": "skill:root/delegate-to-hub",
-      "to": "skill:co-security/verify-authorization",
-      "source": "relates_to",
-      "provenance": {
-        "file": "skills/delegate-to-hub/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
