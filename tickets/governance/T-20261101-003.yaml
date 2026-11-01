@@ -14,12 +14,32 @@ title: >-
   delivered projects stop failing loudly on straggler prose. Historical records
   (CHANGELOG/ADRs/designs) keep old ids — do not retro-edit.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-01T16:08:25.274+09:00'
 history:
   - at: '2026-11-01T16:08:25.274+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-01T17:04:00.430+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-01T17:04:00.450+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-01T17:04:00.466+09:00'
+    from: running
+    to: review
+  - at: '2026-11-01T17:04:00.482+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered (PR #1796, merged): MM-01 LITERAL regex gpt-5.6 alternation retired
+  (validate-templates 1.69.0) — future old-id literals outside managed sections
+  now FAIL loudly. Convergence window formally closed (vocabulary design R2.2
+  addendum line). Residual sweep: delivered surfaces 0; deliberate keeps 6
+  (CHANGELOG/ADR-0077/designs/lifecycle history, not retro-edited). Generalized
+  family pattern in model-literal-patterns 1.1.0 unchanged. Tests:
+  convergence-window pin retired, full suite 3118 green. v0.27.0 released +
+  tagged. Historical records keep old ids per R2.6.
 error: null

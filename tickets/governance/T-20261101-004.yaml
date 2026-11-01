@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20261101-004
+kind: manual
+title: >-
+  [Governance] skill-graph-analytics weekly triage cadence has no live trigger -
+  stale 02:30 runner reference. Health check 2026-11-01 found: the daily MACHINE
+  part is healthy (consecutive fleet-report snapshots Oct 27-31 in
+  memory/skill-graph-metrics, orphan sweep 0 NEW / 0 VANISHED in the Oct 31
+  daily review, convergence clean: 20 converged / 0 divergence / 0 hash-unknown,
+  rootOrphans 0 candidates / 2 carriedByScoped, all 16 project projections
+  regenerated same-day), but the WEEKLY triage part (consolidation/promotion
+  candidates, delivery-gap ticketing) has not fired: the skill's own trigger
+  text in .agents/skills/skill-graph-analytics/SKILL.md v1.2.0 references a
+  02:30 ticket runner that no longer exists (automation roster = 01:30
+  fleet-review+resync and 04:00 governance-ticket runners only), and October
+  memory logs contain zero skill-graph-analytics / consolidation runs.
+  Delivery-gap triage is the impacted function: per-project missingFromProjects
+  is large by design on narrow variants (co-abap 171 of 294 root capabilities)
+  with the 2026-09-27 whitelist as the reference, and distinguishing genuine new
+  gaps from expected scope is exactly the lapsed weekly step. Fix direction: (a)
+  correct the stale 02:30 reference in SKILL.md (L0-only - scope: workspace,
+  l2_propagate: false; route the edit through skill-lifecycle-manager with a
+  version bump); (b) decide the revived cadence - recommended: fold the weekly
+  consolidation into the 01:30 runner FRIDAY FULL OVERRIDE (existing automation,
+  one prompt-line addition, no new schedule); alternative: a standalone weekly
+  automation; (c) record the decision in the skill doc cadence note so the
+  trigger reference cannot rot again. Gates: skill-lifecycle-manager conventions
+  for the SKILL.md change, bun scripts/skill-graph-fleet-report.ts as the weekly
+  triage input. Discovered during the 2026-11-01 user-requested skill-graph
+  health check.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-01T16:24:54.406+09:00'
+history:
+  - at: '2026-11-01T16:24:54.406+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
