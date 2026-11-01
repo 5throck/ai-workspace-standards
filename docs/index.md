@@ -52,6 +52,7 @@ Standard operating procedures, developer guides, variant creation workflows, and
 - [**Creating a Variant Guide**](guides/creating-a-variant.md) — Step-by-step guide for scaffolding and initializing a new variant project
 - [**Variant Conversion Guide**](guides/variant-conversion-guide.md) — Operational guide for converting existing non-variant repositories into workspace variants
 - [**Variant Creation Workflow**](guides/variant-creation-workflow.md) — Detailed workflow stages and lifecycle milestones for variant initialization
+- [**Hub Operator Guide**](guides/hub-operator-guide.md) — Runbook for the hub-and-spoke delegation channel: filing delegation tickets (spoke side) and triaging the delegation queue (hub side)
 - [**External Framework References**](guides/external-references.md) — Mappings, integrations, and compatibility references for external tools and frameworks
 
 ---
