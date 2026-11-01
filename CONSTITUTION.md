@@ -660,7 +660,7 @@ Used by `upgrade-project.ts` (v1.22.0+) to classify every template file during a
 
 `docs/skill-graph.json` is REGENERATED in place; the upgrader itself is workspace-side (`L0`-only, ADR-0073 Amendment 1 — run `bun scripts/upgrade-project.ts Projects/<name>` from the workspace root). Report and gate: `bun scripts/check-upgrade-coverage.ts [--strict]`.
 
-The graft repo-context-graph fleet surface (MCP registrations, `.claude/skills/graft/`, instruction blocks) is delivered through the same engine per **ADR-0076**: hand-maintained outside the SSOT `skills/` (claude-only by design), so its tree-sync claim must precede the platform-mirror rule; per-host setup for machine-global hosts (Codex global, Antigravity registry, Claude Desktop) is documented in `docs/guides/graft-platform-integration.md`.
+The Trail repo-context-graph fleet surface (Trail is the vendor rename of graft, 0.28; MCP registrations, the `skills/trail/` skill and its platform mirrors, instruction blocks) is delivered through the same engine per **ADR-0076**: the skill lives in the SSOT `skills/` (ADR-0076 amendment, upgrade-policy v1.21.0), so the platform-mirror rule delivers it to the platform dirs like any other skill; per-host setup for machine-global hosts (Codex global, Antigravity registry, Claude Desktop) is documented in `docs/guides/trail-platform-integration.md`.
 
 #### Platform Documentation Parity
 The requirement that `CLAUDE.md` and `GEMINI.md` in every project template maintain equivalent section coverage. If a security configuration, behavioral rule, or workflow is documented in `CLAUDE.md`, an equivalent entry must exist in `GEMINI.md`, and vice versa. Verified during template validation (`bun scripts/validate-templates.ts`).
@@ -846,4 +846,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-10-31*
+*Last Updated: 2026-11-01*

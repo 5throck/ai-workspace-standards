@@ -216,7 +216,7 @@ C:\git\ (raíz del workspace - este repo)
 ├── .githooks/               # Git hooks para hacer cumplir políticas de PR y reglas
 ├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # Directorios de plataforma de herramientas de IA (ajustes, espejos de skills, comandos slash)
 ├── Handbooks/               # Fuentes locales de los manuales de aprendizaje publicados
-├── graft/                   # Grafo de contexto del repo (ADR-0076)
+├── .trail/                  # Índice/caché del grafo de contexto del repo (Trail, ADR-0076)
 ├── schemas/                 # Esquemas JSON compartidos
 ├── tickets/                 # Tickets de decisiones de gobernanza
 ├── docs/                    # Documentación de gobernanza — manifiesto: docs/README.md
