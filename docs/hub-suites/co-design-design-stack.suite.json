@@ -1,0 +1,98 @@
+{
+  "suite": "co-design-design-stack",
+  "hub_variant": "co-design",
+  "description": "co-design design stack hub suite — batch B of the 2026-11-01-hub-consolidation Phase 1. Promotes/re-asserts the byte-clean design-stack assets from the co-design hub project (Projects/co-design) into the co-design variant template and registers them as hub-doctrine canonicals. Deliberately EXCLUDED from this wave: skills design-foundation (L3 v1.2.0, L2 absent) and design-review (L3 v1.1.0, L2 absent) — both are L3-ahead, but their verbatim bytes fail the workspace skill-structure battery (audit.ts checkVariantSkillSections: design-foundation lacks all 5 required sections; design-review lacks '## Context'), and hub-promotion's byte-identity model forbids L2-side adaptation. They land in a follow-up wave after a hub-side (Projects/co-design) template-grade conformance fix per the 2026-10-27 frame gate (b). service-design is registered here but NOT byte-promoted: the L2 copy is the richer side (l2_propagate:true frontmatter, newer last_reviewed 2026-09-27, clean EOF) while the L3 copy carries a stray ', EOF artifact. Consumers/minimum_version reflect measured installed versions in Projects/co-architect and Projects/co-develop (fan-in evidence: co-architect consumes the design suite; co-develop consumes skill design-review). tokens.json carries no embedded version; 1.0.0 is the initial registration pin.",
+  "assets": [
+    {
+      "source": "Projects/co-design/skills/accessibility-audit/SKILL.md",
+      "dest": "templates/co-design/skills/accessibility-audit/SKILL.md",
+      "kind": "skill",
+      "name": "accessibility-audit"
+    },
+    {
+      "source": "Projects/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+      "dest": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+      "kind": "skill",
+      "name": "ui-ux-design-intelligence"
+    },
+    {
+      "source": "Projects/co-design/skills/token-usage-lint/SKILL.md",
+      "dest": "templates/co-design/skills/token-usage-lint/SKILL.md",
+      "kind": "skill",
+      "name": "token-usage-lint"
+    },
+    {
+      "source": "Projects/co-design/tokens.json",
+      "dest": "templates/co-design/tokens.json",
+      "kind": "file",
+      "name": "tokens.json"
+    }
+  ],
+  "registry_entries": [
+    {
+      "asset": "accessibility-audit",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project)",
+      "canonical_path": "templates/co-design/skills/accessibility-audit/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "ui-ux-design-intelligence",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project)",
+      "canonical_path": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+      "version": "1.0.2",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.0.1" }
+      ]
+    },
+    {
+      "asset": "service-design",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project)",
+      "canonical_path": "templates/co-design/skills/service-design/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "token-usage-lint",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project)",
+      "canonical_path": "templates/co-design/skills/token-usage-lint/SKILL.md",
+      "version": "1.1.1",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "tokens.json",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project)",
+      "canonical_path": "templates/co-design/tokens.json",
+      "version": "1.0.0",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.0.0" }
+      ]
+    }
+  ]
+}

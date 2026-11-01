@@ -752,249 +752,340 @@
     }
   },
   "hub_topology": {
-    "description": "Hub-and-spoke topology registry (design docs/designs/2026-11-01-hub-consolidation-design.md §2). Static-only: identity, classification, canonical paths, versions, consumers, and pointers. Per-hub operational state NEVER lives here — it lives in each hub's local .pipeline-state/hub-<name>.state.json (write-owned by the hub PM) and the root observes it via the read-only weekly probe (design §3.5). The static-only constraint is structural, not stylistic: the L0<->L1 hash-parity gate (validate-templates.ts schema-hash-parity) fails on ANY divergence between the two hand-maintained copies of this file, so per-session state churn here would permanently break parity.",
-    "version": "1.0.0",
-    "domains": [
-      "co-develop",
-      "co-design",
-      "co-security"
-    ],
-    "categories": [
-      "variant-identity",
-      "hub-doctrine",
-      "hub-escalation",
-      "incident-escalation"
-    ],
-    "bootstrap_states": [
-      "BOOTSTRAPPED",
-      "VALIDATED",
-      "READY"
-    ],
-    "operational_states": [
-      "AVAILABLE",
-      "DEGRADED",
-      "UNAVAILABLE",
-      "RECOVERY"
-    ],
-    "capability_enum": {
-      "pentest-execution": {
-        "description": "Offensive-security task execution against any target",
-        "never_in_degraded": true,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 1"
+      "description": "Hub-and-spoke topology registry (design docs/designs/2026-11-01-hub-consolidation-design.md §2). Static-only: identity, classification, canonical paths, versions, consumers, and pointers. Per-hub operational state NEVER lives here — it lives in each hub's local .pipeline-state/hub-<name>.state.json (write-owned by the hub PM) and the root observes it via the read-only weekly probe (design §3.5). The static-only constraint is structural, not stylistic: the L0<->L1 hash-parity gate (validate-templates.ts schema-hash-parity) fails on ANY divergence between the two hand-maintained copies of this file, so per-session state churn here would permanently break parity.",
+      "version": "1.0.0",
+      "domains": [
+        "co-develop",
+        "co-design",
+        "co-security"
+      ],
+      "categories": [
+        "variant-identity",
+        "hub-doctrine",
+        "hub-escalation",
+        "incident-escalation"
+      ],
+      "bootstrap_states": [
+        "BOOTSTRAPPED",
+        "VALIDATED",
+        "READY"
+      ],
+      "operational_states": [
+        "AVAILABLE",
+        "DEGRADED",
+        "UNAVAILABLE",
+        "RECOVERY"
+      ],
+      "capability_enum": {
+        "pentest-execution": {
+          "description": "Offensive-security task execution against any target",
+          "never_in_degraded": true,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 1"
+        },
+        "verify-authorization": {
+          "description": "Authorization issuance/renewal (the authorization chain's gate)",
+          "never_in_degraded": true,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 2"
+        },
+        "auth-threat-modeling": {
+          "description": "Threat modeling on authentication surfaces",
+          "never_in_degraded": true,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 3"
+        },
+        "hub-bootstrap-validation": {
+          "description": "Hub bootstrap/validation (the VALIDATED gate — a degraded hub cannot validate another)",
+          "never_in_degraded": true,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 4"
+        },
+        "routine-triage": {
+          "description": "Triage of routine delegation tickets",
+          "never_in_degraded": false,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
+        },
+        "non-auth-threat-modeling": {
+          "description": "Threat modeling outside authentication surfaces",
+          "never_in_degraded": false,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
+        },
+        "documentation": {
+          "description": "Documentation work",
+          "never_in_degraded": false,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
+        },
+        "probe-response": {
+          "description": "Responding to root-side lifecycle probes",
+          "never_in_degraded": false,
+          "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
+        }
       },
-      "verify-authorization": {
-        "description": "Authorization issuance/renewal (the authorization chain's gate)",
-        "never_in_degraded": true,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 2"
-      },
-      "auth-threat-modeling": {
-        "description": "Threat modeling on authentication surfaces",
-        "never_in_degraded": true,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 3"
-      },
-      "hub-bootstrap-validation": {
-        "description": "Hub bootstrap/validation (the VALIDATED gate — a degraded hub cannot validate another)",
-        "never_in_degraded": true,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 item 4"
-      },
-      "routine-triage": {
-        "description": "Triage of routine delegation tickets",
-        "never_in_degraded": false,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
-      },
-      "non-auth-threat-modeling": {
-        "description": "Threat modeling outside authentication surfaces",
-        "never_in_degraded": false,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
-      },
-      "documentation": {
-        "description": "Documentation work",
-        "never_in_degraded": false,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
-      },
-      "probe-response": {
-        "description": "Responding to root-side lifecycle probes",
-        "never_in_degraded": false,
-        "source": "docs/designs/2026-11-01-coworkspace-attach-mode-design.md §4 rationale (DEGRADED may continue)"
+      "hubs": [],
+      "entries": [
+        {
+          "asset": "accessibility-audit",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project)",
+          "canonical_path": "templates/co-design/skills/accessibility-audit/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "ui-ux-design-intelligence",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project)",
+          "canonical_path": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+          "version": "1.0.2",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.1"
+            }
+          ]
+        },
+        {
+          "asset": "service-design",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project)",
+          "canonical_path": "templates/co-design/skills/service-design/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "token-usage-lint",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project)",
+          "canonical_path": "templates/co-design/skills/token-usage-lint/SKILL.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "tokens.json",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project)",
+          "canonical_path": "templates/co-design/tokens.json",
+          "version": "1.0.0",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.0.0"
+            }
+          ]
+        }
+      ],
+      "known_unregistered_duplicates": [
+        {
+          "asset": "architect",
+          "kind": "agent",
+          "variants": [
+            "co-abap",
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "change-management-partner",
+          "kind": "agent",
+          "variants": [
+            "co-consult",
+            "co-hr"
+          ]
+        },
+        {
+          "asset": "code-writer",
+          "kind": "agent",
+          "variants": [
+            "co-abap",
+            "co-develop"
+          ]
+        },
+        {
+          "asset": "data-analyst",
+          "kind": "agent",
+          "variants": [
+            "co-consult",
+            "co-hr"
+          ]
+        },
+        {
+          "asset": "designer",
+          "kind": "agent",
+          "variants": [
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "devops-admin",
+          "kind": "agent",
+          "variants": [
+            "co-abap",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "security-monitor",
+          "kind": "agent",
+          "variants": [
+            "co-abap",
+            "co-develop",
+            "co-game",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "stack-setup",
+          "kind": "agent",
+          "variants": [
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "storyteller",
+          "kind": "agent",
+          "variants": [
+            "co-design",
+            "co-work"
+          ]
+        },
+        {
+          "asset": "test-runner",
+          "kind": "agent",
+          "variants": [
+            "co-abap",
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "code-review",
+          "kind": "skill",
+          "variants": [
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "competitive-intelligence",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "consulting-report-writing",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-hr"
+          ]
+        },
+        {
+          "asset": "executive-presentation",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "insight-synthesis",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "org-readiness-assessment",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-hr"
+          ]
+        },
+        {
+          "asset": "pdf-export",
+          "kind": "skill",
+          "variants": [
+            "co-deck",
+            "co-price"
+          ]
+        },
+        {
+          "asset": "refactoring",
+          "kind": "skill",
+          "variants": [
+            "co-develop",
+            "co-game"
+          ]
+        },
+        {
+          "asset": "stakeholder-alignment",
+          "kind": "skill",
+          "variants": [
+            "co-consult",
+            "co-hr"
+          ]
+        },
+        {
+          "asset": "test-driven-development",
+          "kind": "skill",
+          "variants": [
+            "co-develop",
+            "co-game"
+          ]
+        }
+      ],
+      "_notes": {
+        "static_only": "This section carries static declarations ONLY (design §2.2). Dynamic per-hub state (bootstrap/operational states, TTL leases, degraded_capabilities, state_history) lives in each hub repo's .pipeline-state/hub-<name>.state.json following the gitignored local-state convention; the root NEVER writes it. The root observes hub state via the weekly read-only probe (lifecycle-manager), which records observed values + head hash into docs/reports/YYYY-MM-DD-hub-probe-<hub>.md (keep-latest-N=4 per hub).",
+        "state_ref": "state_ref (on entries) is hub-local and unresolvable from the root BY DESIGN (design §2.3): the root repo cannot read another project's local .pipeline-state/ directory. The field exists so root-side tooling can NAME the expected state location and so the probe can report which file it read; a dangling state_ref at the root is normal operation, not an error.",
+        "entry_shape": "entries[] rows: {asset, domain (enum domains), hub_variant, category (enum categories), verticals[], origin, canonical_path, version (semver), consumers[] of {variant, minimum_version}, hub_remote, state_ref}. hub-doctrine consumers declare consumption and hold no copies; variant-identity assets are kept locally in their owning variant AND registered (promotion must never overwrite them with a thinner copy).",
+        "hub_shape": "hubs[] rows: {name, hub_remote, capabilities[] (subset of capability_enum keys — a hub cannot declare or degrade into a capability the enum does not know), minimum_version_policy}.",
+        "consumer_enforcement": "Consuming variants declare {domain, minimum_version} in their variant.json hub.consumes block; the validate-templates.ts hub legs and the audit.ts hub-resolve checker FAIL when a declared minimum_version exceeds the corresponding registry entry's version (semver compare). The checks are vacuously green while entries[] is empty and activate as promotion batches B-D land registry rows.",
+        "known_unregistered_duplicates": "Declared soak inventory of cross-variant asset copies that predate the registry (baseline scan at registry landing, 2026-11-01; same finding class as the co-develop/co-security security-suite fork of the 2026-10-31 audit). validate-templates.ts hub-dup-unregistered WARNs on duplicates present in this inventory and FAILs on any duplicate absent from BOTH entries[] and this inventory — new undeclared forks fail closed immediately. Rows must be retired (registered into entries[] or commonized per the >=3-convergence rule) by promotion batches B-D; a row whose duplication no longer exists on disk WARNs as stale so the inventory shrinks to empty.",
+        "l1_common_exclusion": "Skills/agents delivered by the L1 common contract (docs/templates/common-contract.json common_skills/common_agents) are intentionally present in every variant and are NOT cross-variant duplication; the duplicate legs exclude them by name.",
+        "fan_in_rule": "Hub selection is provisional on measured fan-in (design §9): an asset consumed by >=2 OTHER variants qualifies. The registry is data-driven — the roster re-pins if fleet reports contradict it."
       }
-    },
-    "hubs": [],
-    "entries": [],
-    "known_unregistered_duplicates": [
-      {
-        "asset": "architect",
-        "kind": "agent",
-        "variants": [
-          "co-abap",
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "change-management-partner",
-        "kind": "agent",
-        "variants": [
-          "co-consult",
-          "co-hr"
-        ]
-      },
-      {
-        "asset": "code-writer",
-        "kind": "agent",
-        "variants": [
-          "co-abap",
-          "co-develop"
-        ]
-      },
-      {
-        "asset": "data-analyst",
-        "kind": "agent",
-        "variants": [
-          "co-consult",
-          "co-hr"
-        ]
-      },
-      {
-        "asset": "designer",
-        "kind": "agent",
-        "variants": [
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "devops-admin",
-        "kind": "agent",
-        "variants": [
-          "co-abap",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "security-monitor",
-        "kind": "agent",
-        "variants": [
-          "co-abap",
-          "co-develop",
-          "co-game",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "stack-setup",
-        "kind": "agent",
-        "variants": [
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "storyteller",
-        "kind": "agent",
-        "variants": [
-          "co-design",
-          "co-work"
-        ]
-      },
-      {
-        "asset": "test-runner",
-        "kind": "agent",
-        "variants": [
-          "co-abap",
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "code-review",
-        "kind": "skill",
-        "variants": [
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "competitive-intelligence",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "consulting-report-writing",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-hr"
-        ]
-      },
-      {
-        "asset": "executive-presentation",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "insight-synthesis",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "org-readiness-assessment",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-hr"
-        ]
-      },
-      {
-        "asset": "pdf-export",
-        "kind": "skill",
-        "variants": [
-          "co-deck",
-          "co-price"
-        ]
-      },
-      {
-        "asset": "refactoring",
-        "kind": "skill",
-        "variants": [
-          "co-develop",
-          "co-game"
-        ]
-      },
-      {
-        "asset": "stakeholder-alignment",
-        "kind": "skill",
-        "variants": [
-          "co-consult",
-          "co-hr"
-        ]
-      },
-      {
-        "asset": "test-driven-development",
-        "kind": "skill",
-        "variants": [
-          "co-develop",
-          "co-game"
-        ]
-      }
-    ],
-    "_notes": {
-      "static_only": "This section carries static declarations ONLY (design §2.2). Dynamic per-hub state (bootstrap/operational states, TTL leases, degraded_capabilities, state_history) lives in each hub repo's .pipeline-state/hub-<name>.state.json following the gitignored local-state convention; the root NEVER writes it. The root observes hub state via the weekly read-only probe (lifecycle-manager), which records observed values + head hash into docs/reports/YYYY-MM-DD-hub-probe-<hub>.md (keep-latest-N=4 per hub).",
-      "state_ref": "state_ref (on entries) is hub-local and unresolvable from the root BY DESIGN (design §2.3): the root repo cannot read another project's local .pipeline-state/ directory. The field exists so root-side tooling can NAME the expected state location and so the probe can report which file it read; a dangling state_ref at the root is normal operation, not an error.",
-      "entry_shape": "entries[] rows: {asset, domain (enum domains), hub_variant, category (enum categories), verticals[], origin, canonical_path, version (semver), consumers[] of {variant, minimum_version}, hub_remote, state_ref}. hub-doctrine consumers declare consumption and hold no copies; variant-identity assets are kept locally in their owning variant AND registered (promotion must never overwrite them with a thinner copy).",
-      "hub_shape": "hubs[] rows: {name, hub_remote, capabilities[] (subset of capability_enum keys — a hub cannot declare or degrade into a capability the enum does not know), minimum_version_policy}.",
-      "consumer_enforcement": "Consuming variants declare {domain, minimum_version} in their variant.json hub.consumes block; the validate-templates.ts hub legs and the audit.ts hub-resolve checker FAIL when a declared minimum_version exceeds the corresponding registry entry's version (semver compare). The checks are vacuously green while entries[] is empty and activate as promotion batches B-D land registry rows.",
-      "known_unregistered_duplicates": "Declared soak inventory of cross-variant asset copies that predate the registry (baseline scan at registry landing, 2026-11-01; same finding class as the co-develop/co-security security-suite fork of the 2026-10-31 audit). validate-templates.ts hub-dup-unregistered WARNs on duplicates present in this inventory and FAILs on any duplicate absent from BOTH entries[] and this inventory — new undeclared forks fail closed immediately. Rows must be retired (registered into entries[] or commonized per the >=3-convergence rule) by promotion batches B-D; a row whose duplication no longer exists on disk WARNs as stale so the inventory shrinks to empty.",
-      "l1_common_exclusion": "Skills/agents delivered by the L1 common contract (docs/templates/common-contract.json common_skills/common_agents) are intentionally present in every variant and are NOT cross-variant duplication; the duplicate legs exclude them by name.",
-      "fan_in_rule": "Hub selection is provisional on measured fan-in (design §9): an asset consumed by >=2 OTHER variants qualifies. The registry is data-driven — the roster re-pins if fleet reports contradict it."
     }
-  }
 }

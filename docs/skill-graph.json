@@ -7470,7 +7470,7 @@
       "name": "accessibility-audit",
       "scope": "root",
       "capability": "accessibility-audit",
-      "content_hash": "aa244933ce706aa7",
+      "content_hash": "9e6da04e275eb51c",
       "version": "1.1.0",
       "mirrors": [
         "skills/accessibility-audit/SKILL.md",
