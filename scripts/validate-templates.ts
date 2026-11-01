@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.67.0
+ * @version 1.68.0
+ *
+ * v1.68.0 (2026-11-01, spec docs/designs/2026-10-31-template-security-hardening-design.md
+ *          Addendum 2026-11-01): new WARN arm `gemini-execution-policy-floor`, run inside
+ *          the VA-04 platform settings parity pass — a variant gemini overlay's
+ *          `terminal.executionPolicy` must not rank weaker than common's
+ *          (Off > Manual > Auto ordering). The overlay wins over common in the effective
+ *          template tree, so a weak overlay silently defeats the common hardening floor
+ *          (observed: the 2026-10-31 wave reached only the overlay-less project, and
+ *          co-security's overlay re-regressed its hardened Manual policy to Auto).
+ *          Missing/unknown values skip (shared-key loop and schema checks own those);
+ *          at-or-above-floor values pass. Severity: WARN per ADR-0055 soak.
  *
  * v1.67.0 (2026-10-31, T-20261031-005 — spec
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
@@ -4614,6 +4625,48 @@ function checkPlatformSettingsParity(variant: string): void {
         warn(variant, 'VA-04', `Claude-only key '${key}' was found in templates/${variant}/.gemini/settings.json -- incorrect parity attempt`);
       }
     }
+  }
+
+  checkGeminiExecutionPolicyFloor(variant, geminiSettings);
+}
+
+// v1.68.0 (spec docs/designs/2026-10-31-template-security-hardening-design.md,
+// Addendum 2026-11-01): the variant gemini overlay WINS over common in the
+// effective template tree, so a weak overlay policy silently defeats the
+// common hardening floor (the 2026-10-31 wave delivered Manual to the one
+// overlay-less project only, and co-security's overlay re-regressed its
+// manually hardened Manual policy to Auto). WARN when a variant overlay's
+// terminal.executionPolicy ranks weaker than common's (Off > Manual > Auto).
+// Floor is a floor, not a ceiling: Off and any stricter value never warn.
+// Missing/unknown values are skipped -- the shared-key loop above already
+// reports a missing key, and an unrecognized value is a schema problem, not a
+// floor violation. Severity: WARN per ADR-0055 (soak-first for net-new arms).
+const EXECUTION_POLICY_RANK: Record<string, number> = { Auto: 0, Manual: 1, Off: 2 };
+
+function checkGeminiExecutionPolicyFloor(variant: string, geminiSettings: Record<string, unknown> | null): void {
+  if (geminiSettings === null) return; // missing/invalid overlay already WARNed by the parity loop above
+
+  const commonGeminiPath = join(TEMPLATES_DIR, 'common', '.gemini', 'settings.json');
+  if (!existsSync(commonGeminiPath)) return; // common-surface checks live elsewhere; nothing to compare against
+
+  let commonPolicy: unknown;
+  try {
+    commonPolicy = JSON.parse(readFileSync(commonGeminiPath, 'utf-8'))['terminal.executionPolicy'];
+  } catch {
+    return; // unreadable common baseline -- not this arm's failure to report
+  }
+
+  const floorRank = EXECUTION_POLICY_RANK[String(commonPolicy)];
+  if (floorRank === undefined) return; // unknown baseline value: skip (schema concern, not a floor violation)
+
+  const variantPolicy = geminiSettings['terminal.executionPolicy'];
+  const variantRank = variantPolicy === undefined ? undefined : EXECUTION_POLICY_RANK[String(variantPolicy)];
+  if (variantRank === undefined) return; // missing key -> shared-key loop; unknown value -> schema concern
+
+  if (variantRank < floorRank) {
+    warn(variant, 'gemini-execution-policy-floor', `templates/${variant}/.gemini/settings.json executionPolicy '${String(variantPolicy)}' is weaker than the common floor '${String(commonPolicy)}' -- the overlay wins over common in the effective template tree, so the template security floor is defeated; raise the overlay to 'Manual' + the common 50-entry terminal.denyList (stricter overlays are preserved verbatim; see design 2026-10-31-template-security-hardening Addendum 2026-11-01)`);
+  } else {
+    pass(`gemini-execution-policy-floor: ${variant} -- executionPolicy '${String(variantPolicy)}' at-or-above the common floor '${String(commonPolicy)}'`);
   }
 }
 

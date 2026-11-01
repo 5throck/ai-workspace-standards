@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.67.0
+- **Version**: 1.68.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-01
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-01 | production | production | v1.67.0 → v1.68.0 (spec docs/designs/2026-10-31-template-security-hardening-design.md Addendum 2026-11-01): new WARN arm `gemini-execution-policy-floor`, run inside the VA-04 platform settings parity pass — a variant gemini overlay's `terminal.executionPolicy` must not rank weaker than common's (Off > Manual > Auto ordering). The overlay wins over common in the effective template tree, so a weak overlay silently defeats the common hardening floor (observed: the 2026-10-31 wave reached only the one overlay-less project, and co-security's overlay re-regressed its manually hardened Manual policy to Auto). Missing/unknown values skip (shared-key loop and schema checks own those); at-or-above-floor values pass. Severity: WARN per ADR-0055 soak. | automation-engineer |
 | 2026-10-31 | production | production | v1.66.0 → v1.67.0 (T-20261031-005, spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.2 surface 6): MM-01 LITERAL alternation gains the GPT-6.x ids (`gpt-6\.1-(?:sol|terra)` + `gpt-6-luna`) so the codex column rebase (gpt-5.6-sol/terra/luna → gpt-6.1-sol/terra, gpt-6-luna) keeps matching inside the instruction twins; the `gpt-5\.6` alternatives are KEPT through the L3 convergence window — delivered-side stragglers keep FAILing loudly (visible, not silent) until their upgrade visit normalizes them. No other check changes. | automation-engineer |
 | 2026-10-31 | production | production | v1.65.0 → v1.66.0 (U-20261029-004, spec docs/designs/2026-10-31-variant-generators-design.md §6.3): additive generator-manifest arm — when a variant template declares `scripts/<variant>/generators.json`, validate shape + containment through lib/generator-manifest.ts (strict parse, `bun` argv[0], project-relative traversal-free outputs/sources, size caps, script existence + symlink containment vs the variant root); absent file → no check (the manifest is project-authored and optional — absence must never become a template-validation failure). Check id `generator-manifest`, beside B-10. | automation-engineer |
 | 2026-10-29 | production | production | v1.64.0 → v1.65.0 (U-20261028-014, spec docs/designs/2026-10-29-owner-decision-batch-design.md §2): Check 2 gains the variant-designlint shape check — a variant.json `designLint` block must be {enabled: boolean (required), scanRoots?/allowlist?: string[]}, the same rule the audit gate enforces via helpers/design-lint-roots.ts v1.1.0 validateDesignLintOverride (restated inline; absent block stays valid — the override is opt-in per variant). | automation-engineer |
