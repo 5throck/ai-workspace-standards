@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1: stage() normalizes every StagedFile.relPath to forward slashes so
+// marker swappedPaths / rollback lists render identically on win32 (repo-
+// relative strings follow the isSafeRepoPath convention: backslash-free).
 // hub-promotion.ts — asset-level L3→L2 promotion tool for the hub program
 // (design docs/designs/2026-11-01-hub-consolidation-design.md §hub-promotion,
 // Phase 1; executes the ratified per-suite frame of
@@ -499,7 +502,12 @@ function makeStaging(rootDir: string, apply: boolean, suite: string): Staging {
 function stageAll(manifest: SuiteManifest, rootDir: string, staging: Staging): { staged: StagedFile[]; errors: string[] } {
   const staged: StagedFile[] = [];
   const errors: string[] = [];
-  const stage = (relPath: string, content: Buffer | string) => {
+  // relPath is a LOGICAL repo-relative locator (marker swappedPaths, rollback
+  // lists, verifyStaged comparisons) — always forward slashes regardless of
+  // OS, matching the isSafeRepoPath convention. win32 path.join accepts
+  // forward-slash segments, so filesystem ops below are unaffected.
+  const stage = (rawRelPath: string, content: Buffer | string) => {
+    const relPath = rawRelPath.replace(/\\/g, '/');
     const targetAbs = join(staging.payloadDir, relPath);
     mkdirSync(dirname(targetAbs), { recursive: true });
     writeFileSync(targetAbs, content);

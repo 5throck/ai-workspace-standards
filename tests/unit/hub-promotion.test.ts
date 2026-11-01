@@ -12,7 +12,10 @@
 // the suite never spawns the real battery — FILE_TIME_BUDGETS stays well under
 // the 60s ceiling on mkdtempSync fixtures.
 //
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1: snapshot() keys normalized to forward slashes (win32 join produces
+// backslash keys, which the POSIX-only '/.pipeline-state/' residue filter
+// missed — the windows-latest CI failure); no change on POSIX.
 import { describe, test, expect, afterAll } from 'bun:test';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -311,7 +314,11 @@ function snapshot(root: string): Record<string, string> {
     for (const e of readdirSorted(dir)) {
       const p = join(dir, e);
       if (statIsDir(p)) walk(p);
-      else out[p.slice(root.length)] = readFileSync(p, 'utf-8');
+      // keys are separator-neutral repo-relative strings: win32 join yields
+      // backslashes, which withoutPipelineState's '/.pipeline-state/' filter
+      // would miss (the windows-latest CI failure). POSIX keys contain no
+      // backslash, so this is a no-op on macos/ubuntu.
+      else out[p.slice(root.length).replace(/\\/g, '/')] = readFileSync(p, 'utf-8');
     }
   };
   walk(root);
