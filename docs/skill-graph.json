@@ -3441,6 +3441,11 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "doc:co-security/docs/authorization-registry.md",
+      "type": "doc",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "doc:co-security/docs/co-security.context.md",
       "type": "doc",
       "layer": "variant:co-security"
@@ -7683,8 +7688,8 @@
       "name": "verify-authorization",
       "scope": "co-security",
       "capability": "verify-authorization",
-      "content_hash": "7b7d1e13a5edbfd1",
-      "version": "1.0.0",
+      "content_hash": "bb03d579ce02de95",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/verify-authorization/SKILL.md"
       ]
@@ -8074,6 +8079,25 @@
         ".agents/skills/decision-write-integrity/SKILL.md",
         ".codex/skills/decision-write-integrity/SKILL.md",
         ".hermes/skills/decision-write-integrity/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/delegate-to-hub",
+      "type": "skill",
+      "layer": "L0",
+      "name": "delegate-to-hub",
+      "scope": "root",
+      "capability": "delegate-to-hub",
+      "content_hash": "ce4d0e0b4c1486a2",
+      "version": "1.0.0",
+      "mirrors": [
+        "skills/delegate-to-hub/SKILL.md",
+        "templates/common/skills/delegate-to-hub/SKILL.md",
+        ".claude/skills/delegate-to-hub/SKILL.md",
+        ".gemini/skills/delegate-to-hub/SKILL.md",
+        ".agents/skills/delegate-to-hub/SKILL.md",
+        ".codex/skills/delegate-to-hub/SKILL.md",
+        ".hermes/skills/delegate-to-hub/SKILL.md"
       ]
     },
     {
@@ -15804,6 +15828,18 @@
       "type": "cites_skill",
       "from": "doc:co-security/agents/threat-modeler.md",
       "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/authorization-registry.md",
+      "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/authorization-registry.md",
+      "to": "skill:root/delegate-to-hub",
       "source": "workflow-doc"
     },
     {
@@ -30497,6 +30533,29 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/delegate-to-hub",
+      "to": "skill:co-security/verify-authorization",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/delegate-to-hub/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/delegate-to-hub",
+      "to": "skill:co-security/verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/delegate-to-hub",
+      "to": "skill:root/sync",
+      "source": "prose"
     },
     {
       "type": "composes_with",

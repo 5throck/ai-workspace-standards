@@ -11,7 +11,7 @@ Curated registry for the co-security variant-exclusive skills (T-20260924-009). 
 | `sarif-exporter` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — export findings and threat matrices to SARIF v2.1.0 |
 | `spdx-sbom` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only — SPDX 2.3 SBOM generation from dependency manifests |
 | `stride-threat-matrix` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — STRIDE threat matrix generation with DREAD scoring |
-| `verify-authorization` | 1.0.0 | active | pm | 2026-06-13 | — | co-security only — hard gate for signed authorization documents |
+| `verify-authorization` | 1.1.0 | active | pm | 2026-11-02 | — | co-security only — hard gate for signed authorization documents + hub-delegation authorization registry check (AUTH-YYYY-NNN) |
 
 ## Usage
 

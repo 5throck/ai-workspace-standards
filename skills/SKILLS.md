@@ -62,6 +62,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
 | `trail` | 1.1.0 | active | pm | 2026-10-31 | — | Renamed from `graft` (vendor rename 0.28, @trailhq/trail-code): trail-era doctrine with a graft-era alias note — design 2026-10-31-graft-trail-migration, U-20261031-009 |
 | `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |
+| `delegate-to-hub` | 1.0.0 | active | pm | 2026-11-02 | — | — |
 
 ### Variant-Exclusive Skills
 
@@ -82,7 +83,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `storyline` | 1.2.0 | active | storyline | 2026-06-19 | — | co-deck only |
 | `technical-feasibility` | 1.0.0 | active | solutions-architect | 2026-06-13 | — | co-consult only |
 | `theme-authoring` | 1.0.1 | active | pm | 2026-06-21 | — | co-deck only |
-| `verify-authorization` | 1.0.0 | active | pm | 2026-06-13 | — | co-security only |
+| `verify-authorization` | 1.1.0 | active | pm | 2026-11-02 | — | co-security only |
 | `version` | 1.3.0 | active | version | 2026-06-20 | — | co-deck only |
 | `swe-solve` | 1.1.1 | active | pm | 2026-08-25 | — | co-develop only |
 | `exam-bank-operations` | 1.1.0 | active | exam-bank-steward | 2026-10-06 | — | co-learning only |

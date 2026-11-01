@@ -178,6 +178,12 @@
       "overridable": false,
       "description": "Zod runtime schema validation patterns and contract safety rules"
     },
+    "delegate-to-hub": {
+      "source": "skills/delegate-to-hub/SKILL.md",
+      "version": "1.0.0",
+      "overridable": false,
+      "description": "Files a hub delegation ticket with pre-checks, security-domain authorization gate (AUTH-YYYY-NNN registry row), safe-content rules, and kanban alias priority governance"
+    },
     "accessibility-audit": {
       "source": "skills/accessibility-audit/SKILL.md",
       "version": "1.1.0",
