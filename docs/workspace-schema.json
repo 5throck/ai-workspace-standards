@@ -1772,6 +1772,42 @@
           "origin": "identity; CAD specialist skill — ZWCAD 2026 geometry drawing via MCP tools (primary) or the Python CAD Agent (fallback) (batch E⑥ variant-identity declaration (registry-only; no content change))",
           "canonical_path": "templates/co-architect/skills/zwcad-ai-drawing/SKILL.md",
           "version": "1.3.0"
+        },
+        {
+          "asset": "design-foundation",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-architect"
+          ],
+          "origin": "Projects/co-design (hub project); canonical restructured to the workspace skill battery at L2 (2026-11-02 follow-up wave, registry-only authored canonical)",
+          "canonical_path": "templates/co-design/skills/design-foundation/SKILL.md",
+          "version": "1.2.0",
+          "consumers": [
+            {
+              "variant": "co-architect",
+              "minimum_version": "1.2.0"
+            }
+          ]
+        },
+        {
+          "asset": "design-review",
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-design (hub project); canonical conformed at L2 (## Context added from the L3 Purpose; 2026-11-02 follow-up wave, registry-only authored canonical)",
+          "canonical_path": "templates/co-design/skills/design-review/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
         }
       ],
       "known_unregistered_duplicates": [],

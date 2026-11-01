@@ -5921,6 +5921,32 @@
       ]
     },
     {
+      "id": "skill:co-design/design-foundation",
+      "type": "skill",
+      "layer": "variant:co-design",
+      "name": "design-foundation",
+      "scope": "co-design",
+      "capability": "design-foundation",
+      "content_hash": "5cc8c4108e26a610",
+      "version": "1.2.0",
+      "mirrors": [
+        "templates/co-design/skills/design-foundation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-design/design-review",
+      "type": "skill",
+      "layer": "variant:co-design",
+      "name": "design-review",
+      "scope": "co-design",
+      "capability": "design-review",
+      "content_hash": "6ca0b0620fe377cc",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-design/skills/design-review/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-design/token-usage-lint",
       "type": "skill",
       "layer": "variant:co-design",
@@ -23967,6 +23993,184 @@
       "type": "references",
       "from": "skill:co-deck/version",
       "to": "skill:co-deck/storyline",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/token-usage-lint",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:root/accessibility-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/design-foundation",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/design-foundation",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/token-usage-lint",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/accessibility-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/meeting-facilitation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 5
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/project-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 6
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/service-design",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 4
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:root/service-design",
       "source": "prose"
     },
     {

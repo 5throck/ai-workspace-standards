@@ -136,8 +136,8 @@ describe('variant SKILLS.md registries (T-20260924-009 R3.5)', () => {
     expect(coPrice).toContain('## Usage');
   });
 
-  test('already-clean variants stay clean (co-design 4/4, co-game 5/5)', () => {
-    for (const [variant, expected] of [['co-design', 4], ['co-game', 5]] as const) {
+  test('already-clean variants stay clean (co-design 6/6, co-game 5/5)', () => {
+    for (const [variant, expected] of [['co-design', 6], ['co-game', 5]] as const) {
       const content = readFileSync(join(templatesDir, variant, 'skills', 'SKILLS.md'), 'utf-8');
       const { rows } = parseSkillRegistryRows(content);
       expect(rows.size).toBe(expected);

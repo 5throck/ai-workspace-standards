@@ -73,6 +73,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `change-impact-assessment` | 1.0.0 | active | change-management-partner | 2026-06-13 | — | co-consult only |
 | `industry-research-pack` | 1.0.0 | active | pm | 2026-10-08 | — | co-consult only |
 | `design` | 1.2.1 | active | design | 2026-08-24 | — | co-deck only |
+| `design-review` | 1.1.0 | active | pm | 2026-11-02 | — | co-design only |
 | `financial-modeling` | 1.0.1 | active | strategy-analyst | 2026-08-26 | — | co-consult only |
 | `html-build` | 1.6.0 | active | html-build | 2026-10-07 | — | co-deck only |
 | `narrative-framework` | 1.0.0 | active | communications-lead | 2026-06-13 | — | co-consult only |

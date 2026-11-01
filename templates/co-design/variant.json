@@ -55,6 +55,14 @@
       "file": "skills/accessibility-audit/SKILL.md"
     },
     {
+      "name": "design-foundation",
+      "file": "skills/design-foundation/SKILL.md"
+    },
+    {
+      "name": "design-review",
+      "file": "skills/design-review/SKILL.md"
+    },
+    {
       "name": "service-design",
       "file": "skills/service-design/SKILL.md"
     },
