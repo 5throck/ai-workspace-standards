@@ -273,6 +273,74 @@
         }
       }
     },
+    "hub": {
+      "type": "object",
+      "description": "Hub/spoke topology declaration (design docs/designs/2026-11-01-hub-consolidation-design.md SS2 and SS6). Optional: variants without the block are standalone and existing variant.json files stay valid. Hub-role fields (domain, arbitrates, hub_remote) and consumer-role fields (consumes) are mutually exclusive; enforcement lives in validate-templates.ts hub legs, audit.ts hub-resolve, and the hub_topology registry (docs/workspace-schema.json).",
+      "required": ["role"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["hub", "consumer", "standalone"],
+          "description": "This variant's position in the hub-and-spoke topology: hub (carries the canonical, richest copies of a domain's shared assets and owns their delivery quality), consumer (reads canonical assets from a hub via consumes declarations), standalone (neither)"
+        },
+        "domain": {
+          "type": "string",
+          "enum": ["co-develop", "co-design", "co-security"],
+          "description": "Hub role only: the domain this variant serves as hub (mirrors hub_topology.domains)"
+        },
+        "arbitrates": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hub role only: domains or topics this hub arbitrates for its spokes (final adjudication stays with the workspace-root PM)"
+        },
+        "hub_remote": {
+          "type": "string",
+          "description": "Hub role only: git remote URL used by hub-bootstrap.ts for the SHA-pinned working clone (design SS4)"
+        },
+        "consumes": {
+          "type": "array",
+          "description": "Consumer role only: declared hub consumption (design SS7.3). Enforced by the audit.ts hub-resolve checker and the validate-templates.ts hub-consumer-min-version leg: a declared minimum_version newer than the canonical registry entry version FAILs.",
+          "items": {
+            "type": "object",
+            "required": ["domain", "minimum_version"],
+            "properties": {
+              "domain": {
+                "type": "string",
+                "enum": ["co-develop", "co-design", "co-security"],
+                "description": "The hub domain consumed (mirrors hub_topology.domains)"
+              },
+              "minimum_version": {
+                "type": "string",
+                "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+                "description": "Oldest acceptable canonical version of the consumed domain assets (MAJOR.MINOR.PATCH)"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "role": { "const": "hub" } }, "required": ["role"] },
+          "then": {
+            "required": ["domain"],
+            "properties": {
+              "consumes": { "not": {} }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "role": { "const": "consumer" } }, "required": ["role"] },
+          "then": {
+            "required": ["consumes"],
+            "properties": {
+              "domain": { "not": {} },
+              "arbitrates": { "not": {} },
+              "hub_remote": { "not": {} }
+            }
+          }
+        }
+      ]
+    },
     "country_config": {
       "type": "object",
       "description": "Country/jurisdiction profile configuration",

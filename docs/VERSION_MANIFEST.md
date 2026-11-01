@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-01T07:57:28.223Z
+**Generated**: 2026-11-01T10:36:21.625Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 59
-- **Scripts**: 127 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 128 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -112,7 +112,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.60.0 | scripts/audit.ts | bun |
+| audit.ts | 2.61.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.1.0 | scripts/backport-diff.ts | N/A |
@@ -142,6 +142,7 @@
 | generate-skill-graph.ts | 2.0.0 | scripts/generate-skill-graph.ts | js-yaml |
 | generate-version-manifest.ts | 1.11.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | N/A |
+| hub-promotion.ts | 1.0.0 | scripts/hub-promotion.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
@@ -174,7 +175,7 @@
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | N/A |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-graph-fleet-report.ts | 2.1.0 | scripts/skill-graph-fleet-report.ts | N/A |
+| skill-graph-fleet-report.ts | 2.2.0 | scripts/skill-graph-fleet-report.ts | N/A |
 | skill-lifecycle-audit.ts | 1.10.0 | scripts/skill-lifecycle-audit.ts | N/A |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
@@ -188,7 +189,7 @@
 | sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
 | sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
 | sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | N/A |
-| sync-variant-settings.ts | 1.2.0 | scripts/sync-variant-settings.ts | N/A |
+| sync-variant-settings.ts | 1.3.0 | scripts/sync-variant-settings.ts | N/A |
 | tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
 | team-builder.ts | 1.5.0 | scripts/team-builder.ts | N/A |
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
@@ -215,7 +216,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.69.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.70.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.6.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |

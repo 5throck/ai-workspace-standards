@@ -12,7 +12,11 @@
  * - the L0/L1 schema pair carries a byte-identical platform_surfaces block and
  *   the same version (rootAllowlist divergence stays sanctioned by DEC-20261028-05).
  *
- * @version 1.1.0
+ * @version 1.2.0
+ * v1.2.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md
+ *          Phase 1): schema version pin moves 1.8.0 → 1.9.0 with the
+ *          hub_topology registry landing (both copies bumped together; the
+ *          same-version pin semantics are unchanged).
  * v1.1.0 (2026-10-31, T-20261031-007 — spec
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
  *          §R2.4): the zcode row joins the pinned set (8 platforms,
@@ -49,8 +53,8 @@ describe('platform_surfaces registry (design §4.1)', () => {
   test('block is present in both schema copies with the same minor-bumped version', () => {
     expect(registry).toBeDefined();
     expect(l1Registry).toBeDefined();
-    expect(root.version).toBe('1.8.0');
-    expect(l1.version).toBe('1.8.0');
+    expect(root.version).toBe('1.9.0');
+    expect(l1.version).toBe('1.9.0');
   });
 
   test('the platform set is exactly validate-model-registry.ts PLATFORMS', () => {

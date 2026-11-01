@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://templates.circuit.stream/common/stack-profile.schema.json",
+  "title": "Stack Profile Schema",
+  "description": "Per-hub declared technology/capability profile constraining degraded_capabilities[] (glossary row of docs/designs/2026-11-01-hub-consolidation-design.md; the never-in-DEGRADED floor is defined once in docs/designs/2026-11-01-coworkspace-attach-mode-design.md SS4 and cited normatively by hub_topology.capability_enum). Authored per hub as stack-profile.json in the hub program's Batch E; this schema is the delivery contract. Lives beside variant.schema.json (L0 docs/templates/, same tier) — a schema contract, not a per-variant authored file.",
+  "type": "object",
+  "required": ["name", "stack", "commands"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^co-[a-z]+$",
+      "description": "Hub/project identifier this profile describes (matches variant.json name)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable summary of the declared stack and its delivery scope"
+    },
+    "stack": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Declared technologies/runtimes the hub's deliverables are built on (e.g. bun, typescript, xlsx). Free-form names — the capability constraint below is what the state machine enforces"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Capability keys this hub may declare or degrade, constrained to hub_topology.capability_enum keys (docs/workspace-schema.json). A hub cannot declare — and cannot degrade into — a capability the root schema does not know (design SS3.4); entries with never_in_degraded: true may never appear in a DEGRADED declaration"
+    },
+    "commands": {
+      "type": "object",
+      "description": "Canonical build/test/lint/deploy commands for the hub's deliverables. Consumers (delegation tickets, hub-bootstrap VALIDATED gate) run these verbatim from the hub repo root.",
+      "required": ["build", "test", "lint"],
+      "properties": {
+        "build": { "type": "string", "description": "Build command (e.g. bun run build)" },
+        "test": { "type": "string", "description": "Test command (e.g. bun run test:unit)" },
+        "lint": { "type": "string", "description": "Lint command (e.g. bun run lint)" },
+        "deploy": { "type": "string", "description": "Deploy/publish command; omit when the hub ships no deployable runtime" }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "Artifact structure: the deliverables this stack produces, where they land, and their kind",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Project-relative artifact path or glob (e.g. dist/report.xlsx); must resolve inside the hub repo"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["report", "document", "model", "dataset", "bundle", "other"],
+            "description": "Artifact class used by delegation routing and probe reports"
+          },
+          "description": { "type": "string", "description": "What the artifact contains and who consumes it" }
+        }
+      }
+    },
+    "handoffs": {
+      "type": "array",
+      "description": "Handoff mappings: producer-to-consumer contracts between pipeline stages or agents",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "artifact"],
+        "properties": {
+          "from": { "type": "string", "description": "Producing stage or agent name" },
+          "to": { "type": "string", "description": "Consuming stage or agent name" },
+          "artifact": {
+            "type": "string",
+            "description": "Artifact path handed over (should match an artifacts[].path entry)"
+          },
+          "trigger": { "type": "string", "description": "When the handoff fires (workflow phase, event, or gate)" }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-text notes (constraints, environment prerequisites, known limitations)"
+    }
+  }
+}
