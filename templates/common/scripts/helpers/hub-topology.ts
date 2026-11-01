@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // hub-topology.ts — pure helpers for the hub-and-spoke topology registry
 // (docs/workspace-schema.json `hub_topology`, design
 // docs/designs/2026-11-01-hub-consolidation-design.md §2).
@@ -13,7 +13,6 @@
 // File reads are injected via rootDir/params; every exported function is
 // deterministic given its inputs, which keeps the unit suite on mkdtempSync
 // fixtures fast (FILE_TIME_BUDGETS 60s ceiling).
-// @l2-propagate: false
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
