@@ -3,8 +3,8 @@ name: samm-maturity
 description: >
   OWASP SAMM maturity self-assessment producing a scored 15-stream posture
   roadmap across five business functions with three-level maturity rubric.
-version: 1.0.0
-last_reviewed: 2026-08-24
+version: 1.1.0
+last_reviewed: 2026-11-01
 status: active
 owner: pm
 prerequisites: Repository access, security artifacts (policies, scan results, incident logs)
@@ -28,7 +28,7 @@ OWASP SAMM (Software Assurance Maturity Model) provides a structured framework f
 
 ## When to Use
 
-- Performing baseline security posture assessment during Phase 1 security engagements.
+- Performing baseline security posture assessment during {{PROJECT_PHASE_GATES}}.
 - Evaluating security program maturity before recommending tooling or process investments.
 - Tracking security improvement progress across multiple engagement cycles.
 - Generating stakeholder-ready maturity reports for governance, risk, and compliance (GRC) reviews.
@@ -150,6 +150,27 @@ OWASP SAMM (Software Assurance Maturity Model) provides a structured framework f
 
 **Size Legend**: S (1-2 weeks, <5 person-days), M (3-8 weeks, 5-20 person-days), L (9+ weeks, >20 person-days)
 ```
+
+## Co-develop Integration Note
+
+This file is the hub-doctrine canonical for the co-security assurance suite
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch C). Co-security
+engagements run it as written. A co-develop pipeline instance derives from this
+doctrine by substituting the bindings below — the derivation never edits
+frontmatter: `owner: pm` stays single-valued here, and the co-develop ownership
+binding lives in this note only.
+
+Parameterization — unfilled placeholders resolve to the co-security doctrine
+defaults; a co-develop derivation substitutes the bindings:
+
+| Placeholder | Instance | Unfilled default (co-security) | Co-develop binding |
+|---|---|---|---|
+| {{PROJECT_PHASE_GATES}} | When to Use, first bullet | Phase 1 security engagements | Phase 0 security baseline scans |
+
+Co-develop bindings beyond placeholders:
+
+- Ownership: co-develop renders this skill as co-owned `pm, security-monitor` — the Phase 0 security baseline scans it feeds are security-monitor scans. Frontmatter here stays `owner: pm`.
+- Delivery: the co-develop fork carries `scope: common`; this canonical keeps `scope: co-security` (the engagement label stays `co-security` for hub readers).
 
 ## Related Skills
 

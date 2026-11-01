@@ -2,10 +2,10 @@
 name: sarif-exporter
 description: >
   Exports security scan results, threat matrices, and vulnerability findings into standard SARIF v2.1.0 (Static Analysis Results Interchange Format) JSON reports.
-version: 1.0.1
+version: 1.1.0
 status: active
 owner: security-expert
-last_reviewed: 2026-08-25
+last_reviewed: 2026-11-01
 prerequisites: Security scan findings, threat matrix assessments, or raw vulnerability objects
 relates_to:
   - skill: samm-maturity
@@ -77,7 +77,7 @@ Interoperability between security scanning tools, threat matrix modeling, and mo
     {
       "tool": {
         "driver": {
-          "name": "ai-workspace-co-security-exporter",
+          "name": "ai-workspace-{{PROJECT_NAME}}-exporter",
           "version": "1.0.0",
           "rules": [
             {
@@ -125,6 +125,28 @@ Interoperability between security scanning tools, threat matrix modeling, and mo
   ]
 }
 ```
+
+## Co-develop Integration Note
+
+This file is the hub-doctrine canonical for the co-security assurance suite
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch C). Co-security
+engagements run it as written. A co-develop pipeline instance derives from this
+doctrine by substituting the bindings below — the derivation never edits
+frontmatter: `owner: security-expert` stays single-valued here, and the
+co-develop ownership binding lives in this note only.
+
+Parameterization — unfilled placeholders resolve to the co-security doctrine
+defaults; a co-develop derivation substitutes the bindings:
+
+| Placeholder | Instance | Unfilled default (co-security) | Co-develop binding |
+|---|---|---|---|
+| {{PROJECT_NAME}} | Output Format, `tool.driver.name` | co-security | co-develop |
+
+Co-develop bindings beyond placeholders:
+
+- Ownership: co-develop renders this skill as owned by `security-monitor` (its Phase 0/5 scan exporter). Frontmatter here stays `owner: security-expert`.
+- Related Skills: co-develop omits the `verify-authorization` entry — that pre-flight gate is a co-security engagement skill not adopted in the co-develop pipeline (authorization there is the pipeline's own Phase 0/5 security-monitor scan gates). The example rule's `help` text is likewise doctrine-fixed.
+- Delivery: the co-develop fork carries `scope: common`; this canonical keeps `scope: co-security`.
 
 ## Related Skills
 

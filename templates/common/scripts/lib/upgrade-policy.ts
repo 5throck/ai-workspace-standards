@@ -1,4 +1,12 @@
-// @version 1.34.0
+// @version 1.35.0
+// v1.35.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          Phase 1 batch C): PLACEHOLDER_ALLOWLIST gains the 5 co-security
+//          assurance-suite canonical SKILL.md paths. Their {{PROJECT_*}} tokens
+//          are hub-doctrine derivation parameters (Co-develop Integration Note
+//          in each file defines unfilled defaults + spoke bindings), never
+//          scaffold substitutions — the strict placeholder check must not flag
+//          them. Skill-level keys cover the platform mirrors via the
+//          mirror-prefix strip.
 // v1.34.0 (2026-11-01, design addendum
 //          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md
 //          §Addendum, U-20261101-001): template-authoritative vocabulary blocks.
@@ -439,6 +447,19 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
   // broken half-skill.)
   'skills/explain-me/templates/report.html',
   'skills/explain-me/references/BUILD_GUIDE.md',
+  // co-security assurance-suite canonicals (hub doctrine, spec
+  // 2026-11-01-hub-consolidation-design Phase 1 batch C): the {{PROJECT_*}}
+  // tokens are hub-doctrine derivation parameters substituted when a spoke
+  // variant adopts the doctrine (each SKILL.md's "Co-develop Integration Note"
+  // defines the unfilled defaults and bindings) — never by scaffolding. Same
+  // "ships verbatim unrendered by design" contract as explain-me above; the
+  // mirror-prefix strip in check-upgrade-coverage.ts covers the platform
+  // mirrors via these skill-level keys.
+  'skills/samm-maturity/SKILL.md',
+  'skills/sarif-exporter/SKILL.md',
+  'skills/spdx-sbom/SKILL.md',
+  'skills/stride-threat-matrix/SKILL.md',
+  'skills/finding-reconciliation/SKILL.md',
 ]);
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────

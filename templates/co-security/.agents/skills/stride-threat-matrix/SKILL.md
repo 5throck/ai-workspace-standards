@@ -3,10 +3,10 @@ name: stride-threat-matrix
 description: >
   Automated STRIDE threat matrix generation and DREAD risk scoring framework
   for architecture, API endpoints, data flows, and infrastructure models.
-version: 1.0.0
+version: 1.1.0
 status: active
 owner: security-expert
-last_reviewed: 2026-08-06
+last_reviewed: 2026-11-01
 prerequisites: Architecture diagrams or data flow specifications (DFD), system component inventory
 relates_to:
   - skill: finding-reconciliation
@@ -33,7 +33,7 @@ In security-focused engineering and threat modeling engagements (`co-security`),
 
 ## When to Use
 
-- Performing architectural threat modeling during Phase 1 security assessments.
+- Performing architectural threat modeling during {{PROJECT_PHASE_GATES}}.
 - Evaluating new service endpoints, inter-process communication (IPC) channels, or external data ingestion paths.
 - Calculating quantitative risk scores for identified design vulnerabilities before remediation planning.
 - Generating structured threat matrix artifacts for security documentation, stakeholder reviews, and audit compliance.
@@ -65,7 +65,7 @@ In security-focused engineering and threat modeling engagements (`co-security`),
    $$\text{DREAD Score} = \frac{D + R + E + A + D}{5}$$
 
    Risk Classification Matrix:
-   - **Critical**: Score $\ge 8.0$ (Requires immediate mitigation before Phase 2 operations)
+   - **Critical**: Score $\ge 8.0$ (Requires immediate mitigation before {{PROJECT_PHASE_GATES_CRITICAL}})
    - **High**: Score $6.0 - 7.9$ (High priority fix; security gate blocker)
    - **Medium**: Score $4.0 - 5.9$ (Scheduled remediation in sprint cycle)
    - **Low**: Score $< 4.0$ (Documented residual risk; monitor)
@@ -84,7 +84,7 @@ In security-focused engineering and threat modeling engagements (`co-security`),
 
 **Target System**: [System / Module Name]
 **Evaluation Date**: 2026-08-06
-**Evaluator**: security-expert
+**Evaluator**: {{PROJECT_ROLE}}
 
 ### Threat Summary
 
@@ -97,10 +97,35 @@ In security-focused engineering and threat modeling engagements (`co-security`),
 
 #### THREAT-001: Elevation of Privilege
 - **STRIDE Category**: Elevation of Privilege
-- **Component**: Command Processor (c:\git\ai_workspace\scripts\)
+- **Component**: Command Processor (scripts/)
 - **DREAD Calculation**: (9 + 8 + 8 + 9 + 7) / 5 = **8.2 (Critical)**
 - **Mitigation Requirement**: Mandatory authentication check prior to command dispatch.
 ```
+
+## Co-develop Integration Note
+
+This file is the hub-doctrine canonical for the co-security assurance suite
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch C). Co-security
+engagements run it as written. A co-develop pipeline instance derives from this
+doctrine by substituting the bindings below — the derivation never edits
+frontmatter: `owner: security-expert` stays single-valued here, and the
+co-develop ownership binding lives in this note only.
+
+Parameterization — unfilled placeholders resolve to the co-security doctrine
+defaults; a co-develop derivation substitutes the bindings:
+
+| Placeholder | Instance | Unfilled default (co-security) | Co-develop binding |
+|---|---|---|---|
+| {{PROJECT_PHASE_GATES}} | When to Use, first bullet | Phase 1 security assessments | Phase 1–2 design (architect) and Phase 0/5 security-monitor scans |
+| {{PROJECT_PHASE_GATES_CRITICAL}} | Risk Classification Matrix, Critical line | Phase 2 operations | Phase 4 execution |
+| {{PROJECT_ROLE}} | Output Format, `**Evaluator**` line | security-expert | security-monitor |
+
+Co-develop bindings beyond placeholders:
+
+- Ownership: co-develop renders this skill as co-owned `architect, security-monitor` (threat modeling runs during Phase 1–2 design by the architect and again in the Phase 0/5 security-monitor scans). Frontmatter here stays `owner: security-expert`.
+- Engagement label: the Context sentence keeps `co-security`; a co-develop derivation reads it as `co-develop`.
+- Example mitigation text and Related Skills: co-develop omits the `verify-authorization` references (that pre-flight gate is a co-security engagement skill not adopted in the co-develop pipeline). This canonical keeps them doctrine-fixed.
+- Delivery: the co-develop fork carries `scope: common`; this canonical keeps `scope: co-security`.
 
 ## Related Skills
 
