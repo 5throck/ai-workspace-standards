@@ -274,3 +274,85 @@ gate passes) and the sync-agent-mirrors parity guard reads the landed
   rejected with Decision 1; revisit only if a project legitimately needs gate
   config that differs from its delivered schema AND cannot use the override in
   audit.ts's gate scope.
+
+## Addendum (2026-11-01): ownership corrections
+
+Status of the base spec stays `implemented`. This addendum documents two
+corrections delivered under the same spec id (`2026-10-31-workspace-schema-
+merge-delivery-design`), dispatched via the PM Gateway after the 0.26.0 fleet
+wave surfaced two ownership defects in and around the SCHEMA_MERGE policy.
+
+### A1. Template-authoritative vocabulary blocks (U-20261101-001)
+
+**Failure (verified on the canary + all 15 wave projects).** The MERGE pass
+stamps the template-authoritative GPT-6.x prose into AGENTS.md §3.6 and
+CODEX.md (WORKSPACE-MANAGED blocks), while the SCHEMA_MERGE pass project-wins
+the matching `models.codex` rows in `docs/workspace-schema.json`. The pair
+desyncs; `validate-model-registry.ts`'s exact-equality gate fails (~6 errors
+per project). Every project needed a manual 3-value convergence (schema row,
+AGENTS.md prose, CODEX.md prose) — sanctioned ad hoc, but unreachable "via
+upgrade visits" as the vocabulary design R2.2 mandates.
+
+**Ruling.** `models` and `platform_surfaces` are template-authoritative.
+
+**Fix.** `mergeWorkspaceSchemaData` (scripts/lib/upgrade-policy.ts v1.34.0)
+gains `SCHEMA_TEMPLATE_AUTHORITATIVE_KEYS = ['models', 'platform_surfaces']`.
+When one of these blocks is present on both sides, the template value lands
+VERBATIM; every project divergence is recorded as a TEMPLATE_DELTA INFO row
+(visibility, not withholding), and a project-only key inside the block is
+dropped by the verbatim landing and logged the same way (`template` field
+reads "(absent …)"). Unchanged by design: `designLint` stays project-wins (the
+protected token-debt class), project-only top-level blocks stay preserved,
+template-owned additions land, arrays stay atomic, and the merge stays a pure
+function of (template, project) — the §4 fixed point holds (the second pass
+reports zero deltas: the landing resolves the divergence).
+
+**Tests.** tests/unit/workspace-schema-merge.test.ts v1.1.0: fixture 9 (the
+wave failure shape — diverged `models.codex` lands `gpt-6.1-sol` verbatim,
+divergence rows at INFO, `designLint` untouched, re-merge clean), fixture 1
+and fixture 6/8 updated for the new class (`models.*` rows flip WARN→INFO and
+vanish on the second pass).
+
+### A2. VARIANT-SCOPE SKILL PRUNE: loud decisions + adoption guard (T-20261101-001 adjudication)
+
+**Forensics (verbatim from the co-develop incident).**
+scripts/upgrade-project.ts ~4588-4618: the VARIANT-SCOPE SKILL PRUNE pass
+reads workspace-schema `variant_scoped_skills`, `git rm -rf`s foreign skills
+across PLATFORM_SKILL_BASES (including the `skills/` SSOT) unconditionally —
+no `--prune-removed` gate — with the only escape `projectManifestSkills.has`
+(variant.json `skill_manifest.variant_specific`), and logs no
+`recordDecision()`. The decision log kept PRESERVE rows from the earlier
+SYNC_IF_NEWER pass while files silently vanished (co-develop lost 3 adopted
+skills, 15 paths). A pass-ordering artifact between two ownership models.
+
+**Ruling.** Two fixes, per the adjudication:
+
+- (a) **Loudness** — every prune action records a decision row, severity WARN
+  minimum. A new `DELETE` verdict joins `DecisionVerdict` +
+  `DECISION_SEVERITY_CONTRACT` at WARN (upgrade-policy.ts v1.34.0): DELETE
+  verdicts are never silent. Manifest-seeded KEEP survivals also gain a
+  decision row (SKIP, INFO) — no silent survivals either.
+- (b) **Cross-variant adoption protection** — a skill whose `skills/` SSOT dir
+  exists but which has NO entry in the project's variant.json
+  `skill_manifest.variant_specific` AND no counterpart in the project's
+  delivery lineage (templates/common/skills + templates/<variant>/skills) is
+  a project-adopted asset, not scaffold residue: SKIPPED with a WARN row
+  ("unregistered project-adopted skill — seed variant.json to opt into
+  pruning") instead of deleted. Pruning still proceeds for the pass's real
+  job — registry-detected foreign skills the project did not adopt:
+  promotion-mistake copies that DO have a template counterpart, and
+  mirror-only residue (no SSOT dir). Manifest-seeded skills keep the v1.43.0
+  KEEP behavior (scripts/upgrade-project.ts v1.88.0).
+
+**Tests.** tests/unit/upgrade-decision-log.test.ts v2.1.0, three engine-integration
+shapes: `variant-scope-unregistered` (sarif-exporter survives with the WARN
+SKIP row; no DELETE row may name it), `variant-scope-manifest-seeded` (KEEP
+row, INFO), `variant-scope-mirror-prune` (mirror-only sound-synth pruned WITH
+a DELETE WARN row).
+
+### A3. Version and record parity
+
+- scripts/lib/upgrade-policy.ts → 1.34.0; scripts/upgrade-project.ts → 1.88.0.
+- SCRIPTS.md rows, lifecycle records (Check H parity), and the CHANGELOG
+  `[Unreleased]` entry (2026-11-01) cite U-20261101-001, T-20261101-001, and
+  this addendum.

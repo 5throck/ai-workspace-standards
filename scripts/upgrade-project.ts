@@ -1,5 +1,24 @@
 #!/usr/bin/env bun
-// @version 1.87.0
+// @version 1.88.0
+// v1.88.0 (2026-11-01, T-20261101-001 adjudication, design addendum
+//          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md
+//          §Addendum): VARIANT-SCOPE SKILL PRUNE loudness + adoption guard —
+//          the co-develop 0.26.0 incident (3 adopted skills / 15 paths silently
+//          `git rm`-ed while the earlier SYNC_IF_NEWER pass had logged PRESERVE
+//          rows) was a pass-ordering artifact between two ownership models.
+//          (a) Every destructive action now records a decision row — DELETE
+//          (WARN, new verdict) per pruned path; DELETE verdicts are never
+//          silent. (b) Cross-variant adoption protection: a skill whose skills/
+//          SSOT dir exists but which has NEITHER a variant.json
+//          skill_manifest.variant_specific entry NOR a counterpart in the
+//          project's delivery lineage (templates/common/skills +
+//          templates/<variant>/skills) is a project-adopted asset — SKIPPED
+//          with a WARN row ("unregistered project-adopted skill — seed
+//          variant.json to opt into pruning") instead of deleted. Pruning
+//          proceeds for registry-detected foreign skills the project did not
+//          adopt: promotion-mistake copies that DO have a template counterpart,
+//          and mirror-only residue (no SSOT dir). Manifest-seeded skills keep
+//          the v1.43.0 KEEP behavior, now with a decision row too.
 // v1.87.0 (2026-10-31, design
 //          docs/designs/2026-10-31-graft-trail-migration-design.md R2.4,
 //          U-20261031-009): the two trail-migration upgrade-pass tolerance
@@ -4566,14 +4585,33 @@ let countryPrunedSkills = 0;
 }
 console.log('');
 
-// ── VARIANT-SCOPE SKILL PRUNE (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md)
+// ── VARIANT-SCOPE SKILL PRUNE (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md;
+//    T-20261101-001 adjudication, v1.88.0)
 // Owner-curated registry: docs/workspace-schema.json `variant_scoped_skills` maps
 // variant → skills exclusive to that variant. If such a skill reaches a project whose
 // variant does not own it (typically via a mistaken promotion into templates/common
 // followed by the SYNC_IF_NEWER skills pass), prune it from the project's skills/
-// SSOT + the three platform mirrors. Registry-driven (ADR-0057/0058 pattern) —
-// heuristics cannot safely distinguish variant-exclusive skills from genuinely
-// common ones.
+// SSOT + the platform mirrors. Registry-driven (ADR-0057/0058 pattern) — heuristics
+// cannot safely distinguish variant-exclusive skills from genuinely common ones.
+//
+// T-20261101-001 adjudication (v1.88.0): the 0.26.0 co-develop incident — 3 adopted
+// skills silently `git rm`-ed while the earlier SYNC_IF_NEWER pass had logged PRESERVE
+// rows for the same paths — was a pass-ordering artifact between two ownership models.
+// Two fixes, per the ruling:
+//   (a) LOUDNESS — every destructive action records a decision row (DELETE, contractually
+//       WARN). A PRESERVE row from an earlier pass next to a silent deletion is now
+//       impossible; the decision log owns the full prune story.
+//   (b) CROSS-VARIANT ADOPTION PROTECTION — a skill whose skills/ SSOT dir exists but
+//       which has NEITHER a variant.json skill_manifest.variant_specific entry NOR a
+//       counterpart in the project's delivery lineage (templates/common/skills +
+//       templates/<variant>/skills) is a project-adopted asset, not scaffold residue —
+//       the same ownership model PRUNE REMOVED applies. It is SKIPPED with a WARN row
+//       ("unregistered project-adopted skill — seed variant.json to opt into pruning")
+//       instead of deleted. Pruning still proceeds for the pass's real job — registry-
+//       detected foreign skills the project did not adopt: promotion-mistake copies that
+//       DO have a template counterpart, and mirror-only residue (no SSOT dir).
+//       Manifest-seeded skills keep the v1.43.0 KEEP behavior (now with a decision row).
+const VARIANT_SCOPE_PRUNE_PASS = 'VARIANT-SCOPE SKILL PRUNE';
 console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
 {
   const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
@@ -4600,14 +4638,36 @@ console.log('--- VARIANT-SCOPE SKILL PRUNE ---');
       // deliberately registers in skill_manifest.variant_specific is an adopted
       // asset, not scaffold residue — an adoption run seeds the manifest precisely
       // so that foreign-domain skills survive this registry-driven prune.
+      // v1.88.0: the KEEP is decision-logged (SKIP, INFO) — no silent survivals either.
       if (projectManifestSkills.has(skill)) {
         console.log(`  ⚠️  KEEP ${skill}/  (owning variant: ${owner})  — declared in the project variant.json skill_manifest`);
+        recordDecision(`skills/${skill}`, 'VARIANT_SCOPE_PRUNE', VARIANT_SCOPE_PRUNE_PASS, 'SKIP',
+          `KEEP — declared in the project variant.json skill_manifest.variant_specific (owning variant: ${owner}) — manifest-seeded adoption survives the registry-driven prune`);
         continue;
+      }
+      // Cross-variant adoption protection (v1.88.0, T-20261101-001): a skill present
+      // in the SSOT with no manifest entry AND no counterpart in the project's
+      // delivery lineage is a project-adopted asset. The earlier SYNC_IF_NEWER pass
+      // classified it PRESERVE ('project-only skill — no template counterpart');
+      // deleting it here repeated the co-develop incident. Skip loudly — seeding
+      // variant.json skill_manifest.variant_specific is the explicit adoption record.
+      const ssotDir = join(projectDir, 'skills', skill);
+      if (existsSync(ssotDir)) {
+        const hasTemplateCounterpart = existsSync(join(commonDir, 'skills', skill)) || existsSync(join(templatesDir, 'skills', skill));
+        if (!hasTemplateCounterpart) {
+          console.log(`  ⚠️  SKIP ${skill}/  (owning variant: ${owner})  — unregistered project-adopted skill — seed variant.json to opt into pruning`);
+          recordDecision(`skills/${skill}`, 'VARIANT_SCOPE_PRUNE', VARIANT_SCOPE_PRUNE_PASS, 'SKIP',
+            `unregistered project-adopted skill — no variant.json skill_manifest.variant_specific entry and no template counterpart (templates/common/skills, templates/${variant}/skills) — the project's copy is project-owned (owning variant: ${owner}); seed variant.json to opt into pruning`,
+            undefined, 'WARN');
+          continue;
+        }
       }
       for (const dir of PLATFORM_SKILL_BASES) {
         const target = join(projectDir, dir, skill);
         if (!existsSync(target)) continue;
         console.log(`  ${dryTag}PRUNE  ${dir}/${skill}/  (owning variant: ${owner})`);
+        recordDecision(`${dir}/${skill}`, 'VARIANT_SCOPE_PRUNE', VARIANT_SCOPE_PRUNE_PASS, 'DELETE',
+          `foreign variant-scoped skill pruned (owning variant: ${owner}; registry-curated deletion — decision-logged per the T-20261101-001 adjudication: DELETE verdicts are never silent)`);
         if (!dryRun) {
           const gitRm = spawnSync('git', ['-C', projectDir, 'rm', '-rf', '--quiet', `${dir}/${skill}`], { encoding: 'utf8' });
           if (gitRm.status !== 0) rmSync(target, { recursive: true, force: true });

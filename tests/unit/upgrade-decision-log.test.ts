@@ -37,6 +37,16 @@
  *         documented spawn hygiene: fresh temp dir per shape, stdin pinned
  *         closed, pipes consumed (PR #1677 Windows handle fix).
  *
+ * v2.1.0 (2026-11-01, T-20261101-001 adjudication — design addendum
+ *         docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md
+ *         §Addendum): VARIANT-SCOPE SKILL PRUNE decision-log regressions —
+ *         three shapes (unregistered project-adopted skill → WARN SKIP row +
+ *         files survive; manifest-seeded adoption → SKIP INFO KEEP row;
+ *         mirror-only foreign residue → DELETE WARN row + prune proceeds). The
+ *         co-develop 0.26.0 incident state (PRESERVE rows next to silent
+ *         deletions) is structurally impossible: every destructive action now
+ *         carries a decision row.
+ *
  * v1.1.0 (2026-10-28, U-20261028-001 — spec
  *         docs/designs/2026-10-28-delivery-tombstone-ownership-design.md):
  *         delivery tombstones (D1–D3) — absent+baseline TOMBSTONED (ERROR)
@@ -80,7 +90,7 @@
  * Engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 2.0.0
+ * @version 2.1.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve, basename } from 'node:path';
@@ -395,8 +405,54 @@ const SHAPES: Record<string, { args: string[]; setup: (tmp: string) => void }> =
       commitAll(tmp, 'chore: prior delivery recorded');
     },
   },
+  // v2.1.0 (T-20261101-001 adjudication) — VARIANT-SCOPE SKILL PRUNE fixtures.
+  // sarif-exporter is variant-scoped to co-security (workspace-schema
+  // variant_scoped_skills) and has no counterpart in the co-develop delivery
+  // lineage (templates/common/skills + templates/co-develop/skills) — exactly
+  // the co-develop 0.26.0 incident shape. Unregistered (no variant.json) → the
+  // adoption guard SKips it with a WARN row and every file survives.
+  'variant-scope-unregistered': {
+    args: [],
+    setup: (tmp: string): void => {
+      mkdirSync(join(tmp, 'skills', 'sarif-exporter'), { recursive: true });
+      writeFileSync(join(tmp, 'skills', 'sarif-exporter', 'SKILL.md'), ADOPTED_SKILL_MD);
+      commitAll(tmp, 'chore: seed project-adopted foreign-scoped skill (no manifest)');
+    },
+  },
+  // The same skill WITH the manifest seed (variant.json
+  // skill_manifest.variant_specific) — the v1.43.0 KEEP behavior, now decision-
+  // logged (SKIP, INFO).
+  'variant-scope-manifest-seeded': {
+    args: [],
+    setup: (tmp: string): void => {
+      mkdirSync(join(tmp, 'skills', 'sarif-exporter'), { recursive: true });
+      writeFileSync(join(tmp, 'skills', 'sarif-exporter', 'SKILL.md'), ADOPTED_SKILL_MD);
+      writeFileSync(join(tmp, 'variant.json'), JSON.stringify({
+        skill_manifest: { variant_specific: [{ name: 'sarif-exporter' }] },
+      }, null, 2) + '\n', 'utf8');
+      commitAll(tmp, 'chore: seed manifest-declared adopted foreign-scoped skill');
+    },
+  },
 };
 
+/** Minimal project-adopted SKILL.md seed — foreign-scoped (co-security's
+ *  sarif-exporter), no template counterpart in the co-develop lineage. */
+const ADOPTED_SKILL_MD = [
+  '---',
+  'name: sarif-exporter',
+  'version: "1.0.0"',
+  'status: active',
+  '---',
+  '',
+  '# SARIF Exporter',
+  '',
+  'Project-adopted skill (restored per T-20261101-001) — no template counterpart.',
+  '',
+].join('\n');
+
+// v2.1.0: the mirror-only prune shape is MUTATING (the engine deletes the
+// mirror), so it cannot share the apply-run shapes above — one dedicated
+// seeded project, asserted after its own run.
 const DIR_SHAPES: Record<string, () => string> = {
   // Members: the dry-run report (TOMBSTONED (ERROR) candidate + persists
   // nothing), the --dry-run tombstone-flag refusal, and the --tombstone
@@ -407,6 +463,27 @@ const DIR_SHAPES: Record<string, () => string> = {
     const tmp = makeTempProject();
     seedPriorDelivery(tmp, WORKFLOWS_REL, OLD_WORKFLOWS);
     commitAll(tmp, 'chore: prior delivery recorded');
+    return tmp;
+  },
+  // Registry-detected foreign skill present ONLY as a platform mirror (no
+  // skills/ SSOT dir) — the adoption guard does not apply (it protects the
+  // SSOT), the pass's real job proceeds: the mirror is pruned WITH a DELETE
+  // (WARN) decision row — never silently.
+  'variant-scope-mirror-prune': (): string => {
+    const tmp = makeTempProject();
+    mkdirSync(join(tmp, '.claude', 'skills', 'sound-synth'), { recursive: true });
+    writeFileSync(join(tmp, '.claude', 'skills', 'sound-synth', 'SKILL.md'), [
+      '---',
+      'name: sound-synth',
+      'version: "1.0.0"',
+      '---',
+      '',
+      '# Sound Synth',
+      '',
+      'Mirror-only residue of the sound-synth promotion-mistake class (co-game-scoped).',
+      '',
+    ].join('\n'));
+    commitAll(tmp, 'chore: seed mirror-only foreign variant skill');
     return tmp;
   },
 };
@@ -1133,4 +1210,67 @@ describe('upgrade-project.ts STUB_VERSION_DIVERGENCE (D1)', () => {
     expect(status).toBe(0);
     expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_DIVERGENCE')).toBe(false);
   }, 180000);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// VARIANT-SCOPE SKILL PRUNE loudness + adoption guard (v2.1.0, T-20261101-001
+// adjudication, design addendum 2026-10-31-workspace-schema-merge-delivery
+// §Addendum): the co-develop 0.26.0 incident — 3 adopted skills / 15 paths
+// silently `git rm`-ed by the prune pass while the earlier SYNC_IF_NEWER pass
+// had logged PRESERVE rows for the same paths — must be structurally
+// impossible. Three regression arms:
+//   (1) unregistered project-adopted skill (SSOT dir, no variant.json manifest
+//       entry, no template counterpart) → files SURVIVE + WARN SKIP row naming
+//       the adoption guard ("seed variant.json to opt into pruning") — the
+//       PRESERVE-row-plus-silent-deletion state cannot recur;
+//   (2) manifest-seeded skill → the v1.43.0 KEEP behavior, now decision-logged
+//       (SKIP, INFO);
+//   (3) registry-detected foreign skill the project did NOT adopt (mirror-only
+//       residue, no SSOT dir) → the pass's real job still proceeds, WITH a
+//       DELETE (WARN) row — DELETE verdicts are never silent.
+// ═════════════════════════════════════════════════════════════════════════════
+describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE decisions (T-20261101-001)', () => {
+  test('unregistered project-adopted foreign skill survives with a WARN SKIP row (no silent deletion)', () => {
+    const { tmp, status, manifest, out } = useShape('variant-scope-unregistered');
+    expect(status).toBe(0);
+    // The adopted skill's files SURVIVE — the co-develop incident does not recur.
+    expect(existsSync(join(tmp, 'skills', 'sarif-exporter', 'SKILL.md'))).toBe(true);
+    // The skip is decision-logged at WARN with the adjudicated message.
+    const row = manifest.decisions.find((d) => d.path === 'skills/sarif-exporter' && d.verdict === 'SKIP');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('WARN');
+    expect(row!.detail).toContain('unregistered project-adopted skill');
+    expect(row!.detail).toContain('seed variant.json to opt into pruning');
+    expect(row!.pass).toBe('VARIANT-SCOPE SKILL PRUNE');
+    // And NOTHING deleted the skill anywhere: no DELETE row may name it.
+    expect(manifest.decisions.some((d) => d.verdict === 'DELETE' && d.path.includes('sarif-exporter'))).toBe(false);
+    // The loud console line is present (the operator sees the guard fire).
+    expect(out).toContain('unregistered project-adopted skill');
+  }, 300000);
+
+  test('manifest-seeded adoption keeps the skill with a SKIP (INFO) row', () => {
+    const { tmp, status, manifest } = useShape('variant-scope-manifest-seeded');
+    expect(status).toBe(0);
+    expect(existsSync(join(tmp, 'skills', 'sarif-exporter', 'SKILL.md'))).toBe(true);
+    const row = manifest.decisions.find((d) => d.path === 'skills/sarif-exporter' && d.verdict === 'SKIP');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('INFO');
+    expect(row!.detail).toContain('declared in the project variant.json skill_manifest.variant_specific');
+    expect(manifest.decisions.some((d) => d.verdict === 'DELETE' && d.path.includes('sarif-exporter'))).toBe(false);
+  }, 300000);
+
+  test('mirror-only foreign residue is still pruned — with a DELETE (WARN) row, never silently', () => {
+    const tmp = useDir('variant-scope-mirror-prune');
+    const result = runUpgrade(tmp);
+    expect(result.status).toBe(0);
+    // The pass's real job proceeds: the mirror is gone.
+    expect(existsSync(join(tmp, '.claude', 'skills', 'sound-synth'))).toBe(false);
+    // ...and the deletion is decision-logged (DELETE is contractually WARN).
+    const manifest = readManifest(tmp);
+    const row = manifest.decisions.find((d) => d.path === '.claude/skills/sound-synth' && d.verdict === 'DELETE');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('WARN');
+    expect(row!.detail).toContain('foreign variant-scoped skill pruned');
+    expect(row!.pass).toBe('VARIANT-SCOPE SKILL PRUNE');
+  }, 300000);
 });
