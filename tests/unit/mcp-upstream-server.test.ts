@@ -1,4 +1,9 @@
-// @version 2.2.0
+// @version 2.3.0
+// v2.3.0 (2026-11-02, ADR-0103 F3): T-id delegation read-back tests — narrow kanban
+//           status read (delegation:true, by-id-only, not-found semantics, self_declared
+//           read treatment), T-id reprioritize happy path + P0 refusal + cap refusal with
+//           strike recording, and the U-path ownership regression; the bad-id fixture in
+//           11b swaps its old T- placeholder for a genuinely malformed id.
 /**
  * Tests for scripts/mcp-upstream-server.ts against design §13
  * (docs/designs/2026-10-01-upstream-request-mcp-design.md).
@@ -1093,7 +1098,9 @@ describe('13.11 status', () => {
     seedKnown(ws, 'co-test');
     const s = open(proj);
     for (let i = 0; i < 4; i++) await s.create(withWord(i));
-    for (const args of [{ project: 'co-other' }, { id: 'T-20260101-001' }, { id: 'U-1' }, { limit: 0 }, { limit: 51 }, { limit: 1.5 }, { limit: '5' }, { id: 5 }]) {
+    // v1.13.0: a T- id is now VALID grammar (delegation read-back), so the bad-id
+    // fixture here uses a genuinely malformed id instead of the old T- placeholder.
+    for (const args of [{ project: 'co-other' }, { id: 'T-1' }, { id: 'U-1' }, { limit: 0 }, { limit: 51 }, { limit: 1.5 }, { limit: '5' }, { id: 5 }]) {
       expect([JSON.stringify(args), (await s.status(args)).rpc.error?.code]).toEqual([JSON.stringify(args), -32602]);
     }
     const two = await s.status({ limit: 2 });
@@ -1882,5 +1889,146 @@ describe('kanban reprioritize (design 2026-11-01 §5)', () => {
     expect(rep.error?.message).toMatch(/attested identity/);
     const unregistered = await open(ws.root).tool('upstream_request_reprioritize', { id: 'U-20261102-001', priority: 'P1' });
     expect(unregistered.error?.code).toBe(-32602);
+  });
+});
+
+// =====================================================================
+// v1.13.0 — T-id delegation read-back (ADR-0103 F3, design 2026-11-01 §5.3)
+// =====================================================================
+describe('delegation T-id read-back (ADR-0103 F3)', () => {
+  function strikesPath(): string { return join(ws.root, '.pipeline-state', 'hub-reprioritize-strikes.json'); }
+
+  /** Writes a schema-valid delegation ticket (kind manual, no upstream block — the
+   * schema forbids one on a T- id) directly into the temp root governance store. */
+  function writeDelegationTicket(id: string, extra: Record<string, unknown> = {}): any {
+    const at = '2026-11-01T07:00:00.000+09:00';
+    const t = {
+      schemaVersion: 1, id, kind: 'manual', title: `Delegation drill: ${id}`,
+      priority: 'normal', status: 'backlog', attempts: 0, created_at: at,
+      history: [{ at, from: null, to: 'backlog' }], result: null, error: null, ...extra,
+    };
+    validateTicket(t);
+    writeFileSync(join(ws.ticketsDir, `${id}.yaml`), dump(t, { schema: JSON_SCHEMA }));
+    return t;
+  }
+
+  test('T-id status read: narrow kanban field set with delegation:true, by id only', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    writeDelegationTicket('T-20261102-042');
+    writeDelegationTicket('T-20261102-043', { sev: 'SEV2' });
+
+    const st = await s.status({ id: 'T-20261102-042' });
+    expect(st.rpc.error).toBeUndefined();
+    expect(st.body.requests).toHaveLength(1);
+    expect(st.body.requests[0]).toEqual({
+      id: 'T-20261102-042',
+      title: 'Delegation drill: T-20261102-042',
+      status: 'backlog',
+      priority: 'normal',
+      delegation: true,
+    });
+    // sev surfaces only when the ticket carries one
+    const stSev = await s.status({ id: 'T-20261102-043' });
+    expect(stSev.body.requests[0].sev).toBe('SEV2');
+    expect(stSev.body.requests[0].delegation).toBe(true);
+
+    // not-found answers like the U-path
+    const missing = await s.status({ id: 'T-20261102-999' });
+    expect(missing.rpc.error?.code).toBe(-32602);
+    expect(missing.rpc.error?.message).toBe('not found');
+
+    // the unfiltered listing stays U-only: no id -> project-scoped upstream requests
+    const list = await s.status();
+    expect(list.body.requests.every((r: any) => r.id.startsWith('U-'))).toBe(true);
+    expect(JSON.stringify(list.body)).not.toContain('T-20261102-042');
+
+    // the status call is audit-logged like any other (T-20261002-004 posture)
+    const audit = auditLines().filter((l) => l.outcome === 'status');
+    expect(audit.length).toBeGreaterThan(0);
+  });
+
+  test('T-id status read from a self-declared caller: same read treatment as U-tickets (narrow set, read-only)', async () => {
+    seedKnown(ws, 'co-test');
+    const proj = ws.project('co-test');
+    writeDelegationTicket('T-20261102-042');
+    // cwd is the workspace root (unregistered); project_root falls through to the
+    // self_declared tier — reads are allowed there today, and the narrow T- field set
+    // carries nothing beyond what the U-path redaction already withholds.
+    const s = open(ws.root);
+    const st = await s.status({ id: 'T-20261102-042', project_root: proj });
+    expect(st.rpc.error).toBeUndefined();
+    expect(st.body.requests[0].delegation).toBe(true);
+    // a write from the same identity tier stays refused
+    const rep = await s.tool('upstream_request_reprioritize', { id: 'T-20261102-042', priority: 'P1', project_root: proj });
+    expect(rep.error?.code).toBe(-32602);
+    expect(rep.error?.message).toMatch(/attested identity/);
+  });
+
+  test('T-id reprioritize happy path: priority-only, history actor is the gateway-derived identity, audit-logged', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    writeDelegationTicket('T-20261102-042');
+    const rep = await s.tool('upstream_request_reprioritize', { id: 'T-20261102-042', priority: 'P1' });
+    expect(rep.error).toBeUndefined();
+    const body = JSON.parse(rep.result.content[0].text);
+    expect(body).toEqual({ id: 'T-20261102-042', priority: 'high', status: 'backlog' });
+    const t = readTicketYaml('T-20261102-042');
+    expect(t.priority).toBe('high');
+    expect(t.status).toBe('backlog'); // priority-only: status untouched
+    const last = t.history[t.history.length - 1];
+    expect(last).toMatchObject({ action: 'reprioritize', actor: 'spoke-pm:co-test', from: 'normal', to: 'high' });
+    const repAudit = auditLines().find((l) => l.outcome === 'reprioritize');
+    expect(repAudit).toMatchObject({ project: 'co-test', id: 'T-20261102-042', from: 'normal', to: 'high' });
+    expect(existsSync(strikesPath())).toBe(false); // no violation, no ledger
+  });
+
+  test('T-id reprioritize P0 refusal: typed error, no strike recorded', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    writeDelegationTicket('T-20261102-042');
+    for (const priority of ['P0', 'urgent']) {
+      const rep = await s.tool('upstream_request_reprioritize', { id: 'T-20261102-042', priority });
+      expect(rep.error?.code).toBe(-32602);
+      expect(rep.error?.message).toBe('P0 requires user action via ticket.ts — upstream_request_reprioritize cannot set urgent');
+    }
+    expect(readTicketYaml('T-20261102-042').priority).toBe('normal');
+    expect(existsSync(strikesPath())).toBe(false);
+  });
+
+  test('T-id reprioritize cap refusal: a >1-level raise is refused and feeds the 3-strike counter', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj);
+    writeDelegationTicket('T-20261102-042', { priority: 'low' });
+    const rep = await s.tool('upstream_request_reprioritize', { id: 'T-20261102-042', priority: 'P1' });
+    expect(rep.error?.code).toBe(-32602);
+    expect(rep.error?.message).toMatch(/capped at \+1 level per ticket per 24h/);
+    expect(readTicketYaml('T-20261102-042').priority).toBe('low');
+    const strikes = JSON.parse(readFileSync(strikesPath(), 'utf-8'));
+    expect(strikes.projects['co-test'].violations).toBe(1);
+    expect(strikes.projects['co-test'].frozen).toBe(false);
+  });
+
+  test('U-path regression: reprioritize ownership against upstream.project is unchanged', async () => {
+    seedKnown(ws, 'co-test', 'co-other');
+    const a = ws.project('co-test');
+    const b = ws.project('co-other');
+    const sa = open(a);
+    const ra = await sa.create(good());
+    // foreign U- ticket still answers "not found" from another project
+    const sb = open(b);
+    const cross = await sb.tool('upstream_request_reprioritize', { id: ra.body.id, priority: 'P1' });
+    expect(cross.error?.code).toBe(-32602);
+    expect(cross.error?.message).toBe('not found');
+    // own U- ticket still reprioritizes
+    const own = await sa.tool('upstream_request_reprioritize', { id: ra.body.id, priority: 'P1' });
+    expect(own.error).toBeUndefined();
+    // a foreign project's status read of a U- id still answers "not found"
+    const statusCross = await sb.status({ id: ra.body.id });
+    expect(statusCross.rpc.error?.message).toBe('not found');
   });
 });
