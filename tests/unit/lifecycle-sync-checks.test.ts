@@ -9,7 +9,9 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.5.0
+ * @version 1.5.1
+ * v1.5.1 (2026-11-01, spec 2026-10-31-graft-trail-migration-design R2.5 addendum):
+ *          new-project record pin 1.38.0 → 1.39.0 (§7.7 trail build flip).
  * v1.5.0 (T-20260924-001, spec 2026-09-25-propagation-engine-batch-design):
  *         Check B projection arm — compareMirrorProjection semantics
  *         (AC-12: drifted fixture → error whose fix hint names the generator;
@@ -167,7 +169,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.38.0'],
+      ['new-project', '1.39.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.38.0
+// @version 1.39.0
+// v1.39.0 (2026-11-01, spec docs/designs/2026-10-31-graft-trail-migration-design.md
+//          R2.5 addendum — trigger met: L0 trail init complete, PR #1783): §7.7
+//          index build flips graft-first/bunx-fallback → plain `trail build`
+//          (trail 0.28.1; the graft-era bunx fallback is dropped — new scaffolds
+//          are trail-native). The graft-era fallback binary spellings are retired
+//          from the scaffold path; pre-migration projects keep working via their
+//          own tooling. MANAGED_TOP_LEVEL_DIRS gains '.trail' (trail init
+//          destination) and keeps 'graft' — trail 0.28.1 `trail build` still
+//          defaults its graph dir to `<repo>/graft` (vendor --dir default,
+//          observed 2026-11-01), migrated to `.trail/cache` by the project's own
+//          `trail init` at its next upgrade visit.
 // v1.38.0 (2026-10-28, canary finding on Projects/co-newbiz — design §4.2 stub
 //          rule): §2.3c mirror generation passes --templates-root <workspace>/templates
 //          explicitly — a fresh scaffold sits beside (not under) any workspace
@@ -370,8 +381,11 @@ if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(pro
 // into tests/.temp/ by design.
 const MANAGED_TOP_LEVEL_DIRS = new Set([
   'templates', 'scripts', 'docs', 'agents', 'skills', 'memory', 'graft',
-  '.github', '.claude', '.gemini', '.agents', '.codex',
+  '.trail', '.github', '.claude', '.gemini', '.agents', '.codex',
 ]);
+// 'graft' stays: trail 0.28.1 `trail build` still materializes `<repo>/graft`
+// (vendor --dir default) until the project's own `trail init` migrates it to
+// `.trail/cache` (design 2026-10-31-graft-trail-migration R2.5 addendum).
 if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/')[0])) {
   console.error(`❌ Project target '${projectName}' resolves inside the managed '${projectName.split('/')[0]}/' directory.`);
   console.error('   Scaffold into Projects/ (bare name) or tests/.temp/ instead.');
@@ -1733,31 +1747,23 @@ try {
   console.log(`  ⚠️  Skill graph generation errored (non-fatal): ${(err as Error).message}`);
 }
 
-// ── 7.7. Graft index build (ADR-0076) ─────────────────────────────────────────
-// The template ships the full graft surface (MCP entries, skill, hooks); give the
-// fresh project its repo graph right away. Non-fatal: bunx/graft may be unavailable
-// (offline), and every graft tool self-refreshes the graph before answering, so a
-// skipped build self-heals on first use.
-console.log('\nBuilding graft repo index…');
-// graft-first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience): bunx
-// installs the package on first run, and a native postinstall failure (observed
-// with tree-sitter-kotlin on Windows) leaves a partial temp cache that breaks
-// every later bunx call. The global binary skips that install path entirely.
-const graftDirect = spawnSync('graft', ['build'], { stdio: 'inherit', cwd: projectDir });
-if (graftDirect.status === 0) {
-  console.log('  ✅ graft/ index created');
+// ── 7.7. Trail repo index build (ADR-0076; ex-graft — design
+// ──────  2026-10-31-graft-trail-migration R2.5 addendum) ─────────────────────
+// The template ships the full tool surface (trail MCP entries, skill, hooks);
+// give the fresh project its repo graph right away. Non-fatal: the trail binary
+// may be unavailable (offline), and every trail tool self-refreshes the graph
+// before answering, so a skipped build self-heals on first use.
+console.log('\nBuilding trail repo index…');
+// Plain `trail build` (trail 0.28.1; graft-first/bunx-fallback spellings retired
+// from the scaffold path per the R2.5 addendum — new scaffolds are trail-native).
+// Vendor note: 0.28.1 defaults its graph dir to `<repo>/graft` (--dir global
+// flag); the project's own `trail init` (next upgrade visit) migrates it to
+// `.trail/cache`.
+const trailBuild = spawnSync('trail', ['build'], { stdio: 'inherit', cwd: projectDir });
+if (trailBuild.status === 0) {
+  console.log('  ✅ trail repo index created');
 } else {
-  console.log('  ⚠️  global graft unavailable or failed — falling back to bunx');
-  try {
-    const graftResult = spawnSync('bunx', ['@nanonets/graft', 'build'], { stdio: 'inherit', cwd: projectDir });
-    if (graftResult.status === 0) {
-      console.log('  ✅ graft/ index created (via bunx)');
-    } else {
-      console.log('  ⚠️  graft build failed (non-fatal) — run `graft build` or `bunx @nanonets/graft build` in the project later.');
-    }
-  } catch (err) {
-    console.log(`  ⚠️  graft build skipped (non-fatal): ${(err as Error).message}`);
-  }
+  console.log('  ⚠️  trail build failed or trail unavailable (non-fatal) — run `trail build` in the project later.');
 }
 
 // ── 7.8. Version manifest generation (T-20260916-010) ─────────────────────────

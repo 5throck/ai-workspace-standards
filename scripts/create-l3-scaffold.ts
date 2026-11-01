@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.18.0
+// @version 1.19.0
+// v1.19.0 (2026-11-01, spec docs/designs/2026-10-31-graft-trail-migration-design.md
+//          R2.5 addendum — trigger met: L0 trail init complete, PR #1783): Step 8.5
+//          index build flips graft-first/bunx-fallback → plain `trail build`
+//          (trail 0.28.1; the graft-era bunx fallback is dropped — new scaffolds
+//          are trail-native). Vendor note: 0.28.1 defaults its graph dir to
+//          `<repo>/graft` (--dir global flag); the project's own `trail init`
+//          (next upgrade visit) migrates it to `.trail/cache`.
 // v1.18.0 (2026-10-04, spec 2026-10-04-llm-interaction-standard-design): docs/standards/
 //          delivered at scaffold — the LLM Interaction Standard (ADR-0098) ships with every
 //          project so the AGENTS.md pointer resolves project-locally (upgrades refresh it
@@ -1154,25 +1161,19 @@ function main(): void {
   writePackageJson(projectDir, args.variant);
   bunInstall(projectDir);
 
-  // Step 8.5: graft index build (ADR-0076) — the template ships the full graft
-  // surface (MCP entries, skill, hooks); give the fresh project its graph right
-  // away. Non-fatal: bunx/graft may be unavailable (offline), and every graft tool
-  // self-refreshes the graph before answering, so a skipped build self-heals.
-  // graft-first, bunx fallback (spec 2026-09-20-graft-scaffold-resilience): a
-  // bunx native postinstall failure leaves a partial temp cache that breaks every
-  // later bunx call, so the global binary is tried first.
-  log("\nBuilding graft repo index…");
+  // Step 8.5: trail repo index build (ADR-0076; ex-graft — design
+  // 2026-10-31-graft-trail-migration R2.5 addendum) — the template ships the full
+  // tool surface (trail MCP entries, skill, hooks); give the fresh project its
+  // graph right away. Non-fatal: the trail binary may be unavailable (offline),
+  // and every trail tool self-refreshes the graph before answering, so a skipped
+  // build self-heals. Plain `trail build` (0.28.1): the graft-first/bunx-fallback
+  // spellings are retired from the scaffold path — new scaffolds are trail-native.
+  log("\nBuilding trail repo index…");
   try {
-    runNoShell("graft", ["build"], { cwd: projectDir });
-    log("✅ graft/ index created");
+    runNoShell("trail", ["build"], { cwd: projectDir });
+    log("✅ trail repo index created");
   } catch {
-    log("⚠️  global graft unavailable or failed — trying bunx fallback…");
-    try {
-      runNoShell("bunx", ["@nanonets/graft", "build"], { cwd: projectDir });
-      log("✅ graft/ index created (via bunx)");
-    } catch {
-      log("⚠️  graft build skipped — run `graft build` or `bunx @nanonets/graft build` in the project later.");
-    }
+    log("⚠️  trail build failed or trail unavailable (non-fatal) — run `trail build` in the project later.");
   }
 
   // Step 9: post-scaffold audit — new-project.ts self-verifies immediately after

@@ -34,7 +34,10 @@
  *        both servers end up in the merged file, the preserved list names the
  *        project-only entry, and the template server arrives (design D6).
  *
- * @version 1.5.0
+ * @version 1.5.1
+ * v1.5.1 (2026-11-01, spec 2026-10-31-graft-trail-migration-design R2.5 addendum):
+ *          MCP JSON MERGE seed key graft → trail (template .mcp.json seed flipped to
+ *          trail-era entries; merge mechanism under test unchanged).
  *
  * v1.5.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *         R2.4/R5, U-20261031-009): TRAIL MIGRATION TOLERANCE describe block — the
@@ -686,7 +689,7 @@ describe('upgrade-project.ts MCP JSON MERGE (.agents/mcp.json, registry complete
         command: 'uvx',
         args: ['project-mcp', 'serve'],
       });
-      expect(merged.mcpServers['graft']).toBeDefined();
+      expect(merged.mcpServers['trail']).toBeDefined();
 
       // No overwrite verdict from any pass for the file.
       expect(out).not.toContain('UPDATE .agents/mcp.json');

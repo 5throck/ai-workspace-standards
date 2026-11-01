@@ -1,9 +1,10 @@
 # Codex CLI workspace config — see docs/adr/0076-graft-fleet-integration.md and
 # docs/adr/0077-codex-platform-support.md.
-# Graft MCP is registered project-side; `graft mcp` resolves the repo root from the
-# working directory (nearest ancestor with a graft/ index). Machine-global fallbacks
+# Trail MCP is registered project-side; `trail mcp` resolves the repo root from the
+# working directory (nearest ancestor with a context-graph index). Machine-global fallbacks
 # (~/.codex/config.toml) follow the ADR-0076 per-host matrix.
+# (Trail is the renamed graft vendor binary, 0.28 — design 2026-10-31-graft-trail-migration R2.5 addendum.)
 
-[mcp_servers.graft]
-command = "bunx"
-args = ["@nanonets/graft", "mcp"]
+[mcp_servers.trail]
+command = "trail"
+args = ["mcp"]
