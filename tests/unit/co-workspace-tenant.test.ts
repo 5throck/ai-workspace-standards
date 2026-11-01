@@ -5,6 +5,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig, resolveLlmProviderKey, resolveLlmProviderName, resolveVariants } from "../../services/co-workspace/src/config";
+import { createServer } from "../../services/co-workspace/src/server";
+import { createState } from "../../services/co-workspace/src/state";
 import { statSync } from "node:fs";
 import { UserStore } from "../../services/co-workspace/src/users";
 import {
@@ -80,6 +82,33 @@ describe("GatewayConfig (loadConfig)", () => {
     expect(cfg.hermesSeedHome).toBe("/seed");
     expect(cfg.hermesBin).toBe("/usr/local/bin/hermes");
     expect(cfg.hermesExtraArgs).toEqual(["--yolo", "--verbose"]);
+  });
+
+  test("CO_WORKSPACE_PORT=0 is meaningful (ephemeral) — spec 2026-11-01-coworkspace-ephemeral-port-design", () => {
+    // 0 binds an ephemeral port (the CI EADDRINUSE flake fix); unset/empty/junk stay 9030.
+    expect(loadConfig({ CO_WORKSPACE_PORT: "0" }).port).toBe(0);
+    expect(loadConfig({}).port).toBe(9030);
+    expect(loadConfig({ CO_WORKSPACE_PORT: "" }).port).toBe(9030);
+    expect(loadConfig({ CO_WORKSPACE_PORT: "  " }).port).toBe(9030);
+    expect(loadConfig({ CO_WORKSPACE_PORT: "not-a-number" }).port).toBe(9030);
+    expect(loadConfig({ CO_WORKSPACE_PORT: "-1" }).port).toBe(9030);
+  });
+
+  test("createServer on port 0 binds an ephemeral port and reports the actual one", () => {
+    const cfg = loadConfig({
+      CO_WORKSPACE_HOST: "127.0.0.1",
+      CO_WORKSPACE_PORT: "0",
+      CO_WORKSPACE_DATA_DIR: tempDir(),
+      CO_WORKSPACE_WORKSPACE_DIR: tempDir(),
+    });
+    const state = createState(cfg);
+    const server = createServer(state);
+    try {
+      expect(server.port).not.toBe(0);
+      expect(server.port).toBeGreaterThan(0);
+    } finally {
+      server.stop(true);
+    }
   });
 });
 

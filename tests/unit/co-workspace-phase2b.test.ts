@@ -116,7 +116,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
 
   const cfg = loadConfig({
     CO_WORKSPACE_HOST: "127.0.0.1",
-    CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+    CO_WORKSPACE_PORT: "0",
     CO_WORKSPACE_DATA_DIR: dataDir,
     CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
     HERMES_BIN: hermesBin,
@@ -324,7 +324,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
     );
     const cfgS = loadConfig({
       CO_WORKSPACE_HOST: "127.0.0.1",
-      CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+      CO_WORKSPACE_PORT: "0",
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-slow-data-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: ws,
       // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
@@ -422,7 +422,7 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
     // budget test server shares state; build a dedicated config-based check instead:
     const cfgB = loadConfig({
       CO_WORKSPACE_HOST: "127.0.0.1",
-      CO_WORKSPACE_PORT: String(20000 + Math.floor(Math.random() * 20000)),
+      CO_WORKSPACE_PORT: "0",
       CO_WORKSPACE_DATA_DIR: join(tmpdir(), `gw-budget-${crypto.randomUUID().slice(0, 8)}`),
       CO_WORKSPACE_WORKSPACE_DIR: workspaceDir,
       // Anonymous provisioning flow — opt into the 2026-10-02 gate design's knob.
