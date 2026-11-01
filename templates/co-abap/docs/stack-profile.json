@@ -1,0 +1,49 @@
+{
+  "name": "co-abap",
+  "description": "SAP ABAP development template — SAP process analysis (SD/MM/FI/LE/PP), ABAP implementation over the VSP enforcement harness, and human-gated SAP approvals.",
+  "stack": [
+    "bun",
+    "typescript",
+    "sap-abap",
+    "vsp"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/handoff-spec.md",
+      "kind": "document",
+      "description": "Phase-gated ABAP requirement handoff package consumed by the SAP build spine."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "co-analyst",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Phase 1 SAP process analysis"
+    },
+    {
+      "from": "co-analyst",
+      "to": "architect",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Process findings recorded; design dispatch"
+    },
+    {
+      "from": "architect",
+      "to": "code-writer",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "ABAP design frozen; implementation dispatch"
+    },
+    {
+      "from": "code-writer",
+      "to": "test-runner",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Implementation complete; verification"
+    }
+  ],
+  "notes": "Variant-specific platform CLIs live in scripts/ (sap-approve.ts, sap-integrity.ts, sap-mcp-proxy.ts — human-gated HMAC approval chain) and scripts/co-abap/ (VSP harness: vsp-audit/install-vsp/vsp-publish/vsp-task). Platform parity validator: bun scripts/validate-abap-platform-parity.ts. All are registered variant-identity assets (hub_topology)."
+}

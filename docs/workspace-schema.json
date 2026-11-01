@@ -753,11 +753,19 @@
   },
   "hub_topology": {
       "description": "Hub-and-spoke topology registry (design docs/designs/2026-11-01-hub-consolidation-design.md §2). Static-only: identity, classification, canonical paths, versions, consumers, and pointers. Per-hub operational state NEVER lives here — it lives in each hub's local .pipeline-state/hub-<name>.state.json (write-owned by the hub PM) and the root observes it via the read-only weekly probe (design §3.5). The static-only constraint is structural, not stylistic: the L0<->L1 hash-parity gate (validate-templates.ts schema-hash-parity) fails on ANY divergence between the two hand-maintained copies of this file, so per-session state churn here would permanently break parity.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "domains": [
         "co-develop",
         "co-design",
-        "co-security"
+        "co-security",
+        "co-abap",
+        "co-consult",
+        "co-deck",
+        "co-game",
+        "co-hr",
+        "co-price",
+        "co-safety",
+        "co-work"
       ],
       "categories": [
         "variant-identity",
@@ -1117,133 +1125,417 @@
               "minimum_version": "1.0.0"
             }
           ]
-        }
-      ],
-      "known_unregistered_duplicates": [
+        },
         {
           "asset": "change-management-partner",
-          "kind": "agent",
-          "variants": [
-            "co-consult",
-            "co-hr"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; organizational-transformation specialist; co-hr copy is an HR-domain adaptation with DEI lens, not a consumer; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/agents/change-management-partner.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "change-management-partner",
+          "domain": "co-hr",
+          "hub_variant": "co-hr",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-hr (identity copy; HR-domain adaptation (reorg/rollout change management, DEI-lens culture diagnosis) of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-hr/agents/change-management-partner.md",
+          "version": "1.1.1"
         },
         {
           "asset": "data-analyst",
-          "kind": "agent",
-          "variants": [
-            "co-consult",
-            "co-hr"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; statistical analysis and business-insights specialist; co-hr copy is a workforce-analytics adaptation, not a consumer; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/agents/data-analyst.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "data-analyst",
+          "domain": "co-hr",
+          "hub_variant": "co-hr",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-hr (identity copy; workforce-statistics/people-analytics adaptation (turnover, hiring-conversion, labor-cost) of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-hr/agents/data-analyst.md",
+          "version": "1.1.1"
         },
         {
           "asset": "designer",
-          "kind": "agent",
-          "variants": [
-            "co-develop",
-            "co-game"
-          ]
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-develop (origin; batch-D deferral retired as variant-identity — fan-in 1 (co-game only) is below the >=2 hub-qualification bar (design §9) and the co-game copy is a parameterized adaptation; dev-spine semantic merge deferred to a future promotion wave; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-develop/agents/designer.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "designer",
+          "domain": "co-game",
+          "hub_variant": "co-game",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-game (identity copy; game-domain adaptation (level-design/visual-design capabilities, handoff_to game-developer) of the co-develop origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-game/agents/designer.md",
+          "version": "1.1.1"
         },
         {
           "asset": "devops-admin",
-          "kind": "agent",
-          "variants": [
-            "co-abap",
-            "co-price"
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-abap (identity; SAP DevOps/Admin specialist of the ABAP harness — distinct asset sharing the devops-admin name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-abap/agents/devops-admin.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "devops-admin",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-price (origin; generic DevOps agent (build pipelines, Docker deployment, git hooks, bun toolchain, infra ops) — distinct asset sharing the devops-admin name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/agents/devops-admin.md",
+          "version": "2.2.1"
+        },
+        {
+          "asset": "security-monitor",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game"
+          ],
+          "origin": "Projects/co-develop (hub project); registry-only hub-doctrine declaration (batch E④) — co-develop copy is the superset canonical (adds the required-deliverable-artifact section); the co-game copy is a stale pre-artifact adaptation to be absorbed at the next promotion wave (2026-10-27 frame)",
+          "canonical_path": "templates/co-develop/agents/security-monitor.md",
+          "version": "1.1.1",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.1.1"
+            }
           ]
         },
         {
           "asset": "security-monitor",
-          "kind": "agent",
-          "variants": [
-            "co-abap",
-            "co-develop",
-            "co-game",
-            "co-price"
-          ]
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; SAP ABAP harness security monitor (dependency audit + secret scan over the SAP toolchain) — distinct asset sharing the security-monitor name (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-abap/agents/security-monitor.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "security-monitor",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; quality-domain security monitor (vulnerability scanning, advisory watch, security/ findings register, Dependabot resolution) — distinct asset sharing the security-monitor name (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/agents/security-monitor.md",
+          "version": "2.2.1"
         },
         {
           "asset": "stack-setup",
-          "kind": "agent",
-          "variants": [
-            "co-develop",
-            "co-game"
-          ]
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-develop (origin; batch-D deferral retired as variant-identity — fan-in 1 (co-game only) is below the >=2 hub-qualification bar (design §9) and the co-game copy is a setup.sh-invoked adaptation; dev-spine semantic merge deferred to a future promotion wave; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-develop/agents/stack-setup.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "stack-setup",
+          "domain": "co-game",
+          "hub_variant": "co-game",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-game (identity copy; game-bootstrap adaptation (invoked by scripts/setup.sh rather than PM dispatch) of the co-develop origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-game/agents/stack-setup.md",
+          "version": "1.1.1"
         },
         {
           "asset": "storyteller",
-          "kind": "agent",
-          "variants": [
-            "co-design",
-            "co-work"
-          ]
+          "domain": "co-design",
+          "hub_variant": "co-design",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-design (identity; brand-narrative and design-principles lead (design-brand-narrative capability) — distinct asset sharing the storyteller name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-design/agents/storyteller.md",
+          "version": "2.2.1"
+        },
+        {
+          "asset": "storyteller",
+          "domain": "co-work",
+          "hub_variant": "co-work",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-work (identity; organizational-culture and change-narrative steward (org-culture-narrative capability) — distinct asset sharing the storyteller name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-work/agents/storyteller.md",
+          "version": "1.2.1"
         },
         {
           "asset": "competitive-intelligence",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-price"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; consulting market/competitive-analysis skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/competitive-intelligence/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "competitive-intelligence",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-price (identity copy; pricing-engagement adaptation (pricing-relevant market evidence) of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/skills/competitive-intelligence/SKILL.md",
+          "version": "1.0.1"
         },
         {
           "asset": "consulting-report-writing",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-hr"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; McKinsey/BCG-style consulting report skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/consulting-report-writing/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "consulting-report-writing",
+          "domain": "co-hr",
+          "hub_variant": "co-hr",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-hr (identity copy; generalized client-facing-deliverable adaptation for HR engagements of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-hr/skills/consulting-report-writing/SKILL.md",
+          "version": "1.0.1"
         },
         {
           "asset": "executive-presentation",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-price"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; C-level strategy-presentation skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/executive-presentation/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "executive-presentation",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-price (identity copy; pricing-engagement decision-deck adaptation of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/skills/executive-presentation/SKILL.md",
+          "version": "1.0.1"
         },
         {
           "asset": "insight-synthesis",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-price"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; multi-specialist insight-integration skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/insight-synthesis/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "insight-synthesis",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-price (identity copy; pricing-engagement adaptation of the co-consult origin; semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/skills/insight-synthesis/SKILL.md",
+          "version": "1.0.1"
         },
         {
           "asset": "org-readiness-assessment",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-hr"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; organizational-readiness diagnosis skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/org-readiness-assessment/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "org-readiness-assessment",
+          "domain": "co-hr",
+          "hub_variant": "co-hr",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-hr (identity copy; near-identical HR-engagement derivative of the co-consult origin (candidate for a future semantic merge); semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-hr/skills/org-readiness-assessment/SKILL.md",
+          "version": "1.0.1"
         },
         {
           "asset": "pdf-export",
-          "kind": "skill",
-          "variants": [
-            "co-deck",
-            "co-price"
-          ]
+          "domain": "co-deck",
+          "hub_variant": "co-deck",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-deck (origin; slide-data-to-PDF export over pdf-lib (deck pipeline) — distinct asset sharing the pdf-export name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-deck/skills/pdf-export/SKILL.md",
+          "version": "2.1.1"
+        },
+        {
+          "asset": "pdf-export",
+          "domain": "co-price",
+          "hub_variant": "co-price",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-price (identity; report-to-PDF generation for client-facing deliverables — distinct asset sharing the pdf-export name; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-price/skills/pdf-export/SKILL.md",
+          "version": "1.1.0"
         },
         {
           "asset": "stakeholder-alignment",
-          "kind": "skill",
-          "variants": [
-            "co-consult",
-            "co-hr"
-          ]
+          "domain": "co-consult",
+          "hub_variant": "co-consult",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-consult (origin; stakeholder-mapping and alignment skill; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-consult/skills/stakeholder-alignment/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "stakeholder-alignment",
+          "domain": "co-hr",
+          "hub_variant": "co-hr",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-hr (identity copy; HR-engagement derivative of the co-consult origin (candidate for a future semantic merge); semantic merge not attempted; batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-hr/skills/stakeholder-alignment/SKILL.md",
+          "version": "1.0.1"
+        },
+        {
+          "asset": "sap-approve.ts",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; human CLI turning pending SAP requests into single-use HMAC-signed approvals (batch E④ variant-identity declaration (registry-only; no content change); version is the declared baseline — the script carries no semver header)",
+          "canonical_path": "templates/co-abap/scripts/sap-approve.ts",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "sap-integrity.ts",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; human CLI for the SAP safety integrity manifest (HMAC key + signed-manifest lifecycle) (batch E④ variant-identity declaration (registry-only; no content change); version is the declared baseline — the script carries no semver header)",
+          "canonical_path": "templates/co-abap/scripts/sap-integrity.ts",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "sap-mcp-proxy.ts",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; platform-neutral stdio MCP proxy in front of vsp — the single SAP enforcement point (batch E④ variant-identity declaration (registry-only; no content change); version is the declared baseline — the script carries no semver header)",
+          "canonical_path": "templates/co-abap/scripts/sap-mcp-proxy.ts",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "abap-code-review",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; ABAP-specific code-review skill — distinct from the co-develop code-review dev-spine doctrine (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-abap/skills/abap-code-review/SKILL.md",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "vsp-harness",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; directory asset — the VSP enforcement harness within scripts/co-abap/ (vsp-audit.ts, install-vsp.ts, vsp-publish.ts, vsp-task.ts; siblings in that directory are the general co-abap script suite, not part of this row) (batch E④ variant-identity declaration (registry-only; no content change); version is the declared baseline)",
+          "canonical_path": "templates/co-abap/scripts/co-abap",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "arcade-physics",
+          "domain": "co-game",
+          "hub_variant": "co-game",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; arcade-class 2D physics over the zero-dependency ECS core (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-game/skills/arcade-physics/SKILL.md",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "sound-synth",
+          "domain": "co-game",
+          "hub_variant": "co-game",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; procedural sound synthesis over the Web Audio API (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-game/skills/sound-synth/SKILL.md",
+          "version": "1.0.0"
+        },
+        {
+          "asset": "game-developer",
+          "domain": "co-game",
+          "hub_variant": "co-game",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; game-implementation spine agent (batch E④ variant-identity declaration (registry-only; no content change))",
+          "canonical_path": "templates/co-game/agents/game-developer.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "regulations",
+          "domain": "co-safety",
+          "hub_variant": "co-safety",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; directory asset — the KR + international regulation libraries that anchor every co-safety compliance workflow (batch E④ variant-identity declaration (registry-only; no content change); version tracks the owning template)",
+          "canonical_path": "templates/co-safety/regulations",
+          "version": "0.1.0"
+        },
+        {
+          "asset": "workflows",
+          "domain": "co-safety",
+          "hub_variant": "co-safety",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; directory asset — the compliance/daily/domains/emergency workflow trees incl. _shared (batch E④ variant-identity declaration (registry-only; no content change); version tracks the owning template)",
+          "canonical_path": "templates/co-safety/workflows",
+          "version": "0.1.0"
         }
       ],
+      "known_unregistered_duplicates": [],
       "_notes": {
         "static_only": "This section carries static declarations ONLY (design §2.2). Dynamic per-hub state (bootstrap/operational states, TTL leases, degraded_capabilities, state_history) lives in each hub repo's .pipeline-state/hub-<name>.state.json following the gitignored local-state convention; the root NEVER writes it. The root observes hub state via the weekly read-only probe (lifecycle-manager), which records observed values + head hash into docs/reports/YYYY-MM-DD-hub-probe-<hub>.md (keep-latest-N=4 per hub).",
         "state_ref": "state_ref (on entries) is hub-local and unresolvable from the root BY DESIGN (design §2.3): the root repo cannot read another project's local .pipeline-state/ directory. The field exists so root-side tooling can NAME the expected state location and so the probe can report which file it read; a dangling state_ref at the root is normal operation, not an error.",
         "entry_shape": "entries[] rows: {asset, domain (enum domains), hub_variant, category (enum categories), verticals[], origin, canonical_path, version (semver), consumers[] of {variant, minimum_version}, hub_remote, state_ref}. hub-doctrine consumers declare consumption and hold no copies; variant-identity assets are kept locally in their owning variant AND registered (promotion must never overwrite them with a thinner copy).",
         "hub_shape": "hubs[] rows: {name, hub_remote, capabilities[] (subset of capability_enum keys — a hub cannot declare or degrade into a capability the enum does not know), minimum_version_policy}.",
         "consumer_enforcement": "Consuming variants declare {domain, minimum_version} in their variant.json hub.consumes block; the validate-templates.ts hub legs and the audit.ts hub-resolve checker FAIL when a declared minimum_version exceeds the corresponding registry entry's version (semver compare). The checks are vacuously green while entries[] is empty and activate as promotion batches B-D land registry rows.",
-        "known_unregistered_duplicates": "Declared soak inventory of cross-variant asset copies that predate the registry (baseline scan at registry landing, 2026-11-01; same finding class as the co-develop/co-security security-suite fork of the 2026-10-31 audit). validate-templates.ts hub-dup-unregistered WARNs on duplicates present in this inventory and FAILs on any duplicate absent from BOTH entries[] and this inventory — new undeclared forks fail closed immediately. Rows must be retired (registered into entries[] or commonized per the >=3-convergence rule) by promotion batches B-D; a row whose duplication no longer exists on disk WARNs as stale so the inventory shrinks to empty.",
+        "known_unregistered_duplicates": "Declared soak inventory of cross-variant asset copies that predate the registry (baseline scan at registry landing, 2026-11-01; same finding class as the co-develop/co-security security-suite fork of the 2026-10-31 audit). validate-templates.ts hub-dup-unregistered WARNs on duplicates present in this inventory and FAILs on any duplicate absent from BOTH entries[] and this inventory — new undeclared forks fail closed immediately. Rows must be retired (registered into entries[] or commonized per the >=3-convergence rule) by promotion batches B-D; a row whose duplication no longer exists on disk WARNs as stale so the inventory shrinks to empty. Retired to empty at batch E④ (2026-11-01): all 14 baseline rows were adjudicated into entries[] (1 hub-doctrine + 28 variant-identity rows); the key is retained as an empty array because the hub-topology-shape leg requires it.",
         "l1_common_exclusion": "Skills/agents delivered by the L1 common contract (docs/templates/common-contract.json common_skills/common_agents) are intentionally present in every variant and are NOT cross-variant duplication; the duplicate legs exclude them by name.",
-        "fan_in_rule": "Hub selection is provisional on measured fan-in (design §9): an asset consumed by >=2 OTHER variants qualifies. The registry is data-driven — the roster re-pins if fleet reports contradict it."
+        "fan_in_rule": "Hub selection is provisional on measured fan-in (design §9): an asset consumed by >=2 OTHER variants qualifies. The registry is data-driven — the roster re-pins if fleet reports contradict it.",
+        "identity_domains": "Identity domains (batch E④): domains[] lists the three hub domains first, then the identity domains of non-hub variants that hold registered variant-identity assets. A domain here names an asset-ownership scope, NOT hub status — only a variant listed in hubs[] (with a variant.json hub block, role: hub) is a hub; identity-domain entries carry no consumers and no delegation surface. Added because retiring the soak required registering cross-variant copies that live outside the three hub domains."
       }
     }
 }

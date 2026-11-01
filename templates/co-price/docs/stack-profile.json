@@ -1,0 +1,54 @@
+{
+  "name": "co-price",
+  "description": "Pricing-engagement template — pricing strategy over an on-rails pricing engine (ledgered calc_id outputs, Zod-validated, human-gated client deliverables) with its own quality/security monitoring.",
+  "stack": [
+    "bun",
+    "typescript",
+    "zod",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "security/",
+      "kind": "report",
+      "description": "security/ findings register maintained by the security-monitor agent (gitleaks + advisory watch + Dependabot resolution, 7-day cleanup)."
+    },
+    {
+      "path": "deliverables/",
+      "kind": "report",
+      "description": "Client-facing pricing deliverables (human gate; engine outputs ledgered by calc_id)."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "engagement-director",
+      "artifact": "deliverables/",
+      "trigger": "Engagement scoping"
+    },
+    {
+      "from": "engagement-director",
+      "to": "pricing-strategist",
+      "artifact": "deliverables/",
+      "trigger": "Commercial frame set; strategy dispatch"
+    },
+    {
+      "from": "pricing-strategist",
+      "to": "core-engine-dev",
+      "artifact": "deliverables/",
+      "trigger": "Strategy frozen; engine implementation"
+    },
+    {
+      "from": "core-engine-dev",
+      "to": "qa-tester",
+      "artifact": "deliverables/",
+      "trigger": "Engine build complete; verification"
+    }
+  ],
+  "notes": "Engine guardrails per docs/co-price-plan.md: LLM never computes; critic blocks untraceable numbers; structured Zod outputs; certainty-language guard. Domain-adapted skills shared with co-consult/co-deck are registered variant-identity (hub_topology)."
+}

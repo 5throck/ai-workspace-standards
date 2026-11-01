@@ -1,0 +1,63 @@
+{
+  "name": "co-security",
+  "description": "Hub (co-security domain): offensive-security engagement template — threat modeling, authorized pentest execution, findings reconciliation, and the assurance suite (samm-maturity, sarif-exporter, spdx-sbom, stride-threat-matrix, finding-reconciliation).",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "capabilities": [
+    "pentest-execution",
+    "verify-authorization",
+    "auth-threat-modeling",
+    "non-auth-threat-modeling",
+    "hub-bootstrap-validation",
+    "routine-triage",
+    "documentation",
+    "probe-response"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/findings/",
+      "kind": "report",
+      "description": "Evidence-linked engagement findings (the delegation data-handling rules restrict spoke reads of this tree)."
+    },
+    {
+      "path": "docs/reports/",
+      "kind": "report",
+      "description": "Engagement reports produced from reconciled findings."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "threat-modeler",
+      "artifact": "docs/findings/",
+      "trigger": "Authorization verified; threat-model dispatch (verify-authorization gate)"
+    },
+    {
+      "from": "threat-modeler",
+      "to": "pentester",
+      "artifact": "docs/findings/",
+      "trigger": "Auth-surface model complete; authorized execution scope set"
+    },
+    {
+      "from": "pentester",
+      "to": "report-writer",
+      "artifact": "docs/findings/",
+      "trigger": "Execution evidence recorded; write-up dispatch"
+    },
+    {
+      "from": "report-writer",
+      "to": "patch-engineer",
+      "artifact": "docs/reports/",
+      "trigger": "Report accepted; remediation hand-off"
+    }
+  ],
+  "notes": "Registry-hub variant (variant.json hub.role=hub, domain co-security). Security-domain patch versions ship out-of-band (same-week propagation SLA, design §7.2)."
+}

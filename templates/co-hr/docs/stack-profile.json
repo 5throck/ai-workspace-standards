@@ -1,0 +1,47 @@
+{
+  "name": "co-hr",
+  "description": "HR-advisory engagement template — org design, talent, compensation, labor compliance, and people analytics over the ISO-30414 metrics mapping.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "deliverables/",
+      "kind": "report",
+      "description": "HR engagement deliverables: Phase 1 findings through the final client deliverable (engagement-orchestration flow)."
+    },
+    {
+      "path": "docs/countries/",
+      "kind": "dataset",
+      "description": "Per-country labor-regulation profiles."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "org-design-consultant",
+      "artifact": "deliverables/",
+      "trigger": "Engagement scoping"
+    },
+    {
+      "from": "org-design-consultant",
+      "to": "data-analyst",
+      "artifact": "deliverables/",
+      "trigger": "Diagnosis frame set; workforce analytics dispatch"
+    },
+    {
+      "from": "org-design-consultant",
+      "to": "labor-compliance-analyst",
+      "artifact": "deliverables/",
+      "trigger": "Compliance review of the proposed design"
+    }
+  ],
+  "notes": "metric-dictionary-schema.json and iso-30414-metrics-mapping.md define the people-analytics evidence layer. Shares several domain-adapted assets with co-consult (registered variant-identity in hub_topology)."
+}

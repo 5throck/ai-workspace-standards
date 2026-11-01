@@ -1,0 +1,47 @@
+{
+  "name": "co-export",
+  "description": "Trade/export-compliance template — HS classification, FTA origin, customs duty/drawback, export control, and market-entry strategy over country profiles.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "deliverables/",
+      "kind": "report",
+      "description": "Export-engagement deliverables: classification rulings, documentation packs, regulatory intelligence briefs."
+    },
+    {
+      "path": "docs/countries/",
+      "kind": "dataset",
+      "description": "Per-country regulatory profiles consumed by every engagement."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "market-entry-strategist",
+      "artifact": "deliverables/",
+      "trigger": "Engagement scoping"
+    },
+    {
+      "from": "market-entry-strategist",
+      "to": "hs-classification-specialist",
+      "artifact": "deliverables/",
+      "trigger": "Market entry frame set; classification dispatch"
+    },
+    {
+      "from": "hs-classification-specialist",
+      "to": "trade-documentation-specialist",
+      "artifact": "deliverables/",
+      "trigger": "Classification frozen; documentation pack"
+    }
+  ],
+  "notes": "Country profiles (docs/countries/) are the shared evidence base; export-engagement-checklist.md gates the engagement flow."
+}

@@ -1,0 +1,54 @@
+{
+  "name": "co-design",
+  "description": "Hub (co-design domain): design-stack template — UX research, design system, prototyping, and the design doctrine suite (accessibility-audit, ui-ux-design-intelligence, service-design, token-usage-lint, tokens.json).",
+  "stack": [
+    "bun",
+    "typescript",
+    "design-tokens",
+    "markdown"
+  ],
+  "capabilities": [
+    "hub-bootstrap-validation",
+    "routine-triage",
+    "documentation",
+    "probe-response"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/designs/",
+      "kind": "document",
+      "description": "Design specifications, component primitives, and screen patterns."
+    },
+    {
+      "path": "tokens.json",
+      "kind": "dataset",
+      "description": "Design token source of truth (hub-doctrine asset, registry entry co-design/tokens.json)."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "ux-researcher",
+      "artifact": "docs/designs/",
+      "trigger": "Phase 1 research dispatch"
+    },
+    {
+      "from": "ux-researcher",
+      "to": "design-lead",
+      "artifact": "docs/designs/",
+      "trigger": "Research synthesis into design direction"
+    },
+    {
+      "from": "design-lead",
+      "to": "prototype-engineer",
+      "artifact": "docs/designs/",
+      "trigger": "Design system frozen; prototype build"
+    }
+  ],
+  "notes": "Registry-hub variant (variant.json hub.role=hub, domain co-design). Owns the design-doctrine hub assets consumed by co-architect."
+}

@@ -1,0 +1,42 @@
+{
+  "name": "co-consult",
+  "description": "Management-consulting engagement template — strategy analysis, solutions architecture, and client-facing deliverable production under the engagement-orchestration contract.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "deliverables/",
+      "kind": "report",
+      "description": "Engagement deliverables: Phase 1 research packs (deliverables/research/), analyses, and final client-facing reports."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "strategy-analyst",
+      "artifact": "deliverables/",
+      "trigger": "Phase 1 problem framing"
+    },
+    {
+      "from": "strategy-analyst",
+      "to": "solutions-architect",
+      "artifact": "deliverables/",
+      "trigger": "Evidence pack complete; solution design dispatch"
+    },
+    {
+      "from": "solutions-architect",
+      "to": "communications-lead",
+      "artifact": "deliverables/",
+      "trigger": "Solution frozen; final deliverable production"
+    }
+  ],
+  "notes": "Ships its own package.json (audit/dev-sync/sync-md — same values as the common contract). disclosure-ingestion-contract.md and market-data-schema.json govern evidence inputs."
+}
