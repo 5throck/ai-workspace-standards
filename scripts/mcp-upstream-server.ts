@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.12.0
+// @version 1.13.0
+// v1.13.0 (2026-11-02, ADR-0103 F3, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §5.3): T-id delegation read-back — upstream_request_status and
+//          upstream_request_reprioritize accept BOTH id grammars (U-YYYYMMDD-NNN unchanged;
+//          T-YYYYMMDD-NNN = delegation tickets in the same root store per ADR-0103 store
+//          topology). T-id status returns the narrow kanban field set only (id, title,
+//          status, triage when present, priority, sev when set, delegation: true) — no
+//          result/error content — by explicit id only (unfiltered listings stay U-only and
+//          project-scoped). T-id reprioritize rides the same store reprioritizeTicket
+//          enforcement (caps, P0 user-only, 3-strike ledger, history[] append, shared
+//          ticket lock); the U-path's upstream.project ownership check cannot apply to
+//          T-tickets (delegation tickets carry no per-project owner metadata — ADR-0103
+//          records this as a known gap; every call is audit-logged with the
+//          gateway-derived spoke-pm:<project> actor). No new write surface: spokes file
+//          T-tickets via ticket.ts (read + reprioritize only).
 // v1.12.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
 //          Phase 3a kanban core): upstream_request_status gains `priority` (and `sev`
 //          when set) per request; NEW read-limited tool upstream_request_reprioritize
@@ -122,7 +136,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.12.0';
+export const SERVER_VERSION = '1.13.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -195,6 +209,14 @@ const KNOWN_PROJECTS_FILE = join(LOGS_DIR, 'known-projects.json');
 
 const PATH_RE = /^(?!\/)(?!.*\.\.)[A-Za-z0-9._\-/]+$/;
 const MAX_TOTAL_BYTES = 16 * 1024;
+
+// v1.13.0 (ADR-0103 F3): two id grammars share the root store. U-* upstream requests
+// (this server's intake, upstream block required by schema) and T-* delegation tickets
+// (filed via ticket.ts per ADR-0103; no upstream block — the schema forbids one on a
+// T- id). The U grammar below is the pre-existing behavior and must not widen.
+const UPSTREAM_ID_RE = /^U-\d{8}-\d{3,4}$/;
+const DELEGATION_ID_RE = /^T-\d{8}-\d{3,4}$/;
+const TICKET_ID_RE = /^[TU]-\d{8}-\d{3,4}$/;
 
 // Design §9 L1: sanitization. Removes format (Cf: zero-width, bidi, BOM, tag characters
 // U+E0000-E007F), control (Cc), private-use (Co), surrogate (Cs) and unassigned (Cn) code
@@ -1082,7 +1104,7 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
   for (const key of Object.keys(p)) {
     if (key !== 'id' && key !== 'limit' && key !== 'project_root') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
   }
-  if (p.id !== undefined && (typeof p.id !== 'string' || !/^U-\d{8}-\d{3,4}$/.test(p.id))) return { error: { code: -32602, message: 'invalid params: id' } };
+  if (p.id !== undefined && (typeof p.id !== 'string' || !TICKET_ID_RE.test(p.id))) return { error: { code: -32602, message: 'invalid params: id' } };
   let limit = 20;
   if (p.limit !== undefined) {
     if (typeof p.limit !== 'number' || !Number.isInteger(p.limit) || p.limit < 1 || p.limit > 50) return { error: { code: -32602, message: 'invalid params: limit must be an integer 1-50' } };
@@ -1093,6 +1115,37 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
   // (self-declared project_root — unverified until PM review) gets redacted results:
   // ids + status/triage only, never another project's resolution summary or PR URL.
   appendAuditLog({ project, outcome: 'status', ...identityAuditFields(resolvedId) });
+
+  // v1.13.0 (ADR-0103 F3): delegation read-back. A T- id is answered from the shared
+  // root store with the NARROW kanban field set only (no result/error content — the
+  // ticket `result` field and history stay store-side). Read-only and identity-gated;
+  // a self_declared caller gets exactly this field set (there is no resolution content
+  // to redact — the same posture as the U-path's redaction). By explicit id only: the
+  // unfiltered listing below stays U-only and project-scoped. Not-found and a foreign
+  // delegation ticket answer identically ("not found"), matching U-path semantics.
+  if (p.id !== undefined && DELEGATION_ID_RE.test(p.id)) {
+    let t: ReturnType<typeof readTicket>;
+    try {
+      t = readTicket(ticketsDir(), p.id);
+    } catch {
+      return { error: { code: -32602, message: 'not found' } };
+    }
+    return {
+      result: {
+        requests: [{
+          id: t.id,
+          ...(t.title !== undefined ? { title: t.title } : {}),
+          status: t.status,
+          // triage lives in the upstream block, which the schema forbids on T- ids —
+          // kept conditional per the F3 field contract ("triage if present").
+          ...(t.upstream?.triage !== undefined ? { triage: t.upstream.triage } : {}),
+          priority: t.priority,
+          ...(t.sev !== undefined ? { sev: t.sev } : {}),
+          delegation: true,
+        }],
+      },
+    };
+  }
 
   const mine = loadUpstreamTickets()
     .filter(({ ticket }) => ticket.upstream.project === project && (p.id === undefined || ticket.id === p.id))
@@ -1133,7 +1186,7 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   for (const key of Object.keys(p)) {
     if (key !== 'id' && key !== 'priority') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
   }
-  if (typeof p.id !== 'string' || !/^U-\d{8}-\d{3,4}$/.test(p.id)) return { error: { code: -32602, message: 'invalid params: id' } };
+  if (typeof p.id !== 'string' || !TICKET_ID_RE.test(p.id)) return { error: { code: -32602, message: 'invalid params: id' } };
   if (typeof p.priority !== 'string') return { error: { code: -32602, message: 'invalid params: priority' } };
 
   // Alias mapping through the kanban alias table (P0-P3 or the canonical enum).
@@ -1150,6 +1203,14 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   // Ownership: "not found" for a missing ticket AND for another project's ticket
   // (same answer-for-both semantics as status); reprioritizeTicket re-checks under
   // the ticket lock via ownerProject.
+  // v1.13.0 (ADR-0103 F3): T- delegation tickets carry NO per-project owner metadata
+  // (the schema forbids an upstream block on a T- id, and delegation tickets are filed
+  // via ticket.ts with no owner field), so the U-path's upstream.project ownership
+  // check cannot apply to them. The enforcement that IS portable applies identically:
+  // gateway-derived spoke-pm:<project> actor, P0 user-only, +1-level-per-24h cap, the
+  // 3-strike ledger keyed by the caller's project, and the history[] actor entry.
+  // ADR-0103 records cross-project T-ticket reprioritize as a known gap; every call is
+  // audit-logged with the gateway-derived identity.
   let before: ReturnType<typeof readTicket>;
   try {
     before = readTicket(ticketsDir(), p.id);
@@ -1160,7 +1221,7 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   try {
     const t = reprioritizeTicket(ticketsDir(), p.id, to, `spoke-pm:${project}`, {
       stateDir: join(WORKSPACE_ROOT, '.pipeline-state'),
-      ownerProject: project,
+      ...(DELEGATION_ID_RE.test(p.id) ? {} : { ownerProject: project }),
     });
     appendAuditLog({ project, outcome: 'reprioritize', id: t.id, from: before.priority, to, priority_from: before.priority, priority_to: t.priority, ...identityAuditFields(resolvedId) });
     return { result: { id: t.id, priority: t.priority, status: t.status } };
@@ -1245,11 +1306,11 @@ function getTools() {
     },
     {
       name: 'upstream_request_status',
-      description: 'Read status of upstream requests filed from the current project. Read-only.',
+      description: 'Read status of upstream requests filed from the current project, or one delegation ticket (T-id, ADR-0103) by id — delegation reads return the narrow kanban field set (id, title, status, priority, sev, delegation:true). Read-only.',
       inputSchema: {
         type: 'object', additionalProperties: false,
         properties: {
-          id: { type: 'string', pattern: '^U-\\d{8}-\\d{3,4}$' },
+          id: { type: 'string', pattern: '^[TU]-\\d{8}-\\d{3,4}$', description: 'An upstream request id (U-YYYYMMDD-NNN, project-scoped) or a delegation ticket id (T-YYYYMMDD-NNN, narrow read-back per ADR-0103).' },
           limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
           project_root: { type: 'string', maxLength: 200, description: ENABLE_CLIENT_ROOTS
             ? 'Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client\'s workspace roots resolve to exactly one registered project. A project_root that conflicts with the client\'s workspace roots is rejected.'
@@ -1259,11 +1320,11 @@ function getTools() {
     },
     {
       name: 'upstream_request_reprioritize',
-      description: 'Change ONLY the priority (P0-P3 alias or low|normal|high|urgent) of one of this project\'s upstream requests — never status, content or triage; every change is appended to the ticket history with the server-derived caller identity. Kanban aliases: P0=urgent, P1=high, P2=normal, P3=low. Spoke callers are capped at +1 level per ticket per 24h and can never set urgent; P0 requires user action via ticket.ts.',
+      description: 'Change ONLY the priority (P0-P3 alias or low|normal|high|urgent) of one of this project\'s upstream requests (U-id) or a delegation ticket (T-id) — never status, content or triage; every change is appended to the ticket history with the server-derived caller identity. Kanban aliases: P0=urgent, P1=high, P2=normal, P3=low. Spoke callers are capped at +1 level per ticket per 24h and can never set urgent; P0 requires user action via ticket.ts.',
       inputSchema: {
         type: 'object', additionalProperties: false, required: ['id', 'priority'],
         properties: {
-          id: { type: 'string', pattern: '^U-\\d{8}-\\d{3,4}$', description: 'The upstream request id (from upstream_request_status).' },
+          id: { type: 'string', pattern: '^[TU]-\\d{8}-\\d{3,4}$', description: 'The upstream request id (U-) or delegation ticket id (T-) from upstream_request_status.' },
           priority: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3', 'low', 'normal', 'high', 'urgent'] },
         },
       },
