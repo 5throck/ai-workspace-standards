@@ -192,7 +192,7 @@
       "note": "Project-level prompts support on Codex is verified live in W5; an unsupported result demotes this mirror to documented no-op"
     },
     "codex-config": {
-      "description": "L0 .codex/config.toml → L1 templates/common/.codex/config.toml — Codex TOML config (graft MCP seed, ADR-0076)",
+      "description": "L0 .codex/config.toml → L1 templates/common/.codex/config.toml — Codex TOML config (trail MCP seed; ex-graft, design 2026-10-31-graft-trail-migration R2.5 addendum, ADR-0076)",
       "source": ".codex",
       "target": "templates/common/.codex",
       "include_pattern": "config.toml",

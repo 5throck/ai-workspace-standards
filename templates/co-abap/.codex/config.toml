@@ -25,6 +25,6 @@ url = "https://mcp-sap-docs.marianzeis.de/mcp"
 enabled = true
 path = "skills"
 
-[mcp_servers.graft]
-command = "bunx"
-args = ["@nanonets/graft", "mcp"]
+[mcp_servers.trail]
+command = "trail"
+args = ["mcp"]

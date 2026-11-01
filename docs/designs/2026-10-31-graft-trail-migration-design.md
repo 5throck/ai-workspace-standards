@@ -214,3 +214,76 @@ mechanical scope.
 
 - No forced migration; pre-migration projects keep working graft surfaces until their visit.
 - Residual risk: `trail init` behavior beyond the observed co-develop diff (e.g. future path changes) — the marker-based (`.trail/` exists) tolerance rules degrade gracefully: unknown surfaces re-seed as before, worst case recreating today's flag-and-clean loop.
+
+## Addendum (2026-11-01): mcp_servers surface flip (R2.5 trigger met)
+
+R2.5 deferred the mcpServers surface "until the L0 itself completes its own
+`trail init` — which is the trigger event for the whole L0/L1 surface flip".
+**Trigger met**: the L0 root completed `trail init` (PR #1783, 2026-11-01) —
+the root `opencode.json` now carries `{"mcp": {"trail": {"type": "local",
+"command": ["trail", "mcp"], "enabled": true}}}` and `.trail/` exists at the
+root. This addendum lands the deferred flip (Track 4) under the same spec id.
+
+### A1 — Vendor shape verification (2026-11-01, trail 0.28.1)
+
+- `trail --version` → 0.28.1 (`/Users/techcross/.local/bin/trail`).
+- Hidden `mcp` subcommand confirmed: `trail mcp` serves the graph over stdio
+  (tools `graft_find_code`, `graft_trace_calls`, … — vendor-internal names keep
+  the graft spelling; that is vendor surface, not ours to rename).
+- `trail build` confirmed (0.28.1): rebuilds the code map. **Vendor note
+  (observed in scratch probes)**: 0.28.1 `trail build` still defaults its graph
+  directory to `<repo>/graft` (the global `--dir <path>` flag, default
+  `<repo>/graft`, controls it; `trail --dir .trail/cache build` was probed and
+  works, and `trail ask`/`trail mcp` resolve both layouts). The scaffolds use
+  plain `trail build` (no invented flags); the project's own `trail init` at
+  its next upgrade visit migrates the graph to `.trail/cache` — consistent
+  with R2.4/R2.6 (migration at the natural visit, no forced migration).
+- The vendor hook confirms both package names resolve
+  (`@trailhq/trail-code` / `@nanonets/graft`).
+
+### A2 — The 11-item flip list (all landed)
+
+| # | File | Change |
+|---|---|---|
+| 1 | `CODEX.md` §4 | MCP prose "registers the graft context-graph server" → trail (vendor rename note) + TOML block → `[mcp_servers.trail]` / `command = "trail"` / `args = ["mcp"]` (bunx/@nanonets indirection dropped) |
+| 2 | `templates/common/CODEX.md` | Same edit, byte-parity with L0 (transform-parity gate re-run) |
+| 3 | `.codex/config.toml` | `[mcp_servers.graft]` → `[mcp_servers.trail]` (`trail mcp` direct, no bunx); graft-era header prose comments flipped to trail-era (ADR-0076/0077 references kept) |
+| 4 | `templates/common/.codex/config.toml` | Same flip, byte-identical with L0 (codex-config domain publishes L0→L1) |
+| 5 | `templates/common/opencode.json` | graft entry → trail entry (matches root shape: `type: local`, `command: ["trail","mcp"]`, `enabled: true`) |
+| 6 | `templates/common/.mcp.json` | `"graft"` server → `"trail"` (`command: "trail"`, `args: ["mcp"]`) |
+| 7 | `templates/common/.agents/mcp.json` | Same flip |
+| 8 | `templates/co-abap/.mcp.json` | graft entry → trail entry (abap / abap-docs / sap-docs entries preserved verbatim) |
+| 9 | `scripts/propagation-map.json` (codex-config domain) | description "graft MCP seed" → "trail MCP seed; ex-graft, design R2.5 addendum" — L1 mirror `templates/common/scripts/propagation-map.json` re-synced byte-identical |
+| 10 | `scripts/new-project.ts` (v1.38.0 → v1.39.0) | §7.7: graft-first + bunx fallback → plain `trail build`, graft-era fallback **dropped** (new scaffolds trail-native); `MANAGED_TOP_LEVEL_DIRS` gains `.trail` and **keeps** `graft` — 0.28.1 `trail build` still materializes `<repo>/graft` (A1 vendor note), so the guard stays load-bearing |
+| 11 | `scripts/create-l3-scaffold.ts` (v1.18.0 → v1.19.0) | Step 8.5: same treatment as #10 |
+
+Companion flip required by the same R2.5 sentence ("create-variant checklist"
+is named in R2.5's deferred-surface list) and by this track's grep gate:
+`skills/create-variant/SKILL.md` + its five byte-identical L1 copies
+(`templates/common/.{agents,claude,codex,gemini,hermes}/skills/create-variant/SKILL.md`)
+— the Step-8.5 checklist line and the L3 tool-surface checklist line flip from
+"graft-era paths until the L0 completes its own `trail init`" (stale — trigger
+met) to trail-era wording; the tool-managed-block line (L125) was already
+trail-aware and is untouched. Also flipped under the grep gate:
+`templates/co-abap/.codex/config.toml` (same `mcp_servers.graft` block class as
+item 3; per-project abap entries untouched).
+
+### A3 — Records
+
+- `scripts/SCRIPTS.md`: `new-project.ts` 1.38.0 → **1.39.0**, `create-l3-scaffold.ts` 1.18.0 → **1.19.0** (prior chains demoted one slot).
+- `docs/lifecycle/scripts/new-project.md`: metadata synced to 1.39.0 / 2026-11-01 + phase-history row (Check H parity; create-l3-scaffold has no per-script record — SCRIPTS.md is its SSOT).
+- Both scripts are L0-only (no `templates/common/scripts/` mirror exists; L1 `SCRIPTS.md` carries no rows for them — verified) → no L1 script propagation required for this change.
+
+### A4 — Deliberate keeps (restated)
+
+- `docs/self-managed-surfaces.json` dual path generations (graft-era + trail-era) — pre-migration projects still carry graft paths (R2.1).
+- `.gitignore` graft-era legacy blocks (L0 + `templates/common/`) — kept until fleet convergence (R2.2).
+- Historical docs (ADR-0076, past designs, CHANGELOG history) — never retro-edited (R2.6).
+- `Projects/*` — no hand edits; each converges at its own upgrade visit (R2.4/R2.6).
+- Vendored hermes runtime / platform skill mirrors — self-managed, regenerate at `trail init` (R2.3).
+- `skills/upgrade-project/SKILL.md` / `skills/adopt-project/SKILL.md` seed-retirement wording — still accurate for pre-migration projects; not in this track's grep scope.
+- `AGENTS.md` graft markers block — tool-managed, arrives via the vendor's own rewrite; never hand-edited (R2.1).
+
+### A5 — Acceptance
+
+Grep gate: `grep -rn 'mcp_servers.graft\|nanonets/graft' CODEX.md templates/ .codex/` → **0 live hits**. Excluded classes: one history-class residual — `templates/common/scripts/SCRIPTS.md` file footer (*Last updated: 2026-10-12*) quoting the v1.13.0-era Step 8.5 spelling inside a dated batch record (R2.6: historical records are never retro-edited); the self-managed dual-generation registry `docs/self-managed-surfaces.json` sits outside this path and keeps both generations by design. Platform parity, unit tests, typecheck, audit, and template validation re-run green at PR time (see CHANGELOG 2026-11-01 entry).
