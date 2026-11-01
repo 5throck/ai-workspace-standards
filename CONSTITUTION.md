@@ -492,7 +492,7 @@ The `templates/common/` directory is the shared foundation for all variant templ
 Additive overrides are concatenated with the common file during scaffolding. Replacement overrides fully substitute the common file. Both types require `reason` and `since` fields in the `variant.json` entry.
 
 #### Anti-Swelling Rule
-If **≥ 50 %** of variants declare an override for the same agent or skill, the common definition must be updated instead of accumulating per-variant overrides. `bun scripts/validate-templates.ts` enforces this threshold and will fail with an actionable error listing the affected files.
+If **≥ 50 %** of variants declare an override for the same agent or skill, the common definition must be updated instead of accumulating per-variant overrides. `bun scripts/validate-templates.ts` enforces this threshold and will fail with an actionable error listing the affected files. Hub-doctrine consumption declarations (`hub.consumes` in `variant.json`, registered in the `hub_topology` registry) are not overrides and do not count toward this threshold — a hub-owned canonical asset is delivered by its hub regardless of consumer count and is never commonized by this rule (design `docs/designs/2026-11-01-hub-consolidation-design.md` §2.3).
 
 #### L0 Agent Non-Propagation
 
@@ -846,4 +846,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-11-01*
+*Last Updated: 2026-11-02*
