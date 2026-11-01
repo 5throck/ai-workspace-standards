@@ -10,7 +10,7 @@ Background: `docs/VERSION_MANIFEST.md` regenerated with two permanent WARNING-le
 
 Change:
 - `scripts/generate-version-manifest.ts` v1.8.1: `collectAgents()` skips every `README*` file (`/^README/`), covering all locale translation mirrors, not just the English index.
-- `.agents/skills/source-command-meeting/SKILL.md` 1.0.0 → 1.0.1: adds `metadata.triggers` (six trigger phrases taken from the skill's own "Use when" description) and refreshes `last_reviewed`; `bun scripts/sync-skills.ts` Phase 2 back-syncs the `.agents` copy to the `.claude`/`.gemini`/`.codex` mirrors.
+- The `.agents`-only shortcut skill `source-command-meeting`, 1.0.0 → 1.0.1 (its SKILL.md): adds `metadata.triggers` (six trigger phrases taken from the skill's own "Use when" description) and refreshes `last_reviewed`; `bun scripts/sync-skills.ts` Phase 2 back-syncs the `.agents` copy to the `.claude`/`.gemini`/`.codex` mirrors. (Note: this workspace-root shortcut skill is not part of the co-architect template's own skill tree.)
 
 ## Verification
 

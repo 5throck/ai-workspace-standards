@@ -21,6 +21,8 @@ This directory contains agent definition files for the co-architect multi-agent 
 | Service Designer | `service-designer.md` | End-to-end service experience and journey mapping |
 | Typography Expert | `typography-expert.md` | Font selection, type hierarchy, readability |
 | Design Storyteller | `design-storyteller.md` | Design philosophy, brand narrative, meaning coherence |
+| Visualization Expert | `visualization-expert.md` | Photorealistic 3D rendering and bird's-eye view visualization |
+| Interior Designer | `interior-designer.md` | Interior space planning, furniture layout, material finishes |
 
 ### Research Team (Lead: analyst)
 
@@ -29,6 +31,7 @@ This directory contains agent definition files for the co-architect multi-agent 
 | Analyst | `analyst.md` | Team lead; systematic research, data synthesis, evidence gathering |
 | Content Writer | `content-writer.md` | Transforms research into documentation and communications |
 | Storyteller | `storyteller.md` | Organizational culture, change narratives, historical context |
+| Bylaw Expert | `bylaw-expert.md` | Building code, zoning regulations (BCR/FAR), municipal bylaws |
 
 ### Project Team (Lead: project-coordinator)
 
@@ -44,6 +47,9 @@ This directory contains agent definition files for the co-architect multi-agent 
 |-------|------|------|
 | SketchUp Modeler | `sketchup-modeler.md` | Team lead; converts Design Team mockups into SketchUp 3D models |
 | ZWCAD Drafter | `zwcad-drafter.md` | 2D technical drawing production (floor plans, elevations, sections) in ZWCAD |
+| Drafting Architect | `drafting-architect.md` | Architectural drafting standards lead, section details, DWG set audit |
+| Structural Engineer | `structural-engineer.md` | Structural feasibility, load path analysis, bearing wall classification |
+| MEP Engineer | `mep-engineer.md` | Building services (HVAC/electrical/plumbing), shaft routing, RCP integration |
 
 ### Platform Engineering Team (Lead: architect)
 

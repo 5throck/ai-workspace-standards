@@ -2,6 +2,7 @@
 sync_version: 1
 lang: ko
 lang_reason: source-material
+translated_from_hash: 3fff3bfdcf5fc24037f6e7fe74f8f553eada8ac8aa3f09213665420aefe52cfe
 ---
 
 # co-architect
@@ -38,6 +39,7 @@ Architecture firm collaboration variant integrating design (UI/UX, service desig
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
+| **pm** | Project Manager (PM) — cross-team orchestrator; routes to Design / Research / Project / Engineering team leads at Phase 0 | medium | inherit |
 | **technical-writer** | Technical writer - creates API documentation, technical guides, and developer re | medium | inherit |
 | **design-lead** | Design system architect - defines visual language, design tokens, and component  | high | inherit |
 | **automation-engineer** | Implements approved technical plans for co-architect's software/platform layer — | medium | inherit |

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 779afa2623a2e1cf507747e46893b4a649207e7d74d757d8e6339bdceaa64790
+content_hash: 3fff3bfdcf5fc24037f6e7fe74f8f553eada8ac8aa3f09213665420aefe52cfe
 ---
 
 # co-architect
@@ -37,6 +37,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
+| **pm** | Project Manager (PM) — cross-team orchestrator; routes to Design / Research / Project / Engineering team leads at Phase 0 | medium | inherit |
 | **technical-writer** | Technical writer - creates API documentation, technical guides, and developer re | medium | inherit |
 | **design-lead** | Design system architect - defines visual language, design tokens, and component  | high | inherit |
 | **automation-engineer** | Implements approved technical plans for co-architect's software/platform layer — | medium | inherit |
