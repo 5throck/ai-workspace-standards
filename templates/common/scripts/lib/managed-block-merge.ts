@@ -1,4 +1,24 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-01, addendum
+//           docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+//           §Addendum): the result carries `restamps[]` — one block-level row
+//           per managed block whose PROJECT content diverged from the template
+//           and was therefore restamped template-wins (the tier-model-mapping
+//           / COMMON-CODEX vocabulary class). This is the decision-log parity
+//           half of the PR #1787 precedent (SCHEMA_TEMPLATE_AUTHORITATIVE_KEYS
+//           logs TEMPLATE_DELTA INFO rows for schema vocabulary landings): the
+//           MERGE pass already restamped these blocks template-wins — keyed
+//           blocks by key (v1.4.0), equal-count unlabeled zones positionally —
+//           but only on the console, so a fleet convergence wave was invisible
+//           in the persisted decision log and its absence read as a code gap.
+//           Rows fire ONLY on a real byte divergence (projBlock.matched !==
+//           tplBlock.matched); byte-equal keyed replaces keep today's silent
+//           MERGED log and no row, making the second pass a zero-row no-op
+//           (idempotent). The destructive count-mismatch reconcile is NOT
+//           restamp-classified — it already carries WARNING + snapshot +
+//           recovery file. Pure data: the caller (upgrade-project.ts
+//           mergeWorkspaceManaged) records one TEMPLATE_DELTA (INFO) decision
+//           row per entry.
 // v1.5.0 (2026-10-28, design
 //           docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //           D2): the destructive unlabeled-block count-mismatch reconcile now
@@ -125,6 +145,11 @@ export interface ManagedBlock {
 
 function escapeClose(close: string): string {
   return close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** v1.6.0: line count of a marker-inclusive block text. */
+function lineCount(blockText: string): number {
+  return blockText.split('\n').length;
 }
 
 function patternRegex(pattern: ManagedPattern): RegExp {
@@ -255,6 +280,20 @@ export function findInsertionPosition(content: string, rel: string, key: string,
   return content.length;
 }
 
+/** v1.6.0: one block-level restamp row — a managed block whose project content
+ *  diverged from the template and was restamped template-wins. `key` is ''
+ *  for unlabeled (COMMON-*) zones. Line counts are of the full marker-inclusive
+ *  block text. Emitted for the keyed by-key replace and the equal-count
+ *  positional unlabeled replace ONLY when the two sides actually differ; the
+ *  count-mismatch reconcile is not restamp-classified (it already carries
+ *  WARNING + snapshot + recovery file). */
+export interface ManagedBlockRestamp {
+  label: string;
+  key: string;
+  linesBefore: number;
+  linesAfter: number;
+}
+
 export interface ManagedBlockMergeResult {
   /** The merged content (=== projectContent when nothing changed). */
   content: string;
@@ -278,6 +317,10 @@ export interface ManagedBlockMergeResult {
    *  explicit --disposition adopt-template grant (snapshot + replace as
    *  today; the engine records the ADOPT row). */
   adaptedReplaces: number;
+  /** v1.6.0: block-level restamp rows (one per genuinely diverged block the
+   *  merge restamped template-wins) — the caller records one TEMPLATE_DELTA
+   *  (INFO) decision row per entry. Empty when every block was byte-equal. */
+  restamps: ManagedBlockRestamp[];
 }
 
 /** v1.5.0 (D2): the instruction-region census gate. Structurally
@@ -316,12 +359,13 @@ export function mergeManagedBlocks(
   const log: string[] = [];
   const snapshots: { rel: string; content: string }[] = [];
   const escalated: { rel: string; content: string }[] = [];
+  const restamps: ManagedBlockRestamp[] = [];
   let adaptedReplaces = 0;
   const mergedManaged = buildMergedTemplateBlocks(templateContent, commonContent);
 
   if (mergedManaged.length === 0) {
     log.push(`    INFO: Template has no managed markers — skipping ${rel}`);
-    return { content: projectContent, merged: false, log, snapshots, escalated, adaptedReplaces };
+    return { content: projectContent, merged: false, log, snapshots, escalated, adaptedReplaces, restamps };
   }
 
   let updated = projectContent;
@@ -351,6 +395,9 @@ export function mergeManagedBlocks(
       const projBlock = scanPatternBlocks(updated, pattern).filter((b) => b.key === tplBlock.key)[nth];
       if (projBlock) {
         // Found by key — replace it
+        if (projBlock.matched !== tplBlock.matched) {
+          restamps.push({ label: pattern.label, key: tplBlock.key, linesBefore: lineCount(projBlock.matched), linesAfter: lineCount(tplBlock.matched) });
+        }
         updated = updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end);
         merged = true;
         log.push(`    ${dryTag}MERGED ${pattern.label}:${tplBlock.key} in: ${rel}`);
@@ -415,6 +462,9 @@ export function mergeManagedBlocks(
         const occ = fresh[i];
         if (!occ) continue;
         const tplBlock = unlabeledTplBlocks[i];
+        if (occ.matched !== tplBlock.matched) {
+          restamps.push({ label: pattern.label, key: '', linesBefore: lineCount(occ.matched), linesAfter: lineCount(tplBlock.matched) });
+        }
         updated = updated.slice(0, occ.start) + tplBlock.matched + updated.slice(occ.end);
         merged = true;
         log.push(`    ${dryTag}MERGED ${pattern.label} block in: ${rel}`);
@@ -429,5 +479,5 @@ export function mergeManagedBlocks(
     log.push(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
   }
 
-  return { content: updated, merged, log, snapshots, escalated, adaptedReplaces };
+  return { content: updated, merged, log, snapshots, escalated, adaptedReplaces, restamps };
 }

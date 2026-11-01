@@ -44,7 +44,17 @@
  *         sections inserted in template-relative order, project-local EOF
  *         tail byte-identical, second composition run a full no-op.
  *
- * @version 1.2.0
+ * v1.3.0 (2026-11-01, addendum
+ *         docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *         §Addendum): tier-vocabulary restamp rows — lib v1.6.0's `restamps[]`
+ *         result field, one block-level row per genuinely diverged managed
+ *         block restamped template-wins. Fixtures mirror the real fleet shape
+ *         (AGENTS.md tier-model-mapping gpt-5.6 → gpt-6.1 x2; CODEX.md
+ *         COMMON-CODEX zone), plus dry-run purity, converged-pass idempotency
+ *         (zero rows), and the negative: byte-equal non-tier managed blocks
+ *         get no row and stay byte-identical.
+ *
+ * @version 1.3.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
@@ -752,5 +762,91 @@ describe('MERGE-pass composition: zones merged + skeleton sections restored + ta
     expect(skeletonPass2.merged).toBe(false);
     expect(skeletonPass2.content).toBe(zonePass2.content);
     expect(skeletonPass2.log.filter((l) => l.includes('SKELETON INSERTED') || l.includes('SKELETON REPLACED'))).toEqual([]);
+  });
+});
+
+// ── Tier-vocabulary restamp rows (v1.6.0, 2026-11-01) ────────────────────────
+// (addendum docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+// §Addendum): the result carries restamps[] — one block-level row per managed
+// block whose PROJECT content diverged from the template and was restamped
+// template-wins — so the engine can record TEMPLATE_DELTA (INFO) decision rows
+// (PR #1787 models.* decision-log parity). Fixtures mirror the real fleet
+// divergence the 0.26.0 wave left in co-deck/co-game/co-hr/co-learning:
+// project AGENTS.md tier-model-mapping blocks carrying gpt-5.6-* vs a template
+// carrying gpt-6.1-*/gpt-6-*, and the CODEX.md COMMON-CODEX zone.
+
+describe('tier-vocabulary restamp rows (v1.6.0, 2026-11-01 addendum)', () => {
+  const blk = (key: string, body: string) => `<!-- WORKSPACE-MANAGED: ${key} -->\n${body}\n<!-- /WORKSPACE-MANAGED -->`;
+
+  const proj56 = [
+    '### §3.6 3-Tier Strategy',
+    '',
+    blk('tier-model-mapping', '- **High-tier**: planning (gpt-5.6-sol)'),
+    '',
+    blk('tier-model-mapping', '> **Note**: alias table (gpt-5.6 note)'),
+    '',
+    'Project-authored §7 content lives outside the zones and must survive.',
+  ].join('\n');
+  const tpl61 = [
+    blk('tier-model-mapping', '- **High-tier**: planning (gpt-6.1-sol)'),
+    '',
+    blk('tier-model-mapping', '> **Note**: alias table (gpt-6.1 note + zcode clause)'),
+  ].join('\n');
+
+  test('diverged keyed blocks restamp template-wins, one row per block, neighbors untouched', () => {
+    const r = mergeManagedBlocks(proj56, tpl61, null, 'AGENTS.md', false);
+    expect(r.content).toContain('gpt-6.1-sol');
+    expect(r.content).toContain('gpt-6.1 note + zcode clause');
+    expect(r.content).not.toContain('gpt-5.6');
+    expect(r.restamps).toHaveLength(2);
+    expect(r.restamps[0]).toEqual({ label: 'WORKSPACE-MANAGED', key: 'tier-model-mapping', linesBefore: 3, linesAfter: 3 });
+    expect(r.restamps[1]).toEqual({ label: 'WORKSPACE-MANAGED', key: 'tier-model-mapping', linesBefore: 3, linesAfter: 3 });
+    // project-authored content outside the managed zones is byte-identical
+    expect(r.content).toContain('Project-authored §7 content lives outside the zones and must survive.');
+    expect(r.content).toContain('### §3.6 3-Tier Strategy');
+  });
+
+  test('dry-run purity: restamp rows returned verbatim, content unchanged on disk side', () => {
+    const r = mergeManagedBlocks(proj56, tpl61, null, 'AGENTS.md', true);
+    expect(r.restamps).toHaveLength(2);
+    expect(r.log.join('\n')).toContain('[DRY RUN] MERGED WORKSPACE-MANAGED:tier-model-mapping');
+  });
+
+  test('COMMON-CODEX equal-count positional restamp emits an unlabeled row', () => {
+    const zone = (body: string) => `<!-- COMMON-CODEX:START -->\n${body}\n<!-- COMMON-CODEX:END -->`;
+    const proj = `head\n${zone('> **Note (Codex-specific)**: Use the literal model ID (e.g. `gpt-5.6-sol`) ...')}\ntail`;
+    const common = zone('> **Note (Codex-specific)**: Use the literal model ID (e.g. `gpt-6.1-sol`) ...\n- **High-tier** → `gpt-6.1-sol`\n- **Medium-tier** → `gpt-6.1-terra`\n- **Low-tier** → `gpt-6-luna`');
+    const r = mergeManagedBlocks(proj, 'variant has no CODEX.md markers', common, 'CODEX.md', false);
+    expect(r.content).toContain('gpt-6-luna');
+    expect(r.content).not.toContain('gpt-5.6');
+    expect(r.restamps).toEqual([{ label: 'COMMON-CODEX', key: '', linesBefore: 3, linesAfter: 6 }]);
+    expect(r.content).toContain('head\n');
+    expect(r.content.trimEnd().endsWith('tail')).toBe(true);
+  });
+
+  test('idempotency: the converged second pass changes no content and emits zero restamp rows', () => {
+    const first = mergeManagedBlocks(proj56, tpl61, null, 'AGENTS.md', false);
+    const second = mergeManagedBlocks(first.content, tpl61, null, 'AGENTS.md', false);
+    expect(second.content).toBe(first.content);
+    expect(second.restamps).toEqual([]);
+    // byte-equal keyed blocks keep the legacy silent MERGED log but no row
+    expect(second.log.join('\n')).toContain('MERGED WORKSPACE-MANAGED:tier-model-mapping');
+  });
+
+  test('negative: byte-equal non-tier managed blocks are neither restamped nor rowed', () => {
+    const graft = blk('graft repo context graph', 'trail lines — unchanged');
+    const proj = `top\n${blk('tier-model-mapping', '- gpt-5.6-sol')}\n## Next\n${graft}`;
+    const tpl = `${blk('tier-model-mapping', '- gpt-6.1-sol')}\n${graft}`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    // exactly one restamp row: the divergent tier block only
+    expect(r.restamps).toEqual([{ label: 'WORKSPACE-MANAGED', key: 'tier-model-mapping', linesBefore: 3, linesAfter: 3 }]);
+    // the non-tier managed block is preserved byte-identical
+    expect(r.content).toContain(graft);
+  });
+
+  test('no managed markers on either side → early return with empty restamps', () => {
+    const r = mergeManagedBlocks('plain project', 'plain template', null, 'AGENTS.md', false);
+    expect(r.restamps).toEqual([]);
+    expect(r.merged).toBe(false);
   });
 });
