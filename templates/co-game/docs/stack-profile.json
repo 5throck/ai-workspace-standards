@@ -1,0 +1,43 @@
+{
+  "name": "co-game",
+  "description": "Game-development template — game design (level/puzzle/sound), implementation over a zero-dependency ECS core with arcade physics and Web Audio synthesis, and game-specific debugging.",
+  "stack": [
+    "bun",
+    "typescript",
+    "ecs",
+    "web-audio"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/designs/",
+      "kind": "document",
+      "description": "Game design specifications: scene management, level and puzzle layouts, sound design."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "game-designer",
+      "artifact": "docs/designs/",
+      "trigger": "Phase 2 game design dispatch"
+    },
+    {
+      "from": "game-designer",
+      "to": "game-developer",
+      "artifact": "docs/designs/",
+      "trigger": "Design frozen; implementation dispatch"
+    },
+    {
+      "from": "game-developer",
+      "to": "game-debugger",
+      "artifact": "docs/designs/",
+      "trigger": "Build complete; Phase 5 debugging and verification"
+    }
+  ],
+  "notes": "Identity assets registered in hub_topology: arcade-physics and sound-synth skills, game-developer agent. Consumes the co-develop dev-spine doctrine (architect, code-review, refactoring, test-driven-development, test-runner) as the registered consumer."
+}

@@ -1,0 +1,48 @@
+{
+  "name": "co-news",
+  "description": "Financial-newsroom template — reporting, fact-checking, legal review, style and visual editing over the financial-journalism style guide and wire format.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "deliverables/",
+      "kind": "report",
+      "description": "News wire stories in the docs/wire-format.md structure."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "reporter",
+      "artifact": "deliverables/",
+      "trigger": "Story assignment"
+    },
+    {
+      "from": "reporter",
+      "to": "fact-checker",
+      "artifact": "deliverables/",
+      "trigger": "Draft complete; verification dispatch"
+    },
+    {
+      "from": "fact-checker",
+      "to": "style-editor",
+      "artifact": "deliverables/",
+      "trigger": "Facts verified; style pass"
+    },
+    {
+      "from": "style-editor",
+      "to": "visual-editor",
+      "artifact": "deliverables/",
+      "trigger": "Style pass complete; visual treatment"
+    }
+  ],
+  "notes": "corrections-workflow.md and security.md govern post-publication and source-protection flows."
+}

@@ -1,0 +1,42 @@
+{
+  "name": "co-safety",
+  "description": "Industrial-safety governance template — regulation-anchored (KR + international) safety workflows across compliance/daily/domains/emergency scopes with registered procedure output types.",
+  "stack": [
+    "bun",
+    "typescript",
+    "yaml",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "workflows/",
+      "kind": "document",
+      "description": "Delivered safety workflow definitions (compliance/daily/domains/emergency incl. _shared) — the template's primary produced asset."
+    },
+    {
+      "path": "procedures/_output-types.yaml",
+      "kind": "dataset",
+      "description": "Registered procedure output types (hazard_inventory, risk_assessment_record, governance_review, plan_review_record, audit_findings, governance_actions)."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "safety-governance-manager",
+      "artifact": "workflows/",
+      "trigger": "Governance workflow dispatch"
+    },
+    {
+      "from": "safety-governance-manager",
+      "to": "safety-workflow-manager",
+      "artifact": "workflows/",
+      "trigger": "Workflow execution and evidence collection"
+    }
+  ],
+  "notes": "regulations/ and workflows/ directories are registered variant-identity directory assets (hub_topology). The nested agents/ (domains/**, _shared/**) layout is covered by the agent-quality-recursive validator."
+}

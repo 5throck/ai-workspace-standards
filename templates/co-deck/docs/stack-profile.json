@@ -1,0 +1,44 @@
+{
+  "name": "co-deck",
+  "description": "Presentation/deck production template — storyline, theme pipeline (HTML themes → PDF via pdf-lib), diagram and image curation, with visual-regression tests.",
+  "stack": [
+    "bun",
+    "typescript",
+    "html",
+    "pdf-lib",
+    "pptx"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun test scripts/co-deck/tests/",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/html-themes/preview/",
+      "kind": "bundle",
+      "description": "Theme previews and built decks (build-theme-preview.ts writes docs/html-themes/preview/decks/; build-theme-deck.ts takes --output)."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "storyline",
+      "artifact": "docs/html-themes/preview/",
+      "trigger": "Narrative structure approved"
+    },
+    {
+      "from": "storyline",
+      "to": "html-build",
+      "artifact": "docs/html-themes/preview/",
+      "trigger": "Slide content frozen; theme build"
+    },
+    {
+      "from": "html-build",
+      "to": "pdf-export",
+      "artifact": "docs/html-themes/preview/",
+      "trigger": "HTML deck built; PDF export (slidedata.json → pdf-lib)"
+    }
+  ],
+  "notes": "Ships its own package.json: test = bun test scripts/co-deck/tests/ (theme suite), plus test:visual / test:visual:update / test:smoke. The common integration runner remains available via bun scripts/test-runner.ts."
+}

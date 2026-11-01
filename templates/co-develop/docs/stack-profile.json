@@ -1,0 +1,59 @@
+{
+  "name": "co-develop",
+  "description": "Hub (co-develop domain): full-lifecycle software development template — dev spine (architect/designer/code-writer/test-runner) with parameterized phase-gated handoffs, plus dev tooling (audit, dev-sync, test-runner).",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "capabilities": [
+    "hub-bootstrap-validation",
+    "routine-triage",
+    "documentation",
+    "probe-response"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/handoff-spec.md",
+      "kind": "document",
+      "description": "Phase-gated handoff contract for the dev spine (architect → designer → code-writer → test-runner), bilingual (ko edition shipped)."
+    },
+    {
+      "path": "docs/benchmark-fixtures/",
+      "kind": "dataset",
+      "description": "Benchmark fixtures used by regression checks during dev-spine verification."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "architect",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Phase 2 architecture gate"
+    },
+    {
+      "from": "architect",
+      "to": "designer",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Data/API structure frozen; user-facing layer hand-off"
+    },
+    {
+      "from": "designer",
+      "to": "code-writer",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Design specification complete (agent frontmatter handoff_to: code-writer)"
+    },
+    {
+      "from": "code-writer",
+      "to": "test-runner",
+      "artifact": "docs/handoff-spec.md",
+      "trigger": "Implementation complete; Phase 5 verification"
+    }
+  ],
+  "notes": "Registry-hub variant (variant.json hub.role=hub, domain co-develop). Commands resolve post-scaffold from the common package.json contract; the template tree itself carries agents/, skills/, and docs/ only."
+}

@@ -1,0 +1,41 @@
+{
+  "name": "co-learning",
+  "description": "Learning/curriculum template with a lean roster (pm + exam-bank-steward) inheriting the common dev-spine doctrine for tooling work.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/benchmark-fixtures/",
+      "kind": "dataset",
+      "description": "Learning benchmark fixtures for assessment calibration."
+    },
+    {
+      "path": "docs/handoff-spec.md",
+      "kind": "document",
+      "description": "Phase-gated handoff contract (inherited dev-spine shape)."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "exam-bank-steward",
+      "artifact": "docs/benchmark-fixtures/",
+      "trigger": "Curriculum/exam-bank work dispatch"
+    },
+    {
+      "from": "exam-bank-steward",
+      "to": "pm",
+      "artifact": "docs/benchmark-fixtures/",
+      "trigger": "Bank update complete; review cycle"
+    }
+  ],
+  "notes": "Registered consumer of the co-develop dev-spine doctrine (architect, code-writer, test-runner)."
+}

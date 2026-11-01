@@ -1,0 +1,43 @@
+{
+  "name": "co-work",
+  "description": "General knowledge-work template — project coordination, analysis, and document production with Microsoft 365 integration over connector schemas.",
+  "stack": [
+    "bun",
+    "typescript",
+    "microsoft-365",
+    "markdown"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/drafts/",
+      "kind": "document",
+      "description": "Working drafts: documents, analyses, minutes."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "project-coordinator",
+      "artifact": "docs/drafts/",
+      "trigger": "Work-stream coordination dispatch"
+    },
+    {
+      "from": "project-coordinator",
+      "to": "content-writer",
+      "artifact": "docs/drafts/",
+      "trigger": "Drafting dispatch per document-style-registry.json"
+    },
+    {
+      "from": "content-writer",
+      "to": "ms365-expert",
+      "artifact": "docs/drafts/",
+      "trigger": "Draft complete; M365 delivery"
+    }
+  ],
+  "notes": "connector-schemas.json and document-style-registry.json are the integration and style contracts. The storyteller agent is the co-work org-culture identity variant (registered in hub_topology)."
+}
