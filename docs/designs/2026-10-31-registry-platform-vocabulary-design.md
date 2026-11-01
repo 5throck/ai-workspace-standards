@@ -239,3 +239,91 @@ deduped at implementation): upgrade-visit convergence only.
 | T-005 | Rebase to gpt-6.1-sol/terra/luna; 9 lockstep surfaces incl. MM-01 regex; old ids kept in MM-01 alternation for convergence window; sweep via model-migration skill | Adopting gpt-6-astra (owner selected standing pattern); hand-editing 65 L3 files (forbidden) |
 | T-006 | Uniform HIGH, advisory prose, no machine gate, floor semantics untouched | Per-tier levels (couples independent dials); machine gate (checks nothing that exists as data) |
 | T-007 | Registry-only zcode, zai-mirrored ids, corrected agents evidence (supported: false), no ZCODE.md | Full delivery profile (owns an empty path set); distinct zcode model ids (host exposes zai ids only — direct evidence) |
+
+## Addendum (2026-11-01): skeleton tier-block convergence mechanics
+
+Dispatch context: the 2026-11-01 fleet exploration found gpt-5.6 tier literals
+in exactly 2 files each of 5 delivered projects (co-deck, co-game, co-hr,
+co-learning, co-newbiz), all inside managed blocks (AGENTS.md
+`WORKSPACE-MANAGED: tier-model-mapping` x2, CODEX.md `COMMON-CODEX` zone), and
+suspected a restamp gap in the skeleton/managed-block merge passes ("unions
+adds but never rewrites existing divergent lines"). This addendum records the
+investigation verdict, the verbatim mechanics, and the change that closes the
+real (observability) gap. R2.2's L3 model is otherwise confirmed correct.
+
+### A1 — Owning passes (verified, file:line @ main e7ee2fdb)
+
+| Surface | Owning pass | Verbatim semantics |
+|---|---|---|
+| AGENTS.md `tier-model-mapping` (keyed, repeated x2) | `mergeManagedBlocks` keyed branch — `scripts/lib/managed-block-merge.ts:347-367` (v1.4.0 hyphenated/repeated-key handling), invoked from `mergeWorkspaceManaged` (`scripts/upgrade-project.ts:1960`, MERGE pass claim via `resolveClaim` → `MERGE_MANAGED_FILES`, `scripts/lib/upgrade-policy.ts:588`) | Template block REPLACES the project block wholesale by key (`updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end)`); repeated keys pair by occurrence order with a fresh scan per replace; census-gated NEVER (keyed replaces are engine-zone I1 delivery per v1.5.0 header). Template-authoritative by construction. |
+| CODEX.md `COMMON-CODEX` zone (unlabeled) | `mergeManagedBlocks` unlabeled branch — equal counts → positional back-to-front replace (`scripts/lib/managed-block-merge.ts:410-421`); count mismatch → WARNING + snapshot reconcile (`:378-409`) | Positional replace is template-wins; the co-hr variant tree has no CODEX.md so the effective template is `templates/common/CODEX.md` (common-only union, `buildMergedTemplateBlocks`). |
+| `docs/workspace-schema.json` `models.codex` | `mergeWorkspaceSchemaData` template-authoritative branch — `scripts/lib/upgrade-policy.ts:969-978` (`SCHEMA_TEMPLATE_AUTHORITATIVE_KEYS`, PR #1787) | Template value lands verbatim; divergence logged as TEMPLATE_DELTA INFO rows. Verified by executing the merge on co-hr's real files: output `models.codex = {high: gpt-6.1-sol, medium: gpt-6.1-terra, low: gpt-6-luna}`. |
+
+The suspected "merge-union never rewrites divergent lines" mechanism is
+**refuted**: the per-key union (`buildMergedTemplateBlocks`) unions the VARIANT
+and COMMON template sides only — the project side is not unioned at all; keyed
+blocks are replaced verbatim. "Block classified variant-scoped" is also
+refuted: `templates/co-hr/AGENTS.md` (and all 14 variant AGENTS.md) already
+carry gpt-6.1 via commit 095394c67, and the variant contributes nothing to
+CODEX.md (no such file in the variant tree).
+
+### A2 — Why the 0.26.0 visit did not restamp: it never ran
+
+The four straggling projects' last upgrade visit PRECEDED the vocabulary
+batch. Timeline (all UTC, git + template-version.txt evidence):
+
+| When | Event |
+|---|---|
+| 2026-10-31 04:05 | co-hr upgraded at template 0.25.0 (`Projects/co-hr/template-version.txt`: `version=0.25.0`, `upgraded=2026-10-31T04:05:08Z`); co-deck/co-game/co-learning same 0.25.0 stamp |
+| 2026-10-31 10:01 | commit 095394c67 lands the GPT-6.x rebase in all 18 template surfaces (T-20261031-004..007) |
+| 2026-10-31 (later) | release 2df8a6aa3 bumps `templates/VERSION` to 0.26.0 |
+| 2026-11-01 05:06 | co-newbiz takes its 0.26.0 visit (PR #788) — its AGENTS.md/CODEX.md are clean, empirically proving the mechanism converges |
+
+A dry-run visit executed for this addendum (`bun scripts/upgrade-project.ts
+Projects/co-hr --dry-run --yes`) restamps every stale surface:
+`[DRY RUN] MERGED WORKSPACE-MANAGED:tier-model-mapping in: AGENTS.md` (x2),
+`[DRY RUN] MERGED COMMON-CODEX block in: CODEX.md`, schema
+`TEMPLATE_DELTA models.codex.*` landing rows, and `UPDATE scripts/lib/
+model-literal-patterns.ts 1.0.0 → 1.1.0`. R2.2's "converge via upgrade visits"
+is mechanically sound — the remaining gap was visit scheduling for the four
+0.25.0-stamped projects, not code.
+
+### A3 — The real gap this addendum closes: decision-log parity
+
+The MERGE pass restamped vocabulary blocks template-wins but recorded the
+landing NOWHERE except console lines (`MERGED
+WORKSPACE-MANAGED:tier-model-mapping in: AGENTS.md`). A convergence wave was
+therefore unverifiable from the persisted decision log
+(`.claude/last-upgrade-delivery.json`) — which is exactly why the pending
+visits read as a code defect. PR #1787 set the precedent for the schema side
+(`models`/`platform_surfaces` landings → TEMPLATE_DELTA INFO rows); the
+managed-block side had no equivalent. Fix (this addendum's change set):
+
+1. `scripts/lib/managed-block-merge.ts` v1.6.0 — `ManagedBlockMergeResult`
+   gains `restamps[]` (block-level `{label, key, linesBefore, linesAfter}`),
+   pushed ONLY when the replaced project block genuinely differed from the
+   template block (`projBlock.matched !== tplBlock.matched` / equal-count
+   positional equivalent). Byte-equal blocks: no row (idempotent second pass).
+   The destructive count-mismatch reconcile stays outside restamp
+   classification — it already carries WARNING + snapshot + recovery file.
+2. `scripts/upgrade-project.ts` v1.89.0 — `mergeWorkspaceManaged` records one
+   TEMPLATE_DELTA (INFO) decision row per restamp; the SCHEMA_MERGE reporting
+   stops calling template-authoritative landings "withheld (project-wins)" —
+   INFO deltas print/record as "landed (template wins)" and only non-INFO
+   deltas keep the withheld wording/count (the misleading wording is what
+   made the co-hr dry-run schema rows read as a failure).
+3. Tests: `tests/unit/managed-block-merge.test.ts` v1.3.0 — six cases pinning
+   the fleet divergence shape (gpt-5.6 → gpt-6.1 x2 + COMMON-CODEX), neighbor
+   preservation, dry-run purity, converged-pass idempotency (zero rows), and
+   the negative (byte-equal non-tier block: no row, byte-identical).
+
+### A4 — Convergence path (acceptance)
+
+The four 0.25.0-stamped projects converge at their next 0.26.0 upgrade visit —
+never hand-edited, per R2.2. This change set's acceptance run visits co-hr
+(smallest) in apply mode and asserts: `grep -rlE
+'gpt-5\.6-(sol|terra|luna)' Projects/co-hr --include="*.md"` → 0 hits, project
+audit passes, and the persisted decision log carries the new TEMPLATE_DELTA
+(INFO) restamp rows. co-deck/co-game/co-learning follow on the next wave
+(identical mechanism, no further code change expected); MM-01's retained
+gpt-5.6 alternation keeps them failing loudly until then, per R2.2.

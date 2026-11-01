@@ -1,5 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.88.0
+// @version 1.89.0
+// v1.89.0 (2026-11-01, addendum
+//          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+//          §Addendum): managed-block restamp decision rows + landed-vs-withheld
+//          TEMPLATE_DELTA wording. (a) mergeWorkspaceManaged records one
+//          TEMPLATE_DELTA (INFO) decision row per lib/managed-block-merge
+//          v1.6.0 `restamps[]` entry — a managed block whose project content
+//          diverged from the template and was restamped template-wins (the
+//          AGENTS.md tier-model-mapping / CODEX.md COMMON-CODEX vocabulary
+//          class). Decision-log parity with the PR #1787 schema precedent: the
+//          MERGE pass always restamped these blocks template-wins, but only on
+//          the console, so the 0.26.0 vocabulary wave's convergence state was
+//          invisible in the persisted decision log. (b) the SCHEMA_MERGE
+//          reporting no longer calls template-authoritative landings
+//          "withheld (project-wins)": INFO-severity deltas are landing
+//          documentation and print/record as "landed (template wins)"; only
+//          non-INFO deltas keep the withheld wording and the withheld count.
 // v1.88.0 (2026-11-01, T-20261101-001 adjudication, design addendum
 //          docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md
 //          §Addendum): VARIANT-SCOPE SKILL PRUNE loudness + adoption guard —
@@ -1917,6 +1933,17 @@ function mergeWorkspaceManaged(projectFile: string, templateFile: string, rel: s
 
   const result = mergeManagedBlocks(projContent, tplContent, commonContent, rel, dryRun, censusGate);
   for (const line of result.log) console.log(line);
+  // v1.89.0 (registry-platform-vocabulary addendum): one TEMPLATE_DELTA (INFO)
+  // row per genuinely diverged managed block the merge restamped template-wins
+  // (lib/managed-block-merge v1.6.0 restamps[]). Block-level, not per-line —
+  // the tier-vocabulary class (AGENTS.md tier-model-mapping, CODEX.md
+  // COMMON-CODEX) converges whole-block, and the row documents the landing the
+  // same way the SCHEMA_MERGE template-authoritative rows do (PR #1787
+  // precedent). Byte-equal blocks produce no row, so a converged project's
+  // next visit logs zero restamp rows (idempotent).
+  for (const rs of result.restamps) {
+    recordDecision(rel, 'MERGE_MANAGED', pass, 'TEMPLATE_DELTA', `template-authoritative managed block restamped (template wins): ${rs.label}${rs.key ? `:${rs.key}` : ''} — project block diverged from the template and was restamped (${rs.linesBefore} line(s) → ${rs.linesAfter} line(s))`, undefined, 'INFO');
+  }
   // D2/D4: a census-blocked adapted-span reconcile records CONFLICT (ERROR) —
   // the decision names the adjudicated-port procedure as the sanctioned path.
   for (const esc of result.escalated) {
@@ -4156,25 +4183,37 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           console.log(`  OK     ${rel}  (schema merge — in sync)`);
           continue;
         }
-        const withheld = result.templateDeltas;
+        const deltas = result.templateDeltas;
+        // v1.89.0: INFO-severity deltas are template-authoritative landing
+        // documentation (the template value WON and landed — PR #1787 class);
+        // only non-INFO deltas are genuine withholdings (project-wins).
+        const withheld = deltas.filter((d) => d.severity !== 'INFO');
+        const landedDeltas = deltas.filter((d) => d.severity === 'INFO');
         const landedList = result.landed.join(', ') || '—';
         const preservedList = result.preserved.join(', ') || '—';
-        console.log(`  MERGE  ${rel}  (landed: ${landedList}; preserved: ${preservedList}; withheld template changes: ${withheld.length})`);
+        console.log(`  MERGE  ${rel}  (landed: ${landedList}; preserved: ${preservedList}; landed template deltas: ${landedDeltas.length}; withheld template changes: ${withheld.length})`);
+        for (const delta of landedDeltas) {
+          console.log(`      TEMPLATE_DELTA (landed — template wins) ${delta.path}  project ${delta.project} vs template ${delta.template}`);
+        }
         for (const delta of withheld) {
-          console.log(`      TEMPLATE_DELTA ${delta.path}  project ${delta.project} vs template ${delta.template}`);
+          console.log(`      TEMPLATE_DELTA (withheld — project wins) ${delta.path}  project ${delta.project} vs template ${delta.template}`);
         }
         // House CONFLICT (WARN) guard: uncommitted local modifications survive only via the
         // pre-upgrade stash — the merge applies over them, visibly.
         if (isLocallyModified(dest)) {
           recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'CONFLICT', 'uncommitted local modifications — schema merge applied over them (pre-upgrade stash covers rollback)', priorBaselines[rel], 'WARN');
         }
-        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', `schema merge — landed: ${landedList}; preserved: ${preservedList}; template changes withheld (project-wins): ${withheld.length}`);
+        recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'MERGE', `schema merge — landed: ${landedList}; preserved: ${preservedList}; landed template deltas: ${landedDeltas.length}; template changes withheld (project-wins): ${withheld.length}`);
         if (!dryRun) writeFileSync(dest, result.merged, 'utf8');
         noteDelivered(rel);
-        // One TEMPLATE_DELTA row per withheld template change (design §4): the decision
-        // log owns visibility of what did not land; the upgrade stays green.
-        for (const delta of withheld) {
-          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'TEMPLATE_DELTA', `template change withheld (project-wins): ${delta.path} — project ${delta.project} vs template ${delta.template}`, undefined, delta.severity);
+        // One TEMPLATE_DELTA row per template delta (design §4 + v1.89.0): the
+        // decision log owns visibility of what landed template-wins (INFO
+        // landing documentation) and what did not land (non-INFO withheld);
+        // the upgrade stays green.
+        for (const delta of deltas) {
+          recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'TEMPLATE_DELTA', delta.severity === 'INFO'
+            ? `template-authoritative vocabulary landed (template wins): ${delta.path} — project ${delta.project} vs template ${delta.template}`
+            : `template change withheld (project-wins): ${delta.path} — project ${delta.project} vs template ${delta.template}`, undefined, delta.severity);
         }
         console.log(`  ${dryTag}WROTE: ${rel}`);
         treeChanged++;
