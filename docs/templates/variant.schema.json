@@ -275,7 +275,7 @@
     },
     "hub": {
       "type": "object",
-      "description": "Hub/spoke topology declaration (design docs/designs/2026-11-01-hub-consolidation-design.md SS2 and SS6). Optional: variants without the block are standalone and existing variant.json files stay valid. Hub-role fields (domain, arbitrates, hub_remote) and consumer-role fields (consumes) are mutually exclusive; enforcement lives in validate-templates.ts hub legs, audit.ts hub-resolve, and the hub_topology registry (docs/workspace-schema.json).",
+      "description": "Hub/spoke topology declaration (design docs/designs/2026-11-01-hub-consolidation-design.md SS2 and SS6). Optional: variants without the block are standalone and existing variant.json files stay valid. Role hub requires domain; role consumer requires consumes and forbids the hub-role fields (domain, arbitrates, hub_remote). consumes[] is allowed on BOTH roles (extension 2026-11-02, co-develop hub-consumes-co-security precedent): a hub may also consume another domain's doctrine. Enforcement lives in validate-templates.ts hub legs, audit.ts hub-resolve, and the hub_topology registry (docs/workspace-schema.json).",
       "required": ["role"],
       "properties": {
         "role": {
@@ -299,7 +299,7 @@
         },
         "consumes": {
           "type": "array",
-          "description": "Consumer role only: declared hub consumption (design SS7.3). Enforced by the audit.ts hub-resolve checker and the validate-templates.ts hub-consumer-min-version leg: a declared minimum_version newer than the canonical registry entry version FAILs.",
+          "description": "Declared hub consumption (design SS7.3). Allowed on role consumer AND on role hub (extension 2026-11-02: a hub may also consume another domain's doctrine — co-develop consumes co-security). Enforced by the audit.ts hub-resolve checker and the validate-templates.ts hub-consumer-min-version leg: a declared minimum_version newer than the canonical registry entry version FAILs.",
           "items": {
             "type": "object",
             "required": ["domain", "minimum_version"],
@@ -322,10 +322,7 @@
         {
           "if": { "properties": { "role": { "const": "hub" } }, "required": ["role"] },
           "then": {
-            "required": ["domain"],
-            "properties": {
-              "consumes": { "not": {} }
-            }
+            "required": ["domain"]
           }
         },
         {

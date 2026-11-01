@@ -58,6 +58,8 @@
 | `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-abap/pm | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
+| `co-design/design-foundation` | variant:co-design | 1.2.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
+| `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with) | — | — |
 | `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
 | `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.2 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows), root/service-design (follows) | — | — |
 | `co-develop/code-review` | variant:co-develop | 1.0.1 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
@@ -499,7 +501,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
 | `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
 | `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/service-design` | — | — |
-| `doc:co-design/README.md` | doc | `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
+| `doc:co-design/README.md` | doc | `co-design/design-foundation`, `co-design/design-review`, `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-develop/agents/designer.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/ui-ux-design-intelligence` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
@@ -816,6 +818,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `ux-researcher` | agent | divergence | co-architect@1.0.0 #1bc28048; co-design@1.1.1 #1a8d22e1 |
 | `visual-designer` | agent | divergence | co-architect@1.0.0 #ae1be86d; co-design@1.1.1 #19bc59c2 |
 | `agent-lifecycle-manager` | skill | version-drift | co-safety@1.3.1 #a5b6fdf8; root@1.3.1 #230ce8c0 |
+| `design-foundation` | skill | divergence | co-design@1.2.0 #5cc8c410; root@1.1.0 #0f50cf02 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
@@ -842,7 +845,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-141 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+143 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -879,7 +882,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-02), window 90 days. Skill nodes with usage: 8.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (8): co-safety/meeting-facilitation, co-safety/sync, common/sync, root/meeting-facilitation, root/project-resync, root/project-to-variant, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (238): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/standup-synthesizer, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build … and 198 more
+- **unused** (0 sessions in 90 days) (240): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/standup-synthesizer, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build … and 200 more
 
 ## Ambiguous Name Resolutions
 

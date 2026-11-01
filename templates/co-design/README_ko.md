@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 1e8cebc1a35879a4615474af2ee563023f54ecbf847c319dda44cf47eeb4cead
+translated_from_hash: 5d817df7730cb709661886d483384a4594cfbb28ab5fcebebebb8dcb8520efc8
 lang: ko
 lang_reason: source-material
 ---
@@ -52,6 +52,8 @@ lang_reason: source-material
 ## 스킬
 
 - **accessibility-audit**: UI 컴포넌트, 템플릿, 웹 애플리케이션을 위한 자동화된 WCAG 2.1 Level AA 접근성 평가 규칙, DOM 감사 패턴, axe-core 기반 수정 가이드를 정의합니다.
+- **design-foundation**: 도메인 증거에서 디자인 원칙, 기록된 디자인 결정, 3계층 토큰 아키텍처(Primitive → Semantic ← [data-theme] → Component)로 이어지는 스타일 중립적 디자인 시스템 도출 절차입니다. 사용 시점: 신규 프로젝트의 디자인 원칙 수립, 프로젝트 디자인 가이드 작성, 디자인 토큰 시스템 구축, 디자인 파운데이션 완성도 검토.
+- **design-review**: 구현된 UI(프로토타입 또는 출시 화면)를 프로젝트의 디자인 SSOT과 사용자 여정에 대조하여 문제를 검토하고 수정을 주도합니다 — 디자인 시스템 컨포먼스, 인터랙션 어포던스, 사용자 여정 워크스루, 공유 증거 기반 이슈 로그가 있는 전 에이전트 UI/UX 크리티크 세션. 사용 시점: 구현된 UI의 디자인 컨포먼스 검토 또는 게이트 기반 UI/UX 수정 루프 실행.
 - **service-design**: 고객 여정, 서비스 블루프린트, 운영 프로세스를 포함한 엔드투엔드 서비스 경험을 디자인합니다. 사용 시점: 고객 경험 매핑, 터치포인트 최적화, 프론트스테이지/백스테이지 운영 정렬, 서비스 전달 개선.
 - **token-usage-lint**: tokens.json SSOT을 우회하는 하드코딩된 디자인 값(원시 hex 색상, rgb()/hsl() 리터럴, 원시 px 간격)을 co-design UI 코드에서 검사하는 린트 절차입니다. 사용 시점: 생성된 UI 코드 검토, 하드코딩된 디자인 값 감사, 플레이그라운드 데모 및 핸드오프 아티팩트의 디자인 토큰 컴플라이언스 확인.
 - **ui-ux-design-intelligence**: 디자인 시스템 생성, 컴포넌트 디자인, 시각적 계층 구조, 사용자 중심 디자인 원칙을 포함한 종합적인 UI/UX 디자인 역량을 제공합니다. 사용 시점: 디자인 시스템 구축, 시각 디자인 생성, UI 컴포넌트 디자인, 디자인 명세 수립.

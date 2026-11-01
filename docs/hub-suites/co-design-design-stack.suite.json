@@ -1,7 +1,7 @@
 {
   "suite": "co-design-design-stack",
   "hub_variant": "co-design",
-  "description": "co-design design stack hub suite — batch B of the 2026-11-01-hub-consolidation Phase 1. Promotes/re-asserts the byte-clean design-stack assets from the co-design hub project (Projects/co-design) into the co-design variant template and registers them as hub-doctrine canonicals. Deliberately EXCLUDED from this wave: skills design-foundation (L3 v1.2.0, L2 absent) and design-review (L3 v1.1.0, L2 absent) — both are L3-ahead, but their verbatim bytes fail the workspace skill-structure battery (audit.ts checkVariantSkillSections: design-foundation lacks all 5 required sections; design-review lacks '## Context'), and hub-promotion's byte-identity model forbids L2-side adaptation. They land in a follow-up wave after a hub-side (Projects/co-design) template-grade conformance fix per the 2026-10-27 frame gate (b). service-design is registered here but NOT byte-promoted: the L2 copy is the richer side (l2_propagate:true frontmatter, newer last_reviewed 2026-09-27, clean EOF) while the L3 copy carries a stray ', EOF artifact. Consumers/minimum_version reflect measured installed versions in Projects/co-architect and Projects/co-develop (fan-in evidence: co-architect consumes the design suite; co-develop consumes skill design-review). tokens.json carries no embedded version; 1.0.0 is the initial registration pin.",
+  "description": "co-design design stack hub suite — batch B of the 2026-11-01-hub-consolidation Phase 1. Promotes/re-asserts the byte-clean design-stack assets from the co-design hub project (Projects/co-design) into the co-design variant template and registers them as hub-doctrine canonicals. Deliberately EXCLUDED from this wave: skills design-foundation (L3 v1.2.0, L2 absent) and design-review (L3 v1.1.0, L2 absent) — both are L3-ahead, but their verbatim bytes fail the workspace skill-structure battery (audit.ts checkVariantSkillSections: design-foundation lacks all 5 required sections; design-review lacks '## Context'), and hub-promotion's byte-identity model forbids L2-side adaptation. They land in a follow-up wave after a hub-side (Projects/co-design) template-grade conformance fix per the 2026-10-27 frame gate (b). Follow-up wave (2026-11-02, spec 2026-11-01-hub-consolidation Phase 1 batch B follow-up): both landed as the last two registry_entries rows below. The L2 canonicals were authored directly from the L3 doctrine — restructured to the workspace skill battery (checkVariantSkillSections) WITHOUT touching Projects/co-design, so the L3 files remain battery-failing and hub-promotion's byte-identity asset model is bypassed: assets[] deliberately carries NO row for either skill (registry-only entries, batch C/D authored-L2 mechanism). Restructuring maps — design-foundation: L3 Purpose -> Context (verbatim), Procedure -> Execution Steps (verbatim, Stages 1-6 intact), When to Use / Output Format / Related Skills derived from the frontmatter Use-when clause, the procedure's own artifacts, and the relates_to/Boundaries handoffs; design-review: L3 Purpose -> Context (verbatim), all four remaining required sections already present. Frontmatter doctrine values (name/description/version/scope/owner/relates_to/metadata) preserved; only last_reviewed bumped to 2026-11-02; versions stay the L3 versions (1.2.0 / 1.1.0). One forced wording adaptation on the design-review variant canonicals (all six copies): Step 6 deferred-items sentence drops the literal `bun scripts/ticket.ts create --manual` invocation (validate-templates WS-05a FAILs any variant command/skill markdown naming the L0-only ticket CLI); the doctrine sentence otherwise survives verbatim and Projects/co-design keeps the original wording. Registration also required one root-surface row: skills/SKILLS.md Variant-Exclusive catalog gained a design-review row (co-design only) per the catalog's missing-row FAIL; design-foundation needs none (root workspace skill, excluded from the catalog by construction). consumers[] follows the batch D convention: co-architect installs design-foundation 1.1.0 (re-derivation to the 1.2.0 canonical pending — minimum_version set to the canonical); co-develop's installed design-review 1.1.0 matches the canonical. service-design is registered here but NOT byte-promoted: the L2 copy is the richer side (l2_propagate:true frontmatter, newer last_reviewed 2026-09-27, clean EOF) while the L3 copy carries a stray ', EOF artifact. Consumers/minimum_version reflect measured installed versions in Projects/co-architect and Projects/co-develop (fan-in evidence: co-architect consumes the design suite; co-develop consumes skill design-review). tokens.json carries no embedded version; 1.0.0 is the initial registration pin.",
   "assets": [
     {
       "source": "Projects/co-design/skills/accessibility-audit/SKILL.md",
@@ -92,6 +92,32 @@
       "version": "1.0.0",
       "consumers": [
         { "variant": "co-architect", "minimum_version": "1.0.0" }
+      ]
+    },
+    {
+      "asset": "design-foundation",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-architect"],
+      "origin": "Projects/co-design (hub project); canonical restructured to the workspace skill battery at L2 (2026-11-02 follow-up wave, registry-only authored canonical)",
+      "canonical_path": "templates/co-design/skills/design-foundation/SKILL.md",
+      "version": "1.2.0",
+      "consumers": [
+        { "variant": "co-architect", "minimum_version": "1.2.0" }
+      ]
+    },
+    {
+      "asset": "design-review",
+      "domain": "co-design",
+      "hub_variant": "co-design",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-design (hub project); canonical conformed at L2 (## Context added from the L3 Purpose; 2026-11-02 follow-up wave, registry-only authored canonical)",
+      "canonical_path": "templates/co-design/skills/design-review/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
       ]
     }
   ]

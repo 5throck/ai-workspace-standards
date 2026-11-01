@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 1e8cebc1a35879a4615474af2ee563023f54ecbf847c319dda44cf47eeb4cead
+content_hash: 5d817df7730cb709661886d483384a4594cfbb28ab5fcebebebb8dcb8520efc8
 ---
 
 # co-design
@@ -50,6 +50,8 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 ## Skills
 
 - **accessibility-audit**: Defines automated WCAG 2.1 Level AA accessibility evaluation rules, DOM audit patterns, and remediation guidance using axe-core for UI components, templates, and web applications.
+- **design-foundation**: Style-neutral procedure for deriving a project's own design system — from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture (Primitive → Semantic ← [data-theme] → Component). Use when: establishing design principles for a new project, creating a project design guide, setting up a design token system, or reviewing a project's design foundation completeness.
+- **design-review**: Reviews an implemented UI (prototype or shipped screens) against the project's design SSOT and user journeys, and drives remediation of the issues found — design-system conformance, interaction affordances, user-journey walkthroughs, and an all-agent UI/UX critique session with a shared evidence-based issue log. Use when: reviewing an implemented UI for design conformance or running a gated UI/UX remediation loop.
 - **service-design**: Designs end-to-end service experiences including customer journeys, service blueprints, and operational processes. Use when: mapping customer experiences, optimizing touchpoints, aligning frontstage and backstage operations, or improving service delivery.
 - **token-usage-lint**: Lint procedure that scans co-design UI code for hardcoded design values (raw hex colors, rgb()/hsl() literals, raw px spacing) that bypass the tokens.json SSOT. Use when: reviewing generated UI code, auditing for hardcoded design values, or checking design token compliance in playground demos and handoff artifacts.
 - **ui-ux-design-intelligence**: Provides comprehensive UI/UX design capabilities including design system creation, component design, visual hierarchy, and user-centered design principles. Use when: building design systems, creating visual designs, designing UI components, or establishing design specifications.
@@ -94,4 +96,4 @@ This variant focuses on UI/UX design, design systems, prototyping, and design ha
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-02*

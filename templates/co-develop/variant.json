@@ -132,7 +132,13 @@
   "hub": {
     "role": "hub",
     "domain": "co-develop",
-    "hub_remote": "https://github.com/5throck/co-develop.git"
+    "hub_remote": "https://github.com/5throck/co-develop.git",
+    "consumes": [
+      {
+        "domain": "co-security",
+        "minimum_version": "1.1.0"
+      }
+    ]
   },
   "process_manifest": {
     "stages_file": null,
