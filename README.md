@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
+content_hash: 18fc2968818077f6d2b760c419fa1ea9a9e9fd33f8be05e9bcbbde29d3466c5c
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -218,7 +218,7 @@ C:\git\ (workspace root - this repo)
 ├── .githooks/               # Git hooks for enforcing PR policies and rules
 ├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AI tool platform directories (settings, skills mirrors, slash commands)
 ├── Handbooks/               # Local sources for the published learning handbooks
-├── graft/                   # Repo context graph (ADR-0076)
+├── .trail/                  # Repo context graph index/cache (Trail, ADR-0076)
 ├── schemas/                 # Shared JSON schemas
 ├── tickets/                 # Governance decision tickets
 ├── docs/                    # Governance docs — manifest & creation criteria: docs/README.md
@@ -408,4 +408,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-01*

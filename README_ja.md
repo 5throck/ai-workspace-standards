@@ -220,7 +220,7 @@ C:\git\ (ワークスペースルート - このリポジトリ)
 ├── .githooks/               # PRポリシーとルールを強制するGitフック
 ├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AIツールプラットフォームディレクトリ（設定、スキルミラー、スラッシュコマンド）
 ├── Handbooks/               # 公開学習ハンドブックのローカルソース
-├── graft/                   # リポジトリコンテキストグラフ（ADR-0076）
+├── .trail/                  # リポジトリコンテキストグラフのインデックス/キャッシュ（Trail, ADR-0076）
 ├── schemas/                 # 共有JSONスキーマ
 ├── tickets/                 # ガバナンス決定チケット
 ├── docs/                    # ガバナンス文書 — マニフェスト: docs/README.md
@@ -406,4 +406,4 @@ AGPL-3.0 - [LICENSE](LICENSE)を参照
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-10*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-01*

@@ -1,5 +1,5 @@
 ---
-translated_from_hash: f60609e949438ea0834756e67db77ed7fa7f1b3ffb621db431ca5ddb342fa2e3
+translated_from_hash: 18fc2968818077f6d2b760c419fa1ea9a9e9fd33f8be05e9bcbbde29d3466c5c
 sync_version: 4
 lang: ko
 lang_reason: source-material
@@ -217,7 +217,7 @@ C:\git\ (워크스페이스 루트 - 현재 저장소)
 ├── .githooks/               # PR 산출물 강제 및 시크릿 검사를 위한 Git 훅
 ├── .claude/ .gemini/ .agents/ .codex/ .hermes/   # AI 툴 플랫폼 디렉터리 (설정, 스킬 미러, 슬래시 명령어)
 ├── Handbooks/               # 공개 학습 핸드북의 로컬 소스
-├── graft/                   # 저장소 컨텍스트 그래프 (ADR-0076)
+├── .trail/                  # 저장소 컨텍스트 그래프 인덱스/캐시 (Trail, ADR-0076)
 ├── schemas/                 # 공유 JSON 스키마
 ├── tickets/                 # 거버넌스 의사결정 티켓
 ├── docs/                    # 거버넌스 문서 — 매니페스트 및 생성 기준: docs/README.md
@@ -405,4 +405,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-10-27*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-01*
