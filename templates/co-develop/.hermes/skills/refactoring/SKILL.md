@@ -440,6 +440,29 @@ Identify Issue → Plan Refactoring → Apply Change → Run Tests → Commit �
 
 ---
 
+## Spoke Derivation Note
+
+This file is the hub-doctrine canonical for the co-develop generic dev spine
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch D). Co-develop
+pipelines run it as written. A spoke variant derives from this doctrine by
+substituting the bindings below — the derivation never edits the
+single-valued frontmatter doctrine: `scope: co-develop` stays as written
+here, and the spoke label lives in this note only.
+
+No {{PROJECT_*}} placeholder is needed in this skill: its per-spoke deltas
+are frontmatter labels, not body prose, so they are documented as bindings
+rather than parameterized. This canonical also cleans the stray `", ` EOF
+artifact inherited from the pre-consolidation copies (all four measured
+L2/L3 copies carried it).
+
+| Spoke | Derivation binding |
+|---|---|
+| co-game | Renders `scope: co-game`; body and edges otherwise identical. |
+| co-learning | Not adopted — absent from Projects/co-learning and its template. The fleet skill-graph projection carries only a dangling reference node for it (content_hash null); it is not an installed consumer. |
+| co-abap | Not adopted — co-abap carries no refactoring capability; its `abap-dev` skill is a domain-specific asset outside this generic spine. |
+
+---
+
 ## Related Skills
 
 - **test-driven-development**: For building test safety net
@@ -513,4 +536,3 @@ Identify Issue → Plan Refactoring → Apply Change → Run Tests → Commit �
 - Add tests first, then refactor
 - Stabilize before improving
 - Focus on new features instead
-",

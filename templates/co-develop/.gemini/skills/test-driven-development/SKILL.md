@@ -360,6 +360,27 @@ Unit Tests (many)
 
 ---
 
+## Spoke Derivation Note
+
+This file is the hub-doctrine canonical for the co-develop generic dev spine
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch D). Co-develop
+pipelines run it as written. A spoke variant derives from this doctrine by
+substituting the bindings below — the derivation never edits the
+single-valued frontmatter doctrine: `scope: co-develop` stays as written
+here, and the spoke label lives in this note only.
+
+No {{PROJECT_*}} placeholder is needed in this skill: its per-spoke deltas
+are frontmatter labels, not body prose, so they are documented as bindings
+rather than parameterized.
+
+| Spoke | Derivation binding |
+|---|---|
+| co-game | Renders `scope: co-game`; body and edges otherwise identical. |
+| co-learning | Not adopted — absent from Projects/co-learning and its template. The fleet skill-graph projection carries only a dangling reference node for it (content_hash null); it is not an installed consumer. |
+| co-abap | Not adopted — co-abap carries no TDD capability; its SAP quality chain (RunUnitTests/ATC via the test-runner agent) is a domain-specific workflow outside this generic spine. |
+
+---
+
 ## Related Skills
 
 - **code-review**: For evaluating test quality and coverage

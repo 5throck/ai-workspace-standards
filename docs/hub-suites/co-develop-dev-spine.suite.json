@@ -1,0 +1,145 @@
+{
+  "suite": "co-develop-dev-spine",
+  "hub_variant": "co-develop",
+  "description": "co-develop generic dev spine hub suite — batch D of the 2026-11-01-hub-consolidation Phase 1, the SEMANTIC-MERGE batch for the generic development spine (agents architect/code-writer/test-runner + skills code-review/refactoring/test-driven-development). The six canonicals in templates/co-develop are authored merge products per the batch C mechanism: hub-promotion's byte-identity asset model would overwrite them with the unparameterized Projects/co-develop L3 bytes, so all six are registry-only rows here. Authoring decisions: (a) agents keep the L2 [Project Name] scaffold token the template copies already carry and parameterize measured per-spoke body deltas with {{PROJECT_IMPLEMENTATION_AGENT}} (architect, test-runner — co-game binds game-developer) and {{PROJECT_AUDIT_COMMAND}} (test-runner — co-game binds bash scripts/audit.sh); frontmatter handoff_to/handoff_from/required_skills stay single-valued co-develop doctrine with per-spoke bindings documented in a Spoke Derivation Note; all three agents bumped 1.1.1 -> 1.2.0 (code-writer note-only — it IS the implementation role, no tokens). (b) SKILLS stay at their measured on-disk versions (code-review 1.0.1, refactoring 1.0.1, test-driven-development 1.0.0; last_reviewed unchanged): these three are multi-variant at L2 (co-develop + co-game templates) and the Variant-Exclusive catalog gate fails any one-sided version bump — the minor bump to 1.1.0 lands with the co-game re-derivation wave, when both variants move together; this batch's skill changes are body-only (Spoke Derivation Note added; refactoring additionally drops the stray '\", ' EOF artifact carried by all four pre-consolidation copies). (c) assets[] carries the only byte-clean suite-coupled files — the three lifecycle reference cards (byte-identical L3<->L2 re-assert, zero-overwrite). EXCLUSIONS per the batch scope: agent stack-setup and agent designer are present in only 2/16 projects (co-develop, co-game) — fan-in data does not prove them generic, so they stay OUT of the spine (their known_unregistered_duplicates soak rows remain); co-abap's abap-code-review is domain-specific. Consumer-set corrections vs the fleet-report fanIn2 evidence: co-learning is NOT an installed consumer of refactoring/test-driven-development/code-review (its skill-graph projection carries only dangling reference nodes with content_hash null for the first two, and it never carried code-review on disk), so consumers[] records co-game only for the three skills; co-learning IS a real consumer of all three agents (installed 1.0.0 copies, next-wave re-derivation); co-abap is excluded from every consumer set — its three agents are SAP-specific forks, not derivations of this doctrine. Tokens join PLACEHOLDER_ALLOWLIST (upgrade-policy.ts v1.36.0, both schema copies of the script); the six registered assets retire their known_unregistered_duplicates soak rows in the same commit.",
+  "assets": [
+    {
+      "source": "Projects/co-develop/docs/lifecycle/agents/architect.md",
+      "dest": "templates/co-develop/docs/lifecycle/agents/architect.md",
+      "kind": "file",
+      "name": "lifecycle-agents-architect"
+    },
+    {
+      "source": "Projects/co-develop/docs/lifecycle/agents/code-writer.md",
+      "dest": "templates/co-develop/docs/lifecycle/agents/code-writer.md",
+      "kind": "file",
+      "name": "lifecycle-agents-code-writer"
+    },
+    {
+      "source": "Projects/co-develop/docs/lifecycle/agents/test-runner.md",
+      "dest": "templates/co-develop/docs/lifecycle/agents/test-runner.md",
+      "kind": "file",
+      "name": "lifecycle-agents-test-runner"
+    }
+  ],
+  "registry_entries": [
+    {
+      "asset": "architect",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-game",
+        "co-learning"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/agents/architect.md",
+      "version": "1.2.0",
+      "consumers": [
+        {
+          "variant": "co-game",
+          "minimum_version": "1.2.0"
+        },
+        {
+          "variant": "co-learning",
+          "minimum_version": "1.2.0"
+        }
+      ]
+    },
+    {
+      "asset": "code-writer",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-learning"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/agents/code-writer.md",
+      "version": "1.2.0",
+      "consumers": [
+        {
+          "variant": "co-learning",
+          "minimum_version": "1.2.0"
+        }
+      ]
+    },
+    {
+      "asset": "test-runner",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-game",
+        "co-learning"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/agents/test-runner.md",
+      "version": "1.2.0",
+      "consumers": [
+        {
+          "variant": "co-game",
+          "minimum_version": "1.2.0"
+        },
+        {
+          "variant": "co-learning",
+          "minimum_version": "1.2.0"
+        }
+      ]
+    },
+    {
+      "asset": "code-review",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-game"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/skills/code-review/SKILL.md",
+      "version": "1.0.1",
+      "consumers": [
+        {
+          "variant": "co-game",
+          "minimum_version": "1.0.1"
+        }
+      ]
+    },
+    {
+      "asset": "refactoring",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-game"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/skills/refactoring/SKILL.md",
+      "version": "1.0.1",
+      "consumers": [
+        {
+          "variant": "co-game",
+          "minimum_version": "1.0.1"
+        }
+      ]
+    },
+    {
+      "asset": "test-driven-development",
+      "domain": "co-develop",
+      "hub_variant": "co-develop",
+      "category": "hub-doctrine",
+      "verticals": [
+        "co-game"
+      ],
+      "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+      "canonical_path": "templates/co-develop/skills/test-driven-development/SKILL.md",
+      "version": "1.0.0",
+      "consumers": [
+        {
+          "variant": "co-game",
+          "minimum_version": "1.0.0"
+        }
+      ]
+    }
+  ]
+}

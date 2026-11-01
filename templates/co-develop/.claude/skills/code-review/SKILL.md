@@ -352,6 +352,28 @@ This skill provides systematic code review capabilities, ensuring code changes a
 
 ---
 
+## Spoke Derivation Note
+
+This file is the hub-doctrine canonical for the co-develop generic dev spine
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch D). Co-develop
+pipelines run it as written. A spoke variant derives from this doctrine by
+substituting the bindings below — the derivation never edits the
+single-valued frontmatter doctrine: `scope: co-develop` and
+`capability: swe-code-review` stay as written here, and the spoke labels
+live in this note only.
+
+No {{PROJECT_*}} placeholder is needed in this skill: its per-spoke deltas
+are frontmatter labels and skill-graph edges, not body prose, so they are
+documented as bindings rather than parameterized.
+
+| Spoke | Derivation binding |
+|---|---|
+| co-game | Renders `capability: game-code-review`, `scope: co-game`; `relates_to` swaps the `refactoring`/`composes_with` edge for `arcade-physics` + `test-driven-development` (both `follows`); the description's closing sentence names the game-development variant capability. |
+| co-learning | Not adopted — absent from Projects/co-learning and its template. The fleet skill-graph projection carries only dangling reference nodes for it (content_hash null); it is not an installed consumer. |
+| co-abap | Not adopted — co-abap derives the domain-specific `abap-code-review` instead, which is outside this generic spine. |
+
+---
+
 ## Related Skills
 
 - **security-review**: For specialized security auditing

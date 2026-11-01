@@ -1,4 +1,15 @@
-// @version 1.35.0
+// @version 1.36.0
+// v1.36.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          Phase 1 batch D): PLACEHOLDER_ALLOWLIST gains the 2 co-develop
+//          generic-dev-spine agent canonicals that carry derivation tokens
+//          (agents/architect.md, agents/test-runner.md). Their
+//          {{PROJECT_IMPLEMENTATION_AGENT}} / {{PROJECT_AUDIT_COMMAND}} tokens
+//          are hub-doctrine derivation parameters (Spoke Derivation Note in
+//          each file defines unfilled defaults + spoke bindings), never
+//          scaffold substitutions — same contract as the batch C skill keys
+//          below. Agent files get no platform mirrors at L2 (agent mirrors are
+//          a workspace-root generator surface), so plain agent-level keys
+//          suffice.
 // v1.35.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          Phase 1 batch C): PLACEHOLDER_ALLOWLIST gains the 5 co-security
 //          assurance-suite canonical SKILL.md paths. Their {{PROJECT_*}} tokens
@@ -460,6 +471,11 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
   'skills/spdx-sbom/SKILL.md',
   'skills/stride-threat-matrix/SKILL.md',
   'skills/finding-reconciliation/SKILL.md',
+  // co-develop generic-dev-spine agent canonicals (hub doctrine, spec
+  // 2026-11-01-hub-consolidation-design Phase 1 batch D): derivation tokens
+  // per the batch C contract above; agent files carry no L2 platform mirrors.
+  'agents/architect.md',
+  'agents/test-runner.md',
 ]);
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────

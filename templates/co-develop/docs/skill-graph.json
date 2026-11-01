@@ -203,6 +203,18 @@
     },
     {
       "type": "references",
+      "from": "code-review",
+      "to": "refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "code-review",
+      "to": "test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "designer",
       "to": "code-review",
       "source": "prose"

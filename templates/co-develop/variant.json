@@ -129,6 +129,11 @@
   },
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "core",
+  "hub": {
+    "role": "hub",
+    "domain": "co-develop",
+    "hub_remote": "https://github.com/5throck/co-develop.git"
+  },
   "process_manifest": {
     "stages_file": null,
     "raci_file": null,
