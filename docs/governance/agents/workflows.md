@@ -128,6 +128,10 @@ Use this to resolve ambiguity when multiple agents could handle a request.
 <!-- VARIANT-ROLE-BOUNDARY-START -->
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
+### §4.4 Hub-and-Spoke Topology (pointer)
+
+Cross-variant asset ownership (hub canonical assets, spoke consumption, variant-identity protection) is declared in the `hub_topology` registry (`docs/workspace-schema.json`) and governed by `docs/designs/2026-11-01-hub-consolidation-design.md`. PM consumption duties on this topology: hub service consumption rules live in [pm-gateway-workflow.md §3.13](pm-gateway-workflow.md#313-hub-service-consumption-hub-and-spoke-topology).
+
 ---
 
 

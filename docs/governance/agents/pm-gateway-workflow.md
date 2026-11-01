@@ -86,6 +86,10 @@ Upstream-request tickets (`U-YYYYMMDD-NNN`, `kind: manual`, `trust: untrusted`) 
 
 **Project side and surfaces** (ADR-0097): the reporting duty for project PMs lives in `templates/common/agents/pm.md` ("Upstream Reporting Duty"). Every surface in CONSTITUTION §11.0 loads that file through its instruction file, so the rule is the same everywhere. `bun scripts/install-upstream-mcp.ts` (run by the user) registers the tool per surface; see the design's Appendix B. A project agent on a surface without the tool marks the patch `LOCAL-PATCH(upstream-request: pending)` and records the facts in the task log, then reports when the tool exists.
 
+### §3.13 Hub Service Consumption (hub-and-spoke topology)
+
+Hub-and-spoke asset delivery (design: `docs/designs/2026-11-01-hub-consolidation-design.md`; registry: `hub_topology` in `docs/workspace-schema.json`, §11.5) makes a hub a **delivery responsibility, not an authority**: the hub variant's PM owns its domain's canonical assets, and spoke PMs consume hub services locally through the promotion machinery — a spoke never writes cross-repo, and consuming a hub asset never bypasses the consumer's own PM Gateway. Hard problems that exceed a spoke's local capability escalate through **delegation tickets** (design Phase 3 — not yet active; until the pilot lands, cross-project requests follow the upstream-request path, §3.12). Final adjudication over any hub/spoke dispute rests with the **workspace-root PM**.
+
 ---
 
 
