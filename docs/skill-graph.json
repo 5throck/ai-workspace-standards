@@ -1113,8 +1113,8 @@
       "name": "architect",
       "scope": "co-develop",
       "capability": "architect",
-      "content_hash": "357b319a29aba3a8",
-      "version": "1.1.1",
+      "content_hash": "8ba5b888cf3d9111",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/architect.md"
       ]
@@ -1126,8 +1126,8 @@
       "name": "code-writer",
       "scope": "co-develop",
       "capability": "code-writer",
-      "content_hash": "187fe7ae0d527643",
-      "version": "1.1.1",
+      "content_hash": "6f177c02a5e13e34",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/code-writer.md"
       ]
@@ -1192,8 +1192,8 @@
       "name": "test-runner",
       "scope": "co-develop",
       "capability": "test-runner",
-      "content_hash": "3d9c4d22096e5521",
-      "version": "1.1.1",
+      "content_hash": "758043dad0e76fb5",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/test-runner.md"
       ]
@@ -5503,7 +5503,7 @@
       "name": "code-review",
       "scope": "co-develop",
       "capability": "swe-code-review",
-      "content_hash": "42e904a2eb48362e",
+      "content_hash": "ff7a3bd5a5db8752",
       "version": "1.0.1",
       "mirrors": [
         "templates/co-develop/skills/code-review/SKILL.md"
@@ -5516,11 +5516,10 @@
       "name": "refactoring",
       "scope": "co-develop",
       "capability": "refactoring",
-      "content_hash": "ac456953a305a80b",
+      "content_hash": "f9c59c97a00f25c5",
       "version": "1.0.1",
       "mirrors": [
-        "templates/co-develop/skills/refactoring/SKILL.md",
-        "templates/co-game/skills/refactoring/SKILL.md"
+        "templates/co-develop/skills/refactoring/SKILL.md"
       ]
     },
     {
@@ -5543,11 +5542,10 @@
       "name": "test-driven-development",
       "scope": "co-develop",
       "capability": "test-driven-development",
-      "content_hash": "31bdc8f895a4e8ae",
+      "content_hash": "ced5b4713cb781eb",
       "version": "1.0.0",
       "mirrors": [
-        "templates/co-develop/skills/test-driven-development/SKILL.md",
-        "templates/co-game/skills/test-driven-development/SKILL.md"
+        "templates/co-develop/skills/test-driven-development/SKILL.md"
       ]
     },
     {
@@ -5720,6 +5718,19 @@
       ]
     },
     {
+      "id": "skill:co-game/refactoring",
+      "type": "skill",
+      "layer": "variant:co-game",
+      "name": "refactoring",
+      "scope": "co-game",
+      "capability": "refactoring",
+      "content_hash": "ac456953a305a80b",
+      "version": "1.0.1",
+      "mirrors": [
+        "templates/co-game/skills/refactoring/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-game/sound-synth",
       "type": "skill",
       "layer": "variant:co-game",
@@ -5730,6 +5741,19 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-game/skills/sound-synth/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-game/test-driven-development",
+      "type": "skill",
+      "layer": "variant:co-game",
+      "name": "test-driven-development",
+      "scope": "co-game",
+      "capability": "test-driven-development",
+      "content_hash": "31bdc8f895a4e8ae",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-game/skills/test-driven-development/SKILL.md"
       ]
     },
     {
@@ -12885,19 +12909,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide_ko.md",
-      "to": "skill:co-develop/refactoring",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide_ko.md",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide_ko.md",
       "to": "skill:co-game/code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill:co-game/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -12933,19 +12957,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
-      "to": "skill:co-develop/refactoring",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide.md",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:co-game/code-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill:co-game/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -12976,12 +13000,6 @@
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:root/skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/README.md",
-      "to": "skill:co-develop/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -13000,6 +13018,12 @@
       "type": "cites_skill",
       "from": "doc:co-game/README.md",
       "to": "skill:co-game/sound-synth",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -17306,13 +17330,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
-      "to": "skill:co-develop/test-driven-development",
+      "to": "skill:co-game/arcade-physics",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
-      "to": "skill:co-game/arcade-physics",
+      "to": "skill:co-game/test-driven-development",
       "source": "procedure_schema"
     },
     {
@@ -17420,13 +17444,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-release-verification",
-      "to": "skill:co-develop/test-driven-development",
+      "to": "skill:co-game/code-review",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-release-verification",
-      "to": "skill:co-game/code-review",
+      "to": "skill:co-game/test-driven-development",
       "source": "procedure_schema"
     },
     {
@@ -17470,13 +17494,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
-      "to": "skill:co-develop/test-driven-development",
+      "to": "skill:co-game/code-review",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
-      "to": "skill:co-game/code-review",
+      "to": "skill:co-game/test-driven-development",
       "source": "procedure_schema"
     },
     {
@@ -17546,12 +17570,6 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.gameplay-feature-loop",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-game.gameplay-feature-loop",
       "to": "skill:co-game/arcade-physics",
       "source": "procedure_schema"
     },
@@ -17559,6 +17577,12 @@
       "type": "step_uses_skill",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "skill:co-game/code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "skill:co-game/test-driven-development",
       "source": "procedure_schema"
     },
     {
@@ -22894,6 +22918,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "skill:co-develop/code-review",
+      "to": "skill:co-abap/abap-code-review",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "skill:co-develop/code-review",
       "to": "skill:co-develop/refactoring",
@@ -22906,6 +22936,24 @@
       }
     },
     {
+      "type": "references",
+      "from": "skill:co-develop/code-review",
+      "to": "skill:co-develop/refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-develop/code-review",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-develop/code-review",
+      "to": "skill:co-game/arcade-physics",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "skill:co-develop/refactoring",
       "to": "agent:co-develop/code-writer",
@@ -22915,18 +22963,6 @@
         "field": "required_skills",
         "index": 1
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-develop/refactoring",
-      "to": "agent:co-game/game-debugger",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-develop/refactoring",
-      "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
     },
     {
       "type": "produces",
@@ -22941,16 +22977,10 @@
       "source": "skill_manifest"
     },
     {
-      "type": "phase",
+      "type": "references",
       "from": "skill:co-develop/refactoring",
-      "to": "phase:co-game/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-develop/refactoring",
-      "to": "phase:co-game/5",
-      "source": "skill_manifest"
+      "to": "skill:co-abap/abap-dev",
+      "source": "prose"
     },
     {
       "type": "composes_with",
@@ -22988,46 +23018,6 @@
       }
     },
     {
-      "type": "used_by",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "agent:co-game/game-debugger",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-game/agents/game-debugger.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "agent:co-game/test-runner",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-game/agents/test-runner.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "output_type.prototyping_environment",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "output_type.regression_report",
-      "source": "procedure_schema"
-    },
-    {
       "type": "produces",
       "from": "skill:co-develop/test-driven-development",
       "to": "output_type.test_scaffold",
@@ -23037,18 +23027,6 @@
       "type": "phase",
       "from": "skill:co-develop/test-driven-development",
       "to": "phase:co-develop/4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "phase:co-game/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "phase:co-game/5",
       "source": "skill_manifest"
     },
     {
@@ -23907,24 +23885,6 @@
     {
       "type": "composes_with",
       "from": "skill:co-game/arcade-physics",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-game/arcade-physics",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "prose"
-    },
-    {
-      "type": "composes_with",
-      "from": "skill:co-game/arcade-physics",
       "to": "skill:co-game/code-review",
       "source": "relates_to",
       "symmetric": true,
@@ -23955,6 +23915,24 @@
       "type": "references",
       "from": "skill:co-game/arcade-physics",
       "to": "skill:co-game/sound-synth",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-game/arcade-physics",
+      "to": "skill:co-game/test-driven-development",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-game/arcade-physics",
+      "to": "skill:co-game/test-driven-development",
       "source": "prose"
     },
     {
@@ -24020,7 +23998,18 @@
     {
       "type": "follows",
       "from": "skill:co-game/code-review",
-      "to": "skill:co-develop/test-driven-development",
+      "to": "skill:co-game/arcade-physics",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-game/code-review",
+      "to": "skill:co-game/test-driven-development",
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-game/skills/code-review/SKILL.md",
@@ -24029,12 +24018,37 @@
       }
     },
     {
-      "type": "follows",
-      "from": "skill:co-game/code-review",
-      "to": "skill:co-game/arcade-physics",
+      "type": "used_by",
+      "from": "skill:co-game/refactoring",
+      "to": "agent:co-game/game-debugger",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-game/refactoring",
+      "to": "agent:co-game/game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-game/refactoring",
+      "to": "phase:co-game/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-game/refactoring",
+      "to": "phase:co-game/5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-game/refactoring",
+      "to": "skill:co-game/code-review",
       "source": "relates_to",
+      "symmetric": true,
       "provenance": {
-        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "file": "templates/co-game/skills/refactoring/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -24070,6 +24084,69 @@
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-game/skills/sound-synth/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-game/test-driven-development",
+      "to": "agent:co-game/game-debugger",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-game/test-driven-development",
+      "to": "agent:co-game/game-developer",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-game/test-driven-development",
+      "to": "agent:co-game/test-runner",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-game/test-driven-development",
+      "to": "output_type.prototyping_environment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-game/test-driven-development",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-game/test-driven-development",
+      "to": "phase:co-game/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-game/test-driven-development",
+      "to": "phase:co-game/5",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-game/test-driven-development",
+      "to": "skill:co-game/code-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/test-driven-development/SKILL.md",
         "field": "relates_to",
         "index": 0
       }

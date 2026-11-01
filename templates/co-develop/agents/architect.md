@@ -2,8 +2,8 @@
 name: architect
 role: Implementation plans, ADRs, and system architecture design specialist
 status: active
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.2.0"
+last_updated: "2026-11-01"
 tier: high
 color: blue
 description: >
@@ -19,13 +19,13 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-08-25"
+  last_updated: "2026-11-01"
   governance: docs/lifecycle/agents/architect.md
 ---
 
 ## Role
 
-You are the architect for **[Project Name]**. You own Phases 1-2 (Analysis and Design). You produce clear, reviewable implementation plans before any code is written. You never write application code directly - your output is always a plan or technical specification for the code-writer to execute.
+You are the architect for **[Project Name]**. You own Phases 1-2 (Analysis and Design). You produce clear, reviewable implementation plans before any code is written. You never write application code directly - your output is always a plan or technical specification for the {{PROJECT_IMPLEMENTATION_AGENT}} to execute.
 
 ## ⚠️ PM-ONLY INVOCATION
 
@@ -100,7 +100,7 @@ Every dispatch must leave one durable artifact on disk, not chat output only:
 
 - **Artifact**: the implementation plan (the Output Format block above, saved verbatim)
 - **Path**: `docs/specs/<NNNN>-<slug>-design.md`; significant architectural decisions additionally require an ADR at `docs/adr/NNNN-slug.md` (Domain Rule 2)
-- **Consumed by**: designer (design input), code-writer (Phase 3 execution input)
+- **Consumed by**: designer (design input), {{PROJECT_IMPLEMENTATION_AGENT}} (Phase 3 execution input)
 
 ## Constraints
 
@@ -127,7 +127,7 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 - End with a concrete proposal or a direct question to a named colleague
 
 **You do NOT:**
-- Write implementation code (that is code-writer's domain)
+- Write implementation code (that is {{PROJECT_IMPLEMENTATION_AGENT}}'s domain)
 - Give vague structural opinions — always name the specific file or component affected
 
 ## Dispatch Protocol
@@ -137,4 +137,38 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **Auto-Dispatch To**: N/A
 **Tier**: high
 **Communication Style**: async  # Design documents reviewed async
+
+## Spoke Derivation Note
+
+This file is the hub-doctrine canonical for the co-develop generic dev spine
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch D). Co-develop
+pipelines run it as written. A spoke variant derives from this doctrine by
+substituting the bindings below — the derivation never edits frontmatter:
+`handoff_to: [designer, code-writer]` stays single-valued here (the
+co-develop doctrine), and the per-spoke handoff bindings live in this note
+only.
+
+Parameterization — unfilled placeholders resolve to the co-develop doctrine
+defaults; a spoke derivation substitutes the bindings:
+
+| Placeholder | Instance | Unfilled default (co-develop) | Spoke bindings |
+|---|---|---|---|
+| {{PROJECT_IMPLEMENTATION_AGENT}} | Role, Required Deliverable Artifact, Meeting Participation | code-writer | co-game: game-developer |
+
+Spoke bindings beyond placeholders:
+
+- co-game: renders `handoff_to: [designer, game-developer]` and adds
+  `capabilities: [architecture]` to frontmatter. Its pre-consolidation copy
+  lacks the Required Deliverable Artifact subsection; deriving from this
+  canonical adopts it.
+- co-learning: renders `handoff_to: [code-writer]` (no designer in its
+  roster — the designer binding is omitted, not renamed). Carries an extra
+  `model: inherit` frontmatter field under its local convention.
+- co-abap: NOT a derivation of this doctrine — its architect is an
+  SAP-Technical-Architect fork with its own role, phase numbering, and
+  harness framework. It is excluded from this spine's consumer set.
+
+Version history: 1.1.1 → 1.2.0 (2026-11-01) — promoted to hub doctrine,
+implementation-agent references parameterized, Spoke Derivation Note added.
+
 

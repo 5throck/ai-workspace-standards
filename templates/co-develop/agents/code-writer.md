@@ -2,8 +2,8 @@
 name: code-writer
 role: Approved plan implementation with surgical, minimal code changes
 status: active
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.2.0"
+last_updated: "2026-11-01"
 tier: low
 color: green
 description: >
@@ -19,7 +19,7 @@ required_skills: [code-review, refactoring]
 lifecycle:
   phase: production
   created: "2026-08-12"
-  last_updated: "2026-08-25"
+  last_updated: "2026-11-01"
   governance: docs/lifecycle/agents/code-writer.md
 ---
 
@@ -114,3 +114,28 @@ In a `/meeting` session, Claude role-plays you inline. This section defines your
 **Auto-Dispatch To**: test-runner  # After implementation, dispatch test-runner
 **Tier**: low
 **Communication Style**: async  # Implementation can proceed asynchronously
+
+## Spoke Derivation Note
+
+This file is the hub-doctrine canonical for the co-develop generic dev spine
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch D). Co-develop
+pipelines run it as written. A spoke variant derives from this doctrine by
+substituting the bindings below — the derivation never edits frontmatter:
+`handoff_from: [designer, architect]` and
+`required_skills: [code-review, refactoring]` stay single-valued here (the
+co-develop doctrine), and the per-spoke bindings live in this note only.
+
+No {{PROJECT_*}} placeholder is needed in this agent: its per-spoke deltas
+are handoff bindings and phase labels, not replaceable agent names (this
+agent IS the implementation role), so they are documented as bindings
+rather than parameterized.
+
+| Spoke | Derivation binding |
+|---|---|
+| co-learning | Renders `handoff_from: [architect]` (no designer in its roster), `required_skills: []`, `Can Lead Phases: [3]`, and labels its phase "Phase 4 - Implementation" (drops the co-develop "& QA Gate" suffix — QA is test-runner-owned there). |
+| co-game | Not a derivation — co-game has no code-writer; its game-developer agent covers the implementation role. Excluded from this spine's consumer set. |
+| co-abap | NOT a derivation of this doctrine — its code-writer is an SAP ABAP implementation fork with its own role, phase numbering, and harness framework. Excluded from this spine's consumer set. |
+
+Version history: 1.1.1 → 1.2.0 (2026-11-01) — promoted to hub doctrine,
+Spoke Derivation Note added.
+

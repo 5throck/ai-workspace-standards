@@ -999,32 +999,133 @@
               "minimum_version": "1.1.0"
             }
           ]
+        },
+        {
+          "asset": "architect",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game",
+            "co-learning"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/agents/architect.md",
+          "version": "1.2.0",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.2.0"
+            },
+            {
+              "variant": "co-learning",
+              "minimum_version": "1.2.0"
+            }
+          ]
+        },
+        {
+          "asset": "code-writer",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-learning"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/agents/code-writer.md",
+          "version": "1.2.0",
+          "consumers": [
+            {
+              "variant": "co-learning",
+              "minimum_version": "1.2.0"
+            }
+          ]
+        },
+        {
+          "asset": "test-runner",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game",
+            "co-learning"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/agents/test-runner.md",
+          "version": "1.2.0",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.2.0"
+            },
+            {
+              "variant": "co-learning",
+              "minimum_version": "1.2.0"
+            }
+          ]
+        },
+        {
+          "asset": "code-review",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/skills/code-review/SKILL.md",
+          "version": "1.0.1",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.0.1"
+            }
+          ]
+        },
+        {
+          "asset": "refactoring",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/skills/refactoring/SKILL.md",
+          "version": "1.0.1",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.0.1"
+            }
+          ]
+        },
+        {
+          "asset": "test-driven-development",
+          "domain": "co-develop",
+          "hub_variant": "co-develop",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-game"
+          ],
+          "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
+          "canonical_path": "templates/co-develop/skills/test-driven-development/SKILL.md",
+          "version": "1.0.0",
+          "consumers": [
+            {
+              "variant": "co-game",
+              "minimum_version": "1.0.0"
+            }
+          ]
         }
       ],
       "known_unregistered_duplicates": [
-        {
-          "asset": "architect",
-          "kind": "agent",
-          "variants": [
-            "co-abap",
-            "co-develop",
-            "co-game"
-          ]
-        },
         {
           "asset": "change-management-partner",
           "kind": "agent",
           "variants": [
             "co-consult",
             "co-hr"
-          ]
-        },
-        {
-          "asset": "code-writer",
-          "kind": "agent",
-          "variants": [
-            "co-abap",
-            "co-develop"
           ]
         },
         {
@@ -1078,23 +1179,6 @@
           ]
         },
         {
-          "asset": "test-runner",
-          "kind": "agent",
-          "variants": [
-            "co-abap",
-            "co-develop",
-            "co-game"
-          ]
-        },
-        {
-          "asset": "code-review",
-          "kind": "skill",
-          "variants": [
-            "co-develop",
-            "co-game"
-          ]
-        },
-        {
           "asset": "competitive-intelligence",
           "kind": "skill",
           "variants": [
@@ -1143,27 +1227,11 @@
           ]
         },
         {
-          "asset": "refactoring",
-          "kind": "skill",
-          "variants": [
-            "co-develop",
-            "co-game"
-          ]
-        },
-        {
           "asset": "stakeholder-alignment",
           "kind": "skill",
           "variants": [
             "co-consult",
             "co-hr"
-          ]
-        },
-        {
-          "asset": "test-driven-development",
-          "kind": "skill",
-          "variants": [
-            "co-develop",
-            "co-game"
           ]
         }
       ],
