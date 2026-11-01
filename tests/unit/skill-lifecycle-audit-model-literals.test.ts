@@ -1,12 +1,20 @@
 /**
  * Check MM — model-ID literal ban in skill trees (T-20261011-015)
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-01, T-20261101-003 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2): the convergence-window pin is retired with the MM-01
+ *          tolerance (validate-templates v1.69.0) — the generalized family
+ *          pattern keeps detecting the retired gpt-5.6 generation for
+ *          historical records, reworded accordingly.
  *
  * v1.1.0 (2026-10-31, T-20261031-005 — spec
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
  *          §R2.2 surface 9): fixtures rebase to the GPT-6.x codex ids
- *          (gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna); a dedicated case pins
- *          that gpt-5.6 literals still match through the L3 convergence window.
+ *          (gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna); a dedicated case pinned
+ *          that gpt-5.6 literals still matched through the L3 convergence
+ *          window (retired 2026-11-01 post-convergence, T-20261101-003).
  *
  * Covers the pure detection surfaces behind skill-lifecycle-audit Check MM:
  * findModelLiterals (shared lib) and the exported skill-tree walk. The
@@ -36,7 +44,7 @@ describe('findModelLiterals (Check MM detection patterns)', () => {
       .toEqual(['gemini-3.8-flash', 'gpt-6.1-sol', 'gpt-6.1-terra', 'gpt-6-luna']);
   });
 
-  test('delivered-side gpt-5.6 stragglers still match through the L3 convergence window', () => {
+  test('retired gpt-5.6 generation still matches via the generalized family pattern (historical records)', () => {
     expect(findModelLiterals('legacy plan row pinned to gpt-5.6-luna'))
       .toEqual(['gpt-5.6-luna']);
   });

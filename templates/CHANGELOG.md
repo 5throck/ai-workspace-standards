@@ -4,6 +4,10 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-01
+### Changed
+- **[2026-11-01]**: MM-01 alternation retirement post-convergence (T-20261101-003, design docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.2): validate-templates v1.69.0 retires the retained `gpt-5\.6-(?:sol|terra|luna)` alternatives from the MM-01 LITERAL regex — the L3 tier-vocabulary convergence window closed 2026-11-01 (all 16 projects verified at 0.26.0, 0 gpt-5.6 literals in delivered md surfaces), so any future gpt-5.6 literal outside a managed section fails loudly again instead of being tolerated. The generalized Codex family pattern (scripts/lib/model-literal-patterns.ts v1.1.0, delivered L1) is unchanged.
+
 ## [0.26.0] - 2026-11-01
 ### Changed
 - **[2026-11-01]**: Security hardening batch (PR #1776, design 2026-10-31-template-security-hardening-design, U-20261031-001..008): delivered-side settings permission reductions, SSRF fix, hook fixes, hook-dedupe and upgrade-project v1.86.0.

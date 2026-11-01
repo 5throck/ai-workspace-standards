@@ -14,15 +14,19 @@
  *          §R2.2): the Codex family pattern generalizes from
  *          `gpt-5\.\d-` to `gpt-\d+(?:\.\d+)?-` so the GPT-6.x rebase
  *          (gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna) stays under Check MM
- *          detection while delivered-side gpt-5.6 stragglers keep matching
- *          through the L3 convergence window.
+ *          detection. The convergence-window retention that let delivered-side
+ *          gpt-5.6 stragglers keep matching was retired 2026-11-01
+ *          post-convergence (T-20261101-003) on the validate-templates MM-01
+ *          side; this generalized family pattern is unchanged by that
+ *          retirement.
  */
 
 /**
  * Versioned registry model-ID literal patterns (case-insensitive, word-bounded):
  * Claude `claude-opus-5-5`-style, Gemini `gemini-3.1-pro`/`gemini-3.8-flash`,
- * and the Codex sol/terra/luna tier family (`gpt-5.6-*` through the GPT-6.x
- * generation — `gpt-6.1-*` / `gpt-6-*`).
+ * and the Codex sol/terra/luna tier family (GPT-6.x generation —
+ * `gpt-6.1-*` / `gpt-6-*`; the family pattern also still matches the retired
+ * `gpt-5.6-*` generation in historical records).
  */
 export const MODEL_ID_PATTERNS: readonly RegExp[] = [
   /\bclaude-(?:opus|sonnet|haiku)-\d+-\d+\b/i,
