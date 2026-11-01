@@ -28,6 +28,11 @@
       "layer": "common"
     },
     {
+      "id": "delegate-to-hub",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "design-foundation",
       "type": "skill",
       "layer": "common"
@@ -257,6 +262,12 @@
       "type": "references",
       "from": "decision-record",
       "to": "evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "delegate-to-hub",
+      "to": "sync",
       "source": "prose"
     },
     {
