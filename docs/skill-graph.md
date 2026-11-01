@@ -420,6 +420,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0100` | adr | — | root/adopt-project, root/migrate-project | — |
 | `adr:0101` | adr | — | root/project-resync | — |
 | `adr:0102` | adr | — | root/model-migration | — |
+| `adr:0103` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |
@@ -834,7 +835,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Type | Count | Nodes |
 |------|-------|-------|
-| adr | 55 | (expected until docs `references` edges are mined) |
+| adr | 56 | (expected until docs `references` edges are mined) |
 | agent | 22 | co-abap/i18n-specialist, co-architect/architect, co-architect/automation-engineer, co-architect/design-storyteller, co-architect/mep-engineer, co-architect/prototype-engineer, co-architect/sketchup-modeler, co-architect/structural-engineer, co-architect/typography-expert, co-architect/ux-researcher, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
 | decision | 15 | (expected until docs `references` edges are mined) |
 | skill | 3 | common/gateguard, root/standup-synthesizer, root/trail |

@@ -1,0 +1,51 @@
+schemaVersion: 1
+id: T-20261102-001
+kind: manual
+title: >-
+  Pilot drill: spoke delegation channel exercise (co-develop -> co-security hub;
+  DRILL, no real engagement; filed via delegate-to-hub positive path,
+  domain-general)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-02T07:38:43.489+09:00'
+history:
+  - at: '2026-11-02T07:38:43.489+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-02T07:39:05.874+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-02T07:39:05.891+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-02T07:39:16.998+09:00'
+    from: running
+    to: review
+  - at: '2026-11-02T07:39:26.926+09:00'
+    action: reprioritize
+    actor: user
+    from: normal
+    to: high
+  - at: '2026-11-02T07:39:30.540+09:00'
+    action: reprioritize
+    actor: user
+    from: high
+    to: urgent
+  - at: '2026-11-02T07:39:35.798+09:00'
+    action: reprioritize
+    actor: spoke-pm:co-develop
+    from: urgent
+    to: normal
+  - at: '2026-11-02T07:39:42.447+09:00'
+    from: review
+    to: done
+result: >-
+  PILOT DRILL complete (spec 2026-11-01-hub-consolidation-design, Phase 3a step
+  iv). Authorization gate negative test passed (AUTH-2026-001 expired + project
+  mismatch, nothing filed). Positive path exercised: create via --priority-alias
+  P2, backlog->waiting->running->review, reprioritize governance (user P2->P1,
+  hub-pm P0 refusal, user P0, spoke lower, spoke raise-window refusal).
+  Cross-repo finding: ticket store is workspace-root-bound, hub-local store does
+  not exist (F1). Ticket retained as pilot evidence.
+error: null

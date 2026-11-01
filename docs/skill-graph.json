@@ -428,6 +428,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0103",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
