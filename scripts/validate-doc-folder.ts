@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.2.2
+ * @version 1.2.3
+ * v1.2.3 (2026-11-01, spec 2026-11-01-hub-consolidation-design): allowlist gains
+ *           `hub-suites/` — the Phase 1 suite-manifest genre consumed by
+ *           scripts/hub-promotion.ts (docs/README.md §2/§3 rows are the contract).
  * v1.2.2 (2026-10-31, spec 2026-10-31-learning-extraction-design Decision 0d-2):
  *           allowlist gains `patterns/` — the new docs/ genre for variant-proven
  *           reusable runtime shapes (docs/README.md §2 row is the contract).
@@ -47,6 +50,7 @@ const ALLOWED_DIRS: ReadonlySet<string> = new Set([
   'adr', 'architecture', 'archive', 'constitution', 'decisions',
   'designs', 'evidence', 'examples', 'governance', 'graph-deltas', 'guides', 'lifecycle',
   'patterns', 'reports', 'security', 'specs', 'standards', 'templates',
+  'hub-suites',
 ]);
 
 /** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the

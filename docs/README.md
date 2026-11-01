@@ -1,7 +1,7 @@
 # docs/ Folder Manifest & Creation Criteria
 
 **Status:** Active
-**Version:** 1.0.2 (2026-10-31, spec `2026-10-31-learning-extraction-design` — `patterns/` row added for the new variant-proven patterns genre; v1.0.1 2026-10-04, spec `2026-10-04-docs-folder-manifest-design` — §2/§3 rows repointed off the folded `analysis/`/`audits/` directories, found by project review)
+**Version:** 1.0.3 (2026-11-01, spec `2026-11-01-hub-consolidation-design` — `hub-suites/` §2/§3 rows added for the Phase 1 suite-manifest genre consumed by `scripts/hub-promotion.ts`; v1.0.2 2026-10-31, spec `2026-10-31-learning-extraction-design` — `patterns/` row added for the new variant-proven patterns genre; v1.0.1 2026-10-04, spec `2026-10-04-docs-folder-manifest-design` — §2/§3 rows repointed off the folded `analysis/`/`audits/` directories, found by project review)
 **Machine gate:** `bun scripts/validate-doc-folder.ts --workspace` (wired into `audit.ts`)
 **Purpose:** This manifest is the single source of truth for what each `docs/` top-level
 entry is for, what belongs where by default, and what a new top-level folder requires.
@@ -43,6 +43,7 @@ It exists to stop folder proliferation: a folder is a contract, not a scratch sp
 | `guides/` | Workspace how-to guides (moved from docs/ root, 2026-10-04) | getting-started, upgrade/variant guides, external references | dated reports (→ `reports/`) |
 | `governance/` | Governance SSOT documents (ADR-0090 pointer targets) | agents/, variant contracts, workflow references | project-specific procedure docs |
 | `graph-deltas/` | Skill-graph delta projections (ADR-0084 §5.4) | `<YYYY>/…` machine-written delta records | hand-edited JSON |
+| `hub-suites/` | Hub suite promotion manifests (hub program, design `2026-11-01-hub-consolidation-design` §hub-promotion) | `<name>.suite.json` consumed by `scripts/hub-promotion.ts` | prose (→ `designs/`), registry rows (→ `workspace-schema.json`) |
 | `lifecycle/` | Skill/script lifecycle records | per-component lifecycle records | reports |
 | `patterns/` | Reusable runtime/architecture shapes proven in a variant, recorded for other variants (charter in the folder README) | versioned pattern references citing variant provenance + adoption checklists | operator guides (→ `guides/`), workspace decisions (→ `adr/`), project-specific procedure docs (spec `2026-10-31-learning-extraction-design` Decision 0d-2) |
 | `reports/` | Dated outcome reports | fleet reviews, resync sweeps, UI verifications | decision records |
@@ -72,4 +73,5 @@ variant planning pair (`variant-roadmap-2026-q3-q4.md`,
 | Dated audit / analysis report (project-review, survey, feasibility) | `reports/<date>-<slug>.md` |
 | Normative cross-cutting standard | `standards/<slug>.md` (ADR + manifest row) |
 | Superseded/dead content with provenance | `archive/…` |
+| Hub suite promotion manifest (data) | `hub-suites/<name>.suite.json` |
 | Machine-written projection | `docs/` root, generator-declared name |

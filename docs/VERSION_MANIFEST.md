@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-01T11:36:32.782Z
+**Generated**: 2026-11-01T12:20:50.235Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -206,7 +206,7 @@
 | upgrade-project.ts | 1.89.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
-| validate-doc-folder.ts | 1.2.2 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.2.3 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | fs |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | N/A |
