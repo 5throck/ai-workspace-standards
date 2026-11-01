@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "description": "Delegation kanban lane vocabulary mapped onto the ticket store's canonical enums. No schema-version bump, no migration: the ticket store enums stay low|normal|high|urgent x backlog|waiting|running|review|done|failed (scripts/helpers/ticket-schema.ts). Design: docs/designs/2026-11-01-hub-consolidation-design.md section 5.",
+  "priorityAliases": {
+    "P0": "urgent",
+    "P1": "high",
+    "P2": "normal",
+    "P3": "low"
+  },
+  "statusAliases": {
+    "queued": "waiting",
+    "in-progress": "running",
+    "accepted": "review",
+    "blocked": "waiting"
+  },
+  "blockedSubstate": {
+    "alias": "blocked",
+    "canonicalStatus": "waiting",
+    "reasonField": "blocked_reason"
+  },
+  "sevDefaultPriority": {
+    "SEV1": "P0",
+    "SEV2": "P1",
+    "SEV3": "P2"
+  },
+  "sevFieldNote": "SEV (SEV1-SEV3) is a standalone ticket field, not a priority alias; sevDefaultPriority is an initial-suggestion mapping only (SEV1 tickets additionally bypass triage: the triage command auto-readies them with a history[] marker).",
+  "priorityGovernance": {
+    "p0UserOnly": true,
+    "p0Note": "P0/urgent is settable by actor=user only (ticket.ts); hub-pm and spoke-pm actors are refused with a hard error.",
+    "spokeRaiseCap": {
+      "maxLevelsPer24h": 1,
+      "forbiddenTargets": ["urgent"],
+      "note": "Spoke-initiated raises are capped at +1 level per ticket per 24h (P3->P2 today, P2->P1 at the earliest 24h later); spoke raises never target urgent/P0."
+    },
+    "threeStrikeCounter": {
+      "file": ".pipeline-state/hub-reprioritize-strikes.json",
+      "violationsToFrozen": 3,
+      "note": "gitignored JSON counter keyed by requesting project; 3 cap violations set frozen=true and further priority raises from that project are refused with a typed error pending user review."
+    }
+  }
+}

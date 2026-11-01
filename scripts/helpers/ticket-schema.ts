@@ -1,5 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.9.0
+// @version 1.10.0
+// v1.10.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
+//          Phase 3a kanban core): delegation kanban alias layer — optional `sev`
+//          (SEV1|SEV2|SEV3) and `blocked_reason` ticket fields (no enum/shape break:
+//          both optional, existing tickets parse unchanged); history[] gains ACTION
+//          entries ({action, actor, from, to, at}) — reprioritize audits and the SEV1
+//          bypass-triage marker live beside status transitions and are TRANSPARENT to
+//          the chaining/creation invariants (an action entry never starts a history,
+//          must carry a non-empty actor, and the next status entry still chains from
+//          the last status entry's `to`); validateKanbanAliases + DEFAULT_KANBAN_ALIASES
+//          + resolvePriorityInput pin the docs/templates/hub-kanban-aliases.json shape
+//          (P0-P3 -> urgent/high/normal/low, queued/in-progress/accepted/blocked lanes,
+//          SEV1-3 -> P0-P2 suggestion). Ticket store enums stay low|normal|high|urgent
+//          x backlog|waiting|running|review|done|failed — no migration.
 // v1.9.0 (2026-10-29, T-20261029-001): YAML prose-fragment lint — the
 //          2026-10-29 upstream-adjudication batch's writer embedded broken
 //          shell conditionals verbatim into resolution/result prose
@@ -49,6 +62,11 @@ export type Priority = 'low' | 'normal' | 'high' | 'urgent';
  * AND ticket.ts create input validation, so the CLI can never mint a priority
  * the schema would reject at read time. */
 export const PRIORITIES: readonly Priority[] = ['low', 'normal', 'high', 'urgent'];
+/** Incident severity (hub-consolidation design §5.1): a standalone ticket field, NOT a
+ * priority alias. SEV1 tickets additionally bypass triage (auto-ready with a history[]
+ * marker); sevDefaultPriority in the alias JSON is an initial-suggestion mapping only. */
+export type Sev = 'SEV1' | 'SEV2' | 'SEV3';
+export const SEVS: readonly Sev[] = ['SEV1', 'SEV2', 'SEV3'];
 export type RunType = 'skill' | 'script';
 export type UpstreamLayer = 'L1' | 'L2' | 'unsure';
 export type UpstreamTriage = 'inbox' | 'ready';
@@ -94,6 +112,26 @@ export interface HistoryEntry {
   to: Status;
 }
 
+/** v1.10.0 action record — a non-transition audit entry appended BESIDE the status
+ * chain (reprioritize changes, the SEV1 bypass-triage marker). Transparent to the
+ * history invariants: never history[0], must carry a non-empty actor, and the next
+ * STATUS entry still chains from the last status entry's `to`. `from`/`to` hold the
+ * values the action moved between (priorities for reprioritize, triage values for
+ * the auto-ready marker) — they are never status transitions. */
+export interface ActionHistoryEntry {
+  at: string;
+  action: string;
+  actor: string;
+  from: string;
+  to: string;
+}
+
+export type HistoryRecord = HistoryEntry | ActionHistoryEntry;
+
+export function isActionEntry(e: HistoryRecord): e is ActionHistoryEntry {
+  return typeof (e as ActionHistoryEntry).action === 'string';
+}
+
 export interface UpstreamBlock {
   project: string;                           // e.g. "co-work" — server-derived
   variant: string | null;                   // from project's template-version.txt (root; legacy .claude/ accepted)
@@ -128,6 +166,12 @@ export interface Ticket {
   inputs?: Record<string, string>;
   priority: Priority;
   status: Status;
+  /** v1.10.0 (hub-consolidation §5.1): incident severity, optional — a ticket without
+   * the field parses exactly as before. */
+  sev?: Sev;
+  /** v1.10.0 (hub-consolidation §5.1): `blocked` is a waiting-substate in the
+   * delegation kanban alias layer, not a new status — the reason lives here. */
+  blocked_reason?: string;
   /** Failure-retry count — derivable from history: every failed → waiting
    *  transition is one retry. validateTicket enforces the equality so the
    *  field cannot drift into unmaintained state (T-20260917-003). */
@@ -136,7 +180,7 @@ export interface Ticket {
   /** ISO YYYY-MM-DD. Governance Backlog eligibility gate, orthogonal to `status` —
    * absent means always eligible. See docs/designs/2026-08-16-governance-backlog-design.md. */
   not_before?: string;
-  history: HistoryEntry[];
+  history: HistoryRecord[];
   result: string | null;
   error: string | null;
   upstream?: UpstreamBlock;  // optional, allowed only on kind: manual
@@ -221,6 +265,84 @@ export function corruptedProseFinding(text: unknown): string | null {
   return null;
 }
 
+// ── v1.10.0: delegation kanban alias layer (hub-consolidation design §5) ──────
+
+export interface KanbanAliases {
+  version: number;
+  priorityAliases: Record<string, Priority>;
+  statusAliases: Record<string, Status>;
+  blockedSubstate: { alias: string; canonicalStatus: Status; reasonField: string };
+  sevDefaultPriority: Record<string, string>;
+}
+
+export const KANBAN_PRIORITY_ALIAS_KEYS = ['P0', 'P1', 'P2', 'P3'] as const;
+export const KANBAN_STATUS_ALIAS_KEYS = ['queued', 'in-progress', 'accepted', 'blocked'] as const;
+
+/** Built-in shape used when docs/templates/hub-kanban-aliases.json is absent (unit-test
+ * temp workspaces). Production always reads the real file; the loader validates it
+ * against the same rules, so drift between the shipped file and this default fails loudly. */
+export const DEFAULT_KANBAN_ALIASES: KanbanAliases = {
+  version: 1,
+  priorityAliases: { P0: 'urgent', P1: 'high', P2: 'normal', P3: 'low' },
+  statusAliases: { queued: 'waiting', 'in-progress': 'running', accepted: 'review', blocked: 'waiting' },
+  blockedSubstate: { alias: 'blocked', canonicalStatus: 'waiting', reasonField: 'blocked_reason' },
+  sevDefaultPriority: { SEV1: 'P0', SEV2: 'P1', SEV3: 'P2' },
+};
+
+/** v1.10.0: shape validation for docs/templates/hub-kanban-aliases.json. Strict on the
+ * keys the governance rules depend on (exact P0-P3 / lane / SEV sets, distinct priority
+ * targets, blocked -> waiting); tolerant on free-text note fields. */
+export function validateKanbanAliases(obj: unknown): asserts obj is KanbanAliases {
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) fail('kanban aliases must be an object');
+  const a = obj as Record<string, unknown>;
+  if (a.version !== 1) fail(`kanban aliases version must be 1 (got: ${JSON.stringify(a.version)})`);
+  if (typeof a.priorityAliases !== 'object' || a.priorityAliases === null) fail('kanban aliases.priorityAliases must be an object');
+  const pa = a.priorityAliases as Record<string, unknown>;
+  const expectedPriorityKeys = [...KANBAN_PRIORITY_ALIAS_KEYS].sort().join(',');
+  if (Object.keys(pa).sort().join(',') !== expectedPriorityKeys) {
+    fail(`kanban aliases.priorityAliases must map exactly ${expectedPriorityKeys}`);
+  }
+  const targets = new Set<string>();
+  for (const k of KANBAN_PRIORITY_ALIAS_KEYS) {
+    const v = pa[k];
+    if (!(PRIORITIES as readonly string[]).includes(v as string)) fail(`kanban aliases.priorityAliases[${k}] invalid: ${JSON.stringify(v)}`);
+    targets.add(v as string);
+  }
+  if (targets.size !== KANBAN_PRIORITY_ALIAS_KEYS.length) fail('kanban aliases.priorityAliases targets must be distinct');
+  if (typeof a.statusAliases !== 'object' || a.statusAliases === null) fail('kanban aliases.statusAliases must be an object');
+  const sa = a.statusAliases as Record<string, unknown>;
+  const expectedStatusKeys = [...KANBAN_STATUS_ALIAS_KEYS].sort().join(',');
+  if (Object.keys(sa).sort().join(',') !== expectedStatusKeys) {
+    fail(`kanban aliases.statusAliases must map exactly ${expectedStatusKeys}`);
+  }
+  const STATUSES: readonly string[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
+  for (const k of KANBAN_STATUS_ALIAS_KEYS) {
+    if (!STATUSES.includes(sa[k] as string)) fail(`kanban aliases.statusAliases[${k}] invalid: ${JSON.stringify(sa[k])}`);
+  }
+  if (sa.blocked !== 'waiting') fail('kanban aliases.statusAliases.blocked must map to waiting (blocked is a waiting-substate, not a status)');
+  if (typeof a.blockedSubstate !== 'object' || a.blockedSubstate === null) fail('kanban aliases.blockedSubstate must be an object');
+  const bs = a.blockedSubstate as Record<string, unknown>;
+  if (bs.alias !== 'blocked' || bs.canonicalStatus !== 'waiting') fail('kanban aliases.blockedSubstate must be { alias: "blocked", canonicalStatus: "waiting", ... }');
+  if (typeof bs.reasonField !== 'string' || bs.reasonField.length === 0) fail('kanban aliases.blockedSubstate.reasonField must be a non-empty string');
+  if (typeof a.sevDefaultPriority !== 'object' || a.sevDefaultPriority === null) fail('kanban aliases.sevDefaultPriority must be an object');
+  const sp = a.sevDefaultPriority as Record<string, unknown>;
+  const expectedSevKeys = [...SEVS].sort().join(',');
+  if (Object.keys(sp).sort().join(',') !== expectedSevKeys) fail(`kanban aliases.sevDefaultPriority must map exactly ${expectedSevKeys}`);
+  for (const k of SEVS) {
+    if (!(KANBAN_PRIORITY_ALIAS_KEYS as readonly string[]).includes(sp[k] as string)) {
+      fail(`kanban aliases.sevDefaultPriority[${k}] must be a P0-P3 alias (got: ${JSON.stringify(sp[k])})`);
+    }
+  }
+}
+
+/** v1.10.0: maps a caller-supplied priority token — a kanban alias (P0-P3) or a
+ * canonical enum value — onto the canonical Priority. null when unrecognized. */
+export function resolvePriorityInput(value: string, aliases: KanbanAliases): Priority | null {
+  if ((PRIORITIES as readonly string[]).includes(value)) return value as Priority;
+  const mapped = aliases.priorityAliases[value];
+  return (PRIORITIES as readonly string[]).includes(mapped) ? (mapped as Priority) : null;
+}
+
 export function validateTicket(obj: unknown): asserts obj is Ticket {
   if (typeof obj !== 'object' || obj === null) fail('ticket must be an object');
   const t = obj as Record<string, unknown>;
@@ -238,6 +360,14 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   if (!PRIORITIES.includes(t.priority as Priority)) fail(`ticket.priority invalid: ${JSON.stringify(t.priority)}`);
   const validStatuses: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
   if (!validStatuses.includes(t.status as Status)) fail(`ticket.status invalid: ${JSON.stringify(t.status)}`);
+  // v1.10.0 (hub-consolidation §5.1): optional sev / blocked_reason — absent on every
+  // pre-existing ticket, so the schema stays tolerance-compatible (no migration).
+  if (t.sev !== undefined && !(SEVS as readonly unknown[]).includes(t.sev)) {
+    fail(`ticket.sev must be one of: ${SEVS.join(', ')} (got: ${JSON.stringify(t.sev)})`);
+  }
+  if (t.blocked_reason !== undefined && (typeof t.blocked_reason !== 'string' || t.blocked_reason.trim() === '' || t.blocked_reason.length > 500)) {
+    fail('ticket.blocked_reason must be a non-empty string of at most 500 chars');
+  }
   if (typeof t.attempts !== 'number' || t.attempts < 0) fail('ticket.attempts must be a non-negative number');
   if (t.not_before !== undefined && (typeof t.not_before !== 'string' || !ISO_DATE_PATTERN.test(t.not_before))) {
     fail(`ticket.not_before must be an ISO YYYY-MM-DD string: ${JSON.stringify(t.not_before)}`);
@@ -261,6 +391,22 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
       if (prevAt !== null && e.at < prevAt) {
         fail(`history[${i}].at (${e.at}) predates the previous entry (${prevAt}) — non-monotonic history (repair with: ticket.ts repair-history)`);
       }
+      // v1.10.0 (hub-consolidation §5): ACTION entries (reprioritize audits, the SEV1
+      // bypass-triage marker) are transparent to the chain — they never start a
+      // history, must carry a non-empty actor, and the next status entry still
+      // chains from the last status entry's `to`.
+      if (isActionEntry(e as HistoryRecord)) {
+        if (i === 0) fail('history[0] must be the creation transition — action entries follow the status chain');
+        const act = e as unknown as Record<string, unknown>;
+        if (typeof act.actor !== 'string' || act.actor.trim() === '') {
+          fail(`history[${i}].actor must be a non-empty string on an action entry`);
+        }
+        if (typeof act.from !== 'string' || typeof act.to !== 'string') {
+          fail(`history[${i}] action entry must carry string from/to (got: ${JSON.stringify(e)})`);
+        }
+        prevAt = e.at as string;
+        continue;
+      }
       if (i === 0 && t.status !== 'done') {
         // A done ticket may carry a TRIMMED history (archived/legacy shapes
         // keep only the closing review→done edge) — the creation rules bind
@@ -282,8 +428,10 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   }
   // attempts must equal the number of failed → waiting transitions in history —
   // the field is a derived retry count, not independent state (T-20260917-003).
-  const expectedAttempts = (t.history as unknown[]).filter(
-    (h) => (h as HistoryEntry).from === 'failed' && (h as HistoryEntry).to === 'waiting',
+  // Action entries (v1.10.0) never count: their from/to are priorities or triage
+  // values, not status hops.
+  const expectedAttempts = (t.history as HistoryRecord[]).filter(
+    (h) => !isActionEntry(h) && h.from === 'failed' && h.to === 'waiting',
   ).length;
   if (t.attempts !== expectedAttempts) {
     fail(`ticket.attempts (${t.attempts}) must equal the number of failed → waiting history transitions (${expectedAttempts})`);
