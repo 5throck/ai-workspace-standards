@@ -21,7 +21,21 @@
  * 310 lines) synthetically so the suite stays hermetic — the real project copies
  * change on apply, and tests must not read Projects/.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-11-01, design addendum
+ *         docs/designs/2026-10-31-workspace-schema-merge-delivery-design.md
+ *         §Addendum, U-20261101-001): template-authoritative vocabulary blocks —
+ *         `models` and `platform_surfaces` now land the template value VERBATIM
+ *         even when the project copy diverged (the 0.26.0 wave's manual 3-value
+ *         convergence is unreachable-by-design: the MERGE pass stamps
+ *         template-managed GPT-6.x prose into AGENTS.md §3.6 / CODEX.md while
+ *         project-wins withheld the matching models.codex rows, failing
+ *         validate-model-registry.ts's exact-equality gate fleet-wide). Fixture 9
+ *         covers the diverged models.codex + platform_surfaces landing with INFO
+ *         TEMPLATE_DELTA rows; fixtures 1 and 6 updated for the new class
+ *         (models deltas flip WARN→INFO and vanish on the second pass — the
+ *         divergence is resolved by the landing, not preserved).
+ *
+ * @version 1.1.0
  */
 import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -155,6 +169,10 @@ describe('fixture 1 — co-price 131-entry allowlist shape', () => {
     expect(result.preserved).toEqual([]);
   });
 
+  test('models is template-authoritative: the template value lands verbatim (v1.1.0)', () => {
+    expect(result.merged.models).toEqual(TEMPLATE_V170.models);
+  });
+
   test('TEMPLATE_DELTA names designLint.scanRoots, designLint.allowlist, designLint.description at WARN', () => {
     const byPath = new Map(result.templateDeltas.map((d) => [d.path, d]));
     for (const p of ['designLint.scanRoots', 'designLint.allowlist', 'designLint.description']) {
@@ -164,9 +182,11 @@ describe('fixture 1 — co-price 131-entry allowlist shape', () => {
     // The withheld values name both sides (truncated summary, deterministic JSON).
     expect(byPath.get('designLint.scanRoots')!.project).toBe('["src"]');
     expect(byPath.get('designLint.allowlist')!.template).toBe('[]');
-    // Reshaped scalars (models) are withheld too — project-wins everywhere.
+    // Template-authoritative divergence (models) is logged too — but at INFO, because
+    // the template value LANDED (visibility, not withholding).
     expect(byPath.has('models.pm')).toBe(true);
-    // Leaves that LAND (metadata scalars, template-added blocks) never produce deltas.
+    expect(byPath.get('models.pm')!.severity).toBe('INFO');
+    // Leaves that LAND silently (metadata scalars, template-added blocks) never produce deltas.
     expect(byPath.has('version')).toBe(false);
     expect(byPath.has('description')).toBe(false);
   });
@@ -288,7 +308,11 @@ describe('fixture 6 — idempotency (design §4 fixed point)', () => {
   });
 
   test('delta reporting is stable across the second merge', () => {
-    expect(second.templateDeltas).toEqual(first.templateDeltas);
+    // v1.1.0: the template-authoritative rows (models.*) vanish on the second pass —
+    // the landing RESOLVED the divergence, so nothing is left to report. The
+    // project-wins designLint rows are stable (the divergence persists by design).
+    expect(second.templateDeltas).toEqual(first.templateDeltas.filter((d) => !d.path.startsWith('models.')));
+    expect(first.templateDeltas.some((d) => d.path.startsWith('models.'))).toBe(true);
     expect(second.landed).toEqual([]);
     expect(second.preserved).toEqual([]);
   });
@@ -367,7 +391,9 @@ describe('fixture 8 — serialization: stable key order, 2-space indent, trailin
     const second = mergeWorkspaceSchemaJson(proj2, tpl);
     expect(second.changed).toBe(false);
     expect(second.merged).toBe(first.merged);
-    expect(second.templateDeltas).toEqual(first.templateDeltas);
+    // v1.1.0: the template-authoritative models rows vanish on the second pass —
+    // the landing resolved them; the project-wins designLint rows are stable.
+    expect(second.templateDeltas).toEqual(first.templateDeltas.filter((d) => !d.path.startsWith('models.')));
   });
 
   test('key-order-only differences between equal blocks are not false deltas', () => {
@@ -384,5 +410,92 @@ describe('fixture 8 — serialization: stable key order, 2-space indent, trailin
     const result = mergeWorkspaceSchemaData(deepClone(template), deepClone(reordered));
     // Only the metadata `version` divergence is reported (it lands, so actually zero deltas).
     expect(result.templateDeltas).toEqual([]);
+  });
+});
+
+// ── Fixture 9: template-authoritative vocabulary blocks (v1.1.0, U-20261101-001) ──
+
+describe('fixture 9 — template-authoritative blocks land verbatim (U-20261101-001)', () => {
+  // The 0.26.0 wave failure shape: the project's models.codex copy carries the
+  // pre-restamp vocabulary while the MERGE pass already stamped the template's
+  // GPT-6.x prose into AGENTS.md §3.6 / CODEX.md — project-wins withheld the
+  // matching rows and validate-model-registry.ts's exact-equality gate failed on
+  // every wave project. The manual 3-value convergence must be unnecessary: the
+  // merge itself delivers the template vocabulary.
+  const template = {
+    $schema: './workspace-schema.schema.json',
+    version: '1.8.0',
+    description: 'Fleet workspace schema — registries, gates, and tripwires (template-managed)',
+    models: {
+      claude: 'claude-opus-5-5',
+      codex: 'gpt-6.1-sol',
+      gemini: 'gemini-3.1-pro',
+      zcode: 'glm-5.3',
+    },
+    designLint: {
+      enabled: true,
+      scanRoots: ['src'],
+      allowlist: ['src/generated/legacy.css'],
+      description: 'project-evolved token-debt gate config',
+    },
+    platform_surfaces: {
+      claude: { mirror: '.claude', skills: true },
+      codex: { mirror: '.codex', skills: false },
+    },
+  };
+  const project = {
+    $schema: './workspace-schema.schema.json',
+    version: '1.7.0',
+    description: 'Fleet workspace schema — registries, gates, and tripwires (template-managed)',
+    models: {
+      claude: 'claude-opus-4-1',
+      codex: 'gpt-5.2', // the stale pre-restamp row that desynced the prose pair
+      gemini: 'gemini-3.1-pro',
+      legacyRow: 'project-only model the template never shipped',
+    },
+    designLint: {
+      enabled: true,
+      scanRoots: ['src'],
+      allowlist: ['src/generated/legacy.css'],
+      description: 'project-evolved token-debt gate config',
+    },
+    platform_surfaces: {
+      claude: { mirror: '.claude', skills: true },
+    },
+  };
+  const result = mergeWorkspaceSchemaData(deepClone(template), deepClone(project));
+
+  test('diverged models rows land the template values verbatim', () => {
+    expect(result.merged.models).toEqual(template.models);
+    expect((result.merged.models as Record<string, unknown>).codex).toBe('gpt-6.1-sol');
+  });
+
+  test('diverged platform_surfaces lands the template value (the codex surface arrives)', () => {
+    expect(result.merged.platform_surfaces).toEqual(template.platform_surfaces);
+  });
+
+  test('every divergence is logged as TEMPLATE_DELTA INFO (landing, not withholding)', () => {
+    const byPath = new Map(result.templateDeltas.map((d) => [d.path, d]));
+    expect(byPath.get('models.claude')).toMatchObject({ severity: 'INFO', template: '"claude-opus-5-5"', project: '"claude-opus-4-1"' });
+    expect(byPath.get('models.codex')).toMatchObject({ severity: 'INFO', template: '"gpt-6.1-sol"', project: '"gpt-5.2"' });
+    // The project-only models row is DROPPED by the verbatim landing — loudly.
+    expect(byPath.get('models.legacyRow')!.severity).toBe('INFO');
+    expect(byPath.get('models.legacyRow')!.template).toContain('(absent');
+    // Template-only additions inside the block (the codex surface) land silently —
+    // they are the template's vocabulary, not a divergence.
+    expect(byPath.has('platform_surfaces.codex')).toBe(false);
+    // No WARN rows from the template-authoritative class.
+    expect(result.templateDeltas.every((d) => d.severity === 'INFO')).toBe(true);
+  });
+
+  test('designLint stays project-wins (the protected token-debt class)', () => {
+    expect(result.merged.designLint).toEqual(project.designLint);
+    expect(result.templateDeltas.some((d) => d.path.startsWith('designLint.'))).toBe(false);
+  });
+
+  test('the merged output re-merges clean (no second-pass deltas — the wave-standard manual edit is unnecessary)', () => {
+    const second = mergeWorkspaceSchemaData(deepClone(template), deepClone(result.merged));
+    expect(second.merged).toEqual(result.merged);
+    expect(second.templateDeltas).toEqual([]);
   });
 });
