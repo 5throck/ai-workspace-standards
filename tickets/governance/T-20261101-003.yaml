@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261101-003
+kind: manual
+title: >-
+  MM-01 alternation retirement: L3 tier-vocabulary convergence is ACHIEVED
+  (2026-11-01 — all 16 projects at template 0.26.0 with 0 gpt-5.6 literals in
+  delivered md surfaces; verified across co-hr #20, co-deck #199, co-game #64,
+  co-learning #33, co-newbiz #788 + the 11 already-clean projects). Retirement
+  scope per design 2026-10-31-registry-platform-vocabulary-design R2.2
+  convergence-window: remove gpt-5\.6-(sol|terra|luna) from
+  validate-templates.ts MM-01 LITERAL regex + retain via
+  model-literal-patterns.ts family pattern already generalized; sweep any
+  residual old-id literals; release as the next minor (v0.27.0 line) so
+  delivered projects stop failing loudly on straggler prose. Historical records
+  (CHANGELOG/ADRs/designs) keep old ids — do not retro-edit.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-01T16:08:25.274+09:00'
+history:
+  - at: '2026-11-01T16:08:25.274+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
