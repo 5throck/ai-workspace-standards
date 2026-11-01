@@ -1,4 +1,17 @@
-// @version 2.60.0
+// @version 2.61.0
+// v2.61.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §2.4 leg 3 / §7.3 Phase 1): hub-resolve checker — workspace-root-only
+//          additive gate over the docs/workspace-schema.json hub_topology
+//          registry. Shared helpers/hub-topology.ts v1.0.0 (same derivation as
+//          validate-templates.ts's hub legs and hub-promotion.ts). For each
+//          variant template variant.json carrying a hub.consumes block, registry
+//          entries are resolved per consumed domain and the declared
+//          minimum_version is checked against the canonical entry version
+//          (semver): a consumer below its declared minimum FAILs once entries
+//          land. hub_topology.entries empty + consumes present → WARN (soak —
+//          minimum_version unresolved until promotion batches B-D populate the
+//          registry); malformed registry shape FAILs (fail-closed). Additive
+//          only — no existing check touched.
 // v2.60.0 (2026-10-29, U-20261028-014 — spec
 //          docs/designs/2026-10-29-owner-decision-batch-design.md §2):
 //          designLint per-variant override — a project's variant.json
@@ -273,6 +286,12 @@ import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } 
 import { variantContextPlacement } from './helpers/variant-context.ts';
 import { resolveDesignLintRoots, validateDesignLintOverride, type DesignLintOverride } from './helpers/design-lint-roots.ts';
 import { PLATFORM_SKILL_BASES } from './lib/platforms.ts';
+import {
+  loadHubTopology,
+  validateHubTopologyShape,
+  checkConsumerMinimumVersions,
+  loadConsumingVariants,
+} from './helpers/hub-topology.ts';
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
   try {
@@ -2426,6 +2445,43 @@ const IS_WORKSPACE_ROOT = fs.existsSync('CONSTITUTION.md') && !fs.existsSync('va
   } else {
     Warn('Tracked node_modules guard skipped (git ls-files failed — not a git worktree?)');
   }
+}
+
+// ── Hub-resolve checker (v2.61.0; hub-consolidation design §2.4 leg 3 / §7.3) ─
+// Workspace root only (the registry lives in docs/workspace-schema.json, which
+// project contexts do not carry at this path). For each variant template
+// variant.json with a hub.consumes block, resolve registry entries per domain
+// and verify the declared minimum_version against the canonical entry version.
+// entries[] empty + consumes present → WARN (soak: minimum_version is
+// unresolved until promotion batches B-D land registry rows); real violations
+// FAIL once populated; malformed registry shape FAILs (fail-closed). Additive
+// only — validate-templates.ts carries the same three legs as template-side
+// FAILs via the shared helper (helpers/hub-topology.ts).
+if (IS_WORKSPACE_ROOT && fs.existsSync(path.join('docs', 'workspace-schema.json'))) {
+    const loaded = loadHubTopology('.');
+    if (!loaded.ok) {
+        if (loaded.error !== 'absent-file' && loaded.error !== 'absent-section') {
+            Fail(`hub-resolve: ${loaded.error}`);
+        }
+        // absent file/section (legacy checkout): the registry has not landed here — skip silently
+    } else {
+        const topology = loaded.topology!;
+        const shapeErrors = validateHubTopologyShape(topology);
+        for (const e of shapeErrors) {
+            Fail(`hub-resolve: hub_topology registry malformed: ${e} — reconcile the hand-maintained root + L1 schema pair in the same commit`);
+        }
+        const consumers = loadConsumingVariants('.');
+        const entriesCount = Array.isArray(topology.entries) ? topology.entries.length : 0;
+        if (shapeErrors.length === 0 && consumers.length > 0 && entriesCount === 0) {
+            Warn(`hub-resolve: ${consumers.length} variant.json hub.consumes declaration(s) but hub_topology.entries is empty — minimum_version unresolved until promotion batches B-D land registry rows (declared soak, hub-consolidation design §12 Phase 1)`);
+        }
+        const leg = checkConsumerMinimumVersions(topology, consumers);
+        for (const f of leg.fails) Fail(`hub-resolve: ${f}`);
+        for (const w of leg.warns) Warn(`hub-resolve: ${w}`);
+        if (shapeErrors.length === 0 && leg.fails.length === 0 && leg.warns.length === 0) {
+            Pass(`hub-resolve: ${consumers.length} consuming variant(s) resolved against ${entriesCount} registry entr(ies) — no violations`);
+        }
+    }
 }
 
 // ── Docs relative-link gate (design-foundation v1.2 PR-2; T-20261004-024) ─────

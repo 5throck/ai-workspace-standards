@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md Phase 0):
+//           VARIANTS is no longer a hardcoded literal — the set derives from
+//           templates/*/variant.json (the L2 variant set, the authoritative delivery
+//           source) via deriveVariants(rootDir), sorted deterministically. This closes
+//           the v1.1.1 co-learning incident class structurally: a variant added to
+//           templates/ (e.g. co-architect) joins the sync automatically instead of
+//           being silently missed. `--check` semantics and exit codes are unchanged;
+//           `--list` prints the derived variant set without touching any file.
 // v1.2.0 (2026-10-26, T-20261026-016): SyncResult gains `pruned` — empty groups left by
 //           removals set changed=true without touching any entry counter, so --check read
 //           them as in-sync; drifts() now counts prunes and check mode reports them.
@@ -27,18 +35,35 @@
 // Design: docs/designs/2026-10-17-pm-dispatch-gate-design.md §7 (v1.1.0);
 //         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md §C2 (v1.0.0)
 
-import { existsSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync, renameSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
 
-const VARIANTS = [
-  'co-abap', 'co-consult', 'co-deck', 'co-design', 'co-develop', 'co-export',
-  'co-game', 'co-hr', 'co-learning', 'co-news', 'co-price', 'co-safety',
-  'co-security', 'co-work',
-] as const;
+/**
+ * The variant set this script syncs: every directory under `<rootDir>/templates` that
+ * carries a variant.json — i.e. the L2 variant set, the authoritative delivery source.
+ * Derived, not hardcoded (v1.3.0): a variant added to templates/ joins the sync
+ * automatically instead of being silently missed (the v1.1.1 co-learning repair
+ * motivated this structural fix; hub-consolidation design Phase 0). Sorted
+ * lexicographically — deterministic, and identical to the v1.2.0 hardcoded order.
+ *
+ * Projects/ is deliberately NOT the source: Projects/ holds project instances, some of
+ * which are template-less (e.g. co-newbiz) — they have no templates/<name>/ delivery
+ * surface and no templates/<name>/.claude|.gemini/settings.json to sync into. Template
+ * settings management is a template concern; template-less projects must not enter it.
+ */
+export function deriveVariants(rootDir: string): string[] {
+  const dir = join(rootDir, 'templates');
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && existsSync(join(dir, entry.name, 'variant.json'))) out.push(entry.name);
+  }
+  return out.sort();
+}
 
 type Platform = 'claude' | 'gemini';
 
@@ -159,11 +184,12 @@ function settingsPath(rootDir: string, variant: string, platform: Platform): str
 
 export function drifts(rootDir: string): string[] {
   const out: string[] = [];
+  const variants = deriveVariants(rootDir);
   for (const platform of ['claude', 'gemini'] as const) {
     const commonPath = settingsPath(rootDir, 'common', platform);
     if (!existsSync(commonPath)) { out.push(`templates/common/.${platform}/settings.json missing`); continue; }
     const common = JSON.parse(readFileSync(commonPath, 'utf-8')) as Settings;
-    for (const v of VARIANTS) {
+    for (const v of variants) {
       const p = settingsPath(rootDir, v, platform);
       if (!existsSync(p)) { out.push(`templates/${v}/.${platform}/settings.json missing`); continue; }
       let total = { added: 0, updated: 0, removed: 0, pruned: 0 };
@@ -181,8 +207,13 @@ export function drifts(rootDir: string): string[] {
 }
 
 function main(): void {
-  const check = process.argv.includes('--check');
   const root = process.env.TICKET_WORKSPACE_ROOT ?? WORKSPACE_ROOT; // test seam, same pattern as ticket.ts
+  if (process.argv.includes('--list')) {
+    // v1.3.0: print the derived variant set without touching any file (verification path).
+    for (const v of deriveVariants(root)) console.log(v);
+    return;
+  }
+  const check = process.argv.includes('--check');
   if (check) {
     const found = drifts(root);
     if (found.length > 0) {
@@ -191,15 +222,16 @@ function main(): void {
       console.error('   Remedy: bun scripts/sync-variant-settings.ts');
       process.exit(1);
     }
-    console.log(`✅ variant settings.json managed hooks: ${VARIANTS.length} variants × ${SYNC_TARGETS.length} channels in sync with templates/common.`);
+    console.log(`✅ variant settings.json managed hooks: ${deriveVariants(root).length} variants × ${SYNC_TARGETS.length} channels in sync with templates/common.`);
     return;
   }
+  const variants = deriveVariants(root);
   let touched = 0;
   for (const platform of ['claude', 'gemini'] as const) {
     const commonPath = settingsPath(root, 'common', platform);
     if (!existsSync(commonPath)) { console.log(`  ⚠️  templates/common/.${platform}/settings.json missing, skipping ${platform}`); continue; }
     const common = JSON.parse(readFileSync(commonPath, 'utf-8')) as Settings;
-    for (const v of VARIANTS) {
+    for (const v of variants) {
       const p = settingsPath(root, v, platform);
       if (!existsSync(p)) { console.log(`  ⚠️  templates/${v}/.${platform}/settings.json missing, skipping`); continue; }
       const variant = JSON.parse(readFileSync(p, 'utf-8')) as Settings;

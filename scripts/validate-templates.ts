@@ -1,7 +1,30 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.69.0
+ * @version 1.70.0
+ *
+ * v1.70.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
+ *          §2.4 Phase 1): additive hub_topology validator legs — new check
+ *          `checkHubTopology()` fired from main() after checkWorkspaceSchema(),
+ *          backed by the shared helpers/hub-topology.ts v1.0.0 (one derivation
+ *          shared with audit.ts's hub-resolve checker and hub-promotion.ts):
+ *          (1) hub-topology-shape — the registry section itself (enums, entry
+ *          shape, semver versions, hub capability refs) fail-closed;
+ *          (2) hub-dup-unregistered — a non-common skill/agent present in >1
+ *          variant templates must appear in hub_topology.entries or the
+ *          declared known_unregistered_duplicates soak (WARN; retire by
+ *          promotion batches B-D) — anything else FAILs; L1-common assets
+ *          (docs/templates/common-contract.json common_skills/common_agents)
+ *          are excluded because common delivery is inheritance, not
+ *          duplication; (3) hub-identity-clobber — a variant-identity entry's
+ *          asset must not exist in any foreign variant template (the PR #61
+ *          clobber class); (4) hub-consumer-min-version — a variant.json
+ *          hub.consumes {domain, minimum_version} resolved against registry
+ *          entries FAILs when the canonical is older than the declared
+ *          minimum (vacuously green while entries[] is empty). With the
+ *          registry landed empty + the 20-row pre-registry duplicate soak
+ *          declared, the battery stays green today and the legs activate as
+ *          batches B-D land entries.
  *
  * v1.69.0 (2026-11-01, T-20261101-003 — spec
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
@@ -471,6 +494,15 @@ import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from './help
 import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
 import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
 import { scanMirrorHygiene } from './helpers/mirror-hygiene.ts';
+import {
+  loadHubTopology,
+  validateHubTopologyShape,
+  findCrossVariantDuplicates,
+  checkUnregisteredDuplicates,
+  checkVariantIdentity,
+  checkConsumerMinimumVersions,
+  loadConsumingVariants,
+} from './helpers/hub-topology.ts';
 import { agentBodyCompletenessFinding } from './validate-agents.ts';
 import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from './lib/platform-mirror-freshness.ts';
 import {
@@ -3463,6 +3495,59 @@ export function variantScopedSkillLeaks(
   return leaks.sort();
 }
 
+// ── Hub topology registry legs (v1.70.0; design
+//    docs/designs/2026-11-01-hub-consolidation-design.md §2.4) ──────────────
+// Four arms over docs/workspace-schema.json hub_topology, backed by the
+// shared helpers/hub-topology.ts (one derivation also feeding audit.ts's
+// hub-resolve checker and hub-promotion.ts). Absent file/section skips
+// cleanly (legacy checkouts); a present registry is fail-closed. The checks
+// are vacuously green with an empty entries[] array and activate as the
+// Phase 1 promotion batches B-D land registry rows.
+function checkHubTopology(): void {
+  if (!JSON_MODE) console.log('\n=== Check hub-topology: hub_topology registry legs (hub-consolidation design §2.4) ===');
+  const loaded = loadHubTopology(ROOT);
+  if (!loaded.ok) {
+    if (loaded.error === 'absent-file' || loaded.error === 'absent-section') {
+      pass('hub_topology: registry absent (legacy checkout) — hub legs skip cleanly');
+      return;
+    }
+    fail('root', 'hub-topology-shape', loaded.error ?? 'hub_topology unreadable');
+    return;
+  }
+  const topology = loaded.topology!;
+
+  // Leg 0 — registry shape (fail-closed per §2.4: bad enums, missing fields,
+  // non-semver versions, unknown capability keys all FAIL)
+  const shapeErrors = validateHubTopologyShape(topology);
+  for (const e of shapeErrors) {
+    fail('root', 'hub-topology-shape', `hub_topology: ${e}`, 'Fix docs/workspace-schema.json hub_topology — reconcile the hand-maintained root + L1 pair in the same commit');
+  }
+  if (shapeErrors.length === 0) pass('hub-topology-shape: registry shape valid');
+
+  // Leg 1 — unregistered cross-variant duplication (design §2.4 leg 1):
+  // L1-common assets are excluded (common delivery is inheritance, not
+  // duplication); declared soak rows WARN; everything else FAILs.
+  const dupLeg = checkUnregisteredDuplicates(topology, findCrossVariantDuplicates(ROOT));
+  for (const f of dupLeg.fails) fail('root', 'hub-dup-unregistered', f);
+  for (const w of dupLeg.warns) warn('root', 'hub-dup-unregistered', w);
+  for (const p of dupLeg.passes) pass(`hub-dup-unregistered: ${p}`);
+
+  // Leg 2 — variant-identity unauthorized promotion (design §2.4 leg 2):
+  // identity assets may not exist in foreign variant templates.
+  const identityLeg = checkVariantIdentity(topology, ROOT);
+  for (const f of identityLeg.fails) fail('root', 'hub-identity-clobber', f);
+  for (const w of identityLeg.warns) warn('root', 'hub-identity-clobber', w);
+  for (const p of identityLeg.passes) pass(`hub-identity-clobber: ${p}`);
+
+  // Leg 3 — consumer minimum_version (design §2.4 leg 3): variant.json
+  // hub.consumes resolved against registry entries; vacuously green while
+  // entries[] is empty.
+  const consumerLeg = checkConsumerMinimumVersions(topology, loadConsumingVariants(ROOT));
+  for (const f of consumerLeg.fails) fail('root', 'hub-consumer-min-version', f);
+  for (const w of consumerLeg.warns) warn('root', 'hub-consumer-min-version', w);
+  for (const p of consumerLeg.passes) pass(`hub-consumer-min-version: ${p}`);
+}
+
 export interface ScriptsRegistryRow {
   name: string;
   version: string;
@@ -6259,6 +6344,7 @@ function main(): number {
   }
 
   checkWorkspaceSchema();
+  checkHubTopology(); // v1.70.0: hub_topology registry legs (hub-consolidation design §2.4)
   checkCommonContract();
   checkCommonContractReverseCoverage(); // C-CM-04: exists→listed contract coverage (T-20260910-019)
   for (const [variant, manifest] of manifests) {

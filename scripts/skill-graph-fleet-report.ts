@@ -2,7 +2,15 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
- * @version 2.1.0
+ * @version 2.2.0
+ *
+ * v2.2.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md §9/Phase 0):
+ *          adds the FAN-IN classification (`fanIn2`, threshold 2): capabilities (skills +
+ *          agents only — scripts are not graph nodes) carried by >= 2 DISTINCT project
+ *          graphs, the hub-candidacy substrate. Purely additive: the convergence threshold
+ *          (3) and every prior field are untouched. Snapshot gains an additive `fanIn2`
+ *          field; the report gains a fan-in table plus a hub-candidate asset breakout
+ *          (co-develop / co-design / co-security) listing each hub's assets with fan-in >= 2.
  *
  * v2.1.0 (2026-10-09, T-20261009-008, design docs/designs/2026-10-09-skill-graph-triage-hardening-design.md D1-D3):
  *          HERMES.md joins the docRef corpus (5 bases); isolated agents carry the same
@@ -82,10 +90,19 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
+
+/** v2.2.0 (hub-consolidation design §9): fan-in threshold — a capability (skill/agent)
+ *  carried by >= this many DISTINCT project graphs is fan-in-qualifying (hub candidacy). */
+export const FAN_IN_THRESHOLD = 2;
+
+/** v2.2.0: the designated hub candidates whose fan-in-qualifying assets the report
+ *  breaks out (design docs/designs/2026-11-01-hub-consolidation-design.md §9 / Phase 0
+ *  evidence for the hub-selection record). */
+export const HUB_CANDIDATES = ["co-develop", "co-design", "co-security"] as const;
 
 /** A skill-graph projection (v1 or v2 file, always read through the compat loader). */
 type SkillGraph = SkillGraphV2;
@@ -105,6 +122,9 @@ interface Snapshot {
   jaccard: Record<string, number>;
   /** v2.0.0: capability-keyed convergence classification (threshold = CONVERGENCE_THRESHOLD). */
   convergence?: ConvergenceResult;
+  /** v2.2.0 (additive): fan-in classification (skills + agents, threshold = FAN_IN_THRESHOLD),
+   *  the hub-candidacy substrate (2026-11-01-hub-consolidation design §9). */
+  fanIn2?: FanIn2Result;
   /** v1.1.0: root-graph orphan cross-check (4-way: definition+registry+mirror+reference).
    *  v2.1.0: isolatedAgents carries the same axes as skills; carriedByScoped lists L0
    *  nodes whose same-name scoped copies hold the edges (v2 re-attribution, not isolation). */
@@ -133,6 +153,14 @@ export interface ConvergenceResult {
   convergenceWithDivergence: Array<{ capability: string; hashes: Record<string, string[]> }>;
   /** Present in >= threshold projects but >= 1 project graph (v1) carries no hash. */
   hashUnknown: string[];
+}
+
+/** v2.2.0 (hub-consolidation design §9): fan-in classification over `skill:`/`agent:`
+ *  capability keys. Capability entries carry the fan-in count and the sorted carrier list. */
+export interface FanIn2Result {
+  threshold: number;
+  /** Capabilities with fan-in >= threshold, sorted by fan-in desc then capability. */
+  capabilities: Array<{ capability: string; fanIn: number; projects: string[] }>;
 }
 
 /** Per project: capability -> content hashes of its skill nodes (null = unknown, e.g. v1 graph). */
@@ -183,6 +211,59 @@ export function classifyConvergence(
     }
   }
   return result;
+}
+
+/**
+ * v2.2.0 — Fan-in capability keys of one graph: `skill:<capability>` / `agent:<capability>`
+ * (same key shape as nodeKey). Skills and agents ONLY — scripts are not graph nodes
+ * (hub-consolidation design §9: script fan-in is not graph-derivable), phases are not
+ * capabilities.
+ */
+export function fanInCapabilityKeys(graph: SkillGraph): Set<string> {
+  const out = new Set<string>();
+  for (const n of graph.nodes ?? []) {
+    if (n.type !== "skill" && n.type !== "agent") continue;
+    const k = nodeKey(n);
+    if (k !== null) out.add(k);
+  }
+  return out;
+}
+
+/**
+ * v2.2.0 — Classify capabilities by fan-in (design docs/designs/2026-11-01-hub-consolidation-design.md
+ * §9). Pure: input is per-project capability-key sets; only project graphs count (root is the
+ * source, not a consumer). A capability carried by >= `threshold` DISTINCT project graphs is
+ * fan-in-qualifying. Additive to the convergence classification (threshold 3 stays untouched).
+ */
+export function classifyFanIn2(
+  projects: Map<string, Set<string>>,
+  threshold: number = FAN_IN_THRESHOLD,
+): FanIn2Result {
+  const carriers = new Map<string, string[]>();
+  for (const [project, keys] of projects) {
+    for (const key of keys) {
+      const list = carriers.get(key);
+      if (list) list.push(project);
+      else carriers.set(key, [project]);
+    }
+  }
+  const capabilities = [...carriers.entries()]
+    .filter(([, list]) => list.length >= threshold)
+    .map(([capability, list]) => ({ capability, fanIn: list.length, projects: [...list].sort() }))
+    .sort((a, b) => (b.fanIn - a.fanIn) || a.capability.localeCompare(b.capability));
+  return { threshold, capabilities };
+}
+
+/**
+ * v2.2.0 — Assets (capability keys) of `project` that are fan-in-qualifying, sorted.
+ * A project's own carriership counts toward its assets' fan-in, so an asset qualifies
+ * for a hub candidate when at least one OTHER project also carries it.
+ */
+export function hubQualifyingAssets(project: string, fanIn2: FanIn2Result): string[] {
+  return fanIn2.capabilities
+    .filter((c) => c.projects.includes(project))
+    .map((c) => c.capability)
+    .sort();
 }
 
 function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
@@ -402,6 +483,8 @@ function markdownReport(
   orphans: NonNullable<Snapshot["rootOrphans"]> | null,
   convergence: ConvergenceResult | null = null,
   v1Projects: string[] = [],
+  fanIn2: FanIn2Result | null = null,
+  hubEvidence: Record<string, string[] | null> = {},
 ): string {
   const lines: string[] = [
     `# skill-graph fleet report — ${localDateISO()}`,
@@ -456,6 +539,28 @@ function markdownReport(
       for (const d of convergence.convergenceWithDivergence) {
         const groups = Object.entries(d.hashes).map(([h, ps]) => `${h.slice(0, 8)}: ${ps.join(", ")}`).join(" · ");
         lines.push(`| ${d.capability} | ${groups} |`);
+      }
+    }
+    lines.push("");
+  }
+
+  // v2.2.0 — fan-in >= 2 classification (hub-candidacy substrate, 2026-11-01-hub-consolidation §9)
+  if (fanIn2) {
+    lines.push(`## Fan-in >= ${fanIn2.threshold} by capability (hub-candidacy substrate)`, "");
+    lines.push(`${fanIn2.capabilities.length} capabilities (skills + agents) are carried by >= ${fanIn2.threshold} distinct project graphs. Scripts are not graph nodes — script fan-in is tracked via the hub registry's declared consumers[], not measured here.`);
+    lines.push("");
+    lines.push("| capability | fan-in | projects |", "|---|---|---|");
+    for (const c of fanIn2.capabilities) {
+      lines.push(`| ${c.capability} | ${c.fanIn} | ${c.projects.join(", ")} |`);
+    }
+    lines.push("");
+    lines.push("### Hub-candidate assets with fan-in >= 2 (hub-selection evidence)", "");
+    for (const hub of HUB_CANDIDATES) {
+      const assets = hubEvidence[hub];
+      if (assets === null || assets === undefined) {
+        lines.push(`- ${hub}: no project graph loaded — no evidence this run`);
+      } else {
+        lines.push(`- ${hub}: ${assets.length} qualifying assets${assets.length > 0 ? ` — ${assets.join(", ")}` : ""}`);
       }
     }
     lines.push("");
@@ -558,6 +663,8 @@ same-date). Read-only over all inputs.`);
   const projectSkillSets = new Map<string, Set<string>>();
   const projectNodeSets = new Map<string, Set<string>>();
   const projectCaps = new Map<string, Map<string, Set<string | null>>>();
+  // v2.2.0: fan-in substrate — per-project skill:/agent: capability keys (same load pass, no re-walk)
+  const projectFanInKeys = new Map<string, Set<string>>();
   const v1Projects: string[] = [];
 
   for (const g of graphPaths) {
@@ -572,6 +679,7 @@ same-date). Read-only over all inputs.`);
     projectSkillSets.set(g.name, skillSet);
     projectNodeSets.set(g.name, nodeIds(graph));
     projectCaps.set(g.name, skillCapabilities(graph));
+    projectFanInKeys.set(g.name, fanInCapabilityKeys(graph));
     if (graph.upgradedFrom === 1) v1Projects.push(g.name);
     stats.push({ project: g.name, nodes: graph.nodes?.length ?? 0, edges: graph.edges?.length ?? 0, skills: skillNodeCount(graph) });
   }
@@ -625,6 +733,8 @@ same-date). Read-only over all inputs.`);
     missingFromProjects,
     jaccard,
     convergence: classifyConvergence(projectCaps),
+    // v2.2.0 (additive): fan-in classification — the hub-selection evidence
+    fanIn2: classifyFanIn2(projectFanInKeys),
   };
 
   // v1.1.0 — root-graph orphan cross-check
@@ -642,6 +752,13 @@ same-date). Read-only over all inputs.`);
   if (json) {
     console.log(JSON.stringify(snapshot, null, 2));
   } else {
+    // v2.2.0: hub-candidate asset evidence — null marks a hub project with no graph loaded
+    const hubEvidence: Record<string, string[] | null> = {};
+    for (const hub of HUB_CANDIDATES) {
+      hubEvidence[hub] = snapshot.fanIn2 && projectFanInKeys.has(hub)
+        ? hubQualifyingAssets(hub, snapshot.fanIn2)
+        : null;
+    }
     console.log(markdownReport(
       rootGraph ?? { version: 2, nodes: [], edges: [] },
       stats,
@@ -654,6 +771,8 @@ same-date). Read-only over all inputs.`);
       orphans,
       snapshot.convergence ?? null,
       v1Projects,
+      snapshot.fanIn2 ?? null,
+      hubEvidence,
     ));
   }
   process.exit(0);

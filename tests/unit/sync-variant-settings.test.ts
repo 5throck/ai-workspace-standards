@@ -12,10 +12,18 @@
  * byte-for-value (never mutated with a `hooks` key), managed entries are
  * group-wrapped.
  *
- * @version 1.1.0
+ * v1.3.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md
+ * Phase 0) pins deriveVariants: the variant set derives from the templates/ directory's
+ * variant.json markers (directories without variant.json — e.g. common — excluded;
+ * template-less projects never enter; deterministic lexicographic order).
+ *
+ * @version 1.3.0
  */
 import { describe, test, expect } from 'bun:test';
-import { syncManagedSessionStart, syncManagedEntries, MANAGED_SUBSTRINGS, SYNC_TARGETS } from '../../scripts/sync-variant-settings.ts';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { syncManagedSessionStart, syncManagedEntries, deriveVariants, MANAGED_SUBSTRINGS, SYNC_TARGETS } from '../../scripts/sync-variant-settings.ts';
 
 const BOOTSTRAP = { type: 'command', command: 'bun scripts/hooks/pm-role-bootstrap.ts', timeout: 8000 };
 const DISPATCH_CLAUDE = { type: 'command', command: 'bun scripts/hooks/pm-dispatch-gate.ts', timeout: 10, statusMessage: 'Checking PM dispatch policy...' };
@@ -243,5 +251,44 @@ describe('pruned counter (T-20261026-016)', () => {
     expect(second.removed).toBe(1);
     expect(second.pruned).toBe(1);
     expect(second.changed).toBe(true);
+  });
+});
+
+// v1.3.0 — deriveVariants (hub-consolidation design Phase 0): the variant set derives
+// from templates/*/variant.json instead of a hardcoded literal, so a variant added to
+// templates/ joins the managed sync automatically (the co-learning incident class).
+describe('deriveVariants (v1.3.0)', () => {
+  test('derives from templates/*/variant.json, sorted lexicographically, excluding non-variant dirs', () => {
+    const root = mkdtempSync(join(tmpdir(), 'svs-derive-'));
+    try {
+      for (const name of ['co-b', 'co-a', 'common']) {
+        mkdirSync(join(root, 'templates', name), { recursive: true });
+        writeFileSync(join(root, 'templates', name, 'variant.json'), '{}');
+      }
+      mkdirSync(join(root, 'templates', 'co-novariant'), { recursive: true }); // no variant.json — excluded
+      writeFileSync(join(root, 'templates', 'loose.json'), '{}'); // a file, not a directory — excluded
+      expect(deriveVariants(root)).toEqual(['co-a', 'co-b', 'common']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('a template-less project name (Projects/ only) never enters the derived set', () => {
+    // co-newbiz exists only under Projects/, never under templates/ — the derivation
+    // reads templates/ alone, so a Projects/ listing cannot leak in by construction.
+    const root = mkdtempSync(join(tmpdir(), 'svs-derive-'));
+    try {
+      mkdirSync(join(root, 'templates', 'co-real'), { recursive: true });
+      writeFileSync(join(root, 'templates', 'co-real', 'variant.json'), '{}');
+      mkdirSync(join(root, 'Projects', 'co-newbiz'), { recursive: true });
+      writeFileSync(join(root, 'Projects', 'co-newbiz', 'variant.json'), '{}');
+      expect(deriveVariants(root)).toEqual(['co-real']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('a missing templates/ directory yields an empty set (no throw)', () => {
+    expect(deriveVariants(mkdtempSync(join(tmpdir(), 'svs-empty-')))).toEqual([]);
   });
 });

@@ -4,7 +4,7 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.69.0
+- **Version**: 1.70.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-01
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-01 | production | production | v1.69.0 → v1.70.0 (spec docs/designs/2026-11-01-hub-consolidation-design.md §2.4 Phase 1): additive checkHubTopology() — hub-topology-shape (fail-closed), hub-dup-unregistered (L1-common excluded; 20-row pre-registry duplicate soak declared via known_unregistered_duplicates, retires in hub-promotion batches B–D), hub-identity-clobber, hub-consumer-min-version; backed by new helpers/hub-topology.ts v1.0.0 (shared derivation also consumed by audit.ts v2.61.0 hub-resolve and hub-promotion.ts v1.0.0). | automation-engineer |
 | 2026-11-01 | production | production | v1.68.0 → v1.69.0 (T-20261101-003, spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.2): MM-01 LITERAL alternation retires the retained `gpt-5\.6-(?:sol\|terra\|luna)` alternatives — the L3 tier-vocabulary convergence window closed 2026-11-01 (all 16 projects at 0.26.0, 0 gpt-5.6 literals in delivered md surfaces), so the old ids now FAIL loudly outside managed sections instead of being tolerated. The generalized Codex family arm in lib/model-literal-patterns.ts (Check MM / sync side) is unchanged. No other check changes. | automation-engineer |
 | 2026-11-01 | production | production | v1.67.0 → v1.68.0 (spec docs/designs/2026-10-31-template-security-hardening-design.md Addendum 2026-11-01): new WARN arm `gemini-execution-policy-floor`, run inside the VA-04 platform settings parity pass — a variant gemini overlay's `terminal.executionPolicy` must not rank weaker than common's (Off > Manual > Auto ordering). The overlay wins over common in the effective template tree, so a weak overlay silently defeats the common hardening floor (observed: the 2026-10-31 wave reached only the one overlay-less project, and co-security's overlay re-regressed its manually hardened Manual policy to Auto). Missing/unknown values skip (shared-key loop and schema checks own those); at-or-above-floor values pass. Severity: WARN per ADR-0055 soak. | automation-engineer |
 | 2026-10-31 | production | production | v1.66.0 → v1.67.0 (T-20261031-005, spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.2 surface 6): MM-01 LITERAL alternation gains the GPT-6.x ids (`gpt-6\.1-(?:sol|terra)` + `gpt-6-luna`) so the codex column rebase (gpt-5.6-sol/terra/luna → gpt-6.1-sol/terra, gpt-6-luna) keeps matching inside the instruction twins; the `gpt-5\.6` alternatives were KEPT through the L3 convergence window — delivered-side stragglers kept FAILing loudly (visible, not silent) until their upgrade visit normalized them (retired 2026-11-01 post-convergence, T-20261101-003). No other check changes. | automation-engineer |

@@ -154,6 +154,8 @@
 | 2026-06-21 | Pluggable variant audit hooks and pipeline integrity validation | meeting notes removed in the 7c8a2f8d memory cleanup |
 | 2026-06-21 | html-themes per-theme style restructure design — artifact ownership, target structure, 3-layer PDF merge | meeting notes removed in the 7c8a2f8d memory cleanup |
 | 2026-05-24 | Multi-agent analysis: 96 improvement opportunities identified | *(archived — file not preserved)* |
+| 2026-10-31 | Hub-and-Spoke consolidation plan review — gaps, red-team challenge, 12-item synthesis | [meeting-2026-10-31-hub-spoke-consolidation-review.md](meeting-2026-10-31-hub-spoke-consolidation-review.md) |
+| 2026-11-01 | v6 baseline review — registry/state split, attach-mode contract, kanban alias, adoption metric; v7 approved | [meeting-2026-11-01-v6-baseline-review.md](meeting-2026-11-01-v6-baseline-review.md) |
 
 ## ADRs
 

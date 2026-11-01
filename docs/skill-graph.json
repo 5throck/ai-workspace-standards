@@ -6760,7 +6760,11 @@
       "version": "1.5.0",
       "mirrors": [
         "templates/co-safety/skills/meeting-facilitation/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-01"
+      }
     },
     {
       "id": "skill:co-safety/mid-construction-inspection",
@@ -7737,7 +7741,11 @@
         ".agents/skills/meeting-facilitation/SKILL.md",
         ".codex/skills/meeting-facilitation/SKILL.md",
         ".hermes/skills/meeting-facilitation/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-01"
+      }
     },
     {
       "id": "skill:root/migrate-project",
