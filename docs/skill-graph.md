@@ -191,7 +191,7 @@
 | `co-security/sarif-exporter` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
 | `co-security/spdx-sbom` | variant:co-security | 1.1.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
 | `co-security/stride-threat-matrix` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
-| `co-security/verify-authorization` | variant:co-security | 1.0.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
+| `co-security/verify-authorization` | variant:co-security | 1.1.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
 | `co-work/standup-synthesizer` | variant:co-work | 1.0.1 | co-work/project-coordinator | co-work/phase 4 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
@@ -218,6 +218,7 @@
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
 | `root/create-variant` | L0 | 1.4.3 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
 | `root/decision-write-integrity` | L0 | 1.0.0 | — | — | root/meeting-facilitation | — | — |
+| `root/delegate-to-hub` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/design-foundation` | L0 | 1.1.0 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |
@@ -589,6 +590,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-security/agents/red-team-lead.md` | doc | `co-security/verify-authorization` | — | — |
 | `doc:co-security/agents/report-writer.md` | doc | `co-security/verify-authorization` | — | — |
 | `doc:co-security/agents/threat-modeler.md` | doc | `co-security/verify-authorization` | — | — |
+| `doc:co-security/docs/authorization-registry.md` | doc | `co-security/verify-authorization`, `root/delegate-to-hub` | — | — |
 | `doc:co-security/docs/co-security.context.md` | doc | `co-security/verify-authorization`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-security/docs/phase-definitions.md` | doc | `co-security/stride-threat-matrix`, `co-security/verify-authorization`, `root/project-review` | — | — |
 | `doc:co-security/docs/user-guide_ko.md` | doc | `co-security/verify-authorization` | — | — |
@@ -839,7 +841,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-140 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+141 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -876,7 +878,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-02), window 90 days. Skill nodes with usage: 8.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (8): co-safety/meeting-facilitation, co-safety/sync, common/sync, root/meeting-facilitation, root/project-resync, root/project-to-variant, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (237): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/standup-synthesizer, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build … and 197 more
+- **unused** (0 sessions in 90 days) (238): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/standup-synthesizer, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/hwp-document-processing, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build … and 198 more
 
 ## Ambiguous Name Resolutions
 
