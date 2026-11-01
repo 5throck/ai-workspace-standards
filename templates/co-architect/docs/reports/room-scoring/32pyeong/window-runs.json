@@ -1,0 +1,222 @@
+[
+ {
+  "orient": "H",
+  "pos": 10810,
+  "range": [
+   15204,
+   18509
+  ],
+  "width": 3305,
+  "nearest_zone": "침실1",
+  "dist": 2347
+ },
+ {
+  "orient": "H",
+  "pos": 10810,
+  "range": [
+   18689,
+   23169
+  ],
+  "width": 4480,
+  "nearest_zone": "거실",
+  "dist": 2347
+ },
+ {
+  "orient": "H",
+  "pos": 11409,
+  "range": [
+   23319,
+   24589
+  ],
+  "width": 1270,
+  "nearest_zone": "침실2",
+  "dist": 1748
+ },
+ {
+  "orient": "H",
+  "pos": 11915,
+  "range": [
+   15204,
+   18509
+  ],
+  "width": 3305,
+  "nearest_zone": "침실1",
+  "dist": 1242
+ },
+ {
+  "orient": "H",
+  "pos": 11915,
+  "range": [
+   23319,
+   25824
+  ],
+  "width": 2505,
+  "nearest_zone": "침실2",
+  "dist": 1242
+ },
+ {
+  "orient": "H",
+  "pos": 13157,
+  "range": [
+   15394,
+   18114
+  ],
+  "width": 2720,
+  "nearest_zone": "침실1",
+  "dist": 0
+ },
+ {
+  "orient": "H",
+  "pos": 13157,
+  "range": [
+   19254,
+   23169
+  ],
+  "width": 3915,
+  "nearest_zone": "거실",
+  "dist": 0
+ },
+ {
+  "orient": "H",
+  "pos": 13157,
+  "range": [
+   23319,
+   26334
+  ],
+  "width": 3015,
+  "nearest_zone": "침실2",
+  "dist": 0
+ },
+ {
+  "orient": "H",
+  "pos": 16647,
+  "range": [
+   14715,
+   15313
+  ],
+  "width": 598,
+  "nearest_zone": "드레스실",
+  "dist": 0
+ },
+ {
+  "orient": "H",
+  "pos": 18027,
+  "range": [
+   23417,
+   24659
+  ],
+  "width": 1242,
+  "nearest_zone": "현관",
+  "dist": 24
+ },
+ {
+  "orient": "H",
+  "pos": 21242,
+  "range": [
+   16327,
+   18353
+  ],
+  "width": 2026,
+  "nearest_zone": "침실3",
+  "dist": 65
+ },
+ {
+  "orient": "H",
+  "pos": 22289,
+  "range": [
+   16279,
+   18359
+  ],
+  "width": 2080,
+  "nearest_zone": "침실3",
+  "dist": 1112
+ },
+ {
+  "orient": "H",
+  "pos": 22289,
+  "range": [
+   18609,
+   20304
+  ],
+  "width": 1695,
+  "nearest_zone": "다용도실",
+  "dist": 62
+ },
+ {
+  "orient": "H",
+  "pos": 22289,
+  "range": [
+   21409,
+   22329
+  ],
+  "width": 920,
+  "nearest_zone": "주방&식당",
+  "dist": 62
+ },
+ {
+  "orient": "H",
+  "pos": 23808,
+  "range": [
+   19109,
+   22244
+  ],
+  "width": 3135,
+  "nearest_zone": "주방&식당",
+  "dist": 1581
+ },
+ {
+  "orient": "H",
+  "pos": 23808,
+  "range": [
+   25914,
+   27134
+  ],
+  "width": 1220,
+  "nearest_zone": "주방&식당",
+  "dist": 3391
+ },
+ {
+  "orient": "V",
+  "pos": 17372,
+  "range": [
+   12897,
+   13467
+  ],
+  "width": 570,
+  "nearest_zone": "침실1",
+  "dist": 25
+ },
+ {
+  "orient": "V",
+  "pos": 17372,
+  "range": [
+   20907,
+   21477
+  ],
+  "width": 570,
+  "nearest_zone": "침실3",
+  "dist": 15
+ },
+ {
+  "orient": "V",
+  "pos": 20399,
+  "range": [
+   19645,
+   21369
+  ],
+  "width": 1724,
+  "nearest_zone": "다용도실",
+  "dist": 65
+ },
+ {
+  "orient": "V",
+  "pos": 24516,
+  "range": [
+   11336,
+   11977
+  ],
+  "width": 641,
+  "nearest_zone": "침실2",
+  "dist": 1500
+ }
+]

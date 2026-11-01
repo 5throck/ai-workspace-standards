@@ -39,8 +39,8 @@ describe('SURFACES completeness against the actual repo', () => {
     for (const rel of onDisk) {
       expect(resolved).toContain(rel);
     }
-    // Sanity: the workspace currently ships 14 variants.
-    expect(onDisk.length).toBe(14);
+    // Sanity: the workspace currently ships 15 variants.
+    expect(onDisk.length).toBe(15);
     expect(VARIANT_AGENTS_GLOB).toBe('templates/*/AGENTS.md');
   });
 

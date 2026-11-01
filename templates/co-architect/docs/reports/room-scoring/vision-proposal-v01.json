@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "drawing": "tests/아파트 평면도.dwg",
+    "source": "User screenshot (1254x864 px). Room rectangles read from the image by Claude on 2026-09-24 BEFORE any DWG data was extracted (spec v0.1).",
+    "units": "screenshot pixels, y down",
+    "anchor_px_bbox": [415, 212, 860, 630],
+    "anchor_note": "Outer extents of the drawn plan in the screenshot (incl. top projection and right protrusions), paired with the DWG wall extents"
+  },
+  "rooms": [
+    {"label": "LIVING ROOM", "px": [[569.2, 567.5], [694.2, 567.5], [694.2, 459.2], [569.2, 459.2]]},
+    {"label": "DINING ROOM", "px": [[419.2, 567.5], [569.2, 567.5], [569.2, 442.5], [419.2, 442.5]]},
+    {"label": "ROOM #1",     "px": [[419.2, 442.5], [569.2, 442.5], [569.2, 342.5], [419.2, 342.5]]},
+    {"label": "ROOM #2",     "px": [[419.2, 342.5], [569.2, 342.5], [569.2, 250.8], [419.2, 250.8]]},
+    {"label": "MAIN ROOM",   "px": [[694.2, 567.5], [819.2, 567.5], [819.2, 459.2], [694.2, 459.2]]},
+    {"label": "파우더 & 드레스룸", "px": [[698.3, 459.2], [819.2, 459.2], [819.2, 380.0], [698.3, 380.0]]},
+    {"label": "욕실 (공용)",  "px": [[573.3, 321.7], [677.5, 321.7], [677.5, 250.8], [573.3, 250.8]]},
+    {"label": "욕실 (부부)",  "px": [[623.3, 459.2], [698.3, 459.2], [698.3, 375.8], [623.3, 375.8]]},
+    {"label": "ENTRANCE",    "px": [[740.0, 380.0], [865.0, 380.0], [865.0, 280.0], [740.0, 280.0]]}
+  ]
+}

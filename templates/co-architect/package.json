@@ -1,0 +1,29 @@
+{
+  "name": "co-architect-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dependency root for Projects/co-architect/mcp/ — the MCP servers registered in .mcp.json (building-skill) resolve node_modules by walking up from mcp/<name>/index.ts, so this file must live at project root, not under scripts/ (which has its own separate package.json/bun.lock for scripts/ tooling).",
+  "scripts": {
+    "verify-skills": "bun scripts/verify-skills.ts",
+    "verify-scripts": "bun scripts/verify-scripts.ts",
+    "agent-lifecycle-audit": "bun scripts/agent-lifecycle-audit.ts",
+    "skill-lifecycle-audit": "bun scripts/skill-lifecycle-audit.ts",
+    "agent:create": "bun scripts/agent-create.ts",
+    "agent:list": "bun scripts/agent-list.ts",
+    "agent:delete": "bun scripts/agent-delete.ts",
+    "agent:verify": "bun scripts/agent-verify.ts",
+    "dispatch:parallel": "bun scripts/dispatch.ts parallel",
+    "dispatch:serial": "bun scripts/dispatch.ts serial",
+    "audit": "bun scripts/audit.ts",
+    "audit:security": "bun scripts/co-architect/security/audit-security.ts",
+    "dev-sync": "bun scripts/dev-sync.ts",
+    "sync-md": "bun scripts/sync-md.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "js-yaml": "^5.4.2"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

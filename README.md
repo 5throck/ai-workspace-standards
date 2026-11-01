@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: 18fc2968818077f6d2b760c419fa1ea9a9e9fd33f8be05e9bcbbde29d3466c5c
+content_hash: add2d95a5d5f4a3f9a00fdbdf5a6a78e801f05eb3cf00788fcd769b489e69c1f
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -239,7 +239,8 @@ C:\git\ (workspace root - this repo)
     ├── co-abap/             # ✅ Stable — SAP ABAP development agent team
     ├── co-hr/               # 🔶 Beta — HR & labor-relations consulting agent team (KR country profile included)
     ├── co-safety/           # 🔶 Beta — EHS/GxP compliance platform agent team (KR country profile included)
-    └── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset, KR country profile included)
+    ├── co-price/            # 🔶 Beta — pricing management & consulting simulator (K-Beauty sample dataset, KR country profile included)
+    └── co-architect/        # 🔶 Beta — architecture-firm collaboration agent team (KR country profile included)
 ```
 
 Each sub-project lives in its own directory and git repository:
@@ -299,6 +300,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 - **co-hr**: A 4-phase HR & labor-relations consulting workflow covering engagement intake, labor-law compliance audit for the target jurisdiction (country profiles under docs/countries/ — KR profile included), HRM/HRD system design, and org restructuring/change management, with k-law/k-kosis regulatory research integration (KR-scoped skills, attached only to KR-country projects) across a 12-agent roster
 - **co-safety**: A 6-phase EHS/GxP compliance workflow covering Korean occupational safety (OSHA-KR, SAPA), process safety management (PSM), GxP pharmaceutical quality (GMP/GLP/GDP/GCP/GVP), medical device safety (KGMP-MD, ISO 13485), and 15 industry-specific domains (chemical, construction, semiconductor, battery, shipbuilding, steelmaking, etc.) across a 40+ agent roster; jurisdiction content attaches via country profiles under docs/countries/ (KR profile included)
 - **co-price**: A multi-industry pricing management & consulting simulator workflow covering pricing strategy, finance strategy, CPA auditing, market intelligence, and engagement direction across a 15-agent roster, with a bundled K-Beauty sample dataset and a KR country profile under docs/countries/
+- **co-architect**: An architecture-firm collaboration workflow integrating design (UI/UX, service design, prototyping), research (analysis, content), project coordination (scheduling, acquisition), and engineering (SketchUp 3D modeling, ZWCAD 2D drafting, structural/MEP review) across a 24-agent, 5-team roster with 6 named workflows (market-research, design-exploration, project-acquisition, design-delivery, permit-compliance, interior-execution); jurisdiction content attaches via country profiles under docs/countries/ (KR profile included)
 
 **💡 How to Check Workflow Details**
 Specific agent rosters and governance phases are managed within the documents of each generated project. After scaffolding a project, check:
@@ -326,6 +328,7 @@ New projects are scaffolded from versioned template variants. Templates are tagg
 | `co-hr` | 🔶 Beta | HR & labor-relations consulting workflow — PM, Labor Compliance Analyst, Labor Relations Specialist, Safety & Health Officer, Talent Acquisition Specialist, Compensation & Benefits Analyst, Performance Management Consultant, L&D Specialist, Career & Succession Consultant, Org Design Consultant, Change Management Partner, Data Analyst. Labor-law scope via country profiles (KR profile included) |
 | `co-safety` | 🔶 Beta | EHS/GxP compliance platform workflow — PM/CSO, 40+ specialist agents (emergency, compliance, legal, training, PSM, risk, audit, 15 industry domains, 5 GxP domains), k-law regulatory research integration (KR-scoped); jurisdiction content via country profiles (KR profile included) |
 | `co-price` | 🔶 Beta | Multi-industry pricing management & consulting simulator — PM, Finance Strategy Lead, CPA Auditor, Pricing Strategist, Market Intelligence Analyst, Engagement Director, with bundled K-Beauty sample dataset; KR country profile included |
+| `co-architect` | 🔶 Beta | Architecture-firm collaboration workflow — 5 teams (Design, Research, Project Coordination, Engineering, Platform Engineering) with 24 agents covering UI/UX design, SketchUp 3D modeling, ZWCAD 2D drafting, structural/MEP review, and 6 named workflows from market research to interior execution; KR country profile included |
 
 ### Selecting a version and variant
 
@@ -408,4 +411,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-01*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-02*

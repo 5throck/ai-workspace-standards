@@ -1,0 +1,631 @@
+{
+  "version": 1,
+  "graph_profile": "deg/v1",
+  "nodes": [
+    {
+      "id": "agent-lifecycle-manager",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "analyst",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "api-documentation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "architect",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "automation-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "bylaw-expert",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "cad-server-manager",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "cad-space-recognition",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "cad-svg-preview",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "content-writer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "decision-record",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "design-lead",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "design-storyteller",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "documentation-writing",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "drafting-architect",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "evidence-ledger",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "generate-room-elevation",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "interior-designer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "k-law",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "mep-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "ms365-expert",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.angle_options",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.closure_record",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.draft_document",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.evidence_pack",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.final_document",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.integrated_document",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.narrative_outline",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "output_type.narrative_review",
+      "type": "output_type",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.distribution-integration",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.document-production",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.narrative-design",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "procedure.co-architect.project-intake-analysis",
+      "type": "procedure",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "project-coordinator",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "prototype-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "research-analysis",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "service-design",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "service-designer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "sketchup-modeler",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "standup-synthesizer",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "storyteller",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "structural-engineer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "technical-writer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "typography-expert",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "ui-ux-design-intelligence",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "upgrade-project",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
+      "id": "ux-researcher",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "visual-designer",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "visualization-expert",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "zwcad-ai-drawing",
+      "type": "skill",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "zwcad-drafter",
+      "type": "agent",
+      "layer": "variant:co-architect"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "api-documentation",
+      "to": "technical-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "bylaw-expert",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-server-manager",
+      "to": "cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-server-manager",
+      "to": "cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-server-manager",
+      "to": "zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-space-recognition",
+      "to": "cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-space-recognition",
+      "to": "generate-room-elevation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-space-recognition",
+      "to": "zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-svg-preview",
+      "to": "cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-svg-preview",
+      "to": "generate-room-elevation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "cad-svg-preview",
+      "to": "zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "documentation-writing",
+      "to": "content-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.draft_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "documentation-writing",
+      "to": "output_type.narrative_review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "documentation-writing",
+      "to": "technical-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "evidence-ledger",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "generate-room-elevation",
+      "to": "cad-space-recognition",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "generate-room-elevation",
+      "to": "cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "generate-room-elevation",
+      "to": "interior-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "generate-room-elevation",
+      "to": "zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pm",
+      "to": "agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pm",
+      "to": "upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "ms365-expert",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "output_type.integrated_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "procedure.co-architect.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "project-coordinator",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.distribution-integration",
+      "to": "standup-synthesizer",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "analyst",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "content-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.document-production",
+      "to": "evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.document-production",
+      "to": "output_type.final_document",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.document-production",
+      "to": "technical-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "decision-record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "output_type.narrative_outline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "procedure.co-architect.project-intake-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.narrative-design",
+      "to": "storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "analyst",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "evidence-ledger",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "output_type.evidence_pack",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "procedure.co-architect.document-production",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-architect.project-intake-analysis",
+      "to": "storyteller",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "used_by",
+      "from": "research-analysis",
+      "to": "analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "research-analysis",
+      "to": "output_type.angle_options",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "design-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "service-design",
+      "to": "service-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "produces",
+      "from": "standup-synthesizer",
+      "to": "output_type.closure_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "design-lead",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "ui-ux-design-intelligence",
+      "to": "visual-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "zwcad-ai-drawing",
+      "to": "cad-server-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "zwcad-ai-drawing",
+      "to": "cad-svg-preview",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "zwcad-ai-drawing",
+      "to": "drafting-architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "zwcad-ai-drawing",
+      "to": "generate-room-elevation",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "zwcad-ai-drawing",
+      "to": "zwcad-drafter",
+      "source": "required_skills"
+    }
+  ]
+}

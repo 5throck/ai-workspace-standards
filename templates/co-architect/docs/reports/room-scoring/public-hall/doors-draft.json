@@ -1,0 +1,171 @@
+{
+ "swing": [
+  {
+   "hinge": [
+    16271,
+    273961
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "to": "ST-1",
+   "to_dist": 0,
+   "from": "엘리베이터 홀",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    14761,
+    276901
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "to": "계단실-1",
+   "to_dist": 0,
+   "from": "ST-1",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    14571,
+    273961
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    90,
+    180
+   ],
+   "to": "비품 창고",
+   "to_dist": 0,
+   "from": "엘리베이터 홀",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    10572,
+    268820
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "to": "계단실-2",
+   "to_dist": 0,
+   "from": "통로 (ST-3/4 아래)",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    9352,
+    270330
+   ],
+   "leaf": 1044,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "to": "통로 (ST-3/4 아래)",
+   "to_dist": 0,
+   "from": "엘리베이터 홀",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    7626,
+    273706
+   ],
+   "leaf": 1100,
+   "swing_deg": [
+    270,
+    0
+   ],
+   "to": "엘리베이터 홀",
+   "to_dist": 0,
+   "from": "엘리베이터 홀",
+   "from_dist": 533
+  },
+  {
+   "hinge": [
+    21465,
+    271852
+   ],
+   "leaf": 938,
+   "swing_deg": [
+    149,
+    179
+   ],
+   "to": "엘리베이터 홀",
+   "to_dist": 0,
+   "from": "AV",
+   "from_dist": 0
+  },
+  {
+   "hinge": [
+    18981,
+    273782
+   ],
+   "leaf": 745,
+   "swing_deg": [
+    181,
+    211
+   ],
+   "to": "엘리베이터 홀",
+   "to_dist": 0,
+   "from": "PIT-2",
+   "from_dist": 6
+  }
+ ],
+ "elevator": [
+  {
+   "id": "E1",
+   "kind": "elevator landing door",
+   "from": "엘리베이터 홀",
+   "to": "엘리베이터 (3대)",
+   "range": [
+    12552,
+    13761
+   ],
+   "wall_y": 271863
+  },
+  {
+   "id": "E2",
+   "kind": "elevator landing door",
+   "from": "엘리베이터 홀",
+   "to": "엘리베이터 (3대)",
+   "range": [
+    15305,
+    16446
+   ],
+   "wall_y": 271863
+  },
+  {
+   "id": "E3",
+   "kind": "elevator landing door",
+   "from": "엘리베이터 홀",
+   "to": "엘리베이터 (3대)",
+   "range": [
+    17991,
+    19199
+   ],
+   "wall_y": 271863
+  },
+  {
+   "id": "E4",
+   "kind": "freight elevator door",
+   "from": "비품 창고",
+   "to": "화물용 엘리베이터",
+   "range_y": [
+    274817,
+    275958
+   ],
+   "wall_x": 12042,
+   "note": "car door faces the supply storage room (plan)"
+  }
+ ]
+}

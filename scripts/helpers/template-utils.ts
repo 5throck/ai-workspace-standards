@@ -95,20 +95,24 @@ export function applyContextTemplate(
  * @version 1.2.0: completed from 5 to all 13 variants (co-abap, co-deck,
  *          co-export, co-game, co-hr, co-news, co-price, co-safety added;
  *          map alphabetized).
+ * @version 1.3.0: +co-architect (15th variant, 2026-11-01 fleet addition;
+ *          description derived from docs/co-architect.context.md PM roster row
+ *          and the 6-workflow phase table).
  */
 export const DEFAULT_PM_ROLE_DESCRIPTIONS: Record<string, string> = {
-  'co-abap':     'SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates',
-  'co-consult':  'Engagement orchestration, client interface, final decisions',
-  'co-deck':     'Deck pipeline orchestration, stage gate approvals, export readiness',
-  'co-design':   'Design process management, creative direction, quality review',
-  'co-develop':  'Workflow management, task dispatch, quality gates',
-  'co-export':   'Trade engagement coordination, compliance approval gates, final sign-off',
-  'co-game':     'Game pipeline orchestration, genre-based dispatch, test and debug gates',
-  'co-hr':       'HR engagement coordination, people-domain dispatch, client approval gates',
-  'co-learning': 'Assessment pipeline orchestration, question-bank quality gates, exam delivery readiness',
-  'co-news':     'Newsroom pipeline gating, editorial approval, publication readiness',
-  'co-price':    'Pricing engagement governance, method dispatch, executive synthesis',
-  'co-safety':   'Safety governance, regulatory evidence gates, deliverable closeout approval',
-  'co-security': 'Security governance, threat modeling, compliance review',
-  'co-work':     'Content workflow management, editorial oversight, quality gates',
+  'co-abap':      'SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates',
+  'co-architect': 'Architecture workspace orchestration, cross-team dispatch (design, research, engineering), design-delivery quality gates',
+  'co-consult':   'Engagement orchestration, client interface, final decisions',
+  'co-deck':      'Deck pipeline orchestration, stage gate approvals, export readiness',
+  'co-design':    'Design process management, creative direction, quality review',
+  'co-develop':   'Workflow management, task dispatch, quality gates',
+  'co-export':    'Trade engagement coordination, compliance approval gates, final sign-off',
+  'co-game':      'Game pipeline orchestration, genre-based dispatch, test and debug gates',
+  'co-hr':        'HR engagement coordination, people-domain dispatch, client approval gates',
+  'co-learning':  'Assessment pipeline orchestration, question-bank quality gates, exam delivery readiness',
+  'co-news':      'Newsroom pipeline gating, editorial approval, publication readiness',
+  'co-price':     'Pricing engagement governance, method dispatch, executive synthesis',
+  'co-safety':    'Safety governance, regulatory evidence gates, deliverable closeout approval',
+  'co-security':  'Security governance, threat modeling, compliance review',
+  'co-work':      'Content workflow management, editorial oversight, quality gates',
 };

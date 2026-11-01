@@ -1,0 +1,948 @@
+{
+  "_meta": {
+    "drawing": "tests/아파트캐드평면도.dwg",
+    "status": "DRAFT — blind vision proposal + detected openings, awaiting user review",
+    "coords": "absolute DWG mm",
+    "tolerance": {
+      "centroid_mm": 400,
+      "area_ratio": [
+        0.8,
+        1.15
+      ]
+    },
+    "mirror_axis_x": 115443.5
+  },
+  "rooms": [
+    {
+      "id": "R01",
+      "label": "침실-2",
+      "polygon": [
+        [
+          106446,
+          18378
+        ],
+        [
+          106446,
+          21338
+        ],
+        [
+          108726,
+          21338
+        ],
+        [
+          108726,
+          18378
+        ]
+      ],
+      "category": "room"
+    },
+    {
+      "id": "R02",
+      "label": "주방/식당",
+      "polygon": [
+        [
+          108726,
+          16608
+        ],
+        [
+          108726,
+          21338
+        ],
+        [
+          111726,
+          21338
+        ],
+        [
+          111726,
+          16608
+        ]
+      ],
+      "category": "room"
+    },
+    {
+      "id": "R03",
+      "label": "침실-3",
+      "polygon": [
+        [
+          111726,
+          17808
+        ],
+        [
+          111726,
+          20738
+        ],
+        [
+          114056,
+          20738
+        ],
+        [
+          114056,
+          17808
+        ]
+      ],
+      "category": "room"
+    },
+    {
+      "id": "R04",
+      "label": "욕실-1",
+      "polygon": [
+        [
+          106446,
+          16608
+        ],
+        [
+          106446,
+          18378
+        ],
+        [
+          108726,
+          18378
+        ],
+        [
+          108726,
+          16608
+        ]
+      ],
+      "category": "room"
+    },
+    {
+      "id": "R05",
+      "label": "침실-1",
+      "polygon": [
+        [
+          106446,
+          13378
+        ],
+        [
+          106446,
+          16608
+        ],
+        [
+          110226,
+          16608
+        ],
+        [
+          110226,
+          13378
+        ]
+      ],
+      "category": "room"
+    },
+    {
+      "id": "R06",
+      "label": "거실",
+      "polygon": [
+        [
+          114056,
+          16608
+        ],
+        [
+          114056,
+          13578
+        ],
+        [
+          110226,
+          13578
+        ],
+        [
+          110226,
+          16608
+        ],
+        [
+          111726,
+          16608
+        ],
+        [
+          111726,
+          17808
+        ],
+        [
+          112763,
+          17808
+        ],
+        [
+          112763,
+          16608
+        ]
+      ],
+      "category": "room",
+      "note": "Includes the wall-less strip between 침실-3 and 현관 (x 111,726–112,763, y 16,608–17,808) — user 2026-09-25"
+    },
+    {
+      "id": "R07",
+      "label": "욕실-2",
+      "category": "room",
+      "polygon": [
+        [
+          106461,
+          12098
+        ],
+        [
+          108026,
+          12098
+        ],
+        [
+          108026,
+          13338
+        ],
+        [
+          106461,
+          13338
+        ]
+      ],
+      "note": "Unlabelled cell below 침실-1 reached by D05 is a bathroom (user 2026-09-25); bounds = wall centerlines WAL 106416/106506, 107981/108071, BLK 12053/12143, WAL 13238/13438"
+    },
+    {
+      "id": "R01R",
+      "label": "침실-2_R",
+      "polygon": [
+        [
+          122161,
+          18378
+        ],
+        [
+          122161,
+          21338
+        ],
+        [
+          124441,
+          21338
+        ],
+        [
+          124441,
+          18378
+        ]
+      ],
+      "category": "room",
+      "mirrored_from": "R01"
+    },
+    {
+      "id": "R02R",
+      "label": "주방/식당_R",
+      "polygon": [
+        [
+          119161,
+          16608
+        ],
+        [
+          119161,
+          21338
+        ],
+        [
+          122161,
+          21338
+        ],
+        [
+          122161,
+          16608
+        ]
+      ],
+      "category": "room",
+      "mirrored_from": "R02"
+    },
+    {
+      "id": "R03R",
+      "label": "침실-3_R",
+      "polygon": [
+        [
+          116831,
+          17808
+        ],
+        [
+          116831,
+          20738
+        ],
+        [
+          119161,
+          20738
+        ],
+        [
+          119161,
+          17808
+        ]
+      ],
+      "category": "room",
+      "mirrored_from": "R03"
+    },
+    {
+      "id": "R04R",
+      "label": "욕실-1_R",
+      "polygon": [
+        [
+          122161,
+          16608
+        ],
+        [
+          122161,
+          18378
+        ],
+        [
+          124441,
+          18378
+        ],
+        [
+          124441,
+          16608
+        ]
+      ],
+      "category": "room",
+      "mirrored_from": "R04"
+    },
+    {
+      "id": "R05R",
+      "label": "침실-1_R",
+      "polygon": [
+        [
+          120661,
+          13378
+        ],
+        [
+          120661,
+          16608
+        ],
+        [
+          124441,
+          16608
+        ],
+        [
+          124441,
+          13378
+        ]
+      ],
+      "category": "room",
+      "mirrored_from": "R05"
+    },
+    {
+      "id": "R06R",
+      "label": "거실_R",
+      "polygon": [
+        [
+          118124,
+          16608
+        ],
+        [
+          118124,
+          17808
+        ],
+        [
+          119161,
+          17808
+        ],
+        [
+          119161,
+          16608
+        ],
+        [
+          120661,
+          16608
+        ],
+        [
+          120661,
+          13578
+        ],
+        [
+          116831,
+          13578
+        ],
+        [
+          116831,
+          16608
+        ]
+      ],
+      "category": "room",
+      "note": "Includes the wall-less strip between 침실-3 and 현관 (x 111,726–112,763, y 16,608–17,808) — user 2026-09-25",
+      "mirrored_from": "R06"
+    },
+    {
+      "id": "R07R",
+      "label": "욕실-2_R",
+      "category": "room",
+      "polygon": [
+        [
+          124426,
+          13338
+        ],
+        [
+          122861,
+          13338
+        ],
+        [
+          122861,
+          12098
+        ],
+        [
+          124426,
+          12098
+        ]
+      ],
+      "note": "Unlabelled cell below 침실-1 reached by D05 is a bathroom (user 2026-09-25); bounds = wall centerlines WAL 106416/106506, 107981/108071, BLK 12053/12143, WAL 13238/13438",
+      "mirrored_from": "R07"
+    }
+  ],
+  "non_rooms": [
+    {
+      "id": "Z01",
+      "label": "현관",
+      "polygon": [
+        [
+          112763,
+          16602
+        ],
+        [
+          112763,
+          17808
+        ],
+        [
+          114056,
+          17808
+        ],
+        [
+          114056,
+          16602
+        ]
+      ],
+      "category": "other",
+      "note": "Boundary confirmed by user 2026-09-25 (one edge had no CAD evidence)"
+    },
+    {
+      "id": "Z02",
+      "label": "발코니-1",
+      "polygon": [
+        [
+          108096,
+          12028
+        ],
+        [
+          108096,
+          13578
+        ],
+        [
+          114056,
+          13578
+        ],
+        [
+          114056,
+          12028
+        ]
+      ],
+      "category": "balcony"
+    },
+    {
+      "id": "Z03",
+      "label": "발코니-2",
+      "polygon": [
+        [
+          106446,
+          21338
+        ],
+        [
+          106446,
+          22838
+        ],
+        [
+          111726,
+          22838
+        ],
+        [
+          111726,
+          21338
+        ]
+      ],
+      "category": "balcony"
+    },
+    {
+      "id": "Z04",
+      "label": "발코니-3",
+      "polygon": [
+        [
+          111726,
+          20738
+        ],
+        [
+          111726,
+          22238
+        ],
+        [
+          114056,
+          22238
+        ],
+        [
+          114056,
+          20738
+        ]
+      ],
+      "category": "balcony"
+    },
+    {
+      "id": "C01",
+      "label": "엘리베이터",
+      "category": "core",
+      "shared": true,
+      "polygon": [
+        [
+          114241,
+          19038
+        ],
+        [
+          116651,
+          19038
+        ],
+        [
+          116651,
+          21738
+        ],
+        [
+          114241,
+          21738
+        ]
+      ],
+      "note": "From core block CO1 (exploded): shaft walls WAL x 114196/114286 & 116606/116696, y 18938/19138 (door gap 114896–115996) and 21638/21838; ELEV text inside"
+    },
+    {
+      "id": "C02",
+      "label": "홀",
+      "category": "core",
+      "shared": true,
+      "polygon": [
+        [
+          114056,
+          16508
+        ],
+        [
+          116831,
+          16508
+        ],
+        [
+          116831,
+          19038
+        ],
+        [
+          114056,
+          19038
+        ]
+      ],
+      "note": "From core block CO1 (exploded): between the last stair tread (FIN y16508) and the shaft wall (y≈19038), between the unit walls; both entrance doors D06/D06R open into it"
+    },
+    {
+      "id": "C03",
+      "label": "계단",
+      "category": "core",
+      "shared": true,
+      "polygon": [
+        [
+          114056,
+          13238
+        ],
+        [
+          116831,
+          13238
+        ],
+        [
+          116831,
+          16508
+        ],
+        [
+          114056,
+          16508
+        ]
+      ],
+      "note": "From core block CO1 (exploded): stair treads FIN y14588–16508 with landing line y14102; exterior wall with stair window at y 13138/13338; UP/DN text at its top"
+    },
+    {
+      "id": "Z01R",
+      "label": "현관_R",
+      "polygon": [
+        [
+          116831,
+          16602
+        ],
+        [
+          116831,
+          17808
+        ],
+        [
+          118124,
+          17808
+        ],
+        [
+          118124,
+          16602
+        ]
+      ],
+      "category": "other",
+      "note": "Boundary confirmed by user 2026-09-25 (one edge had no CAD evidence)",
+      "mirrored_from": "Z01"
+    },
+    {
+      "id": "Z02R",
+      "label": "발코니-1_R",
+      "polygon": [
+        [
+          116831,
+          12028
+        ],
+        [
+          116831,
+          13578
+        ],
+        [
+          122791,
+          13578
+        ],
+        [
+          122791,
+          12028
+        ]
+      ],
+      "category": "balcony",
+      "mirrored_from": "Z02"
+    },
+    {
+      "id": "Z03R",
+      "label": "발코니-2_R",
+      "polygon": [
+        [
+          119161,
+          21338
+        ],
+        [
+          119161,
+          22838
+        ],
+        [
+          124441,
+          22838
+        ],
+        [
+          124441,
+          21338
+        ]
+      ],
+      "category": "balcony",
+      "mirrored_from": "Z03"
+    },
+    {
+      "id": "Z04R",
+      "label": "발코니-3_R",
+      "polygon": [
+        [
+          116831,
+          20738
+        ],
+        [
+          116831,
+          22238
+        ],
+        [
+          119161,
+          22238
+        ],
+        [
+          119161,
+          20738
+        ]
+      ],
+      "category": "balcony",
+      "mirrored_from": "Z04"
+    }
+  ],
+  "doors": [
+    {
+      "id": "D01",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        110046,
+        16518
+      ],
+      "leaf": 910,
+      "swing_deg": [
+        180,
+        270
+      ]
+    },
+    {
+      "id": "D02",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        108636,
+        18888
+      ],
+      "leaf": 810,
+      "swing_deg": [
+        90,
+        180
+      ]
+    },
+    {
+      "id": "D03",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        111906,
+        17898
+      ],
+      "leaf": 810,
+      "swing_deg": [
+        0,
+        90
+      ]
+    },
+    {
+      "id": "D04",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        108636,
+        16813
+      ],
+      "leaf": 710,
+      "swing_deg": [
+        90,
+        180
+      ]
+    },
+    {
+      "id": "D05",
+      "note": "욕실-2 door (DOR arc) — room confirmed by user 2026-09-25",
+      "hinge": [
+        107866,
+        13338
+      ],
+      "leaf": 610,
+      "swing_deg": [
+        180,
+        270
+      ]
+    },
+    {
+      "id": "D06",
+      "note": "Entrance door from the DWG: DOR arc inside core block CO1 (found after exploding blocks). Opens out to the shared hall. Confirmed by user 2026-09-25",
+      "from": "홀(공용)",
+      "to": "현관",
+      "hinge": [
+        114146,
+        17653
+      ],
+      "leaf": 910,
+      "swing_deg": [
+        270,
+        360
+      ]
+    },
+    {
+      "id": "D01R",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        120841,
+        16518
+      ],
+      "leaf": 910,
+      "swing_deg": [
+        270,
+        0
+      ],
+      "mirrored_from": "D01"
+    },
+    {
+      "id": "D02R",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        122251,
+        18888
+      ],
+      "leaf": 810,
+      "swing_deg": [
+        0,
+        90
+      ],
+      "mirrored_from": "D02"
+    },
+    {
+      "id": "D03R",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        118981,
+        17898
+      ],
+      "leaf": 810,
+      "swing_deg": [
+        90,
+        180
+      ],
+      "mirrored_from": "D03"
+    },
+    {
+      "id": "D04R",
+      "note": "VERIFY — DOR arc",
+      "hinge": [
+        122251,
+        16813
+      ],
+      "leaf": 710,
+      "swing_deg": [
+        0,
+        90
+      ],
+      "mirrored_from": "D04"
+    },
+    {
+      "id": "D05R",
+      "note": "욕실-2 door (DOR arc) — room confirmed by user 2026-09-25",
+      "hinge": [
+        123021,
+        13338
+      ],
+      "leaf": 610,
+      "swing_deg": [
+        270,
+        0
+      ],
+      "mirrored_from": "D05"
+    },
+    {
+      "id": "D06R",
+      "note": "Entrance door from the DWG: DOR arc inside core block CO1 (found after exploding blocks). Opens out to the shared hall. Confirmed by user 2026-09-25",
+      "from": "홀(공용)",
+      "to": "현관_R",
+      "hinge": [
+        116741,
+        17653
+      ],
+      "leaf": 910,
+      "swing_deg": [
+        180,
+        270
+      ],
+      "mirrored_from": "D06"
+    }
+  ],
+  "windows": [
+    {
+      "id": "W01",
+      "room": "침실-1",
+      "orient": "H",
+      "pos": 13398,
+      "range": [
+        108383,
+        110099
+      ],
+      "width": 1716
+    },
+    {
+      "id": "W02",
+      "room": "거실",
+      "orient": "H",
+      "pos": 13562,
+      "range": [
+        110954,
+        113279
+      ],
+      "width": 2325
+    },
+    {
+      "id": "W03",
+      "room": "침실-3",
+      "orient": "H",
+      "pos": 20757,
+      "range": [
+        112006,
+        113916
+      ],
+      "width": 1910
+    },
+    {
+      "id": "W04",
+      "room": "침실-2",
+      "orient": "H",
+      "pos": 21318,
+      "range": [
+        107181,
+        108597
+      ],
+      "width": 1416
+    },
+    {
+      "id": "W05",
+      "room": "주방/식당",
+      "orient": "H",
+      "pos": 21354,
+      "range": [
+        108846,
+        110274
+      ],
+      "width": 1428
+    },
+    {
+      "id": "W01R",
+      "room": "침실-1_R",
+      "orient": "H",
+      "pos": 13398,
+      "range": [
+        120788,
+        122504
+      ],
+      "width": 1716,
+      "mirrored_from": "W01"
+    },
+    {
+      "id": "W02R",
+      "room": "거실_R",
+      "orient": "H",
+      "pos": 13562,
+      "range": [
+        117608,
+        119933
+      ],
+      "width": 2325,
+      "mirrored_from": "W02"
+    },
+    {
+      "id": "W03R",
+      "room": "침실-3_R",
+      "orient": "H",
+      "pos": 20757,
+      "range": [
+        116971,
+        118881
+      ],
+      "width": 1910,
+      "mirrored_from": "W03"
+    },
+    {
+      "id": "W04R",
+      "room": "침실-2_R",
+      "orient": "H",
+      "pos": 21318,
+      "range": [
+        122290,
+        123706
+      ],
+      "width": 1416,
+      "mirrored_from": "W04"
+    },
+    {
+      "id": "W05R",
+      "room": "주방/식당_R",
+      "orient": "H",
+      "pos": 21354,
+      "range": [
+        120613,
+        122041
+      ],
+      "width": 1428,
+      "mirrored_from": "W05"
+    }
+  ],
+  "pitfalls": [
+    "TILE layer is paired linework but not walls (vetoed by name)",
+    "Bathroom below 침실-1 has no label in the DWG (only reachable via D05)",
+    "The whole shared core (elevator, stair, entrance doors) is block CO1 on layer DIM, mirrored (sx=-1): explode blocks when extracting evidence"
+  ],
+  "open_connections": [
+    {
+      "between": [
+        "주방/식당",
+        "거실"
+      ],
+      "note": "Wall-less connection, no door (user 2026-09-25, general rule R16). Not tied to D06."
+    }
+  ]
+}

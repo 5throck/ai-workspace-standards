@@ -168,7 +168,7 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
     const variants = readdirSync(templatesDir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
       .map((e) => e.name);
-    expect(variants.length).toBe(14);
+    expect(variants.length).toBe(15);
     for (const variant of variants) {
       const issues: string[] = [];
       const variantBlocks = extractKeyedBlocks(

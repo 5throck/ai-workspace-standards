@@ -1,0 +1,120 @@
+{
+  "drawing": "tests/아파트 평면도.dwg",
+  "rooms_total": 9,
+  "rooms_passed": 1,
+  "rooms_matched": 3,
+  "mean_iou": 0.259,
+  "matches": [
+    {
+      "gt_id": "R01",
+      "label": "LIVING ROOM",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "no detection overlaps this room"
+    },
+    {
+      "gt_id": "R02",
+      "label": "DINING ROOM",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "best overlap IoU 0.00 < 0.5"
+    },
+    {
+      "gt_id": "R03",
+      "label": "ROOM #1",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "no detection overlaps this room"
+    },
+    {
+      "gt_id": "R04",
+      "label": "ROOM #2",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "best overlap IoU 0.02 < 0.5"
+    },
+    {
+      "gt_id": "R05",
+      "label": "MAIN ROOM",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "best overlap IoU 0.00 < 0.5"
+    },
+    {
+      "gt_id": "R06",
+      "label": "파우더 & 드레스룸",
+      "detected_id": "Room-bccd29de",
+      "detected_name": null,
+      "iou": 0.888,
+      "centroid_offset_mm": 76.4,
+      "area_ratio": 0.888,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "gt_id": "R07",
+      "label": "욕실 (공용)",
+      "detected_id": "Room-55e286c0",
+      "detected_name": null,
+      "iou": 0.728,
+      "centroid_offset_mm": 142.1,
+      "area_ratio": 1.296,
+      "passed": false,
+      "reason": "area ratio 1.30 outside [0.8, 1.15]"
+    },
+    {
+      "gt_id": "R08",
+      "label": "욕실 (부부)",
+      "detected_id": "Room-02dd2657",
+      "detected_name": null,
+      "iou": 0.718,
+      "centroid_offset_mm": 148.6,
+      "area_ratio": 0.718,
+      "passed": false,
+      "reason": "area ratio 0.72 outside [0.8, 1.15]"
+    },
+    {
+      "gt_id": "R09",
+      "label": "ENTRANCE",
+      "detected_id": null,
+      "detected_name": null,
+      "iou": 0.0,
+      "centroid_offset_mm": null,
+      "area_ratio": null,
+      "passed": false,
+      "reason": "best overlap IoU 0.00 < 0.5"
+    }
+  ],
+  "merged": [],
+  "non_room_hits": [
+    {
+      "detected_id": "Room-b8354caa",
+      "label": "WET ZONE (좌)",
+      "iou": 0.633
+    }
+  ],
+  "unmatched_detections": [
+    "Room-755e3c3f",
+    "Room-aa29255c"
+  ]
+}

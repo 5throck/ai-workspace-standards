@@ -1,0 +1,100 @@
+{
+ "drawing": "tests/32평형아파트.dwg",
+ "rooms_total": 8,
+ "rooms_passed": 7,
+ "rooms_matched": 8,
+ "mean_iou": 0.946,
+ "matches": [
+  {
+   "gt_id": "R01",
+   "label": "침실1",
+   "detected_id": "V1",
+   "detected_name": "침실1",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R02",
+   "label": "거실",
+   "detected_id": "V2",
+   "detected_name": "거실",
+   "iou": 0.865,
+   "centroid_offset_mm": 243.6,
+   "area_ratio": 0.865,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R03",
+   "label": "주방&식당",
+   "detected_id": "V3",
+   "detected_name": "주방&식당",
+   "iou": 0.7,
+   "centroid_offset_mm": 546.2,
+   "area_ratio": 1.165,
+   "passed": false,
+   "reason": "centroid 546>400mm; area ratio 1.17 outside [0.8, 1.15]"
+  },
+  {
+   "gt_id": "R04",
+   "label": "침실2",
+   "detected_id": "V4",
+   "detected_name": "침실2",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R05",
+   "label": "욕실1",
+   "detected_id": "V5",
+   "detected_name": "욕실1",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R06",
+   "label": "침실3",
+   "detected_id": "V6",
+   "detected_name": "침실3",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R07",
+   "label": "욕실2",
+   "detected_id": "V7",
+   "detected_name": "욕실2",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  },
+  {
+   "gt_id": "R08",
+   "label": "드레스실",
+   "detected_id": "V8",
+   "detected_name": "드레스실",
+   "iou": 1.0,
+   "centroid_offset_mm": 0.0,
+   "area_ratio": 1.0,
+   "passed": true,
+   "reason": ""
+  }
+ ],
+ "merged": [],
+ "non_room_hits": [],
+ "unmatched_detections": []
+}
