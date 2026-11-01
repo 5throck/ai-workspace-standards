@@ -12,12 +12,32 @@ title: >-
   ('CODEX.md/HERMES.md deliberately retain graft blocks — design R2.5 follow-up
   ticket')
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-01T01:16:48.187+09:00'
 history:
   - at: '2026-11-01T01:16:48.187+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-01T10:16:02.568+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-01T10:16:02.585+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-01T10:16:02.602+09:00'
+    from: running
+    to: review
+  - at: '2026-11-01T10:16:02.637+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered (PR #1786): vendor trail init writes AGENTS/GEMINI/copilot only -
+  never CODEX/HERMES (trail init --dry-run evidence), so the design
+  R2.5-sanctioned mechanical flip was applied: markers graft:->trail:, index
+  graft/->.trail/cache/, commands graft->trail - post-flip blocks byte-identical
+  to the vendor-written AGENTS.md reference. L1 reconciled via governance-l1;
+  transform-parity gate (PR #1782) PASSES all four instruction files - the
+  acceptance proof. mcp_servers.graft surface deferred to its own follow-up per
+  R2.5.
 error: null

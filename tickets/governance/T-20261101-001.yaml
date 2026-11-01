@@ -14,12 +14,35 @@ title: >-
   upgrade-project bug beyond U-20261101-001. Evidence: Projects/co-develop PR
   #197, wave batch B report 2026-11-01
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-01T01:16:48.173+09:00'
 history:
   - at: '2026-11-01T01:16:48.173+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-01T10:16:02.516+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-01T10:16:02.533+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-01T10:16:02.551+09:00'
+    from: running
+    to: review
+  - at: '2026-11-01T10:16:02.620+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered in 2 parts. Part 1 (forensics): the deleter is the VARIANT-SCOPE
+  SKILL PRUNE pass (upgrade-project.ts ~4588-4618) - reads workspace-schema
+  variant_scoped_skills (the 3 skills map to co-consult/co-security), git rm
+  -rf's them across PLATFORM_SKILL_BASES incl. the skills/ SSOT, UNCONDITIONALLY
+  (no --prune-removed gate), with the only escape being variant.json
+  skill_manifest seeding (co-develop never had one); it logs no decision row, so
+  PRESERVE rows from the earlier SYNC_IF_NEWER pass survive next to silent
+  deletions. Pass-ordering artifact between two ownership models. Part 2
+  (restoration): PR #198 - 3 skills restored verbatim from pre-delete commit
+  2fb4fc8 with patch bumps, mirrors re-synced via sync-skills, relates_to
+  re-anchored, registries 50 skills / audit green, CI green.
 error: null
