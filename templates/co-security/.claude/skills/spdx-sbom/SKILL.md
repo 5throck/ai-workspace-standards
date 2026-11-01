@@ -3,8 +3,8 @@ name: spdx-sbom
 description: >
   SPDX 2.3 (ISO/IEC 5962) Software Bill of Materials generation from dependency
   manifests, producing standard JSON SBOMs for compliance and vulnerability analysis.
-version: 1.0.0
-last_reviewed: 2026-08-24
+version: 1.1.0
+last_reviewed: 2026-11-01
 status: active
 owner: pm
 prerequisites: dependency manifests (package.json / lockfiles / dependency closures)
@@ -98,18 +98,18 @@ A Software Bill of Materials (SBOM) is a comprehensive inventory of all software
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "ai-workspace-co-security-1.0.0-sbom",
-  "documentNamespace": "https://spdx.org/spdxdocs/ai-workspace-co-security-1.0.0-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "ai-workspace-{{PROJECT_NAME}}-1.0.0-sbom",
+  "documentNamespace": "https://spdx.org/spdxdocs/ai-workspace-{{PROJECT_NAME}}-1.0.0-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "creationInfo": {
     "created": "2026-08-24T12:34:56Z",
     "tool": "ai-workspace-spdx-generator v1.0.0",
     "licenseListVersion": "3.22"
   },
-  "documentDescribes": ["SPDXRef-Package-ai-workspace-co-security"],
+  "documentDescribes": ["SPDXRef-Package-ai-workspace-{{PROJECT_NAME}}"],
   "packages": [
     {
-      "SPDXID": "SPDXRef-Package-ai-workspace-co-security",
-      "name": "ai-workspace-co-security",
+      "SPDXID": "SPDXRef-Package-ai-workspace-{{PROJECT_NAME}}",
+      "name": "ai-workspace-{{PROJECT_NAME}}",
       "versionInfo": "1.0.0",
       "downloadLocation": "git+https://github.com/5throck/ai-workspace@v1.0.0",
       "filesAnalyzed": false,
@@ -145,16 +145,40 @@ A Software Bill of Materials (SBOM) is a comprehensive inventory of all software
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
       "relationshipType": "DESCRIBES",
-      "relatedSpdxElement": "SPDXRef-Package-ai-workspace-co-security"
+      "relatedSpdxElement": "SPDXRef-Package-ai-workspace-{{PROJECT_NAME}}"
     },
     {
-      "spdxElementId": "SPDXRef-Package-ai-workspace-co-security",
+      "spdxElementId": "SPDXRef-Package-ai-workspace-{{PROJECT_NAME}}",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-Package-lodash"
     }
   ]
 }
 ```
+
+## Co-develop Integration Note
+
+This file is the hub-doctrine canonical for the co-security assurance suite
+(spec 2026-11-01-hub-consolidation-design, Phase 1 batch C). Co-security
+engagements run it as written. A co-develop pipeline instance derives from this
+doctrine by substituting the bindings below — the derivation never edits
+frontmatter: `owner: pm` stays single-valued here, and the co-develop ownership
+binding lives in this note only.
+
+Parameterization — unfilled placeholders resolve to the co-security doctrine
+defaults; a co-develop derivation substitutes the bindings (every instance in
+the Output Format example: document `name`, `documentNamespace`,
+`documentDescribes`, and the three top-level package `SPDXID`/`name`/
+`relationship` references):
+
+| Placeholder | Instance | Unfilled default (co-security) | Co-develop binding |
+|---|---|---|---|
+| {{PROJECT_NAME}} | Output Format example, all 7 occurrences | co-security | co-develop |
+
+Co-develop bindings beyond placeholders:
+
+- Ownership: co-develop renders this skill as owned by `security-monitor` (SBOM generation sits inside its Phase 0/5 scan gates). Frontmatter here stays `owner: pm`.
+- Delivery: the co-develop fork carries `scope: common`; this canonical keeps `scope: co-security`.
 
 ## Related Skills
 

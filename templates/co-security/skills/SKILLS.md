@@ -6,11 +6,11 @@ Curated registry for the co-security variant-exclusive skills (T-20260924-009). 
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `finding-reconciliation` | 1.0.0 | active | security-expert | 2026-08-25 | — | co-security only — deduplicate SARIF/scan findings by code location |
-| `samm-maturity` | 1.0.0 | active | pm | 2026-08-24 | — | co-security only — OWASP SAMM self-assessment and maturity roadmap |
-| `sarif-exporter` | 1.0.1 | active | security-expert | 2026-08-25 | — | co-security only — export findings and threat matrices to SARIF v2.1.0 |
-| `spdx-sbom` | 1.0.0 | active | pm | 2026-08-24 | — | co-security only — SPDX 2.3 SBOM generation from dependency manifests |
-| `stride-threat-matrix` | 1.0.0 | active | security-expert | 2026-08-06 | — | co-security only — STRIDE threat matrix generation with DREAD scoring |
+| `finding-reconciliation` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — deduplicate SARIF/scan findings by code location |
+| `samm-maturity` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only — OWASP SAMM self-assessment and maturity roadmap |
+| `sarif-exporter` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — export findings and threat matrices to SARIF v2.1.0 |
+| `spdx-sbom` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only — SPDX 2.3 SBOM generation from dependency manifests |
+| `stride-threat-matrix` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — STRIDE threat matrix generation with DREAD scoring |
 | `verify-authorization` | 1.0.0 | active | pm | 2026-06-13 | — | co-security only — hard gate for signed authorization documents |
 
 ## Usage

@@ -178,11 +178,11 @@
 | `co-safety/thermal-burn-prevention-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tool-box-meeting` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/translate` | variant:co-safety | 1.0.1 | — | — | root/documentation-writing (composes_with) | — | — |
-| `co-security/finding-reconciliation` | variant:co-security | 1.0.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5, co-security/phase 6 | co-security/sarif-exporter (composes_with), co-security/spdx-sbom (follows) | — | — |
-| `co-security/samm-maturity` | variant:co-security | 1.0.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | — | — | — |
-| `co-security/sarif-exporter` | variant:co-security | 1.0.1 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
-| `co-security/spdx-sbom` | variant:co-security | 1.0.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
-| `co-security/stride-threat-matrix` | variant:co-security | 1.0.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
+| `co-security/finding-reconciliation` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5, co-security/phase 6 | co-security/sarif-exporter (composes_with), co-security/spdx-sbom (follows) | — | — |
+| `co-security/samm-maturity` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | — | — | — |
+| `co-security/sarif-exporter` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
+| `co-security/spdx-sbom` | variant:co-security | 1.1.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
+| `co-security/stride-threat-matrix` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
 | `co-security/verify-authorization` | variant:co-security | 1.0.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
 | `co-work/standup-synthesizer` | variant:co-work | 1.0.1 | co-work/project-coordinator | co-work/phase 4 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |

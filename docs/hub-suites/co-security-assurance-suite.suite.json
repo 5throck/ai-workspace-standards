@@ -1,0 +1,86 @@
+{
+  "suite": "co-security-assurance-suite",
+  "hub_variant": "co-security",
+  "description": "co-security 5-skill assurance suite hub suite — batch C of the 2026-11-01-hub-consolidation Phase 1, the SEMANTIC-MERGE batch. The five canonicals in templates/co-security/skills/ are authored merge products (parameterized doctrine per spec 2026-11-01-hub-consolidation-design): each carries {{PROJECT_*}} derivation placeholders with unfilled co-security defaults plus a 'Co-develop Integration Note' carrying the co-develop bindings (security-monitor ownership, Phase 0/5 scan gates, parameterized document names, verify-authorization omissions) — so the co-security engagement doctrine AND the co-develop pipeline adaptation both derive from one canonical. Consequently all five skills are registry-only rows here: hub-promotion's byte-identity asset model would overwrite the authored canonicals with the unparameterized Projects/co-security L3 bytes (batch B precedent for files whose canonical lives L2-side). assets[] carries the only byte-clean suite-coupled assets — the lifecycle reference cards for two suite members (byte-identical L3<->L2 re-assert, zero-overwrite). Adoption-state resolution recorded in the 2026-11-01 review-meeting follow-up: Projects/co-develop/skills/ forks (rows #3-#7 of its 2026-10-31 variant-asset-adoption design, status implemented) match the on-disk diffs byte-for-byte — the 'implemented' claim is TRUE; templates/co-security was still raw L3 doctrine (byte-identical to Projects/co-security), which is the gap this batch closes. Consumers/minimum_version = the merged canonical version (1.1.0): co-develop's installed forks (1.0.0-1.0.2) must re-derive from the parameterized canonical in the NEXT wave; this batch deliberately leaves Projects/co-develop untouched.",
+  "assets": [
+    {
+      "source": "Projects/co-security/docs/lifecycle/skills/sarif-exporter.md",
+      "dest": "templates/co-security/docs/lifecycle/skills/sarif-exporter.md",
+      "kind": "file",
+      "name": "lifecycle-skills-sarif-exporter"
+    },
+    {
+      "source": "Projects/co-security/docs/lifecycle/skills/stride-threat-matrix.md",
+      "dest": "templates/co-security/docs/lifecycle/skills/stride-threat-matrix.md",
+      "kind": "file",
+      "name": "lifecycle-skills-stride-threat-matrix"
+    }
+  ],
+  "registry_entries": [
+    {
+      "asset": "samm-maturity",
+      "domain": "co-security",
+      "hub_variant": "co-security",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+      "canonical_path": "templates/co-security/skills/samm-maturity/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "sarif-exporter",
+      "domain": "co-security",
+      "hub_variant": "co-security",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+      "canonical_path": "templates/co-security/skills/sarif-exporter/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "spdx-sbom",
+      "domain": "co-security",
+      "hub_variant": "co-security",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+      "canonical_path": "templates/co-security/skills/spdx-sbom/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "stride-threat-matrix",
+      "domain": "co-security",
+      "hub_variant": "co-security",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+      "canonical_path": "templates/co-security/skills/stride-threat-matrix/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
+      ]
+    },
+    {
+      "asset": "finding-reconciliation",
+      "domain": "co-security",
+      "hub_variant": "co-security",
+      "category": "hub-doctrine",
+      "verticals": ["co-develop"],
+      "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+      "canonical_path": "templates/co-security/skills/finding-reconciliation/SKILL.md",
+      "version": "1.1.0",
+      "consumers": [
+        { "variant": "co-develop", "minimum_version": "1.1.0" }
+      ]
+    }
+  ]
+}

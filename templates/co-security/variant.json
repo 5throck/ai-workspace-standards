@@ -162,6 +162,11 @@
   },
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "governed",
+  "hub": {
+    "role": "hub",
+    "domain": "co-security",
+    "hub_remote": "https://github.com/5throck/co-security.git"
+  },
   "process_manifest": {
     "stages_file": "process/stages.yaml",
     "raci_file": "governance/raci.yaml",

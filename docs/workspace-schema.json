@@ -909,6 +909,96 @@
               "minimum_version": "1.0.0"
             }
           ]
+        },
+        {
+          "asset": "samm-maturity",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+          "canonical_path": "templates/co-security/skills/samm-maturity/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "sarif-exporter",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+          "canonical_path": "templates/co-security/skills/sarif-exporter/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "spdx-sbom",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+          "canonical_path": "templates/co-security/skills/spdx-sbom/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "stride-threat-matrix",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+          "canonical_path": "templates/co-security/skills/stride-threat-matrix/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
+          "asset": "finding-reconciliation",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); canonical semantic-merged at L2 (batch C)",
+          "canonical_path": "templates/co-security/skills/finding-reconciliation/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
         }
       ],
       "known_unregistered_duplicates": [

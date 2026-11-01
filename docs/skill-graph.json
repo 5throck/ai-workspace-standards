@@ -7154,8 +7154,8 @@
       "name": "finding-reconciliation",
       "scope": "co-security",
       "capability": "finding-reconciliation",
-      "content_hash": "5ea22e486663f77b",
-      "version": "1.0.0",
+      "content_hash": "a87dcf813961cd52",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/finding-reconciliation/SKILL.md"
       ]
@@ -7167,8 +7167,8 @@
       "name": "samm-maturity",
       "scope": "co-security",
       "capability": "samm-maturity",
-      "content_hash": "299ffa47d4c024c9",
-      "version": "1.0.0",
+      "content_hash": "27750237a04466c1",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/samm-maturity/SKILL.md"
       ]
@@ -7180,8 +7180,8 @@
       "name": "sarif-exporter",
       "scope": "co-security",
       "capability": "sarif-exporter",
-      "content_hash": "b585403b956ea6c8",
-      "version": "1.0.1",
+      "content_hash": "dd461a28a5cf7a79",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/sarif-exporter/SKILL.md"
       ]
@@ -7193,8 +7193,8 @@
       "name": "spdx-sbom",
       "scope": "co-security",
       "capability": "spdx-sbom",
-      "content_hash": "0e130dc94cf742e8",
-      "version": "1.0.0",
+      "content_hash": "55c651014bfe3ffd",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/spdx-sbom/SKILL.md"
       ]
@@ -7206,8 +7206,8 @@
       "name": "stride-threat-matrix",
       "scope": "co-security",
       "capability": "stride-threat-matrix",
-      "content_hash": "df21ffe85f9068e1",
-      "version": "1.0.0",
+      "content_hash": "036ecc1a85c9ccb3",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-security/skills/stride-threat-matrix/SKILL.md"
       ]
