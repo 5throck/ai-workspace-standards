@@ -1,5 +1,25 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-02, Windows portability hardening round 2 — CI round-trip
+//          showed the DRY-RUN path itself exiting 1 on Windows after v1.2.0,
+//          so the early path is made hazard-free and every external spawn is
+//          made diagnosable): (a) run() spawns with windowsHide:true and, when
+//          a child cannot be spawned AT ALL (status null + proc.error, e.g.
+//          ENOENT for a missing binary), surfaces the spawn error inside the
+//          returned output — a missing tool can no longer masquerade as a
+//          silent empty-output failure; (b) the gate's bun invocations use
+//          process.execPath (the bun binary already running this script)
+//          instead of re-resolving the bare name 'bun' from the ambient PATH,
+//          which is shim-dependent on Windows CI; (c) gitleaks is existence-
+//          gated via Bun.which — a missing scanner is a typed fail-closed
+//          message naming the explicit skip seam, never a misread "exit 1 =
+//          findings" verdict (spawn ENOENT also reads status null → 1);
+//          (d) moveIntoPlace's same-volume check compares only FINITE dev
+//          numbers — where a Windows/Bun runtime leaves statSync().dev NaN the
+//          check is undecided and skipped with a note instead of false-failing
+//          the atomic rename (documented platform guard; shell probes like
+//          `stat -f` stay forbidden here); (e) resolvePinnedSha splits
+//          ls-remote output on /\r?\n/ so a CRLF-tinged stream still parses.
 // v1.2.0 (2026-11-02, Windows CI fix — tests/unit/hub-bootstrap.test.ts
 //          'hook-integrity divergence FAILS the gate'): (a) the hook-integrity
 //          fingerprint is line-ending-neutral — sha256 over content with CRLF
@@ -99,9 +119,19 @@ function fail(msg: string): never {
 }
 
 function run(cmd: string[], opts: { cwd?: string } = {}): { code: number; out: string } {
-  const proc = spawnSync(cmd[0], cmd.slice(1), { cwd: opts.cwd, encoding: 'utf-8' });
-  return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}${proc.stderr ?? ''}` };
+  const proc = spawnSync(cmd[0], cmd.slice(1), { cwd: opts.cwd, encoding: 'utf-8', windowsHide: true });
+  // status null = the child never ran (spawn error, e.g. ENOENT for a missing
+  // binary — v1.3.0): surface the reason in the output instead of returning a
+  // silent empty string that callers would report as an opaque tool failure.
+  const spawnNote = proc.status === null && proc.error ? ` [spawn failed: ${proc.error.message}]` : '';
+  return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}${proc.stderr ?? ''}${spawnNote}` };
 }
+
+/** The bun binary running THIS process (v1.3.0): the VALIDATED gate's bun
+ * invocations spawn it by absolute path. Re-resolving the bare name 'bun'
+ * from the ambient PATH is shim-dependent on Windows CI, and a missed
+ * resolution would surface as a tool failure rather than a gate verdict. */
+const BUN_BIN = process.execPath;
 
 /** Best-effort temp-dir cleanup that can never mask the typed failure printed
  * after it (v1.2.0): on Windows rmSync can throw EBUSY/EPERM while AV or a
@@ -176,7 +206,7 @@ function resolveHubRemote(hub: string): HubRemoteResolution {
 function resolvePinnedSha(remote: string): string | null {
   for (const ref of ['main', 'HEAD']) {
     const r = run(['git', 'ls-remote', remote, ref]);
-    const line = r.out.split('\n').find(l => l.includes(ref));
+    const line = r.out.split(/\r?\n/).find(l => l.includes(ref));
     if (r.code === 0 && line) return line.split(/\s+/)[0];
   }
   return null;
@@ -309,7 +339,14 @@ function runValidatedGate(cloneDir: string): ValidationReport {
   // Check 1 — gitleaks with explicit workspace-owned --config (working tree).
   const cfg = join(ROOT, '.gitleaks.toml');
   if (!existsSync(cfg)) return { ok: false, reasons: ['gitleaks: workspace .gitleaks.toml missing — refusing to validate without the owned rules'], skippedExternal };
-  const gl = run(['gitleaks', 'detect', '--source', cloneDir, '--config', cfg, '--no-git', '--redact']);
+  // Existence-gated (v1.3.0): a missing gitleaks binary spawns as ENOENT and
+  // reads exit 1 — indistinguishable from a FINDING. Gate it explicitly and
+  // fail closed with the typed route out (install, or the documented seam).
+  const glPath = Bun.which('gitleaks');
+  if (!glPath) {
+    return { ok: false, reasons: ['gitleaks: not found on PATH — install gitleaks (https://gitleaks.io) or set HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS=1 to skip the external checks explicitly (a missing scanner is never read as a clean scan)'], skippedExternal };
+  }
+  const gl = run([glPath, 'detect', '--source', cloneDir, '--config', cfg, '--no-git', '--redact']);
   if (gl.code === 1) {
     return { ok: false, reasons: [`gitleaks: findings in the clone working tree (exit 1) — review before bootstrapping`], skippedExternal };
   }
@@ -321,9 +358,9 @@ function runValidatedGate(cloneDir: string): ValidationReport {
   // Check 3 — bun install && bun audit, no advisories (design floor: no
   // high/critical; the gate refuses ANY advisory — fail-closed beyond it).
   if (existsSync(join(cloneDir, 'package.json'))) {
-    const install = run(['bun', 'install'], { cwd: cloneDir });
+    const install = run([BUN_BIN, 'install'], { cwd: cloneDir });
     if (install.code !== 0) return { ok: false, reasons: [`bun install failed in the clone (exit ${install.code}) ${install.out.slice(0, 400)}`], skippedExternal };
-    const audit = run(['bun', 'audit'], { cwd: cloneDir });
+    const audit = run([BUN_BIN, 'audit'], { cwd: cloneDir });
     if (audit.code !== 0) {
       return { ok: false, reasons: [`bun audit reported advisories (exit ${audit.code}) — no high/critical allowed ${audit.out.slice(0, 400)}`], skippedExternal };
     }
@@ -333,7 +370,7 @@ function runValidatedGate(cloneDir: string): ValidationReport {
   }
 
   // Check 4 — root audit.ts green.
-  const audit = run(['bun', 'scripts/audit.ts'], { cwd: ROOT });
+  const audit = run([BUN_BIN, 'scripts/audit.ts'], { cwd: ROOT });
   if (audit.code !== 0) {
     return { ok: false, reasons: [`root audit.ts not green (exit ${audit.code}) ${audit.out.slice(-400)}`], skippedExternal };
   }
@@ -355,11 +392,18 @@ export interface MoveOutcome {
  * Exported for tests (deterministic ENOTEMPTY injection — the concurrent
  * window cannot be hit reliably from a subprocess). */
 export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
+  // Same-volume check (§4.3.3). fs.statSync().dev is the portable volume id on
+  // every documented platform; where a Windows/Bun runtime leaves it NaN (0 is
+  // a real drive id and compares fine), the check is UNDECIDABLE — skip it
+  // with a note instead of false-failing the atomic rename (v1.3.0 platform
+  // guard; shell probes like `stat -f` stay forbidden here).
   const tempDev = statSync(tempDir).dev;
   const targetParentDev = statSync(join(targetDir, '..')).dev;
-  if (tempDev !== targetParentDev) {
+  const decidable = Number.isFinite(tempDev) && Number.isFinite(targetParentDev);
+  if (decidable && tempDev !== targetParentDev) {
     failWithCleanup(`same-volume check failed: temp dir (dev ${tempDev}) and target parent (dev ${targetParentDev}) are on different devices — an atomic rename is impossible; free the cross-volume mount and retry`, tempDir);
   }
+  if (!decidable) console.log('   note: same-volume check skipped (fs dev numbers unavailable on this platform) — the rename stays within Projects/ and atomic');
   try {
     renameSync(tempDir, targetDir);
     return { moved: true, concurrentClaim: false };

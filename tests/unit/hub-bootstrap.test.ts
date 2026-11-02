@@ -1,4 +1,20 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-02, Windows portability hardening round 2 — self-describing
+//          failures): CI round 2 failed the dry-run test blind (exit 1, no
+//          stderr in the report), so every exit-code assertion on a spawned
+//          CLI now goes through expectExit/expectSilentStderr — on mismatch
+//          they throw carrying exit code + stderr + stdout head, making the
+//          next CI run self-explaining (original substring assertions kept).
+//          Windows hazards removed: deadPid() no longer spawns 'true' (no such
+//          binary on Windows; and its -1 fallback reads EPERM=alive on POSIX
+//          via kill(-1,0)) — it spawns process.execPath and refuses to return
+//          a non-number pid; the CLI runners spawn process.execPath (the bun
+//          binary running this suite) instead of re-resolving 'bun' from the
+//          ambient PATH, all with windowsHide:true; buildFixture resolves git
+//          once via Bun.which (typed throw when absent) and cleans the work
+//          tree via rmRfBestEffort (brief retry — a freshly pushed git tree
+//          can be EBUSY/EPERM on Windows while handles close). Pairs with
+//          hub-bootstrap.ts v1.3.0.
 // v1.1.0 (2026-11-02, Windows CI fix): every fixture git op pins
 // -c core.autocrlf=false — the fixture seeds LF blobs and must never depend on
 // the ambient autocrlf of the machine (a smudged checkout would flip hook
@@ -40,9 +56,34 @@ const TICKET_CLI = join(REPO_ROOT, 'scripts', 'ticket.ts');
 const HUB = 'co-fixture';
 const NOW = '2026-11-02T12:00:00.000Z';
 
-/** A pid that is DEFINITELY dead: spawn a child, wait for it, use its pid. */
+/** A pid that is DEFINITELY dead: spawn a child with THIS runtime's binary
+ * (process.execPath — v1.2.0: 'true' does not exist on Windows, and the old
+ * `?? -1` fallback is poison because kill(-1, 0) reads EPERM = ALIVE on
+ * POSIX), wait for it, use its pid. A non-number pid throws instead of ever
+ * returning a value that could invert the dead/alive verdict. */
 function deadPid(): number {
-  return spawnSync('true').pid ?? -1;
+  const p = spawnSync(process.execPath, ['-e', ''], { windowsHide: true });
+  if (typeof p.pid !== 'number') {
+    throw new Error(`deadPid helper could not spawn a child: ${p.error?.message ?? `status ${p.status}`}`);
+  }
+  return p.pid;
+}
+
+/** rmSync that survives the Windows handle race (v1.2.0): a freshly pushed or
+ * freshly cloned tree can be EBUSY/EPERM for a few hundred ms while git/AV
+ * handles close. Retries briefly, then gives up — for CLEANUP ONLY (fixtures
+ * live under tmpdir; a leftover is cosmetic). Never use where removal is
+ * itself asserted. */
+function rmRfBestEffort(dir: string): void {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+      return;
+    } catch {
+      if (attempt >= 4) return;
+      Bun.sleepSync(60 * (attempt + 1));
+    }
+  }
 }
 
 interface Fixture {
@@ -80,11 +121,15 @@ function buildFixture(name = HUB): Fixture {
   }), 'utf-8');
 
   const bare = join(root, 'fixture-remote.git');
+  // git resolved ONCE (v1.2.0): a missing binary is a typed fixture-setup
+  // error naming the cause, not a cryptic per-command failure downstream.
+  const GIT = Bun.which('git');
+  if (!GIT) throw new Error('fixture setup: git not found on PATH — the fixture clones a local bare repo');
   // All fixture git ops pin -c core.autocrlf=false (v1.1.0): the fixture seeds
   // LF blobs and the assertions must not depend on the machine's autocrlf
   // (Windows checkouts would otherwise smudge the hook bytes). No-op on POSIX.
   const run = (cmd: string[], cwd?: string) => {
-    const p = spawnSync(cmd[0], ['-c', 'core.autocrlf=false', ...cmd.slice(1)], { cwd, encoding: 'utf-8' });
+    const p = spawnSync(GIT, ['-c', 'core.autocrlf=false', ...cmd.slice(1)], { cwd, encoding: 'utf-8', windowsHide: true });
     if ((p.status ?? 1) !== 0) throw new Error(`fixture git failed: ${cmd.join(' ')}\n${p.stdout}${p.stderr}`);
   };
   run(['git', 'init', '--quiet', '--bare', '--initial-branch=main', bare]);
@@ -99,12 +144,12 @@ function buildFixture(name = HUB): Fixture {
   run(['git', 'add', '.'], wt);
   run(['git', '-c', 'user.email=fixture@test', '-c', 'user.name=fixture', 'commit', '--quiet', '-m', 'fixture hub seed'], wt);
   run(['git', 'push', '--quiet', 'origin', 'main'], wt);
-  const sha = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: wt, encoding: 'utf-8' }).stdout.trim();
+  const sha = spawnSync(GIT, ['rev-parse', 'HEAD'], { cwd: wt, encoding: 'utf-8', windowsHide: true }).stdout.trim();
 
   // The registry needs the absolute bare path (built after the bare repo).
   const schemaPath = join(root, 'docs', 'workspace-schema.json');
   writeFileSync(schemaPath, readFileSync(schemaPath, 'utf-8').replace('<RESOLVED-BELOW>', bare), 'utf-8');
-  rmSync(wt, { recursive: true, force: true });
+  rmRfBestEffort(wt); // v1.2.0 — cleanup only; a leftover fixture-wt is harmless
   return { root, bare, sha };
 }
 
@@ -116,15 +161,44 @@ function makeFixture(name = HUB): Fixture {
 }
 
 afterAll(() => {
-  for (const f of fixtures) rmSync(f.root, { recursive: true, force: true });
+  for (const f of fixtures) rmRfBestEffort(f.root);
 });
 
 function runBootstrap(args: string[], root: string, extraEnv: Record<string, string> = {}) {
-  const proc = spawnSync('bun', [BOOTSTRAP_CLI, ...args], {
+  // process.execPath (v1.2.0): spawn the bun binary already running this
+  // suite — re-resolving the bare name 'bun' from the ambient PATH is
+  // shim-dependent on Windows CI. windowsHide kills console flashes.
+  const proc = spawnSync(process.execPath, [BOOTSTRAP_CLI, ...args], {
     env: { ...process.env, HUB_BOOTSTRAP_ROOT: root, HUB_BOOTSTRAP_NOW: NOW, ...extraEnv },
     encoding: 'utf-8',
+    windowsHide: true,
   });
   return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}`, err: `${proc.stderr ?? ''}` };
+}
+
+/** Self-describing exit-code assertion (v1.2.0): on mismatch it throws BEFORE
+ * the bare expect, carrying exit code + stderr + stdout head — a CI-only
+ * failure becomes legible from the report alone. All original substring
+ * assertions stay untouched after it. */
+function expectExit(r: { code: number; out: string; err: string }, want: number, what: string): void {
+  if (r.code !== want) {
+    throw new Error(
+      `${what}: expected exit ${want}, got ${r.code}\n` +
+      `--- stderr ---\n${r.err.trim() ? r.err.slice(0, 800) : '<empty>'}\n` +
+      `--- stdout (head 500) ---\n${r.out.slice(0, 500) || '<empty>'}`,
+    );
+  }
+  expect(r.code).toBe(want);
+}
+
+/** Same discipline for the exact-empty-stderr assertion (success paths). */
+function expectSilentStderr(r: { code: number; out: string; err: string }, what: string): void {
+  if (r.err !== '') {
+    throw new Error(
+      `${what}: expected EMPTY stderr, got:\n${r.err.slice(0, 800)}\n--- stdout (head 500) ---\n${r.out.slice(0, 500)}`,
+    );
+  }
+  expect(r.err).toBe('');
 }
 
 // ── (d) dry-run zero-write ───────────────────────────────────────────────────
@@ -133,7 +207,7 @@ describe('dry-run writes nothing (design §4.5 audit/idempotency frame)', () => 
   test('plan printed, no target, no temp dirs, no lock residue', () => {
     const f = makeFixture();
     const r = runBootstrap([HUB], f.root);
-    expect(r.code).toBe(0);
+    expectExit(r, 0, 'dry-run plan');
     expect(r.out).toMatch(new RegExp(`hub_remote: ${f.bare.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
     expect(r.out).toMatch(new RegExp(`pinned SHA: ${f.sha.slice(0, 12)}`));
     expect(r.out).toMatch(/dry-run/i);
@@ -145,7 +219,7 @@ describe('dry-run writes nothing (design §4.5 audit/idempotency frame)', () => 
   test('remote-missing routes to the user-decision boundary and never creates a remote', () => {
     const f = makeFixture('co-other');
     const r = runBootstrap(['co-nowhere'], f.root);
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'remote-missing halt');
     expect(r.err).toMatch(/REMOTE-MISSING case/);
     expect(r.err).toMatch(/ensure-github-repo/);
     expect(r.err).toMatch(/NEVER creates a remote/);
@@ -159,8 +233,8 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
   test('clone lands READY with approval + 3 chained journal entries; hooks verified; no residue', () => {
     const f = makeFixture();
     const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-    expect(r.err).toBe('');
-    expect(r.code).toBe(0);
+    expectSilentStderr(r, 'E2E bootstrap (clone→VALIDATED→READY)');
+    expectExit(r, 0, 'E2E bootstrap (clone→VALIDATED→READY)');
     const hubDir = join(f.root, 'Projects', HUB);
     expect(existsSync(join(hubDir, 'variant.json'))).toBe(true);
     expect(existsSync(join(hubDir, '.git'))).toBe(true);
@@ -180,9 +254,10 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
 
   test('idempotent re-run on the valid hub is a no-op reporting existing state', () => {
     const f = makeFixture();
-    expect(runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' }).code).toBe(0);
+    const first = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    expectExit(first, 0, 'idempotency setup bootstrap');
     const again = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-    expect(again.code).toBe(0);
+    expectExit(again, 0, 'idempotent re-run');
     expect(again.out).toMatch(/already present.*nothing to do/s);
     expect(again.out).toMatch(/Bootstrap state: READY/);
   });
@@ -190,7 +265,7 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
   test('approval gate: --apply without --yes is refused before any clone', () => {
     const f = makeFixture();
     const r = runBootstrap([HUB, '--apply'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'approval gate refusal');
     expect(r.err).toMatch(/approval gate/);
     expect(r.err).toMatch(/--yes/);
     expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
@@ -199,9 +274,10 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
 
   test('status subcommand renders the state file', () => {
     const f = makeFixture();
-    runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    const boot = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    expectExit(boot, 0, 'status-test setup bootstrap');
     const s = runBootstrap(['status', HUB], f.root);
-    expect(s.code).toBe(0);
+    expectExit(s, 0, 'status subcommand');
     expect(s.out).toMatch(/Bootstrap state: READY/);
     expect(s.out).toMatch(/Operational state: null/);
     expect(s.out).toMatch(/chain VALID/);
@@ -214,7 +290,7 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
     // differs from the (sabotaged) canonical tree the gate diffs against.
     writeFileSync(join(f.root, 'scripts', 'hooks', 'pre-commit.ts'), '// TAMPERED\n', 'utf-8');
     const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'hook-integrity divergence gate');
     expect(r.err).toMatch(/VALIDATED gate FAILED/);
     expect(r.err).toMatch(/hook differs from canonical/);
     expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
@@ -231,7 +307,7 @@ describe('lock concurrency (automation-lock bootstrap-<hub>)', () => {
     expect(lock.ok).toBe(true);
     try {
       const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-      expect(r.code).toBe(1);
+      expectExit(r, 1, 'held-lock refusal');
       expect(r.err).toMatch(/lock refused/);
       expect(r.err).toMatch(/bootstrap-co-fixture/);
       expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
@@ -291,7 +367,7 @@ describe('recovery sweep (--recover, design §4.3.5)', () => {
     const fresh = mk('.bootstrap-co-fresh', { pid: process.pid, url: 'x', sha: 's', started_at: NOW });
 
     const dry = runBootstrap(['--recover'], f.root);
-    expect(dry.code).toBe(0);
+    expectExit(dry, 0, 'recover dry-run');
     expect(dry.out).toMatch(/pid \d+ is dead/);
     expect(dry.out).toMatch(/age > 24h/);
     expect(dry.out).toMatch(/Re-run with --apply/);
@@ -300,7 +376,7 @@ describe('recovery sweep (--recover, design §4.3.5)', () => {
     expect(existsSync(fresh)).toBe(true);
 
     const applied = runBootstrap(['--recover', '--apply'], f.root);
-    expect(applied.code).toBe(0);
+    expectExit(applied, 0, 'recover --apply sweep');
     expect(existsSync(dead)).toBe(false);
     expect(existsSync(aged)).toBe(false);
     expect(existsSync(fresh)).toBe(true); // live pid + fresh age survives
@@ -322,9 +398,10 @@ function seedProbeHub(root: string, hooksContent: Record<string, string>): strin
 
 describe('hub-probe (read-only, design §3.5)', () => {
   function runProbe(args: string[], root: string) {
-    const proc = spawnSync('bun', [PROBE_CLI, ...args], {
+    const proc = spawnSync(process.execPath, [PROBE_CLI, ...args], {
       env: { ...process.env, HUB_PROBE_ROOT: root, HUB_BOOTSTRAP_NOW: NOW },
       encoding: 'utf-8',
+      windowsHide: true,
     });
     return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}`, err: `${proc.stderr ?? ''}` };
   }
@@ -349,7 +426,7 @@ describe('hub-probe (read-only, design §3.5)', () => {
     applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'session start', at: NOW });
 
     const r = runProbe(['co-probe'], root);
-    expect(r.code).toBe(0);
+    expectExit(r, 0, 'probe MATCH');
     expect(r.out).toMatch(/MATCH/);
     const report = join(root, 'docs', 'reports', `${kstDate()}-hub-probe-co-probe.md`);
     expect(existsSync(report)).toBe(true);
@@ -370,7 +447,7 @@ describe('hub-probe (read-only, design §3.5)', () => {
     writeFileSync(path, JSON.stringify(state, null, 2), 'utf-8');
 
     const r = runProbe(['co-probe'], root);
-    expect(r.code).toBe(2);
+    expectExit(r, 2, 'probe chain-tamper DIVERGENT');
     expect(r.out).toMatch(/DIVERGENT/);
     expect(r.out).toMatch(/hash chain BROKEN/);
     expect(r.out).toMatch(/ticket\.ts create --manual "SEV2: hub probe divergence — co-probe"/); // printed, not filed
@@ -380,7 +457,7 @@ describe('hub-probe (read-only, design §3.5)', () => {
     initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
     applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up', at: '2026-10-31T00:00:00.000Z' });
     const r = runProbe(['co-probe'], root);
-    expect(r.code).toBe(2);
+    expectExit(r, 2, 'probe expired-lease DIVERGENT');
     expect(r.out).toMatch(/EXPIRED TTL lease/);
     expect(r.out).toMatch(/consumers read UNAVAILABLE/);
   });
@@ -388,14 +465,15 @@ describe('hub-probe (read-only, design §3.5)', () => {
   test('DIVERGENT: prior probe head missing from the history (journal rewritten between probes)', () => {
     initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
     applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up', at: NOW });
-    expect(runProbe(['co-probe'], root).code).toBe(0); // first probe records the head
+    const head = runProbe(['co-probe'], root);
+    expectExit(head, 0, 'first probe records head'); // first probe records the head
 
     // Rewrite the whole journal (the forbidden history rewrite): new hashes.
     rmSync(stateFilePath(hubDir, 'co-probe'));
     initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r2', sha: 'b'.repeat(40), at: NOW });
     applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 're-written', at: NOW });
     const r = runProbe(['co-probe'], root);
-    expect(r.code).toBe(2);
+    expectExit(r, 2, 'probe rewritten-journal DIVERGENT');
     expect(r.out).toMatch(/is NOT in the current history/);
     expect(r.out).toMatch(/rewritten between probes/);
   });
@@ -405,13 +483,13 @@ describe('hub-probe (read-only, design §3.5)', () => {
     // seedProbeHub ran in beforeEach — remove the clone to hit the no-repo path.
     rmSync(hubDir, { recursive: true, force: true });
     const noRepo = runProbe(['co-probe'], root);
-    expect(noRepo.code).toBe(0);
+    expectExit(noRepo, 0, 'probe NOT-BOOTSTRAPPED');
     expect(noRepo.out).toMatch(/NOT-BOOTSTRAPPED/);
     void absent;
 
     seedProbeHub(root, { 'a.ts': 'canonical-a\n', 'b.ts': 'canonical-b\n' });
     const noState = runProbe(['co-probe'], root);
-    expect(noState.code).toBe(0);
+    expectExit(noState, 0, 'probe absent-state MATCH');
     expect(noState.out).toMatch(/MATCH/); // signals clean; nothing declared to compare
   });
 
@@ -422,7 +500,8 @@ describe('hub-probe (read-only, design §3.5)', () => {
     }
     initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
     applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up', at: NOW });
-    expect(runProbe(['co-probe'], root).code).toBe(0);
+    const probeRun = runProbe(['co-probe'], root);
+    expectExit(probeRun, 0, 'probe retention run');
     const files = readdirSync(reportsDir).filter(f => f.endsWith('-hub-probe-co-probe.md')).sort();
     expect(files).toHaveLength(4); // 3 newest fakes + today's
     expect(files.some(f => f.startsWith('2026-10-20'))).toBe(false); // oldest pruned
@@ -434,9 +513,10 @@ describe('hub-probe (read-only, design §3.5)', () => {
 
 describe('ticket.ts create --hub (UNAVAILABLE refusal, design §4.5)', () => {
   function runTicket(args: string[], root: string) {
-    const proc = spawnSync('bun', [TICKET_CLI, ...args], {
+    const proc = spawnSync(process.execPath, [TICKET_CLI, ...args], {
       env: { ...process.env, TICKET_WORKSPACE_ROOT: root },
       encoding: 'utf-8',
+      windowsHide: true,
     });
     return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}`, err: `${proc.stderr ?? ''}` };
   }
@@ -454,7 +534,7 @@ describe('ticket.ts create --hub (UNAVAILABLE refusal, design §4.5)', () => {
     mkdirSync(hubDir, { recursive: true });
     applyTransition(hubDir, 'co-dead', { kind: 'operational', to: 'UNAVAILABLE', actor: 'hub-pm', reason: 'down' });
     const r = runTicket(['create', '--manual', 'delegation attempt', '--hub', 'co-dead'], root);
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'ticket UNAVAILABLE refusal');
     expect(r.err).toMatch(/refused: hub 'co-dead' is UNAVAILABLE/);
     expect(r.err).toMatch(/blocked \(design §3\.4\)/);
     expect(readdirSync(join(root, 'tickets', 'governance')).filter(f => f.endsWith('.yaml'))).toEqual([]);
@@ -465,14 +545,14 @@ describe('ticket.ts create --hub (UNAVAILABLE refusal, design §4.5)', () => {
     mkdirSync(hubDir, { recursive: true });
     applyTransition(hubDir, 'co-stale', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up', at: '2026-10-31T00:00:00.000Z' });
     const r = runTicket(['create', '--manual', 'delegation attempt', '--hub', 'co-stale'], root);
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'ticket expired-lease refusal');
     expect(r.err).toMatch(/EXPIRED TTL lease/);
   });
 
   test('absent state file allows; the ticket carries the hub metadata field', () => {
     mkdirSync(join(root, 'Projects', 'co-alive'), { recursive: true }); // no state file
     const r = runTicket(['create', '--manual', 'delegation ok', '--hub', 'co-alive'], root);
-    expect(r.code).toBe(0);
+    expectExit(r, 0, 'ticket absent-state allow');
     expect(r.out).toMatch(/\(hub co-alive\)/);
     const file = readdirSync(join(root, 'tickets', 'governance')).find(f => f.endsWith('.yaml'))!;
     expect(readFileSync(join(root, 'tickets', 'governance', file), 'utf-8')).toMatch(/hub: co-alive/);
@@ -483,11 +563,11 @@ describe('ticket.ts create --hub (UNAVAILABLE refusal, design §4.5)', () => {
     mkdirSync(hubDir, { recursive: true });
     applyTransition(hubDir, 'co-open', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up' });
     const r = runTicket(['create', '--manual', 'delegation ok', '--hub', 'co-open'], root);
-    expect(r.code).toBe(0);
+    expectExit(r, 0, 'ticket AVAILABLE allow');
 
     const bad = runTicket(['create', '--manual', 'x', '--hub', 'not-a-hub-name'], root);
-      expect(bad.code).toBe(1);
-      expect(bad.err).toMatch(/--hub must match co-<slug>/);
+    expectExit(bad, 1, 'ticket malformed hub name');
+    expect(bad.err).toMatch(/--hub must match co-<slug>/);
   });
 });
 
@@ -495,9 +575,10 @@ describe('ticket.ts create --hub (UNAVAILABLE refusal, design §4.5)', () => {
 
 describe('hub-bootstrap declare — divergence force + capability requirement', () => {
   function runDeclare(args: string[], root: string) {
-    const proc = spawnSync('bun', [BOOTSTRAP_CLI, 'declare', ...args], {
+    const proc = spawnSync(process.execPath, [BOOTSTRAP_CLI, 'declare', ...args], {
       env: { ...process.env, HUB_BOOTSTRAP_ROOT: root },
       encoding: 'utf-8',
+      windowsHide: true,
     });
     return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}`, err: `${proc.stderr ?? ''}` };
   }
@@ -526,7 +607,7 @@ describe('hub-bootstrap declare — divergence force + capability requirement', 
   test('a standing DIVERGENT probe report auto-forces the next AVAILABLE declaration to DEGRADED (design §3.5)', () => {
     writeReport('2026-11-01', 'DIVERGENT');
     const r = runDeclare(['co-decl', 'AVAILABLE', '--actor', 'hub-pm', '--reason', 'business as usual'], root);
-    expect(r.code).toBe(0);
+    expectExit(r, 0, 'declare auto-forced DEGRADED');
     expect(r.out).toMatch(/operational_state=DEGRADED/);
     expect(r.out).toMatch(/auto-forced to DEGRADED by probe divergence/);
     const s = readState(hubDir, 'co-decl')!;
@@ -539,7 +620,7 @@ describe('hub-bootstrap declare — divergence force + capability requirement', 
     expect(runDeclare(['co-decl', 'AVAILABLE', '--actor', 'hub-pm', '--reason', 'first'], root).out).toMatch(/DEGRADED/);
     // The forced declaration WAS the next opportunity — AVAILABLE re-opens after it.
     const again = runDeclare(['co-decl', 'AVAILABLE', '--actor', 'hub-pm', '--reason', 'second'], root);
-    expect(again.code).toBe(0);
+    expectExit(again, 0, 'declare re-attest AVAILABLE');
     expect(again.out).toMatch(/operational_state=AVAILABLE/);
     expect(again.out).not.toMatch(/auto-forced/);
 
@@ -557,7 +638,7 @@ describe('hub-bootstrap declare — divergence force + capability requirement', 
 
   test('DEGRADED without --capabilities on an empty degraded set is refused (design §3.4, guide §5.3)', () => {
     const r = runDeclare(['co-decl', 'DEGRADED', '--actor', 'hub-pm', '--reason', 'reduce'], root);
-    expect(r.code).toBe(1);
+    expectExit(r, 1, 'declare DEGRADED without --capabilities');
     expect(r.err).toMatch(/--capabilities is required/);
   });
 });
@@ -572,11 +653,11 @@ describe('boot-time sweep (design §4.3.5)', () => {
     writeFileSync(join(staleDir, 'bootstrap-state.json'), JSON.stringify({ pid: deadPid(), url: 'x', sha: 's', started_at: NOW }), 'utf-8');
 
     const dry = runBootstrap([HUB], f.root); // dry-run default — zero-write guarantee holds
-    expect(dry.code).toBe(0);
+    expectExit(dry, 0, 'boot-time sweep dry-run');
     expect(existsSync(staleDir)).toBe(true);
 
     const applied = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
-    expect(applied.code).toBe(0);
+    expectExit(applied, 0, 'boot-time sweep --apply');
     expect(applied.out).toMatch(/boot-time sweep removed/);
     expect(existsSync(staleDir)).toBe(false);
   });
