@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261103-002
+kind: manual
+title: >-
+  validator-hardening (Phase I 2026-11-03 A1+A2, nightly E2E red): new-project
+  hub-consumption preflight vs registry semantic drift — (a)
+  checkHubDoctrineDuplication (scripts/helpers/hub-topology.ts:566-607) does not
+  honor variant-identity registry rows as a sanction: co-abap/co-price templates
+  carry same-named security-monitor assets explicitly registered category
+  variant-identity (batch E4) but the checker only skips non-hub-doctrine
+  entries, so scaffolds fail 'unregistered hub-doctrine duplication' — extend
+  the checker to skip when a variant-identity entry exists for
+  (hub_variant==variantName, same canonical rel-path) + unit fixture; (b)
+  co-architect promotion (E5/E6) missed hub-doctrine reconciliation:
+  templates/co-architect/agents/architect.md has no variant-identity row and
+  variant.json hub.consumes lacks co-develop (registry consumers:
+  co-game/co-learning only) — decide variant-identity registration (preferred:
+  distinct architecture-firm role) or add hub.consumes co-develop; blast radius:
+  fresh scaffolds of 3/15 variants fail hard (nightly run 41409778763 red since
+  11-02); new-project-only — upgrades unaffected
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-03T06:04:40.384+09:00'
+history:
+  - at: '2026-11-03T06:04:40.384+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
