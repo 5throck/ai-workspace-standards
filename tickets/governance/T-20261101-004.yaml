@@ -29,12 +29,18 @@ title: >-
   triage input. Discovered during the 2026-11-01 user-requested skill-graph
   health check.
 priority: normal
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-11-01T16:24:54.406+09:00'
 history:
   - at: '2026-11-01T16:24:54.406+09:00'
     from: null
     to: backlog
+  - at: '2026-11-03T04:02:31.915+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-03T04:02:31.936+09:00'
+    from: waiting
+    to: running
 result: null
 error: null

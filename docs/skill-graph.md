@@ -243,7 +243,7 @@
 | `root/security-scan` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
-| `root/skill-graph-analytics` | L0 | 1.2.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
+| `root/skill-graph-analytics` | L0 | 1.3.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
 | `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.0.0 | — | — | — | — | — |
