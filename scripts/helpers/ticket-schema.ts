@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.10.0
+// @version 1.11.0
+// v1.11.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §4.5, Phase 3.5): optional `hub` ticket field — the delegation target
+//          hub written by `ticket.ts create --hub <name>`. Pure metadata (the
+//          store and enums are unchanged); validated as a co-<slug> name so a
+//          malformed hub reference can never enter a ticket. Absent on every
+//          pre-existing ticket (tolerance-compatible, no migration).
 // v1.10.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
 //          Phase 3a kanban core): delegation kanban alias layer — optional `sev`
 //          (SEV1|SEV2|SEV3) and `blocked_reason` ticket fields (no enum/shape break:
@@ -172,6 +178,10 @@ export interface Ticket {
   /** v1.10.0 (hub-consolidation §5.1): `blocked` is a waiting-substate in the
    * delegation kanban alias layer, not a new status — the reason lives here. */
   blocked_reason?: string;
+  /** v1.11.0 (hub-consolidation §4.5, Phase 3.5): delegation target hub —
+   * written by `ticket.ts create --hub <name>`; the create path refuses the
+   * write when the hub's state file reads UNAVAILABLE. Pure metadata. */
+  hub?: string;
   /** Failure-retry count — derivable from history: every failed → waiting
    *  transition is one retry. validateTicket enforces the equality so the
    *  field cannot drift into unmaintained state (T-20260917-003). */
@@ -367,6 +377,10 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   }
   if (t.blocked_reason !== undefined && (typeof t.blocked_reason !== 'string' || t.blocked_reason.trim() === '' || t.blocked_reason.length > 500)) {
     fail('ticket.blocked_reason must be a non-empty string of at most 500 chars');
+  }
+  // v1.11.0 (hub-consolidation §4.5): optional delegation-target hub metadata.
+  if (t.hub !== undefined && (typeof t.hub !== 'string' || !/^co-[a-z0-9-]{1,40}$/.test(t.hub))) {
+    fail(`ticket.hub must match co-<slug>: ${JSON.stringify(t.hub)}`);
   }
   if (typeof t.attempts !== 'number' || t.attempts < 0) fail('ticket.attempts must be a non-negative number');
   if (t.not_before !== undefined && (typeof t.not_before !== 'string' || !ISO_DATE_PATTERN.test(t.not_before))) {

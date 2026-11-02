@@ -8119,8 +8119,8 @@
       "name": "delegate-to-hub",
       "scope": "root",
       "capability": "delegate-to-hub",
-      "content_hash": "1e814a61d651fc0d",
-      "version": "1.0.0",
+      "content_hash": "6a8d68b6e8a283da",
+      "version": "1.0.1",
       "mirrors": [
         "skills/delegate-to-hub/SKILL.md",
         "templates/common/skills/delegate-to-hub/SKILL.md",

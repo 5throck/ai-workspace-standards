@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §4.5, Phase 3.5): createTicket gains the optional `hub` delegation-
+//          target metadata field (ticket-schema v1.11.0) — written verbatim from
+//          `ticket.ts create --hub <name>`; the UNAVAILABLE refusal itself lives
+//          in the CLI create path (scripts/ticket.ts), not the store.
 // v1.13.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
 //          Phase 3a kanban core): reprioritizeTicket — priority-only mutation under
 //          the shared ticket lock, governed by helpers/reprioritize.ts (actor caps,
@@ -269,6 +274,9 @@ export interface CreateTicketInput {
   inputs?: Record<string, string>;
   priority: Priority;
   not_before?: string;
+  /** v1.14.0 (hub-consolidation §4.5): delegation target hub metadata
+   * (`--hub <name>`); optional, validated co-<slug> by the ticket schema. */
+  hub?: string;
 }
 
 /** Creates a ticket file with a collision-safe ID: computes a candidate seq from a
@@ -298,6 +306,7 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
       inputs: input.inputs,
       priority: input.priority,
       not_before: input.not_before,
+      hub: input.hub,
       status: 'backlog',
       attempts: 0,
       created_at: kstIso(),
