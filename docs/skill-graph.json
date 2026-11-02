@@ -728,8 +728,8 @@
       "name": "analyst",
       "scope": "co-architect",
       "capability": "analyst",
-      "content_hash": "f0c91d5beeddbb49",
-      "version": "1.0.0",
+      "content_hash": "6e6bb883d331329d",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/analyst.md"
       ]
@@ -780,8 +780,8 @@
       "name": "content-writer",
       "scope": "co-architect",
       "capability": "content-writer",
-      "content_hash": "5c4297a811ba5eae",
-      "version": "1.0.0",
+      "content_hash": "94dd6e9adb000afa",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/content-writer.md"
       ]
@@ -858,8 +858,8 @@
       "name": "ms365-expert",
       "scope": "co-architect",
       "capability": "ms365-expert",
-      "content_hash": "fbb2bafc0ba3a667",
-      "version": "1.0.0",
+      "content_hash": "b82c7f15ce9f749c",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/ms365-expert.md"
       ]
@@ -884,8 +884,8 @@
       "name": "project-coordinator",
       "scope": "co-architect",
       "capability": "project-coordinator",
-      "content_hash": "636e248ed9f9a6a9",
-      "version": "1.0.0",
+      "content_hash": "079d7d9dd2a962b5",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/project-coordinator.md"
       ]
@@ -962,8 +962,8 @@
       "name": "technical-writer",
       "scope": "co-architect",
       "capability": "technical-writer",
-      "content_hash": "b1552a476a4411d3",
-      "version": "1.0.0",
+      "content_hash": "d71945bc254802e6",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/technical-writer.md"
       ]
