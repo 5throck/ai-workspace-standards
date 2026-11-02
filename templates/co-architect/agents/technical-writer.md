@@ -2,8 +2,9 @@
 name: technical-writer
 role: API documentation, technical guides, and developer resources creator
 status: active
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.1"
+last_updated: "2026-11-02"
+formal_name: Technical Writer & Developer Documentation Specialist
 capabilities:
   - documentation
 tier: medium
@@ -22,7 +23,7 @@ required_skills: [api-documentation, documentation-writing]
 lifecycle:
   phase: production
   created: "2026-05-28"
-  last_updated: "2026-05-28"
+  last_updated: "2026-11-02"
   governance: docs/lifecycle/agents/technical-writer.md
 ---
 
