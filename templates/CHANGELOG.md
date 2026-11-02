@@ -3,6 +3,10 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+
+## [0.28.0] - 2026-11-02
+### Changed
+- **[2026-11-03]**: auto-release 2026-11-03: 689 delivered paths (A 559 / M 130 / D 0 / R 0)
 ### Added
 - **[2026-11-02]**: co-work designated as 4th hub — business-collaboration doctrine (5-agent family: analyst/content-writer/ms365-expert/project-coordinator/technical-writer); consumers declare via `hub.consumes`. "Hub-and-Spoke Topology" hub enumeration updated to four hubs (L0 COMMON-AGENTS zone, propagated to `templates/common/AGENTS.md` and all 15 variant `AGENTS.md` files); registry entries pre-existing from the E⑤ adjudication, consumer `co-architect`.
 - **[2026-11-02]**: Hub-and-spoke v2 boundary protocol (spec `2026-11-01-hub-consolidation-design`, Phase 2 step 0) — `templates/common/AGENTS.md` COMMON-AGENTS zone gains a "Hub-and-Spoke Topology" section: hubs (`co-develop`/`co-design`/`co-security`) are service providers, not superior organizations; routine quality gates stay local through each project's PM Gateway; hard problems escalate to the hub via delegation (Phase 3 channel; upstream-request path until then); SEV1–SEV3 incident tiers triggerable locally without pre-authorization; workspace-root PM holds final adjudication. Reaches every variant's `AGENTS.md` through the COMMON-AGENTS marker-inject domain (propagation-map `governance-agents`, 15 variants re-injected this batch); the Phase 2 upgrade wave delivers it to projects. Phase 1 hub state included for wave consumers: `hub_topology` registry (71 entries) in the workspace-schema pair and the `co-architect` template (beta).
