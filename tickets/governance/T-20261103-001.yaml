@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261103-001
+kind: manual
+title: 'Phase 4 drill: post-bootstrap delegation filing'
+priority: normal
+hub: co-security
+status: done
+attempts: 0
+created_at: '2026-11-03T01:38:14.891+09:00'
+history:
+  - at: '2026-11-03T01:38:14.891+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-03T01:39:25.909+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-03T01:39:25.926+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-03T01:39:25.942+09:00'
+    from: review
+    to: done
+result: >-
+  Phase 4 drill evidence: post-bootstrap delegation filing into hub co-security
+  succeeded; lifecycle gate passed (hub AVAILABLE); ticket retained as drill
+  evidence
+error: null

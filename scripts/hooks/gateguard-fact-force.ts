@@ -13,7 +13,15 @@
  * State semantics: the hook process is spawned fresh on every tool call, so
  * first-edit tracking is per-invocation only (in-memory Map, no persistence).
  *
- * @version 1.3.0
+ * @version 1.3.2
+ *
+ * v1.3.1 (2026-11-02, Phase 4 hook-delivery wave): version bump only — carries
+ * the line-137 comment correction (governance-marker wording, landed at root
+ * in 7e7003c0d without a bump) to the L1 delivery source
+ * templates/common/scripts/hooks/ (byte-identical modulo the sanctioned
+ * CONSTITUTION scrub). The fleet's project copies (@1.3.0) refresh through
+ * upgrade-project's version-gated SYNC_IF_NEWER: scripts/ pass, which needed
+ * the bump. No behavior change.
  */
 
 import { readFileSync } from 'node:fs';

@@ -196,6 +196,17 @@
         ]
       },
       {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/agent-model-gate.ts",
+            "timeout": 10,
+            "statusMessage": "Checking Agent dispatch model tier..."
+          }
+        ]
+      },
+      {
         "hooks": [
           {
             "type": "command",
