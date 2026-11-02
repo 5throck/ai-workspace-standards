@@ -1,4 +1,27 @@
-// @version 1.3.0
+// @version 1.5.0
+// v1.5.0 (2026-11-02, pairs with hub-bootstrap.ts v1.6.0 — Phase 4 remediation
+//          follow-up): SANCTIONED-SCRUB TOLERANCE — the drill's second
+//          false-positive class (gateguard-fact-force.ts "one-comment diff")
+//          is pinned: a canonical hook carrying a CONSTITUTION.md mention in
+//          comments vs a delivered copy carrying the sanctioned
+//          CONSTITUTION.md→context.md scrub (§7.5 Non-Propagation — this is
+//          exactly what templates/common/scripts/hooks/ ships) PASSES the
+//          gate, while the same delivered copy with an additionally-changed
+//          string literal still FAILS byte-exactly. The probe-side twin lives
+//          in the hub-probe describe (MATCH despite _test-* + scrub-only
+//          divergence).
+// v1.4.0 (2026-11-02, pairs with hub-bootstrap.ts v1.5.0 — Phase 4 remediation):
+//          (a) LOCK-LEAK REGRESSION — a gate-failure bootstrap must leave NO
+//          automation-lock residue: the drill's real bug (failWithCleanup →
+//          process.exit skipped bootstrap()'s finally, leaving
+//          automation-bootstrap-<hub>.lock behind) is pinned by asserting the
+//          lock file is GONE after a VALIDATED gate failure. (b) The fixture's
+//          canonical hooks now carry the root-only _test-consumer.ts /
+//          _test-module.ts fixtures while the seeded hub repo does NOT — the
+//          E2E pass case proves hub-bootstrap v1.5.0's /^_test-.*\.ts$
+//          exclusion (pre-fix this exact fixture fails the gate with "hook
+//          missing in clone"), and the sabotage case still fails on a REAL
+//          divergence, proving the exclusion masks nothing.
 // v1.3.0 (2026-11-02, Windows CI fix round 3 — malformed fixture schema):
 //          buildFixture wrote docs/workspace-schema.json with a placeholder
 //          hub_remote and then re-wrote the FILE TEXT via String.replace
@@ -125,6 +148,14 @@ function buildFixture(name = HUB): Fixture {
   const hookFiles: Record<string, string> = {
     'pre-commit.ts': `// fixture canonical hook\nexport const CANONICAL = true;\n`,
     'README.md': `# fixture canonical hooks\n`,
+    // v1.4.0: the ROOT canonical tree carries the root-only _test-* fixtures
+    // exactly like the real workspace — the seeded hub repo below deliberately
+    // does NOT ship them (they are never delivered), so the E2E pass case is
+    // the standing regression test for hub-bootstrap v1.5.0's /^_test-.*\.ts$
+    // exclusion. Without the exclusion this fixture set fails the gate with
+    // "hook missing in clone: scripts/hooks/_test-consumer.ts".
+    '_test-consumer.ts': `import { testValue } from './_test-module'; console.log(testValue);\n`,
+    '_test-module.ts': `export const testValue = 42;\n`,
   };
   for (const [f, content] of Object.entries(hookFiles)) writeFileSync(join(root, 'scripts', 'hooks', f), content, 'utf-8');
 
@@ -367,6 +398,96 @@ describe('E2E bootstrap (bare-repo remote, external checks via documented skip s
     expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
     expect(readdirSync(join(f.root, 'Projects')).filter(n => n.startsWith('.bootstrap-'))).toEqual([]);
   });
+
+  test('gate failure releases the automation lock — NO .lock residue (v1.5.0 lock-leak regression)', () => {
+    const f = makeFixture();
+    // Sabotage the canonical hooks AFTER the remote was seeded: the gate now
+    // fails inside the lock-held window. THE REAL DRILL BUG (hub-bootstrap
+    // v1.4.0): failWithCleanup called process.exit() directly, which skips
+    // bootstrap()'s finally — the lock file survived the failure and every
+    // later bootstrap read automation-bootstrap-<hub>.lock as a held-live
+    // holder. The v1.5.0 ExitSignal unwinds through the finally instead.
+    writeFileSync(join(f.root, 'scripts', 'hooks', 'pre-commit.ts'), '// TAMPERED\n', 'utf-8');
+    const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    expectExit(r, 1, 'gate failure (lock-release regression)');
+    expect(r.err).toMatch(/VALIDATED gate FAILED/);
+    expect(existsSync(join(f.root, '.pipeline-state', `automation-bootstrap-${HUB}.lock`))).toBe(false); // released BEFORE exit
+    expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
+    expect(readdirSync(join(f.root, 'Projects')).filter(n => n.startsWith('.bootstrap-'))).toEqual([]);
+    // The released lock must be RE-ACQUIRABLE (a leaked lock dead-locked the
+    // next run — the observable failure mode in the drill).
+    const reacquire = acquireLock(`bootstrap-${HUB}`, { stateDir: join(f.root, '.pipeline-state') });
+    expect(reacquire.ok).toBe(true);
+    releaseLock(`bootstrap-${HUB}`, { stateDir: join(f.root, '.pipeline-state') });
+  });
+});
+
+// ── (e2) sanctioned-scrub tolerance (v1.6.0: drill false-positive class 2) ───
+
+describe('hook-integrity sanctioned-scrub tolerance (v1.6.0: CONSTITUTION.md→context.md comment scrub)', () => {
+  const TARGET = 'gateguard-scrub-fixture.ts';
+  // Mirrors the real drill case: a // comment AND a block comment mention
+  // CONSTITUTION.md; a functional string literal must NOT be touched by the
+  // scrub (constitution-scrub.ts code-file rules).
+  const UNSCRUBBED = [
+    '// @version 1.0.0',
+    '// Remove extension for broader matching (e.g., "CONSTITUTION" not just "CONSTITUTION.md")',
+    '/**',
+    ' * Block comment referencing CONSTITUTION.md for L0 readers.',
+    ' */',
+    'import { join } from "node:path";',
+    'export const MARKER = join(".", "CONSTITUTION.md");',
+    '',
+  ].join('\n');
+  // What propagate-to-templates actually ships: comments scrubbed, the
+  // functional string literal untouched.
+  const SCRUBBED = UNSCRUBBED
+    .replace('"CONSTITUTION" not just "CONSTITUTION.md"', '"CONSTITUTION" not just "context.md"')
+    .replace('referencing CONSTITUTION.md for L0 readers', 'referencing context.md for L0 readers');
+
+  /** Push one hook file to the bare remote and return the new main SHA. */
+  function pushRemoteCopy(f: Fixture, content: string): string {
+    const GIT = Bun.which('git');
+    if (!GIT) throw new Error('fixture: git not found');
+    const wt = join(f.root, 'scrub-wt');
+    const run = (cmd: string[], cwd?: string) => {
+      const p = spawnSync(GIT, ['-c', 'core.autocrlf=false', ...cmd.slice(1)], { cwd, encoding: 'utf-8', windowsHide: true });
+      if ((p.status ?? 1) !== 0) throw new Error(`fixture git failed: ${cmd.join(' ')}\n${p.stdout}${p.stderr}`);
+    };
+    run(['git', 'clone', '--quiet', f.bare, wt]); // cwd must not be the (absent) wt for the clone itself
+    mkdirSync(join(wt, 'scripts', 'hooks'), { recursive: true });
+    writeFileSync(join(wt, 'scripts', 'hooks', TARGET), content, 'utf-8');
+    run(['git', 'add', '.'], wt);
+    run(['git', '-c', 'user.email=fixture@test', '-c', 'user.name=fixture', 'commit', '--quiet', '-m', 'scrub fixture'], wt);
+    run(['git', 'push', '--quiet', 'origin', 'main'], wt);
+    const sha = spawnSync(GIT, ['rev-parse', 'HEAD'], { cwd: wt, encoding: 'utf-8', windowsHide: true }).stdout.trim();
+    rmRfBestEffort(wt);
+    return sha;
+  }
+
+  test('a scrub-only divergence (canonical unscrubbed vs delivered scrubbed) PASSES the gate', () => {
+    const f = makeFixture();
+    writeFileSync(join(f.root, 'scripts', 'hooks', TARGET), UNSCRUBBED, 'utf-8'); // canonical side: L0 raw
+    pushRemoteCopy(f, SCRUBBED); // delivered side: what the L1 source ships
+    const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    expectSilentStderr(r, 'scrub-only divergence must pass');
+    expectExit(r, 0, 'scrub-only divergence must pass');
+    expect(readState(join(f.root, 'Projects', HUB), HUB)!.bootstrap_state).toBe('READY');
+  });
+
+  test('the scrub does not mask REAL divergence: a changed string literal still fails the gate', () => {
+    const f = makeFixture();
+    writeFileSync(join(f.root, 'scripts', 'hooks', TARGET), UNSCRUBBED, 'utf-8');
+    // Beyond the sanctioned scrub, the functional string literal changed —
+    // the code-file scrub rules never touch literals, so this must fail.
+    const tampered = SCRUBBED.replace('join(".", "CONSTITUTION.md")', 'join(".", "context.md")');
+    pushRemoteCopy(f, tampered);
+    const r = runBootstrap([HUB, '--apply', '--yes'], f.root, { HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS: '1' });
+    expectExit(r, 1, 'scrub-masked tamper must fail');
+    expect(r.err).toMatch(/VALIDATED gate FAILED/);
+    expect(r.err).toMatch(/hook differs from canonical/);
+    expect(existsSync(join(f.root, 'Projects', HUB))).toBe(false);
+  });
 });
 
 // ── (f) lock concurrency ─────────────────────────────────────────────────────
@@ -507,6 +628,41 @@ describe('hub-probe (read-only, design §3.5)', () => {
     expect(text).toMatch(/tickets_store: writable/);
     expect(text).toMatch(/head_hash: [0-9a-f]{64}/);
     expect(text).toMatch(/operational_state \(declared\): AVAILABLE/);
+  });
+
+  test('MATCH survives the drill false-positive classes: root-only _test-* fixtures + scrub-only comment divergence (v1.2.0 probe)', () => {
+    initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
+    applyTransition(hubDir, 'co-probe', { kind: 'bootstrap', to: 'BOOTSTRAPPED', actor: 'hub-bootstrap', reason: 'clone', at: NOW });
+    applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'session start', at: NOW });
+    // (a) Root-only _test-* fixtures exist ONLY at the canonical side — never
+    // delivered, must not read as divergence. (b) The canonical side carries
+    // the raw L0 comment; the hub carries the sanctioned
+    // CONSTITUTION.md→context.md scrub of it (exactly what templates/common
+    // ships). Raw byte diff flagged both in the 2026-11-02 drill.
+    writeFileSync(join(root, 'scripts', 'hooks', '_test-consumer.ts'), 'export const t = 1;\n', 'utf-8');
+    writeFileSync(join(root, 'scripts', 'hooks', 'g.ts'), '// e.g., "CONSTITUTION" not just "CONSTITUTION.md"\nexport const K = "CONSTITUTION.md";\n', 'utf-8');
+    writeFileSync(join(hubDir, 'scripts', 'hooks', 'g.ts'), '// e.g., "CONSTITUTION" not just "context.md"\nexport const K = "CONSTITUTION.md";\n', 'utf-8');
+
+    const r = runProbe(['co-probe'], root);
+    expectExit(r, 0, 'probe MATCH despite _test-* + scrub-only divergence');
+    expect(r.out).toMatch(/MATCH/);
+    const text = readFileSync(join(root, 'docs', 'reports', `${kstDate()}-hub-probe-co-probe.md`), 'utf-8');
+    expect(text).toMatch(/Verdict\*\*: MATCH/);
+    expect(text).toMatch(/hooks_integrity: match \(3 files\)/);
+  });
+
+  test('scrub tolerance masks nothing: a functional hook change still reports MISMATCH (v1.2.0 probe)', () => {
+    initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
+    applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'up', at: NOW });
+    // Same comment situation as the MATCH case, but the hub also changed the
+    // functional string literal — the code-file scrub never touches literals.
+    writeFileSync(join(root, 'scripts', 'hooks', 'g.ts'), '// e.g., "CONSTITUTION" not just "CONSTITUTION.md"\nexport const K = "CONSTITUTION.md";\n', 'utf-8');
+    writeFileSync(join(hubDir, 'scripts', 'hooks', 'g.ts'), '// e.g., "CONSTITUTION" not just "context.md"\nexport const K = "context.md";\n', 'utf-8');
+
+    const r = runProbe(['co-probe'], root);
+    expectExit(r, 2, 'probe MISMATCH on functional divergence');
+    expect(r.out).toMatch(/DIVERGENT/); // the verdict; MISMATCH is the in-report signal wording
+    expect(r.out).toMatch(/hook file\(s\) differ/);
   });
 
   test('DIVERGENT: tampered hash chain → exit 2, divergence named, SEV command printed (never auto-filed)', () => {

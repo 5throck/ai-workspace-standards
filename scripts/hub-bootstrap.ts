@@ -1,5 +1,48 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.6.0
+// v1.6.0 (2026-11-02, Phase 4 remediation follow-up — sanctioned-scrub
+//          tolerance in the hook-integrity fingerprint): the 2026-11-02 drill
+//          ALSO flagged gateguard-fact-force.ts as "one-comment diff" — and
+//          the v1.5.0 wave does not clear it: the L1 delivery source
+//          (templates/common/scripts/hooks/) carries the SANCTIONED
+//          CONSTITUTION.md→context.md comment scrub
+//          (scripts/lib/constitution-scrub.ts, §7.5 Non-Propagation — a
+//          // comment mentioning CONSTITUTION.md at root reads context.md in
+//          every delivered project/hub copy), so the raw byte diff between
+//          root canonical and ANY correctly-delivered clone still reports
+//          "hook differs from canonical" forever. contentFingerprint() now
+//          normalizes BOTH sides through scrubConstitutionRefs() (the shared
+//          lib — single derivation, exactly what its header prescribes for
+//          checkers) before hashing: comment-text scrub differences stop
+//          reading as divergence, while functional changes (string literals,
+//          code, the @version header) still fail the gate byte-exactly. The
+//          scrub is idempotent, so a clone that already carries the scrubbed
+//          bytes hashes unchanged. Paired tests/unit/hub-bootstrap.test.ts
+//          v1.5.0: scrub-only divergence passes the gate; a scrubbed copy
+//          with an additionally-changed string literal still fails it.
+// v1.5.0 (2026-11-02, Phase 4 remediation — REAL lock leak + drill checker
+//          false-positive): (a) LOCK-LEAK FIX — fail()/failWithCleanup()
+//          called process.exit() directly, and process.exit terminates the VM
+//          without running any intervening finally block, so the bootstrap
+//          automation lock (five-guarantee #2, released in bootstrap()'s
+//          finally) leaked on EVERY gate-failure path — the 2026-11-02 fleet
+//          drill left .pipeline-state/automation-bootstrap-co-security.lock
+//          behind after a hook-integrity failure. fail() now throws a typed
+//          ExitSignal (exported) that unwinds through bootstrap()'s
+//          try/finally — the lock is released BEFORE the process exits — and
+//          the outermost CLI frame prints the ❌ verdict and converts it to
+//          the exit code exactly once. All fail() sites keep their messages
+//          and exit codes; the only behavior change is for library consumers
+//          of moveIntoPlace (same-volume failure now throws ExitSignal
+//          instead of killing the process). (b) _test-* EXCLUSION —
+//          scripts/hooks/_test-*.ts are root-only test helper modules
+//          (SCRIPTS.md registers them as internal test fixtures; no @version
+//          header — lifecycle Check A already treats them as version-
+//          unvalidatable), NOT delivered artifacts, so the hook-integrity
+//          comparison excludes /^_test-.*\.ts$/ from BOTH sides of the
+//          canonical diff — their root-only presence can no longer false-fail
+//          any hub (the drill failed co-security on _test-consumer.ts /
+//          _test-module.ts, which every clone legitimately lacks).
 // v1.4.0 (2026-11-02, Windows CI fix round 4 — concurrent-claim errno):
 //          Windows CI failed the 'EEXIST/ENOTEMPTY = concurrent claim' test
 //          with "EPERM: operation not permitted, rename '...stage' ->
@@ -108,6 +151,7 @@ import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { acquireLock, releaseLock } from './automation-lock.ts';
 import { latestProbeReportFile, probeReportVerdict } from './hub-probe.ts';
+import { hookDirViolations } from './lib/hook-integrity.ts';
 import { loadHubTopology } from './helpers/hub-topology.ts';
 import {
   applyTransition, initStateFile, isLeaseValid, loadRegistryEnums, readState,
@@ -128,9 +172,23 @@ function nowIso(): string {
   return process.env.HUB_BOOTSTRAP_NOW ?? new Date().toISOString();
 }
 
-function fail(msg: string): never {
-  console.error(`❌ ${msg}`);
-  process.exit(1);
+/** The typed unwinding exit (v1.5.0): fail() throws this instead of calling
+ * process.exit() — process.exit terminates the VM without running intervening
+ * finally blocks, which is exactly how the lock leaked (the 2026-11-02 drill
+ * left .pipeline-state/automation-bootstrap-<hub>.lock behind after a gate
+ * failure). ExitSignal propagates through bootstrap()'s try/finally — the
+ * automation lock is released BEFORE the process exits — and the outermost
+ * CLI frame prints the ❌ verdict and converts it to the exit code once.
+ * Exported so library consumers (and tests) can catch it explicitly. */
+export class ExitSignal extends Error {
+  constructor(readonly exitCode: number, message: string) {
+    super(message);
+    this.name = 'ExitSignal';
+  }
+}
+
+function fail(msg: string, exitCode = 1): never {
+  throw new ExitSignal(exitCode, msg);
 }
 
 function run(cmd: string[], opts: { cwd?: string } = {}): { code: number; out: string } {
@@ -279,54 +337,20 @@ function printStatus(hub: string, stateDirOverride?: string): void {
 
 // ── VALIDATED gate (design §4.4) ─────────────────────────────────────────────
 
-/** Line-ending-normalized content fingerprint (v1.2.0): sha256 over the utf-8
- * bytes with CRLF normalized to LF. Platform-agnostic BY CONSTRUCTION — on a
- * core.autocrlf=true Windows checkout git smudges LF blobs to CRLF on disk,
- * which must not read as hook divergence; on POSIX (LF-only files) the
- * normalization is a no-op and the fingerprint is the plain byte identity. */
-function contentFingerprint(p: string): string {
-  const normalized = readFileSync(p, 'utf-8').replace(/\r\n/g, '\n');
-  return createHash('sha256').update(normalized, 'utf-8').digest('hex');
-}
-
-function dirFingerprint(dir: string): Map<string, string> {
-  const out = new Map<string, string>();
-  if (!existsSync(dir)) return out;
-  const walk = (d: string, prefix: string): void => {
-    for (const e of readdirSync(d, { withFileTypes: true })) {
-      const p = join(d, e.name);
-      // Keys are ALWAYS posix-style ('/' separators, no drive letter) so the
-      // comparison is separator-neutral on Windows.
-      const key = prefix + e.name;
-      if (e.isDirectory()) walk(p, `${key}/`);
-      else out.set(key, contentFingerprint(p));
-    }
-  };
-  walk(dir, '');
-  return out;
-}
-
-/** Hook-integrity diff: the temp clone's scripts/hooks/ must be byte-identical
- * to the canonical scripts/hooks/ (design §4.4 check 2) modulo line endings —
- * v1.2.0 fingerprints sha256-normalize CRLF to LF so a core.autocrlf=true
- * Windows checkout cannot false-fail the pass case. Returns violation strings
- * (empty = clean). */
+/** Hook-integrity diff (design §4.4 check 2): the temp clone's scripts/hooks/
+ * must match the canonical scripts/hooks/ byte-exactly modulo (a) line
+ * endings (v1.2.0 — core.autocrlf=true Windows checkouts cannot false-fail),
+ * (b) the sanctioned CONSTITUTION.md→context.md comment scrub (v1.6.0 — the
+ * L1 delivery source ships comment-scrubbed copies; the drill's
+ * gateguard-fact-force.ts "one-comment diff"), and (c) the root-only _test-*
+ * test fixtures excluded from BOTH sides (v1.5.0 — never delivered; the
+ * drill's _test-consumer.ts / _test-module.ts false failure). The
+ * normalization rules live in ONE place — lib/hook-integrity.ts — shared with
+ * hub-probe's hooks_integrity signal so the gate and the probe can never
+ * disagree about what divergence is. Returns violation strings (empty =
+ * clean). */
 function hookIntegrityDiff(cloneDir: string): string[] {
-  const canonical = join(ROOT, 'scripts', 'hooks');
-  const delivered = join(cloneDir, 'scripts', 'hooks');
-  const violations: string[] = [];
-  if (!existsSync(canonical)) return [`canonical ${canonical} is missing — cannot diff (refusing to validate)`];
-  if (!existsSync(delivered)) return [`clone carries no scripts/hooks/ directory — the canonical hooks must ship with the hub`];
-  const a = dirFingerprint(canonical);
-  const b = dirFingerprint(delivered);
-  for (const [f, content] of a) {
-    if (!b.has(f)) violations.push(`hook missing in clone: scripts/hooks/${f}`);
-    else if (b.get(f) !== content) violations.push(`hook differs from canonical: scripts/hooks/${f}`);
-  }
-  for (const f of b.keys()) {
-    if (!a.has(f)) violations.push(`extra hook not in canonical: scripts/hooks/${f}`);
-  }
-  return violations;
+  return hookDirViolations(join(ROOT, 'scripts', 'hooks'), join(cloneDir, 'scripts', 'hooks'));
 }
 
 interface ValidationReport {
@@ -780,8 +804,9 @@ const USAGE = `usage: bun scripts/hub-bootstrap.ts <hub-name> [--apply] [--yes]
        bun scripts/hub-bootstrap.ts declare <hub> <AVAILABLE|DEGRADED|UNAVAILABLE|RECOVERY> --actor <user|hub-pm> --reason "<text>" [--capabilities a,b] [--lease-hours N] [--state-dir <dir>]
        bun scripts/hub-bootstrap.ts --recover [--apply]`;
 
-// Import-safe: the exported logic (moveIntoPlace) must not trigger the CLI.
+// Import-safe: the exported logic (moveIntoPlace, ExitSignal) must not trigger the CLI.
 if (import.meta.main) {
+  let exitCode = 0;
   try {
     const args = process.argv.slice(2);
     if (args.includes('--recover')) {
@@ -799,12 +824,25 @@ if (import.meta.main) {
         bootstrap(sub, flags.apply === true, flags.yes === true);
       } else {
         console.log(USAGE);
-        process.exit(sub ? 1 : 0);
+        exitCode = sub ? 1 : 0;
       }
     }
   } catch (err) {
-    if (err instanceof HubStateError) fail(err.message);
-    console.error(`❌ ${(err as Error).message}`);
-    process.exit(1);
+    // The typed unwinding exit (v1.5.0): the ❌ verdict prints HERE — the
+    // outermost frame — AFTER every intervening finally (the bootstrap lock
+    // release) has already run. process.exit happens after the whole
+    // try/catch completes, never inside it, so no exit path can skip a
+    // cleanup that the call stack registered.
+    if (err instanceof ExitSignal) {
+      console.error(`❌ ${err.message}`);
+      exitCode = err.exitCode;
+    } else if (err instanceof HubStateError) {
+      console.error(`❌ ${err.message}`);
+      exitCode = 1;
+    } else {
+      console.error(`❌ ${(err as Error).message}`);
+      exitCode = 1;
+    }
   }
+  process.exit(exitCode);
 }

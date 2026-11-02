@@ -1,5 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-02, Phase 4 remediation follow-up — drill false-positive
+//          classes): the hooks_integrity quick-check now compares through the
+//          SHARED lib/hook-integrity.ts normalization (single derivation with
+//          hub-bootstrap's VALIDATED gate) instead of a raw byte diff:
+//          (a) the root-only _test-*.ts test fixtures are excluded from BOTH
+//          sides — they are never delivered, so their root-only presence read
+//          as divergence on every hub probe (the 2026-11-02 drill class); (b)
+//          the sanctioned CONSTITUTION.md→context.md comment scrub
+//          (§7.5 Non-Propagation) no longer reads as divergence — the L1
+//          delivery source ships comment-scrubbed copies (the drill's
+//          gateguard-fact-force.ts "one-comment diff"). Real divergence —
+//          code, string literals, a missing or extra hook — still reports
+//          MISMATCH exactly as before; the "match (N files)" count is over
+//          the delivered files after the fixture exclusion. Left unfixed, §3.5
+//          would have auto-forced every AVAILABLE declaration to DEGRADED on
+//          these non-divergences.
 // v1.1.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §3.5, Phase 3.5 audit completion): the report-format knowledge is
 //          exported for single-derivation reuse — probeReportFiles /
@@ -37,6 +53,7 @@
 
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync, accessSync, constants } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { fingerprintHookDir } from './lib/hook-integrity.ts';
 import { loadHubTopology } from './helpers/hub-topology.ts';
 import { effectiveOperationalState, readState, validateChain, type HubStateFile } from './helpers/hub-state.ts';
 import { kstDate } from './helpers/kst-time.ts';
@@ -95,16 +112,12 @@ function registryHubs(): string[] {
 
 function fingerprintDir(dir: string): Map<string, string> | null {
   if (!existsSync(dir)) return null;
-  const out = new Map<string, string>();
-  const walk = (d: string, prefix: string): void => {
-    for (const e of readdirSync(d, { withFileTypes: true })) {
-      const p = join(d, e.name);
-      if (e.isDirectory()) walk(p, `${prefix}${e.name}/`);
-      else out.set(`${prefix}${e.name}`, readFileSync(p, 'utf-8'));
-    }
-  };
-  walk(dir, '');
-  return out;
+  // v1.2.0: the shared normalization (lib/hook-integrity.ts, single derivation
+  // with hub-bootstrap's VALIDATED gate) — _test-* fixtures excluded from both
+  // sides, sanctioned CONSTITUTION.md→context.md comment scrub applied before
+  // hashing. A raw byte diff here reported the drill's two false-positive
+  // classes as divergence and would have §3.5-forced AVAILABLE→DEGRADED.
+  return fingerprintHookDir(dir);
 }
 
 /** The hub's probe-report file names in a reports dir, oldest first (the
