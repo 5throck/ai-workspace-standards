@@ -2,9 +2,21 @@
 /**
  * test-l3-to-variant-promotion.ts — E2E smoke test for the L3 scaffold → variant promotion path
  *
- * @version 1.6.0
- * @last_updated 2026-09-16
+ * @version 1.7.0
+ * @last_updated 2026-11-02
  *
+ * v1.7.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+ *         §6.1/§6.2 Phase 1.5): Test 8 — hub-topology asset classification.
+ *         Fixture bait skills (a hub-doctrine asset canonical to another
+ *         variant + an unregistered asset) + a variant-identity bait agent;
+ *         the registry is injected via the pipeline's hubTopologyOverride
+ *         programmatic seam, so no real registry row is touched. 8a asserts
+ *         the enforce default: foreign hub-doctrine asset NOT copied +
+ *         "consumes declaration required: {domain, minimum_version}" flagged
+ *         in the report (declare-first — the pipeline flags, never edits
+ *         registry rows); unregistered asset copied + reported (never
+ *         silent). 8b asserts the refusal: a foreign variant-identity asset
+ *         fails the run with a clear error naming the asset + owning hub.
  * v1.6.0: T-20260916-001 — fixture dir names under templates/ are now built
  *         from the shared TRANSIENT_TEST_FIXTURE_PREFIXES constants
  *         (helpers/scaffold-markers.ts) so the validator skip predicate
@@ -123,7 +135,9 @@ function pass(label: string) { console.log(`  ✅ ${label}`); testsPassed++; tes
 function fail(label: string, reason: string) { console.error(`  ❌ ${label}: ${reason}`); allPassed = false; testsRun++; }
 
 function cleanup(): void {
-  for (const p of [L3_FIXTURE_PATH, PIPELINE_OUTPUT_PATH, AGENTS_MD_STAGING_PATH,
+  for (const p of [L3_FIXTURE_PATH, PIPELINE_OUTPUT_PATH,
+    `${PIPELINE_OUTPUT_PATH}-hub8a`, `${PIPELINE_OUTPUT_PATH}-hub8b`,
+    AGENTS_MD_STAGING_PATH,
     join(WORKSPACE_ROOT, 'templates', GUARD_FIXTURE_BETA),
     join(WORKSPACE_ROOT, 'templates', GUARD_FIXTURE_STABLE),
     ...P2V_FIXTURES.map((name) => join(WORKSPACE_ROOT, 'templates', name)),
@@ -541,6 +555,172 @@ try {
         pass('Test 6c PASSED: no .overlay-backup-* snapshot strays in templates/');
       }
     } catch (e) { fail('Test 6', String(e)); }
+
+    // ── Test 8: hub-topology asset classification (v1.22.0 — design §6.1/§6.2)
+    // docs/designs/2026-11-01-hub-consolidation-design.md §6 (Phase 1.5): the
+    // promotion pipeline CLASSIFIES L3-carried skills/agents against the
+    // hub_topology registry instead of copying blindly.
+    //   8a — an L3 carrying a hub-doctrine asset canonical to ANOTHER variant
+    //        (enforce default): the asset is NOT copied, the report flags
+    //        "consumes declaration required: {domain, minimum_version}"
+    //        (declare-first — the pipeline flags, never edits registry rows),
+    //        and an unregistered asset copies as today PLUS a report line.
+    //   8b — an L3 carrying a variant-identity asset owned by another variant:
+    //        the run REFUSES (identity is never absorbed).
+    // The registry is injected via hubTopologyOverride (programmatic-caller
+    // seam) so no real registry row is ever touched.
+    console.log('\nTest 8: hub-topology classification (design §6.1/§6.2)');
+    try {
+      const HUB_DOCTRINE_BAIT = 'e2e-hub-doctrine-bait';
+      const UNREGISTERED_BAIT = 'e2e-unregistered-bait';
+      const IDENTITY_BAIT = 'e2e-identity-bait';
+      const hubTopologyOverride = {
+        version: '1.2.0',
+        domains: ['co-develop', 'co-design'],
+        categories: ['variant-identity', 'hub-doctrine'],
+        entries: [
+          {
+            asset: HUB_DOCTRINE_BAIT,
+            domain: 'co-develop',
+            hub_variant: 'co-develop',
+            category: 'hub-doctrine',
+            canonical_path: `templates/co-develop/skills/${HUB_DOCTRINE_BAIT}/SKILL.md`,
+            version: '1.2.0',
+          },
+          {
+            asset: IDENTITY_BAIT,
+            domain: 'co-design',
+            hub_variant: 'co-design',
+            category: 'variant-identity',
+            canonical_path: `templates/co-design/agents/${IDENTITY_BAIT}.md`,
+            version: '1.0.0',
+          },
+        ],
+        hubs: [],
+        known_unregistered_duplicates: [],
+      };
+      const writeBaitSkill = (name: string): void => {
+        const dir = join(L3_FIXTURE_PATH, 'skills', name);
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(
+          join(dir, 'SKILL.md'),
+          [
+            '---',
+            `name: ${name}`,
+            'description: Disposable classification-bait skill — not a real skill.',
+            '---',
+            '',
+            `# ${name}`,
+            '',
+            'Disposable fixture skill for hub-topology classification assertions.',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+      };
+
+      // 8a: enforce mode (default) — doctrine-of-another-variant skipped,
+      // unregistered copied + reported.
+      const OUTPUT_8A = `${PIPELINE_OUTPUT_PATH}-hub8a`;
+      writeBaitSkill(HUB_DOCTRINE_BAIT);
+      writeBaitSkill(UNREGISTERED_BAIT);
+      const { executeL3ToVariantPipeline } = await import('./l3-to-variant-pipeline.ts');
+      const run8a = await executeL3ToVariantPipeline({
+        l3ProjectPath: L3_FIXTURE_PATH,
+        variantName: 'co-e2etest',
+        variantType: 'collaboration',
+        variantDescription: 'Test 8a hub-classification fixture run',
+        skipParityValidation: true,
+        skipIntegration: true,
+        skipNormalization: true,
+        outputPath: OUTPUT_8A,
+        hubTopologyOverride: hubTopologyOverride as never,
+      });
+      const report8aPath = join(OUTPUT_8A, '_pipeline_report.json');
+      if (run8a.success !== true || !existsSync(report8aPath)) {
+        fail('Test 8a', `expected a successful run with a report, got success=${run8a?.success}, errors=${JSON.stringify(run8a?.errors ?? [])}`);
+      } else {
+        const report8a = JSON.parse(readFileSync(report8aPath, 'utf8')) as {
+          hubTopologyClassification?: {
+            mode: string;
+            requiredDeclarations: Array<{ asset: string; domain: string; minimum_version: string; hub_variant: string }>;
+            unregistered: Array<{ asset: string }>;
+            refused: unknown[];
+            skipped: Array<{ asset: string; hub_variant: string }>;
+          };
+        };
+        const cls = report8a.hubTopologyClassification;
+        const decl = cls?.requiredDeclarations?.find(d => d.asset === HUB_DOCTRINE_BAIT);
+        const skipped = cls?.skipped?.find(s => s.asset === HUB_DOCTRINE_BAIT);
+        const unreg = cls?.unregistered?.find(u => u.asset === UNREGISTERED_BAIT);
+        const doctrineCopied = existsSync(join(OUTPUT_8A, 'skills', HUB_DOCTRINE_BAIT, 'SKILL.md'));
+        const unregisteredCopied = existsSync(join(OUTPUT_8A, 'skills', UNREGISTERED_BAIT, 'SKILL.md'));
+        const md = readFileSync(join(OUTPUT_8A, '_pipeline_report.md'), 'utf8');
+        if (!cls) {
+          fail('Test 8a', '_pipeline_report.json carries no hubTopologyClassification section');
+        } else if (!decl || decl.domain !== 'co-develop' || decl.minimum_version !== '1.2.0' || decl.hub_variant !== 'co-develop') {
+          fail('Test 8a', `expected a consume declaration {domain: co-develop, minimum_version: 1.2.0} for ${HUB_DOCTRINE_BAIT}, got: ${JSON.stringify(cls?.requiredDeclarations)}`);
+        } else if (!skipped || skipped.hub_variant !== 'co-develop') {
+          fail('Test 8a', `expected a skip verdict for ${HUB_DOCTRINE_BAIT}, got: ${JSON.stringify(cls?.skipped)}`);
+        } else if (!unreg) {
+          fail('Test 8a', `expected an unregistered report line for ${UNREGISTERED_BAIT}, got: ${JSON.stringify(cls?.unregistered)}`);
+        } else if (doctrineCopied) {
+          fail('Test 8a', `hub-doctrine asset ${HUB_DOCTRINE_BAIT} was COPIED into the promoted template — design §6.1 says NOT copied`);
+        } else if (!unregisteredCopied) {
+          fail('Test 8a', `unregistered asset ${UNREGISTERED_BAIT} missing from output — unregistered assets copy as today`);
+        } else if (!md.includes('consumes declaration required') || !md.includes(HUB_DOCTRINE_BAIT)) {
+          fail('Test 8a', '_pipeline_report.md lacks the consumes-declaration-required line for the doctrine bait');
+        } else if (cls.refused.length !== 0) {
+          fail('Test 8a', `unexpected refusal verdicts: ${JSON.stringify(cls.refused)}`);
+        } else {
+          pass('Test 8a PASSED: foreign hub-doctrine asset skipped + consumes declaration flagged; unregistered asset copied + reported (design §6.1)');
+        }
+      }
+
+      // 8b: the L3 now carries a variant-identity asset owned by co-design —
+      // the run refuses with a clear error (identity is never absorbed).
+      const OUTPUT_8B = `${PIPELINE_OUTPUT_PATH}-hub8b`;
+      writeFileSync(
+        join(agentsDir, `${IDENTITY_BAIT}.md`),
+        [
+          '---',
+          `name: ${IDENTITY_BAIT}`,
+          'capabilities: [communication, task-management, documentation, knowledge-sharing]',
+          '---',
+          '',
+          `# ${IDENTITY_BAIT}`,
+          '',
+          'Disposable fixture agent — variant-identity refusal bait, not a real agent.',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+      const run8b = await executeL3ToVariantPipeline({
+        l3ProjectPath: L3_FIXTURE_PATH,
+        variantName: 'co-e2etest',
+        variantType: 'collaboration',
+        variantDescription: 'Test 8b identity-refusal fixture run',
+        skipParityValidation: true,
+        skipIntegration: true,
+        skipNormalization: true,
+        outputPath: OUTPUT_8B,
+        hubTopologyOverride: hubTopologyOverride as never,
+      });
+      const refusal8b = run8b.errors.find(e => e.phase === '3.9-hub-classification');
+      if (
+        run8b.success !== false ||
+        !refusal8b ||
+        !refusal8b.error.includes(IDENTITY_BAIT) ||
+        !refusal8b.error.includes('co-design') ||
+        !refusal8b.error.includes('variant-identity')
+      ) {
+        fail('Test 8b', `expected a 3.9-hub-classification refusal naming ${IDENTITY_BAIT} + co-design, got: success=${run8b?.success}, errors=${JSON.stringify(run8b?.errors ?? [])}`);
+      } else if (existsSync(join(OUTPUT_8B, 'agents', `${IDENTITY_BAIT}.md`))) {
+        fail('Test 8b', 'refused run left the identity asset in the output tree');
+      } else {
+        pass('Test 8b PASSED: foreign variant-identity asset refuses the promotion run with a clear error (design §6.1)');
+      }
+    } catch (e) { fail('Test 8', String(e)); }
   }
 
   // ── Test 7: project-to-variant.ts overlay guard (subprocess) ─────────────

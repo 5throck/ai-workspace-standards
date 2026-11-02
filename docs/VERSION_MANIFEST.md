@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-01T23:10:35.922Z
+**Generated**: 2026-11-02T01:17:10.678Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -147,7 +147,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
-| l3-to-variant-pipeline.ts | 1.21.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
+| l3-to-variant-pipeline.ts | 1.22.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.20.1 | scripts/lifecycle-sync-audit.ts | js-yaml |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
@@ -156,7 +156,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.39.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.40.0 | scripts/new-project.ts | N/A |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
@@ -195,7 +195,7 @@
 | team-builder.ts | 1.5.0 | scripts/team-builder.ts | N/A |
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l3-to-variant-promotion.ts | 1.6.0 | scripts/test-l3-to-variant-promotion.ts | bun |
+| test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.10.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.9.0 | scripts/test-runner.ts | fs, os, path |

@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261102-002
+kind: manual
+title: Hub-and-spoke adoption gate review (ADR-0103)
+priority: normal
+not_before: '2027-01-31'
+status: backlog
+attempts: 0
+created_at: '2026-11-02T09:52:40.651+09:00'
+history:
+  - at: '2026-11-02T09:52:40.651+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
+description: >-
+  Adoption gate for the hub-and-spoke delegation channel, per ADR-0103
+  (docs/adr/0103-hub-delegation-channel-n2-exception.md) and the hub-and-spoke
+  consolidation design §8.2 kill criterion 4
+  (docs/designs/2026-11-01-hub-consolidation-design.md). Review procedure:
+  count delegation tickets over the trailing 90 days. If the channel averaged
+  fewer than 3 delegation tickets per month, the adoption metric fails: on
+  that miss ADR-0103 auto-expires, the delegation kanban alias layer and the
+  upstream MCP extension are retired, and the channel reverts to
+  upstream-request routing per the ADR-0103 decision record. If the metric is
+  met, record the evidence in the ticket resolution and keep the exception
+  alive pending the N2-exception ADR ratification review (design §11.3).

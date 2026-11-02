@@ -2,8 +2,8 @@
 
 - **Spec ID**: 2026-11-01-hub-consolidation-design
 - **Date**: 2026-11-01
-- **Status**: Approved (v7 execution baseline, user-approved 2026-11-01) — pending implementation
-- **Registry status**: `planned` (docs/specs/registry.json) — implementation lands in Phases 1–3a; the design and its spec entry land now (Phase 0), so ADR-0074's Design Gate is satisfied before any Phase 1 landing
+- **Status**: Implemented (v7 execution baseline, user-approved 2026-11-01; final phase 1.5 — pipeline conformance — landed 2026-11-02)
+- **Registry status**: `implemented` (docs/specs/registry.json) — Phases 0–1.5 and 3a landed (PR #1814 and predecessors); Phase 3b remains demand-gated per ADR-0092 Addendum 17 (ticket T-20261102-003)
 - **Owner**: architect (PM Gateway dispatch, after user approval of the v7 baseline)
 - **Source evidence**: memory/meeting-2026-10-31-hub-spoke-consolidation-review.md (12-item synthesis + user decisions), memory/meeting-2026-11-01-v6-baseline-review.md (verified code anchors, all synthesis items 1–11, preserved red-team dissent)
 - **Sibling design**: docs/designs/2026-11-01-coworkspace-attach-mode-design.md (attach-mode service change, ADR-0092 Addendum 17 — designed in the same Phase 0)
