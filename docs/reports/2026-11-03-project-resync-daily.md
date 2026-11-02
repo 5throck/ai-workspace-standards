@@ -60,10 +60,46 @@ co-price **clean**; co-newbiz **3 findings** — `tests/unit/{api,login-form-har
 
 Report-only landing (judgment report + tickets T-20261103-005/-006/-007). Design Gate: standing specs ADR-0089 + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design (+ 2026-10-31-changelog-normalize-design for the wave's heal path).
 
-## Steps 4–5 — v0.28.0 wave (delivers 0.24.0→0.28.0 to the laggards)
+## Steps 4–5 — v0.28.0 wave: **COMPLETE — 16/16 delivered and merged**
 
-Appended after the wave. Note: the pause sessions already delivered 0.26.0/0.27.0 fleet-wide (fail-then-heal worked — including the 6 projects halted on 10-31); tonight's wave brings all tracked projects to 0.28.0.
+The pause sessions had already delivered 0.26.0/0.27.0 fleet-wide (including the 6 projects halted on 10-31 — the fail-then-heal changelog path worked). Tonight's wave brought **every tracked project to 0.28.0**:
 
-## Step 6 — Final state
+| Project | PR | Result |
+|---|---|---|
+| co-safety (canary) | #229 | real CI clean → MERGED, audit green |
+| co-abap #237 · co-consult #113 · co-deck #201 · co-design #78 · co-export #65 · co-game #67 · co-hr #22 · co-learning #36 · co-news #21 · co-security #100 · co-work #33 · co-architect #390 · co-price #177 · co-develop #203 | billing-wall exception per merge (0-step) | ALL MERGED, post-merge audits green |
+| co-newbiz | #799 | billing-wall exception → MERGED, audit green |
 
-Appended after the wave.
+In-wave fixes (all gate-satisfying, none a bypass): co-safety's delivered-but-untracked `delegate-to-hub` skill mirrors staged so the manifest generator's git-tracked filter saw it (94→95 skills); co-newbiz's SKILLS.md `delegate-to-hub` row moved to its sorted position (the delivery appended it at the tail; the lifecycle audit wants sorted order) + `library.generated.ts` projection refreshed via its sync script; co-design's DEC-20261026-02 dangling `knowledge_refs` entry (memory/2026-10-26.md deleted) dropped; co-game's 2 CONFLICT dispositions (agents/test-runner.md + agents/architect.md equal-version drift on project-evolved content) recorded as the by-design human-path rows — content restored per the recorded disposition, no runner --disposition passed.
+
+Notable: **co-price's ci.yml MIGRATION_UNSAFE resolved itself** — the 0.28.0 template's CI triggers converged with the project's migrated form; #177 landed clean (no `--accept-ci-perm-diff` needed).
+
+## Step 6 — Final state (09:20 KST)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| co-abap | main, synced | 0 | 0 | **0.28.0** |
+| co-architect | main, synced | 0 | 0 | **0.28.0** |
+| co-consult | main, synced | 0 | 0 | **0.28.0** |
+| co-deck | main, synced | 0 | 0 | **0.28.0** |
+| co-design | main, synced | 0 | **#77** (live session: agent-model-gate delivery, Phase 4) | **0.28.0** |
+| co-develop | main, synced | 0 | 0 | **0.28.0** |
+| co-export | main, synced | 0 | 0 | **0.28.0** |
+| co-game | main, synced | 0 | 0 | **0.28.0** |
+| co-hr | main, synced | 0 | 0 | **0.28.0** |
+| co-learning | main, synced | 0 | 0 | **0.28.0** |
+| co-newbiz | main, synced | 0 | 0 | **0.28.0** |
+| co-news | main, synced | 0 | 0 | **0.28.0** |
+| co-price | main, synced | 1 (docker-compose.override.yml — deliberately untracked, self-declared local-ops) | 0 | **0.28.0** |
+| co-safety | main, synced | 0 | 0 | **0.28.0** |
+| co-security | main, synced | 0 | 0 | **0.28.0** |
+| co-work | main, synced | 0 | **#32** (live session: agent-model-gate delivery branch) | **0.28.0** |
+| co-newbiz-pr-disable-register | (gitignored local L3) | 0 | — | 0.26.0 (local sandbox) |
+
+**16/16 tracked projects at 0.28.0, all post-merge audits green.** Open PRs: 2, both live-session work (#77 co-design, #32 co-work — agent-model-gate Phase 4 delivery; session-owned).
+
+**Tombstone guard (corrected `-m` invocation, all 16)**: zero reappearances fleet-wide. Prune: open-PR heads checked before pruning; merged branches pruned local+remote.
+
+## Verdict
+
+**Fleet fully converged at 0.28.0** — the 0.23.x laggards are gone (the pause sessions' waves + tonight's wave completed the 0.24.0→0.28.0 ladder). 15 wave PRs merged (14 billing-wall, 1 real-CI canary). 3 in-wave gate fixes recorded. 2 live-session PRs remain intentionally open. No gates bypassed; the changelog-normalize migration path (T-20261031-003) proved itself across the previously-blocked projects.
