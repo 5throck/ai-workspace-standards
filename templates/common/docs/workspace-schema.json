@@ -1083,11 +1083,11 @@
           ],
           "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
           "canonical_path": "templates/co-develop/skills/code-review/SKILL.md",
-          "version": "1.0.1",
+          "version": "1.1.0",
           "consumers": [
             {
               "variant": "co-game",
-              "minimum_version": "1.0.1"
+              "minimum_version": "1.1.0"
             }
           ]
         },
@@ -1101,11 +1101,11 @@
           ],
           "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
           "canonical_path": "templates/co-develop/skills/refactoring/SKILL.md",
-          "version": "1.0.1",
+          "version": "1.1.0",
           "consumers": [
             {
               "variant": "co-game",
-              "minimum_version": "1.0.1"
+              "minimum_version": "1.1.0"
             }
           ]
         },
@@ -1119,11 +1119,11 @@
           ],
           "origin": "Projects/co-develop (hub project); canonical semantic-merged at L2 (batch D)",
           "canonical_path": "templates/co-develop/skills/test-driven-development/SKILL.md",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "consumers": [
             {
               "variant": "co-game",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.0"
             }
           ]
         },

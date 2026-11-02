@@ -4,11 +4,11 @@ description: >
   Implements software using Test-Driven Development (TDD) methodology with red-green-refactor
   cycle. Use when: developing new features, fixing bugs with tests, or ensuring code
   reliability through test-first approach.
-version: 1.0.0
+version: 1.1.0
 scope: co-game
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-11-02
 prerequisites: none
 relates_to:
   - skill: code-review

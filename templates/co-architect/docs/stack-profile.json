@@ -1,0 +1,60 @@
+{
+  "name": "co-architect",
+  "description": "Architecture-firm collaboration variant (co-design consumer) — five-team workspace (design, research, project, engineering, platform-engineering) over six named workflows, producing design deliverables, CAD drawings (ZWCAD DWG), SketchUp models, and client-ready reports.",
+  "stack": [
+    "bun",
+    "typescript",
+    "markdown",
+    "zwcad",
+    "sketchup"
+  ],
+  "commands": {
+    "build": "bun scripts/dev-sync.ts",
+    "test": "bun scripts/test-runner.ts integration",
+    "lint": "bun scripts/audit.ts"
+  },
+  "artifacts": [
+    {
+      "path": "docs/drafts/",
+      "kind": "document",
+      "description": "Work-in-progress design documents, proposals, and CAD working files."
+    },
+    {
+      "path": "docs/designs/",
+      "kind": "document",
+      "description": "Design specifications, spatial patterns, and design-delivery handoff packages."
+    },
+    {
+      "path": "docs/reports/",
+      "kind": "report",
+      "description": "Final client-ready deliverables: feasibility reports, permit DWG packages, render/elevation presentations."
+    }
+  ],
+  "handoffs": [
+    {
+      "from": "pm",
+      "to": "project-coordinator",
+      "artifact": "docs/drafts/",
+      "trigger": "Workflow selected (one of 6); coordination dispatch"
+    },
+    {
+      "from": "project-coordinator",
+      "to": "design-lead",
+      "artifact": "docs/designs/",
+      "trigger": "Intake analysis approved; design direction dispatch"
+    },
+    {
+      "from": "design-lead",
+      "to": "sketchup-modeler",
+      "artifact": "docs/drafts/",
+      "trigger": "Design frozen at Phase 2 gate; 3D artifact build"
+    },
+    {
+      "from": "drafting-architect",
+      "to": "zwcad-drafter",
+      "artifact": "docs/reports/",
+      "trigger": "Permit drawing specs and detail setup complete; DWG production"
+    }
+  ],
+  "notes": "Hub consumer (variant.json hub.role=consumer, consumes co-design >= 1.0.0) — consumes the design-doctrine hub assets owned by co-design. CAD deliverables run through the skills registered in variant.json (cad-server-manager, zwcad-ai-drawing, cad-space-recognition, cad-svg-preview, generate-room-elevation) over MCP servers resolved via the root package.json dependency tree. Engineering Team starts only after the Phase 2 gate (design-delivery workflow)."
+}

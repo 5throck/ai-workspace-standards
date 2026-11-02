@@ -5980,7 +5980,7 @@
       "scope": "co-develop",
       "capability": "swe-code-review",
       "content_hash": "ff7a3bd5a5db8752",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-develop/skills/code-review/SKILL.md"
       ]
@@ -5993,7 +5993,7 @@
       "scope": "co-develop",
       "capability": "refactoring",
       "content_hash": "f9c59c97a00f25c5",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-develop/skills/refactoring/SKILL.md"
       ]
@@ -6019,7 +6019,7 @@
       "scope": "co-develop",
       "capability": "test-driven-development",
       "content_hash": "ced5b4713cb781eb",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-develop/skills/test-driven-development/SKILL.md"
       ]
@@ -6188,7 +6188,7 @@
       "scope": "co-game",
       "capability": "game-code-review",
       "content_hash": "84a8c5b0308263c0",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-game/skills/code-review/SKILL.md"
       ]
@@ -6201,7 +6201,7 @@
       "scope": "co-game",
       "capability": "refactoring",
       "content_hash": "ac456953a305a80b",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-game/skills/refactoring/SKILL.md"
       ]
@@ -6227,7 +6227,7 @@
       "scope": "co-game",
       "capability": "test-driven-development",
       "content_hash": "31bdc8f895a4e8ae",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-game/skills/test-driven-development/SKILL.md"
       ]
