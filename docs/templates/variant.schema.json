@@ -285,7 +285,7 @@
         },
         "domain": {
           "type": "string",
-          "enum": ["co-develop", "co-design", "co-security"],
+          "enum": ["co-develop", "co-design", "co-security", "co-work"],
           "description": "Hub role only: the domain this variant serves as hub (mirrors hub_topology.domains)"
         },
         "arbitrates": {
@@ -306,7 +306,7 @@
             "properties": {
               "domain": {
                 "type": "string",
-                "enum": ["co-develop", "co-design", "co-security"],
+                "enum": ["co-develop", "co-design", "co-security", "co-work"],
                 "description": "The hub domain consumed (mirrors hub_topology.domains)"
               },
               "minimum_version": {

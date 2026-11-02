@@ -2,8 +2,9 @@
 name: content-writer
 role: Research-to-documentation transformation and communications specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-05-28"
+version: "1.1.1"
+last_updated: "2026-11-02"
+formal_name: Content Writer & Documentation Specialist
 tier: medium
 color: cyan
 description: >
@@ -20,7 +21,7 @@ required_skills: [documentation-writing]
 lifecycle:
   phase: production
   created: "2026-05-28"
-  last_updated: "2026-05-28"
+  last_updated: "2026-11-02"
   governance: docs/lifecycle/agents/content-writer.md
 ---
 

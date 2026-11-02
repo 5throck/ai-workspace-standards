@@ -1,0 +1,41 @@
+schemaVersion: 1
+id: U-20261102-002
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-02T02:26:53.594+09:00
+history:
+  - at: 2026-11-02T02:26:53.594+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.26.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The hub-promotion batches (workspace commits b90c28e50 batch B, 65a3e3451 batch D, spec 2026-11-01-hub-consolidation-design Phase 1) changed skill BODIES in the variant templates without bumping their frontmatter `version:`. Affected: templates/co-develop/skills/{code-review (1.0.1), refactoring (1.0.1), test-driven-development (1.0.0)} gained "Spoke Derivation Note" sections; templates/co-design/skills/service-design (1.1.0) gained `l2_propagate: true`, refreshed last_reviewed, and removed a stray `",` EOF line. Because upgrade-project''s skills/ SYNC_IF_NEWER pass is version-gated, equal-version body deltas are classified DRIFT_PRESERVE (ADR-0085 D3) and silently withheld from delivered projects — the Phase 2 hub upgrade wave cannot deliver them through the tool. Observed in dry-run: `⚠️ DRIFT (preserved) skills/code-review/SKILL.md (same-version content differs — left untouched)`. Remedy: bump the four skills'' frontmatter versions in the templates (e.g. +0.0.1) so the version-gated delivery fires, then re-run the hub wave; projects whose copies were hand-ported to template bytes in the interim will see a no-op. Local workaround applied during the wave: byte-copy of the four template files into Projects/co-develop and Projects/co-design after verifying each diff was 100% template-side (no project-authored content in the delta regions).'
+  affected_paths:
+    - skills/code-review/SKILL.md
+    - skills/refactoring/SKILL.md
+    - skills/test-driven-development/SKILL.md
+    - skills/service-design/SKILL.md
+  identity_source: self_declared
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:in_last_delivery skills/code-review/SKILL.md=false
+    - info:in_last_delivery skills/refactoring/SKILL.md=false
+    - info:in_last_delivery skills/test-driven-development/SKILL.md=false
+    - info:in_last_delivery skills/service-design/SKILL.md=false
+  dedupe_key: eccac28a22fabcaa4d1f243c5fa1e5ad8ecd9636758b2bf6ef2149b58cf52451
+  duplicates:
+    - project: co-develop
+      at: 2026-11-02T02:26:53.594+09:00

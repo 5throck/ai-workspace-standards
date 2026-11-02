@@ -77,6 +77,11 @@
   },
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "core",
+  "hub": {
+    "role": "hub",
+    "domain": "co-work",
+    "hub_remote": "https://github.com/5throck/co-work.git"
+  },
   "process_manifest": {
     "stages_file": null,
     "raci_file": null,

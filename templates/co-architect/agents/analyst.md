@@ -2,8 +2,9 @@
 name: analyst
 role: Systematic investigation, data synthesis, and evidence gathering specialist
 status: active
-version: "1.0.0"
-last_updated: "2026-09-09"
+version: "1.1.1"
+last_updated: "2026-11-02"
+formal_name: Research & Data Analyst
 capabilities:
   - knowledge-sharing
 tier: medium
@@ -22,7 +23,7 @@ required_skills: [research-analysis]
 lifecycle:
   phase: production
   created: "2026-05-28"
-  last_updated: "2026-09-09"
+  last_updated: "2026-11-02"
   governance: docs/lifecycle/agents/analyst.md
 ---
 

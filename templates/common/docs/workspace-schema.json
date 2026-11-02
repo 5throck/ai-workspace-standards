@@ -1243,13 +1243,13 @@
           "verticals": [
             "co-architect"
           ],
-          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave; co-architect copy carries a local capabilities frontmatter tag (knowledge-sharing) absent from the canonical",
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a v1.1.1 re-derivation of this canonical (project-name substitution; absorbed 2026-11-02); co-architect copy carries a local capabilities frontmatter tag (knowledge-sharing) absent from the canonical",
           "canonical_path": "templates/co-work/agents/analyst.md",
           "version": "1.1.1",
           "consumers": [
             {
               "variant": "co-architect",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.1"
             }
           ]
         },
@@ -1261,13 +1261,13 @@
           "verticals": [
             "co-architect"
           ],
-          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a v1.1.1 re-derivation of this canonical (project-name substitution; absorbed 2026-11-02)",
           "canonical_path": "templates/co-work/agents/content-writer.md",
           "version": "1.1.1",
           "consumers": [
             {
               "variant": "co-architect",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.1"
             }
           ]
         },
@@ -1279,13 +1279,13 @@
           "verticals": [
             "co-architect"
           ],
-          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a v1.1.1 re-derivation of this canonical (project-name substitution; absorbed 2026-11-02)",
           "canonical_path": "templates/co-work/agents/ms365-expert.md",
           "version": "1.1.1",
           "consumers": [
             {
               "variant": "co-architect",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.1"
             }
           ]
         },
@@ -1297,13 +1297,13 @@
           "verticals": [
             "co-architect"
           ],
-          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name; adds the connector-schemas Automation-Contracts citation duty); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave",
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name; adds the connector-schemas Automation-Contracts citation duty); the co-architect copy is a v1.1.1 re-derivation of this canonical (project-name substitution; absorbed 2026-11-02)",
           "canonical_path": "templates/co-work/agents/project-coordinator.md",
           "version": "1.1.1",
           "consumers": [
             {
               "variant": "co-architect",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.1"
             }
           ]
         },
@@ -1315,13 +1315,13 @@
           "verticals": [
             "co-architect"
           ],
-          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a stale v1.0.0 derivation (project-name substitution only) to be absorbed at the next promotion wave; co-architect copy carries a local capabilities frontmatter tag (documentation) absent from the canonical",
+          "origin": "Projects/co-work (identity domain; canonical owner of this doctrine — richer side of the pair); registry-only hub-doctrine declaration (batch E⑤) — co-work copy is the superset canonical (v1.1.1, 2026-10-28 doctrine refresh with formal_name); the co-architect copy is a v1.1.1 re-derivation of this canonical (project-name substitution; absorbed 2026-11-02); co-architect copy carries a local capabilities frontmatter tag (documentation) absent from the canonical",
           "canonical_path": "templates/co-work/agents/technical-writer.md",
           "version": "1.1.1",
           "consumers": [
             {
               "variant": "co-architect",
-              "minimum_version": "1.0.0"
+              "minimum_version": "1.1.1"
             }
           ]
         },

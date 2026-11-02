@@ -217,6 +217,10 @@
       {
         "domain": "co-design",
         "minimum_version": "1.0.0"
+      },
+      {
+        "domain": "co-work",
+        "minimum_version": "1.1.1"
       }
     ]
   }

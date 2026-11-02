@@ -10,8 +10,16 @@
 
 This is the operating runbook for the hub-and-spoke delegation channel: how a spoke project's PM hands a hard problem to its domain hub, and how the hub PM works the resulting queue.
 
-- **Who files**: spoke PMs (any variant project) facing a hard problem in the dev, design, or security domain that is not spoke-resolvable.
-- **Who triages**: hub PMs of the three hubs — `co-develop` (dev), `co-design` (design), `co-security` (security).
+- **Who files**: spoke PMs (any variant project) facing a hard problem in a hub domain (see table below) that is not spoke-resolvable.
+- **Who triages**: hub PMs of the four hubs:
+
+| Hub | Domain doctrine owned |
+|---|---|
+| `co-develop` | dev |
+| `co-design` | design |
+| `co-security` | security |
+| `co-work` | general business-collaboration (the analyst/content-writer/ms365-expert/project-coordinator/technical-writer agent family); consumers declare consumption per the `hub_topology` registry in `docs/workspace-schema.json` |
+
 - **What a hub is**: a delivery responsibility, not an authority. The spoke PM owns the spoke project; the hub PM owns domain service quality; final adjudication of any hub-spoke conflict stays with the workspace-root PM.
 
 This guide is a runbook — commands and rules only. The doctrine lives elsewhere:
@@ -33,7 +41,7 @@ Condensed from the `delegate-to-hub` skill. Follow the steps in order; any STOP 
 
 ### 2.1 Pre-checks (hub existence and identity)
 
-1. Resolve the hub repo locally: `Projects/co-<domain>` for the problem's domain (`co-develop`, `co-design`, `co-security`).
+1. Resolve the hub repo locally: `Projects/co-<domain>` for the problem's domain (`co-develop`, `co-design`, `co-security`, `co-work`).
 2. **Hub clone missing → STOP.** Phase 3.5 hub bootstrap is not yet active in this workspace. Report to the user with the registry `hub_remote` value (look up the domain's hub in the `hub_topology` registry of `docs/workspace-schema.json`) so the user can decide on a manual clone. Never auto-clone, never scaffold in this path.
 3. Validate the hub's identity files: `variant.json` exists and parses, and `template-version.txt` exists and names a known template version. Either missing or malformed → **STOP** and report; an unidentifiable hub is not a filing target.
 

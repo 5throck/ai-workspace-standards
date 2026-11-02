@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: U-20261102-001
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-02T02:26:44.842+09:00
+history:
+  - at: 2026-11-02T02:26:44.842+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.26.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Phase 2 step 0 (workspace PR #1805, "boundary protocol and SEV escalation into common agents zone") updated only templates/CHANGELOG.md, docs/VERSION_MANIFEST.md, docs/variant-roadmap-2026-q3-q4.md and memory/2026-11-02.md. The claimed "Hub-and-Spoke Topology" section (hubs as service providers, escalation-via-delegation channel, SEV1-SEV3 incident tiers, workspace-root PM final adjudication) does not exist in templates/common/AGENTS.md — `git log --all -S "Hub-and-Spoke Topology" -- templates/common/AGENTS.md` returns nothing; grep finds the string only in templates/CHANGELOG.md. Expected: every variant''s AGENTS.md receives the section through the COMMON-AGENTS marker-inject domain during the Phase 2 hub upgrade wave; observed: the 0.27.0 upgrade merges the COMMON-AGENTS block into Projects/co-develop/AGENTS.md but the block carries no boundary-protocol content, so the hub receives nothing. Remedy: author the section into the COMMON-AGENTS zone of templates/common/AGENTS.md (L0->L1->L2 propagation), then re-run the hub upgrade wave. Repro: from workspace root, `grep -rn "Hub-and-Spoke" templates/ | grep -v CHANGELOG` (empty) and `bun scripts/upgrade-project.ts Projects/co-develop --dry-run --prune-removed` (merge delivers no such section).'
+  affected_paths:
+    - AGENTS.md
+  identity_source: self_declared
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:in_last_delivery AGENTS.md=true
+  dedupe_key: 8e6bd1d3191d9977282fa7db4a1ce8fff561e08ce18f02a81395e810ac14578d
+  duplicates:
+    - project: co-develop
+      at: 2026-11-02T02:26:44.842+09:00
