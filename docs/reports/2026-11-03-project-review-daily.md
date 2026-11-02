@@ -52,3 +52,24 @@ Unit suite: 3257 pass / 0 fail (236 files; on a tree carrying the live session's
 ## Mode note
 
 Phase I green → Phase 1b and Phase II run in **normal mode**.
+
+---
+
+# Phase 1b — Per-variant project-review (templates/co-*)
+
+## Batteries (15/15 PASS)
+
+The variant fleet is now **15** (co-architect joined via hub-spoke E5; standalone-track is co-newbiz only). All 15: `validate-variant-claims.ts --template <v>` exit 0 (check u green everywhere, including the new co-architect template); `validate-variant-readiness.ts --variant <v>` — 7 "All checks passed", 8 "READY (warnings only)" (known `country-config-default` cosmetic class). **0 FAIL.**
+
+## Scope triage
+
+All 15 variants carry window changes (the hub-spoke common wave: boundary protocol +4 lines per AGENTS.md, hub_topology rows, absorbed agents for co-architect). **The deltas were deep-covered by the Phase I slots** (4-slot pairing): slot D verified the boundary-protocol propagation byte-identical across root/L1/all 15 variants with links resolving; slot A verified the co-architect template's structural completeness + its consumer rows (with the F-2 reconciliation gap ticketed); slot A item 4 verified the co-work hub schema. No new per-variant findings beyond the Phase I consolidated table.
+
+## Findings
+
+| ID | Class | Finding | Evidence | Routing |
+|---|---|---|---|---|
+| F-1 (carried) | **Major** | Preflight checker/registry drift + co-architect `architect` reconciliation gap — fresh scaffolds of 3/15 variants fail; upgrades unaffected | T-20261103-002 | high |
+| (new, Info) | Info | co-architect battery: readiness READY-with-warnings — `country_config` declaration expected on a fresh beta template; cosmetic | validate-variant-readiness output | recorded |
+
+**No new findings on main. Phase 1b ticket spend: 0. Daily shared cap: 3/10 used.**
