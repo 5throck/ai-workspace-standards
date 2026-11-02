@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: skill-graph-analytics
 - **Status**: active
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Created**: 2026-09-22
-- **Last Updated**: 2026-10-08
+- **Last Updated**: 2026-11-03
 
 ## Description
 Weekly fleet analytics over the per-project skill-graph projections: consolidate root + Projects/<co-x> graphs into a dated snapshot, triage skill convergence (consolidation/promotion candidates), delivery drift (root skills missing from projects), and root-graph orphans (4-way cross-check: definition+registry+mirror+reference). Triage only — tickets, no auto-modification.
@@ -25,6 +25,7 @@ Weekly fleet analytics over the per-project skill-graph projections: consolidate
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-03 | production | production | v1.3.0 (T-20261101-004): cadence-note repair — the stale "02:30 ticket runner" trigger reference replaced with the live automation roster (01:30 fleet-review+resync, 04:00 governance-ticket; neither carries the weekly consolidation), the weekly triage marked manual-run pending the revival-home adjudication (recommended: fleet-runner Friday full override), rot-proofed by naming the roster rather than a runner time | pm |
 | 2026-09-22 | - | production | New recurring work type (weekly fleet skill-graph analytics); design implemented and verified | pm |
 
 ## Acceptance Criteria

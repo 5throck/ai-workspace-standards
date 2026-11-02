@@ -8559,8 +8559,8 @@
       "name": "skill-graph-analytics",
       "scope": "root",
       "capability": "skill-graph-analytics",
-      "content_hash": "62423ea15ad0c1b8",
-      "version": "1.2.0",
+      "content_hash": "d0e43dc6687a18f0",
+      "version": "1.3.0",
       "mirrors": [
         "skills/skill-graph-analytics/SKILL.md",
         ".claude/skills/skill-graph-analytics/SKILL.md",
