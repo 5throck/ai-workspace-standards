@@ -6,11 +6,11 @@ description: >
   constructive feedback, or ensuring code standards compliance. Software-engineering
   variant capability: composes with refactoring and follows test-driven-development.
 capability: swe-code-review
-version: 1.0.1
+version: 1.1.0
 scope: co-develop
 status: active
 owner: pm
-last_reviewed: 2026-10-08
+last_reviewed: 2026-11-02
 prerequisites: none
 relates_to:
   - skill: refactoring

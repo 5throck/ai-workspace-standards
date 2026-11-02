@@ -6,11 +6,11 @@ description: >
   constructive feedback, or ensuring code standards compliance. Game-development
   variant capability: follows arcade-physics work and test-driven-development.
 capability: game-code-review
-version: 1.0.1
+version: 1.1.0
 scope: co-game
 status: active
 owner: pm
-last_reviewed: 2026-10-08
+last_reviewed: 2026-11-02
 prerequisites: none
 relates_to:
   - skill: arcade-physics

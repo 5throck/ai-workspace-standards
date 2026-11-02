@@ -62,10 +62,10 @@
 | `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with) | — | — |
 | `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
 | `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.2 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows), root/service-design (follows) | — | — |
-| `co-develop/code-review` | variant:co-develop | 1.0.1 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
-| `co-develop/refactoring` | variant:co-develop | 1.0.1 | co-develop/code-writer | co-develop/phase 4 | co-develop/code-review (composes_with) | — | — |
+| `co-develop/code-review` | variant:co-develop | 1.1.0 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
+| `co-develop/refactoring` | variant:co-develop | 1.1.0 | co-develop/code-writer | co-develop/phase 4 | co-develop/code-review (composes_with) | — | — |
 | `co-develop/swe-solve` | variant:co-develop | 1.1.1 | co-abap/pm | co-develop/phase 4 | — | — | — |
-| `co-develop/test-driven-development` | variant:co-develop | 1.0.0 | co-develop/test-runner | co-develop/phase 4 | co-develop/code-review (follows) | — | — |
+| `co-develop/test-driven-development` | variant:co-develop | 1.1.0 | co-develop/test-runner | co-develop/phase 4 | co-develop/code-review (follows) | — | — |
 | `co-export/customs-duty-drawback-workflow` | variant:co-export | 1.0.0 | co-export/customs-duty-drawback-specialist | co-export/phase 3, co-export/phase 4 | co-export/landed-cost-calculation (follows) | — | — |
 | `co-export/export-control-screening` | variant:co-export | 1.0.0 | co-export/export-control-compliance-specialist | co-export/phase 1, co-export/phase 2 | co-export/fta-origin-determination (composes_with), co-export/halal-certification-workflow (composes_with), co-export/hs-classification-workflow (composes_with), co-export/hs-classification-workflow (follows), co-export/market-entry-strategy (composes_with), co-export/roo-qualification-worksheet (composes_with) | — | — |
 | `co-export/foreign-regulation-monitoring` | variant:co-export | 1.0.0 | co-export/foreign-regulatory-intelligence-analyst | co-export/phase 1 | co-export/export-control-screening (follows), co-export/fta-origin-determination (composes_with), co-export/halal-certification-workflow (composes_with), co-export/hs-classification-workflow (composes_with) | — | — |
@@ -78,10 +78,10 @@
 | `co-export/roo-qualification-worksheet` | variant:co-export | 1.0.0 | co-export/fta-origin-analyst | co-export/phase 1, co-export/phase 2 | co-export/halal-certification-workflow (follows) | — | — |
 | `co-export/trade-documentation-checklist` | variant:co-export | 1.0.0 | co-export/trade-documentation-specialist | co-export/phase 3 | co-export/logistics-coordination (follows) | — | — |
 | `co-game/arcade-physics` | variant:co-game | 1.0.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 4 | co-game/code-review (composes_with), co-game/sound-synth (follows), co-game/test-driven-development (composes_with), root/documentation-writing (composes_with), root/research-analysis (composes_with) | — | — |
-| `co-game/code-review` | variant:co-game | 1.0.1 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-game/arcade-physics (follows), co-game/test-driven-development (follows) | — | — |
-| `co-game/refactoring` | variant:co-game | 1.0.1 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-game/code-review (composes_with) | — | — |
+| `co-game/code-review` | variant:co-game | 1.1.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-game/arcade-physics (follows), co-game/test-driven-development (follows) | — | — |
+| `co-game/refactoring` | variant:co-game | 1.1.0 | co-game/game-debugger, co-game/game-developer | co-game/phase 3, co-game/phase 5 | co-game/code-review (composes_with) | — | — |
 | `co-game/sound-synth` | variant:co-game | 1.0.0 | co-game/sound-designer | co-game/phase 3, co-game/phase 4 | root/documentation-writing (follows) | — | — |
-| `co-game/test-driven-development` | variant:co-game | 1.0.0 | co-game/game-debugger, co-game/game-developer, co-game/test-runner | co-game/phase 3, co-game/phase 5 | co-game/code-review (follows) | — | — |
+| `co-game/test-driven-development` | variant:co-game | 1.1.0 | co-game/game-debugger, co-game/game-developer, co-game/test-runner | co-game/phase 3, co-game/phase 5 | co-game/code-review (follows) | — | — |
 | `co-hr/career-path-succession-planning` | variant:co-hr | 1.0.0 | co-hr/career-succession-consultant | co-hr/phase 2 | co-hr/compensation-benchmarking (composes_with), co-hr/learning-curriculum-design (composes_with), co-hr/org-design-framework (composes_with), co-hr/org-readiness-assessment (composes_with), co-hr/stakeholder-alignment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/compensation-benchmarking` | variant:co-hr | 1.0.0 | co-hr/compensation-benefits-analyst | co-hr/phase 2 | co-hr/consulting-report-writing (composes_with), co-hr/hr-metrics-analysis (follows), co-hr/learning-curriculum-design (follows), co-hr/org-design-framework (composes_with), co-hr/org-readiness-assessment (composes_with), co-hr/performance-system-design (composes_with), co-hr/stakeholder-alignment (composes_with) | — | — |
 | `co-hr/competency-modeling` | variant:co-hr | 1.0.0 | co-hr/career-succession-consultant, co-hr/learning-development-specialist, co-hr/performance-management-consultant | co-hr/phase 2 | — | — | — |
@@ -823,13 +823,13 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.4.4 #4514fc0c |
 | `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
-| `refactoring` | skill | version-drift | co-develop@1.0.1 #f9c59c97; co-game@1.0.1 #ac456953 |
+| `refactoring` | skill | version-drift | co-develop@1.1.0 #f9c59c97; co-game@1.1.0 #ac456953 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
 | `standup-synthesizer` | skill | version-drift | co-architect@1.0.0 #75a2f0bb; co-work@1.0.1 #283abcb3; root@1.0.0 #c74ddbdf |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #cf494776; root@1.8.0 #83013972 |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
-| `test-driven-development` | skill | version-drift | co-develop@1.0.0 #ced5b471; co-game@1.0.0 #31bdc8f8 |
+| `test-driven-development` | skill | version-drift | co-develop@1.1.0 #ced5b471; co-game@1.1.0 #31bdc8f8 |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
 | `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
