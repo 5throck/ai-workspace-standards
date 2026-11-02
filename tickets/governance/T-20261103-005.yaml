@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261103-005
+kind: manual
+title: >-
+  learning (deferred-extraction, pollination): extend
+  docs/patterns/scheduled-jobs-runtime-pattern.md to v1.1 with co-newbiz P7's
+  operator-control layer — (1) run-now as enqueue-only with still-queued-request
+  reuse + the static import-scan unit test pinning the no-in-process-execution
+  boundary (app/web-next/app/api/admin/schedule-jobs/[jobKey]/run/route.ts:23,
+  tests/unit/schedule-jobs-api.test.ts:522); (2) health semantics: 180s
+  heartbeat rule, timeout-derived overdue, 3-strike failure window
+  (health/route.ts); (3) registered-handler-key-only create boundary with shared
+  validator. Beyond the ticketed v1.0.0 (T-20261030-004 covers P1 runtime only —
+  run-now/health/overdue absent, grep-verified). Same promotion-deferral trigger
+  as v1.0.0. Extracted by Step 2f 2026-11-03 (co-newbiz #795 reviewed, nothing
+  to extract — cron picker is project UX)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-03T07:37:42.682+09:00'
+history:
+  - at: '2026-11-03T07:37:42.682+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

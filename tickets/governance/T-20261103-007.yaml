@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261103-007
+kind: manual
+title: >-
+  URGENT secrets-gate finding (hard-fail, consolidates with pending
+  T-20261030-005 structural decision): gitleaks flagged 3x generic-api-key in
+  Projects/co-newbiz window range — tests/unit/api.test.ts x2 +
+  login-form-hardening.test.ts (commit 3c8d983d, auth-flow test fixtures; FP
+  assessment: prose/fixture identifiers in login/password lifecycle tests, not
+  credentials). This is the 4th-5th occurrence of the co-newbiz test-fixture
+  class (T-20261028-009, T-20261029-006, T-20261030-005 all adjudicated
+  per-file; T-20261030-005's own note said 'if a 5th lands, propose a structural
+  fix rather than another entry' — it landed). Adjudication request UNCHANGED
+  from T-20261030-005: pick the systemic policy (bounded test-fixture path+shape
+  allowlist rule / fixture value renaming convention / per-file exact values)
+  and apply it once; this occurrence rides the same decision
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-03T07:38:19.700+09:00'
+history:
+  - at: '2026-11-03T07:38:19.700+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
