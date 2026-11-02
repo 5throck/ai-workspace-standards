@@ -7,7 +7,7 @@
  */
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { readKeyEntries } from "./config";
+import { keyEntryExpired, readKeyEntries } from "./config";
 
 // GET /login must stay keyless: with keys configured, a fresh browser has no session yet,
 // so gating the sign-in page makes sign-in itself impossible. The page holds no data and
@@ -41,27 +41,36 @@ export function isAuthEnabled(cfg: { apiKeys: string[] }): boolean {
   return cfg.apiKeys.length > 0;
 }
 
-/** True when the presented credential matches any configured key. */
+/** True when the presented credential matches any configured key. ADR-0092 Addendum 17
+ * (Decision 6): file entries whose `expires` timestamp has passed no longer validate — the
+ * auth gate 401s them (revocation-by-expiry). Env keys never expire. */
 export function credentialValid(cfg: { apiKeys: string[] }, presented: string | null): boolean {
   if (presented === null || presented === "") return false;
-  return cfg.apiKeys.some((key) => constantTimeEquals(key, presented));
+  const expired = new Set(
+    readKeyEntries((cfg as { apiKeysFile?: string }).apiKeysFile)
+      .filter((e) => keyEntryExpired(e))
+      .map((e) => e.key),
+  );
+  return cfg.apiKeys.some((key) => !expired.has(key) && constantTimeEquals(key, presented));
 }
 
-/** P9: a key entry may carry a principal label (`key:label`) — file style only. The label is
- * a trusted identity for ownership filtering; keys without a label map to the label `default`. */
-export function keyPrincipals(cfg: { apiKeys: string[]; apiKeysFile?: string }): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const key of cfg.apiKeys) map.set(key, "default");
-  for (const e of readKeyEntries(cfg.apiKeysFile)) map.set(e.key, e.label);
-  return map;
-}
-
-/** Principal for a presented credential (P9): the trusted label, or "anonymous" when auth is off. */
+/** Principal for a presented credential (P9): the trusted label — or, when the entry carries
+ * a `spoke-id` (Addendum 17 Decision 6), the spoke id, which scopes the key to one spoke and
+ * becomes the principal for attached-tenant ownership. Always gateway-derived from the
+ * verified key; "anonymous" when auth is off or the key is expired. An expired file entry
+ * also never resolves through the env-keys fallback below (the merged `apiKeys` list still
+ * contains it — a revoked key maps NO principal, Addendum 17 Decision 6). */
 export function principalFor(cfg: { apiKeys: string[]; apiKeysFile?: string }, presented: string | null): string {
   if (presented === null || presented === "") return "anonymous";
-  const map = keyPrincipals(cfg);
-  for (const [key, label] of map) {
-    if (constantTimeEquals(key, presented)) return label;
+  const entries = readKeyEntries(cfg.apiKeysFile);
+  const expired = new Set(entries.filter((e) => keyEntryExpired(e)).map((e) => e.key));
+  for (const e of entries) {
+    if (keyEntryExpired(e)) continue;
+    if (constantTimeEquals(e.key, presented)) return e.spokeId || e.label;
+  }
+  for (const key of cfg.apiKeys) {
+    if (expired.has(key)) continue;
+    if (constantTimeEquals(key, presented)) return "default";
   }
   return "anonymous";
 }

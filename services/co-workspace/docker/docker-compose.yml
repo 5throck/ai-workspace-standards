@@ -126,6 +126,14 @@ services:
       CO_WORKSPACE_HERMES_AUTH_DIR: ${CO_WORKSPACE_HERMES_AUTH_DIR:-/seed/shared}
       # host path of the shared store — sibling containers mount THIS (resolved on the host)
       CO_WORKSPACE_HERMES_AUTH_DIR_HOST: ${CO_WORKSPACE_HERMES_AUTH_DIR_HOST:-${CO_WORKSPACE_HERMES_SEED_HOME:-${CO_WORKSPACE_DATA_DIR_HOST}/seed}/shared}
+      # ADR-0092 Addendum 17 attach mode: WORKSPACE_DIR_HOST doubles as the hub ticket-queue
+      # bind root (attach bind sources must resolve on the HOST). The per-hub attach cap
+      # (default 2; "0" = off; the serialized-lock pilot posture sets 1) and the low-limit
+      # PER-SESSION provider key pool (one key stamped per attach session; empty = the
+      # deployment CO_WORKSPACE_LLM_API_KEY applies per the Addendum 9 posture).
+      CO_WORKSPACE_WORKSPACE_DIR_HOST: ${CO_WORKSPACE_WORKSPACE_DIR_HOST:-}
+      CO_WORKSPACE_ATTACH_HUB_MAX_SESSIONS: ${CO_WORKSPACE_ATTACH_HUB_MAX_SESSIONS:-2}
+      CO_WORKSPACE_ATTACH_LLM_API_KEYS: ${CO_WORKSPACE_ATTACH_LLM_API_KEYS:-}
     volumes:
       - ${CO_WORKSPACE_DATA_DIR_HOST:?set to the absolute host path of the data dir}:/data
       # Workspace clone used for scaffolding. Default: the repo checkout three levels up.

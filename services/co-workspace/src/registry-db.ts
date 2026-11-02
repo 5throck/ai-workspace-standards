@@ -13,7 +13,7 @@
 
 import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { genId } from "./util";
 import type { TenantRecord } from "./tenant";
 
@@ -122,6 +122,14 @@ export class TenantRegistry {
     name?: string;
     description?: string;
     ownerPrincipal?: string;
+    /** ADR-0092 Addendum 17 attach-mode: `kind: "attached"` requires `projectDir` (the
+     * resolved existing checkout under Projects/co-*) and skips the storage `project` leaf —
+     * the per-session scratch is created there by the attach provisioning branch instead. */
+    kind?: "attached";
+    attachHub?: string;
+    attachProviderKey?: string;
+    attachToolsets?: string;
+    projectDir?: string;
   }): TenantRecord {
     const tenantId = genId("gw");
     // Storage layout (user request): tenants live under <dataDir>/storage/<principal>/<name>/
@@ -130,13 +138,16 @@ export class TenantRegistry {
     const principal = init.ownerPrincipal ?? "shared";
     const folder = init.name || tenantId;
     const storageRoot = join(this.dataDir, "storage", principal, folder);
+    const attached = init.kind === "attached";
     const rec: TenantRecord = {
       tenantId,
       key: init.key,
       variant: init.variant,
       status: "provisioning",
       createdAt: new Date().toISOString(),
-      projectDir: join(storageRoot, "project"),
+      // Attach: the existing checkout IS the project dir (no relocate); homes + the scratch
+      // stay under gateway storage so detach can drop them without touching the hub tree.
+      projectDir: attached ? resolve(init.projectDir!) : join(storageRoot, "project"),
       hermesHome: join(storageRoot, "hermes-home"),
       description: init.description,
       name: init.name,
@@ -144,6 +155,14 @@ export class TenantRegistry {
       sessions: 0,
       inputTokens: 0,
       outputTokens: 0,
+      ...(attached
+        ? {
+            kind: "attached" as const,
+            attachHub: resolve(init.attachHub ?? init.projectDir!),
+            ...(init.attachProviderKey ? { attachProviderKey: init.attachProviderKey } : {}),
+            ...(init.attachToolsets ? { attachToolsets: init.attachToolsets } : {}),
+          }
+        : {}),
     };
     this.upsert(rec);
     return rec;

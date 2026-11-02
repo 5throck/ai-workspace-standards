@@ -1,16 +1,67 @@
-import { readdirSync, rmSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import type { Dirent } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
-import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
+import { GatewayConfig, maskApiKey, resolveLlmProviderKey, resolveLlmProviderName } from "./config";
 import { scaffoldProject } from "./scaffold";
-import { chownTree, recordProgress, runtimeHomeDir, seedHermesHome, sweepTenantStragglers, TenantRecord } from "./tenant";
+import { chownTree, recordProgress, runtimeHomeDir, seedHermesHome, sweepTenantStragglers, tenantFolderOf, TenantRecord } from "./tenant";
+import { attachScratchDir, ATTACH_KIND } from "./attach";
 import { dirSize, moveDir } from "./util";
 import { HttpError } from "./http";
 import type { GatewayState } from "./state";
 import { callerPrincipal, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
 
+/** Addendum 17 Decision 2: attach provisioning — NO scaffold, NO relocate. The existing
+ * checkout IS `rec.projectDir`; the gateway creates only its own artifacts (the per-session
+ * scratch + the seeded runtime homes, all under the tenant storage folder) so detach can drop
+ * them without ever touching the hub tree. The docker chown deliberately SKIPS rec.projectDir
+ * (the hub tree must stay hub-owned). */
+async function provisionAttachedTenant(state: GatewayState, rec: TenantRecord): Promise<void> {
+  try {
+    recordProgress(rec, "attaching", `attaching ${basename(rec.attachHub ?? rec.projectDir)} (no scaffold — Addendum 17)…`);
+    state.registry.upsert(rec);
+    recordProgress(rec, "seeding", "seeding session scratch + runtime homes…");
+    state.registry.upsert(rec);
+    mkdirSync(attachScratchDir(rec), { recursive: true, mode: 0o700 });
+    const key = rec.attachProviderKey ?? state.cfg.llmApiKey;
+    seedHermesHome(
+      rec,
+      state.cfg.hermesSeedHome,
+      state.cfg.hermesModel,
+      resolveLlmProviderKey(state.cfg) || rec.attachProviderKey
+        ? {
+            name: resolveLlmProviderName(state.cfg),
+            baseUrl: state.cfg.llmBaseUrl,
+            apiKey: key,
+          }
+        : undefined,
+      resolveLlmProviderKey(state.cfg) || rec.attachProviderKey ? state.cfg.hermesReasoningEffort ?? "low" : undefined,
+    );
+    if (state.cfg.isolation === "docker") {
+      if (state.cfg.dataVolume) {
+        // Volume mode (T-20260930-038): the broker-internal helper creates the project (=
+        // scratch) + home leaves on the volume subpath and chowns them; the hub tree is not
+        // in the volume. (Attach creation refuses volume mode upstream — this stays for
+        // legacy rows created before that guard.)
+        await brokerVolumeControl("init", tenantSubpathBase(state.cfg, rec));
+      } else {
+        chownTree(attachScratchDir(rec), 10000, 10000);
+        chownTree(rec.hermesHome, 10000, 10000);
+        chownTree(runtimeHomeDir(rec, "claude"), 10000, 10000);
+        chownTree(runtimeHomeDir(rec, "codex"), 10000, 10000);
+      }
+    }
+    rec.status = "ready";
+    recordProgress(rec, "ready", "attach session ready");
+  } catch (err) {
+    rec.status = "failed";
+    rec.error = String((err as Error)?.message ?? err);
+  }
+  state.registry.upsert(rec);
+}
+
 /** Scaffold, relocate, seed the tenant Hermes home; persists terminal status either way. */
 export async function provisionTenant(state: GatewayState, rec: TenantRecord): Promise<void> {
+  if (rec.kind === ATTACH_KIND) return provisionAttachedTenant(state, rec);
   let relocated = false;
   try {
     recordProgress(rec, "scaffolding", `scaffolding ${rec.variant} team…`);
@@ -121,7 +172,11 @@ export function sweepOrphanedStorage(state: GatewayState): { removed: string[]; 
     return { removed: [], error: String((err as Error)?.message ?? err) };
   }
   const kept = new Set<string>();
-  for (const rec of state.registry.list()) kept.add(resolve(rec.projectDir, ".."));
+  // tenantFolderOf (hermesHome's parent) — identical to projectDir's parent for scaffolded
+  // tenants, and the correct folder for ATTACHED tenants whose projectDir lives in the hub
+  // workspace (Addendum 17: attached rows are registry-tracked; their storage folder with the
+  // scratch + homes must survive the sweep).
+  for (const rec of state.registry.list()) kept.add(tenantFolderOf(rec));
   const removed: string[] = [];
   const errors: string[] = [];
   for (const principal of principals) {
@@ -204,9 +259,11 @@ export async function cachedDirSize(tenantId: string, projectDir: string, hermes
 }
 
 /** T-20260930-038 volume mode: `storage/<P>/<N>` for a tenant record - the subpath inside
- * the data volume, matching what hostSidePath's bind sources express on the host. */
+ * the data volume, matching what hostSidePath's bind sources express on the host. Derived
+ * from tenantFolderOf(rec) — correct for scaffolded AND attached tenants alike (an attached
+ * record's projectDir lives in the hub workspace, outside the storage root). */
 export function tenantSubpathBase(cfg: GatewayConfig, rec: TenantRecord): string {
-  const rel = relative(resolve(cfg.dataDir, "storage"), resolve(rec.projectDir, ".."));
+  const rel = relative(resolve(cfg.dataDir, "storage"), tenantFolderOf(rec));
   if (!rel || rel.startsWith("..")) {
     throw new Error(`tenant folder ${rec.projectDir} is not under ${cfg.dataDir}/storage`);
   }
@@ -307,14 +364,63 @@ export async function boundedWait(p: Promise<unknown> | undefined, ms = DELETE_W
  * (T-20260929-007). Order matters: validate paths first (a tampered record throws with the
  * registry row, turn history and files untouched, so a corrected delete can be retried), then
  * quiesce the tenant, remove files, and only then drop the registry/history state.
+ *
+ * Addendum 17 Decision 3: for ATTACHED tenants this is a DETACH — the gateway removes only
+ * its own artifacts (the tenant storage folder: scratch + runtime homes) and NEVER recurses
+ * into the attached checkout (`rec.projectDir` is not a rm target here; a full-delete request
+ * is refused upstream with a typed 409). Fail-safe in the same order as the fresh path.
  */
 export async function deleteTenantData(state: GatewayState, rec: TenantRecord, actor: string): Promise<void> {
   const tenantId = rec.tenantId;
   // T-20260928-003: a tampered/legacy record must never point any rmSync outside the tenant
   // storage root (projectDir at the storage root would otherwise wipe <storage> itself).
-  const tenantFolder = resolve(rec.projectDir, "..");
+  // tenantFolderOf (hermesHome's parent) is the guard's anchor: for attached records it is
+  // the ONLY storage-side folder, and a tampered hermesHome outside storage still refuses.
+  const tenantFolder = tenantFolderOf(rec);
   const storageRoot = resolve(state.cfg.dataDir, "storage");
-  if (!tenantFolder.startsWith(storageRoot + sep) || !resolve(rec.hermesHome).startsWith(tenantFolder + sep)) {
+  const guardFailure = !tenantFolder.startsWith(storageRoot + sep) || !resolve(rec.hermesHome).startsWith(tenantFolder + sep);
+  if (rec.kind === ATTACH_KIND) {
+    if (guardFailure) {
+      throw new HttpError(500, `refusing to detach: tenant folder ${tenantFolder} escapes ${storageRoot}`);
+    }
+    state.activeProcs.get(tenantId)?.kill();
+    await boundedWait(state.provisioning.get(tenantId));
+    await boundedWait(state.chatLocks.get(tenantId));
+    if (state.cfg.isolation === "docker" && state.cfg.dataVolume) {
+      try {
+        await brokerVolumeControl("rm", tenantSubpathBase(state.cfg, rec));
+      } catch (err) {
+        rec.status = "failed";
+        rec.error = String((err as Error)?.message ?? err);
+        state.registry.upsert(rec);
+        throw new HttpError(502, `tenant data removal failed: ${rec.error}`);
+      }
+    } else {
+      // Scratch + homes live only in the tenant storage folder — removing the folder never
+      // touches the attached checkout. The project's git state is untouched: merge-back is
+      // the hub PM's act, not the gateway's.
+      rmSync(tenantFolder, { recursive: true, force: true });
+      sweepTenantStragglers(dirname(tenantFolder), tenantId, basename(tenantFolder));
+    }
+    if (rec.attachProviderKey) {
+      // Decision 7: the per-session key is released at session end. Gateway-side release is
+      // automatic; provider-side revocation is the operator's act — the audit line names the
+      // masked key so the operator knows which credential to kill.
+      state.audit.record(
+        actor,
+        "attach.providerKey.released",
+        tenantId,
+        `per-session provider key released — revoke at the provider (${maskApiKey(rec.attachProviderKey)})`,
+      );
+    }
+    state.turns.deleteTenant(tenantId);
+    state.registry.delete(tenantId);
+    state.chatLocks.delete(tenantId);
+    state.activeProcs.delete(tenantId);
+    state.audit.record(actor, "tenant.detach", tenantId, `attached ${rec.attachHub ? basename(rec.attachHub) : rec.projectDir}`);
+    return;
+  }
+  if (guardFailure) {
     throw new HttpError(500, `refusing to delete: tenant folder ${tenantFolder} escapes ${storageRoot}`);
   }
   state.activeProcs.get(tenantId)?.kill();

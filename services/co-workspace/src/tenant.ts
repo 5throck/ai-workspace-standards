@@ -5,7 +5,7 @@
  */
 
 import { chmodSync, chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { basename, join, dirname, resolve } from "node:path";
 import { genId, readJson, writeJson } from "./util";
 
 /**
@@ -59,6 +59,29 @@ export interface TenantRecord {
   ownerPrincipal?: string;
   /** Provisioning progress trail (P8), newest last, capped at 12 entries. */
   progress?: TenantProgressEntry[];
+  /** ADR-0092 Addendum 17 attach-mode: this tenant is ATTACHED to an existing checkout under
+   * `<workspaceDir>/Projects/co-*` — `projectDir` points at the hub/spoke working tree, which
+   * the gateway NEVER modifies or deletes (DELETE = detach, never a recursive rm of the
+   * project). */
+  kind?: "attached";
+  /** Resolved hub dir the session is bound to: the per-hub cap, UNAVAILABLE cancellation, and
+   * mount-policy key (Addendum 17 Decisions 5/9/10). Equals projectDir for attach tenants. */
+  attachHub?: string;
+  /** Per-session low-limit provider key allocated from CO_WORKSPACE_ATTACH_LLM_API_KEYS
+   * (Decision 7). Secret: stamped into the tenant config.yaml and held here — never echoed
+   * by publicTenant or any API surface. */
+  attachProviderKey?: string;
+  /** Session-scoped toolset (`-t`, §3.5 toolset scoping): the delegation task's toolset, not
+   * the full default set. */
+  attachToolsets?: string;
+}
+
+/** Gateway-owned tenant folder on disk (`storage/<P>/<N>`): `hermesHome`'s parent — identical
+ * to `projectDir`'s parent for scaffolded tenants, and the ONLY correct derivation for
+ * attached tenants (whose projectDir lives in the hub workspace, outside gateway storage).
+ * Every rm/volume-subpath/sweep computation must go through this, never projectDir's parent. */
+export function tenantFolderOf(rec: TenantRecord): string {
+  return resolve(rec.hermesHome, "..");
 }
 
 export interface TenantProgressEntry {
@@ -213,7 +236,8 @@ export function seedHermesHome(
   );
 }
 
-/** Public shape for API responses — internal paths stay server-side. */
+/** Public shape for API responses — internal paths stay server-side (the attach hub is named
+ * by its basename only; attachProviderKey is never echoed). */
 export function publicTenant(rec: TenantRecord) {
   return {
     tenantId: rec.tenantId,
@@ -228,5 +252,6 @@ export function publicTenant(rec: TenantRecord) {
     usage: { inputTokens: rec.inputTokens, outputTokens: rec.outputTokens },
     progress: rec.progress,
     error: rec.error,
+    ...(rec.kind === "attached" ? { kind: rec.kind, hub: rec.attachHub ? basename(rec.attachHub) : undefined } : {}),
   };
 }

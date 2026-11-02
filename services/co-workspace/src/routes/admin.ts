@@ -4,6 +4,7 @@ import { sessionTokenFromCookie } from "../users";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { callerPrincipal, requireAdminReauth, requireAdminReady, requireTenantAccess } from "../access";
 import { deleteTenantData, cachedDirSize } from "../lifecycle";
+import { attachScratchDir } from "../attach";
 import {
   applyTurnOverrides,
   maskApiKey,
@@ -27,7 +28,13 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
       const principal = t.ownerPrincipal ?? "anonymous";
       const entry = perUser.get(principal) ?? { principal, tenantCount: 0, diskBytes: 0, turns: 0 };
       entry.tenantCount += 1;
-      entry.diskBytes += await cachedDirSize(t.tenantId, t.projectDir, t.hermesHome);
+      // Addendum 17: attached tenants' gateway disk usage is the per-session scratch (the hub
+      // checkout is not gateway storage and is never walked by the gateway's report).
+      entry.diskBytes += await cachedDirSize(
+        t.tenantId,
+        t.kind === "attached" ? attachScratchDir(t) : t.projectDir,
+        t.hermesHome,
+      );
       entry.turns += turnCounts.get(t.tenantId) ?? 0;
       perUser.set(principal, entry);
     }
