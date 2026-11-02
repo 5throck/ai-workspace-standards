@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-03, CI determinism fix — deterministic clock seam): the probe
+//          now consumes the documented HUB_BOOTSTRAP_NOW seam (same contract as
+//          hub-bootstrap.ts nowIso()): when set, TTL-lease expiry is evaluated
+//          at THAT instant instead of the real wall clock. Before, probeHub
+//          called effectiveOperationalState(state) with the default Date.now(),
+//          so the unit fixture's pinned lease (declared at NOW=12:00Z, expires
+//          20:00Z) went stale the moment the machine's real clock passed
+//          2026-11-02T20:00Z — CI (and any local run after that instant) read
+//          the live fixture lease as EXPIRED and flipped 4 MATCH-expected tests
+//          to DIVERGENT. The test harness already passed HUB_BOOTSTRAP_NOW for
+//          exactly this purpose; the probe just never read it. Lease math
+//          itself was already TZ-safe (absolute ms, Z-qualified ISO); the
+//          report date stays the explicit-KST kstDate() derivation
+//          (scripts/helpers/kst-time.ts) — no host-local time anywhere.
 // v1.2.0 (2026-11-02, Phase 4 remediation follow-up — drill false-positive
 //          classes): the hooks_integrity quick-check now compares through the
 //          SHARED lib/hook-integrity.ts normalization (single derivation with
@@ -47,8 +61,10 @@
 //   bun scripts/hub-probe.ts --all          # every registry hub
 //   bun scripts/hub-probe.ts co-develop …   # specific hubs
 //
-// Test seam: HUB_PROBE_ROOT=<dir> (falls back to HUB_BOOTSTRAP_ROOT) redirects
+// Test seams: HUB_PROBE_ROOT=<dir> (falls back to HUB_BOOTSTRAP_ROOT) redirects
 // the workspace root — Projects/, docs/workspace-schema.json, docs/reports/.
+// HUB_BOOTSTRAP_NOW=<iso> pins the deterministic clock for TTL-lease evaluation
+// (v1.3.0; same contract as hub-bootstrap.ts — unset/unparseable → Date.now()).
 // @l2-propagate: false
 
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync, accessSync, constants } from 'node:fs';
@@ -86,6 +102,18 @@ interface ProbeResult {
 function fail(msg: string): never {
   console.error(`❌ ${msg}`);
   process.exit(1);
+}
+
+/** The probe's clock for TTL-lease evaluation (v1.3.0): HUB_BOOTSTRAP_NOW=<iso>
+ * pins it to a fixed instant (test/CI determinism — a fixture lease seeded
+ * relative to NOW must be judged at NOW, not at the runner's wall clock);
+ * unset or unparseable → real Date.now(). Absolute ms only — never a
+ * host-local calendar parse. */
+function probeNowMs(): number {
+  const iso = process.env.HUB_BOOTSTRAP_NOW;
+  if (!iso) return Date.now();
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? Date.now() : ms;
 }
 
 /** The probe's hub roster for --all: hubs[] rows by name, plus every distinct
@@ -250,7 +278,9 @@ function probeHub(hub: string): ProbeResult {
   }
 
   // Divergence rule 2 — stale declaration (§3.3/§3.5: beyond TTL reads UNAVAILABLE).
-  const effective = effectiveOperationalState(state);
+  // v1.3.0: evaluated at the pinned HUB_BOOTSTRAP_NOW instant when set — the
+  // wall-clock default made verdicts depend on when the machine happened to run.
+  const effective = effectiveOperationalState(state, probeNowMs());
   if (state.operational_state !== null && effective === 'UNAVAILABLE' && state.operational_state !== 'UNAVAILABLE') {
     divergences.push(`declared: operational_state ${state.operational_state} stands on an EXPIRED TTL lease (until ${state.ttl_lease?.expires_at ?? '?'}) — consumers read UNAVAILABLE until re-attest`);
   }

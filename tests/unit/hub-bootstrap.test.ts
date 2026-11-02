@@ -1,4 +1,20 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-03, pairs with hub-probe.ts v1.3.0 — CI determinism fix):
+//          (a) the 4 probe MATCH tests were wall-clock bombs: the fixture lease
+//          is seeded relative to the pinned NOW='2026-11-02T12:00:00.000Z'
+//          (expires 20:00Z) and runProbe already passed HUB_BOOTSTRAP_NOW for
+//          exactly this purpose — but hub-probe.ts never read the seam and
+//          judged the lease against the real Date.now(), so every run after
+//          2026-11-02T20:00Z (CI ubuntu first hit it; the "TZ" symptom was
+//          actually run-time-of-day) read the live fixture lease as EXPIRED and
+//          flipped MATCH→DIVERGENT. The probe now consumes the seam (hub-probe
+//          v1.3.0), making those tests deterministic forever. (b) TZ-INDEPENDENCE
+//          REGRESSION — a new probe test runs the same fixture under child TZ=UTC
+//          and TZ=Asia/Seoul and asserts byte-identical reports + identical
+//          MATCH verdicts, so any host-local calendar parse (naive Date string,
+//          toLocaleDateString, local-midnight lease math) reintroduced into the
+//          probe path fails loudly instead of only on CI. runProbe grew an
+//          extraEnv parameter for it; existing call sites unchanged.
 // v1.5.0 (2026-11-02, pairs with hub-bootstrap.ts v1.6.0 — Phase 4 remediation
 //          follow-up): SANCTIONED-SCRUB TOLERANCE — the drill's second
 //          false-positive class (gateguard-fact-force.ts "one-comment diff")
@@ -589,9 +605,9 @@ function seedProbeHub(root: string, hooksContent: Record<string, string>): strin
 }
 
 describe('hub-probe (read-only, design §3.5)', () => {
-  function runProbe(args: string[], root: string) {
+  function runProbe(args: string[], root: string, extraEnv: Record<string, string> = {}) {
     const proc = spawnSync(process.execPath, [PROBE_CLI, ...args], {
-      env: { ...process.env, HUB_PROBE_ROOT: root, HUB_BOOTSTRAP_NOW: NOW },
+      env: { ...process.env, HUB_PROBE_ROOT: root, HUB_BOOTSTRAP_NOW: NOW, ...extraEnv },
       encoding: 'utf-8',
       windowsHide: true,
     });
@@ -733,6 +749,33 @@ describe('hub-probe (read-only, design §3.5)', () => {
     expect(files).toHaveLength(4); // 3 newest fakes + today's
     expect(files.some(f => f.startsWith('2026-10-20'))).toBe(false); // oldest pruned
     expect(files.some(f => f.startsWith(kstDate()))).toBe(true); // today's survives
+  });
+
+  test('TZ-independence: identical verdicts under TZ=UTC and TZ=Asia/Seoul (probe v1.3.0 seam)', () => {
+    // The probe subprocess is pinned to NOW via HUB_BOOTSTRAP_NOW; this test
+    // additionally forces the CHILD's TZ so any host-local calendar parse
+    // (naive Date string, toLocaleDateString, local midnight arithmetic)
+    // reintroduced into the probe path diverges between the two runs. The
+    // lease validity is judged at the pinned instant (absolute ms) and the
+    // report date is the explicit-KST kstDate() derivation — so both runs
+    // must produce byte-identical verdicts and reports.
+    initStateFile(hubDir, 'co-probe', { actor: 'user', remote: 'r', sha: 'a'.repeat(40), at: NOW });
+    applyTransition(hubDir, 'co-probe', { kind: 'bootstrap', to: 'BOOTSTRAPPED', actor: 'hub-bootstrap', reason: 'clone', at: NOW });
+    applyTransition(hubDir, 'co-probe', { kind: 'operational', to: 'AVAILABLE', actor: 'hub-pm', reason: 'session start', at: NOW });
+
+    const utc = runProbe(['co-probe'], root, { TZ: 'UTC' });
+    expectExit(utc, 0, 'probe under TZ=UTC');
+    expect(utc.out).toMatch(/MATCH/);
+    const report = join(root, 'docs', 'reports', `${kstDate()}-hub-probe-co-probe.md`);
+    const utcText = readFileSync(report, 'utf-8');
+    rmSync(report); // independent second run — no chained-prior coupling between the two
+
+    const kst = runProbe(['co-probe'], root, { TZ: 'Asia/Seoul' });
+    expectExit(kst, 0, 'probe under TZ=Asia/Seoul');
+    expect(kst.out).toMatch(/MATCH/);
+    const kstText = readFileSync(report, 'utf-8');
+
+    expect(kstText).toBe(utcText); // byte-identical report — no host-TZ dependence
   });
 });
 
