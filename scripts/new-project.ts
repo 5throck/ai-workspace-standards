@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.39.0
+// @version 1.40.0
+// v1.40.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §6.2 — Phase 1.5 preflight): hub consumption preflight after the
+//          Variant Readiness Gate — (1) the template's variant.json hub.consumes
+//          rows resolve against the hub_topology registry with the shared leg-3
+//          logic (helpers/hub-topology.ts checkConsumerMinimumVersions);
+//          (2) an unregistered hub-doctrine duplication in the template FAILs
+//          (checkHubDoctrineDuplication — a copy that is neither the hub's own,
+//          nor common-contract stock, nor a declared consumer's stale-read copy
+//          per §7.4). Registry absent → vacuous skip (legacy checkout posture,
+//          same as the validate-templates hub legs). Additive: variants without
+//          a hub block and templates without foreign doctrine copies are
+//          unchanged.
 // v1.39.0 (2026-11-01, spec docs/designs/2026-10-31-graft-trail-migration-design.md
 //          R2.5 addendum — trigger met: L0 trail init complete, PR #1783): §7.7
 //          index build flips graft-first/bunx-fallback → plain `trail build`
@@ -562,6 +574,55 @@ if (existsSync(gateScript)) {
     if (import.meta.main) process.exit(1);
   } else {
     console.log(`✅ Variant '${variant}' passed the Variant Readiness Gate.`);
+  }
+}
+
+// ── Hub consumption preflight (v1.40.0 — design §6.2) ─────────────────────────
+// A variant being instantiated with a hub.consumes block must satisfy
+// minimum_version against the hub_topology registry, and the template must not
+// carry unregistered hub-doctrine duplication. Shared logic lives in
+// helpers/hub-topology.ts (one derivation — same legs validate-templates and
+// the promotion pipeline run).
+{
+  const { loadHubTopology, loadCommonContractNames, checkConsumerMinimumVersions, checkHubDoctrineDuplication } = await import('./helpers/hub-topology.ts');
+  const topoResult = loadHubTopology(workspaceRoot);
+  if (topoResult.ok && topoResult.topology) {
+    console.log(`\nRunning hub consumption preflight for variant '${variant}'...`);
+    const preflightFails: string[] = [];
+
+    // (1) consumes/minimum_version declarations resolve against the registry.
+    if (existsSync(variantJsonPath)) {
+      try {
+        const vj = JSON.parse(readFileSync(variantJsonPath, 'utf8')) as Record<string, unknown>;
+        const hub = vj['hub'];
+        if (hub && typeof hub === 'object' && !Array.isArray(hub)) {
+          const leg3 = checkConsumerMinimumVersions(topoResult.topology, [{ variant, hubBlock: hub as Record<string, unknown> }]);
+          preflightFails.push(...leg3.fails);
+          if (leg3.warns.length > 0) for (const w of leg3.warns) console.warn(`  ⚠️  ${w}`);
+        }
+      } catch {
+        // malformed variant.json — the readiness gate and schema checks own that failure
+      }
+    }
+
+    // (2) unregistered hub-doctrine duplication in the template → FAIL.
+    const dup = checkHubDoctrineDuplication(topoResult.topology, {
+      variantName: variant,
+      templateDir: templatesDir,
+      commonNames: loadCommonContractNames(workspaceRoot),
+    });
+    preflightFails.push(...dup.fails);
+
+    if (preflightFails.length > 0) {
+      for (const f of preflightFails) console.error(`  ❌ ${f}`);
+      console.error(`\n❌ Hub consumption preflight FAILED for variant '${variant}' (design §6.2).`);
+      console.error('   Declare consumption in the template variant.json hub.consumes or remove the unsanctioned copy.');
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.log(`✅ Hub consumption preflight passed for variant '${variant}'.`);
+    }
   }
 }
 

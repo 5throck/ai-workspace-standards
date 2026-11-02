@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261102-003
+kind: manual
+title: Phase 3b attach-mode demand trigger review (ADR-0092 Addendum 17)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-02T09:52:40.667+09:00'
+history:
+  - at: '2026-11-02T09:52:40.667+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
+description: >-
+  Demand-trigger review for Phase 3b, per ADR-0092 Addendum 17
+  (docs/adr/0092-workspace-agent-service-design.md, Addendum 17) and the
+  sibling attach-mode design docs/designs/2026-11-01-coworkspace-attach-mode-design.md.
+  Phase 3b starts ONLY on demand evidence: at least 3 delegation tickets per
+  month hitting a hub-PM turnaround bottleneck, OR an explicit user request
+  for interactive sessions. Evaluate at the next quarterly governance pass:
+  inspect the delegation ticket history since the pilot, record the evidence
+  in the resolution, and either open the Phase 3b implementation ticket or
+  close this review as not-triggered. This review does not touch the kanban
+  alias layer or the hub_topology registry, which are independent of the
+  attach-mode path (design §8.3 session-path kill scope).

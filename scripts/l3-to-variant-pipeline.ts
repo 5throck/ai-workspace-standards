@@ -11,9 +11,33 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.21.2
+ * @version 1.22.0
  * @phase: Complete pipeline orchestration
  *
+ * v1.22.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+ *          §6.1/§6.2 — Phase 1.5 pipeline conformance): hub-topology asset
+ *          CLASSIFICATION replaces blind copying. PHASE 3.9 (new) classifies
+ *          every L3-carried skill/agent the pipeline would copy against the
+ *          hub_topology registry (helpers/hub-topology.ts — one derivation,
+ *          no restatement): a hub-doctrine asset canonical to ANOTHER variant
+ *          is NOT copied and the report names the required consume declaration
+ *          (declare-first: the pipeline FLAGS "consumes declaration required:
+ *          {domain, minimum_version}" — it never edits registry rows; the
+ *          operator/PM applies it via variant.json before landing); a
+ *          variant-identity asset owned by another variant REFUSES the run
+ *          (identity is never absorbed); an unregistered asset copies as
+ *          today PLUS a classification-report line (design: "unregistered
+ *          assets → classification report to PM agenda, never silent").
+ *          DEFAULT is enforce — the design text is normative ("hub-doctrine
+ *          asset | NOT copied into other variants or the template") and the
+ *          Phase 1 preflight/FAIL legs already primed the ecosystem; the
+ *          explicit --hub-classify-report-only escape hatch downgrades the
+ *          classification AND the Phase 4.8 preflight to warn-only for
+ *          operator observation runs. PHASE 4.8 (new, design §6.2): promote
+ *          preflight on the GENERATED template — hub.consumes minimum_version
+ *          resolves against the registry (leg 3) and an unregistered
+ *          hub-doctrine duplication in the template FAILs. Programmatic
+ *          callers may inject hubTopologyOverride (E2E harness fixture runs).
  * v1.21.0 (2026-09-25, ADR-0088 W2): matchCountryScopedSkill recognizes
  *          .hermes/skills/ mirror paths — country-scoped skills can no longer
  *          leak into a promoted variant via the fifth platform mirror.
@@ -172,6 +196,13 @@ import { parsePmMd, extractVariantOverrides, resolveExtendsChain, writeContextMd
 import { splitIntoTopLevelSections, normalizeHeading } from './helpers/context-sections.ts';
 import type { VariantType } from './helpers/registries/variant-type-registry.ts';
 import { listVariantTypes, isVariantType, getVariantTypeDefinition } from './helpers/registries/variant-type-registry.ts';
+import {
+  loadHubTopology,
+  loadCommonContractNames,
+  checkConsumerMinimumVersions,
+  checkHubDoctrineDuplication,
+  type HubTopology,
+} from './helpers/hub-topology.ts';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -211,6 +242,22 @@ export interface PipelineConfig {
   version?: string;
   /** Variant lifecycle status (default: 'beta') */
   status?: string;
+  /**
+   * Hub-topology classification mode (v1.22.0, design §6.1/§6.2 Phase 1.5).
+   * 'enforce' (default) — a hub-doctrine asset canonical to ANOTHER variant is
+   * NOT copied (the report names the required consume declaration) and a
+   * foreign variant-identity asset refuses the run; 'report-only' downgrades
+   * both to warnings and the Phase 4.8 preflight to warn-only (operator
+   * observation runs; the design default is enforcement).
+   */
+  hubClassificationMode?: 'enforce' | 'report-only';
+  /**
+   * Registry injection for programmatic callers (E2E harness fixture runs).
+   * Default: loadHubTopology(cwd()) — the workspace-root docs/workspace-schema.json
+   * hub_topology section. An absent/malformed registry skips classification
+   * (legacy-checkout posture, same as the validate-templates legs).
+   */
+  hubTopologyOverride?: HubTopology;
 }
 
 export interface PipelineResult {
@@ -246,6 +293,179 @@ export function findMissingPurifiedSections(finalContent: string, mergedHeadings
   return mergedHeadings
     .map(heading => normalizeHeading(heading))
     .filter(heading => !presentHeadings.has(heading));
+}
+
+// ============================================================================
+// HUB-TOPOLOGY ASSET CLASSIFICATION (v1.22.0 — design §6.1, Phase 1.5)
+// ============================================================================
+
+export type HubAssetKind = 'skill' | 'agent';
+
+/**
+ * One classification verdict for one L3-carried asset the pipeline would copy
+ * into the promoted template (design §6.1):
+ * - copy: sanctioned (own-hub promotion, common-contract stock, registered
+ *   escalation-category content) — copied as today;
+ * - copy-unregistered: no hub_topology row — copied as today PLUS a
+ *   classification-report line to the PM agenda (never silent);
+ * - skip: hub-doctrine canonical to ANOTHER variant — NOT copied; the report
+ *   flags the consume declaration the operator/PM must apply via variant.json
+ *   (declare-first: the pipeline never edits registry rows);
+ * - refuse: variant-identity owned by another variant — identity assets are
+ *   never absorbed; the run fails.
+ */
+export type HubClassification =
+  | { action: 'copy'; asset: string; kind: HubAssetKind }
+  | { action: 'copy-unregistered'; asset: string; kind: HubAssetKind }
+  | {
+      action: 'skip';
+      asset: string;
+      kind: HubAssetKind;
+      domain: string;
+      hubVariant: string;
+      /** Registry entry version = the minimum_version the consume declaration must declare. */
+      minimumVersion: string;
+      /** True when the target variant is ALREADY a declared consumer (entry.consumers[]). */
+      declaredConsumer: boolean;
+    }
+  | { action: 'refuse'; asset: string; kind: HubAssetKind; hubVariant: string };
+
+export interface ClassifyAssetsArgs {
+  /** Assets the pipeline would copy: L3-carried skills + agent-roster names. */
+  assets: Array<{ name: string; kind: HubAssetKind }>;
+  /** hub_topology.entries rows (unknown[] straight from the registry). */
+  entries: unknown[];
+  /** Target variant name of this promotion run (e.g. 'co-e2etest'). */
+  targetVariant: string;
+  /** Common-contract asset names — L1-delivered stock is inheritance, not
+   * duplication (same exclusion as the duplicate legs; classification skips them). */
+  commonNames?: Set<string>;
+}
+
+/**
+ * Pure per-asset classification against the hub_topology registry. Exported so
+ * the unit suite pins the §6.1 semantics without running the pipeline. Reuses
+ * helpers/hub-topology.ts vocabulary — one derivation, no restatement.
+ */
+export function classifyAssetsForPromotion(args: ClassifyAssetsArgs): HubClassification[] {
+  const entries = (Array.isArray(args.entries) ? args.entries : []).filter(
+    (row): row is Record<string, unknown> => !!row && typeof row === 'object' && !Array.isArray(row),
+  );
+  const byAsset = new Map<string, Array<Record<string, unknown>>>();
+  for (const e of entries) {
+    const asset = typeof e['asset'] === 'string' ? e['asset'] : '';
+    if (!asset) continue;
+    const list = byAsset.get(asset);
+    if (list) list.push(e);
+    else byAsset.set(asset, [e]);
+  }
+
+  return args.assets.map(({ name, kind }): HubClassification => {
+    // Common-contract delivery is inheritance — never classified against the registry.
+    if (args.commonNames?.has(name)) return { action: 'copy', asset: name, kind };
+    const rows = byAsset.get(name) ?? [];
+    if (rows.length === 0) return { action: 'copy-unregistered', asset: name, kind };
+
+    // (b) variant-identity owned by another variant → refuse (identity is never absorbed).
+    // The owning variant itself matches one identity row and is sanctioned.
+    const identityRows = rows.filter(e => e['category'] === 'variant-identity');
+    if (identityRows.length > 0) {
+      const own = identityRows.find(e => e['hub_variant'] === args.targetVariant);
+      if (!own) {
+        return { action: 'refuse', asset: name, kind, hubVariant: String(identityRows[0]['hub_variant'] ?? '<unknown>') };
+      }
+      return { action: 'copy', asset: name, kind };
+    }
+
+    // (a) hub-doctrine canonical to another variant → skip + flag the consume declaration.
+    const doctrineRow = rows.find(e => e['category'] === 'hub-doctrine' && e['hub_variant'] !== args.targetVariant);
+    if (doctrineRow) {
+      const consumers = Array.isArray(doctrineRow['consumers']) ? doctrineRow['consumers'] : [];
+      const declaredConsumer = (consumers as unknown[]).some(
+        c => c && typeof c === 'object' && String((c as Record<string, unknown>)['variant'] ?? '') === args.targetVariant,
+      );
+      return {
+        action: 'skip',
+        asset: name,
+        kind,
+        domain: String(doctrineRow['domain'] ?? '<unknown>'),
+        hubVariant: String(doctrineRow['hub_variant'] ?? '<unknown>'),
+        minimumVersion: String(doctrineRow['version'] ?? '<unknown>'),
+        declaredConsumer,
+      };
+    }
+
+    // Registered non-doctrine/non-identity content (hub-escalation, incident-escalation)
+    // or doctrine owned by the target itself → copy.
+    return { action: 'copy', asset: name, kind };
+  });
+}
+
+export interface HubClassificationReport {
+  mode: 'enforce' | 'report-only';
+  /** Human-readable report lines (console + _pipeline_report.md). */
+  lines: string[];
+  /** Consume declarations the operator/PM must apply via variant.json before landing. */
+  requiredDeclarations: Array<{ asset: string; domain: string; minimum_version: string; hub_variant: string; declared_consumer: boolean }>;
+  unregistered: Array<{ asset: string; kind: HubAssetKind }>;
+  refused: Array<{ asset: string; kind: HubAssetKind; hub_variant: string }>;
+  skipped: Array<{ asset: string; kind: HubAssetKind; hub_variant: string }>;
+  verdicts: HubClassification[];
+}
+
+/**
+ * Format the classification verdicts into report lines + machine-usable
+ * groupings. Design §6.1: "unregistered assets → classification report to PM
+ * agenda (never silent)"; declare-first means the pipeline FLAGS "consumes
+ * declaration required: {domain, minimum_version}" rather than editing
+ * registry rows.
+ */
+export function formatHubClassificationReport(verdicts: HubClassification[], mode: 'enforce' | 'report-only'): HubClassificationReport {
+  const report: HubClassificationReport = {
+    mode,
+    lines: [],
+    requiredDeclarations: [],
+    unregistered: [],
+    refused: [],
+    skipped: [],
+    verdicts,
+  };
+  for (const v of verdicts) {
+    switch (v.action) {
+      case 'skip':
+        report.skipped.push({ asset: v.asset, kind: v.kind, hub_variant: v.hubVariant });
+        report.requiredDeclarations.push({
+          asset: v.asset,
+          domain: v.domain,
+          minimum_version: v.minimumVersion,
+          hub_variant: v.hubVariant,
+          declared_consumer: v.declaredConsumer,
+        });
+        report.lines.push(
+          `hub-doctrine skip: ${v.kind} '${v.asset}' is canonical to hub ${v.hubVariant} (domain ${v.domain}) — NOT copied. ` +
+            `consumes declaration required: {domain: ${v.domain}, minimum_version: ${v.minimumVersion}} ` +
+            `(apply via variant.json hub.consumes before landing; declaredConsumer: ${v.declaredConsumer ? 'yes' : 'no'})`,
+        );
+        break;
+      case 'copy-unregistered':
+        report.unregistered.push({ asset: v.asset, kind: v.kind });
+        report.lines.push(
+          `unregistered asset: ${v.kind} '${v.asset}' has no hub_topology entry — copied as today; ` +
+            `classification report to PM agenda for disposition (design §6.1: never silent)`,
+        );
+        break;
+      case 'refuse':
+        report.refused.push({ asset: v.asset, kind: v.kind, hub_variant: v.hubVariant });
+        report.lines.push(
+          `variant-identity refusal: ${v.kind} '${v.asset}' is variant-identity owned by ${v.hubVariant} — ` +
+            `identity assets are never absorbed (design §6.1)`,
+        );
+        break;
+      case 'copy':
+        break; // sanctioned copies are unremarkable
+    }
+  }
+  return report;
 }
 
 // ============================================================================
@@ -1016,6 +1236,76 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
   }
 
   // ============================================================================
+  // PHASE 3.9: HUB-TOPOLOGY ASSET CLASSIFICATION (v1.22.0 — design §6.1)
+  // ============================================================================
+  // Classifies every L3-carried skill/agent the pipeline would copy against the
+  // hub_topology registry BEFORE any generation write. Semantics (default
+  // 'enforce', the design-text default): hub-doctrine canonical to ANOTHER
+  // variant → NOT copied + "consumes declaration required" flagged (declare-
+  // first: the pipeline never edits registry rows — the operator/PM applies
+  // the declaration via variant.json); foreign variant-identity → REFUSAL;
+  // unregistered → copied + classification-report line to the PM agenda
+  // (never silent). Common-contract stock is excluded (L1 delivery is
+  // inheritance, not duplication). An absent/malformed registry skips the
+  // phase (legacy-checkout posture, same as the validate-templates legs).
+  // The skip itself is APPLIED in Phase 4 (filtering happens where the copy
+  // lists are built); this phase computes the verdicts and enforces refusals.
+  // ============================================================================
+  const hubClassifyMode: 'enforce' | 'report-only' = config.hubClassificationMode ?? 'enforce';
+  let hubTopology: HubTopology | undefined;
+  let hubClassification: HubClassificationReport | undefined;
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 3.9: Hub-Topology Asset Classification (${hubClassifyMode})`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const topoResult = config.hubTopologyOverride
+      ? { ok: true as const, topology: config.hubTopologyOverride }
+      : loadHubTopology(cwd());
+    if (!topoResult.ok) {
+      console.log(`ℹ️  hub_topology registry ${topoResult.error === 'absent-file' ? 'absent' : `not usable (${topoResult.error})`} — skipping hub classification (legacy checkout)`);
+    } else if (topoResult.topology) {
+      hubTopology = topoResult.topology;
+      const commonNames = loadCommonContractNames(cwd());
+      const assets: Array<{ name: string; kind: HubAssetKind }> = [
+        ...extractSkills(scanResult!).map(s => ({ name: s.name, kind: 'skill' as const })),
+        ...extractAgentRoster(scanResult!).map(a => ({ name: a.name, kind: 'agent' as const })),
+      ];
+      const verdicts = classifyAssetsForPromotion({
+        assets,
+        entries: Array.isArray(hubTopology.entries) ? hubTopology.entries : [],
+        targetVariant: config.variantName,
+        commonNames,
+      });
+      hubClassification = formatHubClassificationReport(verdicts, hubClassifyMode);
+      if (hubClassification.lines.length === 0) {
+        console.log(`  ✅ ${assets.length} asset(s) classified — no hub-doctrine skips, refusals, or unregistered assets`);
+      } else {
+        for (const line of hubClassification.lines) console.log(`  ${hubClassifyMode === 'enforce' ? '⚠️ ' : 'ℹ️ '} ${line}`);
+      }
+      if (hubClassification.refused.length > 0) {
+        const refused = hubClassification.refused.map(r => `${r.kind} '${r.asset}' (owned by ${r.hub_variant})`).join(', ');
+        const msg =
+          `HUB-TOPOLOGY CLASSIFICATION REFUSAL: variant-identity asset(s) ${refused} must not be absorbed into ` +
+          `templates/${config.variantName} — identity assets are never promoted with a thinner copy (design §6.1). ` +
+          `Remove the asset from the L3 source or re-register its canonical ownership.`;
+        console.error(`\n❌ ${msg}`);
+        errors.push({ phase: '3.9-hub-classification', error: msg });
+        return failWithRollback();
+      }
+      if (hubClassification.skipped.length > 0 && hubClassifyMode === 'report-only') {
+        console.warn(`⚠️  report-only mode: hub-doctrine skip(s) DOWNGRADED to warnings — the asset(s) WILL be copied (operator observation run; design default is enforcement)`);
+      }
+      console.log(`✅ PHASE 3.9 COMPLETE`);
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`❌ PHASE 3.9 FAILED: ${errorMsg}`);
+    errors.push({ phase: '3.9-hub-classification', error: errorMsg });
+    return failWithRollback();
+  }
+
+  // ============================================================================
   // PHASE 4: GENERATE VARIANT
   // ============================================================================
 
@@ -1047,6 +1337,43 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     // keeps their files out of the copy manifest; this keeps the DECLARED manifest
     // consistent with the generated variant's skills/ tree.
     const skills = extractSkills(scanResult!).filter(s => !scopedSkillNames.has(s.name));
+
+    // Phase 3.9 verdict application (v1.22.0, design §6.1): in enforce mode the
+    // hub-doctrine skip verdicts REMOVE the asset from the copy lists AND from
+    // the reconciled manifest (skills/<name>/** and agents/<name>.md), so the
+    // generated template never carries the copy. report-only mode keeps the
+    // copies (the warn was already emitted in Phase 3.9).
+    const skippedAssetKeys = new Set(
+      hubClassifyMode === 'enforce'
+        ? (hubClassification?.skipped ?? []).map(s => `${s.kind}/${s.asset}`)
+        : [],
+    );
+    if (skippedAssetKeys.size > 0) {
+      const filteredRoster = agentRoster.filter(a => !skippedAssetKeys.has(`agent/${a.name}`));
+      const filteredSkills = skills.filter(s => !skippedAssetKeys.has(`skill/${s.name}`));
+      const rosterRemoved = agentRoster.length - filteredRoster.length;
+      const skillsRemoved = skills.length - filteredSkills.length;
+      agentRoster.length = 0;
+      agentRoster.push(...filteredRoster);
+      skills.length = 0;
+      skills.push(...filteredSkills);
+      const manifestBefore = reconciledManifest!.keepInVariant.length;
+      reconciledManifest!.keepInVariant = reconciledManifest!.keepInVariant.filter(file => {
+        const target = file.targetPath.replace(/\\/g, '/');
+        for (const key of skippedAssetKeys) {
+          const slash = key.indexOf('/');
+          const kind = key.slice(0, slash);
+          const name = key.slice(slash + 1);
+          if (kind === 'skill' && target.startsWith(`skills/${name}/`)) return false;
+          if (kind === 'agent' && (target === `agents/${name}.md` || target.startsWith(`agents/${name}.md`))) return false;
+        }
+        return true;
+      });
+      console.log(
+        `  ⛔ Hub-doctrine skips applied: ${rosterRemoved} agent(s), ${skillsRemoved} skill(s), ` +
+          `${manifestBefore - reconciledManifest!.keepInVariant.length} manifest file(s) removed from the promotion copy set`,
+      );
+    }
 
     const metadata: VariantMetadata = {
       name: config.variantName,
@@ -1183,7 +1510,7 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     // Write pipeline report to variant root
     const reportPath = j(variantPath, '_pipeline_report.md');
     const { writeUTF8File: wu } = await import('./lib/encoding-utils.js');
-    wu(reportPath, `# Pipeline Report\n\nGenerated: ${new Date().toISOString()}\n\n\`\`\`\n${gapReport}\n\`\`\`\n`);
+    wu(reportPath, `# Pipeline Report\n\nGenerated: ${new Date().toISOString()}\n\n\`\`\`\n${gapReport}\n\`\`\`\n${hubReportMdSection(hubClassification)}`);
 
     // Write CI-friendly JSON report alongside the markdown report
     const reportOutputPath = j(variantPath, '_pipeline_report.json');
@@ -1355,6 +1682,19 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
           dropped,
           verified: true,
         };
+        // v1.22.0 (design §6.1): the Phase 3.9 classification is a first-class
+        // report artifact — required consume declarations (PM agenda),
+        // unregistered assets, skips, and refusals ride the CI-friendly JSON.
+        if (hubClassification) {
+          reportJson.hubTopologyClassification = {
+            mode: hubClassification.mode,
+            lines: hubClassification.lines,
+            requiredDeclarations: hubClassification.requiredDeclarations,
+            unregistered: hubClassification.unregistered,
+            refused: hubClassification.refused,
+            skipped: hubClassification.skipped,
+          };
+        }
         wu47(reportJsonPath, JSON.stringify(reportJson, null, 2));
         console.log(`  📄 Purification outcome recorded in _pipeline_report.json`);
       }
@@ -1370,6 +1710,77 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
     console.error(`   ${errorMsg}`);
     console.error(`   Inspect docs/${config.variantName}.context.md and the generate-phase purification log, then re-run the pipeline.\n`);
     errors.push({ phase: '4.7', error: errorMsg });
+    return failWithRollback();
+  }
+
+  // ============================================================================
+  // PHASE 4.8: HUB CONSUMPTION PREFLIGHT (v1.22.0 — design §6.2)
+  // ============================================================================
+  // Promote-side preflight on the GENERATED template (before lifecycle init):
+  // (1) the generated variant.json's hub.consumes rows resolve against the
+  // registry with the shared leg-3 logic (minimum_version semantics); (2) an
+  // unregistered hub-doctrine duplication in the template FAILs (a copy that
+  // is neither the hub's own, nor common-contract stock, nor a declared
+  // consumer's stale-read copy). Enforce mode BLOCKS the run; report-only
+  // downgrades to warnings (coherent observation mode with Phase 3.9).
+  // ============================================================================
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 4.8: Hub Consumption Preflight (${hubClassifyMode})`);
+    console.log(`${'─'.repeat(60)}`);
+
+    if (!hubTopology) {
+      console.log(`ℹ️  hub_topology registry not available — preflight vacuous (legacy checkout)`);
+    } else {
+      const preflightFails: string[] = [];
+
+      // Leg 3 reuse: the generated template's own hub.consumes declarations.
+      const generatedVjPath = join(generatedVariant!.variantPath, 'variant.json');
+      let hubBlock: Record<string, unknown> | undefined;
+      if (existsSync(generatedVjPath)) {
+        try {
+          const vj = JSON.parse(readFileSync(generatedVjPath, 'utf-8')) as Record<string, unknown>;
+          const hub = vj['hub'];
+          if (hub && typeof hub === 'object' && !Array.isArray(hub)) hubBlock = hub as Record<string, unknown>;
+        } catch {
+          // malformed variant.json — the readiness gate owns that failure
+        }
+      }
+      if (hubBlock) {
+        const leg3 = checkConsumerMinimumVersions(hubTopology, [{ variant: config.variantName, hubBlock }]);
+        preflightFails.push(...leg3.fails);
+        console.log(`  ℹ️  hub.consumes declarations resolved: ${leg3.fails.length} fail(s), ${leg3.warns.length} warn(s)`);
+      } else {
+        console.log(`  ℹ️  generated template declares no hub consumption — leg-3 vacuous`);
+      }
+
+      // Unregistered hub-doctrine duplication in the generated template.
+      const dup = checkHubDoctrineDuplication(hubTopology, {
+        variantName: config.variantName,
+        templateDir: generatedVariant!.variantPath,
+        commonNames: loadCommonContractNames(cwd()),
+      });
+      preflightFails.push(...dup.fails);
+
+      if (preflightFails.length > 0) {
+        for (const f of preflightFails) console.error(`  ❌ ${f}`);
+        if (hubClassifyMode === 'report-only') {
+          console.warn(`⚠️  PHASE 4.8 report-only: ${preflightFails.length} preflight fail(s) DOWNGRADED to warnings (design default is FAIL)`);
+        } else {
+          const msg = `hub consumption preflight FAILED with ${preflightFails.length} violation(s) (design §6.2) — see the lines above`;
+          errors.push({ phase: '4.8-hub-preflight', error: msg });
+          console.error(`\n❌ PHASE 4.8 BLOCKING: ${msg}`);
+          return failWithRollback();
+        }
+      } else {
+        console.log(`  ✅ preflight clean — no unregistered hub-doctrine duplication, consumes declarations (if any) resolve`);
+      }
+    }
+    console.log(`✅ PHASE 4.8 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`❌ PHASE 4.8 FAILED: ${errorMsg}`);
+    errors.push({ phase: '4.8-hub-preflight', error: errorMsg });
     return failWithRollback();
   }
 
@@ -1556,6 +1967,29 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 }
 
 /**
+ * Markdown section for the Phase 4.5 _pipeline_report.md carrying the Phase 3.9
+ * hub-topology classification lines (design §6.1: the classification report is a
+ * first-class pipeline artifact — "never silent"). Empty when the phase did not
+ * run (registry absent) or produced no findings.
+ */
+function hubReportMdSection(report: HubClassificationReport | undefined): string {
+  if (!report || report.lines.length === 0) return '';
+  const lines = [
+    `\n## Hub-Topology Asset Classification (design §6.1, mode: ${report.mode})\n`,
+    ...report.lines.map(l => `- ${l}`),
+    '',
+  ];
+  if (report.requiredDeclarations.length > 0) {
+    lines.push(`PM agenda: apply the consume declaration(s) via variant.json hub.consumes BEFORE landing:`);
+    for (const d of report.requiredDeclarations) {
+      lines.push(`  - ${d.asset}: {domain: ${d.domain}, minimum_version: ${d.minimum_version}} (hub: ${d.hub_variant})`);
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+/**
  * Build failure result
  * @version 1.2.0
  */
@@ -1613,6 +2047,11 @@ async function main() {
   // (beta) variant template — destroys the previous tree as a unit; per-file
   // history lives in git. stable/deprecated targets refuse even with the flag.
   const overlayVariantArg = args.includes('--overlay-variant');
+  // Hub-topology classification escape hatch (v1.22.0, design §6.1 Phase 1.5):
+  // downgrades the hub-doctrine skip / identity refusal / §6.2 preflight to
+  // warnings for operator observation runs. DEFAULT is enforce — the design
+  // text is normative ("hub-doctrine asset | NOT copied into other variants").
+  const hubClassifyReportOnlyArg = args.includes('--hub-classify-report-only');
 
   if (!l3PathArg || !nameArg || !typeArg || !descArg) {
     console.error('Usage: bun scripts/l3-to-variant-pipeline.ts \\');
@@ -1628,6 +2067,7 @@ async function main() {
     console.error('  [--auto-fix-agents-md] (phase 3.5: regenerate AGENTS.md on marker misalignment) \\');
     console.error('  [--auto-fix-pm-md] (phase 3.0: emit pm.md slimming guidance)');
     console.error('  [--overlay-variant] (authorize overwriting an existing BETA variant template; stable/deprecated always refuse) \\');
+    console.error('  [--hub-classify-report-only] (downgrade hub-topology classification + preflight to warnings; default is enforce per design §6.1/§6.2) \\');
     console.error('  [--force] (skip the Variant Readiness Gate — see PHASE 8)');
     process.exit(1);
   }
@@ -1659,6 +2099,7 @@ async function main() {
     autoFixAgentsMd: autoFixAgentsMdArg,
     autoFixPmMd: autoFixPmMdArg,
     overlayVariant: overlayVariantArg,
+    hubClassificationMode: hubClassifyReportOnlyArg ? 'report-only' : 'enforce',
   };
 
   try {

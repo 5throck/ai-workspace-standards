@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §6.2 / §6.1 Phase 1.5): promotion/instantiation preflight legs —
+//          checkHubDoctrineDuplication (a template carrying a copy of a
+//          hub-doctrine asset it does not sanction FAILs: not the hub itself,
+//          not common-contract delivery, not a declared consumer's stale-read
+//          copy per §7.4) and entryTemplateRelPath (canonical_path →
+//          template-relative path). Consumers: scripts/new-project.ts
+//          (create-time preflight) and scripts/l3-to-variant-pipeline.ts
+//          (Phase 4.8 promote-time preflight). Additive; the four validate-
+//          templates legs and the audit hub-resolve checker are unchanged.
 // hub-topology.ts — pure helpers for the hub-and-spoke topology registry
 // (docs/workspace-schema.json `hub_topology`, design
 // docs/designs/2026-11-01-hub-consolidation-design.md §2).
@@ -517,4 +527,74 @@ export function loadConsumingVariants(rootDir: string): ConsumingVariant[] {
   }
   out.sort((a, b) => a.variant.localeCompare(b.variant));
   return out;
+}
+
+// ── Promotion/instantiation preflight (design §6.2, helper v1.1.0) ────────
+
+/** Registry canonical_path ('templates/co-design/skills/x/SKILL.md') → the
+ * asset path RELATIVE to a variant template root ('skills/x/SKILL.md').
+ * Returns null when the canonical_path does not sit under the entry's own
+ * hub template (malformed/foreign rows — the shape leg owns those; callers
+ * skip the row rather than guess). */
+export function entryTemplateRelPath(canonicalPath: string, hubVariant: string): string | null {
+  const prefix = `templates/${hubVariant}/`;
+  const normalized = canonicalPath.replace(/\\/g, '/');
+  if (!normalized.startsWith(prefix)) return null;
+  const rel = normalized.slice(prefix.length);
+  if (rel.length === 0 || rel.includes('..') || rel.startsWith('/')) return null;
+  return rel;
+}
+
+export interface HubDoctrineDuplicationContext {
+  /** The variant being created/promoted (e.g. 'co-architect'). */
+  variantName: string;
+  /** Template (or generated-template) directory to scan. */
+  templateDir: string;
+  /** Common-contract asset names — L1-delivered stock is inheritance, not
+   * duplication (same exclusion as the duplicate legs). */
+  commonNames?: Set<string>;
+}
+
+/** Preflight leg — unregistered hub-doctrine duplication (design §6.2):
+ * "an unregistered hub-doctrine duplication FAILs the preflight". For every
+ * hub-doctrine entry whose hub_variant ≠ the variant under preflight, a copy
+ * of the asset at its template-relative canonical path inside templateDir
+ * FAILs — UNLESS the copy is sanctioned: the variant is a DECLARED consumer
+ * (entry.consumers[] names it; the stale-read copy of §7.4) or the asset is
+ * common-contract delivered stock (inheritance, not a fork). The hub itself
+ * is skipped by the hub_variant ≠ filter. */
+export function checkHubDoctrineDuplication(topology: HubTopology, ctx: HubDoctrineDuplicationContext): LegResult {
+  const fails: string[] = [];
+  const warns: string[] = [];
+  const passes: string[] = [];
+  const entries = Array.isArray(topology.entries) ? topology.entries : [];
+  let checked = 0;
+  for (const row of entries) {
+    if (!row || typeof row !== 'object') continue;
+    const e = row as Record<string, unknown>;
+    if (e['category'] !== 'hub-doctrine') continue;
+    const hubVariant = String(e['hub_variant'] ?? '');
+    if (!hubVariant || hubVariant === ctx.variantName) continue; // the hub's own promotion copy
+    const rel = entryTemplateRelPath(String(e['canonical_path'] ?? ''), hubVariant);
+    if (!rel) continue;
+    checked++;
+    const localCopy = join(ctx.templateDir, rel);
+    if (!existsSync(localCopy)) continue;
+    const asset = String(e['asset'] ?? rel);
+    const consumers = Array.isArray(e['consumers']) ? e['consumers'] : [];
+    const declaredConsumer = (consumers as unknown[]).some(
+      c => c && typeof c === 'object' && String((c as Record<string, unknown>)['variant'] ?? '') === ctx.variantName,
+    );
+    const isCommonStock = ctx.commonNames?.has(asset) ?? false;
+    if (declaredConsumer || isCommonStock) continue; // sanctioned copy (§7.4 stale-read / common contract)
+    fails.push(
+      `${ctx.variantName} template carries a copy of hub-doctrine asset '${asset}' (hub: ${hubVariant}, domain: ${String(e['domain'] ?? '')}) at ${rel} with no sanction — unregistered hub-doctrine duplication (design §6.2). Declare consumption in variant.json hub.consumes {domain, minimum_version} or remove the copy; the hub delivers the canonical`,
+    );
+  }
+  if (checked === 0) {
+    passes.push('no foreign hub-doctrine entries resolved for this variant (vacuously clean)');
+  } else if (fails.length === 0) {
+    passes.push(`${checked} foreign hub-doctrine asset(s) checked — no unregistered copies in the template`);
+  }
+  return { fails, warns, passes };
 }
