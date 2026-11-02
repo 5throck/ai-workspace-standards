@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §4.5, Phase 3.5): create gains --hub <name> — writes the optional
+//          `hub` metadata field (ticket-schema v1.11.0) and gates delegated
+//          ticket creation on the hub's lifecycle state: a hub whose state file
+//          reads UNAVAILABLE (declared, or an expired TTL lease — design §3.3)
+//          refuses with a typed error and NO write; an absent state file allows
+//          (not yet bootstrapped through the Phase 3.5 flow). State file path:
+//          <root>/Projects/<hub>/.pipeline-state/hub-<hub>.state.json.
 // v1.13.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5,
 //          Phase 3a kanban core): delegation kanban alias layer — create gains
 //          --priority-alias P0|P1|P2|P3 (maps through docs/templates/
@@ -64,6 +72,7 @@ import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
 import { PRIORITIES, corruptedProseFinding, resolvePriorityInput } from './helpers/ticket-schema.ts';
 import { parseActor, ReprioritizeRefusedError } from './helpers/reprioritize.ts';
+import { effectiveOperationalState, readState, HubStateError } from './helpers/hub-state.ts';
 
 // Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
 // subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
@@ -194,6 +203,38 @@ try {
         aliasPriority = mapped;
       }
       const priority = aliasPriority ?? ((priorityFlag as Priority | undefined) ?? 'normal');
+      // v1.14.0 (hub-consolidation §4.5): delegation target hub. The flag
+      // writes the `hub` metadata field AND gates the write on the hub's
+      // lifecycle state: UNAVAILABLE (declared, or an expired TTL lease) is a
+      // typed refusal with no write (design §3.4: UNAVAILABLE blocks new
+      // tickets); an absent state file allows (never bootstrapped). A corrupt
+      // state file fails closed — a silently-accepted corrupt state is exactly
+      // what the hash chain exists to catch.
+      const hubFlag = flags.hub;
+      let hubName: string | undefined;
+      if (hubFlag !== undefined) {
+        hubName = String(hubFlag);
+        if (!/^co-[a-z0-9-]{1,40}$/.test(hubName)) {
+          fail(`--hub must match co-<slug> (got: ${hubFlag})`);
+        }
+        const hubState = (() => {
+          try {
+            return readState(join(workspaceRoot, 'Projects', hubName), hubName);
+          } catch (err) {
+            if (err instanceof HubStateError) fail(`cannot verify hub '${hubName}' state: ${err.message}`);
+            throw err;
+          }
+        })();
+        if (hubState) {
+          const effective = effectiveOperationalState(hubState);
+          if (effective === 'UNAVAILABLE') {
+            const expired = hubState.operational_state !== 'UNAVAILABLE'
+              ? ` (declared ${hubState.operational_state} on an EXPIRED TTL lease until ${hubState.ttl_lease?.expires_at ?? '?'})`
+              : '';
+            fail(`refused: hub '${hubName}' is UNAVAILABLE${expired} — delegated ticket creation is blocked (design §3.4). Next declaration or probe re-opens the channel`);
+          }
+        }
+      }
       const notBeforeFlag = flags['not-before'];
       if (notBeforeFlag !== undefined) {
         const v = String(notBeforeFlag);
@@ -211,12 +252,12 @@ try {
       const notBefore = notBeforeFlag as string | undefined;
       if (flags.manual) {
         const title = positional[0];
-        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD]');
-        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore });
-        console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}`);
+        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD] [--hub co-<slug>]');
+        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore, hub: hubName });
+        console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}${hubName ? ` (hub ${hubName})` : ''}`);
       } else {
         const serviceId = positional[0];
-        if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--priority-alias P0|P1|P2|P3] [--inputs \'{"k":"v"}\']');
+        if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--priority-alias P0|P1|P2|P3] [--inputs \'{"k":"v"}\'] [--hub co-<slug>]');
         const catalog = loadCatalog(catalogPath);
         if (!catalog.services.some(s => s.id === serviceId)) fail(`unknown service id: ${serviceId} (see services.yaml)`);
         let inputs: Record<string, string> | undefined;
@@ -224,8 +265,8 @@ try {
           try { inputs = JSON.parse(flags.inputs as string); }
           catch { fail(`--inputs is not valid JSON: ${flags.inputs}`); }
         }
-        const t = createTicket(ticketsDir, { kind: 'service', service: serviceId, priority, inputs });
-        console.log(`✅ Created service ticket ${t.id} for '${serviceId}'`);
+        const t = createTicket(ticketsDir, { kind: 'service', service: serviceId, priority, inputs, hub: hubName });
+        console.log(`✅ Created service ticket ${t.id} for '${serviceId}'${hubName ? ` (hub ${hubName})` : ''}`);
       }
       break;
     }
@@ -321,6 +362,7 @@ try {
       console.log(`   Priority: ${ticket.priority}`);
       if (ticket.sev) console.log(`   Sev: ${ticket.sev}`);
       if (ticket.blocked_reason) console.log(`   Blocked: ${ticket.blocked_reason}`);
+      if (ticket.hub) console.log(`   Hub: ${ticket.hub}`);
       if (ticket.kind === 'service') {
         console.log(`   Service: ${ticket.service}`);
       } else {

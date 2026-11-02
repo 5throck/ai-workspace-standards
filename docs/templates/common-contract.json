@@ -180,7 +180,7 @@
     },
     "delegate-to-hub": {
       "source": "skills/delegate-to-hub/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "Files a hub delegation ticket with pre-checks, security-domain authorization gate (AUTH-YYYY-NNN registry row), safe-content rules, and kanban alias priority governance"
     },

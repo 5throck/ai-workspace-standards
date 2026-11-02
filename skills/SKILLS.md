@@ -62,7 +62,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
 | `trail` | 1.1.0 | active | pm | 2026-10-31 | — | Renamed from `graft` (vendor rename 0.28, @trailhq/trail-code): trail-era doctrine with a graft-era alias note — design 2026-10-31-graft-trail-migration, U-20261031-009 |
 | `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |
-| `delegate-to-hub` | 1.0.0 | active | pm | 2026-11-02 | — | — |
+| `delegate-to-hub` | 1.0.1 | active | pm | 2026-11-02 | — | Files delegation tickets spoke→hub; 1.0.1 adds the `--hub` flag + lifecycle UNAVAILABLE gate (Phase 3.5, design §4.5) |
 
 ### Variant-Exclusive Skills
 

@@ -3,10 +3,11 @@ name: delegate-to-hub
 description: >
   Files a DELEGATION TICKET from a spoke project to its domain hub (co-develop,
   co-design, co-security) when the spoke PM faces a hard problem in the hub's
-  domain. Enforces hub pre-checks, the security-domain authorization gate
-  (AUTH-YYYY-NNN registry row), safe ticket-content rules, and kanban alias /
-  priority-governance semantics at filing time.
-version: 1.0.0
+  domain. Enforces hub pre-checks, the lifecycle UNAVAILABLE gate (hub state
+  file), the security-domain authorization gate (AUTH-YYYY-NNN registry row),
+  safe ticket-content rules, and kanban alias / priority-governance semantics
+  at filing time.
+version: 1.0.1
 scope: common
 l2_propagate: true
 status: active
@@ -39,8 +40,9 @@ Never use this skill to bypass the PM Gateway, to file vulnerability data into a
 
 ### Step 1: Pre-checks (hub existence and identity)
 
-1. Resolve the hub repo locally: `Projects/co-<domain>` for the problem's domain (`co-develop`, `co-design`, `co-security`). If the local clone is missing → **STOP**. Phase 3.5 hub bootstrap is not yet active in this workspace; report to the user with the registry `hub_remote` value (from the `hub_topology` registry in `docs/workspace-schema.json`) so the user can decide on a manual clone. Never auto-clone, never scaffold in this path.
-2. Validate the hub's identity files: `variant.json` exists and parses, and `template-version.txt` exists and names a known template version. If either is missing or malformed → **STOP** and report; an unidentifiable hub is not a filing target.
+1. Resolve the hub repo locally: `Projects/co-<domain>` for the problem's domain (`co-develop`, `co-design`, `co-security`). If the local clone is missing → **STOP**. Bootstrap is a user-approved, SHA-pinned act — report the registry `hub_remote` value (from the `hub_topology` registry in `docs/workspace-schema.json`) to the user and point them at the workspace-root flow: `bun scripts/hub-bootstrap.ts <hub-name> --apply --yes` (run by the workspace-root PM after the user approves the printed plan; design §4). Never auto-clone from this skill, never scaffold in this path.
+2. **Lifecycle gate (Phase 3.5)**: before filing, check the hub's state file (`Projects/<hub>/.pipeline-state/hub-<hub>.state.json`) — a hub whose operational state reads UNAVAILABLE (declared, or an expired TTL lease) refuses delegated ticket creation. `ticket.ts create --hub` enforces this mechanically (typed refusal, no write); do not try to bypass it by hand-writing ticket files.
+3. Validate the hub's identity files: `variant.json` exists and parses, and `template-version.txt` exists and names a known template version. If either is missing or malformed → **STOP** and report; an unidentifiable hub is not a filing target.
 
 ### Step 2: Authorization gate (security domain only)
 
@@ -61,7 +63,7 @@ Any of the three → do NOT file; report the abort reason to the user.
 
 ### Step 4: Filing
 
-1. Create the ticket in the hub repo's `tickets/` store using `scripts/ticket.ts` semantics (the hub's ticket store, not the spoke's).
+1. Create the ticket in the hub repo's `tickets/` store using `scripts/ticket.ts` semantics (the hub's ticket store, not the spoke's), passing the target hub explicitly: `bun scripts/ticket.ts create --manual "<title>" --priority-alias P2 --hub <hub-name>`. The `--hub` flag writes the ticket's `hub` metadata field and runs the lifecycle gate of Step 1.2 (UNAVAILABLE → typed refusal, nothing filed).
 2. Priority: use `--priority-alias` values from `docs/templates/hub-kanban-aliases.json` (P0→urgent, P1→high, P2→normal, P3→low). **P0 requires USER action** (P0-user-only rule) — agents cap at P1–P3; spoke-initiated raises are capped at +1 level per ticket per 24h.
 3. SEV field (SEV1–SEV3) is a standalone suggestion field; its default mapping (SEV1→P0) is a suggestion only and does NOT authorize a P0 write by an agent.
 
@@ -83,7 +85,7 @@ Any of the three → do NOT file; report the abort reason to the user.
 **Content scan**: gitleaks clean over drafted body
 **Read-back**: [status from upstream_request_status]
 
-**On STOP**: hub missing/invalid → reported hub_remote for the user's manual clone decision; authorization gate failure → reported abort reason, nothing filed.
+**On STOP**: hub missing/invalid → reported hub_remote + the `hub-bootstrap.ts` flow for the user's decision; hub UNAVAILABLE → reported refusal, nothing filed; authorization gate failure → reported abort reason, nothing filed.
 ```
 
 ## Related Skills
