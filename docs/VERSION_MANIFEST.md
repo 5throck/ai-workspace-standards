@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-02T16:50:40.370Z
+**Generated**: 2026-11-02T21:14:56.132Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -145,7 +145,7 @@
 | generate-version-manifest.ts | 1.11.0 | scripts/generate-version-manifest.ts | bun, js-yaml |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | N/A |
 | hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | N/A |
-| hub-probe.ts | 1.2.0 | scripts/hub-probe.ts | N/A |
+| hub-probe.ts | 1.3.0 | scripts/hub-probe.ts | N/A |
 | hub-promotion.ts | 1.0.1 | scripts/hub-promotion.ts | N/A |
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
