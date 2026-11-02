@@ -1,4 +1,22 @@
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-02, Windows CI fix round 3 — malformed fixture schema):
+//          buildFixture wrote docs/workspace-schema.json with a placeholder
+//          hub_remote and then re-wrote the FILE TEXT via String.replace
+//          ('<RESOLVED-BELOW>' -> bare). On Windows the bare-repo path carries
+//          backslashes (C:\Users\...), which landed RAW inside the JSON string
+//          literal — \U is an invalid escape, so loadHubTopology failed with
+//          "not valid JSON: ... Invalid escape character U" on every fixture
+//          test (Windows-only; POSIX tmpdir paths are slash-joined and parse
+//          fine). Fix: the schema is written ONCE, after the bare path exists,
+//          with hub_remote embedded through JSON.stringify (which escapes
+//          backslashes correctly) — the placeholder and the text-level
+//          rewrite no longer exist. Regression tests pin both sides: the
+//          fixture artifact parses with hub_remote === the bare path, and
+//          loadHubTopology round-trips a Windows-style backslash hub_remote
+//          while the raw-escape corruption mode fails closed with the typed
+//          malformed-JSON error. Fixture-side only — no product writer was
+//          affected (hub-state.ts / hub-bootstrap.ts write JSON exclusively
+//          through JSON.stringify).
 // v1.2.0 (2026-11-02, Windows portability hardening round 2 — self-describing
 //          failures): CI round 2 failed the dry-run test blind (exit 1, no
 //          stderr in the report), so every exit-code assertion on a spawned
@@ -47,6 +65,7 @@ import { join, resolve } from 'node:path';
 import { acquireLock, releaseLock } from '../../scripts/automation-lock.ts';
 import { moveIntoPlace } from '../../scripts/hub-bootstrap.ts';
 import { applyTransition, initStateFile, readState, stateFilePath, validateChain } from '../../scripts/helpers/hub-state.ts';
+import { loadHubTopology } from '../../scripts/helpers/hub-topology.ts';
 import { kstDate } from '../../scripts/helpers/kst-time.ts';
 
 const REPO_ROOT = resolve(import.meta.dir, '..', '..');
@@ -110,17 +129,22 @@ function buildFixture(name = HUB): Fixture {
   for (const [f, content] of Object.entries(hookFiles)) writeFileSync(join(root, 'scripts', 'hooks', f), content, 'utf-8');
 
   writeFileSync(join(root, '.gitleaks.toml'), '[extend]\nuseDefault = true\n', 'utf-8');
+  // The bare-repo path is needed by the schema below; it is a pure path join,
+  // computable before the repo itself is created. The schema is written ONCE
+  // with the REAL path through JSON.stringify (v1.3.0): the previous two-phase
+  // write (placeholder + String.replace on the file text) embedded Windows
+  // backslash paths raw into the JSON — \U invalid escape — and made every
+  // fixture test read the registry as malformed JSON on Windows only.
+  const bare = join(root, 'fixture-remote.git');
   writeFileSync(join(root, 'docs', 'workspace-schema.json'), JSON.stringify({
     hub_topology: {
       bootstrap_states: ['BOOTSTRAPPED', 'VALIDATED', 'READY'],
       operational_states: ['AVAILABLE', 'DEGRADED', 'UNAVAILABLE', 'RECOVERY'],
       capability_enum: { documentation: { never_in_degraded: false } },
-      hubs: [{ name, hub_remote: `<RESOLVED-BELOW>`, capabilities: [] }],
+      hubs: [{ name, hub_remote: bare, capabilities: [] }],
       entries: [],
     },
   }), 'utf-8');
-
-  const bare = join(root, 'fixture-remote.git');
   // git resolved ONCE (v1.2.0): a missing binary is a typed fixture-setup
   // error naming the cause, not a cryptic per-command failure downstream.
   const GIT = Bun.which('git');
@@ -146,9 +170,6 @@ function buildFixture(name = HUB): Fixture {
   run(['git', 'push', '--quiet', 'origin', 'main'], wt);
   const sha = spawnSync(GIT, ['rev-parse', 'HEAD'], { cwd: wt, encoding: 'utf-8', windowsHide: true }).stdout.trim();
 
-  // The registry needs the absolute bare path (built after the bare repo).
-  const schemaPath = join(root, 'docs', 'workspace-schema.json');
-  writeFileSync(schemaPath, readFileSync(schemaPath, 'utf-8').replace('<RESOLVED-BELOW>', bare), 'utf-8');
   rmRfBestEffort(wt); // v1.2.0 — cleanup only; a leftover fixture-wt is harmless
   return { root, bare, sha };
 }
@@ -224,6 +245,56 @@ describe('dry-run writes nothing (design §4.5 audit/idempotency frame)', () => 
     expect(r.err).toMatch(/ensure-github-repo/);
     expect(r.err).toMatch(/NEVER creates a remote/);
     expect(existsSync(join(f.root, 'Projects', 'co-nowhere'))).toBe(false);
+  });
+});
+
+// ── fixture schema integrity (v1.3.0 round-3 regression) ─────────────────────
+
+describe('fixture schema integrity (Windows CI round-3 regression: malformed registry)', () => {
+  test('the fixture workspace-schema.json parses and carries the exact bare path as hub_remote', () => {
+    // Pins the v1.3.0 writer mechanics: the schema must be a single
+    // JSON.stringify artifact whose hub_remote equals the bare-repo path
+    // verbatim. On Windows a re-introduced text-level interpolation would
+    // embed C:\Users\... raw (\U = invalid escape) and fail THIS parse —
+    // the fixture can never again ship a registry the product reads as
+    // malformed JSON.
+    const f = makeFixture();
+    const schema = JSON.parse(readFileSync(join(f.root, 'docs', 'workspace-schema.json'), 'utf-8')) as {
+      hub_topology: { hubs: Array<{ name: string; hub_remote: string }> };
+    };
+    expect(schema.hub_topology.hubs[0]).toMatchObject({ name: HUB, hub_remote: f.bare });
+  });
+
+  test('loadHubTopology round-trips a Windows backslash hub_remote; the raw-escape corruption mode fails closed', () => {
+    // Product contract under the exact CI round-3 conditions: (1) a
+    // hub_remote like C:\Users\... written via JSON.stringify parses back
+    // intact (backslashes escaped in the file text); (2) the historical
+    // corruption mode — the same path interpolated RAW into the JSON text —
+    // is the typed fail-closed malformed-JSON error, never a silent mis-load.
+    const root = mkdtempSync(join(tmpdir(), 'hub-schema-regr-'));
+    mkdirSync(join(root, 'docs'), { recursive: true });
+    const schemaPath = join(root, 'docs', 'workspace-schema.json');
+    const winPath = 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\hub-bootstrap-fix-x\\fixture-remote.git';
+    writeFileSync(schemaPath, JSON.stringify({
+      hub_topology: { hubs: [{ name: HUB, hub_remote: winPath, capabilities: [] }], entries: [] },
+    }), 'utf-8');
+    const ok = loadHubTopology(root);
+    expect(ok.ok).toBe(true);
+    const hubs = (ok.topology as { hubs: Array<Record<string, unknown>> }).hubs;
+    expect(hubs[0]['hub_remote']).toBe(winPath);
+
+    // Corruption mode: identical object graph, but the path lands in the file
+    // text with unescaped backslashes (what String.replace used to produce).
+    writeFileSync(
+      schemaPath,
+      `{"hub_topology":{"hubs":[{"name":"${HUB}","hub_remote":"${winPath}","capabilities":[]}],"entries":[]}}`,
+      'utf-8',
+    );
+    const broken = loadHubTopology(root);
+    expect(broken.ok).toBe(false);
+    expect(broken.error).toMatch(/not valid JSON/);
+    expect(broken.error).toMatch(/Invalid escape/);
+    rmSync(root, { recursive: true, force: true });
   });
 });
 
