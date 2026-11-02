@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-02, Windows CI fix round 4 — concurrent-claim errno):
+//          Windows CI failed the 'EEXIST/ENOTEMPTY = concurrent claim' test
+//          with "EPERM: operation not permitted, rename '...stage' ->
+//          '...Projects\co-x'": renaming a directory onto an EXISTING
+//          directory throws EPERM on Windows where POSIX reports
+//          ENOTEMPTY/EEXIST — the same operation, a platform errno
+//          difference. moveIntoPlace's concurrent-claim catch now includes
+//          EPERM (with the errno difference documented at the catch site);
+//          the cleanup + typed-notice behavior is identical for all three
+//          codes, and the "winner stands" outcome is unchanged. Catching
+//          EPERM unconditionally is unreachable on POSIX for this rename
+//          shape, so no legitimate failure is masked. No other rename site
+//          in the script renames onto a potentially-existing target (the
+//          bootstrap-state.json marker is a direct writeFileSync onto a
+//          fresh path inside the temp clone).
 // v1.3.0 (2026-11-02, Windows portability hardening round 2 — CI round-trip
 //          showed the DRY-RUN path itself exiting 1 on Windows after v1.2.0,
 //          so the early path is made hazard-free and every external spawn is
@@ -383,8 +398,10 @@ function runValidatedGate(cloneDir: string): ValidationReport {
 
 export interface MoveOutcome {
   moved: boolean;
-  /** true when the rename failed with ENOTEMPTY/EEXIST — a concurrent claim
-   * won; our temp dir has been cleaned and the caller reports, not errors. */
+  /** true when the rename failed with ENOTEMPTY/EEXIST/EPERM — a concurrent
+   * claim won; our temp dir has been cleaned and the caller reports, not
+   * errors. (EPERM is Windows' errno for rename-onto-existing-dir — see the
+   * comment at the catch site below.) */
   concurrentClaim: boolean;
 }
 
@@ -409,7 +426,15 @@ export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
     return { moved: true, concurrentClaim: false };
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === 'ENOTEMPTY' || code === 'EEXIST') {
+    // Platform errno difference for the SAME operation (rename a directory
+    // onto an existing directory — the concurrent-claim shape, §4.3.4):
+    // POSIX reports ENOTEMPTY/EEXIST; Windows (libuv MoveFileExW) reports
+    // EPERM. So EPERM joins the concurrent-claim catch (v1.4.0). Catching it
+    // unconditionally is safe on POSIX too: a same-volume rename of this
+    // shape never produces EPERM there, so the branch is unreachable on
+    // POSIX and no legitimate failure is masked. Cleanup + typed notice are
+    // identical for all three codes.
+    if (code === 'ENOTEMPTY' || code === 'EEXIST' || code === 'EPERM') {
       // Five-guarantee #3 concurrency clause (§4.3.4): a concurrent claim
       // won — clean OUR temp and report, this is not an error. Cleanup is
       // best-effort (v1.2.0): a Windows EBUSY here must not turn the
