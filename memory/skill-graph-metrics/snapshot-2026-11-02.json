@@ -56,6 +56,11 @@
       "edges": 1208,
       "skills": 107
     },
+    "co-newbiz-pr-disable-register": {
+      "nodes": 555,
+      "edges": 1208,
+      "skills": 107
+    },
     "co-news": {
       "nodes": 223,
       "edges": 309,
@@ -72,9 +77,9 @@
       "skills": 98
     },
     "co-security": {
-      "nodes": 75,
-      "edges": 146,
-      "skills": 41
+      "nodes": 76,
+      "edges": 150,
+      "skills": 42
     },
     "co-work": {
       "nodes": 60,
@@ -100,15 +105,15 @@
     "cad-space-recognition": 1,
     "cad-svg-preview": 1,
     "generate-room-elevation": 1,
-    "standup-synthesizer": 16,
+    "standup-synthesizer": 17,
     "zwcad-ai-drawing": 1,
     "change-impact-assessment": 1,
-    "company-intelligence": 2,
+    "company-intelligence": 3,
     "consulting-competitive-intelligence": 1,
     "consulting-report-writing": 1,
     "consulting-executive-presentation": 1,
     "financial-modeling": 1,
-    "financial-statement-analysis": 2,
+    "financial-statement-analysis": 3,
     "hwp-document-processing": 1,
     "industry-research-pack": 0,
     "consulting-insight-synthesis": 2,
@@ -116,7 +121,7 @@
     "narrative-framework": 1,
     "consulting-org-readiness-assessment": 1,
     "project-delivery": 1,
-    "sample-driven-report-writing": 2,
+    "sample-driven-report-writing": 3,
     "solution-design": 2,
     "consulting-stakeholder-alignment": 1,
     "stakeholder-review-management": 1,
@@ -131,8 +136,10 @@
     "storyline": 1,
     "theme-authoring": 1,
     "version": 1,
-    "token-usage-lint": 16,
-    "ui-ux-design-intelligence": 16,
+    "design-foundation": 17,
+    "design-review": 2,
+    "token-usage-lint": 17,
+    "ui-ux-design-intelligence": 17,
     "swe-code-review": 1,
     "refactoring": 3,
     "swe-solve": 1,
@@ -178,7 +185,7 @@
     "financial-statement-prep": 1,
     "gabor-granger": 1,
     "harness-verification": 1,
-    "i18n-audit": 16,
+    "i18n-audit": 17,
     "pricing-insight-synthesis": 1,
     "map-channel-enforcement": 1,
     "math-function-plotter": 1,
@@ -191,7 +198,7 @@
     "trade-promotion-roi": 1,
     "ui-component-design": 1,
     "van-westendorp-psm": 1,
-    "agent-lifecycle-manager": 16,
+    "agent-lifecycle-manager": 17,
     "arc-flash-analyzer": 1,
     "asset-integrity-check": 1,
     "audit-preparation": 1,
@@ -226,7 +233,7 @@
     "investigation/hazop-analysis": 1,
     "iso14971-risk-scorer": 1,
     "landfill-methane-anaerobic-explosion-planner": 1,
-    "meeting-facilitation": 16,
+    "meeting-facilitation": 17,
     "mid-construction-inspection": 1,
     "msds-parser": 1,
     "munitions-magazine-storage-safety-planner": 1,
@@ -234,7 +241,7 @@
     "permit-to-work": 1,
     "pre-construction-technical-review": 1,
     "process-hazard-screening": 1,
-    "project-review": 16,
+    "project-review": 17,
     "protocol-deviation-analyzer": 1,
     "psm-loto": 1,
     "psm-moc": 1,
@@ -245,141 +252,140 @@
     "root-cause-analysis": 1,
     "sae-causality-assessor": 1,
     "safety-inspection-validator": 1,
-    "script-lifecycle-manager": 16,
+    "script-lifecycle-manager": 17,
     "signal-detector": 1,
-    "skill-lifecycle-manager": 16,
-    "sync": 16,
+    "skill-lifecycle-manager": 17,
+    "sync": 17,
     "tank-integrity-validator": 1,
     "tar-planning": 1,
-    "team-builder": 16,
+    "team-builder": 17,
     "temperature-excursion-analyzer": 1,
     "thermal-burn-prevention-planner": 1,
     "tool-box-meeting": 1,
-    "translate": 16,
+    "translate": 17,
     "finding-reconciliation": 2,
     "samm-maturity": 2,
     "sarif-exporter": 2,
     "spdx-sbom": 2,
     "stride-threat-matrix": 2,
     "verify-authorization": 1,
-    "decision-record": 16,
-    "evidence-ledger": 16,
-    "gateguard": 16,
-    "handbook": 16,
-    "handbook-sync-audit": 16,
-    "i18n-formatting": 16,
-    "i18n-layout": 16,
-    "i18n-locale-config": 16,
-    "k-dart": 8,
-    "k-ecos": 8,
-    "k-kosis": 8,
-    "k-krx": 8,
-    "k-law": 8,
-    "k-opendata": 8,
-    "accessibility-audit": 16,
+    "decision-record": 17,
+    "evidence-ledger": 17,
+    "gateguard": 17,
+    "handbook": 17,
+    "handbook-sync-audit": 17,
+    "i18n-formatting": 17,
+    "i18n-layout": 17,
+    "i18n-locale-config": 17,
+    "k-dart": 9,
+    "k-ecos": 9,
+    "k-kosis": 9,
+    "k-krx": 9,
+    "k-law": 9,
+    "k-opendata": 9,
+    "accessibility-audit": 17,
     "adopt-project": 0,
-    "api-documentation": 16,
-    "ci-triage": 16,
+    "api-documentation": 17,
+    "ci-triage": 17,
     "context-commonization-review": 0,
     "create-variant": 0,
     "decision-write-integrity": 0,
-    "design-foundation": 16,
+    "delegate-to-hub": 1,
     "design-token-adoption": 0,
-    "documentation-writing": 16,
-    "explain-me": 16,
-    "finishing-a-development-branch": 14,
+    "documentation-writing": 17,
+    "explain-me": 17,
+    "finishing-a-development-branch": 15,
     "migrate-project": 0,
     "model-migration": 0,
     "new-project": 0,
-    "platform-command-lifecycle-manager": 14,
-    "platform-skill-lifecycle-manager": 14,
+    "platform-command-lifecycle-manager": 15,
+    "platform-skill-lifecycle-manager": 15,
     "project-resync": 0,
     "project-to-variant": 0,
     "promote-variant": 0,
     "release-template": 0,
-    "research-analysis": 16,
-    "security-scan": 16,
-    "service-design": 16,
+    "research-analysis": 17,
+    "security-scan": 17,
+    "service-design": 17,
     "simulate-pipeline": 0,
     "skill-graph-analytics": 0,
-    "source-command-commit-push-pr": 16,
+    "source-command-commit-push-pr": 17,
     "ticket-run": 0,
     "trail": 0,
-    "update-bun-packages": 16,
+    "update-bun-packages": 17,
     "upgrade-project": 0,
     "variant-feature": 0,
-    "zod-contract-gate": 16,
+    "zod-contract-gate": 17,
     "fiori-rap-dev": 1,
     "measure": 1,
-    "design-review": 2,
     "graft": 5,
     "code-review": 1,
     "cms-operations": 1,
     "education-planning": 1,
     "lms-operations": 1,
-    "antitrust-screening": 1,
-    "assumption-audit": 1,
-    "brownfield-feasibility": 1,
-    "certification-roadmap": 1,
-    "certification-transferability": 1,
-    "commercial-due-diligence": 1,
-    "community-partnership-planning": 1,
-    "compensation-harmonization-analysis": 1,
-    "competitive-intelligence": 1,
-    "compliance-monitoring": 1,
-    "customer-attrition-risk": 1,
-    "dd-to-valuation-bridge": 1,
-    "deal-execution-playbook": 1,
-    "debt-and-contingent-liability-simulation": 1,
-    "executive-presentation": 1,
-    "financing-plan-review": 1,
-    "forward-industry-research": 1,
-    "greenfield-feasibility": 1,
-    "group-level-review": 1,
-    "growth-projection-modeling": 1,
-    "historical-financial-analysis": 1,
-    "incentive-clawback-assessment": 1,
-    "insight-synthesis": 1,
-    "intra-group-transaction-compliance": 1,
-    "investment-feasibility-modeling": 1,
-    "investment-vehicle-structuring": 1,
-    "ip-fto-review": 1,
-    "jv-structuring": 1,
-    "legal-due-diligence": 1,
-    "legal-risk-register": 1,
-    "management-incentive-review": 1,
-    "market-data-pipeline": 1,
-    "monte-carlo-simulation": 1,
-    "org-readiness-assessment": 1,
-    "partner-due-diligence": 1,
-    "partner-sourcing-strategy": 1,
-    "partnership-health-scorecard": 1,
-    "peer-benchmarking": 1,
-    "permit-pathway-mapping": 1,
-    "pmi-planning": 1,
-    "policy-and-procedure-governance": 1,
-    "portfolio-fit-assessment": 1,
-    "proxy-industry-chain": 1,
-    "quality-of-earnings": 1,
-    "rag-scoring-framework": 1,
-    "regional-incentive-sourcing": 1,
-    "regulatory-screening": 1,
-    "scenario-planning": 1,
-    "site-infrastructure-assessment": 1,
-    "site-visit-protocol": 1,
-    "stage-gate-governance": 1,
-    "strategic-fit-screening": 1,
-    "systematic-market-sizing": 1,
-    "talent-pipeline-planning": 1,
-    "target-costing-analysis": 1,
-    "technical-due-diligence": 1,
-    "two-tier-approval-chain": 1,
-    "unit-conversion-calibration": 1,
-    "value-chain-driver-identification": 1,
-    "value-chain-linkage-analysis": 1,
-    "value-chain-stage-financials": 1,
-    "wacc-input-session": 1,
-    "waiver-management": 1
+    "antitrust-screening": 2,
+    "assumption-audit": 2,
+    "brownfield-feasibility": 2,
+    "certification-roadmap": 2,
+    "certification-transferability": 2,
+    "commercial-due-diligence": 2,
+    "community-partnership-planning": 2,
+    "compensation-harmonization-analysis": 2,
+    "competitive-intelligence": 2,
+    "compliance-monitoring": 2,
+    "customer-attrition-risk": 2,
+    "dd-to-valuation-bridge": 2,
+    "deal-execution-playbook": 2,
+    "debt-and-contingent-liability-simulation": 2,
+    "executive-presentation": 2,
+    "financing-plan-review": 2,
+    "forward-industry-research": 2,
+    "greenfield-feasibility": 2,
+    "group-level-review": 2,
+    "growth-projection-modeling": 2,
+    "historical-financial-analysis": 2,
+    "incentive-clawback-assessment": 2,
+    "insight-synthesis": 2,
+    "intra-group-transaction-compliance": 2,
+    "investment-feasibility-modeling": 2,
+    "investment-vehicle-structuring": 2,
+    "ip-fto-review": 2,
+    "jv-structuring": 2,
+    "legal-due-diligence": 2,
+    "legal-risk-register": 2,
+    "management-incentive-review": 2,
+    "market-data-pipeline": 2,
+    "monte-carlo-simulation": 2,
+    "org-readiness-assessment": 2,
+    "partner-due-diligence": 2,
+    "partner-sourcing-strategy": 2,
+    "partnership-health-scorecard": 2,
+    "peer-benchmarking": 2,
+    "permit-pathway-mapping": 2,
+    "pmi-planning": 2,
+    "policy-and-procedure-governance": 2,
+    "portfolio-fit-assessment": 2,
+    "proxy-industry-chain": 2,
+    "quality-of-earnings": 2,
+    "rag-scoring-framework": 2,
+    "regional-incentive-sourcing": 2,
+    "regulatory-screening": 2,
+    "scenario-planning": 2,
+    "site-infrastructure-assessment": 2,
+    "site-visit-protocol": 2,
+    "stage-gate-governance": 2,
+    "strategic-fit-screening": 2,
+    "systematic-market-sizing": 2,
+    "talent-pipeline-planning": 2,
+    "target-costing-analysis": 2,
+    "technical-due-diligence": 2,
+    "two-tier-approval-chain": 2,
+    "unit-conversion-calibration": 2,
+    "value-chain-driver-identification": 2,
+    "value-chain-linkage-analysis": 2,
+    "value-chain-stage-financials": 2,
+    "wacc-input-session": 2,
+    "waiver-management": 2
   },
   "missingFromProjects": {
     "co-abap": [
@@ -421,7 +427,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "double-entry-reconciliation",
       "dts-verification",
@@ -600,7 +608,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -777,7 +787,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -954,6 +966,8 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -1140,6 +1154,7 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
       "design-token-adoption",
       "desktop-app-fallback",
@@ -1332,6 +1347,7 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
       "design-token-adoption",
       "desktop-app-fallback",
@@ -1512,7 +1528,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -1688,7 +1706,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -1874,7 +1894,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -2052,7 +2074,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -2241,7 +2265,195 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
+      "design-token-adoption",
+      "desktop-app-fallback",
+      "double-entry-reconciliation",
+      "dts-verification",
+      "dump-monitor",
+      "emergency-response",
+      "environmental-compliance-checker",
+      "ess-fire-risk-assessor",
+      "evidence-collection-hot-work-permit",
+      "exam-bank-operations",
+      "excel-export",
+      "export-control-screening",
+      "fall-hazard-assessor",
+      "financial-infographic-svg",
+      "financial-journalism-style",
+      "financial-modeling",
+      "financial-narrative-brief",
+      "financial-statement-prep",
+      "finding-reconciliation",
+      "foreign-regulation-monitoring",
+      "fta-origin-determination",
+      "gabor-granger",
+      "game-code-review",
+      "gas-dispersion-analyzer",
+      "generate-room-elevation",
+      "ghs-classifier",
+      "glp-data-integrity-checker",
+      "glp-study-protocol-validator",
+      "gmp-change-control",
+      "gmp-deviation-capa",
+      "gmp-qrm",
+      "halal-certification-workflow",
+      "harness-verification",
+      "hazop-analysis",
+      "hr-consulting-report-writing",
+      "hr-metrics-analysis",
+      "hr-org-readiness-assessment",
+      "hr-stakeholder-alignment",
+      "hs-classification-workflow",
+      "html-build",
+      "hv-cell-formation-electrical-safety-planner",
+      "hwp-document-processing",
+      "industry-research-pack",
+      "investigation/hazop-analysis",
+      "iso14971-risk-scorer",
+      "labor-compliance-audit",
+      "landed-cost-calculation",
+      "landfill-methane-anaerobic-explosion-planner",
+      "learning-curriculum-design",
+      "logistics-coordination",
+      "map-channel-enforcement",
+      "market-entry-strategy",
+      "math-function-plotter",
+      "mece-logic-auditor",
+      "mid-construction-inspection",
+      "migrate-project",
+      "model-migration",
+      "msds-parser",
+      "munitions-magazine-storage-safety-planner",
+      "narrative-framework",
+      "new-project",
+      "org-design-framework",
+      "painting-coating-fire-toxic-planner",
+      "pdf-export",
+      "performance-system-design",
+      "performance-tuning",
+      "permit-to-work",
+      "post-write-chain",
+      "pre-construction-technical-review",
+      "prep-pdf",
+      "presenter-mode",
+      "price-waterfall-analysis",
+      "pricing-competitive-intelligence",
+      "pricing-executive-presentation",
+      "pricing-governance",
+      "pricing-insight-synthesis",
+      "pricing-playbook",
+      "prisma-7",
+      "process-hazard-screening",
+      "project-delivery",
+      "project-resync",
+      "project-to-variant",
+      "promote-variant",
+      "protocol-deviation-analyzer",
+      "psm-loto",
+      "psm-moc",
+      "pyrophoric-gas-emergency-responder",
+      "rack-fall-protection-planner",
+      "refactoring",
+      "release-template",
+      "research",
+      "risk-assessment",
+      "rolling-stock-maintenance-loto-planner",
+      "roo-qualification-worksheet",
+      "root-cause-analysis",
+      "sae-causality-assessor",
+      "safety-inspection-validator",
+      "samm-maturity",
+      "sap-co",
+      "sap-fi",
+      "sap-le",
+      "sap-mm",
+      "sap-pp",
+      "sap-sd",
+      "sarif-exporter",
+      "scenario-comparison",
+      "sheet-model",
+      "signal-detector",
+      "simulate-pipeline",
+      "skill-graph-analytics",
+      "slide-layout-gate",
+      "solution-design",
+      "sound-synth",
+      "source-command-celebrate",
+      "source-verification-ledger",
+      "spdx-sbom",
+      "stakeholder-review-management",
+      "storyline",
+      "stride-threat-matrix",
+      "style-lint-checklist",
+      "swe-code-review",
+      "swe-solve",
+      "talent-acquisition-strategy",
+      "tank-integrity-validator",
+      "tar-planning",
+      "technical-feasibility",
+      "temperature-excursion-analyzer",
+      "test-driven-development",
+      "theme-authoring",
+      "thermal-burn-prevention-planner",
+      "ticket-run",
+      "tool-box-meeting",
+      "trade-documentation-checklist",
+      "trade-promotion-roi",
+      "trail",
+      "ui-component-design",
+      "upgrade-project",
+      "van-westendorp-psm",
+      "variant-feature",
+      "verify-authorization",
+      "version",
+      "zwcad-ai-drawing"
+    ],
+    "co-newbiz-pr-disable-register": [
+      "abap-code-review",
+      "abap-dev",
+      "adopt-project",
+      "ai-tell-reduction",
+      "arc-flash-analyzer",
+      "arcade-physics",
+      "asset-integrity-check",
+      "audit-preparation",
+      "benefit-risk-assessor",
+      "bsl-lab-aerosol-control-planner",
+      "cad-server-manager",
+      "cad-space-recognition",
+      "cad-svg-preview",
+      "career-path-succession-planning",
+      "change-impact-assessment",
+      "chemical-risk-assessment",
+      "coke-oven-pah-heat-stress-planner",
+      "compensation-benchmarking",
+      "competency-modeling",
+      "completion-inspection",
+      "compliance-gap",
+      "construction-permit-overview",
+      "consulting-competitive-intelligence",
+      "consulting-executive-presentation",
+      "consulting-insight-synthesis",
+      "consulting-org-readiness-assessment",
+      "consulting-report-writing",
+      "consulting-stakeholder-alignment",
+      "context-commonization-review",
+      "contractor-onboarding",
+      "cosmetics-solvent-exposure-monitor",
+      "cost-shock-analysis",
+      "create-variant",
+      "customs-duty-drawback-workflow",
+      "daily/audit-preparation",
+      "daily/compliance-gap",
+      "daily/risk-assessment",
+      "dangerous-cargo-handling-planner",
+      "decision-write-integrity",
+      "delegate-to-hub",
+      "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -2425,7 +2637,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -2606,7 +2820,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "dts-verification",
@@ -2760,7 +2976,9 @@
       "create-variant",
       "customs-duty-drawback-workflow",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -2907,6 +3125,7 @@
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -3093,7 +3312,9 @@
       "daily/risk-assessment",
       "dangerous-cargo-handling-planner",
       "decision-write-integrity",
+      "delegate-to-hub",
       "design",
+      "design-review",
       "design-token-adoption",
       "desktop-app-fallback",
       "double-entry-reconciliation",
@@ -3247,22 +3468,23 @@
     ]
   },
   "jaccard": {
-    "co-abap": 0.9112107623318386,
-    "co-architect": 0.7871376811594203,
-    "co-consult": 0.7554347826086957,
-    "co-deck": 0.9222423146473779,
-    "co-design": 0.935862691960253,
-    "co-develop": 0.9305054151624549,
-    "co-export": 0.7819004524886878,
-    "co-game": 0.9239819004524887,
-    "co-hr": 0.779891304347826,
-    "co-learning": 0.9407008086253369,
-    "co-newbiz": 0.7836644591611479,
-    "co-news": 0.7980072463768115,
-    "co-price": 0.7646001796945193,
-    "co-safety": 0.7631814119749777,
-    "co-security": 0.933996383363472,
-    "co-work": 0.9466063348416289
+    "co-abap": 0.9115281501340482,
+    "co-architect": 0.7879061371841155,
+    "co-consult": 0.7563176895306859,
+    "co-deck": 0.9225225225225225,
+    "co-design": 0.9351351351351351,
+    "co-develop": 0.9297929792979298,
+    "co-export": 0.7826871055004508,
+    "co-game": 0.9242560865644724,
+    "co-hr": 0.7806859205776173,
+    "co-learning": 0.9409131602506714,
+    "co-newbiz": 0.7834067547723935,
+    "co-newbiz-pr-disable-register": 0.7834067547723935,
+    "co-news": 0.7987364620938628,
+    "co-price": 0.7654431512981199,
+    "co-safety": 0.7640249332146037,
+    "co-security": 0.9333333333333333,
+    "co-work": 0.9467989179440938
   },
   "convergence": {
     "threshold": 3,
@@ -3295,6 +3517,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3320,6 +3543,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-security",
@@ -3347,6 +3571,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3357,6 +3582,18 @@
           ],
           "ec264d271a535f41": [
             "co-security"
+          ]
+        }
+      },
+      {
+        "capability": "company-intelligence",
+        "hashes": {
+          "95f876746668483c": [
+            "co-consult"
+          ],
+          "a79bc2a29a34cbe9": [
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3383,7 +3620,8 @@
             "co-architect"
           ],
           "f97306e933b308c0": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3412,7 +3650,8 @@
             "co-design"
           ],
           "bc50d03c2de4aade": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3439,7 +3678,8 @@
             "co-architect"
           ],
           "ae4297fc669e81d8": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3457,6 +3697,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3465,6 +3706,18 @@
           ],
           "b6292be6981e3c7f": [
             "co-architect"
+          ]
+        }
+      },
+      {
+        "capability": "financial-statement-analysis",
+        "hashes": {
+          "8df9dc425fc6f2d1": [
+            "co-consult"
+          ],
+          "4d7db8be1181a4b4": [
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3485,6 +3738,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-safety",
             "co-security",
@@ -3523,6 +3777,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-safety",
             "co-security",
@@ -3550,6 +3805,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3575,6 +3831,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3600,6 +3857,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3624,7 +3882,8 @@
             "co-safety"
           ],
           "10c42957298ab758": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3641,7 +3900,8 @@
             "co-safety"
           ],
           "9ef39309e791fc51": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3658,7 +3918,8 @@
             "co-safety"
           ],
           "2661c11b5cd90f4c": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3677,6 +3938,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-security",
@@ -3700,6 +3962,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-safety",
             "co-security",
@@ -3723,6 +3986,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-safety",
             "co-security",
@@ -3755,7 +4019,8 @@
             "co-work"
           ],
           "feb499d076cfdf5e": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ],
           "f22c2b791465cf40": [
             "co-safety"
@@ -3768,8 +4033,20 @@
           "f9c59c97a00f25c5": [
             "co-develop"
           ],
-          "ac456953a305a80b": [
+          "78fbd8fe249ed20d": [
             "co-game"
+          ]
+        }
+      },
+      {
+        "capability": "sample-driven-report-writing",
+        "hashes": {
+          "24c858b4901e692b": [
+            "co-consult"
+          ],
+          "d78b6d223748af6e": [
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       },
@@ -3784,6 +4061,7 @@
             "co-export",
             "co-game",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-price",
             "co-safety",
             "co-security"
@@ -3822,6 +4100,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3847,6 +4126,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-security",
@@ -3874,6 +4154,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3899,6 +4180,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3937,6 +4219,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3962,6 +4245,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -3987,6 +4271,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -4012,6 +4297,7 @@
             "co-hr",
             "co-learning",
             "co-newbiz",
+            "co-newbiz-pr-disable-register",
             "co-news",
             "co-price",
             "co-safety",
@@ -4046,7 +4332,8 @@
             "co-architect"
           ],
           "9efb8baca890bb8e": [
-            "co-newbiz"
+            "co-newbiz",
+            "co-newbiz-pr-disable-register"
           ]
         }
       }
@@ -4058,7 +4345,7 @@
     "capabilities": [
       {
         "capability": "agent:pm",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4071,6 +4358,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4080,7 +4368,7 @@
       },
       {
         "capability": "skill:accessibility-audit",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4093,6 +4381,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4102,7 +4391,7 @@
       },
       {
         "capability": "skill:agent-lifecycle-manager",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4115,6 +4404,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4124,7 +4414,7 @@
       },
       {
         "capability": "skill:api-documentation",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4137,6 +4427,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4146,7 +4437,7 @@
       },
       {
         "capability": "skill:ci-triage",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4159,6 +4450,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4168,7 +4460,7 @@
       },
       {
         "capability": "skill:decision-record",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4181,6 +4473,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4190,7 +4483,7 @@
       },
       {
         "capability": "skill:design-foundation",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4203,6 +4496,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4212,7 +4506,7 @@
       },
       {
         "capability": "skill:documentation-writing",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4225,6 +4519,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4234,7 +4529,7 @@
       },
       {
         "capability": "skill:evidence-ledger",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4247,6 +4542,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4256,7 +4552,7 @@
       },
       {
         "capability": "skill:explain-me",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4269,6 +4565,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4278,7 +4575,7 @@
       },
       {
         "capability": "skill:gateguard",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4291,6 +4588,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4300,7 +4598,7 @@
       },
       {
         "capability": "skill:handbook",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4313,6 +4611,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4322,7 +4621,7 @@
       },
       {
         "capability": "skill:handbook-sync-audit",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4335,6 +4634,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4344,7 +4644,7 @@
       },
       {
         "capability": "skill:i18n-audit",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4357,6 +4657,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4366,7 +4667,7 @@
       },
       {
         "capability": "skill:i18n-formatting",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4379,6 +4680,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4388,7 +4690,7 @@
       },
       {
         "capability": "skill:i18n-layout",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4401,6 +4703,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4410,7 +4713,7 @@
       },
       {
         "capability": "skill:i18n-locale-config",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4423,6 +4726,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4432,7 +4736,7 @@
       },
       {
         "capability": "skill:meeting-facilitation",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4445,6 +4749,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4454,7 +4759,7 @@
       },
       {
         "capability": "skill:project-review",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4467,6 +4772,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4476,7 +4782,7 @@
       },
       {
         "capability": "skill:research-analysis",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4489,6 +4795,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4498,7 +4805,7 @@
       },
       {
         "capability": "skill:script-lifecycle-manager",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4511,6 +4818,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4520,7 +4828,7 @@
       },
       {
         "capability": "skill:security-scan",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4533,6 +4841,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4542,7 +4851,7 @@
       },
       {
         "capability": "skill:service-design",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4555,6 +4864,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4564,7 +4874,7 @@
       },
       {
         "capability": "skill:skill-lifecycle-manager",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4577,6 +4887,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4586,7 +4897,7 @@
       },
       {
         "capability": "skill:source-command-commit-push-pr",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4599,6 +4910,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4608,7 +4920,7 @@
       },
       {
         "capability": "skill:standup-synthesizer",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4621,6 +4933,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4630,7 +4943,7 @@
       },
       {
         "capability": "skill:sync",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4643,6 +4956,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4652,7 +4966,7 @@
       },
       {
         "capability": "skill:team-builder",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4665,6 +4979,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4674,7 +4989,7 @@
       },
       {
         "capability": "skill:token-usage-lint",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4687,6 +5002,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4696,7 +5012,7 @@
       },
       {
         "capability": "skill:translate",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4709,6 +5025,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4718,7 +5035,7 @@
       },
       {
         "capability": "skill:ui-ux-design-intelligence",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4731,6 +5048,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4740,7 +5058,7 @@
       },
       {
         "capability": "skill:update-bun-packages",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4753,6 +5071,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4762,7 +5081,7 @@
       },
       {
         "capability": "skill:zod-contract-gate",
-        "fanIn": 16,
+        "fanIn": 17,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4775,6 +5094,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety",
@@ -4784,7 +5104,7 @@
       },
       {
         "capability": "agent:i18n-specialist",
-        "fanIn": 14,
+        "fanIn": 15,
         "projects": [
           "co-abap",
           "co-consult",
@@ -4796,6 +5116,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-security",
@@ -4804,7 +5125,7 @@
       },
       {
         "capability": "skill:finishing-a-development-branch",
-        "fanIn": 14,
+        "fanIn": 15,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4816,6 +5137,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-safety",
           "co-security",
@@ -4824,7 +5146,7 @@
       },
       {
         "capability": "skill:platform-command-lifecycle-manager",
-        "fanIn": 14,
+        "fanIn": 15,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4836,6 +5158,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-safety",
           "co-security",
@@ -4844,7 +5167,7 @@
       },
       {
         "capability": "skill:platform-skill-lifecycle-manager",
-        "fanIn": 14,
+        "fanIn": 15,
         "projects": [
           "co-abap",
           "co-architect",
@@ -4856,6 +5179,7 @@
           "co-hr",
           "co-learning",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-safety",
           "co-security",
@@ -4864,13 +5188,14 @@
       },
       {
         "capability": "skill:k-dart",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4878,13 +5203,14 @@
       },
       {
         "capability": "skill:k-ecos",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4892,13 +5218,14 @@
       },
       {
         "capability": "skill:k-kosis",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4906,13 +5233,14 @@
       },
       {
         "capability": "skill:k-krx",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4920,13 +5248,14 @@
       },
       {
         "capability": "skill:k-law",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4934,13 +5263,14 @@
       },
       {
         "capability": "skill:k-opendata",
-        "fanIn": 8,
+        "fanIn": 9,
         "projects": [
           "co-architect",
           "co-consult",
           "co-export",
           "co-hr",
           "co-newbiz",
+          "co-newbiz-pr-disable-register",
           "co-news",
           "co-price",
           "co-safety"
@@ -4999,12 +5329,57 @@
         ]
       },
       {
+        "capability": "agent:dba",
+        "fanIn": 3,
+        "projects": [
+          "co-abap",
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:financial-analyst",
+        "fanIn": 3,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register",
+          "co-news"
+        ]
+      },
+      {
+        "capability": "skill:company-intelligence",
+        "fanIn": 3,
+        "projects": [
+          "co-consult",
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:financial-statement-analysis",
+        "fanIn": 3,
+        "projects": [
+          "co-consult",
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:refactoring",
         "fanIn": 3,
         "projects": [
           "co-develop",
           "co-game",
           "co-learning"
+        ]
+      },
+      {
+        "capability": "skill:sample-driven-report-writing",
+        "fanIn": 3,
+        "projects": [
+          "co-consult",
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5025,11 +5400,59 @@
         ]
       },
       {
+        "capability": "agent:antitrust-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:backend-engineer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:brownfield-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:certification-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "agent:change-management-partner",
         "fanIn": 2,
         "projects": [
           "co-consult",
           "co-hr"
+        ]
+      },
+      {
+        "capability": "agent:commercial-dd-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:compliance-officer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5041,6 +5464,14 @@
         ]
       },
       {
+        "capability": "agent:customer-retention-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "agent:data-analyst",
         "fanIn": 2,
         "projects": [
@@ -5049,11 +5480,11 @@
         ]
       },
       {
-        "capability": "agent:dba",
+        "capability": "agent:data-architect",
         "fanIn": 2,
         "projects": [
-          "co-abap",
-          "co-newbiz"
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5062,6 +5493,14 @@
         "projects": [
           "co-architect",
           "co-design"
+        ]
+      },
+      {
+        "capability": "agent:design-system-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5081,11 +5520,115 @@
         ]
       },
       {
-        "capability": "agent:financial-analyst",
+        "capability": "agent:docs-writer",
         "fanIn": 2,
         "projects": [
           "co-newbiz",
-          "co-news"
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:financing-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:frontend-engineer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:glossary-curator",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:greenfield-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:group-review-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:hr-integration-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:incentive-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:industry-lead",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:infra-automation-engineer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:ip-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:ir-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:legal-counsel",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:market-intelligence-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5094,6 +5637,38 @@
         "projects": [
           "co-architect",
           "co-work"
+        ]
+      },
+      {
+        "capability": "agent:partnership-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:platform-lead",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:pmi-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:process-governance-manager",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5113,6 +5688,46 @@
         ]
       },
       {
+        "capability": "agent:quant-methodologist",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:region-lead",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:release-engineer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:risk-officer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:security-engineer",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "agent:service-designer",
         "fanIn": 2,
         "projects": [
@@ -5121,11 +5736,35 @@
         ]
       },
       {
+        "capability": "agent:site-facility-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "agent:sre",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "agent:stack-setup",
         "fanIn": 2,
         "projects": [
           "co-develop",
           "co-game"
+        ]
+      },
+      {
+        "capability": "agent:technical-dd-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5145,11 +5784,27 @@
         ]
       },
       {
+        "capability": "agent:ux-designer-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "agent:ux-researcher",
         "fanIn": 2,
         "projects": [
           "co-architect",
           "co-design"
+        ]
+      },
+      {
+        "capability": "agent:valuation-agent",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5161,11 +5816,83 @@
         ]
       },
       {
-        "capability": "skill:company-intelligence",
+        "capability": "skill:antitrust-screening",
         "fanIn": 2,
         "projects": [
-          "co-consult",
-          "co-newbiz"
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:assumption-audit",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:brownfield-feasibility",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:certification-roadmap",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:certification-transferability",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:commercial-due-diligence",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:community-partnership-planning",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:compensation-harmonization-analysis",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:competitive-intelligence",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:compliance-monitoring",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5177,6 +5904,38 @@
         ]
       },
       {
+        "capability": "skill:customer-attrition-risk",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:dd-to-valuation-bridge",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:deal-execution-playbook",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:debt-and-contingent-liability-simulation",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:design-review",
         "fanIn": 2,
         "projects": [
@@ -5185,11 +5944,19 @@
         ]
       },
       {
-        "capability": "skill:financial-statement-analysis",
+        "capability": "skill:executive-presentation",
         "fanIn": 2,
         "projects": [
-          "co-consult",
-          "co-newbiz"
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:financing-plan-review",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5201,11 +5968,179 @@
         ]
       },
       {
+        "capability": "skill:forward-industry-research",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:greenfield-feasibility",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:group-level-review",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:growth-projection-modeling",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:historical-financial-analysis",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:incentive-clawback-assessment",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:insight-synthesis",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:intra-group-transaction-compliance",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:investment-feasibility-modeling",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:investment-vehicle-structuring",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:ip-fto-review",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:jv-structuring",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:legal-due-diligence",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:legal-risk-register",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:management-incentive-review",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:market-data-pipeline",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:mece-logic-auditor",
         "fanIn": 2,
         "projects": [
           "co-consult",
           "co-develop"
+        ]
+      },
+      {
+        "capability": "skill:monte-carlo-simulation",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:org-readiness-assessment",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:partner-due-diligence",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:partner-sourcing-strategy",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:partnership-health-scorecard",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5217,6 +6152,86 @@
         ]
       },
       {
+        "capability": "skill:peer-benchmarking",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:permit-pathway-mapping",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:pmi-planning",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:policy-and-procedure-governance",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:portfolio-fit-assessment",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:proxy-industry-chain",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:quality-of-earnings",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:rag-scoring-framework",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:regional-incentive-sourcing",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:regulatory-screening",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:samm-maturity",
         "fanIn": 2,
         "projects": [
@@ -5225,19 +6240,35 @@
         ]
       },
       {
-        "capability": "skill:sample-driven-report-writing",
-        "fanIn": 2,
-        "projects": [
-          "co-consult",
-          "co-newbiz"
-        ]
-      },
-      {
         "capability": "skill:sarif-exporter",
         "fanIn": 2,
         "projects": [
           "co-develop",
           "co-security"
+        ]
+      },
+      {
+        "capability": "skill:scenario-planning",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:site-infrastructure-assessment",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:site-visit-protocol",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       },
       {
@@ -5257,6 +6288,22 @@
         ]
       },
       {
+        "capability": "skill:stage-gate-governance",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:strategic-fit-screening",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:stride-threat-matrix",
         "fanIn": 2,
         "projects": [
@@ -5265,11 +6312,99 @@
         ]
       },
       {
+        "capability": "skill:systematic-market-sizing",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:talent-pipeline-planning",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:target-costing-analysis",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:technical-due-diligence",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
         "capability": "skill:technical-feasibility",
         "fanIn": 2,
         "projects": [
           "co-consult",
           "co-develop"
+        ]
+      },
+      {
+        "capability": "skill:two-tier-approval-chain",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:unit-conversion-calibration",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:value-chain-driver-identification",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:value-chain-linkage-analysis",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:value-chain-stage-financials",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:wacc-input-session",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
+        ]
+      },
+      {
+        "capability": "skill:waiver-management",
+        "fanIn": 2,
+        "projects": [
+          "co-newbiz",
+          "co-newbiz-pr-disable-register"
         ]
       }
     ]

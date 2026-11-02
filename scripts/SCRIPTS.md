@@ -101,6 +101,7 @@ Their absence from the table is policy-consistent, not an oversight.
 | `dispatch-parallel.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
 | `dispatch-serial.ts` | L0 | 1.1.2 | active | v-fix (2026-10-02, T-20261002-013): workspace root via fileURLToPath(new URL(...)) — URL.pathname keeps a leading slash and percent-encodes spaces on Windows, producing an unusable root (same class as pm-role-bootstrap, PR #1317). Prior: — | —| L0+L1 | —|
 | `dispatch.ts` | L0 | 1.1.1 | active | —| —| L0+L1 | —|
+| `fleet-script-parity.ts` | L0 | 1.0.0 | active | v1.0.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §8 Phase 4 verification sweep): fleet-script-parity — hashes the common script set (every file under `templates/common/scripts/`, relative paths) against each `Projects/co-*/scripts/` tree; per-script match/mismatch/missing classification plus a per-repo FULL/DRIFT summary. WARN-soak by design: divergence never FAILs — upgrade-project is the delivery vehicle and repos await their next cycle; project-local merges (sync-overwrite-policy §6 option 3) surface as expected mismatches. Extra project-only files are informational. Pure core (`compareScriptSet`/`summarize`/`listRelativeFiles`) exported for `tests/unit/fleet-script-parity.test.ts`; `import.meta.main` guard; `--json` output. L0-only — not delivered to templates. | —| L0 | —|
 | `fix-script-versions.ts` | L0 | 1.1.1 | active | —| —| L0 | —|
 | `gen-pr-body.ts` | L0 | 1.2.0 | active | —| —| L0+L1 | —|
 | `generate-ide-rules.ts` | L0 | 1.0.0 | active | —| —| L0+L1 | —|
