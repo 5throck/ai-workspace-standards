@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261103-006
+kind: manual
+title: >-
+  learning: extend the security-scan skill with an auth-surface audit step —
+  sweep variant web apps for unauthenticated registration/signup endpoints
+  granting any authenticated role, flag default-open auth surfaces; reference
+  remediation shape = co-newbiz #796 (default-closed behind explicit env flag
+  CO_NEWBIZ_ALLOW_REGISTER, refusal emitted BEFORE body-parse and L1 throttle so
+  no request-shape oracle/quota consumption while closed, dated owner-decision
+  comment, admin-provisioned accounts). Gap: security-scan v1.2.0 covers
+  gitleaks/bun-audit/hooks/gitignore only — zero auth-surface checks;
+  route-audit-scan audits audit-tokens, not open signup. Stack-neutral,
+  documentation/procedure-level. Evidence:
+  Projects/co-newbiz/app/web-next/app/api/auth/register/route.ts:23,35.
+  Extracted by Step 2f 2026-11-03
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-03T07:37:42.696+09:00'
+history:
+  - at: '2026-11-03T07:37:42.696+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
