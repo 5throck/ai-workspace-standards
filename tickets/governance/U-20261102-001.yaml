@@ -3,14 +3,30 @@ id: U-20261102-001
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-02T02:26:44.842+09:00
+created_at: '2026-11-02T02:26:44.842+09:00'
 history:
-  - at: 2026-11-02T02:26:44.842+09:00
+  - at: '2026-11-02T02:26:44.842+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-03T05:45:47.029+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-03T05:45:55.773+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-03T05:45:55.773+09:00'
+    from: review
+    to: done
+result: >-
+  Verified independently: the Hub-and-Spoke Topology section now exists in
+  templates/common/AGENTS.md (grep count 1) — the claim was true at filing time
+  (PR #1805's AGENTS.md edits failed to land; root cause: the L1 AGENTS.md is a
+  transform of root, hand-editing templates/common was overwritten by the L0→L1
+  publish). Fixed via PR #1807: section authored in the ROOT COMMON-AGENTS zone,
+  propagated --governance-l1 + --docs; fleet-verified 15/15 variant AGENTS.md +
+  15/15 project repos carry the section (Phase 4 sweep). No further action.
 error: null
 upstream:
   project: co-develop
@@ -19,11 +35,29 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Phase 2 step 0 (workspace PR #1805, "boundary protocol and SEV escalation into common agents zone") updated only templates/CHANGELOG.md, docs/VERSION_MANIFEST.md, docs/variant-roadmap-2026-q3-q4.md and memory/2026-11-02.md. The claimed "Hub-and-Spoke Topology" section (hubs as service providers, escalation-via-delegation channel, SEV1-SEV3 incident tiers, workspace-root PM final adjudication) does not exist in templates/common/AGENTS.md — `git log --all -S "Hub-and-Spoke Topology" -- templates/common/AGENTS.md` returns nothing; grep finds the string only in templates/CHANGELOG.md. Expected: every variant''s AGENTS.md receives the section through the COMMON-AGENTS marker-inject domain during the Phase 2 hub upgrade wave; observed: the 0.27.0 upgrade merges the COMMON-AGENTS block into Projects/co-develop/AGENTS.md but the block carries no boundary-protocol content, so the hub receives nothing. Remedy: author the section into the COMMON-AGENTS zone of templates/common/AGENTS.md (L0->L1->L2 propagation), then re-run the hub upgrade wave. Repro: from workspace root, `grep -rn "Hub-and-Spoke" templates/ | grep -v CHANGELOG` (empty) and `bun scripts/upgrade-project.ts Projects/co-develop --dry-run --prune-removed` (merge delivers no such section).'
+  symptom: >-
+    Phase 2 step 0 (workspace PR #1805, "boundary protocol and SEV escalation
+    into common agents zone") updated only templates/CHANGELOG.md,
+    docs/VERSION_MANIFEST.md, docs/variant-roadmap-2026-q3-q4.md and
+    memory/2026-11-02.md. The claimed "Hub-and-Spoke Topology" section (hubs as
+    service providers, escalation-via-delegation channel, SEV1-SEV3 incident
+    tiers, workspace-root PM final adjudication) does not exist in
+    templates/common/AGENTS.md — `git log --all -S "Hub-and-Spoke Topology" --
+    templates/common/AGENTS.md` returns nothing; grep finds the string only in
+    templates/CHANGELOG.md. Expected: every variant's AGENTS.md receives the
+    section through the COMMON-AGENTS marker-inject domain during the Phase 2
+    hub upgrade wave; observed: the 0.27.0 upgrade merges the COMMON-AGENTS
+    block into Projects/co-develop/AGENTS.md but the block carries no
+    boundary-protocol content, so the hub receives nothing. Remedy: author the
+    section into the COMMON-AGENTS zone of templates/common/AGENTS.md
+    (L0->L1->L2 propagation), then re-run the hub upgrade wave. Repro: from
+    workspace root, `grep -rn "Hub-and-Spoke" templates/ | grep -v CHANGELOG`
+    (empty) and `bun scripts/upgrade-project.ts Projects/co-develop --dry-run
+    --prune-removed` (merge delivers no such section).
   affected_paths:
     - AGENTS.md
   identity_source: self_declared
-  triage: inbox
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -32,4 +66,16 @@ upstream:
   dedupe_key: 8e6bd1d3191d9977282fa7db4a1ce8fff561e08ce18f02a81395e810ac14578d
   duplicates:
     - project: co-develop
-      at: 2026-11-02T02:26:44.842+09:00
+      at: '2026-11-02T02:26:44.842+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.27.0
+    summary: >-
+      Verified independently: the Hub-and-Spoke Topology section now exists in
+      templates/common/AGENTS.md (grep count 1) — the claim was true at filing
+      time (PR #1805's AGENTS.md edits failed to land; root cause: the L1
+      AGENTS.md is a transform of root, hand-editing templates/common was
+      overwritten by the L0→L1 publish). Fixed via PR #1807: section authored in
+      the ROOT COMMON-AGENTS zone, propagated --governance-l1 + --docs;
+      fleet-verified 15/15 variant AGENTS.md + 15/15 project repos carry the
+      section (Phase 4 sweep). No further action.
