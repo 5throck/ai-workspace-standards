@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261103-004
+kind: manual
+title: >-
+  records hygiene batch (Phase I 2026-11-03): (1) skill-graph fleet projection
+  scans Projects/ without git-awareness — a gitignored local project
+  (co-newbiz-pr-disable-register, a legit L3 checkout for PRs #795/#796) leaks
+  into committed snapshots; filter discovery through git ls-files/check-ignore
+  or mark provenance (scripts/skill-graph-fleet-report.ts:283-288); (2) absorbed
+  co-architect agents' lifecycle records not updated for the 11-02 hub
+  transition — phase histories end at creation, record last_updated
+  (05-28/06-20) contradicts frontmatter 2026-11-02
+  (templates/co-architect/docs/lifecycle/agents/analyst.md,
+  project-coordinator.md); (3) ADR-0103 F2 says authorization-registry rows are
+  'authored at the root' but no root docs/authorization-registry.md exists (only
+  co-security template+project copies) — correct wording or create the canonical
+  root doc; (4) delegate-to-hub skill has a SKILLS.md row but no
+  docs/lifecycle/skills/ record; (5) D-2: 11-01 rulings used T-tickets not DEC
+  records — document the convention
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-03T06:04:40.411+09:00'
+history:
+  - at: '2026-11-03T06:04:40.411+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
