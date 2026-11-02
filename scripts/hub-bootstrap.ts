@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-02, Windows CI fix — tests/unit/hub-bootstrap.test.ts
+//          'hook-integrity divergence FAILS the gate'): (a) the hook-integrity
+//          fingerprint is line-ending-neutral — sha256 over content with CRLF
+//          normalized to LF — and its walk keys are explicitly posix-style, so
+//          a core.autocrlf=true checkout on Windows cannot false-fail the pass
+//          case (every hook "differs" only by line endings); the clone itself
+//          pins -c core.autocrlf=false for the same reason (no-op on POSIX).
+//          (b) every temp-dir cleanup before a fail() is best-effort
+//          (cleanupTemp) — on Windows rmSync can throw EBUSY/EPERM while AV or
+//          a lingering git child still holds a handle on a freshly cloned
+//          file, which used to replace the typed VALIDATED gate verdict with
+//          an opaque cleanup exception (exit 1 without the typed message); the
+//          same best-effort rule covers both sweeps (per-dir try/catch — one
+//          locked dir no longer aborts the sweep) and the concurrent-claim
+//          cleanup in moveIntoPlace.
 // v1.1.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §3.5/§4.3.5/§3.4, Phase 3.5 audit completion): (a) the §3.5
 //          divergence force — a hub whose LATEST root-side probe report reads
@@ -54,6 +69,7 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { acquireLock, releaseLock } from './automation-lock.ts';
 import { latestProbeReportFile, probeReportVerdict } from './hub-probe.ts';
@@ -85,6 +101,26 @@ function fail(msg: string): never {
 function run(cmd: string[], opts: { cwd?: string } = {}): { code: number; out: string } {
   const proc = spawnSync(cmd[0], cmd.slice(1), { cwd: opts.cwd, encoding: 'utf-8' });
   return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}${proc.stderr ?? ''}` };
+}
+
+/** Best-effort temp-dir cleanup that can never mask the typed failure printed
+ * after it (v1.2.0): on Windows rmSync can throw EBUSY/EPERM while AV or a
+ * lingering git child still holds a handle on a freshly cloned file — the
+ * typed verdict must still reach stderr. Returns true when the dir is gone. */
+function cleanupTemp(dir: string): boolean {
+  try {
+    rmSync(dir, { recursive: true, force: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Shared tail for every cleanup-then-fail site: the typed message always
+ * prints; a failed cleanup is named inside it instead of replacing it. */
+function failWithCleanup(msg: string, tempDir: string): never {
+  const cleaned = cleanupTemp(tempDir);
+  fail(cleaned ? msg : `${msg}\n   ⚠ temp dir cleanup FAILED (${tempDir}) — remove it manually`);
 }
 
 // ── Registry resolution (design §4.1) ────────────────────────────────────────
@@ -198,24 +234,38 @@ function printStatus(hub: string, stateDirOverride?: string): void {
 
 // ── VALIDATED gate (design §4.4) ─────────────────────────────────────────────
 
+/** Line-ending-normalized content fingerprint (v1.2.0): sha256 over the utf-8
+ * bytes with CRLF normalized to LF. Platform-agnostic BY CONSTRUCTION — on a
+ * core.autocrlf=true Windows checkout git smudges LF blobs to CRLF on disk,
+ * which must not read as hook divergence; on POSIX (LF-only files) the
+ * normalization is a no-op and the fingerprint is the plain byte identity. */
+function contentFingerprint(p: string): string {
+  const normalized = readFileSync(p, 'utf-8').replace(/\r\n/g, '\n');
+  return createHash('sha256').update(normalized, 'utf-8').digest('hex');
+}
+
 function dirFingerprint(dir: string): Map<string, string> {
   const out = new Map<string, string>();
   if (!existsSync(dir)) return out;
   const walk = (d: string, prefix: string): void => {
     for (const e of readdirSync(d, { withFileTypes: true })) {
       const p = join(d, e.name);
+      // Keys are ALWAYS posix-style ('/' separators, no drive letter) so the
+      // comparison is separator-neutral on Windows.
       const key = prefix + e.name;
       if (e.isDirectory()) walk(p, `${key}/`);
-      else out.set(key, readFileSync(p, 'utf-8'));
+      else out.set(key, contentFingerprint(p));
     }
   };
   walk(dir, '');
   return out;
 }
 
-/** Hook-integrity diff: the temp clone's scripts/hooks/ must be BYTE-identical
- * to the canonical scripts/hooks/ (design §4.4 check 2). Returns violation
- * strings (empty = clean). */
+/** Hook-integrity diff: the temp clone's scripts/hooks/ must be byte-identical
+ * to the canonical scripts/hooks/ (design §4.4 check 2) modulo line endings —
+ * v1.2.0 fingerprints sha256-normalize CRLF to LF so a core.autocrlf=true
+ * Windows checkout cannot false-fail the pass case. Returns violation strings
+ * (empty = clean). */
 function hookIntegrityDiff(cloneDir: string): string[] {
   const canonical = join(ROOT, 'scripts', 'hooks');
   const delivered = join(cloneDir, 'scripts', 'hooks');
@@ -308,8 +358,7 @@ export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
   const tempDev = statSync(tempDir).dev;
   const targetParentDev = statSync(join(targetDir, '..')).dev;
   if (tempDev !== targetParentDev) {
-    rmSync(tempDir, { recursive: true, force: true });
-    fail(`same-volume check failed: temp dir (dev ${tempDev}) and target parent (dev ${targetParentDev}) are on different devices — an atomic rename is impossible; free the cross-volume mount and retry`);
+    failWithCleanup(`same-volume check failed: temp dir (dev ${tempDev}) and target parent (dev ${targetParentDev}) are on different devices — an atomic rename is impossible; free the cross-volume mount and retry`, tempDir);
   }
   try {
     renameSync(tempDir, targetDir);
@@ -318,8 +367,10 @@ export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
     const code = (err as NodeJS.ErrnoException).code;
     if (code === 'ENOTEMPTY' || code === 'EEXIST') {
       // Five-guarantee #3 concurrency clause (§4.3.4): a concurrent claim
-      // won — clean OUR temp and report, this is not an error.
-      rmSync(tempDir, { recursive: true, force: true });
+      // won — clean OUR temp and report, this is not an error. Cleanup is
+      // best-effort (v1.2.0): a Windows EBUSY here must not turn the
+      // concurrent-claim report into an opaque exception.
+      if (!cleanupTemp(tempDir)) console.log(`   ⚠ temp dir cleanup FAILED (${tempDir}) — remove it manually`);
       return { moved: false, concurrentClaim: true };
     }
     throw err;
@@ -390,8 +441,14 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     // no residue; every --apply run clears dead-pid / >24h temp dirs BEFORE
     // creating its own (the manual --recover sweep shares this detection).
     for (const s of sweepStaleTempDirs(Date.parse(nowIso()))) {
-      rmSync(s.dir, { recursive: true, force: true });
-      console.log(`   🧹 boot-time sweep removed ${s.dir} — ${s.cause}`);
+      // Best-effort per dir (v1.2.0): one locked dir (Windows EBUSY) must not
+      // abort the whole bootstrap sweep — the next sweep retries it.
+      try {
+        rmSync(s.dir, { recursive: true, force: true });
+        console.log(`   🧹 boot-time sweep removed ${s.dir} — ${s.cause}`);
+      } catch (e) {
+        console.log(`   ⚠ boot-time sweep could not remove ${s.dir} (${e instanceof Error ? e.message : e}) — left for the next sweep`);
+      }
     }
     // Five-guarantee #3 — temp dir + atomic move (§4.3): clone into
     // .bootstrap-<hub>-<pid>-<ts>; the gw- namespace is FORBIDDEN here —
@@ -400,10 +457,12 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     mkdirSync(plan.tempDir, { recursive: true });
 
     console.log(`\n cloning ${plan.remote} @ ${plan.sha.slice(0, 12)} …`);
-    const clone = run(['git', 'clone', '--quiet', plan.remote, plan.tempDir]);
+    // -c core.autocrlf=false (v1.2.0): pin a faithful checkout so the hook-
+    // integrity byte compare is deterministic on Windows too (no-op on POSIX,
+    // where autocrlf already defaults to false).
+    const clone = run(['git', '-c', 'core.autocrlf=false', 'clone', '--quiet', plan.remote, plan.tempDir]);
     if (clone.code !== 0) {
-      rmSync(plan.tempDir, { recursive: true, force: true });
-      fail(`git clone failed (exit ${clone.code}) ${clone.out.slice(0, 400)} — temp dir cleaned`);
+      failWithCleanup(`git clone failed (exit ${clone.code}) ${clone.out.slice(0, 400)} — temp dir cleaned`, plan.tempDir);
     }
     // Five-guarantee #4 — recovery marker (§4.3.5), written after the clone
     // (git clone refuses a non-empty target); a crash DURING the clone leaves
@@ -414,20 +473,17 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     const head = run(['git', '-C', plan.tempDir, 'rev-parse', 'HEAD']);
     const clonedSha = head.out.trim().split('\n')[0];
     if (head.code !== 0 || clonedSha !== plan.sha) {
-      rmSync(plan.tempDir, { recursive: true, force: true });
-      fail(`SHA pin mismatch: approved ${plan.sha} but the clone resolved ${clonedSha || '<none>'} — the remote moved between approval and clone; re-approve the new SHA and retry (temp dir cleaned)`);
+      failWithCleanup(`SHA pin mismatch: approved ${plan.sha} but the clone resolved ${clonedSha || '<none>'} — the remote moved between approval and clone; re-approve the new SHA and retry (temp dir cleaned)`, plan.tempDir);
     }
     // Verify inside temp BEFORE any gate: identity files parse, it is a work tree.
     try {
       JSON.parse(readFileSync(join(plan.tempDir, 'variant.json'), 'utf-8'));
     } catch (e) {
-      rmSync(plan.tempDir, { recursive: true, force: true });
-      fail(`clone verification failed: variant.json does not parse (${e instanceof Error ? e.message : String(e)}) — temp dir cleaned`);
+      failWithCleanup(`clone verification failed: variant.json does not parse (${e instanceof Error ? e.message : String(e)}) — temp dir cleaned`, plan.tempDir);
     }
     const inside = run(['git', '-C', plan.tempDir, 'rev-parse', '--is-inside-work-tree']);
     if (inside.code !== 0 || !inside.out.includes('true')) {
-      rmSync(plan.tempDir, { recursive: true, force: true });
-      fail('clone verification failed: not a git work tree — temp dir cleaned');
+      failWithCleanup('clone verification failed: not a git work tree — temp dir cleaned', plan.tempDir);
     }
     console.log(`   clone verified at ${clonedSha.slice(0, 12)}; variant.json parses; git work tree ok`);
 
@@ -438,8 +494,7 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     const gate = runValidatedGate(plan.tempDir);
     for (const r of gate.reasons) console.log(`   · ${r}`);
     if (!gate.ok) {
-      rmSync(plan.tempDir, { recursive: true, force: true });
-      fail(`VALIDATED gate FAILED — temp dir cleaned, nothing moved:\n   ${gate.reasons.join('\n   ')}`);
+      failWithCleanup(`VALIDATED gate FAILED — temp dir cleaned, nothing moved:\n   ${gate.reasons.join('\n   ')}`, plan.tempDir);
     }
 
     // State file: init + BOOTSTRAPPED->VALIDATED->READY journal (§3.1), written
@@ -527,8 +582,17 @@ function recover(apply: boolean): void {
     console.log(`\n${stale.length} stale temp dir(s). Re-run with --apply to remove.`);
     return;
   }
-  for (const s of stale) rmSync(s.dir, { recursive: true, force: true });
-  console.log(`\n✅ removed ${stale.length} stale bootstrap temp dir(s).`);
+  let removed = 0;
+  for (const s of stale) {
+    // Best-effort per dir (v1.2.0): one locked dir must not abort the sweep.
+    try {
+      rmSync(s.dir, { recursive: true, force: true });
+      removed++;
+    } catch (e) {
+      console.log(`⚠ could not remove ${s.dir} (${e instanceof Error ? e.message : e}) — left in place`);
+    }
+  }
+  console.log(`\n✅ removed ${removed} of ${stale.length} stale bootstrap temp dir(s).`);
 }
 
 /** Dead-pid check mirroring automation-lock.ts pidAlive (EPERM = alive). */

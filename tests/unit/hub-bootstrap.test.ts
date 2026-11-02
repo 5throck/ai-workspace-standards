@@ -1,4 +1,10 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-02, Windows CI fix): every fixture git op pins
+// -c core.autocrlf=false — the fixture seeds LF blobs and must never depend on
+// the ambient autocrlf of the machine (a smudged checkout would flip hook
+// bytes and mask/mis-detect hook-integrity divergence). Assertion bodies
+// unchanged; pairs with hub-bootstrap.ts v1.2.0 (normalized fingerprints +
+// best-effort cleanupTemp so the typed gate verdict always reaches stderr).
 // hub-bootstrap.test.ts — unit contract for scripts/hub-bootstrap.ts,
 // scripts/hub-probe.ts, and the ticket.ts --hub UNAVAILABLE gate
 // (spec docs/designs/2026-11-01-hub-consolidation-design.md §3.5/§4/§4.5,
@@ -74,8 +80,11 @@ function buildFixture(name = HUB): Fixture {
   }), 'utf-8');
 
   const bare = join(root, 'fixture-remote.git');
+  // All fixture git ops pin -c core.autocrlf=false (v1.1.0): the fixture seeds
+  // LF blobs and the assertions must not depend on the machine's autocrlf
+  // (Windows checkouts would otherwise smudge the hook bytes). No-op on POSIX.
   const run = (cmd: string[], cwd?: string) => {
-    const p = spawnSync(cmd[0], cmd.slice(1), { cwd, encoding: 'utf-8' });
+    const p = spawnSync(cmd[0], ['-c', 'core.autocrlf=false', ...cmd.slice(1)], { cwd, encoding: 'utf-8' });
     if ((p.status ?? 1) !== 0) throw new Error(`fixture git failed: ${cmd.join(' ')}\n${p.stdout}${p.stderr}`);
   };
   run(['git', 'init', '--quiet', '--bare', '--initial-branch=main', bare]);
