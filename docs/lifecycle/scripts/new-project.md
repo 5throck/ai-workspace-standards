@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.39.0
+- **Version**: 1.40.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-01
 - **Last Reviewer**: automation-engineer
@@ -46,6 +46,7 @@
 | 2026-10-09 | production | production | v1.35.0 (T-20261009-002): §2 overlay merges a variant package.json over the §2.5c-generated one (scalar keys variant-wins, object keys per-key via helpers/package-merge.ts 1.0.0) instead of clobbering it — ends the #1432/#1433 Tier-2-loss class that kept the nightly scaffold E2E red 2026-10-06..08. Spec: docs/designs/2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md | automation-engineer |
 | 2026-10-10 | production | production | v1.36.0 (eight-platform coverage): comma-separated `--platform` list with union pruning (lib/platform-prune.ts); single `codex` now drops CLAUDE.md/GEMINI.md. Spec: docs/designs/2026-10-10-eight-platform-coverage-design.md | docs-writer |
 | 2026-11-01 | production | production | v1.39.0 (spec docs/designs/2026-10-31-graft-trail-migration-design.md R2.5 addendum — trigger met: L0 trail init complete, PR #1783): §7.7 index build flips graft-first/bunx-fallback → plain `trail build` (trail 0.28.1); MANAGED_TOP_LEVEL_DIRS gains `.trail`, keeps `graft` (0.28.1 build still defaults its graph dir to `<repo>/graft` until the project's own `trail init` migrates it to `.trail/cache`) | automation-engineer |
+| 2026-11-02 | production | production | v1.40.0 (spec docs/designs/2026-11-01-hub-consolidation-design.md §6.2 — Phase 1.5 preflight): hub consumption preflight after the Variant Readiness Gate — the template's variant.json hub.consumes rows resolve against the hub_topology registry via the shared leg-3 logic (helpers/hub-topology.ts v1.1.0 checkConsumerMinimumVersions), and an unregistered hub-doctrine duplication in the template FAILs (checkHubDoctrineDuplication — sanctioned only as own-hub, common-contract stock, or a declared consumer's stale-read copy per §7.4). Registry absent → vacuous skip. Additive. | automation-engineer |
 
 ## Acceptance Criteria
 
