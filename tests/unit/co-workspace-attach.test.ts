@@ -185,7 +185,7 @@ describe("attach lifecycle (a): POST /sessions attach_dir", () => {
     // Gateway-owned artifacts exist under storage, NOT in the hub tree.
     const scratch = attachScratchDir(rec);
     expect(existsSync(scratch)).toBe(true);
-    expect(scratch.startsWith(resolve(sb.dataDir, "storage") + "/")).toBe(true);
+    expect(scratch.replace(/\\/g, "/").startsWith(resolve(sb.dataDir, "storage").replace(/\\/g, "/") + "/")).toBe(true);
     expect(existsSync(rec.hermesHome)).toBe(true);
     // The seeded config.yaml carries the DEPLOYMENT provider key (empty attach pool).
     const cfgYaml = readFileSync(join(rec.hermesHome, "config.yaml"), "utf8");
