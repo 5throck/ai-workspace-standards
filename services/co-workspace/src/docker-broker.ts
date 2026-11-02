@@ -415,7 +415,7 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
     // Volume mode (T-20260930-038): no host paths exist to walk - the daemon enforces subpath
     // containment inside the named volume, so the on-disk lstat walk is skipped entirely.
     if (cfg.policy.dataVolume === undefined) {
-      const disk = validateBindsOnDisk(verdict.facts.binds, cfg.policy.dataDirHost);
+      const disk = validateBindsOnDisk(verdict.facts.binds, cfg.policy.dataDirHost, undefined, cfg.policy.workspaceDirHost);
       if (!disk.ok) return respond(c, 403, disk.reason);
     }
 
@@ -492,7 +492,7 @@ export function startBroker(cfg: BrokerConfig): BrokerHandle {
           const recorded = cache.get(r.id)?.binds;
           if (!recorded) return respond(c, 403, "start of a container not created through this broker");
           if (!sameBinds(r.binds, recorded)) return respond(c, 403, "binds changed since create");
-          const disk = validateBindsOnDisk(recorded, cfg.policy.dataDirHost);
+          const disk = validateBindsOnDisk(recorded, cfg.policy.dataDirHost, undefined, cfg.policy.workspaceDirHost);
           if (!disk.ok) return respond(c, 403, disk.reason);
         }
       }

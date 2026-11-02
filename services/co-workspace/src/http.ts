@@ -1,7 +1,10 @@
 /** HTTP utilities: error responses, JSON parsing, client IP resolution. */
 
 export class HttpError extends Error {
-  constructor(readonly status: number, message: string) {
+  /** Optional machine-readable error code (ADR-0092 Addendum 17 typed errors:
+   * attach_requires_docker, attach_full_delete_refused, hub_unavailable, …) — surfaced in
+   * the JSON error body by handleRequest so clients can branch on it. */
+  constructor(readonly status: number, message: string, readonly code?: string) {
     super(message);
   }
 }

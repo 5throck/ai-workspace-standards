@@ -221,7 +221,7 @@ design). In-container background self-updates are inert by design.
 | `CO_WORKSPACE_TURN_EXTRA_ARGS` | — | Extra argv for every turn across runtimes; `CO_WORKSPACE_HERMES_EXTRA_ARGS` remains as an alias. Hot-swappable via `PUT /admin/turn-config` without a restart |
 | `CO_WORKSPACE_HERMES_TOOLSETS` / `CO_WORKSPACE_HERMES_EXTRA_ARGS` | — | Toolset scoping (`-t`) and extra CLI args per session |
 | `CO_WORKSPACE_QUOTA_WINDOW` | `lifetime` | `daily` resets per-team quota counters each UTC day |
-| `CO_WORKSPACE_API_KEYS` / `CO_WORKSPACE_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal; the file re-reads on `POST /admin/reload` |
+| `CO_WORKSPACE_API_KEYS` / `CO_WORKSPACE_API_KEYS_FILE` | — | Bearer keys; `key:label` (key file only) maps a key to a trusted principal, extended by attach mode (ADR-0092 Addendum 17) to `key:label,expires,spoke-id` — `expires` (ISO timestamp) revokes by expiry (an expired or unparseable-expiry key 401s), `spoke-id` scopes the key to one spoke and becomes the principal for attached-tenant ownership (always gateway-derived from the verified key, never client-asserted); the file re-reads on `POST /admin/reload` |
 | `CO_WORKSPACE_LOGIN_REQUIRED` | compose: `true` | Web app requires a session; keyless, sessionless visitors are redirected. A valid Bearer key satisfies the demand without a session, so keys and the login gate compose (ADR-0092 Addendum 15) |
 | `CO_WORKSPACE_PUBLISH` | `127.0.0.1` | Host IP of the compose publish binding; `0.0.0.0` exposes the gateway on all interfaces — keep auth on before widening (see Security model) |
 | `CO_WORKSPACE_CSRF_REQUIRED` | compose: `true` | Keyless mutating requests need `x-requested-with: co-workspace` |
@@ -236,6 +236,36 @@ design). In-container background self-updates are inert by design.
 | `CO_WORKSPACE_SESSION_TTL_HOURS` / `CO_WORKSPACE_SESSION_IDLE_HOURS` | `24` / `4` | Session hardening (2026-10-03): absolute lifetime and idle expiry — activity slides the idle window but never past the absolute cap; sign-in is required again after either. Admin destructive ops additionally re-confirm the operator password per call |
 | `CO_WORKSPACE_ALLOW_ANON_PROVISIONING` | `false` | `false` = creating a team requires a credential (sign-in or API key); unauthenticated creation answers `401` and is audited (`tenant.provision.denied`). `true` restores zero-friction anonymous first-use for throwaway deploys — and REQUIRES explicit quotas (`CO_WORKSPACE_TENANT_MAX_TURNS`, `_TENANT_MAX_TOKENS`, `_PRINCIPAL_MAX_TOKENS`): boot fails when any of them is `0`, because anonymous tenants would otherwise spend unmetered provider tokens (2026-10-03 review M6) |
 | `CO_WORKSPACE_DATA_VOLUME` | — (bind mode) | Volume-subpath mode (T-20260930-038): a named Docker volume holding `storage/<P>/<N>/…`; turn containers mount it via `volume-subpath` and no host path is ever named to the daemon. Requires `docker-compose.volume.yml` in `COMPOSE_FILE` and `docker volume create` first (boot probe fails fast) |
+| `CO_WORKSPACE_WORKSPACE_DIR_HOST` | repo checkout | Host path of the workspace clone (the compose `/workspace` mount source). **Attach mode (ADR-0092 Addendum 17) also uses it as the hub ticket-queue bind root** — attach turn containers bind `<WORKSPACE_DIR_HOST>/Projects/co-<hub>/tickets:/work/ticket-queue:rw`, so it must be set and resolve on the HOST for attach deployments; the docker broker accepts ONLY that exact bind shape and rejects attach binds when it is unset |
+| `CO_WORKSPACE_ATTACH_HUB_MAX_SESSIONS` | `2` | Per-hub concurrent attach-session cap (Decision 9); `0` = off; the serialized-lock pilot posture (Decision 11) sets `1` — one attach session per hub at a time. Junk values fall back to the default (never silently off) |
+| `CO_WORKSPACE_ATTACH_LLM_API_KEYS` | — | Low-limit provider key POOL for attach sessions (Decision 7): one key is allocated per attach session, stamped into THAT tenant's `config.yaml`, released at detach (provider-side revocation stays an operator act, audited at release). Empty pool = the deployment `CO_WORKSPACE_LLM_API_KEY` applies (Addendum 9 posture). Pool exhausted → `409 attach_provider_key_pool_exhausted` |
+
+### Attach mode (ADR-0092 Addendum 17)
+
+Headless spoke-PM sessions attached to an EXISTING checkout under `Projects/co-*`
+(hub delegation sessions; design `docs/designs/2026-11-01-coworkspace-attach-mode-design.md`):
+
+- **Create**: `POST /sessions` with `attach_dir` (alias `existing_project`) set to `Projects/<co-name>`.
+  The resolved (realpath) target must be an immediate child of `<workspace>/Projects/` named `co-*` —
+  anything else is `400`. No scaffold runs; the checkout IS the team's project dir. Deleting the
+  tenant is a **DETACH**: gateway artifacts (per-session scratch, runtime homes, registry row,
+  history) are dropped, the hub working tree is never touched, and `DELETE ?purge=1` on an
+  attached tenant answers `409 attach_full_delete_refused`.
+- **Trust shape**: docker isolation ONLY (`409 attach_requires_docker` under process isolation —
+  process mode shares the gateway uid); bind mode only (`409 attach_requires_bind_mode` in volume
+  mode). Mounts are exactly the per-session scratch (at `/work/project`) + the hub's `tickets/`
+  dir (at `/work/ticket-queue`) — the hub working tree is never mounted; a construction-time
+  DENYLIST (hub root, `.git/`, `services/`, `Projects/co-security/docs/{findings,evidence,
+  reports,security}`, `.env*`) answers named `409 attach_mount_denied` violations.
+- **Identity**: per-spoke keys (`key:label,expires,spoke-id` in the keys file); the actor/owner
+  derives from the verified key's `spoke-id` only.
+- **Ceilings**: per-hub concurrent cap (`CO_WORKSPACE_ATTACH_HUB_MAX_SESSIONS`), per-tenant
+  turn/token quotas as usual, serialized per-hub turn lock (Decision 11 pilot posture), and
+  per-session low-limit provider keys from `CO_WORKSPACE_ATTACH_LLM_API_KEYS`.
+- **Hub lifecycle**: when `Projects/<hub>/.pipeline-state/hub-<hub>.state.json` declares
+  `operational_state` (alias `lifecycle_state`) `UNAVAILABLE`, new attach requests answer
+  `409 hub_unavailable` and the hub's active attach sessions are cancelled at the next
+  cap-check; any other state (or an absent file) allows attach (full state machine: Phase 3.5).
 | `CO_WORKSPACE_BROKER_TOKEN` | — (base mode) / **required** (volume mode) | Shared secret between the gateway and the docker broker's volume-control route (sent as `x-co-workspace-token`). Volume mode refuses to start without it — the route runs an `rm -rf` helper inside the data volume (2026-10-03 review M13) |
 | `CO_WORKSPACE_PRINCIPAL_MAX_TOKENS` | `0` (=unlimited) | Token cap across all of a principal's teams |
 | `CO_WORKSPACE_SCAFFOLD_TIMEOUT_MS` | `600000` | Time limit for scaffolding a team (ms) |

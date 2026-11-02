@@ -123,7 +123,9 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
 
     throw new HttpError(404, `no route: ${req.method} ${path}`);
   } catch (err) {
-    if (err instanceof HttpError) return jsonResponse({ error: err.message }, err.status);
+    if (err instanceof HttpError) {
+      return jsonResponse({ error: err.message, ...(err.code ? { code: err.code } : {}) }, err.status);
+    }
     // 2026-10-03 review M1: non-HttpError throws carry internals (fs paths, SQLite and
     // spawn stderr tails). Log the full error server-side; the client gets a generic body.
     console.error(`[co-workspace] 500 on ${req.method} ${path}:`, err);

@@ -19,6 +19,11 @@ export interface PolicyConfig {
   runtimeImage: string;
   /** Host-side data dir (bind sources must live under `<dataDirHost>/storage`). Undefined = every create is rejected. */
   dataDirHost?: string;
+  /** ADR-0092 Addendum 17 attach mode: host-side workspace dir. When set, an attach turn's
+   * THIRD bind — exactly `<workspaceDirHost>/Projects/co-<hub>/tickets:/work/ticket-queue[:rw]` —
+   * is accepted (the delegation kanban's one write surface) and lstat-walked like the others.
+   * Unset = attach-shaped binds are rejected (fail closed). */
+  workspaceDirHost?: string;
   /** Named tenant data volume (T-20260930-038 volume-subpath mode). Set = volume mode: the
    * broker validates HostConfig.Mounts instead of Binds and skips the on-disk lstat walk
    * (the daemon enforces subpath containment). Exactly one of dataDirHost/dataVolume storage
@@ -110,6 +115,7 @@ export function loadPolicyConfig(env: Record<string, string | undefined>): Polic
   const cpuCap = Number(cpuStr);
   if (!Number.isFinite(cpuCap) || cpuCap <= 0) throw new Error(`invalid CO_WORKSPACE_CONTAINER_CPUS: ${cpuStr}`);
   const dataDirHost = env.CO_WORKSPACE_DATA_DIR_HOST || undefined;
+  const workspaceDirHost = env.CO_WORKSPACE_WORKSPACE_DIR_HOST || undefined;
   const dataVolume = env.CO_WORKSPACE_DATA_VOLUME || undefined;
   if (dataVolume && !VOLUME_NAME_RE.test(dataVolume)) {
     throw new Error(`invalid CO_WORKSPACE_DATA_VOLUME: ${dataVolume}`);
@@ -117,6 +123,7 @@ export function loadPolicyConfig(env: Record<string, string | undefined>): Polic
   return {
     runtimeImage: env.CO_WORKSPACE_RUNTIME_IMAGE ?? "co-workspace-runtime:latest",
     dataDirHost: dataDirHost ? stripTrailingSlash(dataDirHost) : undefined,
+    workspaceDirHost: workspaceDirHost ? stripTrailingSlash(workspaceDirHost) : undefined,
     dataVolume,
     instanceId: env.CO_WORKSPACE_INSTANCE_ID || "default",
     hermesBin: env.HERMES_BIN || "hermes",
@@ -514,7 +521,7 @@ export function validateCreate(bodyText: string, cfg: PolicyConfig, name: string
       mounts = mres.mounts;
       hcOut.Mounts = mounts;
     } else {
-      bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string, profile!.homeLeaf);
+      bindRes = validateBindShape(hc.Binds, cfg.dataDirHost as string, profile!.homeLeaf, cfg.workspaceDirHost);
       hcOut.Binds = bindRes.binds;
     }
     for (const k of HC_DEFAULT_FALSE) {
@@ -625,37 +632,64 @@ function validateBindShape(
   v: unknown,
   dataDirHost: string,
   homeLeaf: "hermes-home" | "claude-home" | "codex-home",
+  workspaceDirHost?: string,
 ): { binds: string[]; sources: string[]; principal: string; project: string } {
-  if (!Array.isArray(v) || v.length !== 2) rej("HostConfig.Binds must have exactly 2 entries");
+  if (!Array.isArray(v) || v.length < 2 || v.length > 3) rej("HostConfig.Binds must have exactly 2 entries");
   const data = escapeRe(stripTrailingSlash(dataDirHost));
   const re = new RegExp(`^(${data}/storage/([^/:]+)/([^/:]+)/(project|${homeLeaf})):/work/(project|${homeLeaf})(?::(rw))?$`);
+  // Addendum 17 attach mode: the hub ticket-queue bind — an exact writable leaf under
+  // Projects/co-<hub>. Structural only (a compromised gateway could otherwise mount arbitrary
+  // hub paths); the gateway-side mount policy owns the denylist. Unset workspaceDirHost = no
+  // attach binds. A THIRD bind that is not exactly this shape keeps the historical
+  // "exactly 2 entries" rejection (design B.5 attack table).
+  const attachRe = workspaceDirHost
+    ? new RegExp(`^(${escapeRe(stripTrailingSlash(workspaceDirHost))}/Projects/(co-[A-Za-z0-9._-]{1,64})/tickets):/work/ticket-queue:rw$`)
+    : null;
+  const arr = v as unknown[];
+  if (arr.length === 3) {
+    const third = arr[2];
+    if (!(typeof third === "string" && attachRe?.test(third))) {
+      rej("HostConfig.Binds must have exactly 2 entries");
+    }
+  }
   const binds: string[] = [];
   const sources: string[] = [];
   const seen = new Set<string>();
   let principal = "";
   let project = "";
-  for (const raw of v as unknown[]) {
+  for (const raw of arr) {
     if (typeof raw !== "string") rej("bind must be a string");
-    const m = (raw as string).match(re);
-    if (!m) rej(`bind not allowed: ${(raw as string).slice(0, 256)}`);
+    const s = raw as string;
+    if (arr.length === 3 && s === arr[2]) {
+      // The validated attach ticket-queue bind (tail position, writable, exact leaf).
+      if (seen.has("ticket-queue")) rej("duplicate bind target");
+      seen.add("ticket-queue");
+      binds.push(s);
+      sources.push(s.slice(0, s.indexOf(":/work/")));
+      continue;
+    }
+    const m = s.match(re);
+    if (!m) rej(`bind not allowed: ${s.slice(0, 256)}`);
     const [, src, p, nm, suffix, target] = m!;
     if (!PN_RE.test(p) || !PN_RE.test(nm)) rej("bind principal/name segment not allowed");
     if (suffix !== target) rej("bind source/target mismatch");
     if (seen.has(target)) rej("duplicate bind target");
     seen.add(target);
-    if (binds.length === 0) {
+    // Order-independent: the attach ticket-queue bind (skipped above via `continue`) may
+    // legally precede the standard pair in the Binds array.
+    if (principal === "") {
       principal = p;
       project = nm;
     } else if (p !== principal || nm !== project) {
       rej("binds must share the same principal and name");
     }
-    binds.push(raw as string);
+    binds.push(s);
     sources.push(src);
   }
   // The runtime home must be the entrypoint's own leaf (2026-10-03 sibling-turns design D3):
   // exactly one project bind + one <homeLeaf> bind — a claude container must not receive the
   // credential-bearing hermes home, and vice versa. (seen stores the target LEAF — the regex
-  // captures `/work/(leaf)` as leaf-only.)
+  // captures `/work/(leaf)` as leaf-only; the attach ticket-queue target is its own key.)
   if (!seen.has("project") || !seen.has(homeLeaf)) {
     rej(`binds must be /work/project + /work/${homeLeaf} for this entrypoint`);
   }
@@ -732,26 +766,38 @@ export interface FsOps {
 const defaultFs: FsOps = { lstatSync: fsLstatSync, realpathSync: (p) => fsRealpathSync(p) };
 
 /**
- * lstat-walks from dataDirHost down to every bind source: each component (dataDirHost included)
- * must be a real directory, not a symlink, and realpath(leaf) must equal leaf. Fails closed on
- * any error (EACCES, ENOENT, ...). Does NOT close the check-to-mount TOCTOU window.
+ * lstat-walks from its root down to every bind source: each component (root included) must be
+ * a real directory, not a symlink, and realpath(leaf) must equal leaf. Fails closed on any
+ * error (EACCES, ENOENT, ...). Does NOT close the check-to-mount TOCTOU window. Sources must
+ * live under `<dataDirHost>/` (tenant storage) OR — Addendum 17 attach mode — under
+ * `<workspaceDirHost>/Projects/co-<hub>/tickets` (the delegation ticket-queue bind).
  */
 export function validateBindsOnDisk(
   binds: string[],
   dataDirHost: string | undefined,
   fsOps: FsOps = defaultFs,
+  workspaceDirHost?: string,
 ): { ok: true } | { ok: false; reason: string } {
   if (!dataDirHost) return { ok: false, reason: "data dir host not configured" };
   const data = stripTrailingSlash(dataDirHost);
+  const wsRoot = workspaceDirHost ? stripTrailingSlash(workspaceDirHost) : undefined;
   try {
     for (const bind of binds) {
       const idx = bind.lastIndexOf(":/work/");
       const src = idx > 0 ? bind.slice(0, idx) : bind;
-      if (!src.startsWith(data + "/")) return { ok: false, reason: "bind source outside data dir" };
-      const rest = src.slice(data.length + 1).split("/");
+      const underData = src.startsWith(data + "/");
+      // Addendum 17 attach shape: <wsRoot>/Projects/co-<name>/tickets (exact leaf; the hub
+      // name charset matches the bind-shape regex above).
+      const attachOk = Boolean(
+        wsRoot &&
+          /^co-[A-Za-z0-9._-]{1,64}\/tickets$/.test(src.startsWith(wsRoot + "/Projects/") ? src.slice((wsRoot + "/Projects/").length) : ""),
+      );
+      if (!underData && !attachOk) return { ok: false, reason: "bind source outside data dir" };
+      const base = underData ? data : (wsRoot as string);
+      const rest = src.slice(base.length + 1).split("/");
       if (rest.some((s) => s === "" || s === "." || s === "..")) return { ok: false, reason: "bind source not normalized" };
-      let cur = data;
-      const components = [data];
+      let cur = base;
+      const components = [base];
       for (const s of rest) {
         cur = `${cur}/${s}`;
         components.push(cur);

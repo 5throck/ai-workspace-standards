@@ -88,6 +88,11 @@ export interface HermesSpawnOptions {
     tenantId?: string;
     /** Gateway instance id label for the boot reaper. */
     instance?: string;
+    /** ADR-0092 Addendum 17 attach mode: extra `-v` binds appended after the standard
+     * project/home pair — currently exactly the hub ticket-queue bind from attachMountPlan
+     * (source:target:rw). The broker policy validates the attach shape against
+     * CO_WORKSPACE_WORKSPACE_DIR_HOST; unset there, the bind is rejected (fail closed). */
+    extraBinds?: string[];
   };
   /** Shared Nous credential store (HERMES_SHARED_AUTH_DIR) — one token store across the
    * operator + all tenants, refreshed in place (ADR-0092 Addendum 4). */
@@ -234,6 +239,8 @@ export function turnSpawnArgv(o: {
           "-v",
           `${o.homeSource}:${homeMount}`,
         ]),
+    // Addendum 17 attach mode: the hub ticket-queue bind (scratch IS the project mount above).
+    ...(c.extraBinds ?? []).flatMap((b) => ["-v", b]),
     ...o.envPairs.flatMap((e) => ["-e", e]),
     ...(o.providerKeyEnv ? ["-e", o.providerKeyEnv.name] : []),
     ...(o.sharedAuthDir

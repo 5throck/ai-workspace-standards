@@ -1,5 +1,5 @@
 import { chownSync, copyFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { GatewayConfig, resolveLlmProviderKey, resolveLlmProviderName, runtimeProviderKeyEnv } from "./config";
 import { interactionAddendum, shouldInjectInteractionAddendum } from "./interaction";
 import { recordTurnUsage, runtimeHomeDir, tenantConfigYaml, TenantRecord, writeTenantConfig } from "./tenant";
@@ -7,12 +7,17 @@ import { HermesEvent, HermesTurnResult, runHermesTurn, turnContainerName } from 
 import { runAntigravityTurn } from "./antigravity";
 import { runClaudeTurn } from "./claude";
 import { runCodexTurn } from "./codex";
+import { ATTACH_KIND, attachDockerEnv, attachMountPlan } from "./attach";
+import { HttpError } from "./http";
 import type { GatewayState } from "./state";
 import { hostSidePath, tenantSubpathBase } from "./lifecycle";
 import { TurnTiming, turnLogKey } from "./timing";
 
 /** Serialized per tenant: one Hermes session writer per HERMES_HOME (state.db is a per-home
- * SQLite WAL; concurrent writers across processes are unsafe). */
+ * SQLite WAL; concurrent writers across processes are unsafe). Attached tenants additionally
+ * serialize on a PER-HUB lock (Addendum 17 Decision 11, pilot posture): concurrent sessions on
+ * one hub queue their turns, so delegation-ticket writes into the shared hub tickets/ dir
+ * never interleave. */
 export async function runChat(
   state: GatewayState,
   rec: TenantRecord,
@@ -20,6 +25,14 @@ export async function runChat(
   onEvent?: (evt: HermesEvent) => void,
   onProc?: (proc: { kill: (code?: number) => void }) => void,
 ): Promise<HermesTurnResult> {
+  // Addendum 17 Decision 4: attach sessions launch under docker isolation ONLY — enforced on
+  // every turn (the routes gate earlier with the same 409; this covers every surface).
+  if (rec.kind === ATTACH_KIND && state.cfg.isolation !== "docker") {
+    throw new HttpError(409, "attach tenant requires CO_WORKSPACE_ISOLATION=docker (process isolation would share the gateway uid)", "attach_requires_docker");
+  }
+  if (rec.kind === ATTACH_KIND && state.cfg.dataVolume) {
+    throw new HttpError(409, "attach tenant requires bind-mode docker isolation (volume mode cannot mount the hub ticket-queue)", "attach_requires_bind_mode");
+  }
   // ADR-0098: fresh sessions receive the LLM Interaction Standard short form once;
   // session continuity carries the directive to later turns of the same session.
   if (state.cfg.interactionStandard && shouldInjectInteractionAddendum(state.cfg.runtime, Boolean(rec.conversationId), state.turns.list(rec.tenantId).length)) {
@@ -36,8 +49,11 @@ export async function runChat(
     onProc?.(proc);
   };
   const prev = state.chatLocks.get(rec.tenantId) ?? Promise.resolve();
+  const hubLockKey = rec.kind === ATTACH_KIND && rec.attachHub ? `attach-hub:${resolve(rec.attachHub)}` : null;
+  const prevHub = hubLockKey ? (state.chatLocks.get(hubLockKey) ?? Promise.resolve()) : undefined;
   const task = prev
     .catch(() => undefined)
+    .then(() => (prevHub ? prevHub.catch(() => undefined) : undefined))
     .then(() => {
       timing.mark("t_lock");
       // 2026-10-03 review M10: a turn queued behind a long chain can start AFTER its tenant
@@ -50,13 +66,18 @@ export async function runChat(
           stderrTail: "tenant deleted while this turn was queued",
         } as HermesTurnResult;
       }
+      // Addendum 17 Decision 7: an attached tenant turns with its OWN per-session provider
+      // key (never the deployment key) — a per-tenant config view swaps it in everywhere a
+      // credential is resolved below. Zero ambient env inheritance is enforced separately by
+      // attachDockerEnv (the constructed docker-CLI env for attach turns).
+      const turnCfg: GatewayConfig = rec.attachProviderKey ? { ...state.cfg, llmApiKey: rec.attachProviderKey } : state.cfg;
       // Keep the tenant home's credentials current: the containerized hermes (older release
       // lineage) resolves OAuth from its OWN home's auth.json and cannot consult the shared
       // store, so each turn re-copies the operator's CURRENT auth.json (Addendum 4 note).
       // Provider-key mode (design 2026-09-29-co-workspace-provider-key-config) skips this —
       // static provider keys need no OAuth tokens, and copying them was the refresh-token-
       // reuse revocation class (Nous invalid_grant, 2026-09-29).
-      const seedAuth = resolveLlmProviderKey(state.cfg)
+      const seedAuth = resolveLlmProviderKey(turnCfg)
         ? undefined
         : state.cfg.hermesSeedHome
           ? join(state.cfg.hermesSeedHome, "auth.json")
@@ -69,7 +90,7 @@ export async function runChat(
       // to EXISTING tenants on their next turn (no re-provisioning needed). In legacy mode
       // (no provider key) the stamp carries NO provider lines — stamping `provider: custom`
       // unconditionally would break the OAuth/shared-store tenants.
-      const providerKey = resolveLlmProviderKey(state.cfg);
+      const providerKey = resolveLlmProviderKey(turnCfg);
       writeTenantConfig(
         join(rec.hermesHome, "config.yaml"),
         tenantConfigYaml(
@@ -77,9 +98,9 @@ export async function runChat(
           state.cfg.hermesModel,
           providerKey
             ? {
-                providerName: resolveLlmProviderName(state.cfg),
-                providerBaseUrl: state.cfg.llmBaseUrl,
-                providerApiKey: state.cfg.llmApiKey,
+                providerName: resolveLlmProviderName(turnCfg),
+                providerBaseUrl: turnCfg.llmBaseUrl,
+                providerApiKey: turnCfg.llmApiKey,
                 agentReasoningEffort: state.cfg.hermesReasoningEffort ?? "low",
               }
             : undefined,
@@ -103,12 +124,18 @@ export async function runChat(
           onEvent,
         );
       }
+      // Addendum 17 Decision 5: the attach mount plan — scratch + hub ticket-queue ONLY.
+      // Denylist violations surface HERE, at mount construction (named 409s), and the hub
+      // checkout itself is never mounted (pilot posture: outputs land in scratch/tickets).
+      const attachPlan = rec.kind === ATTACH_KIND ? attachMountPlan(state.cfg, rec) : null;
       // 2026-10-03 CLI provider-key design (D2): non-hermes turns receive the configured
       // deployment key under the CLI's native env name (claude: ANTHROPIC_API_KEY
       // [+ ANTHROPIC_BASE_URL]; codex: OPENAI_API_KEY) — precedence over interactive
-      // logins; nothing is injected when keyless, mismatched, or antigravity.
-      const cliKeyEnv = runtimeProviderKeyEnv(state.cfg.runtime, state.cfg);
+      // logins; nothing is injected when keyless, mismatched, or antigravity. Attach tenants
+      // resolve against turnCfg so the PER-SESSION key applies, never the deployment key.
+      const cliKeyEnv = runtimeProviderKeyEnv(state.cfg.runtime, turnCfg);
       const cliSecret = Object.entries(cliKeyEnv ?? {}).find(([k]) => k.endsWith("_API_KEY"));
+      const cliSecretPair = cliSecret ? { name: cliSecret[0], value: cliSecret[1] } : undefined;
       const cliLiterals = Object.entries(cliKeyEnv ?? {})
         .filter(([k]) => !k.endsWith("_API_KEY"))
         .map(([k, v]) => `${k}=${v}`);
@@ -127,7 +154,11 @@ export async function runChat(
               ...(state.cfg.dataVolume
                 ? { dataVolume: state.cfg.dataVolume, subpathBase: tenantSubpathBase(state.cfg, rec) }
                 : {}),
-              hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+              // Attach tenants mount the per-session SCRATCH as /work/project (never the hub
+              // checkout — Addendum 17 Decision 5).
+              hostProjectDir: attachPlan
+                ? hostSidePath(state.cfg, attachPlan.scratch) ?? attachPlan.scratch
+                : hostSidePath(state.cfg, rec.projectDir),
               // Bind mode: the home source must resolve on the HOST when the gateway is
               // itself containerized; the local path is the bare-metal fallback.
               hostRuntimeHome:
@@ -136,6 +167,7 @@ export async function runChat(
               memory: state.cfg.containerMemory,
               cpus: state.cfg.containerCpus,
               pidsLimit: state.cfg.containerPidsLimit,
+              ...(attachPlan ? { extraBinds: [attachPlan.ticketQueueBind] } : {}),
             }
           : undefined;
       if (state.cfg.runtime === "claude") {
@@ -153,11 +185,13 @@ export async function runChat(
             ],
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
-            env: cliContainer ? undefined : cliEnv,
+            // Attach container turns get the CONSTRUCTED env (zero ambient inheritance,
+            // Decision 7) instead of the process-env merge used by regular container turns.
+            env: cliContainer ? (attachPlan ? attachDockerEnv(cliSecretPair) : undefined) : cliEnv,
             ...(cliContainer
               ? {
                   container: cliContainer,
-                  providerKeyEnv: cliSecret ? { name: cliSecret[0], value: cliSecret[1] } : undefined,
+                  providerKeyEnv: cliSecretPair,
                   extraEnvPairs: cliLiterals,
                 }
               : {}),
@@ -175,11 +209,11 @@ export async function runChat(
             extraArgs: state.cfg.hermesExtraArgs,
             timeoutMs: state.cfg.runBudgetSeconds * 1000,
             onSpawn: registerProc,
-            env: cliContainer ? undefined : cliEnv,
+            env: cliContainer ? (attachPlan ? attachDockerEnv(cliSecretPair) : undefined) : cliEnv,
             ...(cliContainer
               ? {
                   container: cliContainer,
-                  providerKeyEnv: cliSecret ? { name: cliSecret[0], value: cliSecret[1] } : undefined,
+                  providerKeyEnv: cliSecretPair,
                 }
               : {}),
           },
@@ -190,7 +224,7 @@ export async function runChat(
         {
           hermesBin: state.cfg.hermesBin,
           binPrefix: state.cfg.hermesBinPrefix,
-          providerKeyEnv: resolveLlmProviderKey(state.cfg) ?? undefined,
+          providerKeyEnv: resolveLlmProviderKey(turnCfg) ?? undefined,
           projectDir: rec.projectDir,
           hermesHome: rec.hermesHome,
           message,
@@ -198,7 +232,8 @@ export async function runChat(
           runBudgetSeconds: state.cfg.runBudgetSeconds,
           maxTurns: state.cfg.maxTurns,
           extraArgs: state.cfg.hermesExtraArgs,
-          toolsets: state.cfg.hermesToolsets,
+          // §3.5 toolset scoping: attach sessions run the delegation task's declared toolset.
+          toolsets: rec.attachToolsets ?? state.cfg.hermesToolsets,
           // One shared timing timeline: hermes stages join the chat.ts t0 line.
           timing,
           // Docker isolation: the tenant home is re-seeded with the CURRENT seed auth.json
@@ -210,6 +245,10 @@ export async function runChat(
             state.activeProcs.set(rec.tenantId, proc);
             onProc?.(proc);
           },
+          // Decision 7: attach turns run with the CONSTRUCTED docker-CLI env — no ambient
+          // host/gateway variable passes through unlisted, so no gateway secret can reach the
+          // container env (the value side of providerKeyEnv rides this env explicitly).
+          env: attachPlan ? attachDockerEnv(resolveLlmProviderKey(turnCfg) ?? undefined) : undefined,
           container:
             state.cfg.isolation === "docker"
               ? {
@@ -226,10 +265,17 @@ export async function runChat(
                   // the data volume at storage/<P>/<N>/{project,hermes-home} subpaths.
                   ...(state.cfg.dataVolume
                     ? { dataVolume: state.cfg.dataVolume, subpathBase: tenantSubpathBase(state.cfg, rec) }
-                    : {
-                        hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
-                        hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
-                      }),
+                    : attachPlan
+                      ? {
+                          // Attach: /work/project IS the per-session scratch (gateway-owned);
+                          // the hub checkout is never mounted (Decision 5).
+                          hostProjectDir: hostSidePath(state.cfg, attachPlan.scratch) ?? attachPlan.scratch,
+                          hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
+                        }
+                      : {
+                          hostProjectDir: hostSidePath(state.cfg, rec.projectDir),
+                          hostHermesHome: hostSidePath(state.cfg, rec.hermesHome),
+                        }),
                   hostAuthDir: state.cfg.hermesAuthDirHost
                     ?? (state.cfg.dataDirHost
                       ? join(state.cfg.dataDirHost, "shared-auth")
@@ -237,6 +283,8 @@ export async function runChat(
                   memory: state.cfg.containerMemory,
                   cpus: state.cfg.containerCpus,
                   pidsLimit: state.cfg.containerPidsLimit,
+                  // The hub ticket-queue bind (the one delegation write surface).
+                  ...(attachPlan ? { extraBinds: [attachPlan.ticketQueueBind] } : {}),
                 }
               : undefined,
         },
@@ -245,6 +293,10 @@ export async function runChat(
     });
   const tail = task.catch(() => undefined);
   state.chatLocks.set(rec.tenantId, tail);
+  // Per-hub attach serialization (Decision 11): the same tail keys the hub chain. Never
+  // pruned by the tenant cleanup (a resolved promise chain is GC-cheap; the next turn on the
+  // hub replaces the reference).
+  if (hubLockKey) state.chatLocks.set(hubLockKey, tail);
   let result: HermesTurnResult;
   try {
     result = await task;

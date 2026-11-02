@@ -119,6 +119,16 @@ export interface GatewayConfig {
   antigravityBinPrefix?: string[];
   claudeBin: string;
   codexBin: string;
+  /** ADR-0092 Addendum 17 (attach-mode): per-hub concurrent attached-session cap (Decision 9).
+   * Default 2; 0 = off. Pilot deployments set 1 (the serialized per-hub posture, Decision 11). */
+  attachHubMaxSessions: number;
+  /** Low-limit provider key POOL for attach sessions (Decision 7): one key is allocated per
+   * attach tenant and stamped into ITS config.yaml instead of the deployment key. Empty =
+   * attach sessions use the deployment provider key (Addendum 9 posture). */
+  attachLlmApiKeys: string[];
+  /** Host-side path of `workspaceDir` — attach ticket-queue bind sources must resolve on the
+   * HOST when the gateway itself runs inside a container (same pattern as `dataDirHost`). */
+  workspaceDirHost?: string;
 }
 
 export const SERVICE_ROOT = resolve(import.meta.dir, "..");
@@ -160,12 +170,44 @@ const warnedMissingKeyFiles = new Set<string>();
  * synchronous readFileSync on EVERY key-authenticated request. Cached by (mtimeMs, size) —
  * a rotated file gets a new mtime, so `POST /admin/reload` and natural rotation re-read
  * without an explicit invalidation hook. */
-let keyEntriesCache: { path: string; mtimeMs: number; size: number; entries: Array<{ key: string; label: string }> } | null = null;
+let keyEntriesCache: { path: string; mtimeMs: number; size: number; entries: KeyEntry[] } | null = null;
 
-/** Parse key entries from a file with optional labels (key:label format). Returns key and label pairs.
- * A missing OR non-regular file (the compose single-file bind turns a missing host file into a
- * directory — 2026-10-03 review M9's EISDIR boot crash) is the warn-once empty case. */
-export function readKeyEntries(path: string | undefined): Array<{ key: string; label: string }> {
+/** One apiKeysFile entry. ADR-0092 Addendum 17 (attach-mode, Decision 6) extends the P9
+ * `key:label` schema to `key:label,expires,spoke-id`:
+ *   - `expires` (optional ISO timestamp): revocation-by-expiry — an expired key fails
+ *     credentialValid (401 at the gate); empty/unset = immortal (legacy posture).
+ *   - `spokeId` (optional): scopes the key to ONE spoke; when present it becomes the
+ *     principal (actor/owner) derived from the key — never client-asserted.
+ * Backward compatible: `key` and `key:label` lines keep working (no expires, no spoke). */
+export interface KeyEntry {
+  key: string;
+  label: string;
+  expires?: string;
+  spokeId?: string;
+}
+
+const warnedBadExpiryKeys = new Set<string>();
+
+/** True when the entry's `expires` timestamp has passed (or is unparseable — a malformed
+ * expiry fails CLOSED so a typo can never silently extend a key's life). */
+export function keyEntryExpired(e: KeyEntry, now: number = Date.now()): boolean {
+  if (!e.expires) return false;
+  const t = Date.parse(e.expires);
+  if (Number.isNaN(t)) {
+    if (!warnedBadExpiryKeys.has(e.key)) {
+      warnedBadExpiryKeys.add(e.key);
+      console.warn(`[co-workspace] API key entry "${e.label}" has an unparseable expires="${e.expires}" — treating it as EXPIRED (fail-closed)`);
+    }
+    return true;
+  }
+  return t <= now;
+}
+
+/** Parse key entries from a file: `key`, `key:label`, or `key:label,expires,spoke-id` (one
+ * per line, `#` comments). A missing OR non-regular file (the compose single-file bind turns
+ * a missing host file into a directory — 2026-10-03 review M9's EISDIR boot crash) is the
+ * warn-once empty case. */
+export function readKeyEntries(path: string | undefined): KeyEntry[] {
   if (!path) return [];
   let st: { isFile: boolean; mtimeMs: number; size: number };
   try {
@@ -186,15 +228,19 @@ export function readKeyEntries(path: string | undefined): Array<{ key: string; l
   }
   try {
     const text = readFileSync(path, "utf8");
-    const entries: Array<{ key: string; label: string }> = [];
+    const entries: KeyEntry[] = [];
     for (const raw of text.split(/\r?\n/)) {
       const line = raw.replace(/#.*/, "").trim();
       if (!line) continue;
       const idx = line.indexOf(":");
       if (idx > 0) {
+        const labelPart = line.slice(idx + 1).trim();
+        const fields = labelPart.split(",").map((s) => s.trim());
         entries.push({
           key: line.slice(0, idx).trim(),
-          label: line.slice(idx + 1).trim() || "default",
+          label: fields[0] || "default",
+          ...(fields[1] ? { expires: fields[1] } : {}),
+          ...(fields[2] ? { spokeId: fields[2] } : {}),
         });
       } else {
         entries.push({
@@ -322,6 +368,15 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       : undefined,
     claudeBin: env.CO_WORKSPACE_CLAUDE_BIN ?? "claude",
     codexBin: env.CO_WORKSPACE_CODEX_BIN ?? "codex",
+    // Attach cap (Addendum 17 Decision 9): unset/blank = default 2; explicit "0" = off;
+    // junk falls back to the DEFAULT (parsePort semantics) — a typoed value must never
+    // fail-open to "cap off" on a security knob.
+    attachHubMaxSessions: parsePort(env.CO_WORKSPACE_ATTACH_HUB_MAX_SESSIONS, 2),
+    attachLlmApiKeys: (env.CO_WORKSPACE_ATTACH_LLM_API_KEYS ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+    workspaceDirHost: env.CO_WORKSPACE_WORKSPACE_DIR_HOST || undefined,
   };
   // 2026-10-03 review M6: anonymous provisioning with all quotas off means unmetered
   // provider spend for unauthenticated callers. Fail boot with remediation — consistent
