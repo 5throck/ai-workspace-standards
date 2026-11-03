@@ -287,7 +287,7 @@ describe('apply-tier-normalization — collectTargets (real tree shape)', () => 
     const { all, rootCount, l1Count, variantCount, projectCount } = collectTargets(REPO_ROOT);
     expect(rootCount).toBe(9);
     expect(l1Count).toBe(2); // pm.md + i18n-specialist.md; _COMMON.md excluded
-    expect(variantCount).toBe(172); // 148 + 24 co-architect agents (15th variant)
+    expect(variantCount).toBe(173); // 148 + 24 co-architect + 1 co-work deck-builder (15th variant)
     expect(projectCount).toBe(0);
     expect(all).toContain('agents/pm.md');
     expect(all).toContain('templates/common/agents/pm.md');

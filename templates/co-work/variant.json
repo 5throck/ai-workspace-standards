@@ -1,9 +1,9 @@
 {
   "name": "co-work",
-  "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration.",
+  "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration. Includes the native PPTX deck capability (spec 2026-11-03-co-work-native-pptx-deck-design): deck-builder agent authors per-page canonical SVG under deterministic quality gates and exports natively editable DrawingML via svg-check/svg-to-pptx.",
   "variant_type": "collaboration",
   "status": "stable",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "inherits_common": "templates/common",
   "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
@@ -43,12 +43,28 @@
     {
       "name": "i18n-specialist",
       "file": "agents/i18n-specialist.md"
+    },
+    {
+      "name": "deck-builder",
+      "file": "agents/deck-builder.md"
     }
   ],
   "skills": [
     {
       "name": "standup-synthesizer",
       "file": "skills/standup-synthesizer/SKILL.md"
+    },
+    {
+      "name": "svg-slide-authoring",
+      "file": "skills/svg-slide-authoring/SKILL.md"
+    },
+    {
+      "name": "svg-quality-gate",
+      "file": "skills/svg-quality-gate/SKILL.md"
+    },
+    {
+      "name": "pptx-export",
+      "file": "skills/pptx-export/SKILL.md"
     }
   ],
   "agent_manifest": {
@@ -56,9 +72,10 @@
     "pipeline_order": [],
     "optional": [
       "ms365-expert",
-      "storyteller"
+      "storyteller",
+      "deck-builder"
     ],
-    "notes": "ms365-expert: only when MS365 tooling (Word, Excel, PowerPoint, Teams) is required. storyteller: skip for purely technical or operational work."
+    "notes": "ms365-expert: only when MS365 tooling (Word, Excel, PowerPoint, Teams) is required. storyteller: skip for purely technical or operational work. deck-builder: only when a native PPTX deck deliverable is requested (content from content-writer/storyteller)."
   },
   "skill_manifest": {
     "variant_specific": [
@@ -70,6 +87,39 @@
         ],
         "phases": [
           4
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "svg-slide-authoring",
+        "layer": "workspace",
+        "used_by_agents": [
+          "deck-builder"
+        ],
+        "phases": [
+          3
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "svg-quality-gate",
+        "layer": "workspace",
+        "used_by_agents": [
+          "deck-builder"
+        ],
+        "phases": [
+          3
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "pptx-export",
+        "layer": "workspace",
+        "used_by_agents": [
+          "deck-builder"
+        ],
+        "phases": [
+          3
         ],
         "platform_parity": "required"
       }
@@ -92,5 +142,22 @@
     "profiles_dir": "docs/countries",
     "supported": [],
     "default": null
+  },
+  "script_manifest": {
+    "variant_scripts_dir": "scripts/deck",
+    "local": [
+      {
+        "name": "svg-check",
+        "path": "scripts/deck/svg-check.ts",
+        "status": "active"
+      },
+      {
+        "name": "svg-to-pptx",
+        "path": "scripts/deck/svg-to-pptx.ts",
+        "status": "active"
+      }
+    ],
+    "external": [],
+    "notes": "First co-work script_manifest (spec 2026-11-03-co-work-native-pptx-deck-design). svg-check is the canonical-SVG quality gate (imported by svg-to-pptx for the shared parser); svg-to-pptx compiles gate-passed decks into natively editable DrawingML PPTX (flat mode) with fingerprint refusal. Deps: fflate (packaging), @resvg/resvg-js (preview PNGs for the visual acceptance gate)."
   }
 }
