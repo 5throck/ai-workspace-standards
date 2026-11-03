@@ -18,7 +18,7 @@
 ### Production Phase
 
 - [x] variant.json exists with valid schema
-- [x] All 8 collaboration agents present (analyst, content-writer, i18n-specialist, ms365-expert, pm, project-coordinator, storyteller, technical-writer)
+- [x] All 9 collaboration agents present (analyst, content-writer, deck-builder, i18n-specialist, ms365-expert, pm, project-coordinator, storyteller, technical-writer)
 - [x] All 1 collaboration skill present (standup-synthesizer); api-documentation, documentation-writing, and research-analysis are common-inherited L1 skills, not variant-specific
 - [x] inherits_common correctly points to templates/common
 - [x] Optional agents (ms365-expert, storyteller) documented

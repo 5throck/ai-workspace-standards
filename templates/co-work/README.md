@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: ef6fb8bdda12ab229a52f0a1bd51bf74690bc6b98744e0fc67cb7161e1002d86
+content_hash: 61458fc1d11bb7f392c7da2975e2dc259775ac85c1f6dee686e82de686ca8761
 ---
 
 # co-work
@@ -40,6 +40,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
 | **analyst** | Research analyst — investigation, data synthesis, and evidence gathering | medium | inherit |
 | **content-writer** | Content writer — research-to-documentation transformation and communications | medium | inherit |
+| **deck-builder** | Deck builder — canonical-SVG slide authoring, quality gates, native PPTX export | medium | inherit |
 | **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 | **ms365-expert** | Microsoft 365 expert — guidance on Outlook, Word, Excel, PowerPoint, Teams | low | inherit |
 | **project-coordinator** | Project coordinator — schedules, stakeholder communication, delivery logistics | low | inherit |
@@ -85,4 +86,4 @@ This variant focuses on general work, research, documentation, and project coord
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-03*

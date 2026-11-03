@@ -9,6 +9,7 @@ This directory contains agent definition files for the co-work collaboration wor
 | Collaboration PM | `pm.md` | Owns research workflow, documentation strategy, stakeholder alignment |
 | Analyst | `analyst.md` | Research synthesis, data analysis, evidence gathering |
 | Content Writer | `content-writer.md` | Drafts reports, articles, and structured content |
+| Deck Builder | `deck-builder.md` | Authors canonical-SVG slide pages under quality gates and exports natively editable PPTX |
 | I18N Specialist | `i18n-specialist.md` | Locale configuration, locale-specific formatting, text layout guidance |
 | MS365 Expert | `ms365-expert.md` | Microsoft 365 tools, SharePoint, Teams integrations |
 | Project Coordinator | `project-coordinator.md` | Task tracking, timeline management, meeting facilitation |

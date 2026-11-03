@@ -2401,6 +2401,19 @@
       ]
     },
     {
+      "id": "agent:co-work/deck-builder",
+      "type": "agent",
+      "layer": "variant:co-work",
+      "name": "deck-builder",
+      "scope": "co-work",
+      "capability": "deck-builder",
+      "content_hash": "3ec680c822472562",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-work/agents/deck-builder.md"
+      ]
+    },
+    {
       "id": "agent:co-work/ms365-expert",
       "type": "agent",
       "layer": "variant:co-work",
@@ -2712,6 +2725,11 @@
     },
     {
       "id": "dec:DEC-20261102-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261103-01",
       "type": "decision",
       "layer": "L0"
     },
@@ -3482,6 +3500,11 @@
     },
     {
       "id": "doc:co-work/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/deck-builder.md",
       "type": "doc",
       "layer": "variant:co-work"
     },
@@ -4803,6 +4826,14 @@
       "scope": "co-security",
       "ordinal": 6,
       "label": "Quality Assurance & Finalization"
+    },
+    {
+      "id": "phase:co-work/3",
+      "type": "phase",
+      "layer": "variant:co-work",
+      "scope": "co-work",
+      "ordinal": 3,
+      "label": "Content Creation"
     },
     {
       "id": "phase:co-work/4",
@@ -7557,8 +7588,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-01"
+        "sessions": 6,
+        "last_used": "2026-11-03"
       }
     },
     {
@@ -7731,6 +7762,19 @@
       ]
     },
     {
+      "id": "skill:co-work/pptx-export",
+      "type": "skill",
+      "layer": "variant:co-work",
+      "name": "pptx-export",
+      "scope": "co-work",
+      "capability": "pptx-export",
+      "content_hash": "98f4a5efc4f2cd19",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-work/skills/pptx-export/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-work/standup-synthesizer",
       "type": "skill",
       "layer": "variant:co-work",
@@ -7741,6 +7785,32 @@
       "version": "1.0.1",
       "mirrors": [
         "templates/co-work/skills/standup-synthesizer/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-work/svg-quality-gate",
+      "type": "skill",
+      "layer": "variant:co-work",
+      "name": "svg-quality-gate",
+      "scope": "co-work",
+      "capability": "svg-quality-gate",
+      "content_hash": "9467bc4ac156367c",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-work/skills/svg-quality-gate/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:co-work/svg-slide-authoring",
+      "type": "skill",
+      "layer": "variant:co-work",
+      "name": "svg-slide-authoring",
+      "scope": "co-work",
+      "capability": "svg-slide-authoring",
+      "content_hash": "0bfed6c0776e2222",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-work/skills/svg-slide-authoring/SKILL.md"
       ]
     },
     {
@@ -7951,8 +8021,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-01"
+        "sessions": 6,
+        "last_used": "2026-11-03"
       }
     },
     {
@@ -8650,8 +8720,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-01"
+        "sessions": 6,
+        "last_used": "2026-11-03"
       }
     },
     {
@@ -10794,6 +10864,12 @@
       "type": "references",
       "from": "agent:co-security/threat-modeler",
       "to": "skill:co-security/verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/deck-builder",
+      "to": "skill:co-work/svg-slide-authoring",
       "source": "prose"
     },
     {
@@ -16060,6 +16136,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-work/agents/deck-builder.md",
+      "to": "skill:co-work/svg-slide-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-work/docs/co-work.context.md",
       "to": "skill:root/agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -16074,6 +16156,12 @@
       "type": "cites_skill",
       "from": "doc:co-work/docs/document-style-registry.md",
       "to": "skill:co-deck/version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/document-style-registry.md",
+      "to": "skill:co-work/svg-slide-authoring",
       "source": "workflow-doc"
     },
     {
@@ -28477,6 +28565,23 @@
     },
     {
       "type": "used_by",
+      "from": "skill:co-work/pptx-export",
+      "to": "agent:co-work/deck-builder",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/deck-builder.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-work/pptx-export",
+      "to": "phase:co-work/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
       "from": "skill:co-work/standup-synthesizer",
       "to": "agent:co-work/project-coordinator",
       "source": "skill_manifest"
@@ -28492,6 +28597,52 @@
       "from": "skill:co-work/standup-synthesizer",
       "to": "phase:co-work/4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-work/svg-quality-gate",
+      "to": "agent:co-work/deck-builder",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/deck-builder.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-work/svg-quality-gate",
+      "to": "phase:co-work/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-work/svg-slide-authoring",
+      "to": "agent:co-work/deck-builder",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-work/agents/deck-builder.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-work/svg-slide-authoring",
+      "to": "phase:co-work/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/svg-slide-authoring",
+      "to": "skill:co-work/pptx-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/svg-slide-authoring",
+      "to": "skill:co-work/svg-quality-gate",
+      "source": "prose"
     },
     {
       "type": "references",

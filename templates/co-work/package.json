@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "co-work",
+  "version": "1.1.0",
+  "description": "co-work variant — document/deck scripts (canonical SVG deck quality gate + PPTX compiler, standup synthesizer support)",
+  "private": true,
+  "scripts": {
+    "test": "bun test scripts/deck/tests/"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "fflate": "^0.8.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
