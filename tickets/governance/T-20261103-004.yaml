@@ -18,18 +18,21 @@ title: >-
   docs/lifecycle/skills/ record; (5) D-2: 11-01 rulings used T-tickets not DEC
   records — document the convention
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-11-03T06:04:40.411+09:00'
 history:
   - at: '2026-11-03T06:04:40.411+09:00'
     from: null
     to: backlog
-  - at: '2026-11-04T04:05:05.253+09:00'
+  - at: '2026-11-04T04:15:48.195+09:00'
     from: backlog
     to: waiting
-  - at: '2026-11-04T04:05:05.271+09:00'
+  - at: '2026-11-04T04:15:48.211+09:00'
     from: waiting
     to: running
+  - at: '2026-11-04T04:15:48.226+09:00'
+    from: running
+    to: review
 result: null
 error: null

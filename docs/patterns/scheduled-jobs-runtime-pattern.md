@@ -1,11 +1,13 @@
 # Scheduled Jobs Runtime Pattern
 
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Status**: Reference (promotion deferred - see Promotion-deferral)
-- **Date**: 2026-10-31
+- **Date**: 2026-11-04 (v1.1 operator-control layer; v1.0.0 dated 2026-10-31)
 - **Provenance**: co-newbiz, ADR-0189 "Amend ADR-0019 - macOS launchd, a single
   minute-tick dispatcher, and the Docker production model" (Accepted
-  2026-10-29, `Projects/co-newbiz/docs/adr/0189-amend-adr-0019-launchd-and-docker-scheduler-model.md`)
+  2026-10-29, `Projects/co-newbiz/docs/adr/0189-amend-adr-0019-launchd-and-docker-scheduler-model.md`);
+  v1.1 adds the P7 operator-control layer (admin API surface, design
+  `2026-10-29-scheduled-jobs-design.md` §4-§6)
 - **Genre**: pattern (see [README.md](README.md)) - a variant-proven runtime
   shape, not an operator guide and not a workspace decision
 
@@ -19,7 +21,9 @@ reports, watch evaluation) where:
 - jobs run on the host's clock, not an in-app timer (in-process timers die with
   the web server and drift with deploys);
 - overlapping or duplicated dispatch must not double-fire a job;
-- job output can contain credentials and must never leak them into logs.
+- job output can contain credentials and must never leak them into logs;
+- operators need an admin surface over the jobs (run-now, health visibility,
+  controlled creation) without giving the web container job-execution power.
 
 If none of these hold (e.g. a single fixed cron with no admin surface), plain
 OS scheduler entries are simpler - adopt the pattern for the DB-resident
@@ -118,10 +122,83 @@ are injected by the scheduler layer so the scrubber module stays dependency-free
 project root, not under `scripts/co-newbiz/` - ticket-path correction recorded);
 `run-job.ts` `installScrubbedOutput`]
 
+## Operator-Control Layer (v1.1 - admin API surface)
+
+P7 adds the admin-facing control plane over the runtime above. The dividing
+line stays the same as mechanism 5's: the web container may WRITE schedule
+rows, but never EXECUTES jobs or makes privileged OS calls. Three surfaces,
+all admin-gated (authenticate + admin role, 401/403 before any body work):
+
+### Run-now is enqueue-only, with still-queued-request reuse
+
+The "run now" action only enqueues a schedule_job_request row - a pure DB
+INSERT through the scheduler core's enqueue primitive; no jobs/ handler module
+(registry or otherwise) is imported, so no code path exists for in-process
+execution. Because the tick's claim loop would run every queued row, a second
+run-now while a request for the same job is still queued REUSES that row
+instead of stacking a duplicate (response notes `reused`), which caps
+double-fires at the API layer. Manual runs are explicit operator actions: any
+existing job is eligible regardless of its enabled flag (the tick dispatches
+manual requests without an enabled check), unknown keys 404, and the action is
+audited. The response is 202-shaped (request id + pickup note); the UI follows
+confirm-then-poll - it polls the job's runs endpoint until a run row appears
+for that request id. The no-in-process-execution boundary is pinned by a
+static import-scan unit test: the test reads the route module's source,
+extracts its import specifiers, and asserts none matches the handler-directory
+shape while the enqueue primitive is present - so a future handler import
+fails CI before it can ship.
+[`Projects/co-newbiz/app/web-next/app/api/admin/schedule-jobs/[jobKey]/run/route.ts:23`;
+`Projects/co-newbiz/tests/unit/schedule-jobs-api.test.ts:522`]
+
+### Health semantics: 180 s heartbeat, timeout-derived overdue, 3-strike window
+
+A read-only, admin-only health endpoint answers three questions per
+environment (it resolves the scheduler environment marker and refuses without
+it - no implicit environment, ever; being read-only it is not audited - audit
+is for mutations):
+
+- **Tick staleness**: show the health banner when the environment's tick
+  heartbeat is older than 180 s (3 minutes). Stale heartbeat stays the primary
+  did-it-fire alarm (mechanism 5); a missing heartbeat row reads as unhealthy
+  too.
+- **Overdue, timeout-derived**: an ENABLED job with a set fire cursor is
+  overdue when `now > last_fire_minute + timeout_sec` AND no run row of the
+  resolved environment started at/after that fire minute - i.e. a fire the
+  tick dispatched never produced a run here. The rule is deliberately
+  conservative: the cursor also advances on skip-missed catch-up, so a skipped
+  fire reads as overdue until the next run; it never flags never-dispatched
+  (NULL cursor) or disabled jobs - total scheduler stop is the tick
+  heartbeat's job.
+- **Consecutive failures**: a trailing window of the last 3 run rows per job
+  feeds a consecutive-failure counter, so a job stuck in a failure loop
+  surfaces without a per-run alert storm; a single failure stays at 0.
+[`Projects/co-newbiz/app/web-next/app/api/admin/schedule-jobs/health/route.ts:24`
+(`TICK_STALE_MS = 180_000`), `:27` (`CONSECUTIVE_FAILURE_WINDOW = 3`), and the
+overdue rule in the route's documented header]
+
+### Create accepts registered handler keys only
+
+Job creation is the RCE boundary of the admin console: `job_key` must exist in
+the scheduler's handler registry, and a create request naming an unregistered
+key is refused with the key named in the error - a free-text command field
+would be remote code execution from the admin console. The registry import is
+metadata read at create time (key, display name, description, defaults), never
+executed handler code - the same posture as seeding. Omitted fields fall back
+to the registered defaults (cron/timeout/retries/display name/description);
+registry defaults are not subject to the interactive-timeout floor; explicit
+fields reuse the edit-path validation rules through a SHARED validator module
+(create and PATCH cannot drift). `enabled` defaults to false - create-then-
+enable is the safe flow, so enabling stays a separate, deliberate, audited
+admin action. Duplicate keys 409; creation is audited with the full created
+row.
+[`Projects/co-newbiz/app/web-next/app/api/admin/schedule-jobs/route.ts:6-14`
+(create contract header), `lib/schedule/job-validate.ts` (shared validator)]
+
 ## Provenance
 
 - ADR: `Projects/co-newbiz/docs/adr/0189-amend-adr-0019-launchd-and-docker-scheduler-model.md` §2 (Decision), §3 (Consequences), §5 (Decision log) - Accepted 2026-10-29
 - Dispatcher/lease/heartbeat code: `Projects/co-newbiz/scripts/co-newbiz/scheduler-core.ts`, `schedule-tick.ts`, `run-job.ts` (file:line pointers above, verified 2026-10-31)
+- Operator-control layer (v1.1): `Projects/co-newbiz/app/web-next/app/api/admin/schedule-jobs/` (`route.ts` create, `[jobKey]/run/route.ts` run-now, `health/route.ts` health) + `lib/schedule/job-validate.ts` (shared validator) + `tests/unit/schedule-jobs-api.test.ts` §9 (import-scan boundary test) - verified 2026-11-04, T-20261103-005
 - Design of record: `Projects/co-newbiz/docs/designs/2026-10-29-scheduled-jobs-design.md`
 
 Rejected alternatives worth remembering (ADR-0189 §Alternatives): per-job OS
@@ -133,8 +210,8 @@ stale-reclaim pattern was reused).
 
 ## Adoption Checklist
 
-Five decision points a variant must answer before implementing (derived from
-ADR-0189's decision set):
+Seven decision points a variant must answer before implementing (derived from
+ADR-0189's decision set; 6-7 added by the v1.1 operator-control layer):
 
 1. **OS scheduler choice** - launchd (macOS) / systemd user timer (Linux) /
    Task Scheduler (Windows); in Docker production, the tick fires via
@@ -150,6 +227,14 @@ ADR-0189's decision set):
 5. **No in-process execution from the web server** - admin "run now" enqueues a
    request row consumed by the next tick; the web container never runs jobs
    in-process and never makes privileged OS calls.
+6. **Run-now posture** - enqueue-only with still-queued-request reuse
+   (duplicate cap), manual runs allowed on disabled jobs, 202 + confirm-then-
+   poll UX, and a static import-scan unit test pinning the
+   no-in-process-execution boundary.
+7. **Health visibility and create boundary** - heartbeat staleness threshold
+   (co-newbiz: 180 s), timeout-derived overdue rule, consecutive-failure
+   window (co-newbiz: trailing 3); job creation accepts registered handler
+   keys only via a shared create/edit validator, default-disabled.
 
 Also decide up front: catch-up policy for missed fires after host sleep
 (per-job-family: run-once vs skip), and the schema change governing the
@@ -168,4 +253,6 @@ trigger fires:
   (OS registration tooling, notification fan-out) stabilize.
 
 Whichever comes first. Until then, the provenance paths above are the reference
-implementation.
+implementation. v1.1 (operator-control layer) extends the documented shape but
+changes nothing here - it is deferred under the same trigger as v1.0.0
+(T-20261103-005).
