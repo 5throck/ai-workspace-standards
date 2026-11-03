@@ -39,7 +39,11 @@ Three pilot findings are recorded here because they shape the decision:
   workspace-ROOT store is the de-facto delegation substrate, and hub-local ticket
   stores are not built.
 - **F2** — the authorization registry is not yet delivered to deployed hubs
-  (`docs/authorization-registry.md` rows are authored at the root; hub copies lag).
+  (rows are authored in the co-security canonical copy,
+  `templates/co-security/docs/authorization-registry.md`; deployed hub copies
+  under `Projects/<hub>/docs/authorization-registry.md` lag behind it. No
+  workspace-root `docs/authorization-registry.md` exists — wording corrected
+  2026-11-03, T-20261103-004).
 - **F3** — there is no MCP read-back surface for `T-*` delegation tickets
   (`upstream_request_status` covers `U-*` only), so spokes cannot check their own
   ticket's status remotely.
@@ -126,7 +130,9 @@ the F1 resolution).
 
 - **F2 — authorization-registry delivery to deployed hubs.** Hub-local
   `docs/authorization-registry.md` copies are not yet provisioned; the authorization
-  gate in the pilot ran against the root-authored registry. Resolves on the next
+  gate in the pilot ran against the canonical co-security template registry
+  (`templates/co-security/docs/authorization-registry.md` — the authoring site;
+  there is no workspace-root `docs/authorization-registry.md`). Resolves on the next
   upgrade/delivery wave; until then, the gate's negative-test behavior (double
   abort on expired/mismatched rows) is conservative and safe.
 - **F3 — no `T-*` MCP read-back surface.** `upstream_request_status` covers `U-*`

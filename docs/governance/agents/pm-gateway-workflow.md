@@ -62,6 +62,8 @@ PM owns the composition of the agent team and rules on skill changes:
 
 **Enforcement**: governance, not code — the audits (`agent-lifecycle-audit.ts`, `lifecycle-sync-audit.ts`) catch structural drift, and decision records capture the judgment trail. See ADR-0080 (workspace root, `docs/adr/0080-pm-team-management-authority.md`).
 
+**Record-form convention (T-20261103-004, D-2)**: not every PM ruling owes a DEC record. Substantive gate rulings that shape design, scope, or asset disposition (ADR-0061's gate-moment class) emit a `docs/decisions/DEC-YYYYMMDD-NN.md` record; dispatch-level mechanical rulings made while running the ticket flow (transition approvals, batch bookkeeping, landing dispositions, priority calls inside an already-ticketed task) may be recorded directly in the governing `tickets/governance/T-*.yaml` ticket's history — the 2026-11-01 ruling wave worked this way. The ticket trail is the record; escalate to a DEC record when a ruling would be invisible or ambiguous from the ticket alone.
+
 ### §3.12 Upstream Request Triage
 
 Upstream-request tickets (`U-YYYYMMDD-NNN`, `kind: manual`, `trust: untrusted`) are filed by other projects through the global MCP server `scripts/mcp-upstream-server.ts`. Inbox = `status: backlog`; ready = `status: waiting`; `upstream.triage` is authoritative. Identity tiers (introduced in server v1.9.0, design Appendix E): `cwd` > `client_roots` > `self_declared`. A ticket carrying `identity: client_roots_untrusted` stays flagged until the project has a PM-resolved `cwd`/`client_roots`-attested ticket; only then do later `self_declared` filings auto-ready. Never downgrade the identity flag by hand. Design: `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§8, §9, §12, Appendix E).
