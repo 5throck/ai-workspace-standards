@@ -6,7 +6,7 @@
  * `pr/*` evidence excludes a fleet candidate).
  */
 
-import { describe, expect, test } from 'bun:test';
+import { afterAll, describe, expect, test } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -20,6 +20,22 @@ import {
 } from '../../scripts/lib/git-aware-scan.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
+
+// Hooks (pre-push) run `bun test` with GIT_DIR exported, and every git spawn
+// honors GIT_DIR over cwd-based discovery — fixture repos would silently
+// resolve to the workspace repo. Sanitize for the suite's duration so the
+// tests are hermetic regardless of the caller's git environment.
+const GIT_ENV_KEYS = ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY'];
+const savedGitEnv = new Map<string, string | undefined>();
+for (const key of GIT_ENV_KEYS) {
+  savedGitEnv.set(key, process.env[key]);
+  delete process.env[key];
+}
+afterAll(() => {
+  for (const [key, value] of savedGitEnv) {
+    if (value !== undefined) process.env[key] = value;
+  }
+});
 
 describe('trackedFilesUnder / isTrackedRel (per-FILE level inside tracked dirs)', () => {
   test('a tracked dir yields its committed files; untracked names are not members', () => {
