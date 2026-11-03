@@ -120,7 +120,7 @@ describe('lifecycle-sync-audit Check E (lifecycle record metadata gate)', () => 
     // Golden pins — bump alongside the skill's version (checked by step 4.85 of /sync).
     const cases: Array<[string, string, string]> = [
       ['sync', '1.8.0', 'pm'],
-      ['security-scan', '1.2.0', 'pm'],
+      ['security-scan', '1.3.0', 'pm'],
       ['upgrade-project', '1.6.2', 'pm'],
     ];
     for (const [skill, version, owner] of cases) {

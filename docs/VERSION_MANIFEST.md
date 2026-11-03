@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-03T22:04:56.206Z
+**Generated**: 2026-11-03T22:32:44.876Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -78,10 +78,10 @@
 | release-template | 1.0.0 | active | skills/release-template/SKILL.md | workspace | release template, template release, bump templates version, tag template, publish template version | pm |
 | research-analysis | 1.0.2 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
 | script-lifecycle-manager | 1.2.2 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
-| security-scan | 1.2.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
+| security-scan | 1.3.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
 | service-design | 1.1.0 | active | skills/service-design/SKILL.md | workspace | service design, customer journey, service blueprint, touchpoint design, customer experience, service innovation, operational alignment | pm |
 | simulate-pipeline | 1.0.2 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
-| skill-graph-analytics | 1.3.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
+| skill-graph-analytics | 1.3.1 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.0.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
