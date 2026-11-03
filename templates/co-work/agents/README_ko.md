@@ -14,6 +14,7 @@ lang_reason: source-material
 | 협업 PM | `pm.md` | 리서치 워크플로우, 문서화 전략, 이해관계자 조율 |
 | 분석가 | `analyst.md` | 리서치 종합, 데이터 분석, 근거 수집 |
 | 콘텐츠 라이터 | `content-writer.md` | 보고서, 아티클, 구조화된 콘텐츠 초안 작성 |
+| 덱 빌더 | `deck-builder.md` | 품질 게이트 하에서 canonical SVG 슬라이드 페이지 저작 및 네이티브 편집 가능 PPTX 내보내기 |
 | MS365 전문가 | `ms365-expert.md` | Microsoft 365 도구, SharePoint, Teams 연동 |
 | 프로젝트 코디네이터 | `project-coordinator.md` | 태스크 추적, 일정 관리, 회의 진행 |
 | 스토리텔러 | `storyteller.md` | 내러티브 구조, 대상 독자별 커뮤니케이션 |

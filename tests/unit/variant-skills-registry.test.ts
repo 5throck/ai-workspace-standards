@@ -7,7 +7,7 @@
  * Pins the eleven curated variant registries: parseSkillRegistryRows must
  * return one row per skill directory (co-consult 18, co-deck 10, co-security
  * 6, co-develop 4 — the 38-row inventory batch; co-abap 13, co-export 11,
- * co-hr 12, co-news 6, co-price 22, co-safety 61, co-work 1 — the 126-row
+ * co-hr 12, co-news 6, co-price 22, co-safety 61, co-work 4 — the 126-row
  * registry-completeness batch), every row's version/status/owner/last_reviewed
  * must equal the skill's SKILL.md frontmatter, and no row may name a
  * non-existent directory. co-design/co-game were already clean and are pinned
@@ -38,7 +38,7 @@ const EXPECTED_COUNTS: Record<string, number> = {
   'co-news': 6,
   'co-price': 22,
   'co-safety': 61,
-  'co-work': 1,
+  'co-work': 4,
 };
 
 // Design §1 audited fork set — the only co-safety rows classified as
