@@ -21,6 +21,7 @@ import {
   loadCommonContractNames,
   checkUnregisteredDuplicates,
   checkVariantIdentity,
+  checkHubDoctrineDuplication,
   checkConsumerMinimumVersions,
   loadConsumingVariants,
   loadHubTopology,
@@ -231,6 +232,135 @@ describe('loadHubTopology', () => {
     const res = loadHubTopology(root);
     expect(res.ok).toBe(false);
     expect(res.error).toContain('not valid JSON');
+  });
+});
+
+// ── §15.1 (T-20261103-002a) — checkHubDoctrineDuplication variant-identity
+// sanction. Fixture canonical paths use the FULL templates/<variant>/... form
+// (entryTemplateRelPath returns null for bare rel-paths — the duplication
+// tests need resolvable paths, unlike the shape-leg fixtures above).
+describe('checkHubDoctrineDuplication (§6.2 preflight + variant-identity sanction)', () => {
+  const HUB_ROW = {
+    asset: 'security-monitor',
+    domain: 'co-develop',
+    hub_variant: 'co-develop',
+    category: 'hub-doctrine',
+    verticals: ['co-game'],
+    origin: 'fixture hub doctrine',
+    canonical_path: 'templates/co-develop/agents/security-monitor.md',
+    version: '1.1.1',
+  };
+  const IDENTITY_ROW = {
+    asset: 'security-monitor',
+    domain: 'co-game',
+    hub_variant: 'co-game',
+    category: 'variant-identity',
+    verticals: [],
+    origin: 'fixture variant identity',
+    canonical_path: 'templates/co-game/agents/security-monitor.md',
+    version: '1.0.0',
+    consumers: [],
+  };
+
+  function templateWithLocalCopy(rel = 'agents/security-monitor.md'): string {
+    const root = makeFixture();
+    const templateDir = join(root, 'templates', 'co-game');
+    mkdirSync(join(templateDir, rel, '..'), { recursive: true });
+    writeFileSync(join(templateDir, rel), 'local copy\n');
+    return templateDir;
+  }
+
+  test('case 1 — hub-doctrine row + local copy + no identity row FAILs (pins the negative)', () => {
+    const templateDir = templateWithLocalCopy();
+    const res = checkHubDoctrineDuplication(topologyWith({ entries: [HUB_ROW] }), {
+      variantName: 'co-game',
+      templateDir,
+    });
+    expect(res.fails).toHaveLength(1);
+    expect(res.fails[0]).toContain('unregistered hub-doctrine duplication');
+  });
+
+  test('case 2 — variant-identity row at the same rel-path sanctions the copy', () => {
+    const templateDir = templateWithLocalCopy();
+    const res = checkHubDoctrineDuplication(topologyWith({ entries: [HUB_ROW, IDENTITY_ROW] }), {
+      variantName: 'co-game',
+      templateDir,
+    });
+    expect(res.fails).toEqual([]);
+    expect(res.passes.some(p => p.includes('sanctioned by a variant-identity registry row'))).toBe(true);
+  });
+
+  test('case 3 — identity row with the SAME asset name at a DIFFERENT rel-path still FAILs (rel-path is the key)', () => {
+    const templateDir = templateWithLocalCopy();
+    const misplaced = {
+      ...IDENTITY_ROW,
+      canonical_path: 'templates/co-game/skills/security-monitor/SKILL.md',
+    };
+    const res = checkHubDoctrineDuplication(topologyWith({ entries: [HUB_ROW, misplaced] }), {
+      variantName: 'co-game',
+      templateDir,
+    });
+    expect(res.fails).toHaveLength(1);
+    expect(res.fails[0]).toContain('unregistered hub-doctrine duplication');
+  });
+
+  test('case 4 — identity row for ANOTHER variant still FAILs', () => {
+    const templateDir = templateWithLocalCopy();
+    const foreign = { ...IDENTITY_ROW, hub_variant: 'co-other', domain: 'co-other', canonical_path: 'templates/co-other/agents/security-monitor.md' };
+    const res = checkHubDoctrineDuplication(topologyWith({ entries: [HUB_ROW, foreign] }), {
+      variantName: 'co-game',
+      templateDir,
+    });
+    expect(res.fails).toHaveLength(1);
+    expect(res.fails[0]).toContain('unregistered hub-doctrine duplication');
+  });
+
+  test('case 5 — dual sanction (identity row + declared consumer) skips the FAIL with exactly one ambiguity WARN', () => {
+    const templateDir = templateWithLocalCopy();
+    const consumerRow = { ...HUB_ROW, consumers: [{ variant: 'co-game', minimum_version: '1.1.1' }] };
+    const res = checkHubDoctrineDuplication(topologyWith({ entries: [consumerRow, IDENTITY_ROW] }), {
+      variantName: 'co-game',
+      templateDir,
+    });
+    expect(res.fails).toEqual([]);
+    expect(res.warns).toHaveLength(1);
+    expect(res.warns[0]).toContain('dual sanction for agents/security-monitor.md in co-game');
+    expect(res.warns[0]).toContain('registry ambiguity; reconcile to a single category');
+  });
+
+  test('case 6 — real-workspace pins: co-architect, co-abap, co-price preflight legs', () => {
+    const commonNames = loadCommonContractNames(cwd());
+    const loaded = loadHubTopology(cwd());
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+
+    // co-architect (guards the §15.2 row) and co-price (guards the E4 row) are clean.
+    for (const variantName of ['co-architect', 'co-price']) {
+      const res = checkHubDoctrineDuplication(loaded.topology!, {
+        variantName,
+        templateDir: join(cwd(), 'templates', variantName),
+        commonNames,
+      });
+      expect(res.fails).toEqual([]);
+    }
+
+    // co-abap (guards the E4 security-monitor row): the identity sanction clears
+    // security-monitor, but the template still carries three PRE-EXISTING
+    // unregistered co-develop hub-doctrine copies (architect, code-writer,
+    // test-runner) whose disposition (variant-identity registration / declared
+    // consumers / removal as drift) is tracked by the follow-up ticket
+    // T-20261103-008 — outside §15's change set. Pinned here so the residual
+    // is visible and cannot silently grow or shrink.
+    const abap = checkHubDoctrineDuplication(loaded.topology!, {
+      variantName: 'co-abap',
+      templateDir: join(cwd(), 'templates', 'co-abap'),
+      commonNames,
+    });
+    expect(abap.fails).toHaveLength(3);
+    for (const asset of ['architect', 'code-writer', 'test-runner']) {
+      expect(abap.fails.some(f => f.includes(`hub-doctrine asset '${asset}'`))).toBe(true);
+    }
+    expect(abap.fails.some(f => f.includes('security-monitor'))).toBe(false);
   });
 });
 

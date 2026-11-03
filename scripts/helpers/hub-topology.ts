@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-03, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §15.1, ticket T-20261103-002a): checkHubDoctrineDuplication gains
+//          the variant-identity sanction — a registry row
+//          {category: 'variant-identity', hub_variant == variantName} whose
+//          canonical_path resolves to the SAME template-relative path
+//          sanctions the local copy (rel-path join key, not asset-name
+//          equality); dual sanction (identity row + declared consumer for the
+//          same rel) skips the FAIL with a WARN instead — fail-open on
+//          registry ambiguity, fail-closed everywhere else.
 // v1.1.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §6.2 / §6.1 Phase 1.5): promotion/instantiation preflight legs —
 //          checkHubDoctrineDuplication (a template carrying a copy of a
@@ -555,14 +564,36 @@ export interface HubDoctrineDuplicationContext {
   commonNames?: Set<string>;
 }
 
+/** §15.1 variant-identity sanction predicate — true when `entries` carries a
+ * row {category: 'variant-identity', hub_variant: variantName} whose
+ * canonical_path resolves (via entryTemplateRelPath) to the SAME
+ * template-relative path `rel`. The join key is canonical rel-path equality,
+ * NOT asset-name equality: same-named assets across variants are exactly the
+ * identity scenario, so only "this variant's own registered identity file at
+ * this exact location" proves the local copy is identity, not a fork. */
+function variantIdentitySanction(entries: unknown[], variantName: string, rel: string): boolean {
+  return entries.some(row => {
+    if (!row || typeof row !== 'object') return false;
+    const v = row as Record<string, unknown>;
+    if (v['category'] !== 'variant-identity') return false;
+    const hubVariant = String(v['hub_variant'] ?? '');
+    if (hubVariant !== variantName) return false;
+    return entryTemplateRelPath(String(v['canonical_path'] ?? ''), hubVariant) === rel;
+  });
+}
+
 /** Preflight leg — unregistered hub-doctrine duplication (design §6.2):
  * "an unregistered hub-doctrine duplication FAILs the preflight". For every
  * hub-doctrine entry whose hub_variant ≠ the variant under preflight, a copy
  * of the asset at its template-relative canonical path inside templateDir
  * FAILs — UNLESS the copy is sanctioned: the variant is a DECLARED consumer
- * (entry.consumers[] names it; the stale-read copy of §7.4) or the asset is
- * common-contract delivered stock (inheritance, not a fork). The hub itself
- * is skipped by the hub_variant ≠ filter. */
+ * (entry.consumers[] names it; the stale-read copy of §7.4), the asset is
+ * common-contract delivered stock (inheritance, not a fork), or a
+ * variant-identity registry row covers this variant at the same canonical
+ * rel-path (§15.1 — the file is the variant's own registered identity). A
+ * dual sanction (identity row AND declared consumer for the same rel) skips
+ * the FAIL with a WARN — registry ambiguity never blocks the scaffold. The
+ * hub itself is skipped by the hub_variant ≠ filter. */
 export function checkHubDoctrineDuplication(topology: HubTopology, ctx: HubDoctrineDuplicationContext): LegResult {
   const fails: string[] = [];
   const warns: string[] = [];
@@ -586,6 +617,23 @@ export function checkHubDoctrineDuplication(topology: HubTopology, ctx: HubDoctr
       c => c && typeof c === 'object' && String((c as Record<string, unknown>)['variant'] ?? '') === ctx.variantName,
     );
     const isCommonStock = ctx.commonNames?.has(asset) ?? false;
+    const variantIdentity = variantIdentitySanction(entries, ctx.variantName, rel);
+    if (variantIdentity && declaredConsumer) {
+      // Dual sanction (§15.1): the registry is ambiguous about what the local
+      // file IS (identity vs §7.4 stale-read copy). Identity wins — the file
+      // is registered and promotion may not overwrite it — so the leg skips
+      // the FAIL and warns; the weekly drift detector (duplicate-validator)
+      // and registry reconciliation own the cleanup, not the scaffold gate.
+      warns.push(
+        `dual sanction for ${rel} in ${ctx.variantName} (variant-identity row + declared hub-doctrine consumer) — registry ambiguity; reconcile to a single category`,
+      );
+      passes.push(`${rel} dual-sanctioned (variant-identity row + declared consumer) — skipped as registry ambiguity (§15.1)`);
+      continue;
+    }
+    if (variantIdentity) {
+      passes.push(`${rel} sanctioned by a variant-identity registry row (§15.1)`);
+      continue;
+    }
     if (declaredConsumer || isCommonStock) continue; // sanctioned copy (§7.4 stale-read / common contract)
     fails.push(
       `${ctx.variantName} template carries a copy of hub-doctrine asset '${asset}' (hub: ${hubVariant}, domain: ${String(e['domain'] ?? '')}) at ${rel} with no sanction — unregistered hub-doctrine duplication (design §6.2). Declare consumption in variant.json hub.consumes {domain, minimum_version} or remove the copy; the hub delivers the canonical`,
