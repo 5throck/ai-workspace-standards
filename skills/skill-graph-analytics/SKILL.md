@@ -1,13 +1,13 @@
 ---
 name: skill-graph-analytics
-version: 1.3.0
+version: 1.3.1
 description: >
   Weekly fleet analytics over the per-project skill-graph projections:
   consolidate root + Projects/<co-x> graphs into a dated snapshot, triage
   skill convergence (consolidation/promotion candidates), delivery drift
   (root skills missing from projects), and root-graph orphans (4-way
   cross-check), and record findings. Use when: the weekly analytics cadence
-  fires (currently manual — see When to Run), the user says "skill-graph
+  fires (manual until the Friday full-override revival — see When to Run), the user says "skill-graph
   analytics", "fleet skill graph", "skill graph report", or asks which skills
   the project fleet carries, which root skills never reached projects, whether
   any agent or skill is orphaned, or what changed fleet-wide since last week.
@@ -15,7 +15,7 @@ status: active
 scope: workspace
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-10-08
+last_reviewed: 2026-11-04
 prerequisites: workspace-root CWD; docs/skill-graph.json + Projects/<co-x>/docs/skill-graph.json projections present
 relates_to:
   - skill: project-resync
@@ -50,11 +50,11 @@ it does not edit skills, promote content, or rewrite graphs.
 - **Weekly cadence** — NO scheduled runner invokes this skill as of 2026-11-03
   (automation roster: 01:30 fleet-review+resync, 04:00 governance-ticket —
   neither carries the weekly consolidation; the old 02:30 reference here rotted,
-  T-20261101-004). Run it manually at the start of a weekly maintenance session.
-  Revival home pending adjudication — recommended: fold into the fleet runner's
-  Friday full override (one prompt-line addition, no new schedule); alternative:
-  a standalone weekly automation. Until decided, the weekly triage step fires
-  only when a maintenance session runs this skill.
+  T-20261101-004). **Revival home DECIDED 2026-11-03 (T-20261101-004)**: the
+  01:30 fleet runner's FRIDAY FULL OVERRIDE carries the weekly consolidation
+  (one prompt-line addition, no new schedule; runner prompt updated via
+  automation tooling). Until that override next fires, run it manually at the
+  start of a weekly maintenance session.
 - **On demand** — after a fleet-wide skill promotion/upgrade wave, before a
   consolidation decision, or whenever skill-graph drift is suspected.
 
