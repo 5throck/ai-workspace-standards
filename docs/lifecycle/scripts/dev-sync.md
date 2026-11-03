@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.37.0
+- **Version**: 1.38.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-04
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-04 | production | production | v1.38.0 (U-20261104-003): new step 4.87 — agent frontmatter last_updated bump: sync passes that mechanically rewrite an agent file's frontmatter (tier collapse, model-registry delivery, stub merges) left the top-level last_updated stale, so agent-lifecycle-audit emitted identical staleness warnings for every touched file on every later run (co-newbiz: 34 warnings off the single 2026-10-28 commit 0b1a406c). The pass re-stamps the top-level last_updated to the run date for sync-modified agent .md files whose HEAD-to-worktree diff is confined to the frontmatter block, via the shared bumpFrontmatterLastUpdated primitive; body edits and no-ops are never touched; pure decision core helpers/agent-mechanical-date-bump.ts v1.0.0, unit-pinned | automation-engineer |
 | 2026-10-31 | production | production | v1.37.0 (U-20261029-004, spec docs/designs/2026-10-31-variant-generators-design.md §4-§5): new step 3.86 — declared generator pre-convergence (regeneration step family, before the audit gate): runs every project-authored `scripts/<variant>/generators.json` manifest via lib/generator-manifest.ts v1.0.0 (array-form Bun.spawnSync, argv[0] must be `bun`, cwd pinned, no env fabrication, ≤ 16 generators / ≤ 8 outputs, containment + duplicate-name rejection), verifies declared outputs on exit 0, stages them; absent/empty manifest = zero-behavior-change no-op; generator failure = loud `[generator:<name>]` FAIL with secret-scrubbed output, no partial staging; the generator's --check form remains the audit's drift gate | automation-engineer |
 |------|------|-----|---------|----------|
 | 2026-10-31 | production | production | v1.36.0 (T-20261031-003, spec docs/designs/2026-10-31-changelog-normalize-design.md §4): step 3b fail-then-heal — detector findings trigger scripts/changelog-normalize.ts (write mode), re-stage, and re-run the detector, asserting zero findings before the gate verdict; unrepairable structures stay a hard FAIL; zero findings never touch the file. Migration path for the 2026-10-31 wave halt (6 of 11 projects blocked on the v1.35.0 fail-only gate) | automation-engineer |
