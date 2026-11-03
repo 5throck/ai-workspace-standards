@@ -89,6 +89,26 @@ To add a new document type:
 5. For additive changes (new types, new style fields), bump the minor version
 6. For breaking changes (renaming/removing style IDs), bump the major version and record in CHANGELOG
 
+## Decks Section (v1.1.0)
+
+The top-level `decks` object carries style tokens for the **native PPTX deck capability** (canonical-SVG authoring + DrawingML compilation; spec `2026-11-03-co-work-native-pptx-deck-design`, DEC-20261103-01). It is consumed by:
+
+- `templates/co-work/scripts/svg-to-pptx.ts` — derives the PPTX `clrScheme` / `fontScheme` (via `colors.clr_scheme_mapping`) and slide size (via `canvas`) for the flat-mode package.
+- `templates/co-work/skills/svg-slide-authoring` — locked tokens (colors, fonts, canvas) that deck-builder must not invent per run.
+
+| Token group | Contents | PPTX mapping |
+|-------------|----------|--------------|
+| `canvas` | `width_px`, `height_px`, `aspect`, `emu_per_px` (9525) | slide size EMU (`width_px × emu_per_px`) |
+| `colors` | `background` / `primary` / `accent` / `text` / `muted` (hex, no `#`, per `units.color`) + `clr_scheme_mapping` | `clrScheme` dk1/lt1/dk2/lt2/accent1–6 |
+| `fonts` | `major` / `minor` (+ eastAsia variants, `fallback_note`) | `fontScheme` majorFont/minorFont |
+| `deck_types` | presets (`business-report`, `proposal`, `briefing`): `page_count_guidance`, `slide_roles` | design-brief scaffolding; structured layouts are P2 roadmap |
+
+Color unit note: this registry stores colors **without the `#` prefix** (OOXML convention, per `units.color`); canonical SVG authoring spells the same tokens **with** the `#` prefix and uppercase (`#RRGGBB`).
+
+### Extending `decks`
+
+Same rules as document types: additive changes (new deck types, new token fields) bump the minor version; removing/renaming token keys is a major bump. New deck_types are additive; changing `clr_scheme_mapping` semantics is breaking.
+
 ## Governance
 
 The registry version lives in the JSON `version` field. Changes to the registry follow the standard PR flow via `/sync`:

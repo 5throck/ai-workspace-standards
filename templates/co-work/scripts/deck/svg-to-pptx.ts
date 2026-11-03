@@ -1,0 +1,625 @@
+#!/usr/bin/env bun
+/**
+ * @version 1.1.0
+ * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
+ * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
+ */
+
+import { unzipSync, zipSync } from "fflate";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
+import { basename, extname, join, resolve } from "path";
+import { fingerprintFiles, parseSvg, type CheckReport, type SvgNode } from "./svg-check.ts";
+
+const EMU_PER_PX = 9525;
+const emu = (px: number) => Math.round(px * EMU_PER_PX);
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+
+interface Pt { x: number; y: number }
+interface Offset { tx: number; ty: number }
+
+interface GradientDef {
+  kind: "linear" | "radial";
+  stops: { pos: number; color: string; alpha: number }[];
+  x1: number; y1: number; x2: number; y2: number;
+}
+
+interface CompileWarning { rule: string; message: string }
+
+interface DeckTokens {
+  canvas: { width_px: number; height_px: number };
+  colors: Record<string, string>;
+  clrMapping: Record<string, string>;
+  fonts: { major: string; minor: string; eastasia_major: string; eastasia_minor: string };
+}
+
+// ---------------------------------------------------------------------------
+// Path geometry (canonical: absolute M L H V C Q Z)
+// ---------------------------------------------------------------------------
+
+function parsePath(d: string): { cmds: { cmd: string; pts: Pt[] }[]; bbox: { x: number; y: number; w: number; h: number } } {
+  const tokens = d.match(/[MLHVQCZmlhvqcz]|-?\d*\.?\d+(?:e[-+]?\d+)?/gi) ?? [];
+  const cmds: { cmd: string; pts: Pt[] }[] = [];
+  let cur: Pt = { x: 0, y: 0 };
+  let i = 0;
+  const take = (n: number): number[] => {
+    const vals: number[] = [];
+    for (let k = 0; k < n; k++) vals.push(parseFloat(tokens[i++]));
+    return vals;
+  };
+  while (i < tokens.length) {
+    const t = tokens[i];
+    if (/[a-zA-Z]/.test(t)) {
+      const cmd = tokens[i++].toUpperCase();
+      const pts: Pt[] = [];
+      if (cmd === "M" || cmd === "L") { const [x, y] = take(2); pts.push({ x, y }); cur = { x, y }; }
+      else if (cmd === "H") { const [x] = take(1); pts.push({ x, y: cur.y }); cur = { x, y: cur.y }; }
+      else if (cmd === "V") { const [y] = take(1); pts.push({ x: cur.x, y }); cur = { x: cur.x, y }; }
+      else if (cmd === "C") { const v = take(6); for (let k = 0; k < 3; k++) pts.push({ x: v[k * 2], y: v[k * 2 + 1] }); cur = { x: v[4], y: v[5] }; }
+      else if (cmd === "Q") { const v = take(4); pts.push({ x: v[0], y: v[1] }); pts.push({ x: v[2], y: v[3] }); cur = { x: v[2], y: v[3] }; }
+      else if (cmd === "Z") { pts.push({ ...cur }); }
+      cmds.push({ cmd, pts });
+    } else {
+      i++; // skip stray numbers (defensive)
+    }
+  }
+  const all = cmds.flatMap((c) => c.pts).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+  const xs = all.map((p) => p.x); const ys = all.map((p) => p.y);
+  const x = Math.min(...xs); const y = Math.min(...ys);
+  return { cmds, bbox: { x, y, w: Math.max(...xs) - x || 1, h: Math.max(...ys) - y || 1 } };
+}
+
+// ---------------------------------------------------------------------------
+// Fill / stroke / paint
+// ---------------------------------------------------------------------------
+
+function resolvePaint(val: string | undefined, gradients: Map<string, GradientDef>): { kind: "none" } | { kind: "solid"; color: string; alpha: number } | { kind: "gradient"; def: GradientDef } {
+  const v = (val ?? "").trim();
+  if (!v || v === "none") return { kind: "none" };
+  const um = v.match(/^url\(#([\w-]+)\)$/);
+  if (um) {
+    const g = gradients.get(um[1]);
+    if (g) return { kind: "gradient", def: g };
+    return { kind: "none" };
+  }
+  const hex = v.replace("#", "").toUpperCase();
+  return { kind: "solid", color: hex, alpha: 1 };
+}
+
+function alphaFromAttrs(node: SvgNode, paintAlpha: number): number {
+  const o = node.attrs["opacity"] !== undefined ? parseFloat(node.attrs["opacity"]) : 1;
+  const fo = node.attrs["fill-opacity"] !== undefined ? parseFloat(node.attrs["fill-opacity"]) : 1;
+  return Math.round(Math.max(0, Math.min(1, o * fo * paintAlpha)) * 100000);
+}
+
+/** srgbClr with optional alpha; emits a self-closing tag when alpha is full. */
+function srgbClr(color: string, alpha = 100000): string {
+  return alpha < 100000
+    ? `<a:srgbClr val="${color}"><a:alpha val="${alpha}"/></a:srgbClr>`
+    : `<a:srgbClr val="${color}"/>`;
+}
+
+function fillXml(node: SvgNode, gradients: Map<string, GradientDef>): string {
+  const paint = resolvePaint(node.attrs["fill"], gradients);
+  if (paint.kind === "none") return "<a:noFill/>";
+  if (paint.kind === "gradient") {
+    const stops = paint.def.stops.map((s) => `<a:gs pos="${Math.round(s.pos * 100000)}">${srgbClr(s.color, Math.round(s.alpha * 100000))}</a:gs>`).join("");
+    if (paint.def.kind === "linear") {
+      const dx = paint.def.x2 - paint.def.x1; const dy = paint.def.y2 - paint.def.y1;
+      const ang = Math.round((Math.atan2(dy, dx) * 180000) / Math.PI);
+      return `<a:gradFill><a:gsLst>${stops}</a:gsLst><a:lin ang="${ang}" scaled="1"/></a:gradFill>`;
+    }
+    return `<a:gradFill><a:gsLst>${stops}</a:gsLst><a:path path="circle"><a:fillToRect l="50000" t="50000" r="50000" b="50000"/></a:path></a:gradFill>`;
+  }
+  return `<a:solidFill>${srgbClr(paint.color, alphaFromAttrs(node, paint.alpha))}</a:solidFill>`;
+}
+
+function lineXml(node: SvgNode, gradients: Map<string, GradientDef>): string {
+  const paint = resolvePaint(node.attrs["stroke"], gradients);
+  if (paint.kind === "none") return "";
+  const w = emu(parseFloat(node.attrs["stroke-width"] ?? "1") || 1);
+  const color = paint.kind === "gradient" ? paint.def.stops[0]?.color ?? "000000" : paint.color;
+  const o = node.attrs["stroke-opacity"] !== undefined ? parseFloat(node.attrs["stroke-opacity"]) : 1;
+  const alpha = Math.round(Math.max(0, Math.min(1, o)) * 100000);
+  return `<a:ln w="${w}"><a:solidFill>${srgbClr(color, alpha)}</a:solidFill><a:prstDash val="solid"/></a:ln>`;
+}
+
+// ---------------------------------------------------------------------------
+// Page walk → DrawingML shape list
+// ---------------------------------------------------------------------------
+
+interface ShapeXml { xml: string }
+
+function collectGradients(root: SvgNode): Map<string, GradientDef> {
+  const grads = new Map<string, GradientDef>();
+  const visit = (n: SvgNode) => {
+    if ((n.tag === "linearGradient" || n.tag === "radialGradient") && n.attrs["id"]) {
+      const stops = n.children.filter((c) => c.tag === "stop").map((c, i, arr) => ({
+        pos: c.attrs["offset"] !== undefined ? parseFloat(c.attrs["offset"]) : i / Math.max(1, arr.length - 1),
+        color: (c.attrs["stop-color"] ?? "#000000").replace("#", "").toUpperCase(),
+        alpha: c.attrs["stop-opacity"] !== undefined ? parseFloat(c.attrs["stop-opacity"]) : 1,
+      }));
+      grads.set(n.attrs["id"], {
+        kind: n.tag === "linearGradient" ? "linear" : "radial",
+        stops,
+        x1: parseFloat(n.attrs["x1"] ?? "0"), y1: parseFloat(n.attrs["y1"] ?? "0"),
+        x2: parseFloat(n.attrs["x2"] ?? "1"), y2: parseFloat(n.attrs["y2"] ?? "0"),
+      });
+    }
+    for (const c of n.children) visit(c);
+  };
+  visit(root);
+  return grads;
+}
+
+function geomOffset(attrs: Record<string, string>, off: Offset): { x: number; y: number } {
+  return { x: (parseFloat(attrs["x"] ?? attrs["cx"] ?? attrs["x1"] ?? "0") || 0) + off.tx, y: (parseFloat(attrs["y"] ?? attrs["cy"] ?? attrs["y1"] ?? "0") || 0) + off.ty };
+}
+
+function shapeRotation(node: SvgNode, warnings: CompileWarning[]): number {
+  const t = node.attrs["transform"];
+  if (!t) return 0;
+  const m = t.match(/rotate\(\s*(-?[\d.]+)/);
+  if (m) {
+    if (/rotate\(\s*-?[\d.]+\s+[\d.]+/.test(t)) warnings.push({ rule: "W-ROT-PIVOT", message: "rotate(deg cx cy) pivot form approximated as origin rotation" });
+    return Math.round(parseFloat(m[1]) * 60000);
+  }
+  return 0;
+}
+
+function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[]) {
+  const shapes: ShapeXml[] = [];
+  const images: { rel: string; file: string }[] = [];
+  let idSeq = 1;
+  const nextId = () => ++idSeq;
+
+  const xfrm = (x: number, y: number, w: number, h: number, rot = 0): string =>
+    `<a:xfrm${rot ? ` rot="${rot}"` : ""}><a:off x="${emu(x)}" y="${emu(y)}"/><a:ext cx="${emu(Math.max(w, 1))}" cy="${emu(Math.max(h, 1))}"/></a:xfrm>`;
+
+  const spShell = (id: number, name: string, geom: string, fill: string, ln: string, xf: string): string =>
+    `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${esc(name)}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${xf}${geom}${fill}${ln}<a:effectLst/></p:spPr></p:sp>`;
+
+  const walk = (node: SvgNode, off: Offset) => {
+    const attrs = node.attrs;
+    let localOff = off;
+    const t = attrs["transform"];
+    if (t && node.tag === "g") {
+      const tm = t.match(/translate\(\s*(-?[\d.]+)[,\s]+(-?[\d.]+)?\s*\)/);
+      if (tm) localOff = { tx: off.tx + (parseFloat(tm[1]) || 0), ty: off.ty + (parseFloat(tm[2] ?? "0") || 0) };
+      if (/rotate\(/.test(t)) warnings.push({ rule: "W-GROUP-ROTATE", message: "rotate on <g> is not applied — rotate leaf shapes instead" });
+    }
+    const rot = node.tag !== "g" ? shapeRotation(node, warnings) : 0;
+
+    switch (node.tag) {
+      case "rect": {
+        const x = (parseFloat(attrs["x"] ?? "0") || 0) + localOff.tx;
+        const y = (parseFloat(attrs["y"] ?? "0") || 0) + localOff.ty;
+        const w = parseFloat(attrs["width"] ?? "0") || 0;
+        const h = parseFloat(attrs["height"] ?? "0") || 0;
+        const rx = parseFloat(attrs["rx"] ?? "0") || 0;
+        const geom = rx > 0 ? `<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val ${Math.round((rx / Math.min(w, h)) * 100000)}"/></a:avLst></a:prstGeom>` : `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>`;
+        const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
+        shapes.push({ xml: spShell(nextId(), `rect-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(x, y, w, h, rot)) });
+        break;
+      }
+      case "circle":
+      case "ellipse": {
+        const cx = (parseFloat(attrs["cx"] ?? "0") || 0) + localOff.tx;
+        const cy = (parseFloat(attrs["cy"] ?? "0") || 0) + localOff.ty;
+        const rx = node.tag === "circle" ? parseFloat(attrs["r"] ?? "0") || 0 : parseFloat(attrs["rx"] ?? "0") || 0;
+        const ry = node.tag === "circle" ? parseFloat(attrs["r"] ?? "0") || 0 : parseFloat(attrs["ry"] ?? "0") || 0;
+        const geom = `<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>`;
+        const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
+        shapes.push({ xml: spShell(nextId(), `ellipse-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(cx - rx, cy - ry, rx * 2, ry * 2, rot)) });
+        break;
+      }
+      case "line": {
+        const x1 = (parseFloat(attrs["x1"] ?? "0") || 0) + localOff.tx;
+        const y1 = (parseFloat(attrs["y1"] ?? "0") || 0) + localOff.ty;
+        const x2 = (parseFloat(attrs["x2"] ?? "0") || 0) + localOff.tx;
+        const y2 = (parseFloat(attrs["y2"] ?? "0") || 0) + localOff.ty;
+        const id = nextId();
+        const xf = `<a:xfrm${x2 < x1 ? ' flipH="1"' : ""}${y2 < y1 ? ' flipV="1"' : ""}><a:off x="${emu(Math.min(x1, x2))}" y="${emu(Math.min(y1, y2))}"/><a:ext cx="${emu(Math.abs(x2 - x1) || 1)}" cy="${emu(Math.abs(y2 - y1) || 1)}"/></a:xfrm>`;
+        shapes.push({
+          xml: `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="line-${id}"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${xf}<a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:noFill/>${lineXml(node, gradients) || `<a:ln w="${emu(1)}"><a:solidFill><a:srgbClr val="${tokens.colors.text ?? "202020"}"/></a:solidFill></a:ln>`}<a:effectLst/></p:spPr></p:cxnSp>`,
+        });
+        break;
+      }
+      case "polyline":
+      case "path": {
+        const d = node.tag === "path" ? attrs["d"] ?? "" : "M" + (attrs["points"] ?? "").trim().replace(/\s+/g, " L");
+        const { cmds, bbox } = parsePath(d);
+        const ox = bbox.x + localOff.tx; const oy = bbox.y + localOff.ty;
+        let body = "";
+        for (const c of cmds) {
+          const rel = c.pts.map((p) => ({ x: p.x - bbox.x, y: p.y - bbox.y }));
+          if (c.cmd === "M" && rel[0]) body += `<a:moveTo><a:pt x="${emu(rel[0].x)}" y="${emu(rel[0].y)}"/></a:moveTo>`;
+          else if ((c.cmd === "L" || c.cmd === "H" || c.cmd === "V") && rel[0]) body += `<a:lnTo><a:pt x="${emu(rel[0].x)}" y="${emu(rel[0].y)}"/></a:lnTo>`;
+          else if (c.cmd === "C" && rel.length >= 3) body += `<a:cubicBezTo>${rel.slice(0, 3).map((p) => `<a:pt x="${emu(p.x)}" y="${emu(p.y)}"/>`).join("")}</a:cubicBezTo>`;
+          else if (c.cmd === "Q" && rel.length >= 2) {
+            const [c0, p1] = rel;
+            body += `<a:cubicBezTo><a:pt x="${emu((2 / 3) * c0.x)}" y="${emu((2 / 3) * c0.y)}"/><a:pt x="${emu(p1.x + (2 / 3) * (c0.x - p1.x))}" y="${emu(p1.y + (2 / 3) * (c0.y - p1.y))}"/><a:pt x="${emu(p1.x)}" y="${emu(p1.y)}"/></a:cubicBezTo>`;
+          } else if (c.cmd === "Z") body += "<a:close/>";
+        }
+        const geom = `<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:rect l="0" t="0" r="${emu(bbox.w)}" b="${emu(bbox.h)}"/><a:pathLst><a:path w="${emu(bbox.w)}" h="${emu(bbox.h)}">${body}</a:path></a:pathLst></a:custGeom>`;
+        if (!attrs["fill"]) warnings.push({ rule: "W-IMPLICIT-FILL", message: `${node.tag} without fill compiles as noFill (SVG default black is not applied) — set fill explicitly` });
+        const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
+        shapes.push({ xml: spShell(nextId(), `${node.tag}-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(ox, oy, bbox.w, bbox.h, rot)) });
+        break;
+      }
+      case "image": {
+        const href = attrs["href"] ?? attrs["xlink:href"] ?? "";
+        if (!href) { warnings.push({ rule: "W-IMAGE-HREF", message: "<image> without href skipped" }); break; }
+        const x = (parseFloat(attrs["x"] ?? "0") || 0) + localOff.tx;
+        const y = (parseFloat(attrs["y"] ?? "0") || 0) + localOff.ty;
+        const w = parseFloat(attrs["width"] ?? "0") || 0;
+        const h = parseFloat(attrs["height"] ?? "0") || 0;
+        if (attrs["preserveAspectRatio"]?.includes("slice")) warnings.push({ rule: "W-IMAGE-STRETCH", message: `preserveAspectRatio "${attrs["preserveAspectRatio"]}" compiles as stretch (crop not modeled in P1)` });
+        const id = nextId();
+        const rel = `rIdImg${id}`;
+        images.push({ rel, file: href });
+        shapes.push({
+          xml: `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="image-${id}" descr="${esc(href)}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rel}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>${xfrm(x, y, w, h, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`,
+        });
+        break;
+      }
+      case "text": {
+        const fs = parseFloat(attrs["font-size"] ?? "0") || 18;
+        if (!attrs["font-size"]) warnings.push({ rule: "W-TEXT-FONTSIZE", message: "<text> without font-size defaults to 18px" });
+        const baseline = (parseFloat(attrs["y"] ?? "0") || 0) + localOff.ty;
+        const x = (parseFloat(attrs["x"] ?? "0") || 0) + localOff.tx;
+        const top = baseline - fs * 0.8;
+        const direct = node.text.replace(/\s+/g, " ").trim();
+        const tspans = node.children.filter((c) => c.tag === "tspan");
+        const paras: { text: string; dy: number }[] = [];
+        if (direct) paras.push({ text: direct, dy: 0 });
+        let acc = 0;
+        for (const ts of tspans) {
+          const dy = parseFloat(ts.attrs["dy"] ?? "0") || 0;
+          acc += dy;
+          const t2 = ts.text.replace(/\s+/g, " ").trim() || (ts.children.map(nodeTextOf).join(" ").trim());
+          if (t2) paras.push({ text: t2, dy: acc });
+        }
+        const lastDy = paras.length ? paras[paras.length - 1].dy : 0;
+        const boxH = (lastDy > 0 ? lastDy : 0) + fs * 1.6;
+        // Text-anchor model: estimate rendered width, size the box to it, and
+        // reposition so the anchor point lands where SVG says it should.
+        const anchor = attrs["text-anchor"] ?? "start";
+        const algn = anchor === "middle" ? "ctr" : anchor === "end" ? "r" : "l";
+        const longest = paras.reduce((m, p) => (p.text.length > m.text.length ? p : m), { text: "", dy: 0 });
+        const estW = estTextWidth(longest.text, fs);
+        const boxW = Math.max(80, estW);
+        const boxX = anchor === "middle" ? x - boxW / 2 : anchor === "end" ? x - boxW : x;
+        const font = attrs["font-family"] ?? tokens.fonts.minor;
+        const bold = attrs["font-weight"] === "bold" ? ' b="1"' : "";
+        const italic = attrs["font-style"] === "italic" ? ' i="1"' : "";
+        const deco = attrs["text-decoration"] ?? "none";
+        const underline = deco.includes("underline") ? ' u="sng"' : "";
+        const strike = deco.includes("line-through") ? ' strike="singleStrike"' : "";
+        const spacing = attrs["letter-spacing"] !== undefined ? ` spc="${Math.round((parseFloat(attrs["letter-spacing"]) || 0) * 75)}"` : "";
+        const fillPaint = resolvePaint(attrs["fill"], gradients);
+        const color = fillPaint.kind === "solid" ? fillPaint.color : tokens.colors.text ?? "202020";
+        const paraXml = paras.map((p) => `<a:p><a:pPr algn="${algn}"/><a:r><a:rPr lang="en-US" sz="${Math.round(fs * 100)}"${bold}${italic}${underline}${strike}${spacing} dirty="0"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="${esc(font)}"/><a:ea typeface="${esc(tokens.fonts.eastasia_minor)}"/></a:rPr><a:t>${esc(p.text)}</a:t></a:r></a:p>`).join("");
+        const id = nextId();
+        shapes.push({
+          xml: `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="text-${id}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(boxX, top, boxW, boxH, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:effectLst/></p:spPr><p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paraXml}</p:txBody></p:sp>`,
+        });
+        break;
+      }
+      default:
+        break;
+    }
+    for (const c of node.children) {
+      if (c.tag === "defs" || c.tag === "tspan" || c.tag === "stop" || c.tag === "linearGradient" || c.tag === "radialGradient") continue;
+      walk(c, localOff);
+    }
+  };
+  for (const c of root.children) walk(c, { tx: 0, ty: 0 });
+  return { shapes, images };
+}
+
+// nodeTextOf: local import-free copy for tspan text (avoids exporting from svg-check)
+function nodeTextOf(node: SvgNode): string {
+  const own = node.text.replace(/\s+/g, " ").trim();
+  const kids = node.children.map(nodeTextOf).filter(Boolean).join(" ");
+  return [own, kids].filter(Boolean).join(" ").trim();
+}
+
+/** Estimated rendered width in px: CJK ≈ 1.0em, Latin/proportional ≈ 0.58em. Text-box sizing only — not a metric guarantee. */
+function estTextWidth(s: string, fs: number): number {
+  let ems = 0;
+  for (const ch of s) ems += (ch.codePointAt(0) ?? 0) > 0x2e80 ? 1.0 : 0.58;
+  return Math.ceil(ems * fs);
+}
+
+// ---------------------------------------------------------------------------
+// Package assembly
+// ---------------------------------------------------------------------------
+
+const XMLDECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+const NS_A = "http://schemas.openxmlformats.org/drawingml/2006/main";
+const NS_P = "http://schemas.openxmlformats.org/presentationml/2006/main";
+const NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+
+function themeXml(tokens: DeckTokens): string {
+  const c = tokens.colors; const m = tokens.clrMapping;
+  const map = (key: string, fallback: string) => c[m[key] ?? ""] ?? fallback;
+  const dk1 = map("dk1", "202020"); const lt1 = map("lt1", "FFFFFF");
+  const dk2 = map("dk2", "6B6B6B"); const lt2 = map("lt2", "FFFFFF");
+  const accents = [1, 2, 3, 4, 5, 6].map((i) => `<a:accent${i}><a:srgbClr val="${map(`accent${i}`, c.primary ?? "1F3864")}"/></a:accent${i}>`).join("");
+  const scheme = (name: string, latin: string, ea: string) =>
+    `<a:${name}><a:latin typeface="${esc(latin)}"/><a:ea typeface="${esc(ea)}"/><a:cs typeface=""/></a:${name}>`;
+  const gradStops = (c1: string, c2: string) =>
+    `<a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="50000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="50000"/></a:schemeClr></a:gs>`;
+  return XMLDECL + `<p:theme xmlns:a="${NS_A}" xmlns:p="${NS_P}" name="co-work-deck"><p:themeElements><p:clrScheme name="co-work"><a:dk1><a:srgbClr val="${dk1}"/></a:dk1><a:lt1><a:srgbClr val="${lt1}"/></a:lt1><a:dk2><a:srgbClr val="${dk2}"/></a:dk2><a:lt2><a:srgbClr val="${lt2}"/></a:lt2>${accents}<a:hlink><a:srgbClr val="${c.primary ?? "1F3864"}"/></a:hlink><a:folHlink><a:srgbClr val="${c.muted ?? "6B6B6B"}"/></a:folHlink></p:clrScheme><p:fontScheme name="co-work">${scheme("majorFont", tokens.fonts.major, tokens.fonts.eastasia_major)}${scheme("minorFont", tokens.fonts.minor, tokens.fonts.eastasia_minor)}</p:fontScheme><p:fmtScheme name="co-work"><p:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="0" scaled="1"/></a:gradFill></p:fillStyleLst><p:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="28575"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></p:lnStyleLst><p:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></p:effectStyleLst><p:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/></a:schemeClr></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill></p:bgFillStyleLst></p:fmtScheme></p:themeElements></p:theme>`;
+}
+
+function masterAndLayoutXml(tokens: DeckTokens): { master: string; layout: string } {
+  const master = XMLDECL + `<p:sldMaster xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle><a:lvl1pPr><a:defRPr sz="4000"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.major)}"/></a:defRPr></a:lvl1pPr></p:titleStyle><p:bodyStyle><a:lvl1pPr><a:defRPr sz="1800"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.minor)}"/></a:defRPr></a:lvl1pPr></p:bodyStyle><p:otherStyle><a:lvl1pPr><a:defRPr sz="1800"/></a:lvl1pPr></p:otherStyle></p:txStyles></p:sldMaster>`;
+  const layout = XMLDECL + `<p:sldLayout xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" type="blank"><p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
+  return { master, layout };
+}
+
+function slideXml(shapes: ShapeXml[], tokens: DeckTokens): string {
+  return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+}
+
+function notesXml(slideNum: number, text: string): string {
+  const paras = text.split(/\n+/).filter((l) => l.trim()).map((l) => `<a:p><a:r><a:rPr lang="en-US" dirty="0"/><a:t>${esc(l.trim())}</a:t></a:r></a:p>`).join("") || "<a:p><a:endParaRPr lang=\"en-US\"/></a:p>";
+  const phSldNum = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Slide Number Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{GET-NUM}" type="slidenum"><a:rPr lang="en-US"/><a:t>${slideNum}</a:t></a:fld></a:p></p:txBody></p:sp>`;
+  const phBody = `<p:sp><p:nvSpPr><p:cNvPr id="3" name="Notes Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>${paras}</p:txBody></p:sp>`;
+  return XMLDECL + `<p:notes xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${phBody}${phSldNum}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:notes>`;
+}
+
+function notesMasterXml(): string {
+  return XMLDECL + `<p:notesMaster xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:notesStyle><a:lvl1pPr><a:defRPr sz="1200"/></a:lvl1pPr></p:notesStyle></p:notesMaster>`;
+}
+
+// ---------------------------------------------------------------------------
+// Compile
+// ---------------------------------------------------------------------------
+
+export interface CompileOptions {
+  deckDir: string;
+  registryPath: string;
+  deckType: string;
+  notesDir?: string | null;
+}
+
+export interface CompileResult {
+  zip: Uint8Array;
+  receipt: {
+    slides: number;
+    parts: number;
+    mode: "flat";
+    fingerprint_linked: boolean;
+    deck_type: string;
+    warnings: CompileWarning[];
+  };
+}
+
+export function loadDeckTokens(registryPath: string, deckType: string): DeckTokens {
+  const reg = JSON.parse(readFileSync(resolve(registryPath), "utf-8"));
+  const decks = reg.decks;
+  if (!decks) throw new Error("registry has no `decks` section — extend document-style-registry.json first");
+  if (!decks.deck_types?.[deckType]) throw new Error(`unknown deck_type "${deckType}" (available: ${Object.keys(decks.deck_types ?? {}).join(", ")})`);
+  return {
+    canvas: decks.canvas,
+    colors: decks.colors,
+    clrMapping: decks.colors.clr_scheme_mapping ?? {},
+    fonts: {
+      major: decks.fonts.major, minor: decks.fonts.minor,
+      eastasia_major: decks.fonts.eastasia_major ?? decks.fonts.major,
+      eastasia_minor: decks.fonts.eastasia_minor ?? decks.fonts.minor,
+    },
+  };
+}
+
+export function verifyReportAgainstDeck(reportPath: string, deckDir: string): CheckReport {
+  const report = JSON.parse(readFileSync(resolve(reportPath), "utf-8")) as CheckReport;
+  if (report.stage !== "final") throw new Error(`refusing: report stage is "${report.stage}", not "final"`);
+  if ((report.summary?.errors ?? 1) !== 0) throw new Error(`refusing: report has ${report.summary.errors} blocking error(s)`);
+  const files = readdirSync(resolve(deckDir)).filter((f) => f.endsWith(".svg")).sort();
+  const entries = files.map((f) => ({ name: f, bytes: readFileSync(join(resolve(deckDir), f)) }));
+  const fp = fingerprintFiles(entries);
+  if (report.fingerprint !== fp) {
+    throw new Error(`refusing: report fingerprint ${report.fingerprint.slice(0, 19)}… does not match current deck bytes ${fp.slice(0, 19)}… — re-run the final gate after any edit`);
+  }
+  return report;
+}
+
+export function compileDeck(opts: CompileOptions): CompileResult {
+  const deckDir = resolve(opts.deckDir);
+  const tokens = loadDeckTokens(opts.registryPath, opts.deckType);
+  const files = readdirSync(deckDir).filter((f) => f.endsWith(".svg")).sort();
+  if (files.length === 0) throw new Error(`no .svg pages found in ${deckDir}`);
+
+  const warnings: CompileWarning[] = [];
+  const media: { name: string; bytes: Uint8Array }[] = [];
+  const notesByPage = new Map<number, string>();
+  if (opts.notesDir) {
+    const notesDir = resolve(opts.notesDir);
+    for (const f of readdirSync(notesDir).filter((f) => f.endsWith(".md")).sort()) {
+      const num = parseInt(f.split("-")[0] ?? "", 10);
+      if (Number.isFinite(num)) notesByPage.set(num, readFileSync(join(notesDir, f), "utf-8"));
+    }
+  }
+
+  const slideParts: { name: string; data: Uint8Array }[] = [];
+  const slideRels: { name: string; data: Uint8Array }[] = [];
+
+  files.forEach((f, idx) => {
+    const pageIdx = idx + 1;
+    const root = parseSvg(readFileSync(join(deckDir, f), "utf-8"));
+    const grads = collectGradients(root);
+    const { shapes, images } = walkPage(root, tokens, grads, warnings);
+    const rels: string[] = [
+      `<Relationship Id="rIdLay1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>`,
+    ];
+    images.forEach((img, i) => {
+      const imgPath = resolve(join(deckDir, img.file));
+      if (!existsSync(imgPath)) { warnings.push({ rule: "W-IMAGE-MISSING", message: `image not found: ${img.file} (placeholder box emitted)` }); return; }
+      const ext = extname(imgPath).toLowerCase().replace(".", "") || "png";
+      const mediaName = `media/image${pageIdx}_${i}.${ext}`;
+      media.push({ name: `ppt/${mediaName}`, bytes: new Uint8Array(readFileSync(imgPath)) });
+      rels.push(`<Relationship Id="${img.rel}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../${mediaName}"/>`);
+    });
+    if (notesByPage.has(pageIdx)) {
+      rels.push(`<Relationship Id="rIdNotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide${pageIdx}.xml"/>`);
+    }
+    slideParts.push({ name: `ppt/slides/slide${pageIdx}.xml`, data: new TextEncoder().encode(slideXml(shapes, tokens)) });
+    slideRels.push({ name: `ppt/slides/_rels/slide${pageIdx}.xml.rels`, data: new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join("")}</Relationships>`) });
+  });
+
+  const hasNotes = notesByPage.size > 0;
+  const { master, layout } = masterAndLayoutXml(tokens);
+  const theme = themeXml(tokens);
+
+  const presRels: string[] = [
+    `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>`,
+    ...slideParts.map((_, i) => `<Relationship Id="rIdS${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${i + 1}.xml"/>`),
+    `<Relationship Id="rIdTheme" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>`,
+  ];
+  if (hasNotes) presRels.push(`<Relationship Id="rIdNotesMaster" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="notesMasters/notesMaster1.xml"/>`);
+
+  const presentation = XMLDECL + `<p:presentation xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" saveSubsetFonts="1"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${slideParts.map((_, i) => `<p:sldId id="${256 + i}" r:id="rIdS${i + 1}"/>`).join("")}</p:sldIdLst><p:sldSz cx="${emu(tokens.canvas.width_px)}" cy="${emu(tokens.canvas.height_px)}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`;
+
+  const defaults = new Set(["rels", "xml"]);
+  for (const m of media) defaults.add(extname(m.name).toLowerCase().replace(".", ""));
+  const ctDefaults = [...defaults].map((e) => `<Default Extension="${e}" ContentType="${e === "rels" ? "application/vnd.openxmlformats-package.relationships+xml" : e === "xml" ? "application/xml" : `image/${e === "jpg" ? "jpeg" : e}`}"/>`).join("");
+  const overrides = [
+    `/ppt/presentation.xml|application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml`,
+    `/ppt/slideMasters/slideMaster1.xml|application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml`,
+    `/ppt/slideLayouts/slideLayout1.xml|application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml`,
+    `/ppt/theme/theme1.xml|application/vnd.openxmlformats-officedocument.theme+xml`,
+    ...slideParts.map((s, i) => `/${s.name}|application/vnd.openxmlformats-officedocument.presentationml.slide+xml`),
+    ...(hasNotes ? [`/ppt/notesMasters/notesMaster1.xml|application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml`, ...notesByPage.size ? [...notesByPage.keys()].map((n) => `/ppt/notesSlides/notesSlide${n}.xml|application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml`) : []] : []),
+    `/docProps/core.xml|application/vnd.openxmlformats-package.core-properties+xml`,
+    `/docProps/app.xml|application/vnd.openxmlformats-officedocument.extended-properties+xml`,
+  ].map((e) => { const [pn, ct] = e.split("|"); return `<Override PartName="${pn}" ContentType="${ct}"/>`; }).join("");
+  const contentTypes = XMLDECL + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">${ctDefaults}${overrides}</Types>`;
+
+  const coreProps = XMLDECL + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${esc(opts.deckType)} deck</dc:title><dc:creator>co-work deck-builder</dc:creator></cp:coreProperties>`;
+  const appProps = XMLDECL + `<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>co-work svg-to-pptx</Application><Slides>${slideParts.length}</Slides></Properties>`;
+
+  const zipMap: Record<string, Uint8Array> = {
+    "[Content_Types].xml": new TextEncoder().encode(contentTypes),
+    "_rels/.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`),
+    "docProps/core.xml": new TextEncoder().encode(coreProps),
+    "docProps/app.xml": new TextEncoder().encode(appProps),
+    "ppt/presentation.xml": new TextEncoder().encode(presentation),
+    "ppt/_rels/presentation.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${presRels.join("")}</Relationships>`),
+    "ppt/slideMasters/slideMaster1.xml": new TextEncoder().encode(master),
+    "ppt/slideMasters/_rels/slideMaster1.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`),
+    "ppt/slideLayouts/slideLayout1.xml": new TextEncoder().encode(layout),
+    "ppt/slideLayouts/_rels/slideLayout1.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`),
+    "ppt/theme/theme1.xml": new TextEncoder().encode(theme),
+    ...Object.fromEntries([...slideParts, ...slideRels].map((p) => [p.name, p.data])),
+    ...Object.fromEntries(media.map((m) => [m.name, m.bytes])),
+  };
+  if (hasNotes) {
+    zipMap["ppt/notesMasters/notesMaster1.xml"] = new TextEncoder().encode(notesMasterXml());
+    zipMap["ppt/notesMasters/_rels/notesMaster1.xml.rels"] = new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`);
+    for (const [n, text] of notesByPage) {
+      zipMap[`ppt/notesSlides/notesSlide${n}.xml`] = new TextEncoder().encode(notesXml(n, text));
+      zipMap[`ppt/notesSlides/_rels/notesSlide${n}.xml.rels`] = new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide${n}.xml"/></Relationships>`);
+    }
+  }
+
+  const zip = zipSync(zipMap, { level: 6 });
+
+  // Postflight: reopen and verify the package we just built
+  const reopened = unzipSync(zip);
+  const partCount = Object.keys(reopened).length;
+  for (let i = 1; i <= slideParts.length; i++) {
+    if (!reopened[`ppt/slides/slide${i}.xml`]) throw new Error(`postflight failed: ppt/slides/slide${i}.xml missing from package`);
+  }
+
+  return {
+    zip,
+    receipt: {
+      slides: slideParts.length,
+      parts: partCount,
+      mode: "flat",
+      fingerprint_linked: true,
+      deck_type: opts.deckType,
+      warnings,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// PNG previews (visual acceptance input)
+// ---------------------------------------------------------------------------
+
+export async function renderPngs(opts: { deckDir: string; pngDir: string; width?: number }): Promise<string[]> {
+  const { Resvg } = await import("@resvg/resvg-js");
+  const deckDir = resolve(opts.deckDir);
+  const pngDir = resolve(opts.pngDir);
+  mkdirSync(pngDir, { recursive: true });
+  const out: string[] = [];
+  for (const f of readdirSync(deckDir).filter((x) => x.endsWith(".svg")).sort()) {
+    const svg = readFileSync(join(deckDir, f), "utf-8");
+    const png = new Resvg(svg, { fitTo: { mode: "width", value: opts.width ?? 1280 } }).render().asPng();
+    const name = f.replace(/\.svg$/, ".png");
+    writeFileSync(join(pngDir, name), png);
+    out.push(join(pngDir, name));
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
+
+function help(): never {
+  console.log(`
+svg-to-pptx.ts v1.1.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+
+Usage:
+  bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\
+      --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>]
+  bun scripts/svg-to-pptx.ts --deck <dir> --render-png --png-dir <dir>
+
+Export integrity: refuses to run when the report is missing, is not stage=final,
+contains blocking errors, or its SHA-256 fingerprint does not match the current
+deck bytes.
+`);
+  process.exit(0);
+}
+
+if (import.meta.main) {
+  const args = process.argv.slice(2);
+  if (args.includes("--help") || args.includes("-h") || args.length === 0) help();
+  const idx = (k: string) => { const i = args.indexOf(k); return i !== -1 ? args[i + 1] : null; };
+  const deckDir = idx("--deck");
+  if (!deckDir) { console.error("❌ --deck <dir> is required"); process.exit(2); }
+
+  if (args.includes("--render-png")) {
+    const pngDir = idx("--png-dir") ?? join(resolve(deckDir), "previews");
+    renderPngs({ deckDir, pngDir }).then((files) => {
+      console.log(`✅ rendered ${files.length} preview PNG(s) → ${resolve(pngDir)}`);
+    }, (e) => { console.error(`❌ ${(e as Error).message}`); process.exit(1); });
+  } else {
+    const out = idx("--out");
+    const reportPath = idx("--report");
+    const registryPath = idx("--registry");
+    const deckType = idx("--deck-type") ?? "business-report";
+    const notesDir = idx("--notes-dir");
+    if (!out) { console.error("❌ --out <file.pptx> is required"); process.exit(2); }
+    if (!reportPath) { console.error("❌ --report <final-report.json> is required (fingerprint refusal)"); process.exit(2); }
+    if (!registryPath) { console.error("❌ --registry <document-style-registry.json> is required"); process.exit(2); }
+    try {
+      const report = verifyReportAgainstDeck(reportPath, deckDir);
+      const { zip, receipt } = compileDeck({ deckDir, registryPath, deckType, notesDir });
+      mkdirSync(resolve(out, ".."), { recursive: true });
+      writeFileSync(resolve(out), zip);
+      console.log(JSON.stringify({ ...receipt, out: resolve(out), gated_on: report.fingerprint }, null, 2));
+      if (receipt.warnings.length) console.warn(`⚠️ ${receipt.warnings.length} compile warning(s) — see receipt`);
+      console.log(`✅ ${receipt.slides} slide(s), ${receipt.parts} parts → ${resolve(out)}`);
+    } catch (e) {
+      console.error(`❌ ${(e as Error).message}`);
+      process.exit(1);
+    }
+  }
+}
