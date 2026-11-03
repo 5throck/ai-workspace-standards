@@ -447,7 +447,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261031-02` | decision | — | — | — |
 | `dec:DEC-20261031-03` | decision | — | — | — |
 | `dec:DEC-20261102-01` | decision | — | — | — |
-| `dec:DEC-20261103-01` | decision | — | — | — |
 | `dec:DEC-20261103-02` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
@@ -842,7 +841,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 56 | (expected until docs `references` edges are mined) |
 | agent | 22 | co-abap/i18n-specialist, co-architect/architect, co-architect/automation-engineer, co-architect/design-storyteller, co-architect/mep-engineer, co-architect/prototype-engineer, co-architect/sketchup-modeler, co-architect/structural-engineer, co-architect/typography-expert, co-architect/ux-researcher, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 17 | (expected until docs `references` edges are mined) |
+| decision | 16 | (expected until docs `references` edges are mined) |
 | skill | 3 | common/gateguard, root/standup-synthesizer, root/trail |
 
 ## Skills Without `used_by` (G6)
