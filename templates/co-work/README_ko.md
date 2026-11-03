@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: ef6fb8bdda12ab229a52f0a1bd51bf74690bc6b98744e0fc67cb7161e1002d86
+translated_from_hash: 61458fc1d11bb7f392c7da2975e2dc259775ac85c1f6dee686e82de686ca8761
 lang: ko
 lang_reason: source-material
 ---
@@ -42,6 +42,7 @@ lang_reason: source-material
 | **PM** | Project Manager — workflow orchestration, dispatch, quality gates | high | inherit |
 | **analyst** | Research analyst — investigation, data synthesis, and evidence gathering | medium | inherit |
 | **content-writer** | Content writer — research-to-documentation transformation and communications | medium | inherit |
+| **deck-builder** | Deck builder — canonical-SVG 슬라이드 저작, 품질 게이트, 네이티브 PPTX 내보내기 | medium | inherit |
 | **i18n-specialist** | 로케일 구성, 로케일별 포매팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 | **ms365-expert** | Microsoft 365 expert — guidance on Outlook, Word, Excel, PowerPoint, Teams | low | inherit |
 | **project-coordinator** | Project coordinator — schedules, stakeholder communication, delivery logistics | low | inherit |

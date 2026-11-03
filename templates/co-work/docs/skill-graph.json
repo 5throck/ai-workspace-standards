@@ -23,6 +23,11 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "deck-builder",
+      "type": "agent",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "documentation-writing",
       "type": "skill",
       "layer": "L0"
@@ -88,6 +93,11 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "pptx-export",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "procedure.co-work.distribution-integration",
       "type": "procedure",
       "layer": "variant:co-work"
@@ -128,6 +138,16 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "svg-quality-gate",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "svg-slide-authoring",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "technical-writer",
       "type": "agent",
       "layer": "variant:co-work"
@@ -139,6 +159,12 @@
       "from": "api-documentation",
       "to": "technical-writer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "deck-builder",
+      "to": "svg-slide-authoring",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -169,6 +195,24 @@
       "from": "evidence-ledger",
       "to": "output_type.evidence_pack",
       "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "pptx-export",
+      "to": "deck-builder",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "pptx-export",
+      "to": "deck-builder",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "pptx-export",
+      "to": "phase3",
+      "source": "skill_manifest"
     },
     {
       "type": "step_uses_skill",
@@ -358,6 +402,54 @@
       "from": "standup-synthesizer",
       "to": "project-coordinator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "svg-quality-gate",
+      "to": "deck-builder",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "svg-quality-gate",
+      "to": "deck-builder",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "svg-quality-gate",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "svg-slide-authoring",
+      "to": "deck-builder",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "svg-slide-authoring",
+      "to": "deck-builder",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "svg-slide-authoring",
+      "to": "phase3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "svg-slide-authoring",
+      "to": "pptx-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "svg-slide-authoring",
+      "to": "svg-quality-gate",
+      "source": "prose"
     }
   ]
 }
