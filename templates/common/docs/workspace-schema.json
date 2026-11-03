@@ -1789,6 +1789,17 @@
           "version": "0.1.0"
         },
         {
+          "asset": "architect",
+          "domain": "co-architect",
+          "hub_variant": "co-architect",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "Projects/co-architect (identity; distinct architecture-firm technical-architecture role for co-architect's software/platform layer — MCP servers, ZWCAD COM automation; not a copy of, or consumer of, co-develop's software-architect doctrine; T-20261103-002b / DEC-20261103-02)",
+          "canonical_path": "templates/co-architect/agents/architect.md",
+          "version": "1.0.0",
+          "consumers": []
+        },
+        {
           "asset": "cad-server-manager",
           "domain": "co-architect",
           "hub_variant": "co-architect",

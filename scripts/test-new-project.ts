@@ -165,10 +165,23 @@ const today    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
 let testsRun = 0, testsPassed = 0;
 let allPassed = true;
+// Fail-soft (§15.3, T-20261103-003-1): when the scaffold itself fails, the
+// post-scaffold tests cannot execute — each records an explicit FAILED row
+// ("not executed") via requireScaffold instead of the run aborting.
+let scaffoldMissing = false;
 
 function pass(label: string)                    { console.log(`  ✅ ${label}`); testsPassed++; testsRun++; }
 function fail(label: string, reason: string)   { console.error(`  ❌ ${label}: ${reason}`); allPassed = false; testsRun++; }
 function skip(label: string, reason: string)   { console.log(`  ⚠️  ${label} SKIPPED: ${reason}`); testsPassed++; testsRun++; }
+
+/** Guard for every post-scaffold test body: when the scaffold failed, record
+ * the test as an explicit not-executed FAILED row (a not-executed assertion
+ * is a failure, NOT a skip) and let the run continue to the summary. */
+function requireScaffold(label: string): boolean {
+  if (!scaffoldMissing) return true;
+  fail(label, 'not executed — scaffold missing (Test 1 failed)');
+  return false;
+}
 
 function readText(rel: string): string {
   return readFileSync(join(testDir, rel), 'utf-8');
@@ -277,10 +290,10 @@ try {
   }
 
   if (!syntaxOk) {
+    // Fail-soft (§15.3): keep the banner but drop the process.exit — Tests
+    // 0a-0c already recorded their failures and Test 1 below records the
+    // scaffold outcome; the run continues so the summary stays honest.
     console.error('\n❌ Syntax errors found — remaining tests skipped.');
-    if (import.meta.main) {
-      process.exit(1);
-    }
   }
 
   // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
@@ -295,13 +308,16 @@ try {
   } catch (e) { fail('Test 1', String(e)); }
 
   if (!existsSync(testDir)) {
-    console.error('\n❌ Project directory not found — remaining tests skipped.');
-    if (import.meta.main) {
-      process.exit(1);
-    }
+    // Fail-soft (§15.3): reword the banner, set the fail-soft flag and drop
+    // the process.exit — every post-scaffold test body now records an
+    // explicit not-executed FAILED row via requireScaffold and the run
+    // continues to the summary (per-test counts stay honest, exit code 1).
+    console.error('\n❌ Project directory not found — recording remaining tests as not-executed failures (run continues).');
+    scaffoldMissing = true;
   }
 
   // 0e (post-scaffold): Verify generated project outputs in testDir contain CLAUDE.md and GEMINI.md
+  if (requireScaffold('Test 0e (scaffolded output)')) {
   try {
     const missingScaffolded: string[] = [];
     if (platformArg !== 'antigravity' && platformArg !== 'hermes' && !fileExists('CLAUDE.md')) missingScaffolded.push('CLAUDE.md');
@@ -311,10 +327,11 @@ try {
     } else {
       pass('Test 0e (scaffolded output) PASSED: Generated project in testDir contains CLAUDE.md and GEMINI.md as expected');
     }
-  } catch (e) { fail('Test 0e (scaffolded output)', String(e)); }
+  } catch (e) { fail('Test 0e (scaffolded output)', String(e)); } }
 
   // ── Test 2: UTF-8 Integrity [maps to: step 5 (encoding)] ───────────────────
   console.log('\nTest 2: UTF-8 Integrity');
+  if (requireScaffold('Test 2')) {
   try {
     const content = readText('README.md');
     if (content.includes('�')) {  // encoding-check-ignore
@@ -322,10 +339,11 @@ try {
     } else {
       pass('Test 2 PASSED: No encoding corruption in README.md');
     }
-  } catch (e) { fail('Test 2', String(e)); }
+  } catch (e) { fail('Test 2', String(e)); } }
 
   // ── Test 3: Placeholder Substitution [maps to: step 5] ──────────────────────
   console.log('\nTest 3: Placeholder Substitution');
+  if (requireScaffold('Test 3')) {
   try {
     const readme = readText('README.md');
     const hasOldPlaceholder = readme.includes('[Project Name]') ||
@@ -338,10 +356,11 @@ try {
     } else {
       pass('Test 3 PASSED: Placeholders substituted correctly');
     }
-  } catch (e) { fail('Test 3', String(e)); }
+  } catch (e) { fail('Test 3', String(e)); } }
 
   // ── Test 4: Git Initialisation [maps to: step 7] ──────────────────────────
   console.log('\nTest 4: Git Initialisation');
+  if (requireScaffold('Test 4')) {
   try {
     if (!fileExists('.git')) {
       fail('Test 4', '.git directory not found');
@@ -361,10 +380,11 @@ try {
         }
       }
     }
-  } catch (e) { fail('Test 4', String(e)); }
+  } catch (e) { fail('Test 4', String(e)); } }
 
   // ── Test 5: Git Hooks Installed [maps to: step 6 + step 7] ────────────────
   console.log('\nTest 5: Git Hooks Installed');
+  if (requireScaffold('Test 5')) {
   try {
     const required = ['pre-commit', 'pre-push'];
     const missing  = required.filter(h => !fileExists(`.githooks/${h}`));
@@ -373,10 +393,11 @@ try {
     } else {
       pass('Test 5 PASSED: Required hooks present');
     }
-  } catch (e) { fail('Test 5', String(e)); }
+  } catch (e) { fail('Test 5', String(e)); } }
 
   // ── Test 6: Security Bootstrap [maps to: step 6.5] ────────────────────────
   console.log('\nTest 6: Security Bootstrap');
+  if (requireScaffold('Test 6')) {
   const secChecks: [string, () => boolean][] = [
     ['.gitleaks.toml present',          () => fileExists('.gitleaks.toml')],
     ['.gitattributes has eol=lf',       () => fileExists('.gitattributes') && readText('.gitattributes').includes('eol=lf')],
@@ -389,10 +410,11 @@ try {
       if (check()) { pass(label); }
       else         { fail('Test 6', label); secOk = false; }
     } catch (e)    { fail('Test 6', `${label}: ${e}`); secOk = false; }
-  }
+  } }
 
   // ── Test 7: Required Template Files [maps to: step 1 + step 2] ───────────
   console.log('\nTest 7: Required Template Files');
+  if (requireScaffold('Test 7')) {
   try {
     const required = ['AGENTS.md', 'agents/pm.md', '.gitignore', '.githooks/pre-commit'];
     // CLAUDE.md/GEMINI.md depend on --platform (the hermes profile drops the
@@ -405,10 +427,11 @@ try {
     } else {
       pass('Test 7 PASSED: All required files present');
     }
-  } catch (e) { fail('Test 7', String(e)); }
+  } catch (e) { fail('Test 7', String(e)); } }
 
   // ── Test 8: Platform Profile [maps to: step 2.5] ────────────────────────
   console.log('\nTest 8: Platform Profile');
+  if (requireScaffold('Test 8')) {
   try {
     if (platformArg === 'claude') {
       if (fileExists('GEMINI.md'))  fail('Test 8', 'GEMINI.md should be removed for --platform claude');
@@ -444,10 +467,11 @@ try {
         pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, .hermes/, and HERMES.md all present for platform=all');
       }
     }
-  } catch (e) { fail('Test 8', String(e)); }
+  } catch (e) { fail('Test 8', String(e)); } }
 
   // ── Test 9: variant.json lifecycle.statusSince [maps to: step 5.5b] ───────
   console.log('\nTest 9: variant.json lifecycle.statusSince');
+  if (requireScaffold('Test 9')) {
   try {
     if (!fileExists('variant.json')) {
       skip('Test 9', 'variant.json not found');
@@ -459,10 +483,11 @@ try {
         fail('Test 9', `lifecycle.statusSince = "${vj?.lifecycle?.statusSince}", expected "${today}"`);
       }
     }
-  } catch (e) { fail('Test 9', String(e)); }
+  } catch (e) { fail('Test 9', String(e)); } }
 
   // ── Test 10: scripts-snapshot.json [maps to: step 5.5c] ──────────────────
   console.log('\nTest 10: scripts-snapshot.json');
+  if (requireScaffold('Test 10')) {
   try {
     if (!fileExists('scripts-snapshot.json')) {
       fail('Test 10', 'scripts-snapshot.json not found');
@@ -474,10 +499,11 @@ try {
         pass(`Test 10 PASSED: scripts-snapshot.json present (${Object.keys(snap.scripts).length} scripts)`);
       }
     }
-  } catch (e) { fail('Test 10', String(e)); }
+  } catch (e) { fail('Test 10', String(e)); } }
 
   // ── Test 11: package.json Tier 2 scripts [maps to: step 5.5d] ──────────────
   console.log('\nTest 11: package.json Tier 2 scripts');
+  if (requireScaffold('Test 11')) {
   try {
     if (!fileExists('package.json')) {
       skip('Test 11', 'package.json not found');
@@ -491,10 +517,11 @@ try {
         pass('Test 11 PASSED: Tier 2 scripts in package.json');
       }
     }
-  } catch (e) { fail('Test 11', String(e)); }
+  } catch (e) { fail('Test 11', String(e)); } }
 
   // ── Test 12: template-version.txt at project root [maps to: step 5.6] ──────
   console.log('\nTest 12: template-version.txt (project root)');
+  if (requireScaffold('Test 12')) {
   try {
     const tvPath = 'template-version.txt';
     if (!fileExists(tvPath)) {
@@ -511,10 +538,11 @@ try {
         pass('Test 12 PASSED: template-version.txt has all required fields');
       }
     }
-  } catch (e) { fail('Test 12', String(e)); }
+  } catch (e) { fail('Test 12', String(e)); } }
 
   // ── Test 13: .gitattributes merge=ours [maps to: step 5.7] ────────────────
   console.log('\nTest 13: .gitattributes merge=ours for context.md');
+  if (requireScaffold('Test 13')) {
   try {
     if (!fileExists('.gitattributes')) {
       fail('Test 13', '.gitattributes not found');
@@ -526,20 +554,22 @@ try {
         pass('Test 13 PASSED: .gitattributes has merge=ours');
       }
     }
-  } catch (e) { fail('Test 13', String(e)); }
+  } catch (e) { fail('Test 13', String(e)); } }
 
   // ── Test 14: docs/_examples removed [maps to: step 3] ────────────────────
   console.log('\nTest 14: docs/_examples removed');
+  if (requireScaffold('Test 14')) {
   try {
     if (fileExists('docs/_examples')) {
       fail('Test 14', 'docs/_examples directory should have been removed');
     } else {
       pass('Test 14 PASSED: docs/_examples not present');
     }
-  } catch (e) { fail('Test 14', String(e)); }
+  } catch (e) { fail('Test 14', String(e)); } }
 
   // ── Test 15: No .gitkeep files [maps to: step 4] ────────────────────────
   console.log('\nTest 15: No .gitkeep files remain');
+  if (requireScaffold('Test 15')) {
   try {
     const gitkeeps = findFiles(testDir, '.gitkeep');
     if (gitkeeps.length > 0) {
@@ -547,10 +577,11 @@ try {
     } else {
       pass('Test 15 PASSED: No .gitkeep files');
     }
-  } catch (e) { fail('Test 15', String(e)); }
+  } catch (e) { fail('Test 15', String(e)); } }
 
   // ── Test 16: File permissions (Unix only) [maps to: step 6] ───────────────
   console.log('\nTest 16: Hook file permissions');
+  if (requireScaffold('Test 16')) {
   if (isWin) {
     skip('Test 16', 'file permission check not applicable on Windows (git index chmod used instead)');
   } else {
@@ -568,10 +599,11 @@ try {
         }
       }
     } catch (e) { fail('Test 16', String(e)); }
-  }
+  } }
 
   // ── Test 17: No .cmd files [maps to: step 2.6] ────────────────────────────
   console.log('\nTest 17: No .cmd files');
+  if (requireScaffold('Test 17')) {
   try {
     function findCmdFiles(dir: string): string[] {
       const results: string[] = [];
@@ -589,10 +621,11 @@ try {
     } else {
       pass('Test 17 PASSED: No .cmd files present');
     }
-  } catch (e) { fail('Test 17', String(e)); }
+  } catch (e) { fail('Test 17', String(e)); } }
 
   // ── Test 18: Script pair validation in project scripts/ [maps to: step 3.5]
   console.log('\nTest 18: Script pair validation in project scripts/');
+  if (requireScaffold('Test 18')) {
   try {
     const projScripts = join(testDir, 'scripts');
     if (!existsSync(projScripts)) {
@@ -613,10 +646,11 @@ try {
         pass(`Test 18 PASSED: All script pairs present (${shBases.size} pairs)`);
       }
     }
-  } catch (e) { fail('Test 18', String(e)); }
+  } catch (e) { fail('Test 18', String(e)); } }
 
   // ── Test 19: AGENTS.md Skills injected into context.md [maps to: step 5.6b]
   console.log('\nTest 19: AGENTS.md Skills injected into context.md');
+  if (requireScaffold('Test 19')) {
   try {
     const contextPath = join(testDir, 'docs', `${variantArg}.context.md`);
     const agentsPath  = join(testDir, 'AGENTS.md');
@@ -644,10 +678,11 @@ try {
         }
       }
     }
-  } catch (e) { fail('Test 19', String(e)); }
+  } catch (e) { fail('Test 19', String(e)); } }
 
   // ── Test 20: No VARIANT-SECTION markers in pm.md [maps to: AC-03] ─────────
   console.log('\nTest 20: No VARIANT-SECTION markers in pm.md');
+  if (requireScaffold('Test 20')) {
   try {
     const pmPath = join(testDir, 'agents', 'pm.md');
     if (!existsSync(pmPath)) {
@@ -660,10 +695,11 @@ try {
         pass('Test 20 PASSED: pm.md has no VARIANT-SECTION markers');
       }
     }
-  } catch (e) { fail('Test 20', String(e)); }
+  } catch (e) { fail('Test 20', String(e)); } }
 
   // ── Test 21: Exactly one YAML frontmatter block in pm.md [maps to: AC-04] ─
   console.log('\nTest 21: Exactly one YAML frontmatter block in pm.md');
+  if (requireScaffold('Test 21')) {
   try {
     const pmPath = join(testDir, 'agents', 'pm.md');
     if (!existsSync(pmPath)) {
@@ -677,13 +713,14 @@ try {
         pass('Test 21 PASSED: pm.md has exactly one frontmatter block');
       }
     }
-  } catch (e) { fail('Test 21', String(e)); }
+  } catch (e) { fail('Test 21', String(e)); } }
 
   // ── Test 22: pm.md contains all 7 invariant sections [maps to: AC-05] ─────
   // T-20260912-004: the previous `extends:` escape hatch (pass when the scaffolded
   // pm.md still said `extends:`) masked unresolved stubs — the scaffold must inline
   // the common body, so the invariants are required unconditionally.
   console.log('\nTest 22: pm.md contains all 7 invariant sections');
+  if (requireScaffold('Test 22')) {
   try {
     const pmPath = join(testDir, 'agents', 'pm.md');
     if (!existsSync(pmPath)) {
@@ -706,10 +743,11 @@ try {
         pass('Test 22 PASSED: pm.md contains all 7 invariant sections');
       }
     }
-  } catch (e) { fail('Test 22', String(e)); }
+  } catch (e) { fail('Test 22', String(e)); } }
 
   // ── Test 23: Smoke test — dev-sync.ts and sync-md.ts present ─────────────
   console.log('\nTest 23: Smoke test — dev-sync.ts and sync-md.ts present');
+  if (requireScaffold('Test 23')) {
   try {
     const devSyncPath = join(testDir, 'scripts', 'dev-sync.ts');
     const syncMdPath  = join(testDir, 'scripts', 'sync-md.ts');
@@ -723,10 +761,11 @@ try {
     } else {
       pass('Smoke test: scripts/sync-md.ts present');
     }
-  } catch (e) { fail('Test 23', String(e)); }
+  } catch (e) { fail('Test 23', String(e)); } }
 
   // ── Test 24: Smoke test — verify-readme-sync.ts present ──────────────────
   console.log('\nTest 24: Smoke test — verify-readme-sync.ts present');
+  if (requireScaffold('Test 24')) {
   try {
     const verifyReadmeSyncPath = join(testDir, 'scripts', 'verify-readme-sync.ts');
     if (!existsSync(verifyReadmeSyncPath)) {
@@ -734,13 +773,14 @@ try {
     } else {
       pass('Smoke test: scripts/verify-readme-sync.ts present');
     }
-  } catch (e) { fail('Test 24', String(e)); }
+  } catch (e) { fail('Test 24', String(e)); } }
 
   // ── Test 25: pm.md extends-stub fully resolved [T-20260912-004] ──────────
   // The scaffolded agents/pm.md must be self-contained: no dangling `extends:`,
   // no raw `variant_overrides:` YAML (rendered into the body instead), and a
   // substantive body (the L1 PM body, not a stub).
   console.log('\nTest 25: pm.md extends-stub resolution (no extends / no variant_overrides / substantive body)');
+  if (requireScaffold('Test 25')) {
   try {
     const pmPath = join(testDir, 'agents', 'pm.md');
     if (!existsSync(pmPath)) {
@@ -783,7 +823,7 @@ try {
         pass(`Test 25 PASSED: pm.md fully resolved (body: ${body.trim().length} chars, no extends, no variant_overrides)`);
       }
     }
-  } catch (e) { fail('Test 25', String(e)); }
+  } catch (e) { fail('Test 25', String(e)); } }
 
   // ── Test 26: common-template delivery parity (derived vs actual) [T-20260915-003] ──
   // The static derivation of what new-project delivers FROM templates/common/
@@ -795,6 +835,7 @@ try {
   // (bun install lockfiles, node_modules, .git, graft/) are excluded by the
   // helper; comparison is restricted to the common-template universe.
   console.log('\nTest 26: common-template delivery parity (derived vs actual)');
+  if (requireScaffold('Test 26')) {
   try {
     const verdict = verifyActualTreeMatchesDerivation({
       which: 'new-project',
@@ -811,7 +852,7 @@ try {
     } else {
       pass('Test 26 PASSED: actual scaffold matches deriveNewProjectDelivery exactly');
     }
-  } catch (e) { fail('Test 26', String(e)); }
+  } catch (e) { fail('Test 26', String(e)); } }
 
   // ── Test 27: Identity seed — default scaffold [AC2 + AC3, spec 2026-09-24-scaffold-identity-overview-design] ──
   // The main harness scaffold carries NO --description/--type, so docs/project.md
@@ -820,6 +861,7 @@ try {
   // section (heading kept, literal placeholders gone, footer 2.14), and the raw
   // project.template.md copy must be absent from the delivered tree.
   console.log('\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy');
+  if (requireScaffold('Test 27')) {
   {
     const auditPlaceholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
     try {
@@ -857,12 +899,13 @@ try {
         pass('Test 27 PASSED (template removal): no project.template.md in the delivered tree');
       }
     } catch (e) { fail('Test 27', String(e)); }
-  }
+  } }
 
   // ── Test 28: Identity seed — flags render docs/project.md [AC1, spec 2026-09-24-scaffold-identity-overview-design] ──
   // A second scaffold WITH --description/--type must render the identity fields
   // into docs/project.md (fallback gone) and leave no raw template copy.
   console.log('\nTest 28: Identity seed — --description/--type rendered into docs/project.md');
+  if (requireScaffold('Test 28')) {
   {
     const flaggedDir = `tests/.temp/Test-${projectName}-identity`;
     const flagTestRel = (rel: string) => readFileSync(join(flaggedDir, rel), 'utf-8');
@@ -899,7 +942,7 @@ try {
         if (existsSync(flaggedDir)) rmSync(flaggedDir, { recursive: true, force: true });
       } catch { /* ignore */ }
     }
-  }
+  } }
 
   // ── Test 29: skills registry ↔ delivered tree bijection [T-20260924-008] ──
   // The delivered skills/SKILLS.md (seeded from templates/common, overlay
@@ -911,6 +954,7 @@ try {
   // must never reach delivery; the delivered frontmatter (2026-09-06 lineage)
   // wins. Also pins the variant-exclusive append (service-design).
   console.log('\nTest 29: skills registry ↔ delivered tree bijection');
+  if (requireScaffold('Test 29')) {
   {
     try {
       if (!fileExists('skills/SKILLS.md')) {
@@ -976,7 +1020,7 @@ try {
         }
       }
     } catch (e) { fail('Test 29', String(e)); }
-  }
+  } }
 
   // ── Test 30: project skill-lifecycle-audit reports 0 errors [T-20260924-008] ──
   // The project's own audit is the permanent post-scaffold gate and the
@@ -984,6 +1028,7 @@ try {
   // missing rows + 1 last_reviewed drift — on every fresh co-design scaffold).
   // Runs it with --json from the scaffold root and asserts a clean error count.
   console.log('\nTest 30: project skill-lifecycle-audit — 0 errors');
+  if (requireScaffold('Test 30')) {
   {
     try {
       const proc = Bun.spawnSync(['bun', 'scripts/skill-lifecycle-audit.ts', '--json'], {
@@ -1008,7 +1053,7 @@ try {
         }
       }
     } catch (e) { fail('Test 30', String(e)); }
-  }
+  } }
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50));

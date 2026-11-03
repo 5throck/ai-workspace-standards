@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.89.0
+// @version 1.90.0
+// v1.90.0 (2026-11-03, spec docs/designs/2026-11-01-hub-consolidation-design.md
+//          §15.4, ticket T-20261103-003-2): hub-consumption preflight legs —
+//          after the templatesDir invariants and before the --preflight
+//          apply-blockers block, upgrade runs the SAME two legs new-project
+//          runs (checkConsumerMinimumVersions over the template variant.json
+//          hub block + checkHubDoctrineDuplication over templatesDir via the
+//          shared helpers/hub-topology.ts derivation — no copied logic).
+//          Guarded by !commonOnlySync (a common-only sync delivers no variant
+//          assets, so the legs are vacuous) and skipped when the workspace
+//          has no valid hub_topology section (vacuously clean, fail-open on
+//          registry absence). Read-only over the template tree and registry —
+//          runs unconditionally in BOTH --dry-run and apply mode; a FAIL
+//          prints each violation and exits 1 before any delivery-plan
+//          computation.
 // v1.89.0 (2026-11-01, addendum
 //          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
 //          §Addendum): managed-block restamp decision rows + landed-vs-withheld
@@ -1469,6 +1483,63 @@ if (templatesDir === join(workspaceRoot, 'templates') || !variant.trim()) {
 }
 
 if (!commonOnlySync && !existsSync(templatesDir)) { console.error(`ERROR: Template variant not found: ${templatesDir}`); process.exit(1); }
+
+// ── Hub-consumption preflight (§15.4, T-20261103-003-2) ──────────────────────
+// An existing project must not be upgraded against a template carrying
+// unsanctioned hub-doctrine duplication or unsatisfiable hub.consumes
+// minimum_versions — the SAME two legs new-project runs at create time
+// (new-project.ts hub consumption preflight), via the shared
+// helpers/hub-topology.ts derivation (one derivation, no copied logic).
+// Read-only over the template tree and the registry: runs unconditionally in
+// BOTH --dry-run and apply mode (mirrors the Variant Readiness Gate, which is
+// also mode-independent). Guarded by !commonOnlySync — a common-only sync
+// delivers no variant assets, so the legs are vacuous there. Guarded on
+// topoResult.ok exactly as new-project does: a workspace without a valid
+// hub_topology section skips the legs (vacuously clean) rather than blocking
+// upgrades (fail-open on registry absence).
+if (!commonOnlySync) {
+  const { loadHubTopology, loadCommonContractNames, checkConsumerMinimumVersions, checkHubDoctrineDuplication } = await import('./helpers/hub-topology.ts');
+  const topoResult = loadHubTopology(workspaceRoot);
+  if (topoResult.ok && topoResult.topology) {
+    console.log(`\nRunning hub consumption preflight for variant '${variant}'...`);
+    const preflightFails: string[] = [];
+
+    // (1) consumes/minimum_version declarations resolve against the registry
+    //     (identical derivation to new-project's leg 3).
+    const variantJsonPath = join(templatesDir, 'variant.json');
+    if (existsSync(variantJsonPath)) {
+      try {
+        const vj = JSON.parse(readFileSync(variantJsonPath, 'utf8')) as Record<string, unknown>;
+        const hub = vj['hub'];
+        if (hub && typeof hub === 'object' && !Array.isArray(hub)) {
+          const legA = checkConsumerMinimumVersions(topoResult.topology, [{ variant, hubBlock: hub as Record<string, unknown> }]);
+          preflightFails.push(...legA.fails);
+          if (legA.warns.length > 0) for (const w of legA.warns) console.warn(`  ⚠️  ${w}`);
+        }
+      } catch {
+        // malformed variant.json — the readiness gate and schema checks own that failure
+      }
+    }
+
+    // (2) unregistered hub-doctrine duplication in the template → FAIL
+    //     (identical derivation to new-project's leg 2).
+    const dup = checkHubDoctrineDuplication(topoResult.topology, {
+      variantName: variant,
+      templateDir: templatesDir,
+      commonNames: loadCommonContractNames(workspaceRoot),
+    });
+    preflightFails.push(...dup.fails);
+
+    if (preflightFails.length > 0) {
+      for (const f of preflightFails) console.error(`  ❌ ${f}`);
+      console.error(`\n❌ Hub consumption preflight FAILED for variant '${variant}' (design §6.2).`);
+      console.error('   Declare consumption in the template variant.json hub.consumes or remove the unsanctioned copy.');
+      process.exit(1);
+    } else {
+      console.log(`✅ Hub consumption preflight passed for variant '${variant}'.`);
+    }
+  }
+}
 
 // ── Preflight (T-20261007-028): --preflight checks the three apply-blockers ──
 // clean tree / open PRs on the current branch / template-version.txt, then
