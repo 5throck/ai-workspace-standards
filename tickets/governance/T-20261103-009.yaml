@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261103-009
+kind: manual
+title: >-
+  test-harness flake: tests/unit/co-workspace-*.test.ts suites create
+  Projects/<name>/ under a relative cwd and their cleanup leaves the empty
+  Projects/ parent dir behind; bun's nondeterministic parallel test order then
+  makes tests/unit/apply-tier-normalization.test.ts (--projects leg,
+  projectCount=0) observe the dir present-but-empty mid-run and fail. Triggered
+  in PR #1840's pre-push changed-path gate (two blocked runs; worked around by
+  rmdir Projects before push). Fix: isolate the co-workspace suites to a temp
+  wsDir (or clean up the parent dir they create). Discovered 2026-11-03 during
+  the #1840 merge-conflict resolution.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-03T14:59:51.878+09:00'
+history:
+  - at: '2026-11-03T14:59:51.878+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -11,12 +11,26 @@ title: >-
   hub-doctrine duplication silently; add the two preflight legs to
   upgrade-project (or a validate-templates arm) as a follow-up
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-03T06:04:40.398+09:00'
 history:
   - at: '2026-11-03T06:04:40.398+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-03T08:55:51.455+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-03T08:55:51.470+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-03T09:56:51.942+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented per design §15 (PR #1835, merged): test-new-project.ts per-variant
+  fail-soft (requireScaffold guard, 30 not-executed rows recorded, summary
+  reached, exit 1), upgrade-project v1.90.0 gains both hub-consumption preflight
+  legs (dry-run/apply, common-only skip, fail-open absent registry). Co-abap
+  live acceptance verified.
 error: null

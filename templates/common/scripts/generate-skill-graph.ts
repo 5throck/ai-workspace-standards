@@ -1,6 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 2.0.1 (2026-11-03, T-20261103-004): git-aware decisions/ADR scan —
+ * only git-TRACKED files under docs/decisions/ and docs/adr/ become dec:/adr:
+ * nodes. docs/decisions/ is a tracked directory, but a local untracked
+ * DEC-*.md dropped into it used to sweep into the committed projection
+ * (PR #1834 CI-drift class: the file is absent from other checkouts, so their
+ * regeneration diverged). Fail-open on non-git contexts (SKILL_GRAPH_ROOT
+ * fixtures keep the historical include-all behavior). Shared helpers in
+ * scripts/lib/git-aware-scan.ts (v1.8.5 does the same at DIRECTORY level for
+ * procedures/; this is the per-FILE level inside tracked directories).
  * @version 2.0.0 (2026-10-08, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md,
  * ADR-0060 Amendment 11): skill-graph schema v2 (`graph_profile: deg/v2`) for the full graph.
  * Skill/agent/phase node ids are `type:scope/name`; copies of the same name with identical
@@ -133,6 +142,7 @@ import { contentHash, frontmatterVersion, scopeOfLayer, dedupeEdges, splitScoped
 import type { SkillGraphV2 } from './lib/skill-graph-compat.ts';
 import { PLATFORM_MIRROR_DIRS } from './lib/platforms.ts';
 import { parseSkillsUsed } from './lib/skills-used.ts';
+import { isTrackedRel, trackedFilesUnder } from './lib/git-aware-scan.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1580,8 +1590,14 @@ export function buildGraphWithReport(): { graph: SkillGraph; report: BuildReport
   // ADR-0061 is queryable from the same projection. All edges advisory.
   const decisionsDir = join(ROOT, 'docs', 'decisions');
   if (existsSync(decisionsDir)) {
+    // T-20261103-004: only git-TRACKED decision files become nodes. docs/decisions/
+    // is a tracked directory, but a local untracked DEC-*.md dropped into it used to
+    // sweep into the committed projection (PR #1834 CI-drift class — the same file
+    // absent from other checkouts). Fail-open on non-git contexts (fixtures).
+    const trackedDecisions = trackedFilesUnder(ROOT, 'docs/decisions');
     for (const f of readdirSync(decisionsDir)) {
       if (!/^DEC-\d{8}-\d{2}\.md$/.test(f)) continue;
+      if (!isTrackedRel(trackedDecisions, join('docs', 'decisions', f))) continue;
       const docId = `dec:${f.replace(/\.md$/, '')}`;
       allNodes.set(docId, { id: docId, type: 'decision', layer: localLayer });
 
@@ -1626,9 +1642,13 @@ export function buildGraphWithReport(): { graph: SkillGraph; report: BuildReport
 
   const adrsDir = join(ROOT, 'docs', 'adr');
   if (existsSync(adrsDir)) {
+    // T-20261103-004: same tracked-only filter as the decisions scan above —
+    // an untracked local ADR-*.md must not enter the committed projection.
+    const trackedAdrs = trackedFilesUnder(ROOT, 'docs/adr');
     for (const f of readdirSync(adrsDir)) {
       const m = f.match(/^(\d{4})-.*\.md$/);
       if (!m) continue;
+      if (!isTrackedRel(trackedAdrs, join('docs', 'adr', f))) continue;
       const adrId = `adr:${m[1]}`;
       allNodes.set(adrId, { id: adrId, type: 'adr', layer: localLayer });
 
