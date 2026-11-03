@@ -80,9 +80,25 @@ describe('filterTransientCheckouts (only positive pr/* evidence excludes)', () =
     expect(isTransientCheckoutBranch('xpr/lookalike')).toBe(false);
   });
 
-  test('checkoutBranch on the real repo returns a branch name (positive evidence)', () => {
-    const branch = checkoutBranch(REPO_ROOT);
-    expect(branch).not.toBeNull();
-    expect(branch!.length).toBeGreaterThan(0);
+  test('checkoutBranch on a fixture repo returns the checked-out branch (positive evidence)', () => {
+    // Standalone fixture instead of the ambient repo: CI checkouts run on a
+    // detached HEAD, so REPO_ROOT legitimately has no branch name to return.
+    const repo = mkdtempSync(join(tmpdir(), 'git-aware-scan-branch-'));
+    try {
+      writeFileSync(join(repo, 'seed.md'), 'x');
+      spawnSync('git', ['init', '-q'], { cwd: repo });
+      spawnSync('git', ['-C', repo, 'add', 'seed.md'], { cwd: repo });
+      spawnSync('git', ['-C', repo, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'init'], { cwd: repo });
+      spawnSync('git', ['-C', repo, 'checkout', '-qb', 'fixture-branch'], { cwd: repo });
+      const branch = checkoutBranch(repo);
+      expect(branch).not.toBeNull();
+      expect(branch).toBe('fixture-branch');
+      // Detached HEAD is "no positive evidence" — null, never a branch name.
+      const sha = spawnSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
+      spawnSync('git', ['-C', repo, 'checkout', '-q', sha], { cwd: repo });
+      expect(checkoutBranch(repo)).toBeNull();
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
   });
 });
