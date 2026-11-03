@@ -9,6 +9,7 @@
 - **Sibling design**: docs/designs/2026-11-01-coworkspace-attach-mode-design.md (attach-mode service change, ADR-0092 Addendum 17 — designed in the same Phase 0)
 - **Precedent**: docs/designs/2026-10-27-co-design-suite-promotion-design.md (the ratified per-suite promotion frame adopted for Phase 1 PRs); docs/designs/2026-10-31-variant-generators-design.md (same-day design — see §11.4 de-confliction note)
 - **Tier**: L0 (registry schema + validator legs + pipeline scripts) with L2 delivery conventions (hub variants) and L1 reconciliation (hand-maintained schema pair)
+- **Addendum (2026-11-03)**: §15 — variant-identity sanction in the hub-doctrine duplication preflight + co-architect reconciliation (T-20261103-002, DEC-20261103-02); nightly E2E fail-soft + upgrade-project hub-consumption preflight legs (T-20261103-003)
 
 ## 0. Accessibility exemption statement
 
@@ -372,6 +373,132 @@ All artifacts specified by this design (registry section, validator legs, bootst
 4. **Spec entries registered**: both this design and the attach-mode design appear in docs/specs/registry.json with status `planned` and matching docs/specs/entries/ files, in canonical id order.
 5. **Bootstrap five guarantees** each have a test at implementation time (idempotent re-run, lock contention, atomic-move failure injection, dead-PID sweep, state_history audit rows).
 
+## 15. Addendum (2026-11-03) — preflight variant-identity sanction, co-architect reconciliation, E2E fail-soft, upgrade-project hub legs
+
+**Provenance**: tickets `tickets/governance/T-20261103-002.yaml` (validator-hardening A1+A2) and `tickets/governance/T-20261103-003.yaml` (test-harness A3+C2). The nightly scaffold E2E (workflow `.github/workflows/nightly-scaffold-e2e.yml`, run 41409778763) has been red since 2026-11-02: fresh scaffolds of 3 of 15 variants fail hard on `unregistered hub-doctrine duplication`. This addendum is design-only; implementation belongs to automation-engineer under a separate dispatch. All file:line anchors below were verified against the working tree on 2026-11-03.
+
+### 15.1 T-20261103-002a — `checkHubDoctrineDuplication` honors variant-identity rows as a sanction
+
+**Evidence of the defect.** The preflight leg `checkHubDoctrineDuplication` (`scripts/helpers/hub-topology.ts:566-600`) FAILs any local copy of a foreign hub-doctrine asset unless the copy is sanctioned as a declared consumer (`hub-topology.ts:585-587`) or as common-contract stock (`hub-topology.ts:588`). It has no variant-identity path. The registry carries same-named security-monitor assets registered `category: variant-identity` (batch E4): `co-abap/security-monitor` (`templates/co-abap/agents/security-monitor.md`) and `co-price/security-monitor` (`templates/co-price/agents/security-monitor.md`), while the hub-doctrine row `co-develop/security-monitor` declares consumers `[co-game]` only. When scaffolding co-abap or co-price, the checker resolves the hub-doctrine row to rel-path `agents/security-monitor.md`, finds the local copy, finds neither sanction → FAIL (`hub-topology.ts:590-592`) → `scripts/new-project.ts:616-622` aborts the scaffold.
+
+**Exact predicate.** For each hub-doctrine entry `e` with `hub_variant !== ctx.variantName` and `rel = entryTemplateRelPath(e.canonical_path, e.hub_variant)` (non-null; `hub-topology.ts:539-546`), the local copy at `join(ctx.templateDir, rel)` is sanctioned when **any** of:
+
+1. **declaredConsumer** (existing, `hub-topology.ts:585-587`): `e.consumers[]` contains `{variant: ctx.variantName}`;
+2. **isCommonStock** (existing, `hub-topology.ts:588`): `ctx.commonNames.has(asset)`;
+3. **variantIdentitySanction** (NEW): there exists a row `v` in `topology.entries` such that
+   - `v.category === 'variant-identity'`, AND
+   - `String(v.hub_variant) === ctx.variantName`, AND
+   - `entryTemplateRelPath(String(v.canonical_path), String(v.hub_variant)) === rel`.
+
+The join key is **canonical rel-path equality, not asset-name equality**. Same asset name at a different path sanctions nothing, and a variant-identity row for a *different* variant sanctions nothing — this is deliberate: same-named assets across variants are exactly the identity scenario (the registry already holds same-name identity pairs: `designer` in co-develop/co-game, `devops-admin` in co-abap/co-price, `storyteller` in co-design/co-work), so only "this variant's own registered identity file at this exact location" proves the copy is identity, not a fork.
+
+**Dual-sanction failure mode (both rows collide).** If for the same rel-path BOTH a variant-identity row (case 3) and a declared-consumer sanction (case 1) resolve for `(ctx.variantName, rel)`, the registry is ambiguous about what the local file *is* (identity vs §7.4 stale-read copy). Specified behavior: the leg **skips the FAIL** (identity wins — the file is registered, promotion may not overwrite it) and pushes a **WARN** onto `LegResult.warns`: `dual sanction for <rel> in <variantName> (variant-identity row + declared hub-doctrine consumer) — registry ambiguity; reconcile to a single category`. Rationale: failing the scaffold gate on registry bookkeeping ambiguity recreates the exact outage class this ticket records; the weekly drift detector (§2.4 leg 4, `scripts/validators/duplicate-validator.ts`) and registry reconciliation own the cleanup. Everything else stays fail-closed: malformed rows (null rel) are skipped exactly as today (`hub-topology.ts:579`), and any sanction mismatch still FAILs.
+
+**Blast radius of the shared helper.** Both call sites inherit the sanction with zero call-site changes: `scripts/new-project.ts:609-614` (scaffold preflight) and `scripts/l3-to-variant-pipeline.ts:1758-1764` (Phase 4.8 promotion preflight — co-architect promotion waves stop failing there too). Bump the helper header version (currently v1.1.0 per the `hub-topology.ts:532` banner).
+
+**Unit fixture requirements.** `tests/unit/hub-topology-legs.test.ts` currently has describes for legs 0-3 and the drift derivation but **no direct describe for `checkHubDoctrineDuplication`** — add `describe('checkHubDoctrineDuplication (§6.2 preflight + variant-identity sanction)')` with tmp-dir fixtures. Fixture canonical paths MUST use the full `templates/<variant>/...` form (the existing leg fixtures at `hub-topology-legs.test.ts:78,178` use bare rel-paths, which `entryTemplateRelPath` correctly returns null for — the duplication tests need resolvable paths). Case matrix:
+
+1. hub-doctrine row + local copy + no identity row → 1 fail containing `unregistered hub-doctrine duplication` (pins the negative);
+2. + variant-identity row, same rel-path → 0 fails, passes mention the sanction;
+3. variant-identity row with the SAME asset name but a DIFFERENT rel-path → still 1 fail (rel-path is the key, not the name);
+4. variant-identity row with `hub_variant` = another variant → still 1 fail;
+5. dual sanction (identity row + declared consumer) → 0 fails + exactly 1 warn naming the ambiguity;
+6. real-workspace pins: for `variantName` in `co-architect`, `co-abap`, `co-price` with `templateDir = templates/<variant>` and `commonNames = loadCommonContractNames(cwd())` → `fails === []` (live regression pins for 002a + 002b; the co-abap/co-price pins guard the E4 rows, the co-architect pin guards the 15.2 row once landed).
+
+### 15.2 T-20261103-002b — co-architect `architect.md` reconciliation (decision: variant-identity registration)
+
+**Evidence.** The registry's hub-doctrine row `co-develop/architect` (`templates/co-develop/agents/architect.md`, version 1.2.0, consumers `[co-game, co-learning]`) collides at scaffold time with `templates/co-architect/agents/architect.md` — which exists, is not common-contract stock (no `architect` row in `docs/templates/common-contract.json`), and co-architect is not a declared consumer. But the file is NOT a copy of co-develop doctrine: its frontmatter scopes a distinct role — "Technical architecture and implementation-plan specialist for co-architect's software/platform layer (MCP servers, ZWCAD COM automation, Python backend, cross-cutting technical specs) — distinct from design-lead's visual/design-system architecture". Batch E5/E6 (co-architect promotion) missed the hub-doctrine reconciliation step.
+
+**Decision** — recorded as the gate-moment record `docs/decisions/DEC-20261103-02.md` (ADR-0061 format, ADR-0080 authority): **ADOPT the ticket's preferred option — register the co-architect architect agent as a variant-identity row.** Registry row shape (mirrors the sanctioned batch-E4 precedent rows — own-variant domain, empty consumers):
+
+```json
+{
+  "asset": "architect",
+  "domain": "co-architect",
+  "hub_variant": "co-architect",
+  "category": "variant-identity",
+  "verticals": [],
+  "origin": "Projects/co-architect (identity; distinct architecture-firm technical-architecture role for co-architect's software/platform layer — MCP servers, ZWCAD COM automation; not a copy of, or consumer of, co-develop's software-architect doctrine; T-20261103-002b / DEC-20261103-02)",
+  "canonical_path": "templates/co-architect/agents/architect.md",
+  "version": "1.0.0",
+  "consumers": []
+}
+```
+
+The row lands in BOTH schema copies in the same commit — `docs/workspace-schema.json` and `templates/common/docs/workspace-schema.json` (hand-maintained pair; the hash-parity gate `scripts/validate-templates.ts:1240-1257` fails on divergence, §2.1-§2.2).
+
+**`variant.json` hub.consumes: NO CHANGE.** `templates/co-architect/variant.json` keeps `role: consumer`, `consumes: [{domain: co-design, minimum_version: 1.0.0}, {domain: co-work, minimum_version: 1.1.1}]` — no `co-develop` entry is added. **Rejected alternative** (add `hub.consumes` co-develop): co-architect does not read co-develop's architect doctrine, so declaring consumption would (a) misstate the dependency graph the audit.ts hub-resolve checker (§2.4 leg 3) polices, (b) create a `minimum_version` maintenance obligation against content co-architect never consumes, and (c) license a future promotion wave to treat the local file as a §7.4 stale-read consumer copy and reconcile it toward the co-develop canonical — the exact overwrite class §2.4 leg 2 (variant-identity unauthorized promotion, the PR #61 clobber class) exists to prevent. This also matches the liaison-model ruling of DEC-20261102-01: co-architect's roster keeps "tech-specific specialists that are genuine variant identity" as class 3 — this row is that class made machine-readable.
+
+### 15.3 T-20261103-003-1 — nightly scaffold E2E: per-variant legs become fail-soft
+
+**Evidence.** `scripts/test-new-project.ts` (the harness `.github/workflows/nightly-scaffold-e2e.yml:37` drives with `nightly-all-variants --all-variants --yes`) has two hard aborts that end a variant's whole leg before downstream assertions run:
+
+- the syntax gate (`scripts/test-new-project.ts:279-284`): `"Syntax errors found — remaining tests skipped."` + `process.exit(1)`;
+- the scaffold-presence gate (`scripts/test-new-project.ts:297-302`): `"Project directory not found — remaining tests skipped."` + `process.exit(1)`.
+
+In `--all-variants` mode (`test-new-project.ts:125-147`) each variant is a child process, so a hub-preflight scaffold failure (15.1's defect) surfaces as ONE abort line for that variant while Tests 0e-post through 30 never execute — "directory not found — remaining tests skipped" masks every downstream assertion, and the nightly summary shows a bare variant failure instead of per-assertion evidence.
+
+**Specified change** (harness only; `scripts/new-project.ts` behavior untouched):
+
+1. Add `let scaffoldMissing = false;` beside the counters (`test-new-project.ts:166`) and a guard helper:
+   ```ts
+   function requireScaffold(label: string): boolean {
+     if (!scaffoldMissing) return true;
+     fail(label, 'not executed — scaffold missing (Test 1 failed)');
+     return false;
+   }
+   ```
+2. Syntax gate (`:279-284`): keep the banner, **drop the `process.exit`** — Tests 0a-0c already recorded the failures and Test 1 will record the scaffold outcome; the run continues.
+3. Scaffold gate (`:297-302`): reword the banner to `"Project directory not found — recording remaining tests as not-executed failures (run continues)."`, set `scaffoldMissing = true`, **drop the `process.exit`**.
+4. Wrap every post-scaffold test body (from the scaffolded-output check at `:304` through Test 30 at `:1011`) as `if (requireScaffold('<label>')) { …existing body… }`. Each masked test records an explicit FAILED row ("not executed — scaffold missing") so per-variant counts stay honest. The existing `skip()` helper (`:171`) counts as PASSED and must NOT be used here — a not-executed assertion is a failure, not a skip.
+5. The all-variants loop (`:125-147`) and the final summary/exit (`:1013-1026`) are unchanged: a variant whose scaffold failed now reports FAILED with per-test not-executed rows, and the leg's exit code stays 1.
+
+**Acceptance**: with a deliberately broken template (Test 1 fails), the leg prints every Test 2-30 row as a not-executed failure and exits 1; with a healthy template, pass-row output is identical to today.
+
+### 15.4 T-20261103-003-2 — upgrade-project gains the two hub-consumption preflight legs
+
+**Evidence.** `new-project` runs both legs (`scripts/new-project.ts:586-627`: leg 3 `checkConsumerMinimumVersions` against the template's variant.json hub block at `:594-606`, plus `checkHubDoctrineDuplication` over `templatesDir` at `:609-614`). `upgrade-project` runs only the Variant Readiness Gate (`scripts/upgrade-project.ts:1444-1456`) and the `--preflight` apply-blockers block (`:1478+`) — never the hub legs — so an existing project can be upgraded against a template carrying unsanctioned hub-doctrine duplication with no gate at all.
+
+**Specified change** (`scripts/upgrade-project.ts`): insert a hub-consumption preflight block **immediately after the templatesDir invariants** (`:1458-1471`) and **before** the `--preflight` apply-blockers block (`:1478`), guarded by `!commonOnlySync` (the same condition as the readiness gate at `:1445` — a common-only sync delivers no variant assets, so the legs are vacuous there):
+
+- **Leg A — consumer minimum_version**: parse `templates/<variant>/variant.json`; when a `hub` block exists, run `checkConsumerMinimumVersions(topology, [{variant, hubBlock}])` — the identical derivation new-project runs (`new-project.ts:594-606`).
+- **Leg B — unregistered duplication**: `checkHubDoctrineDuplication(topology, {variantName: variant, templateDir: templatesDir, commonNames: loadCommonContractNames(workspaceRoot)})` — identical to `new-project.ts:609-614`.
+- Import via the same dynamic import of `./helpers/hub-topology.ts` new-project uses — one derivation, no copied logic.
+- **Mode coverage**: the block runs unconditionally in BOTH `--dry-run` and apply mode. It is read-only over the template tree and the registry and writes nothing to the project, so there is no dry-run/apply divergence (mirrors the Variant Readiness Gate, which is also mode-independent). A FAIL prints each violation and `process.exit(1)` before any delivery-plan computation, in both modes.
+- **Registry-absent posture**: guard on `topoResult.ok` exactly as new-project does (`new-project.ts:589`) — a workspace without a valid `hub_topology` section skips the legs (vacuously clean) rather than blocking upgrades.
+
+**Landing order matters**: 15.1 + 15.2 must land BEFORE 15.4, otherwise the new upgrade legs would re-create the current scaffold outage on the upgrade path (3 templates red) the moment they activate. With the sanction landed, all 15 templates are green under both legs.
+
+### 15.5 Files to change (implementation change set — automation-engineer, NOT this addendum)
+
+| File | Action | Description |
+|------|--------|-------------|
+| `scripts/helpers/hub-topology.ts` | modify | 15.1 — variantIdentitySanction predicate + dual-sanction WARN; version bump |
+| `tests/unit/hub-topology-legs.test.ts` | modify | 15.1 — new describe block, 6-case matrix, 3 real-workspace pins |
+| `docs/workspace-schema.json` + `templates/common/docs/workspace-schema.json` | modify | 15.2 — co-architect variant-identity row, same commit (hash-parity pair, §2.2) |
+| `scripts/test-new-project.ts` | modify | 15.3 — fail-soft guards, two aborts removed |
+| `scripts/upgrade-project.ts` | modify | 15.4 — two hub-consumption preflight legs |
+| `templates/co-architect/variant.json` | **no change** | 15.2 — hub.consumes stays as-is (explicit no-change) |
+| `scripts/new-project.ts`, `scripts/l3-to-variant-pipeline.ts` | **no change** | 15.1 — inherit the sanction via the shared helper |
+
+### 15.6 Platform Impact
+
+| Platform | Impact | Files Affected |
+|----------|--------|----------------|
+| Claude Code | None — registry + scripts + harness only; no agent-file content changes | N/A |
+| Antigravity (GEMINI.md) | None — no agent definition or instruction-file changes; the co-architect architect.md file itself is untouched (only its registry row is added) | N/A |
+| templates/common | Propagation required for exactly ONE file: `templates/common/docs/workspace-schema.json` gains the same `hub_topology.entries` row as the root copy, same commit (hash-parity gate §2.2) | `templates/common/docs/workspace-schema.json` |
+
+### 15.7 Acceptance criteria
+
+- [ ] `checkHubDoctrineDuplication` skips when a variant-identity entry exists for (hub_variant == variantName, same canonical rel-path); dual sanction → skip + WARN; all other mismatches still FAIL (unit matrix 15.1.1-15.1.5 green).
+- [ ] Real-workspace pins: co-architect, co-abap, co-price scaffold preflight legs report `fails === []`.
+- [ ] Registry carries the co-architect `architect` variant-identity row in BOTH schema copies, same commit; hash-parity gate green.
+- [ ] `templates/co-architect/variant.json` unchanged.
+- [ ] With a scaffold-failing template, the nightly E2E leg records per-test not-executed failures and exits 1 — no `process.exit` before the summary; healthy-template output unchanged.
+- [ ] `upgrade-project --dry-run` and apply mode both run the two hub-consumption legs after the templatesDir invariants and fail closed on violations; `--common-only-sync` skips them.
+- [ ] `docs/decisions/DEC-20261103-02.md` exists (ADR-0061 format) recording the 15.2 decision.
+
 ## References
 
 - memory/meeting-2026-10-31-hub-spoke-consolidation-review.md — first meeting: 12-item synthesis, user decisions, hub=delivery-responsibility principle, fan-in rule
@@ -388,3 +515,6 @@ All artifacts specified by this design (registry section, validator legs, bootst
 - docs/adr/0039, 0040, 0048, 0090, 0092, 0097 — compatibility set (§11.1)
 - docs/adr/0083-domain-execution-graph-and-stage-axis.md:24-25 — naming-rule precedent for the collision check
 - docs/standards/llm-interaction-standard.md:97-99 — §2.5 dangling pointer this glossary resolves (amendment owned by docs-writer)
+- tickets/governance/T-20261103-002.yaml, tickets/governance/T-20261103-003.yaml — addendum §15 source tickets
+- docs/decisions/DEC-20261103-02.md — co-architect variant-identity registration decision (§15.2)
+- scripts/helpers/hub-topology.ts:539-600, scripts/new-project.ts:586-627, scripts/l3-to-variant-pipeline.ts:1758-1764, scripts/upgrade-project.ts:1444-1478, scripts/test-new-project.ts:125-147,279-302 — §15 code anchors (verified 2026-11-03)
