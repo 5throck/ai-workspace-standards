@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.1.1
+ * @version 1.2.0
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -11,12 +11,25 @@
  * - Code Injection: Malicious override sections
  * - DoS: Infinite loops, resource exhaustion
  *
+ * v1.2.0 (2026-11-04, U-20261104-002): workspace-root detection. The
+ * constructor used to pin the workspace boundary to process.cwd(), so a tool
+ * running inside a variant PROJECT (cwd = the project root) classified the
+ * documented cross-tier extends contract (`extends: ../../../agents/pm.md`)
+ * as a path-traversal escape and failed closed. The boundary is now detected
+ * by walking upward from cwd for an L0-only workspace marker (CONSTITUTION.md
+ * or templates/common) — exported as detectWorkspaceRoot() and unit-pinned.
+ * Precedence unchanged and fail-closed: an explicit options.workspace_root
+ * always wins; when no marker exists the boundary falls back to cwd (never
+ * wider than the evidence); genuine traversal escaping the detected root
+ * still fails, and the boundary comparison is now separator-aware so a
+ * SIBLING directory sharing the root's name prefix cannot pass either.
+ *
  * Usage:
  *   Module import: import { SecurityValidator } from './helpers/security-validator.js'
  */
 
-import { resolve, dirname, normalize } from 'path';
-import { existsSync } from 'fs';
+import { resolve, dirname, normalize, join } from 'path';
+import { existsSync, realpathSync } from 'fs';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -106,6 +119,64 @@ function extractCodeBlockContent(content: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Workspace Root Detection
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Workspace-root markers: files/directories that exist ONLY at the L0
+ * ai_workspace workspace root, never inside a delivered variant/project
+ * checkout. `CONSTITUTION.md` is the L0-only governance SSOT (variants receive
+ * the scrubbed docs/context.md slices instead); `templates/common` is the L1
+ * template tree which only the workspace root hosts (variant projects carry a
+ * templates/ directory for their own deliverables but never templates/common).
+ * Verified against every live Projects/co-* checkout when chosen (U-20261104-002).
+ */
+const WORKSPACE_ROOT_MARKERS: string[] = [
+  'CONSTITUTION.md',
+  join('templates', 'common'),
+];
+
+/**
+ * Detect the ai_workspace workspace root by walking upward from `startDir`
+ * (U-20261104-002). A variant project legally extends workspace-root agents
+ * via relative paths (`extends: ../../../agents/pm.md` — the documented 3-tier
+ * upgrade contract), so the workspace boundary is the ai_workspace root, not
+ * the project directory the tool happened to run from. Fail-closed: when no
+ * marker is found up to the filesystem root, fall back to `startDir` itself
+ * (the legacy single-directory boundary) — never a wider boundary than the
+ * evidence supports.
+ */
+export function detectWorkspaceRoot(startDir: string = process.cwd()): string {
+  let dir = resolve(startDir);
+  for (;;) {
+    if (WORKSPACE_ROOT_MARKERS.some((marker) => existsSync(join(dir, marker)))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) {
+      return resolve(startDir); // filesystem root reached — fail closed to cwd
+    }
+    dir = parent;
+  }
+}
+
+/**
+ * Symlink-canonicalize a path when it (or an ancestor) resolves on disk;
+ * fall back to the lexical resolution when it does not exist. macOS serves
+ * /var (and /tmp) as symlinks into /private/var — comparing a lexically
+ * resolved extends target against a chdir-derived (realpath) workspace root
+ * would false-positive a boundary escape purely from the /var spelling
+ * difference (U-20261104-002).
+ */
+function canonicalize(p: string): string {
+  try {
+    return realpathSync(p);
+  } catch {
+    return resolve(p);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Security Validator Class
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -116,7 +187,13 @@ export class SecurityValidator {
   private strictMode: boolean;
 
   constructor(options: SecurityValidatorOptions = {}) {
-    this.workspaceRoot = options.workspace_root || process.cwd();
+    // U-20261104-002: an explicit option always wins; otherwise walk upward
+    // from cwd for a workspace-root marker so a tool running inside a variant
+    // PROJECT (cwd = the project root) still validates extends targets against
+    // the ai_workspace root the 3-tier model defines. Both boundary spellings
+    // are symlink-canonicalized (macOS /var → /private/var) so lexical path
+    // resolution in validateExtendsPath compares like with like.
+    this.workspaceRoot = canonicalize(options.workspace_root || detectWorkspaceRoot(process.cwd()));
     this.allowedRootDirs = options.allowed_root_dirs || ALLOWED_ROOT_DIRS;
     this.overrideWhitelist = options.override_whitelist || OVERRIDE_WHITELIST;
     this.strictMode = options.strict_mode ?? true;
@@ -138,11 +215,16 @@ export class SecurityValidator {
       };
     }
 
-    // Resolve the path properly
-    const resolvedPath = resolve(currentFileDir, extendsPath);
+    // Resolve the path properly (symlink-canonicalized — see canonicalize())
+    const resolvedPath = canonicalize(resolve(currentFileDir, extendsPath));
 
-    // Check 2: Path traversal detection - ensure resolved path stays within workspace
-    if (!resolvedPath.startsWith(this.workspaceRoot)) {
+    // Check 2: Path traversal detection - ensure resolved path stays within workspace.
+    // Separator-aware prefix (U-20261104-002 hardening): a bare startsWith()
+    // would accept a SIBLING directory whose name shares the root's prefix
+    // (`/ws` accepting `/ws-evil/...`); require the root itself or the root
+    // followed by a path separator.
+    const rootPrefix = this.workspaceRoot.endsWith('/') ? this.workspaceRoot : this.workspaceRoot + '/';
+    if (resolvedPath !== this.workspaceRoot && !resolvedPath.startsWith(rootPrefix)) {
       return {
         valid: false,
         violation_type: SecurityViolationType.PATH_TRAVERSAL,
