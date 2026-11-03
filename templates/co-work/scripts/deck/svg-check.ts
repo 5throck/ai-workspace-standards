@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.1.0
+ * @version 1.1.1
  * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, content-SSOT text-run diff, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
  */
@@ -219,8 +219,18 @@ function checkPage(source: string, fileName: string): PageReport {
         }
       }
     }
-    if (node.tag === "tspan" && node.attrs["x"] !== undefined) {
-      warn("W-TSPAN-X", `tspan x repositioning compiles as paragraph flow — use dy-stacked tspans or separate <text> elements`);
+    if (node.tag === "text") {
+      // Line-wrap pattern: every tspan repeats the line-start x — canonical.
+      // Warn only when tspans mix different x values (horizontal repositioning
+      // compiles as paragraph flow and would visually drift).
+      const xs = new Set<string>();
+      if (node.attrs["x"] !== undefined) xs.add(node.attrs["x"].trim());
+      for (const ts of node.children) {
+        if (ts.tag === "tspan" && ts.attrs["x"] !== undefined) xs.add(ts.attrs["x"].trim());
+      }
+      if (xs.size > 1) {
+        warn("W-TSPAN-X", `tspan elements mix x values (${[...xs].join(", ")}) — mixed-x blocks compile as paragraph flow; keep one x per line-start column or split into separate <text> elements`);
+      }
     }
     const isTopGroup = node.depth === 1 && node.tag === "g";
     if (isTopGroup && !node.attrs["data-block-id"]) {
@@ -303,7 +313,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
 
 function help(): never {
   console.log(`
-svg-check.ts v1.1.0 — canonical SVG deck quality gate
+svg-check.ts v1.1.1 — canonical SVG deck quality gate
 
 Usage:
   bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]

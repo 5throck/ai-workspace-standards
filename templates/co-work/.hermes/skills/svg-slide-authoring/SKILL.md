@@ -6,7 +6,7 @@ description: >
   hand authoring with locked registry tokens. Use when: authoring or
   repairing slide pages for the co-work native PPTX deck capability, or
   deciding whether an SVG construct is canonical / compatible / invalid.
-version: 1.1.0
+version: 1.1.1
 last_reviewed: 2026-11-03
 status: active
 scope: co-work
@@ -60,7 +60,7 @@ element/attribute whitelist has exact DrawingML mappings. Three input states:
 |--------|---------------|-------|
 | Structure | `g` (top-level = logical content block) | every top-level `g` requires `data-block-id="bN"` (unique, 1-based per page) |
 | Text | `text` with explicit `x`, `y`, `font-size`, `fill` | `y` is the baseline. `font-family` allowed (registry fonts only). `font-weight="bold"` / `font-style="italic"` allowed |
-| Text runs | `tspan` with `x` + `dy` stacking | dy-stacked tspans compile to paragraphs in one text body; a tspan with explicit `x` warns (`W-TSPAN-X`) |
+| Text runs | `tspan` with `x` + `dy` stacking | dy-stacked tspans compile to paragraphs in one text body; a tspan repeating its line-start `x` (the wrap pattern) is canonical; tspans mixing different `x` values warn (`W-TSPAN-X`) |
 | Text presentation | `text-anchor="start\|middle\|end"`, `letter-spacing` (px number), `text-decoration="underline\|line-through\|none"` | anchor/spacing/decoration compile to `algn`/`spc`/`u`·`strike`; `dominant-baseline`/`alignment-baseline` are unsupported (`W-UNSUPPORTED-BASELINE`) — pre-adjust `y` instead |
 | Geometry | `rect` (+`rx` ≤ half of min side), `circle`, `ellipse`, `line`, `polyline` | explicit numeric `x/y/width/height` or point lists — no percentages |
 | Paths | `path` with absolute `M L H V C Q Z` commands only | lowercase (relative) commands are **compatible** (normalized) |

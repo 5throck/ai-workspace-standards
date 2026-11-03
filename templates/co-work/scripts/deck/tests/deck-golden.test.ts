@@ -231,5 +231,26 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     expect(bytes.subarray(1, 4).toString()).toBe("PNG");
     rmSync(dir, { recursive: true, force: true });
   });
+
+  test("tspan wrap pattern: same-x line starts are canonical; mixed-x warns", () => {
+    const WRAP_PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="110" y="360" font-size="20" font-weight="bold" fill="#1F3864">Enterprise tier launched<tspan x="110" dy="32">with 14 pilot accounts</tspan></text>
+  </g>
+</svg>`;
+    const MIXED_PAGE = WRAP_PAGE.replace('tspan x="110" dy="32"', 'tspan x="130" dy="32"');
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-wrap"), [
+      { name: "01-wrap.svg", body: WRAP_PAGE },
+    ], "Enterprise tier launched with 14 pilot accounts\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+    expect(report.pages[0].warnings.filter((w) => w.rule === "W-TSPAN-X").length).toBe(0);
+    writeFileSync(join(dir, "mixed.svg"), MIXED_PAGE);
+    const mixed = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const mixedWarnings = mixed.pages.flatMap((p) => p.warnings.map((w) => w.rule));
+    expect(mixedWarnings).toContain("W-TSPAN-X");
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
+
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" data-slide-role="closing" data-page-number="6">
+  <g data-block-id="b1">
+    <rect x="0" y="0" width="1280" height="720" fill="#1F3864"/>
+    <text x="640" y="340" font-size="56" font-weight="bold" font-family="Calibri" text-anchor="middle" fill="#FFFFFF">Thank you</text>
+    <text x="640" y="400" font-size="24" font-family="Calibri" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.75">Questions and discussion</text>
+  </g>
+  <g data-block-id="b2">
+    <text x="640" y="640" font-size="16" font-family="Calibri" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.55">Leadership Team Meeting — November 2026</text>
+  </g>
+</svg>

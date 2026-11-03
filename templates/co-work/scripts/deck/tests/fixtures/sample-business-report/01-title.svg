@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" data-slide-role="title" data-page-number="1">
+  <g data-block-id="b1">
+    <rect x="0" y="0" width="1280" height="720" fill="#1F3864"/>
+    <rect x="80" y="400" width="120" height="10" fill="#C00000"/>
+    <text x="640" y="310" font-size="56" font-weight="bold" font-family="Calibri" text-anchor="middle" fill="#FFFFFF">Q3 2026 Business Review</text>
+    <text x="640" y="370" font-size="24" font-family="Calibri" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.75">Revenue, product, and operations performance</text>
+  </g>
+  <g data-block-id="b2">
+    <text x="640" y="640" font-size="16" font-family="Calibri" text-anchor="middle" fill="#FFFFFF" fill-opacity="0.55">Leadership Team Meeting — November 2026</text>
+  </g>
+</svg>
