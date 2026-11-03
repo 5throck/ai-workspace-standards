@@ -349,7 +349,8 @@ describe('checkHubDoctrineDuplication (§6.2 preflight + variant-identity sancti
     // unregistered co-develop hub-doctrine copies (architect, code-writer,
     // test-runner) whose disposition (variant-identity registration / declared
     // consumers / removal as drift) is tracked by the follow-up ticket
-    // T-20261103-008 — outside §15's change set. Pinned here so the residual
+    // T-20261104-002 (re-created; the original T-20261103-008 id no longer
+    // resolves) — outside §15's change set. Pinned here so the residual
     // is visible and cannot silently grow or shrink.
     const abap = checkHubDoctrineDuplication(loaded.topology!, {
       variantName: 'co-abap',

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-03T23:15:13.642Z
+**Generated**: 2026-11-03T23:57:27.297Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -113,7 +113,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.61.0 | scripts/audit.ts | bun |
+| audit.ts | 2.62.0 | scripts/audit.ts | bun |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
 | backport-diff.ts | 1.1.0 | scripts/backport-diff.ts | N/A |
@@ -127,7 +127,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
 | design-gate-coverage.ts | 1.0.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.37.0 | scripts/dev-sync.ts | bun |
+| dev-sync.ts | 1.38.0 | scripts/dev-sync.ts | bun |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
