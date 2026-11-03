@@ -7588,7 +7588,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-03"
       }
     },
@@ -7807,8 +7807,8 @@
       "name": "svg-slide-authoring",
       "scope": "co-work",
       "capability": "svg-slide-authoring",
-      "content_hash": "0bfed6c0776e2222",
-      "version": "1.1.0",
+      "content_hash": "b7960ef927961b81",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-work/skills/svg-slide-authoring/SKILL.md"
       ]
@@ -8021,7 +8021,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-03"
       }
     },
@@ -8720,7 +8720,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-03"
       }
     },

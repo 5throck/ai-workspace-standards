@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" data-slide-role="data" data-page-number="3">
+  <g data-block-id="b1">
+    <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+    <text x="80" y="110" font-size="28" font-weight="bold" font-family="Calibri" fill="#1F3864">Revenue beat plan for the third straight quarter</text>
+    <text x="80" y="150" font-size="20" font-family="Calibri" fill="#6B6B6B">Q3 revenue closed at 5.1M, up 12 percent quarter over quarter</text>
+  </g>
+  <g data-block-id="b2">
+    <text x="1020" y="200" font-size="72" font-weight="bold" font-family="Calibri" text-anchor="end" fill="#C00000">5.1M</text>
+    <rect x="180" y="350" width="90" height="210" fill="#1F3864" fill-opacity="0.55"/>
+    <rect x="360" y="330" width="90" height="230" fill="#1F3864" fill-opacity="0.75"/>
+    <rect x="540" y="305" width="90" height="255" fill="#1F3864"/>
+    <line x1="140" y1="560" x2="700" y2="560" stroke="#6B6B6B" stroke-width="2"/>
+    <text x="225" y="596" font-size="18" font-family="Calibri" text-anchor="middle" fill="#6B6B6B">Jul: 4.2M</text>
+    <text x="405" y="596" font-size="18" font-family="Calibri" text-anchor="middle" fill="#6B6B6B">Aug: 4.6M</text>
+    <text x="585" y="596" font-size="18" font-family="Calibri" text-anchor="middle" fill="#6B6B6B">Sep: 5.1M</text>
+  </g>
+</svg>

@@ -136,7 +136,7 @@ Key rules:
 | Images | `image` (+`preserveAspectRatio`, crop via viewport) | raster embedded into package media |
 | Paint | `fill`, `stroke`, `linearGradient`, `radialGradient` | `#RRGGBB` uppercase; transparency via `fill-opacity` / `stroke-opacity` / element `opacity`, never `rgba()` |
 | Structure | `g` with `transform="translate/rotate/scale"` | top-level `g` = logical content block; carries `data-block-id` |
-| Text presentation | `text-anchor="start\|middle\|end"`, `letter-spacing` (px number), `text-decoration="underline\|line-through\|none"` | compiled to paragraph `algn` / run `spc` / `u`·`strike`; the text box is repositioned from an estimated text width. `dominant-baseline` / `alignment-baseline` are **unsupported** — the checker warns (`W-UNSUPPORTED-BASELINE`) and the compiler ignores them; a `tspan` with an explicit `x` warns (`W-TSPAN-X`, compiles as paragraph flow) |
+| Text presentation | `text-anchor="start\|middle\|end"`, `letter-spacing` (px number), `text-decoration="underline\|line-through\|none"` | compiled to paragraph `algn` / run `spc` / `u`·`strike`; the text box is repositioned from an estimated text width. `dominant-baseline` / `alignment-baseline` are **unsupported** — the checker warns (`W-UNSUPPORTED-BASELINE`) and the compiler ignores them; a `tspan` repeating its line-start `x` is the canonical wrap pattern; tspans mixing different `x` values warn (`W-TSPAN-X`, compiles as paragraph flow) |
 | Markers | `data-block-id` | future transition/animation anchor; required on top-level groups |
 
 Anything outside the whitelist is `invalid` (blocking), except expressions

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" data-slide-role="agenda" data-page-number="2">
+  <g data-block-id="b1">
+    <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+    <text x="80" y="130" font-size="40" font-weight="bold" font-family="Calibri" fill="#1F3864">Agenda</text>
+    <rect x="80" y="152" width="80" height="8" fill="#C00000"/>
+  </g>
+  <g data-block-id="b2">
+    <text x="80" y="280" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">1</text>
+    <text x="150" y="280" font-size="26" font-family="Calibri" fill="#202020">Revenue performance</text>
+    <line x1="80" y1="320" x2="1200" y2="320" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="80" y="390" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">2</text>
+    <text x="150" y="390" font-size="26" font-family="Calibri" fill="#202020">Product milestones</text>
+    <line x1="80" y1="430" x2="1200" y2="430" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="80" y="500" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">3</text>
+    <text x="150" y="500" font-size="26" font-family="Calibri" fill="#202020">Operations and cost</text>
+    <line x1="80" y1="540" x2="1200" y2="540" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="80" y="610" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">4</text>
+    <text x="150" y="610" font-size="26" font-family="Calibri" fill="#202020">Q4 priorities</text>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" data-slide-role="content" data-page-number="4">
+  <g data-block-id="b1">
+    <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+    <text x="80" y="120" font-size="32" font-weight="bold" font-family="Calibri" fill="#1F3864">Three wins carried the quarter</text>
+    <rect x="80" y="142" width="80" height="8" fill="#C00000"/>
+  </g>
+  <g data-block-id="b2">
+    <rect x="80" y="210" width="350" height="360" fill="#FFFFFF" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="110" y="290" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">1</text>
+    <text x="110" y="360" font-size="20" font-weight="bold" font-family="Calibri" fill="#1F3864">Enterprise tier launched<tspan x="110" dy="32">with 14 pilot accounts</tspan></text>
+    <rect x="465" y="210" width="350" height="360" fill="#FFFFFF" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="495" y="290" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">2</text>
+    <text x="495" y="360" font-size="20" font-weight="bold" font-family="Calibri" fill="#1F3864">Support response time cut<tspan x="495" dy="32">in half after the routing rebuild</tspan></text>
+    <rect x="850" y="210" width="350" height="360" fill="#FFFFFF" stroke="#6B6B6B" stroke-width="1"/>
+    <text x="880" y="290" font-size="44" font-weight="bold" font-family="Calibri" fill="#C00000">3</text>
+    <text x="880" y="360" font-size="20" font-weight="bold" font-family="Calibri" fill="#1F3864">Churn held flat<tspan x="880" dy="32">while pricing changes rolled out</tspan></text>
+  </g>
+</svg>
