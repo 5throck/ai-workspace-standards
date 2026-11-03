@@ -1,8 +1,8 @@
 ---
 name: security-scan
-description: Runs static analysis, secret detection (via gitleaks), and dependency vulnerability auditing (via bun audit) across the workspace.
-version: 1.2.0
-last_reviewed: 2026-08-30
+description: Runs static analysis, secret detection (via gitleaks), dependency vulnerability auditing (via bun audit), and auth-surface auditing (unauthenticated signup endpoints) across the workspace.
+version: 1.3.0
+last_reviewed: 2026-11-04
 status: active
 scope: common
 owner: pm
@@ -42,4 +42,29 @@ Used by the `security-expert` agent to ensure that no hardcoded credentials or m
      immediate visibility when a newly disclosed CVE arrives between runs.
 3. Verify `.githooks/` permissions (should be executable on Unix-like systems).
 4. Verify `.gitignore` rules effectively exclude `memory/`, `scripts/temp/`, and `.env` files.
-5. Report any security violations immediately.
+5. Auth-surface audit — unauthenticated registration/signup endpoints (added v1.3.0, T-20261103-006):
+   - Sweep each web app under review (variant templates and `Projects/<co-x>/app`
+     web trees) for account-creation endpoints reachable WITHOUT an authenticated
+     session (register / signup / self-service invite acceptance), and determine
+     which authenticated role a successful signup grants.
+   - **Flag as a finding any unauthenticated signup endpoint that grants ANY
+     authenticated role** — a default-open auth surface lets anyone who can reach
+     the login page mint an account and inherit everything that role can read
+     (business pipelines, MNPI-adjacent material). Default-open is the finding;
+     the granted role's privilege only sets the severity.
+   - Reference remediation shape (co-newbiz #796,
+     `Projects/co-newbiz/app/web-next/app/api/auth/register/route.ts`, owner
+     decision 2026-11-02):
+     1. **Default-closed**: registration refused unless an explicit environment
+        flag enables it (co-newbiz: `CO_NEWBIZ_ALLOW_REGISTER === "1"`, read per
+        request so an operator can flip it without a code change);
+     2. **Refusal BEFORE body-parse and throttle**: while closed the endpoint
+        returns one uniform 403 at the door — no request-shape oracle, no
+        rate-limit quota consumption by closed-surface traffic;
+     3. **Dated owner-decision comment** in the route source (who closed it,
+        when, why, and which provisioning paths are unaffected);
+     4. **Admin-provisioned accounts** as the default identity path (CLI or
+        admin-session-gated flows, never public signup);
+     5. **Documented reversibility**: the enabling flag recorded in the env
+        sample so reopening is a deliberate operator action.
+6. Report any security violations immediately.

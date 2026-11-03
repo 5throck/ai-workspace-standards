@@ -27,7 +27,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
 | `platform-skill-lifecycle-manager` | 1.0.2 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
 | `script-lifecycle-manager` | 1.2.2 | active | pm | 2026-05-30 | — | — |
-| `security-scan` | 1.2.0 | active | pm | 2026-08-30 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
+| `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.2 | active | automation-engineer | 2026-09-21 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
@@ -58,7 +58,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
 | `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
-| `skill-graph-analytics` | 1.3.0 | active | pm | 2026-10-08 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
+| `skill-graph-analytics` | 1.3.1 | active | pm | 2026-11-04 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification |
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
 | `trail` | 1.1.0 | active | pm | 2026-10-31 | — | Renamed from `graft` (vendor rename 0.28, @trailhq/trail-code): trail-era doctrine with a graft-era alias note — design 2026-10-31-graft-trail-migration, U-20261031-009 |
 | `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |
