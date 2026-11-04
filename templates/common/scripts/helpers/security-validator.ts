@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -28,7 +28,7 @@
  *   Module import: import { SecurityValidator } from './helpers/security-validator.js'
  */
 
-import { resolve, dirname, normalize, join } from 'path';
+import { resolve, dirname, normalize, join, sep } from 'path';
 import { existsSync, realpathSync } from 'fs';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -222,8 +222,10 @@ export class SecurityValidator {
     // Separator-aware prefix (U-20261104-002 hardening): a bare startsWith()
     // would accept a SIBLING directory whose name shares the root's prefix
     // (`/ws` accepting `/ws-evil/...`); require the root itself or the root
-    // followed by a path separator.
-    const rootPrefix = this.workspaceRoot.endsWith('/') ? this.workspaceRoot : this.workspaceRoot + '/';
+    // followed by a path separator. Platform separator (path.sep) — a '/'
+    // suffix would never match Windows backslash paths and would reject every
+    // in-workspace target (caught by the windows CI leg, 2026-11-04).
+    const rootPrefix = this.workspaceRoot.endsWith(sep) ? this.workspaceRoot : this.workspaceRoot + sep;
     if (resolvedPath !== this.workspaceRoot && !resolvedPath.startsWith(rootPrefix)) {
       return {
         valid: false,
