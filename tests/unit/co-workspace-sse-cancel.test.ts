@@ -9,6 +9,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { HttpError } from "../../services/co-workspace/src/http";
 import { createServer, createState, openaiChatResponse } from "../../services/co-workspace/src/server";
@@ -17,12 +18,18 @@ function tempDir(): string {
   return join(tmpdir(), `co-workspace-sse-${crypto.randomUUID().slice(0, 8)}`);
 }
 
+const workspaceDir = tempDir();
+
+// T-20261104-003: the fake scaffold embeds the ABSOLUTE fixture root — a relative
+// `Projects/${name}` would resolve against whatever cwd the child inherits and can
+// leave a deceptive Projects/ parent under the repo root (project-loss hardening §5.2).
 const FAKE_SCAFFOLD = `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
-mkdirSync(\`Projects/\${name}/docs\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
-writeFileSync(\`Projects/\${name}/package.json\`, "{}\\n");
+mkdirSync(\`\${projectsRoot}/\${name}/.hermes/skills\`, { recursive: true });
+mkdirSync(\`\${projectsRoot}/\${name}/docs\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake tenant\\n");
+writeFileSync(\`\${projectsRoot}/\${name}/package.json\`, "{}\\n");
 `;
 
 // Sleeps only when the prompt contains SLOW; otherwise finishes immediately.
@@ -35,7 +42,6 @@ console.log('{"type":"result","session_id":"sess-1","exit_code":0,"text":"partia
 `;
 
 const dataDir = tempDir();
-const workspaceDir = tempDir();
 const seedHome = tempDir();
 const binDir = tempDir();
 mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
@@ -72,6 +78,8 @@ process.on("unhandledRejection", onRejection);
 afterAll(() => {
   process.off("unhandledRejection", onRejection);
   server.stop(true);
+  // T-20261104-003: never leave an empty Projects/ parent behind.
+  rmdirIfEmpty(join(workspaceDir, "Projects"));
 });
 
 async function waitFor(desc: string, probe: () => boolean | Promise<boolean>, timeoutMs = 10_000): Promise<void> {

@@ -4,6 +4,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import {
   estimateTokens,
   generateContentPayload,
@@ -88,10 +89,13 @@ describe("gateway server — Gemini surface", () => {
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
+    // T-20261104-003: absolute fixture root — no relative Projects/ tree under the
+    // runner cwd (project-loss hardening design §5.2).
     `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
+mkdirSync(\`\${projectsRoot}/\${name}/.hermes/skills\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake tenant\\n");
 `,
   );
   const hermesBinDir = join(tmpdir(), `co-workspace-gemini-bin-${crypto.randomUUID().slice(0, 8)}`);
@@ -126,7 +130,11 @@ console.log('{"type":"result","session_id":"sess-g","exit_code":0,"text":"Hello 
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;
 
-  afterAll(() => server.stop(true));
+  afterAll(() => {
+    server.stop(true);
+    // T-20261104-003: never leave an empty Projects/ parent behind.
+    rmdirIfEmpty(join(workspaceDir, "Projects"));
+  });
 
   test("stream=false returns a generateContent envelope with mapped usage", async () => {
     const res = await fetch(`${base}/v1beta/models/co-consult:generateContent`, {
