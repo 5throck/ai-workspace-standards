@@ -1,4 +1,33 @@
-// @version 1.39.0
+// @version 1.40.0
+// v1.40.0 (2026-11-05, T-20261104-001 — spec
+//          docs/designs/2026-11-05-merge-integrity-design.md §5.1): new step
+//          3.88 — memory session-block union-verify, BLOCKING. On 2026-11-04
+//          two PR conflict resolutions (#1842/#1845) silently corrupted
+//          memory/YYYY-MM-DD.md session blocks (dropped blocks + fused
+//          heading/separator, no conflict markers); no machine gate compared
+//          merge results against parents. Arm A sweeps bounded recent merge
+//          commits (7 days AND 20 merges) touching flat memory logs and
+//          requires every parent block to survive into the merged result
+//          (order/dedup-tolerant, heading+firstLine fallback for cosmetic
+//          reflows) plus structural well-formedness; Arm B enforces the same
+//          structure on every flat memory log at HEAD (block count ===
+//          separator count + 1, '## '-headed blocks, no block with >= 2
+//          '## Session Summary' headings). Detection core is the pure
+//          helpers/memory-union-verify.ts v1.0.0 (unit-pinned by
+//          tests/unit/memory-union-verify.test.ts), byte-identical L1 mirror
+//          (self-contained: node:fs + git subprocess only — no guarded
+//          dynamic import needed, unlike ticket-drift.ts). Two-tier rollout
+//          (user-approved adaptation, 2026-11-05): the design's "expected
+//          pass on first run" premise was false — the 7-day window contains
+//          REAL landed union violations that immutable history cannot repair
+//          (merge 3db832974 / PR #1850 dropped ~20 session blocks) and five
+//          pre-existing malformed logs at HEAD (2026-10-29/-30/-31, 11-02,
+//          11-03). So: post-activation merges (GATE_3_88_ACTIVATED_AT, the
+//          gate landing instant) and all worktree-structure findings are
+//          FATAL with repair guidance; pre-activation merge findings are
+//          WARN and age out with the window; the five malformed logs were
+//          structurally repaired (separator restore / stub heading) in this
+//          landing commit. Absent memory/ = documented no-op.
 // v1.39.0 (2026-11-05, T-20261104-004 item 3 — spec
 //          docs/designs/2026-11-04-project-loss-hardening-design.md §5.3b
 //          decision (i)): new step 3.87 — ticket-store memory-drift check,
@@ -338,6 +367,7 @@ import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from '
 import { localDateISO } from './lib/local-date.ts';
 import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
 import { driftCheck } from './helpers/ticket-drift.ts';
+import { unionScan, wellFormedScan } from './helpers/memory-union-verify.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -871,6 +901,63 @@ if (fs.existsSync(path.join('memory'))) {
         if (import.meta.main) process.exit(1);
     }
     console.log(`${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${drift.cited} distinct cited id(s), all resolve)${RESET}`);
+}
+
+// 3.88 Memory session-block union-verify (BLOCKING for post-activation merges
+//     and worktree structure — v1.40.0, T-20261104-001, spec
+//     docs/designs/2026-11-05-merge-integrity-design.md §5.1; two-tier
+//     rollout adaptation user-approved 2026-11-05). Two arms via
+//     helpers/memory-union-verify.ts v1.0.0:
+//     Arm A — merge-commit union-verify: bounded sweep (7 days AND 20 merges)
+//     of merge commits touching flat memory logs; every block owed by either
+//     parent must appear in the merged result (order/dedup-tolerant,
+//     heading+firstLine fallback absorbs cosmetic reflows) and the merged
+//     result must be structurally well-formed. Findings on merge commits
+//     committed AFTER GATE_3_88_ACTIVATED_AT are FATAL with repair guidance;
+//     findings on pre-activation history are WARN — immutable history cannot
+//     be repaired, and the design's "expected pass on first run" premise was
+//     false (the window contains real landed drops, e.g. merge 3db832974 /
+//     PR #1850); those age out with the 7-day window.
+//     Arm B — worktree structural integrity: every flat memory/*.md at HEAD
+//     must satisfy blockCount === separatorCount + 1, begin every block with
+//     a '## ' heading, and carry no block with >= 2 '## Session Summary'
+//     headings (the fused-separator signature). FATAL; the five
+//     pre-existing malformed logs (2026-10-29/-30/-31, 11-02, 11-03) were
+//     structurally repaired in the landing commit itself.
+//     Drops via non-merge commits are not detectable (no parents to compare;
+//     design §5.3 documented limit). Read-only, lock-free, in the cheap-gates
+//     band; absent memory/ is a documented no-op (fresh scaffolds).
+const GATE_3_88_ACTIVATED_AT = '2026-11-05T07:00:00+09:00'; // gate landing instant (PR #1856 commit 2)
+if (fs.existsSync(path.join('memory'))) {
+    const merges = unionScan({ sinceDays: 7, maxCommits: 20, activationIso: GATE_3_88_ACTIVATED_AT });
+    const blocking = merges.filter((r) => r.tier === 'blocking');
+    const historical = merges.filter((r) => r.tier === 'historical');
+    if (blocking.length > 0) {
+        console.error(`${RED}✗ Step 3.88: memory union-verify — ${blocking.length} post-activation merge finding group(s)${RESET}`);
+        for (const r of blocking) {
+            console.error(`   ${r.file} @ merge ${r.commit.slice(0, 12)}:`);
+            for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
+            console.error(`   Fix: compare git show ${r.commit}:${r.file} against git show ${r.commit}^1:${r.file} and git show ${r.commit}^2:${r.file}; restore the named block(s) in the working tree and re-commit (history is immutable — the repair lands forward).`);
+        }
+        if (import.meta.main) process.exit(1);
+    }
+    if (historical.length > 0) {
+        console.log(`${YELLOW}⚠️  Step 3.88: ${historical.length} pre-activation merge finding group(s) (WARN — immutable history, ages out with the 7-day window):${RESET}`);
+        for (const r of historical) {
+            for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
+        }
+    }
+    const wf = wellFormedScan({ memoryDir: path.join('memory') });
+    if (wf.length > 0) {
+        console.error(`${RED}✗ Step 3.88: memory structural integrity — ${wf.length} malformed memory log(s) at HEAD${RESET}`);
+        for (const r of wf) {
+            console.error(`   ${r.file}:`);
+            for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
+        }
+        console.error(`  Fix: repair the named file(s) structurally (restore the missing '---' separator(s) / '## Session Summary' block heading), then re-run /sync.`);
+        if (import.meta.main) process.exit(1);
+    }
+    console.log(`${GREEN}✓ Step 3.88: memory union-verify passed (Arm A: ${merges.length} finding group(s), ${blocking.length} blocking / ${historical.length} historical; Arm B: worktree clean)${RESET}`);
 }
 
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check
