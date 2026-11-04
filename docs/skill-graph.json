@@ -793,8 +793,8 @@
       "name": "design-lead",
       "scope": "co-architect",
       "capability": "design-lead",
-      "content_hash": "997214dadf8a33f3",
-      "version": "1.0.0",
+      "content_hash": "923c1a7fc2e63a7c",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/design-lead.md"
       ]
@@ -897,8 +897,8 @@
       "name": "prototype-engineer",
       "scope": "co-architect",
       "capability": "prototype-engineer",
-      "content_hash": "7983a3e09b393507",
-      "version": "1.0.0",
+      "content_hash": "eac0f7101990b257",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/prototype-engineer.md"
       ]
@@ -910,8 +910,8 @@
       "name": "service-designer",
       "scope": "co-architect",
       "capability": "service-designer",
-      "content_hash": "ff99987cf3525a14",
-      "version": "1.0.0",
+      "content_hash": "49a9a40aa58c11f0",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/service-designer.md"
       ]
@@ -975,8 +975,8 @@
       "name": "typography-expert",
       "scope": "co-architect",
       "capability": "typography-expert",
-      "content_hash": "67ddde79aaa1a6c4",
-      "version": "1.0.0",
+      "content_hash": "65e2fbce6c61dfb8",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/typography-expert.md"
       ]
@@ -988,8 +988,8 @@
       "name": "ux-researcher",
       "scope": "co-architect",
       "capability": "ux-researcher",
-      "content_hash": "1bc28048e1a8da22",
-      "version": "1.0.0",
+      "content_hash": "ade7e9078b505158",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/ux-researcher.md"
       ]
@@ -1001,8 +1001,8 @@
       "name": "visual-designer",
       "scope": "co-architect",
       "capability": "visual-designer",
-      "content_hash": "ae1be86dda33a946",
-      "version": "1.0.0",
+      "content_hash": "04697f74c9d70268",
+      "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/visual-designer.md"
       ]

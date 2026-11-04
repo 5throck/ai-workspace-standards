@@ -4,6 +4,7 @@
 - **Skill**: delegate-to-hub
 - **Status**: active
 - **Version**: 1.0.1
+- **Owner**: pm
 - **Created**: 2026-11-02
 - **Last Updated**: 2026-11-02 (v1.0.1 — `--hub` flag + lifecycle UNAVAILABLE gate, Phase 3.5 of the hub-consolidation design §4.5. Record authored 2026-11-03 — the SKILLS.md row existed since the Phase 3a delegation contract but this lifecycle record was missing; T-20261103-004.)
 
