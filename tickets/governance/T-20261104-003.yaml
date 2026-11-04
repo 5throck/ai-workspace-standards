@@ -12,12 +12,28 @@ title: >-
   (or clean up the parent dir they create). Re-created 2026-11-04 (original
   T-20261103-009 lost in the store rollback).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-04T07:40:29.989+09:00'
 history:
   - at: '2026-11-04T07:40:29.989+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-05T06:24:22.054+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-05T06:24:22.069+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-05T06:24:22.085+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #1855 (merge 268e268e21c64): co-workspace suites moved to absolute
+  fixture roots with rmdirIfEmpty sweeps (incl. 4 additional relative-scaffold
+  suites found in follow-up); apply-tier-normalization --projects leg computes
+  its own expected count; project-target-guards.test.ts (the actual CI-side
+  empty-Projects/ creator) given a sentinel child + parent sweep; new
+  test-harness-projects-parent-hygiene pin (settle-window, race-tolerant)
+  prevents recurrence.
 error: null

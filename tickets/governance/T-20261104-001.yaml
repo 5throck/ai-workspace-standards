@@ -13,12 +13,37 @@ title: >-
   customization for memory/*.md. Evidence: #1842 and #1845 resolution reports
   (2026-11-04). Discovered during the 2026-11-03/04 PR merge cycle.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-04T07:19:30.809+09:00'
 history:
   - at: '2026-11-04T07:19:30.809+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-05T07:17:46.746+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-05T07:17:46.768+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-05T07:17:46.789+09:00'
+    from: review
+    to: done
+result: >-
+  Memory session-block union-verify shipped as dev-sync v1.40.0 step 3.88
+  BLOCKING (commit 8191763b5, PR #1856): Arm A verifies every parent block of
+  bounded recent memory-log merge commits (7 days / 20 merges) survives into the
+  merged result via helpers/memory-union-verify.ts v1.0.0 (pure core,
+  unit-pinned by tests/unit/memory-union-verify.test.ts, byte-identical L1
+  mirror); Arm B enforces structural well-formedness (block count === separator
+  count + 1, '## '-headed blocks, no fused double-Session-Summary blocks) on
+  every flat memory log at HEAD. Two-tier rollout user-approved at
+  implementation (2026-11-05): the design's expected-pass-on-first-run premise
+  was false — real immutable-history drops exist in the 7-day window (merge
+  3db832974 / PR #1850 dropped ~20 blocks) and five pre-existing malformed logs
+  at HEAD (2026-10-29/-30/-31, 11-02, 11-03) — so pre-activation merge findings
+  are WARN (age out with the window) and the five files were structurally
+  repaired in the landing commit; post-activation merges and worktree structure
+  are FATAL with repair guidance. No merge driver introduced (design §4 rejects
+  union/custom drivers); merge behavior unchanged.
 error: null
