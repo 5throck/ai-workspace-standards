@@ -6,7 +6,7 @@ description: >
   and per-page PNG previews for the visual acceptance gate. Use when:
   exporting a finished deck, interpreting a postflight report, or producing
   previews for visual-judge acceptance.
-version: 1.2.0
+version: 1.3.0
 last_reviewed: 2026-11-03
 status: active
 scope: co-work
@@ -51,7 +51,7 @@ tokens.
      --deck-type business-report [--native-charts-and-tables] [--structured-layouts]
    ```
    The exporter refuses to run when: the report is missing, its `stage` is not `final`, its `summary.errors` > 0, or its SHA-256 fingerprint does not match the current SVG bytes.
-2. **Flags**: `--native-charts-and-tables` replaces `data-native` blocks (chart/table payloads in `<desc>`) with native objects — charts carry an embedded workbook (Edit Data); `--structured-layouts` emits one role layout per used slide role and binds slides to them. Default export keeps fallback shapes + flat blank layout.
+2. **Flags**: `--native-charts-and-tables` replaces `data-native` blocks (chart/table payloads in `<desc>`) with native objects — charts carry an embedded workbook (Edit Data; kinds: bar, line, pie); `--structured-layouts` emits one role layout per used slide role and binds slides to them. Default export keeps fallback shapes + flat blank layout.
 3. **Read the postflight receipt** (printed on success): slide count, part counts, warnings (external images, generic-only font stacks), report linkage. Consume the receipt — do not re-derive it from the package.
 4. **Previews for visual acceptance**:
    ```bash

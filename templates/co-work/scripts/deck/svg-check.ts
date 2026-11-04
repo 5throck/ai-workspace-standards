@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.3.0
+ * @version 1.4.0
  * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, content-SSOT text-run diff, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
  */
@@ -256,6 +256,10 @@ function checkPage(source: string, fileName: string): PageReport {
         }
       }
     }
+    if (node.tag === "text" && node.attrs["data-ph"] !== undefined) {
+      const ph = node.attrs["data-ph"].trim();
+      if (!["title", "body"].includes(ph)) err("E-PH", `data-ph="${ph}" is invalid (canonical: title|body)`);
+    }
     if (node.tag === "text") {
       // Line-wrap pattern: every tspan repeats the line-start x — canonical.
       // Warn only when tspans mix different x values (horizontal repositioning
@@ -385,7 +389,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
 
 function help(): never {
   console.log(`
-svg-check.ts v1.3.0 — canonical SVG deck quality gate
+svg-check.ts v1.4.0 — canonical SVG deck quality gate
 
 Usage:
   bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]

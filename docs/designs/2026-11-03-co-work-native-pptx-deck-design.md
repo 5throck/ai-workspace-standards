@@ -275,7 +275,7 @@ A top-level `g` block may declare itself a native object:
 - `data-native="chart" | "table"` — object kind.
 - `data-frame="x,y,w,h"` (px) — required; the bounds of the emitted `p:graphicFrame`.
 - A `<desc>` child carrying the **data payload as JSON** (the only place `<desc>` is canonical):
-  - chart: `{"kind":"bar","categories":["Jul","Aug","Sep"],"series":[{"name":"Revenue","values":[4.2,4.6,5.1]}],"colors":["1F3864"]?}` — clustered bar/column only in this slice; `kind` outside the supported set keeps the drawn fallback shapes with a compile warning (`W-NATIVE-UNSUPPORTED`, fail-soft).
+  - chart: `{"kind":"bar|line|pie",...}` — kinds per §13.5 (slice 4 added line/pie); `kind` outside the supported set keeps the drawn fallback shapes with a compile warning (`W-NATIVE-UNSUPPORTED`, fail-soft).
   - table: `{"headers":[...],"rows":[[...],...],"colWidths":[fractions]?}` — fully native in slide XML (editable in PowerPoint directly; no workbook).
 - The block's drawn shapes are the **visual fallback**: in default export they compile as usual; with `--native-charts-and-tables` the marked block's shapes are replaced by the `p:graphicFrame`.
 - Checker rules: `desc` outside a `data-native` block is invalid; malformed payload JSON or missing `data-frame` blocks (`E-NATIVE-DATA`, `E-NATIVE-FRAME`).
@@ -291,6 +291,15 @@ A top-level `g` block may declare itself a native object:
 ### 13.4 Verification additions
 
 Golden tests: table `a:tbl` structure (grid/rows/cells), chart part + workbook presence + series caches + content-type `xlsx` default, per-role layout parts + master registration + slide binding, checker blocks (`desc` misuse, malformed JSON, missing `data-frame`).
+
+### 13.5 Slice 4 (2026-11-04) — line/pie chart kinds + placeholder binding; P3 disposition
+
+- **Chart kinds**: `kind` expands to `bar` | `line` | `pie`. `line` compiles `c:lineChart` (standard grouping, series line from series color, no markers); `pie` compiles `c:pieChart` (varyColors, per-point colors from payload `colors`, no axes). Workbook layout is kind-independent.
+- **Placeholder binding**: a `<text>` element may carry `data-ph="title" | "body"`. In `--structured-layouts` export the emitted text shape binds to its role layout's placeholder (`nvPr/p:ph`, title idx 0 / body idx 1) **while keeping its authored xfrm** — outline view, new-slide semantics, and accessibility improve; visual output is unchanged. In flat export the marker is accepted but inert.
+- **P3 disposition of the remaining roadmap**:
+  - *co-deck HTML deck conversion* (`html-to-svg` extractor incl. ppt-engine theme linkage): deferred to a dedicated future design round — it is a separate measurement pipeline (headless-browser DOM → canonical SVG) with its own fidelity contract, not an increment on this spec.
+  - *TTS narration*: deferred pending an external-TTS API decision (provider/keys/cost) — the pipeline surface (notes sidecar → per-slide audio → auto-advance timings) is already reserved by the notes round-trip.
+  - Ground-truth reminder unchanged: PowerPoint-side rendering of real decks is the final field test (no Office tooling in this pipeline by design §11.6).
 
 ## 12. References
 
