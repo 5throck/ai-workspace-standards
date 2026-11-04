@@ -1,7 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.70.0
+ * @version 1.71.0
+ *
+ * v1.71.0 (2026-11-05, design docs/designs/2026-11-04-project-loss-hardening-design
+ *          §5.4 / T-20261104-004 item 4): new WARN arm `agents-md-destructive-file-ops-pin`
+ *          — every template AGENTS.md §7 (templates/common + every co-* variant) must
+ *          carry the "Destructive File Operations" baseline bullet (the 2026-11-04
+ *          `rm -rf Projects` incident lesson: never recursive-delete a workspace path
+ *          that does or could contain .git children; dry-run list the resolved target
+ *          first; the ALLOW_RECURSIVE_DELETE=1 escape is for reviewed scripted cases only).
+ *          A missing §7 section or a missing marker phrase warns, so the multi-file §7
+ *          propagation wave cannot silently rot (design §5.4: PM-04b checks only the
+ *          COMMON-AGENTS marker zone — §7 variant parity was not machine-checked before).
+ *          Severity: WARN per design — visibility pin, no FAIL promotion.
  *
  * v1.70.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
  *          §2.4 Phase 1): additive hub_topology validator legs — new check
@@ -6446,6 +6458,52 @@ function checkAgentsMdPointerIntegrity(): void {
   }
 }
 
+const DESTRUCTIVE_FILE_OPS_MARKER = 'Destructive File Operations';
+
+/**
+ * §7 destructive-file-operations pin (design 2026-11-04-project-loss-hardening-design §5.4,
+ * T-20261104-004 item 4): every template AGENTS.md §7 (templates/common + every co-*
+ * variant) must carry the "Destructive File Operations" baseline bullet, so the multi-file
+ * §7 propagation wave cannot silently rot. Severity: WARN per design (visibility pin,
+ * not a structural failure; PM-04b covers only the COMMON-AGENTS zone, not §7).
+ */
+function checkAgentsMdDestructiveFileOpsPin(): void {
+  if (!JSON_MODE) console.log('\n=== Check agents-md-destructive-file-ops-pin: §7 carries the destructive-file-operations baseline (project-loss-hardening design §5.4) ===');
+  const targets: Array<{ variant: string; path: string }> = [
+    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md') },
+  ];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) {
+        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md') });
+      }
+    }
+  }
+  let checked = 0;
+  for (const t of targets) {
+    if (!existsSync(t.path)) continue;
+    checked++;
+    const content = readFileSync(t.path, 'utf-8');
+    const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
+    if (!sectionMatch) {
+      warn(t.variant, 'agents-md-destructive-file-ops-pin',
+        `${t.path}: no "§7: Universal Baseline Behaviors" section found — the destructive-file-operations baseline pin cannot hold`,
+        `Restore the §7 section (copy from templates/common/AGENTS.md) including the "Destructive File Operations" bullet (design 2026-11-04-project-loss-hardening-design §5.4)`);
+      continue;
+    }
+    if (!sectionMatch[1].includes(DESTRUCTIVE_FILE_OPS_MARKER)) {
+      warn(t.variant, 'agents-md-destructive-file-ops-pin',
+        `${t.path} §7 is missing the "Destructive File Operations" baseline bullet — the 2026-11-04 rm -rf Projects incident lesson must ride on every template AGENTS.md`,
+        `Add the "Destructive File Operations" bullet to §7 (copy verbatim from templates/common/AGENTS.md §7; design 2026-11-04-project-loss-hardening-design §5.4)`);
+    } else {
+      pass(`agents-md-destructive-file-ops-pin: ${t.path} §7 carries the baseline`);
+    }
+  }
+  if (checked === 0) {
+    pass('agents-md-destructive-file-ops-pin: no template AGENTS.md found — vacuous pass');
+  }
+}
+
   checkVariantIndexCoverage(manifests);                          // WS-12
   checkMirrorHygiene();                                          // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
 
@@ -6468,6 +6526,7 @@ function checkAgentsMdPointerIntegrity(): void {
   checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
   checkAgentsMdSizeBudget();          // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
   checkAgentsMdPointerIntegrity();    // ADR-0090 W0: pointer-table references resolve on disk
+  checkAgentsMdDestructiveFileOpsPin(); // §7 baseline pin: destructive-file-operations bullet on every template AGENTS.md (WARN; T-20261104-004 item 4)
   checkSkillGraphVersionDrift();      // skill-graph v2 E2: same-version-different-content across scopes (WARN)
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json

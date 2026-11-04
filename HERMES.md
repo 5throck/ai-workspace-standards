@@ -75,6 +75,7 @@ All `.md` files you create or modify MUST be in English, except in recognized lo
 Essentials of `AGENTS.md` §7 — read the full section for the complete list:
 
 - **Security Boundaries**: Never expose or log secrets (API keys, tokens). Do not modify CI/CD pipelines without explicit permission.
+- **Destructive File Operations**: Never run recursive deletes (`rm -r`, `rm -rf`, `rm --recursive`, trash commands) against any shared-workspace path that does or could contain `.git` children (`Projects/**` first among them). Always dry-run list the exact resolved target first; regenerable build artifacts are the only blanket exception; the reviewed escape (`ALLOW_RECURSIVE_DELETE=1`) is for scripted, pre-approved cases only.
 - **File Organization**: Never create `.md` files at the project root except standard root files (README.md, CHANGELOG.md, AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, SECURITY.md, CONSTITUTION.md); analysis and reports go in `docs/`, session logs in `memory/`.
 - **Source Attribution**: Cite sources (`[Source: URL]`) for research findings and factual claims; mark unverifiable information as unverified — never present it as established fact.
 - **Computational Integrity**: Never compute high-precision or safety-critical numbers by mental arithmetic — compute via executed code and label AI-generated estimates as approximate.

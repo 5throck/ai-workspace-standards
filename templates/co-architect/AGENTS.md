@@ -568,6 +568,7 @@ Explicit invocation: the `meeting-facilitation` skill with the meeting topic and
 All agents, regardless of their role, must adhere to the following:
 
 - **Security Boundaries**: Never expose or log secrets (API keys, tokens). Do not modify CI/CD pipelines without explicit permission.
+- **Destructive File Operations**: Never run recursive deletes (`rm -r`, `rm -rf`, `rm --recursive`, trash commands) against any path in the shared workspace that does or could contain `.git` children (`Projects/**` first among them). Always dry-run list the exact resolved target first (`ls -la`, `find <target> -maxdepth 1`). The only blanket exception is regenerable build artifacts (`node_modules`, `dist`, `.next`, `coverage`, `tmp`) inside temp directories. The reviewed escape (`ALLOW_RECURSIVE_DELETE=1`) is for scripted, pre-approved cases only.
 - **Communication Style**: Keep explanations concise and use markdown formatting. Always explain "why", not just "what".
 - **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
 - **Coding Standards**: Follow SOLID principles. Write unit tests when creating functional code. No speculative abstractions.
