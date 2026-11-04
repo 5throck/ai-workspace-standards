@@ -3,7 +3,7 @@ agent: service-designer
 state: active
 phase: production
 created: 2026-06-02
-last_updated: 2026-06-02
+last_updated: 2026-11-03
 runtime: agents/service-designer.md
 ---
 
@@ -17,6 +17,7 @@ Scope: Service designer; end-to-end service experiences, customer journeys, serv
 |------------|------------|-------------------------------|
 | 2026-06-02 | created    | Agent definition created      |
 | 2026-06-02 | production | Active                        |
+| 2026-11-03 | production | v1.1.1 re-derivation from the co-design canonical (2026-10-28 doctrine refresh) — adopted the canonical Responsibilities/Output Format/Constraints doctrine sections; co-architect local bindings preserved (project naming, variant phase numbering); consumers-registry-aligned (hub-doctrine consumer minimum_version 1.1.1) |
 
 ## Acceptance Criteria
 

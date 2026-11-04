@@ -811,22 +811,22 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `code-writer` | agent | divergence | co-abap@1.1.1 #abbe5ab6; co-develop@1.2.0 #6f177c02 |
 | `content-writer` | agent | version-drift | co-architect@1.1.1 #94dd6e9a; co-work@1.1.1 #4234472d |
 | `data-analyst` | agent | version-drift | co-consult@1.1.1 #668344f3; co-hr@1.1.1 #cd4c219c |
-| `design-lead` | agent | divergence | co-architect@1.0.0 #997214da; co-design@1.1.1 #04a0e18b |
+| `design-lead` | agent | version-drift | co-architect@1.1.1 #923c1a7f; co-design@1.1.1 #04a0e18b |
 | `designer` | agent | version-drift | co-develop@1.1.1 #df734345; co-game@1.1.1 #615c99bd |
 | `devops-admin` | agent | divergence | co-abap@1.1.1 #85a8bf4a; co-price@2.2.1 #20aad471 |
 | `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.1 #391dcb5b |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #b82c7f15; co-work@1.1.1 #36b74196 |
 | `pm` | agent | version-drift | co-abap@1.1.1 #aef5c9bd; co-architect@1.2.0 #ed1b187f; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.2 #e12dc360; root@1.2.2 #99e82f53 |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #079d7d9d; co-work@1.1.1 #63cd0f0a |
-| `prototype-engineer` | agent | divergence | co-architect@1.0.0 #7983a3e0; co-design@1.1.1 #32d6f634 |
+| `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #eac0f710; co-design@1.1.1 #32d6f634 |
 | `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #7bffa2b7; co-game@1.1.1 #bab2ce39; co-price@2.2.1 #94b3b224 |
-| `service-designer` | agent | divergence | co-architect@1.0.0 #ff99987c; co-design@1.1.1 #6efef328 |
+| `service-designer` | agent | version-drift | co-architect@1.1.1 #49a9a40a; co-design@1.1.1 #6efef328 |
 | `stack-setup` | agent | version-drift | co-develop@1.1.1 #b4974d80; co-game@1.1.1 #01fae45c |
 | `technical-writer` | agent | version-drift | co-architect@1.1.1 #d71945bc; co-work@1.1.1 #3ddb6311 |
 | `test-runner` | agent | version-drift | co-abap@1.1.1 #85db0b2c; co-develop@1.2.0 #758043da; co-game@1.1.1 #fea85c33 |
-| `typography-expert` | agent | divergence | co-architect@1.0.0 #67ddde79; co-design@1.1.1 #1a53df68 |
-| `ux-researcher` | agent | divergence | co-architect@1.0.0 #1bc28048; co-design@1.1.1 #1a8d22e1 |
-| `visual-designer` | agent | divergence | co-architect@1.0.0 #ae1be86d; co-design@1.1.1 #19bc59c2 |
+| `typography-expert` | agent | version-drift | co-architect@1.1.1 #65e2fbce; co-design@1.1.1 #1a53df68 |
+| `ux-researcher` | agent | version-drift | co-architect@1.1.1 #ade7e907; co-design@1.1.1 #1a8d22e1 |
+| `visual-designer` | agent | version-drift | co-architect@1.1.1 #04697f74; co-design@1.1.1 #19bc59c2 |
 | `agent-lifecycle-manager` | skill | version-drift | co-safety@1.3.1 #a5b6fdf8; root@1.3.1 #230ce8c0 |
 | `design-foundation` | skill | divergence | co-design@1.2.0 #5cc8c410; root@1.1.0 #0f50cf02 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
