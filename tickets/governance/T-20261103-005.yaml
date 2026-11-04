@@ -15,12 +15,26 @@ title: >-
   as v1.0.0. Extracted by Step 2f 2026-11-03 (co-newbiz #795 reviewed, nothing
   to extract — cron picker is project UX)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-03T07:37:42.682+09:00'
 history:
   - at: '2026-11-03T07:37:42.682+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-04T05:55:00.497+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T05:55:00.515+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T07:40:01.146+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1844: docs/patterns/scheduled-jobs-runtime-pattern.md v1.1.0 —
+  operator-control layer (run-now enqueue-only + still-queued reuse, health
+  semantics 180s heartbeat/overdue/3-strike window, registered-handler-key-only
+  create boundary), stack-neutral with co-newbiz file:line provenance. Promotion
+  deferral trigger unchanged (no template promotion). CI green.
 error: null

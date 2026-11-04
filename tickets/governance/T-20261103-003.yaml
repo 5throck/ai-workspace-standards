@@ -18,19 +18,21 @@ history:
   - at: '2026-11-03T06:04:40.398+09:00'
     from: null
     to: backlog
-  - at: '2026-11-03T08:55:51.455+09:00'
+  - at: '2026-11-04T07:40:10.072+09:00'
     from: backlog
     to: waiting
-  - at: '2026-11-03T08:55:51.470+09:00'
+  - at: '2026-11-04T07:40:10.087+09:00'
     from: waiting
+    to: running
+  - at: '2026-11-04T07:40:10.102+09:00'
+    from: running
     to: review
-  - at: '2026-11-03T09:56:51.942+09:00'
+  - at: '2026-11-04T07:40:20.271+09:00'
     from: review
     to: done
 result: >-
-  Implemented per design §15 (PR #1835, merged): test-new-project.ts per-variant
-  fail-soft (requireScaffold guard, 30 not-executed rows recorded, summary
-  reached, exit 1), upgrade-project v1.90.0 gains both hub-consumption preflight
-  legs (dry-run/apply, common-only skip, fail-open absent registry). Co-abap
-  live acceptance verified.
+  Implemented per design §15 (PR #1835, MERGED 2026-11-03): test-new-project.ts
+  per-variant fail-soft (requireScaffold guard), upgrade-project v1.90.0
+  hub-consumption preflight legs (dry-run/apply, common-only skip, fail-open
+  absent registry). (State re-applied 2026-11-04 after store rollback.)
 error: null

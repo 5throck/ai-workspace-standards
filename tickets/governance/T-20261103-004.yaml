@@ -18,7 +18,7 @@ title: >-
   docs/lifecycle/skills/ record; (5) D-2: 11-01 rulings used T-tickets not DEC
   records — document the convention
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-03T06:04:40.411+09:00'
 history:
@@ -34,5 +34,15 @@ history:
   - at: '2026-11-04T04:15:48.226+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-04T07:39:51.659+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1842 (adopted by the 04:00 governance runner after the original
+  batch agent was interrupted, then completed by the 2026-11-04 batch):
+  git-aware scanning for skill-graph-fleet-report.ts + generate-skill-graph.ts
+  (lib/git-aware-scan.ts), records hygiene items 2-5 (co-architect lifecycle
+  histories, ADR-0103 F2 wording, delegate-to-hub lifecycle record,
+  ruling-convention note), flaky checkoutBranch test de-flaked with hermetic
+  git-env suite. PRs #1842 + conflict-resolution commits; CI 8/8 green.
 error: null

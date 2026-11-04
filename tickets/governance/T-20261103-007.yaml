@@ -22,23 +22,22 @@ history:
   - at: '2026-11-03T07:38:19.700+09:00'
     from: null
     to: backlog
-  - at: '2026-11-03T10:52:58.344+09:00'
+  - at: '2026-11-04T07:40:10.118+09:00'
     from: backlog
     to: waiting
-  - at: '2026-11-03T10:52:58.361+09:00'
+  - at: '2026-11-04T07:40:10.133+09:00'
     from: waiting
     to: running
-  - at: '2026-11-03T10:56:30.556+09:00'
+  - at: '2026-11-04T07:40:10.148+09:00'
     from: running
     to: review
-  - at: '2026-11-03T14:59:40.485+09:00'
+  - at: '2026-11-04T07:40:20.287+09:00'
     from: review
     to: done
 result: >-
   Implemented per PM decision (a): bounded test-fixture path+shape allowlist
-  appended to .github/gitleaks-full.toml (pw-* fixture shape + s<digit>.<name>
-  shape, tests/ path bound, credential-shaped material still flagged —
-  negative-control verified). Subsumes the co-newbiz fixture class per
-  T-20261030-005 structural directive; DEC-20261103-03 records bounds, probe
-  findings, evidence, rollback. PR #1840 merged.
+  appended to .github/gitleaks-full.toml; credential-shaped material still
+  flagged (negative-control verified); subsumes the co-newbiz fixture class per
+  T-20261030-005. DEC-20261103-03 records bounds/evidence/rollback. PR #1840
+  MERGED 2026-11-03. (State re-applied 2026-11-04 after store rollback.)
 error: null

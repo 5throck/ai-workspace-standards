@@ -26,18 +26,23 @@ history:
   - at: '2026-11-03T06:04:40.384+09:00'
     from: null
     to: backlog
-  - at: '2026-11-03T08:55:51.420+09:00'
+  - at: '2026-11-04T07:40:10.023+09:00'
     from: backlog
     to: waiting
-  - at: '2026-11-03T08:55:51.438+09:00'
+  - at: '2026-11-04T07:40:10.040+09:00'
     from: waiting
+    to: running
+  - at: '2026-11-04T07:40:10.056+09:00'
+    from: running
     to: review
-  - at: '2026-11-03T09:56:42.249+09:00'
+  - at: '2026-11-04T07:40:20.253+09:00'
     from: review
     to: done
 result: >-
-  Implemented per design §15 (PR #1835, merged): variantIdentitySanction
-  predicate in hub-topology v1.2.0, co-architect variant-identity registry row
-  in both schema copies, unit 6-case matrix + real-workspace pins green, live
-  preflight acceptance passed. Residual co-abap trio tracked as T-20261103-008.
+  Implemented per design §15 (PR #1835, MERGED 2026-11-03):
+  variantIdentitySanction predicate in hub-topology v1.2.0, co-architect
+  variant-identity registry row in both schema copies, unit 6-case matrix +
+  real-workspace pins green, live preflight acceptance passed. Residual co-abap
+  trio tracked as T-20261103-008. (State re-applied 2026-11-04 after the store
+  rolled back with the shared-tree pull.)
 error: null

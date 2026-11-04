@@ -15,12 +15,27 @@ title: >-
   Projects/co-newbiz/app/web-next/app/api/auth/register/route.ts:23,35.
   Extracted by Step 2f 2026-11-03
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-03T07:37:42.696+09:00'
 history:
   - at: '2026-11-03T07:37:42.696+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-04T06:17:44.369+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T06:17:44.388+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T07:40:01.164+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1845: security-scan v1.3.0 auth-surface audit step (flag
+  unauthenticated signup granting authenticated roles; reference remediation =
+  co-newbiz #796 five-point pattern) + skill-graph-analytics v1.3.1 cadence note
+  recording the T-20261101-004 revival-home decision + DEC-20261103-04. Registry
+  convergence across SSOT/mirrors/registries verified by gates. CI green (one
+  macOS job infra-cancelled, parallel run green).
 error: null

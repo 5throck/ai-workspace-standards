@@ -1499,6 +1499,36 @@
           "version": "1.1.1"
         },
         {
+          "asset": "architect",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; SAP Technical Architect (translates PRD and Governance findings into implementation plans with pattern selection and risk classification for the SAP toolchain) — distinct role sharing the architect name (T-20261104-002 disposition, DEC-20261104-01; registry-only, no content change)",
+          "canonical_path": "templates/co-abap/agents/architect.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "code-writer",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; SAP ABAP Code Implementation Specialist (high-precision ABAP implementation and optimization from an approved plan) — distinct role sharing the code-writer name (T-20261104-002 disposition, DEC-20261104-01; registry-only, no content change)",
+          "canonical_path": "templates/co-abap/agents/code-writer.md",
+          "version": "1.1.1"
+        },
+        {
+          "asset": "test-runner",
+          "domain": "co-abap",
+          "hub_variant": "co-abap",
+          "category": "variant-identity",
+          "verticals": [],
+          "origin": "identity; SAP test-runner role for the co-abap toolchain — distinct role sharing the test-runner name (T-20261104-002 disposition, DEC-20261104-01; registry-only, no content change)",
+          "canonical_path": "templates/co-abap/agents/test-runner.md",
+          "version": "1.1.1"
+        },
+        {
           "asset": "security-monitor",
           "domain": "co-price",
           "hub_variant": "co-price",
