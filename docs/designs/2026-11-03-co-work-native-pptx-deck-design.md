@@ -264,6 +264,34 @@ review flow cover the new section unchanged.
    checker's rule set is thickened as real PowerPoint breakage surfaces, not
    by rendering the package through an Office emulator.
 
+## 13. Addendum (2026-11-04) — native charts/tables with embedded workbook + structured role layouts
+
+**Provenance**: P2 roadmap items of this spec, executed as slice 3 after user approval. Same spec id; no new registration.
+
+### 13.1 Native chart/table authoring contract
+
+A top-level `g` block may declare itself a native object:
+
+- `data-native="chart" | "table"` — object kind.
+- `data-frame="x,y,w,h"` (px) — required; the bounds of the emitted `p:graphicFrame`.
+- A `<desc>` child carrying the **data payload as JSON** (the only place `<desc>` is canonical):
+  - chart: `{"kind":"bar","categories":["Jul","Aug","Sep"],"series":[{"name":"Revenue","values":[4.2,4.6,5.1]}],"colors":["1F3864"]?}` — clustered bar/column only in this slice; `kind` outside the supported set keeps the drawn fallback shapes with a compile warning (`W-NATIVE-UNSUPPORTED`, fail-soft).
+  - table: `{"headers":[...],"rows":[[...],...],"colWidths":[fractions]?}` — fully native in slide XML (editable in PowerPoint directly; no workbook).
+- The block's drawn shapes are the **visual fallback**: in default export they compile as usual; with `--native-charts-and-tables` the marked block's shapes are replaced by the `p:graphicFrame`.
+- Checker rules: `desc` outside a `data-native` block is invalid; malformed payload JSON or missing `data-frame` blocks (`E-NATIVE-DATA`, `E-NATIVE-FRAME`).
+
+### 13.2 Chart part + embedded workbook (Edit Data)
+
+`--native-charts-and-tables` emits, per chart block: `ppt/charts/chartN.xml` (barChart: `c:ser` per series with `c:tx`/`c:cat`/`c:val` caches, `c:catAx`/`c:valAx`), its rels to `ppt/embeddings/Microsoft_Excel_WorksheetN.xlsx`, and a slide-level `p:graphicFrame` bound via the chart relationship. The workbook is a minimal valid xlsx built with fflate (`Sheet1`: row 1 = categories header + series names, rows 2..n = data) — this is what makes **Edit Data** work in PowerPoint. Series fill defaults to the locked primary token; explicit series colors from payload `colors`.
+
+### 13.3 Structured role layouts
+
+`--structured-layouts` derives PowerPoint structure from the registry `deck_types` preset: one `p:sldLayout` per slide role **used in the deck** (ordered by first appearance), each carrying role-appropriate placeholder stubs (title/body geometry by fixed per-role conventions documented here), registered in the master's `sldLayoutIdLst`. Every slide binds to its role's layout via the slide-to-layout relationship; **slide content stays Slide-local** (flat shapes on a role layout — layouts are registered and usable in PowerPoint's new-slide picker, but slide text is not re-bound into placeholders; content re-binding is explicitly out of scope for this slice). Default export remains flat (single blank layout) — both flags are opt-in.
+
+### 13.4 Verification additions
+
+Golden tests: table `a:tbl` structure (grid/rows/cells), chart part + workbook presence + series caches + content-type `xlsx` default, per-role layout parts + master registration + slide binding, checker blocks (`desc` misuse, malformed JSON, missing `data-frame`).
+
 ## 12. References
 
 - docs/decisions/DEC-20261103-01.md (gate-moment rulings)

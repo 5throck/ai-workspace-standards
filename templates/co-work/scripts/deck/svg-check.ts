@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.2.0
+ * @version 1.3.0
  * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, content-SSOT text-run diff, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
  */
@@ -16,7 +16,7 @@ import { basename, join, resolve } from "path";
 const ALLOWED_ELEMENTS = new Set([
   "svg", "g", "text", "tspan",
   "rect", "circle", "ellipse", "line", "polyline", "path",
-  "image", "defs", "linearGradient", "radialGradient", "stop", "a",
+  "image", "defs", "linearGradient", "radialGradient", "stop", "a", "desc",
 ]);
 
 const FORBIDDEN_ELEMENTS = new Set([
@@ -145,6 +145,20 @@ function normalizeText(s: string): string {
 // Page checks
 // ---------------------------------------------------------------------------
 
+/** desc is canonical only as the payload child of a top-level data-native g. */
+function checkDescPlacement(root: SvgNode, err: (rule: string, message: string) => void): void {
+  const visit = (node: SvgNode, parent: SvgNode | null) => {
+    if (node.tag === "desc") {
+      const parentOk =
+        parent !== null && parent.tag === "g" &&
+        parent.attrs["data-native"] !== undefined;
+      if (!parentOk) err("E-NATIVE-DATA", "<desc> is only canonical as the JSON-payload child of a top-level data-native g block");
+    }
+    for (const c of node.children) visit(c, node);
+  };
+  visit(root, null);
+}
+
 function checkPage(source: string, fileName: string): PageReport {
   const errors: CheckIssue[] = [];
   const warnings: CheckIssue[] = [];
@@ -169,6 +183,8 @@ function checkPage(source: string, fileName: string): PageReport {
   if (trans !== undefined && !TRANSITION_VALUES.has(trans.trim())) {
     err("E-TRANSITION", `data-slide-transition="${trans}" is invalid (canonical: none|fade|push|zoom|wipe)`);
   }
+
+  checkDescPlacement(root, err);
 
   // Depth is relative to root <svg>: its children are depth 1 within the tree.
   const walk = (node: SvgNode, inTopGroup: boolean, inLink = false) => {
@@ -257,6 +273,40 @@ function checkPage(source: string, fileName: string): PageReport {
     if (isTopGroup && !node.attrs["data-block-id"]) {
       err("E-MARKER", `top-level <g> requires data-block-id="bN"`);
     }
+    if (node.tag === "g" && node.attrs["data-native"] !== undefined) {
+      const kind = node.attrs["data-native"];
+      if (!["chart", "table"].includes(kind)) {
+        err("E-NATIVE-DATA", `data-native="${kind}" is invalid (canonical: chart|table)`);
+      }
+      const fr = node.attrs["data-frame"];
+      if (!fr || !/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?,\s*\d+(\.\d+)?,\s*\d+(\.\d+)?$/.test(fr.trim())) {
+        err("E-NATIVE-FRAME", `data-native block requires data-frame="x,y,w,h" (px), got "${fr ?? ""}"`);
+      }
+      const desc = node.children.find((c) => c.tag === "desc");
+      if (!desc) {
+        err("E-NATIVE-DATA", 'data-native block requires a <desc> child carrying the JSON payload');
+      } else {
+        try {
+          const payload = JSON.parse(desc.text) as Record<string, unknown>;
+          if (kind === "chart") {
+            const j = payload as { kind?: unknown; categories?: unknown; series?: unknown };
+            if (typeof j.kind !== "string" || !["bar"].includes(j.kind)) {
+              err("E-NATIVE-DATA", `chart payload kind "${String(j.kind)}" is unsupported (canonical: bar)`);
+            }
+            if (!Array.isArray(j.categories) || !Array.isArray(j.series) || j.series.length === 0) {
+              err("E-NATIVE-DATA", "chart payload requires categories[] and non-empty series[]");
+            }
+          } else if (kind === "table") {
+            const j = payload as { headers?: unknown; rows?: unknown };
+            if (!Array.isArray(j.headers) || !Array.isArray(j.rows) || j.rows.length === 0) {
+              err("E-NATIVE-DATA", "table payload requires headers[] and non-empty rows[]");
+            }
+          }
+        } catch {
+          err("E-NATIVE-DATA", "desc payload is not valid JSON");
+        }
+      }
+    }
     const nextInLink = inLink || node.tag === "a";
     for (const child of node.children) walk(child, inTopGroup || isTopGroup, nextInLink);
   };
@@ -335,7 +385,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
 
 function help(): never {
   console.log(`
-svg-check.ts v1.2.0 — canonical SVG deck quality gate
+svg-check.ts v1.3.0 — canonical SVG deck quality gate
 
 Usage:
   bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
