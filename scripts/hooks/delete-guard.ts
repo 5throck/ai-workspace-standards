@@ -75,7 +75,25 @@
  * shell parser; obfuscated deletes (scripts calling fs.rmSync, find -delete,
  * git clean) are out of scope by design (design N3; v2 candidates).
  *
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-11-05, L1 promotion — forced by the propagation SSOT): the
+ * gemini-settings propagation domain (scripts/propagation-map.json; dev-sync
+ * runs propagate-to-templates --apply unconditionally) mirrors root
+ * .gemini/settings.json BeforeTool entries into templates/common/.gemini
+ * on EVERY sync ("shared ... hook config must stay identical across all
+ * tiers"), so the v1.0.0 wiring landed in the L1 template in commit
+ * a57dc970a while this file stayed L0-only — scaffolded projects would
+ * fire `bun scripts/hooks/delete-guard.ts` against a missing file on every
+ * shell command. The design (§6) had deferred BOTH the L1 mirror and the
+ * delivered wiring to Phase 2 and did not account for the propagation
+ * contract; with the wiring already committed, the minimal coherent state
+ * is the delivered hook (gateguard 1.3.0 L1-promotion precedent:
+ * byte-identical modulo the sanctioned comment scrub — this file's
+ * 'CONSTITUTION.md' marker string is functional code and survives the
+ * scrub unchanged). Design deviation flagged for PM review; reverting the
+ * L1 wiring instead would recreate the broken-artifact state on the next
+ * sync.
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
