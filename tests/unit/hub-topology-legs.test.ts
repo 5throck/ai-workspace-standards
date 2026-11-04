@@ -344,23 +344,18 @@ describe('checkHubDoctrineDuplication (§6.2 preflight + variant-identity sancti
       expect(res.fails).toEqual([]);
     }
 
-    // co-abap (guards the E4 security-monitor row): the identity sanction clears
-    // security-monitor, but the template still carries three PRE-EXISTING
-    // unregistered co-develop hub-doctrine copies (architect, code-writer,
-    // test-runner) whose disposition (variant-identity registration / declared
-    // consumers / removal as drift) is tracked by the follow-up ticket
-    // T-20261103-008 — outside §15's change set. Pinned here so the residual
-    // is visible and cannot silently grow or shrink.
+    // co-abap: the E4 security-monitor row and the three SAP-domain roles
+    // (architect, code-writer, test-runner — distinct roles that merely share
+    // co-develop doctrine names) are all registered as variant-identity, so
+    // the duplication preflight is fully clean. Disposition: T-20261104-002 /
+    // DEC-20261104-01. Pinned at zero fails so an unsanctioned copy cannot
+    // reappear silently.
     const abap = checkHubDoctrineDuplication(loaded.topology!, {
       variantName: 'co-abap',
       templateDir: join(cwd(), 'templates', 'co-abap'),
       commonNames,
     });
-    expect(abap.fails).toHaveLength(3);
-    for (const asset of ['architect', 'code-writer', 'test-runner']) {
-      expect(abap.fails.some(f => f.includes(`hub-doctrine asset '${asset}'`))).toBe(true);
-    }
-    expect(abap.fails.some(f => f.includes('security-monitor'))).toBe(false);
+    expect(abap.fails).toEqual([]);
   });
 });
 

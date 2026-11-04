@@ -40,4 +40,4 @@ invariants, not one variant's business specifics.
 
 | Pattern | Version | Status | Provenance |
 |---------|---------|--------|------------|
-| [scheduled-jobs-runtime-pattern.md](scheduled-jobs-runtime-pattern.md) | 1.0.0 | Reference (promotion deferred) | co-newbiz ADR-0189 |
+| [scheduled-jobs-runtime-pattern.md](scheduled-jobs-runtime-pattern.md) | 1.1.0 | Reference (promotion deferred) | co-newbiz ADR-0189 |

@@ -3,7 +3,7 @@ agent: project-coordinator
 state: active
 phase: production
 created: 2026-06-20
-last_updated: 2026-06-20
+last_updated: 2026-11-02
 runtime: agents/project-coordinator.md
 ---
 
@@ -17,6 +17,7 @@ Scope: Project Team lead; schedules, stakeholder communication, delivery logisti
 |------------|------------|-------------------------------|
 | 2026-06-20 | created    | Agent definition created      |
 | 2026-06-20 | production | Active                        |
+| 2026-11-02 | production | co-architect hub absorption — the agent's home variant became the co-architect hub per the 2026-11-01 hub-consolidation design (Phase 1 batch E5, template promotion 2026-11-01/02); role and dispatch scope unchanged (T-20261103-004) |
 
 ## Acceptance Criteria
 

@@ -29,7 +29,7 @@ title: >-
   triage input. Discovered during the 2026-11-01 user-requested skill-graph
   health check.
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-01T16:24:54.406+09:00'
 history:
@@ -45,5 +45,13 @@ history:
   - at: '2026-11-03T04:12:58.102+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-04T11:17:43.439+09:00'
+    from: review
+    to: done
+result: >-
+  Decision executed 2026-11-03, fully landed by 2026-11-04: (1) weekly
+  skill-graph consolidation triage folded into the 01:30 fleet runner's FRIDAY
+  FULL OVERRIDE (runner prompt updated via automation tooling); (2) SKILL.md
+  v1.3.1 cadence note records the revival home (PR #1845); DEC-20261103-04
+  records the decision. Runner fires next Friday.
 error: null

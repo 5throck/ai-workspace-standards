@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261104-001
+kind: manual
+title: >-
+  Structural fix: git ort auto-merge silently corrupts memory/YYYY-MM-DD.md
+  session-block unions in this repo — no conflict markers, damage only
+  detectable by post-merge block audit (two independent hits on 2026-11-04
+  during PRs #1842/#1845 conflict resolution: dropped blocks + fused
+  heading/separator; both repaired by hand). Session blocks are append-only with
+  '---' separators and four standard headings (verify-memory.ts contract). Fix
+  direction: post-merge union-verify hook (count ## Session Summary headings vs
+  separators before/after merge, fail on drop/fuse) or merge-strategy
+  customization for memory/*.md. Evidence: #1842 and #1845 resolution reports
+  (2026-11-04). Discovered during the 2026-11-03/04 PR merge cycle.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-04T07:19:30.809+09:00'
+history:
+  - at: '2026-11-04T07:19:30.809+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

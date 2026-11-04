@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261103-008
+kind: manual
+title: >-
+  hub-doctrine disposition needed: co-abap carries 3 local copies of co-develop
+  hub-doctrine assets (agents/architect.md, agents/code-writer.md,
+  agents/test-runner.md) with no registry sanction — co-develop rows declare
+  consumers co-game/co-learning only and none are common-contract stock, so the
+  §15.1-extended checkHubDoctrineDuplication flags 3 residual fails
+  (T-20261103-002 implementation real-workspace pin surfaced them; the design's
+  evidence only covered the security-monitor collision). Disposition is a
+  gate-moment decision (ADR-0061): either variant-identity registration (if
+  these are distinct abap-specific roles), declared consumers (if co-abap
+  genuinely consumes co-develop doctrine), or removal as drift. Until
+  adjudicated, the T-20261103-002 unit pin asserts these 3 as documented
+  residual fails. Discovered 2026-11-03 during T-20261103-002 implementation.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-03T09:20:30.199+09:00'
+history:
+  - at: '2026-11-03T09:20:30.199+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

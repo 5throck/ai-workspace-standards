@@ -1,4 +1,23 @@
-// @version 1.37.0
+// @version 1.38.0
+// v1.38.0 (2026-11-04, U-20261104-003): new step 4.87 — agent frontmatter
+//          last_updated bump. A sync pass that mechanically rewrites an agent
+//          file's frontmatter (tier normalization, model-registry delivery,
+//          stub merges) leaves the file's `last_updated:` stale, so
+//          agent-lifecycle-audit emits an identical staleness warning for
+//          every touched file on every later run (co-newbiz: 34 warnings off
+//          the single 2026-10-28 sync commit 0b1a406c). After the pipeline's
+//          writes and before the audit gate, the pass inspects every
+//          sync-modified agent .md (agents/, templates/**/agents/) whose
+//          HEAD→worktree diff is confined to the frontmatter block and
+//          re-stamps the top-level last_updated to the run date via
+//          bumpFrontmatterLastUpdated (helpers/upgrade-versions.ts — no key
+//          injection, idempotent). Negative contracts hold by construction:
+//          body edits are never touched, unchanged files never enter the
+//          modified set (no-op syncs stay no-ops). Decision core is the pure
+//          helpers/agent-mechanical-date-bump.ts v1.0.0 (unit-pinned by
+//          tests/unit/agent-mechanical-date-bump.test.ts). Non-blocking:
+//          individual failures WARN; the lifecycle gates still see any stale
+//          date that escapes.
 // v1.37.0 (2026-10-31, U-20261029-004 — spec
 //          docs/designs/2026-10-31-variant-generators-design.md §4-§5): new
 //          step 3.86 — declared generator pre-convergence. A variant project
@@ -300,6 +319,8 @@ import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts
 import { changelogGateFindings } from './helpers/changelog-duplicates.ts';
 import { runDeclaredGenerators } from './lib/generator-manifest.ts';
 import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
+import { localDateISO } from './lib/local-date.ts';
+import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -1390,6 +1411,54 @@ if (fs.existsSync(genManifestTs)) {
             }
         }
     }
+}
+
+// 4.87 Agent frontmatter last_updated bump (U-20261104-003) — when a sync
+//     pipeline pass mechanically rewrites an agent file's YAML frontmatter
+//     (tier normalization, model-registry delivery, stub merges) the body is
+//     byte-identical but the frontmatter `last_updated:` date stays stale, so
+//     agent-lifecycle-audit emits identical "last_updated older than the
+//     last git commit" warning for every touched file on every later run
+//     (co-newbiz: 34 warnings from the single 2026-10-28 tier-collapse sync
+//     commit 0b1a406c). This pass walks the sync-run's modified agent files,
+//     and for each one whose HEAD→worktree diff is confined to the
+//     frontmatter block, re-stamps the top-level `last_updated:` to the run
+//     date via the shared bumpFrontmatterLastUpdated primitive. Body edits
+//     are never touched (the author dates those); unchanged files never enter
+//     the modified set (no-op syncs stay no-ops); files without a top-level
+//     `last_updated:` key are never injected. Decision core is pure
+//     (helpers/agent-mechanical-date-bump.ts v1.0.0, unit-pinned by
+//     tests/unit/agent-mechanical-date-bump.test.ts). Hygiene pass:
+//     non-blocking — failures WARN and the lifecycle gates still see the
+//     stale dates, so nothing silently weakens.
+try {
+    const agentBumpStatus = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+    if (agentBumpStatus.exitCode === 0) {
+        const changedPaths = parseStatusPorcelain(agentBumpStatus.stdout.toString());
+        const bumpDate = localDateISO();
+        let bumpedCount = 0;
+        for (const rel of changedPaths) {
+            if (!isAgentMdPath(rel)) continue;
+            let headText: string | null = null;
+            const headRes = await $`git show ${'HEAD:' + rel}`.quiet().nothrow();
+            if (headRes.exitCode === 0) headText = headRes.stdout.toString();
+            // exitCode !== 0 → untracked/new file: not a mechanical rewrite of
+            // an existing agent, skip (a new file's date is authored content).
+            const worktreePath = path.resolve(rel);
+            if (!fs.existsSync(worktreePath)) continue;
+            const currentText = fs.readFileSync(worktreePath, 'utf8');
+            const result = bumpMechanicalLastUpdated(headText, currentText, bumpDate);
+            if (!result.bumped) continue;
+            fs.writeFileSync(worktreePath, result.text, 'utf8');
+            await $`git add -- ${rel}`.nothrow();
+            bumpedCount++;
+        }
+        if (bumpedCount > 0) {
+            console.log(`${GREEN}✅ Step 4.87: bumped frontmatter last_updated to ${bumpDate} on ${bumpedCount} mechanically rewritten agent file(s) (U-20261104-003)${RESET}`);
+        }
+    }
+} catch (err) {
+    console.warn(`${YELLOW}⚠️  Step 4.87: agent frontmatter last_updated bump failed (non-blocking): ${String(err)}${RESET}`);
 }
 
 // 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)

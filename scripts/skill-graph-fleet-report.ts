@@ -2,6 +2,17 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.3.0 (2026-11-03, T-20261103-004): git-aware fleet discovery —
+ *          defaultProjects() excludes transient PR working checkouts (a
+ *          Projects/ checkout on a `pr/*` branch, e.g. the gitignored
+ *          co-newbiz-pr-disable-register on `pr/disable-register`) so they no
+ *          longer leak into committed snapshots as phantom fleet members.
+ *          Projects/ is gitignored wholesale, so branch evidence (not
+ *          check-ignore) is the discriminator; exclusion is positive-evidence
+ *          only (main/detached/non-git stay included, fail-open). Skipped
+ *          checkouts are warned to stderr. Shared helpers in
+ *          scripts/lib/git-aware-scan.ts; filterTransientCheckouts exported
+ *          pure for unit coverage (tests/unit/git-aware-scan.test.ts).
  * @version 2.2.0
  *
  * v2.2.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md §9/Phase 0):
@@ -85,12 +96,13 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.2.0";
+const VERSION = "2.3.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -279,14 +291,25 @@ function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
   return { json, snapshotDir, help };
 }
 
-/** List Projects/co-* directories (sorted), like resync-audit.ts. */
+/**
+ * List Projects/co-* directories (sorted), like resync-audit.ts, minus transient
+ * PR working checkouts (T-20261103-004 — see filterTransientCheckouts in
+ * scripts/lib/git-aware-scan.ts).
+ */
 function defaultProjects(): string[] {
   const out: string[] = [];
   if (!existsSync("Projects")) return out;
   for (const e of readdirSync("Projects", { withFileTypes: true })) {
     if (e.isDirectory() && e.name.startsWith("co-")) out.push(join("Projects", e.name));
   }
-  return out.sort();
+  out.sort();
+  const { projects, skipped } = filterTransientCheckouts(out, checkoutBranch);
+  for (const s of skipped) {
+    console.warn(
+      `⚠️  skill-graph-fleet-report: ${s.name} is a transient PR working checkout (branch ${s.branch}) — excluded from fleet discovery (T-20261103-004).`,
+    );
+  }
+  return projects;
 }
 
 /** Load a graph projection file (v1 or v2) as a v2 view; null when absent or unparseable. */

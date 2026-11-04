@@ -1,4 +1,17 @@
-// @version 2.61.0
+// @version 2.62.0
+// v2.62.0 (2026-11-04, U-20261104-001): §28 standing audit-hook regression
+//          check no longer emits a permanent false-positive WARN in variant/
+//          PROJECT layouts. The §28 sweep core (templates co-* variant.json
+//          manifest parsing + hook resolution) moved verbatim to the new
+//          helpers/audit-hook-sweep.ts v1.0.0 collectTemplateAuditHooks()
+//          (unit-pinned by tests/unit/audit-hook-sweep.test.ts). When the
+//          sweep finds zero template hooks AND §27 resolved + executed the
+//          root variant.json audit-variant hook (variantAuditPath), §28 now
+//          emits a PASS naming the already-covered hook instead of the
+//          legacy "nothing to regression-check" WARN; the WARN survives only
+//          when no hook ran anywhere. Also updates the co-abap residual pin
+//          comment in tests/unit/hub-topology-legs.test.ts to the re-created
+//          ticket id T-20261104-002 (comment-only).
 // v2.61.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §2.4 leg 3 / §7.3 Phase 1): hub-resolve checker — workspace-root-only
 //          additive gate over the docs/workspace-schema.json hub_topology
@@ -277,6 +290,7 @@ import { canonicalOrderViolation } from './spec-register.ts';
 import { AGENT_LAYER1_SECTIONS } from './helpers/golden-reference-loader.ts';
 import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
 import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
+import { collectTemplateAuditHooks } from './helpers/audit-hook-sweep.ts';
 import { splitIntoSections, getContentLines, stripMarkerZones } from './helpers/context-sections.ts';
 import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
 import { classifySpecHeader } from './helpers/spec-header-consistency.ts';
@@ -3300,42 +3314,35 @@ if (variantAuditPath) {
 // unnoticed until someone ran an in-variant audit. This standing check sweeps every
 // templates/*/variant.json: each declared audit-variant hook must resolve to a file AND
 // execute cleanly (spawned the same way section 27 runs it, from the workspace root).
+// U-20261104-001: in a variant/PROJECT layout there are no templates/co-* manifests,
+// but §27 above may have resolved and executed the project's own variant.json
+// audit-variant hook. When the sweep finds zero template hooks AND §27 executed a
+// hook, the standing regression check already ran there — emit a PASS noting the
+// coverage instead of the legacy permanent false-positive WARN.
 {
     const templatesDir = path.join('templates');
     if (fs.existsSync(templatesDir)) {
-        let hookCount = 0;
-        for (const entry of fs.readdirSync(templatesDir, { withFileTypes: true })) {
-            if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
-            const variantJsonPath = path.join(templatesDir, entry.name, 'variant.json');
-            if (!fs.existsSync(variantJsonPath)) continue;
-            let manifest: any;
-            try {
-                manifest = JSON.parse(readUTF8File(variantJsonPath));
-            } catch {
-                continue; // malformed variant.json is reported by the schema checks
+        const sweep = collectTemplateAuditHooks(templatesDir);
+        for (const hook of sweep.hooks) {
+            if (!fs.existsSync(hook.resolvedPath)) {
+                Fail(`Variant audit hook regression: ${hook.variant}/variant.json declares audit-variant hook at '${hook.declaredPath}' but templates/${hook.variant}/${hook.declaredPath} does not exist`);
+                continue;
             }
-            const local = manifest?.script_manifest?.local;
-            if (!Array.isArray(local)) continue;
-            for (const hook of local) {
-                if (hook?.name !== 'audit-variant' || typeof hook.path !== 'string' || !hook.path) continue;
-                hookCount++;
-                const hookPath = path.join(templatesDir, entry.name, hook.path);
-                if (!fs.existsSync(hookPath)) {
-                    Fail(`Variant audit hook regression: ${entry.name}/variant.json declares audit-variant hook at '${hook.path}' but templates/${entry.name}/${hook.path} does not exist`);
-                    continue;
-                }
-                const { status, stdout, stderr } = spawnSync('bun', [hookPath], { encoding: 'utf-8', timeout: 120_000 });
-                if (status !== 0) {
-                    if (stdout) console.log(stdout);
-                    if (stderr) console.error(stderr);
-                    Fail(`Variant audit hook regression: ${entry.name} hook (${hook.path}) exited with status ${status} — the hook must execute cleanly`);
-                } else {
-                    Pass(`Variant audit hook: ${entry.name} (${hook.path}) resolves and executes`);
-                }
+            const { status, stdout, stderr } = spawnSync('bun', [hook.resolvedPath], { encoding: 'utf-8', timeout: 120_000 });
+            if (status !== 0) {
+                if (stdout) console.log(stdout);
+                if (stderr) console.error(stderr);
+                Fail(`Variant audit hook regression: ${hook.variant} hook (${hook.declaredPath}) exited with status ${status} — the hook must execute cleanly`);
+            } else {
+                Pass(`Variant audit hook: ${hook.variant} (${hook.declaredPath}) resolves and executes`);
             }
         }
-        if (hookCount === 0) {
-            Warn('No variant declares an audit-variant hook in script_manifest.local — nothing to regression-check');
+        if (sweep.hooks.length === 0) {
+            if (variantAuditPath) {
+                Pass(`Variant audit hook regression: no templates/co-* manifest declares an audit-variant hook — the root variant.json hook (${variantAuditPath}) was already resolved and executed by §27 (U-20261104-001)`);
+            } else {
+                Warn('No variant declares an audit-variant hook in script_manifest.local — nothing to regression-check');
+            }
         }
     }
 }

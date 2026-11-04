@@ -34,7 +34,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Owner**: pm
-- **Last Updated**: 2026-09-12 (record reconciliation per T-20260912-010: Owner corrected security-expert → pm to match SKILL.md frontmatter; Version field added. Previous content update: 2026-08-30 — SKILL.md 1.1.0 → 1.2.0: added on-demand dependency vulnerability step — `bun audit` failing on high/critical, mirroring the CI gate threshold; reconciles the pre-existing "Advisory scan, CVE checking" acceptance criterion that had no corresponding SKILL.md step. Previous: 1.0.0 → 1.1.0 mandated explicit `--config .gitleaks.toml` on all gitleaks invocations — subdirectory scans without it silently fall back to the default ruleset and lose workspace allowlists)
+- **Last Updated**: 2026-11-04 (SKILL.md 1.2.0 → 1.3.0, T-20261103-006 / DEC-20261103-04: added auth-surface audit step — sweep web apps for unauthenticated registration/signup endpoints granting any authenticated role, flag default-open auth surfaces; reference remediation shape = co-newbiz #796 default-closed pattern. Previous: 2026-09-12 record reconciliation per T-20260912-010: Owner corrected security-expert → pm to match SKILL.md frontmatter; Version field added. Previous content update: 2026-08-30 — SKILL.md 1.1.0 → 1.2.0: added on-demand dependency vulnerability step — `bun audit` failing on high/critical, mirroring the CI gate threshold; reconciles the pre-existing "Advisory scan, CVE checking" acceptance criterion that had no corresponding SKILL.md step. Previous: 1.0.0 → 1.1.0 mandated explicit `--config .gitleaks.toml` on all gitleaks invocations — subdirectory scans without it silently fall back to the default ruleset and lose workspace allowlists)
 - **Last Reviewer**: lifecycle-manager

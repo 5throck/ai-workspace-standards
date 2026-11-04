@@ -1,0 +1,97 @@
+schemaVersion: 1
+id: U-20261104-002
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-04T06:07:21.731+09:00'
+history:
+  - at: '2026-11-04T06:07:21.731+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-04T06:32:12.258+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T11:16:57.222+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T11:16:57.222+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #1848 (merged): security-validator v1.2.1 — workspace root is now
+  detected by walking upward from cwd for an L0-only marker (CONSTITUTION.md or
+  templates/common, verified absent from every delivered Projects/co-*
+  checkout); explicit options.workspace_root still wins; fail-closed fallback to
+  cwd when no marker exists. Hardening: boundary comparison
+  symlink-canonicalized (macOS /var→/private/var) and separator-aware
+  (sibling-prefix dirs fail). Legitimate 3-tier extends (agents/pm.md:2
+  ../../../agents/pm.md) now validates from a project cwd while
+  ../../../../etc/passwd still fails closed — 7 negative-control cases pinned in
+  tests/unit/security-validator-workspace-root.test.ts. Windows CI separation
+  bug in the first cut (hardcoded '/' prefix) fixed to path.sep.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.28.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    scripts/helpers/security-validator.ts (~line 119) initializes workspace_root
+    from options.workspace_root || process.cwd(). In a variant project, variant
+    agents legally extend workspace-root agents via relative paths like extends:
+    ../../../agents/pm.md (agents/pm.md:2, agents/docs-writer.md:2 — documented
+    as the intended upgrade contract in agents/docs-writer.md). The targets
+    exist at the workspace root. But running any tool that calls
+    safeValidateExtends() (imported by scripts/helpers/merge-frontmatter.ts,
+    used by scripts/resolve-variants.ts and scripts/validate-templates.ts) with
+    the project root as cwd exits 1 with security_violation: "Path traversal
+    attempt detected - attempting to escape workspace boundaries", because the
+    validator treats the project directory as the whole workspace while the
+    3-tier model defines the workspace as the parent ai_workspace/ directory.
+    Expected: the workspace root should be detected by walking upward for a
+    workspace marker (or threaded explicitly) so legitimate cross-tier extends
+    within ai_workspace/ validate, while genuine outside-of-workspace traversal
+    still fails. Reproduction: from a variant project root, run bun
+    scripts/helpers/extends-validator.ts agents/pm.md → exit 1,
+    security_violation.
+  affected_paths:
+    - scripts/helpers/extends-validator.ts
+    - scripts/helpers/security-validator.ts
+    - scripts/helpers/merge-frontmatter.ts
+    - agents/pm.md
+    - agents/docs-writer.md
+  identity_source: cwd
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - 'path_not_template_managed: agents/docs-writer.md'
+    - info:in_last_delivery scripts/helpers/extends-validator.ts=false
+    - info:in_last_delivery scripts/helpers/security-validator.ts=false
+    - info:in_last_delivery scripts/helpers/merge-frontmatter.ts=false
+    - info:in_last_delivery agents/pm.md=false
+    - info:in_last_delivery agents/docs-writer.md=false
+  dedupe_key: 6df38af59baef349b699e29832ac7e46894dbdf0689b28dae5d94ed08aa35bd4
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-04T06:07:21.731+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1848
+    template_version: unreleased
+    summary: >-
+      Fixed in PR #1848 (merged): security-validator v1.2.1 — workspace root is
+      now detected by walking upward from cwd for an L0-only marker
+      (CONSTITUTION.md or templates/common, verified absent from every delivered
+      Projects/co-* checkout); explicit options.workspace_root still wins;
+      fail-closed fallback to cwd when no marker exists. Hardening: boundary
+      comparison symlink-canonicalized (macOS /var→/private/var) and
+      separator-aware (sibling-prefix dirs fail). Legitimate 3-tier extends
+      (agents/pm.md:2 ../../../agents/pm.md) now validates from a project cwd
+      while ../../../../etc/passwd still fails closed — 7 negative-control cases
+      pinned in tests/unit/security-validator-workspace-root.test.ts. Windows CI
+      separation bug in the first cut (hardcoded '/' prefix) fixed to path.sep.
