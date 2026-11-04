@@ -1747,6 +1747,46 @@ describe('T-20261001-017 intake hardening (lock + retention)', () => {
     expect(existsSync(join(ws.logsDir, `${oldDay}.jsonl`))).toBe(false);
     expect(existsSync(join(ws.logsDir, 'known-projects.json'))).toBe(true);
   });
+
+  // T-20261105-001 (design 2026-11-05-merge-integrity §5.4): transient EPERM/EBUSY/EACCES
+  // on the .intake-lock mkdir is a failed acquisition, not a fatal — retried inside the
+  // existing deadline loop (fail-closed unchanged). The fault seam makes the path
+  // deterministic; the real win32 FS race cannot be reproduced on demand.
+  test('UPSTREAM_FAULT_LOCK_MKDIR=2 — request succeeds despite two synthetic lock-mkdir EPERMs (v1.14.0 retry path)', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const s = open(proj, { UPSTREAM_FAULT_LOCK_MKDIR: '2' });
+    await s.send('initialize', {});
+    const r = await s.create({ ...good(), project_root: proj });
+    expect(r.rpc.error).toBeUndefined();
+    expect(r.body.id).toMatch(/^U-\d{8}-\d{3}$/);
+    expect(existsSync(join(ws.logsDir, '.intake-lock'))).toBe(false);
+  });
+
+  test('fault injection outlasting the deadline fails CLOSED with the transient code in the message (retryable -32000)', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    // Every mkdir attempt faults; the deadline expires -> IntakeLockTimeoutError whose
+    // message carries the last fs error code -> caller converts to retryable -32000.
+    const s = open(proj, { UPSTREAM_FAULT_LOCK_MKDIR: '999', UPSTREAM_LOCK_TIMEOUT_MS: '300' });
+    await s.send('initialize', {});
+    const r = await s.create({ ...good(), project_root: proj });
+    expect(r.rpc.error).toBeUndefined();
+    expect(r.rpc.result?.isError).toBe(true); // retryable family travels as isError (M11)
+    const err = JSON.parse(r.rpc.result.content[0].text);
+    expect(err.error.code).toBe(-32000);
+    expect(err.error.message).toContain('EPERM');
+    expect(err.error.message).toContain('.intake-lock mkdir');
+  });
+
+  test('fault seam unset = zero behavior change; seam 0 is an explicit disable', async () => {
+    const proj = ws.project('co-test');
+    seedKnown(ws, 'co-test');
+    const r = await open(proj).create({ ...good(), project_root: proj });
+    expect(r.rpc.error).toBeUndefined();
+    const r0 = await open(proj, { UPSTREAM_FAULT_LOCK_MKDIR: '0' }).create({ ...good(), project_root: proj });
+    expect(r0.rpc.error).toBeUndefined();
+  });
 });
 
 // =====================================================================

@@ -153,10 +153,28 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 ### Recommended Folder Structure (co-work)
 | Folder | Purpose |
 |--------|---------|
-| `docs/reports/` | Final deliverables, client-ready reports |
-| `docs/drafts/` | Work-in-progress documents and drafts |
-| `docs/research/` | Research notes, reference materials |
+| `deliverables/reports/` | Final deliverables, client-ready reports |
+| `deliverables/drafts/` | Work-in-progress documents and drafts |
+| `deliverables/research/` | Research findings, analytical outputs, data analysis results |
+| `deliverables/references/` | Reference materials, source archives, citations, supporting documents |
+| `deliverables/presentations/` | Client presentation decks |
 | `memory/` | Session logs, meeting transcripts |
+
+> **Note**: The `deliverables/` subdirectories and their README.md files are created during project scaffolding.
+
+### Output Destination Mapping
+
+Each agent saves its deliverables to the designated folder with the naming convention `{topic}-YYYY-MM-DD[_ko].md`, where `{topic}` is derived from the engagement subject or client brief.
+
+**Language Convention**: Deliverables are written in **Korean** by default. Korean-language files use the `_ko.md` suffix. English-language deliverables (only on explicit client request) use `.md` without suffix.
+
+| Output Type | Destination | Naming Convention (Korean default) |
+|-------------|-------------|-------------------|
+| Final deliverables, client-ready reports | `deliverables/reports/` | `{topic}-report-{YYYY-MM-DD}_ko.md` |
+| Work-in-progress documents and drafts | `deliverables/drafts/` | `{topic}-draft-{YYYY-MM-DD}_ko.md` |
+| Research findings, analytical outputs | `deliverables/research/` | `{topic}-analysis-{YYYY-MM-DD}_ko.md` |
+| Source archives, reference materials | `deliverables/references/` | `{topic}-{source-type}-ref-{YYYY-MM-DD}_ko.md` |
+| Client presentation decks (final PPTX) | `deliverables/presentations/` | `{topic}-deck-{YYYY-MM-DD}_ko.pptx` |
 
 ---
 

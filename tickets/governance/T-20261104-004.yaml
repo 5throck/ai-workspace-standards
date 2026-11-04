@@ -18,12 +18,27 @@ title: >-
   workspace; always dry-run list first; never delete a path that can contain
   .git children). Original filing lost — this is the re-creation.
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-04T23:40:45.147+09:00'
 history:
   - at: '2026-11-04T23:40:45.147+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-05T06:25:15.645+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-05T06:25:15.662+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-05T06:25:15.678+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented and merged: PR #1855 (merge commit 268e21c64) — delete-guard hook
+  v1.1.1 (Claude ask / Gemini deny, windows-sep hardened), Projects/ test-leak
+  fix + race-tolerant hygiene pin, ticket-store durability (atomic create,
+  dev-sync 3.87 drift check, duplicate refusal + --allow-duplicate), §7
+  destructive-file-operations prose wave (root+common+15 variants+HERMES) +
+  validate-templates v1.71.0 WARN pin. CI green on all three OS legs + gitleaks.
 error: null

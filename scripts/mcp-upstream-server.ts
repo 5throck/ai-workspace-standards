@@ -1,5 +1,24 @@
 #!/usr/bin/env bun
-// @version 1.13.0
+// @version 1.14.0
+// v1.14.0 (2026-11-05, T-20261105-001, spec docs/designs/2026-11-05-merge-integrity-design.md
+//          §5.4): intake-lock transient-FS tolerance — the lock acquisition was the one
+//          site the v1.9.2/v1.10.1 win32 hardening never covered: it rethrew every
+//          non-EEXIST mkdir error immediately, so windows filter/AV/indexer pressure
+//          surfacing as transient EPERM (CI flake: EPERM mkdir .intake-lock on
+//          windows-latest) killed the request before the deadline loop could wait. Now:
+//          LOCK_TRANSIENT {EBUSY, EPERM, EACCES, EAGAIN} on the lock-dir mkdir is treated
+//          as a failed acquisition inside the existing deadline loop (log once per code,
+//          Bun.sleepSync(25), continue); on deadline expiry the IntakeLockTimeoutError
+//          message carries the LAST transient code (e.g. "... last fs error EPERM on
+//          .intake-lock mkdir") so diagnosis is one read away. FAIL-CLOSED semantics
+//          unchanged (v1.8.0 M5): still-failing after the deadline still answers retryable
+//          -32000, never a silent unlocked fallthrough. mkdirSync(LOGS_DIR) wraps with
+//          withFsRetry(3, 'lock logs dir') under the same LOCK_TRANSIENT set (TRANSIENT_FS
+//          for existing call sites is deliberately untouched — v1.10.1 semantics preserved;
+//          withFsRetry gained an optional transient-set parameter defaulting to it).
+//          Test seam UPSTREAM_FAULT_LOCK_MKDIR=<n>: the first n lock-dir mkdir attempts
+//          throw a synthetic EPERM before the real call, making the retry path
+//          deterministic (default unset = zero behavior change).
 // v1.13.0 (2026-11-02, ADR-0103 F3, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §5.3): T-id delegation read-back — upstream_request_status and
 //          upstream_request_reprioritize accept BOTH id grammars (U-YYYYMMDD-NNN unchanged;
@@ -136,7 +155,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.13.0';
+export const SERVER_VERSION = '1.14.0';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -518,7 +537,11 @@ export function publishTicketWithRetry(
  * few times with a short backoff before rethrowing — the caller's -32603 path stays the
  * last resort, and cap semantics are unchanged (a still-failing write still throws). */
 const TRANSIENT_FS = new Set(["EBUSY", "EPERM", "EAGAIN"]);
-function withFsRetry<T>(fn: () => T, attempts = 3, what: string): T {
+/** T-20261105-001: transient set for the INTAKE-LOCK path only — EACCES added per the
+ * ticket (filter/AV denial windows also surface as EACCES on win32). TRANSIENT_FS stays
+ * untouched for its existing call sites so v1.10.1 semantics are preserved. */
+const LOCK_TRANSIENT = new Set(["EBUSY", "EPERM", "EACCES", "EAGAIN"]);
+function withFsRetry<T>(fn: () => T, attempts = 3, what: string, transient: Set<string> = TRANSIENT_FS): T {
   let lastErr: unknown;
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {
@@ -526,7 +549,7 @@ function withFsRetry<T>(fn: () => T, attempts = 3, what: string): T {
     } catch (err) {
       const code = (err as NodeJS.ErrnoException)?.code ?? "";
       lastErr = err;
-      if (!TRANSIENT_FS.has(code)) throw err;
+      if (!transient.has(code)) throw err;
       const waitMs = 25 * (attempt + 1);
       console.error(`[mcp-upstream-server] transient fs ${code} on ${what} (attempt ${attempt + 1}/${attempts}) — retrying in ${waitMs}ms`);
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, waitMs);
@@ -595,16 +618,54 @@ function intakeLockTimeoutMs(): number {
 
 class IntakeLockTimeoutError extends Error {}
 
+/** T-20261105-001 test seam: the first n lock-dir mkdir attempts throw a synthetic EPERM
+ * before the real call is attempted, so the transient-retry path is deterministic (the
+ * real win32 FS race cannot be reproduced on demand). Unset/'0' = disabled. */
+function lockMkdirFaultCount(): number {
+  const raw = process.env.UPSTREAM_FAULT_LOCK_MKDIR;
+  if (raw === undefined || raw === '') return 0;
+  if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
+  console.error(`[mcp-upstream-server] invalid UPSTREAM_FAULT_LOCK_MKDIR=${JSON.stringify(raw)}; seam disabled`);
+  return 0;
+}
+
 function withIntakeLock<T>(fn: () => T): T {
-  mkdirSync(LOGS_DIR, { recursive: true });
+  // The LOGS_DIR creation is itself a win32 EPERM site under the same pressure —
+  // same treatment as the audit append (v1.10.1), under the lock-scoped transient set.
+  withFsRetry(() => mkdirSync(LOGS_DIR, { recursive: true }), 3, 'lock logs dir', LOCK_TRANSIENT);
   const token = createHash('sha256').update(`${process.pid}-${Date.now()}-${Math.random()}`).digest('hex').slice(0, 16);
   const deadline = Date.now() + intakeLockTimeoutMs();
+  let faultMkdirRemaining = lockMkdirFaultCount();
+  let lastTransientCode = '';
+  const transientLogged = new Set<string>();
   for (;;) {
     try {
+      if (faultMkdirRemaining > 0) {
+        faultMkdirRemaining--;
+        const fault: NodeJS.ErrnoException = Object.assign(new Error(`synthetic EPERM (UPSTREAM_FAULT_LOCK_MKDIR)`), { code: 'EPERM' });
+        throw fault;
+      }
       mkdirSync(INTAKE_LOCK_DIR);
       break;
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      const code = (err as NodeJS.ErrnoException)?.code ?? '';
+      // T-20261105-001: transient win32 FS codes (EPERM under filter/AV pressure) are a
+      // FAILED ACQUISITION, not a fatal condition — wait inside the existing deadline
+      // loop and retry. FAIL-CLOSED unchanged: deadline expiry still throws
+      // IntakeLockTimeoutError (converted to retryable -32000 by the caller).
+      if (code !== 'EEXIST' && LOCK_TRANSIENT.has(code)) {
+        lastTransientCode = code;
+        if (!transientLogged.has(code)) {
+          transientLogged.add(code);
+          console.error(`[mcp-upstream-server] transient fs ${code} on .intake-lock mkdir — retrying until lock deadline`);
+        }
+        if (Date.now() >= deadline) {
+          throw new IntakeLockTimeoutError(`intake lock busy after ${intakeLockTimeoutMs()}ms — last fs error ${lastTransientCode || code} on .intake-lock mkdir; retry shortly`);
+        }
+        Bun.sleepSync(25);
+        continue;
+      }
+      if (code !== 'EEXIST') throw err;
       // M5: stale takeover via ATOMIC RENAME — exactly one waiter wins; the old
       // rmSync-then-retry let two waiters both "remove" the same stale lock.
       let stale = false;

@@ -1,0 +1,42 @@
+schemaVersion: 1
+id: T-20261105-001
+kind: manual
+title: >-
+  Pre-existing win32 CI flake: tests/unit/mcp-upstream-server.test.ts
+  intermittently fails on windows-latest with 'EPERM: operation not permitted,
+  mkdir ...\\logs\\upstream-intake\\.intake-lock' — concurrent lock-dir mkdir
+  race under AV/indexer FS pressure. NOT caused by PR #1855 (git diff
+  main...HEAD contains zero mcp/upstream paths; file last changed d73f31b4c
+  2026-11-02; the server itself documents the identical class from
+  windows-latest PR #1419, v1.9.2 note in scripts/mcp-upstream-server.ts). Fix:
+  retry-with-backoff on EPERM in the lock acquisition path, or serialize the
+  intake-lock creation in tests. Discovered 2026-11-04 during PR #1855 CI
+  triage.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-11-05T04:22:41.808+09:00'
+history:
+  - at: '2026-11-05T04:22:41.808+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-05T07:17:38.087+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-05T07:17:38.109+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-05T07:17:38.132+09:00'
+    from: review
+    to: done
+result: >-
+  intake-lock transient-FS tolerance shipped in scripts/mcp-upstream-server.ts
+  v1.14.0 (commit fd043be13, PR #1856): LOCK_TRANSIENT
+  {EBUSY,EPERM,EACCES,EAGAIN} on the .intake-lock mkdir is a failed acquisition
+  retried inside the existing deadline loop (fail-closed unchanged, last
+  transient code carried in the IntakeLockTimeoutError message);
+  mkdirSync(LOGS_DIR) wrapped withFsRetry; deterministic test seam
+  UPSTREAM_FAULT_LOCK_MKDIR=<n>; 108/108 mcp-upstream-server tests pass.
+  Deviation from the ticket's 3-attempt sketch: deadline-loop integration
+  instead of a second standalone retry layer (design §4 option C).
+error: null

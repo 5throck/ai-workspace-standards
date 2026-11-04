@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 6cdfd685645a36981691450db11c3b2684b152fbc62878aca579ea984555df60
+translated_from_hash: 2cfb18a3b8503d0a2f2a0ed829c601c38f38fb0b1b0d4d3aac261352b443034a
 ---
 # Co-Work 사용자 가이드
 
@@ -97,15 +97,19 @@ Co-Work 작업은 `AGENTS.md`(§3.5, §4.2)에 정의된 동일한 단계 모델
 
 ## 5. 산출물 저장 위치
 
-Co-Work는 일반적인 `deliverables/` 폴더가 아니라 `docs/` 하위에 산출물을 정리합니다:
+Co-Work는 co-consult와 동일한 `deliverables/` 구조로 산출물을 정리합니다:
 
 | 위치 | 저장되는 내용 |
 |------|----------------|
-| `docs/reports/` | 최종, 클라이언트 제공용 산출물 |
-| `docs/drafts/` | 검토 대기 중인 작업 진행 중 문서 및 초안 |
-| `docs/research/` | 리서치 노트, 소스 자료, 참고 자료 수집 |
+| `deliverables/reports/` | 최종, 클라이언트 제공용 산출물 |
+| `deliverables/drafts/` | 검토 대기 중인 작업 진행 중 문서 및 초안 |
+| `deliverables/research/` | 리서치 결과, 분석 산출물 |
+| `deliverables/references/` | 참고 자료, 소스 아카이브, 인용 자료 |
+| `deliverables/presentations/` | 클라이언트 프레젠테이션 자료 (최종 PPTX) |
 | `memory/YYYY-MM-DD.md` | 세션 로그, 회의 트랜스크립트, 의사결정 기록 |
 | `CHANGELOG.md` | 주요 변경 사항의 사용자용 요약 (`[Unreleased]` 섹션, `/changelog` 또는 `/sync`로 추가) |
+
+산출물은 기본적으로 한국어로 작성하며 `_ko.md` 접미사를 사용합니다. 자세한 내용은 `docs/co-work.context.md`의 Output Destination Mapping을 참고하세요.
 
 **염두에 둘 도메인 규칙:**
 - 모든 리서치 결과는 출처 인용과 함께 `memory/`에 기록해야 합니다.

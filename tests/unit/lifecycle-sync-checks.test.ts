@@ -9,7 +9,10 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.5.2
+ * @version 1.5.3
+ * v1.5.3 (2026-11-05, spec docs/designs/2026-11-05-cowork-deliverables-structure-design.md
+ *          §2.6a-2): new-project record pin 1.40.0 → 1.41.0 (co-work deliverables
+ *          scaffold branch; script + lifecycle record v1.41.0 in lockstep).
  * v1.5.2 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
  *          §6.2 — Phase 1.5 preflight): new-project record pin 1.39.0 → 1.40.0
  *          (hub consumption preflight; lifecycle record v1.40.0 in lockstep).
@@ -172,7 +175,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.40.0'],
+      ['new-project', '1.41.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {
