@@ -6,7 +6,7 @@ description: >
   and per-page PNG previews for the visual acceptance gate. Use when:
   exporting a finished deck, interpreting a postflight report, or producing
   previews for visual-judge acceptance.
-version: 1.1.0
+version: 1.2.0
 last_reviewed: 2026-11-03
 status: active
 scope: co-work
@@ -48,16 +48,17 @@ tokens.
      --out <deck-dir>/exports/<name>_<timestamp>.pptx \
      --report <deck-dir>/validation/svg-check-final.json \
      --registry templates/co-work/docs/document-style-registry.json \
-     --deck-type business-report
+     --deck-type business-report [--native-charts-and-tables] [--structured-layouts]
    ```
    The exporter refuses to run when: the report is missing, its `stage` is not `final`, its `summary.errors` > 0, or its SHA-256 fingerprint does not match the current SVG bytes.
-2. **Read the postflight receipt** (printed on success): slide count, part counts, warnings (external images, generic-only font stacks), report linkage. Consume the receipt — do not re-derive it from the package.
-3. **Previews for visual acceptance**:
+2. **Flags**: `--native-charts-and-tables` replaces `data-native` blocks (chart/table payloads in `<desc>`) with native objects — charts carry an embedded workbook (Edit Data); `--structured-layouts` emits one role layout per used slide role and binds slides to them. Default export keeps fallback shapes + flat blank layout.
+3. **Read the postflight receipt** (printed on success): slide count, part counts, warnings (external images, generic-only font stacks), report linkage. Consume the receipt — do not re-derive it from the package.
+4. **Previews for visual acceptance**:
    ```bash
    bun templates/co-work/scripts/deck/svg-to-pptx.ts --deck <deck-dir> --render-png --png-dir <deck-dir>/previews
    ```
    Renders each authored page to PNG (`@resvg/resvg-js`) for the existing visual-judge gate (per the delivery protocol's visual acceptance pass). Note the stated limit: the resvg preview is close to, but not pixel-identical with, PowerPoint's own renderer; visual-judge verdicts are the acceptance gate on these previews.
-4. **Deliver**: the `.pptx` path + postflight receipt + preview PNGs. Any follow-up PowerPoint advisory goes to `ms365-expert`.
+5. **Deliver**: the `.pptx` path + postflight receipt + preview PNGs. Any follow-up PowerPoint advisory goes to `ms365-expert`.
 
 ## Output Format
 

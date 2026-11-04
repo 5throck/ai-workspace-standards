@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.2.0
+ * @version 1.3.0
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
@@ -167,10 +167,17 @@ function shapeRotation(node: SvgNode, warnings: CompileWarning[]): number {
   return 0;
 }
 
-function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[]) {
+interface NativeBlock {
+  kind: "chart" | "table";
+  frame: { x: number; y: number; w: number; h: number };
+  payload: Record<string, unknown>;
+}
+
+function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[], nativeMode: boolean) {
   const shapes: ShapeXml[] = [];
   const images: { rel: string; file: string }[] = [];
   const pageLinks = new Map<string, { relId: string; internal: boolean }>();
+  const nativeBlocks: { block: NativeBlock; skipNode: SvgNode }[] = [];
   let idSeq = 1;
   const nextId = () => ++idSeq;
 
@@ -193,6 +200,17 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
 
   const walk = (node: SvgNode, off: Offset, link: string | null = null) => {
     const attrs = node.attrs;
+    if (node.tag === "g" && attrs["data-native"] !== undefined) {
+      const kind = attrs["data-native"] === "table" ? "table" : attrs["data-native"] === "chart" ? "chart" : null;
+      const [fx, fy, fw, fh] = (attrs["data-frame"] ?? "0,0,0,0").split(",").map((v) => parseFloat(v) || 0);
+      const descNode = node.children.find((c) => c.tag === "desc");
+      if (kind && descNode) {
+        let payload: Record<string, unknown> = {};
+        try { payload = JSON.parse(descNode.text); } catch { /* gate owns payload validity */ }
+        nativeBlocks.push({ block: { kind, frame: { x: fx, y: fy, w: fw, h: fh }, payload }, skipNode: node });
+        if (nativeMode) return; // native mode: marked block shapes are replaced by the graphicFrame
+      }
+    }
     if (node.tag === "a") {
       const aHref = attrs["href"] || null;
       for (const c of node.children) walk(c, off, aHref);
@@ -333,7 +351,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
   };
   for (const c of root.children) walk(c, { tx: 0, ty: 0 });
   const links = [...pageLinks.entries()].map(([href, e]) => ({ href, relId: e.relId, internal: e.internal }));
-  return { shapes, images, links };
+  return { shapes, images, links, nativeBlocks };
 }
 
 // nodeTextOf: local import-free copy for tspan text (avoids exporting from svg-check)
@@ -372,17 +390,45 @@ function themeXml(tokens: DeckTokens): string {
   return XMLDECL + `<p:theme xmlns:a="${NS_A}" xmlns:p="${NS_P}" name="co-work-deck"><p:themeElements><p:clrScheme name="co-work"><a:dk1><a:srgbClr val="${dk1}"/></a:dk1><a:lt1><a:srgbClr val="${lt1}"/></a:lt1><a:dk2><a:srgbClr val="${dk2}"/></a:dk2><a:lt2><a:srgbClr val="${lt2}"/></a:lt2>${accents}<a:hlink><a:srgbClr val="${c.primary ?? "1F3864"}"/></a:hlink><a:folHlink><a:srgbClr val="${c.muted ?? "6B6B6B"}"/></a:folHlink></p:clrScheme><p:fontScheme name="co-work">${scheme("majorFont", tokens.fonts.major, tokens.fonts.eastasia_major)}${scheme("minorFont", tokens.fonts.minor, tokens.fonts.eastasia_minor)}</p:fontScheme><p:fmtScheme name="co-work"><p:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="0" scaled="1"/></a:gradFill></p:fillStyleLst><p:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="28575"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></p:lnStyleLst><p:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></p:effectStyleLst><p:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/></a:schemeClr></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill></p:bgFillStyleLst></p:fmtScheme></p:themeElements></p:theme>`;
 }
 
-function masterAndLayoutXml(tokens: DeckTokens): { master: string; layout: string } {
-  const master = XMLDECL + `<p:sldMaster xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle><a:lvl1pPr><a:defRPr sz="4000"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.major)}"/></a:defRPr></a:lvl1pPr></p:titleStyle><p:bodyStyle><a:lvl1pPr><a:defRPr sz="1800"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.minor)}"/></a:defRPr></a:lvl1pPr></p:bodyStyle><p:otherStyle><a:lvl1pPr><a:defRPr sz="1800"/></a:lvl1pPr></p:otherStyle></p:txStyles></p:sldMaster>`;
-  const layout = XMLDECL + `<p:sldLayout xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" type="blank"><p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
-  return { master, layout };
+const ROLE_LAYOUT_CONVENTIONS: Record<string, { type: string; title: [number, number, number, number]; body: [number, number, number, number] | null }> = {
+  title: { type: "title", title: [100, 260, 1080, 120], body: [100, 400, 1080, 80] },
+  agenda: { type: "obj", title: [80, 80, 1120, 80], body: [80, 220, 1120, 400] },
+  content: { type: "obj", title: [80, 80, 1120, 80], body: [80, 200, 1120, 420] },
+  data: { type: "obj", title: [80, 80, 1120, 80], body: [80, 200, 1120, 420] },
+  divider: { type: "secHead", title: [100, 300, 1080, 120], body: null },
+  closing: { type: "title", title: [100, 280, 1080, 100], body: [100, 380, 1080, 80] },
+};
+
+function layoutForRole(role: string, tokens: DeckTokens, layoutIndex: number): string {
+  const conv = ROLE_LAYOUT_CONVENTIONS[role] ?? ROLE_LAYOUT_CONVENTIONS.content;
+  const ph = (phType: string, idx: number, box: [number, number, number, number], sz: number) =>
+    `<p:sp><p:nvSpPr><p:cNvPr id="${idx}" name="${phType} placeholder ${idx}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="${phType}" sz="quarter" idx="${idx}"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="${emu(box[0])}" y="${emu(box[1])}"/><a:ext cx="${emu(box[2])}" cy="${emu(box[3])}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:pPr algn="${phType === "title" ? "l" : "l"}"/><a:endParaRPr lang="en-US" sz="${sz}"/></a:p></p:txBody></p:sp>`;
+  const title = ph("title", 0, conv.title, 3200);
+  const body = conv.body ? ph("body", 1, conv.body, 1800) : "";
+  const spTree = `<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${title}${body}</p:spTree>`;
+  return XMLDECL + `<p:sldLayout xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" type="${conv.type}"><p:cSld name="${role}">${spTree}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
 }
 
-function slideXml(shapes: ShapeXml[], tokens: DeckTokens, transition?: string): string {
+function masterAndLayoutXml(tokens: DeckTokens, roles: string[], structured: boolean): { master: string; layouts: { name: string; xml: string }[] } {
+  // Flat mode: one blank layout. Structured mode: one role layout per used role (first-appearance order).
+  const layoutRoles = structured && roles.length > 0 ? roles : ["__blank"];
+  const layouts = layoutRoles.map((role, i) => ({
+    name: `slideLayout${i + 1}.xml`,
+    role,
+    xml: structured && roles.length > 0
+      ? layoutForRole(role, tokens, i + 1)
+      : XMLDECL + `<p:sldLayout xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" type="blank"><p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`,
+  }));
+  const layoutIdList = layouts.map((_, i) => `<p:sldLayoutId id="${2147483649 + i}" r:id="rIdL${i + 1}"/>`).join("");
+  const master = XMLDECL + `<p:sldMaster xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:sldLayoutIdLst>${layoutIdList}</p:sldLayoutIdLst><p:txStyles><p:titleStyle><a:lvl1pPr><a:defRPr sz="4000"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.major)}"/></a:defRPr></a:lvl1pPr></p:titleStyle><p:bodyStyle><a:lvl1pPr><a:defRPr sz="1800"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.minor)}"/></a:defRPr></a:lvl1pPr></p:bodyStyle><p:otherStyle><a:lvl1pPr><a:defRPr sz="1800"/></a:lvl1pPr></p:otherStyle></p:txStyles></p:sldMaster>`;
+  return { master, layouts: layouts.map(({ name, xml }) => ({ name, xml })) };
+}
+
+function slideXml(shapes: ShapeXml[], tokens: DeckTokens, transition?: string, graphicFrames = ""): string {
   const trans = transition && transition !== "none"
     ? `<p:transition spd="med"><p:${transition}/></p:transition>`
     : "";
-  return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${trans}</p:sld>`;
+  return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}${graphicFrames}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${trans}</p:sld>`;
 }
 
 function notesXml(slideNum: number, text: string): string {
@@ -396,11 +442,64 @@ function notesMasterXml(): string {
   return XMLDECL + `<p:notesMaster xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:notesStyle><a:lvl1pPr><a:defRPr sz="1200"/></a:lvl1pPr></p:notesStyle></p:notesMaster>`;
 }
 
+// ---- Native object builders (design §13)
+
+function tableGraphicFrame(block: NativeBlock, id: number, tokens: DeckTokens): string {
+  const p = block.payload as { headers: string[]; rows: string[][]; colWidths?: number[] };
+  const cols = p.headers.length;
+  const widths = p.colWidths && p.colWidths.length === cols
+    ? p.colWidths.map((fr) => Math.round(fr * emu(block.frame.w)))
+    : Array.from({ length: cols }, () => Math.round(emu(block.frame.w) / cols));
+  const grid = `<a:tblGrid>${widths.map((w) => `<a:gridCol w="${w}"/>`).join("")}</a:tblGrid>`;
+  const cell = (text: string, bold: boolean) =>
+    `<a:tc><a:txBody><a:bodyPr/><a:lstStyle/><a:p><a:pPr algn="l"/><a:r><a:rPr lang="en-US" sz="${Math.round(14 * 100)}"${bold ? ' b="1"' : ""} dirty="0"><a:solidFill><a:srgbClr val="${bold ? tokens.colors.background ?? "FFFFFF" : tokens.colors.text ?? "202020"}"/></a:solidFill><a:latin typeface="${esc(tokens.fonts.minor)}"/></a:rPr><a:t>${esc(text)}</a:t></a:r></a:p></a:txBody><a:tcPr><a:solidFill><a:srgbClr val="${bold ? tokens.colors.primary ?? "1F3864" : tokens.colors.background ?? "FFFFFF"}"/></a:solidFill></a:tcPr></a:tc>`;
+  const headerRow = `<a:tr h="${emu(36)}">${p.headers.map((h) => cell(String(h), true)).join("")}</a:tr>`;
+  const bodyRows = p.rows.map((r) => `<a:tr h="${emu(30)}">${p.headers.map((_, ci) => cell(String(r[ci] ?? ""), false)).join("")}</a:tr>`).join("");
+  return `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="${id}" name="table-${id}"/><p:cNvGraphicFramePr/><p:nvPr/></p:nvGraphicFramePr><p:xfrm><a:off x="${emu(block.frame.x)}" y="${emu(block.frame.y)}"/><a:ext cx="${emu(block.frame.w)}" cy="${emu(block.frame.h)}"/></p:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblPr firstRow="1" bandRow="1"/>${grid}${headerRow}${bodyRows}</a:tbl></a:graphicData></a:graphic></p:graphicFrame>`;
+}
+
+function buildChartPart(block: NativeBlock, chartIdx: number, tokens: DeckTokens): { chartXml: string; chartRels: string; workbook: { name: string; data: Uint8Array } } {
+  const p = block.payload as { kind: string; categories: string[]; series: { name: string; values: number[] }[]; colors?: string[] };
+  const NS_C = "http://schemas.openxmlformats.org/drawingml/2006/chart";
+  const catRefs = p.categories.map((c, i) => `<c:pt idx="${i}"><c:v>${esc(String(c))}</c:v></c:pt>`).join("");
+  const sers = p.series.map((s, si) => {
+    const col = (si + 2); // column B onward
+    const colLetter = String.fromCharCode(64 + col);
+    const fill = (p.colors && p.colors[si]) || (tokens.colors.primary ?? "1F3864");
+    const valPts = s.values.map((v, i) => `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join("");
+    return `<c:ser><c:idx val="${si}"/><c:order val="${si}"/><c:tx><c:strRef><c:f>Sheet1!$${colLetter}$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>${esc(s.name)}</c:v></c:pt></c:strCache></c:strRef></c:tx><c:spPr><a:solidFill><a:srgbClr val="${String(fill).replace("#", "").toUpperCase()}"/></a:solidFill></c:spPr><c:cat><c:strRef><c:f>Sheet1!$A$2:$A$${p.categories.length + 1}</c:f><c:strCache><c:ptCount val="${p.categories.length}"/>${catRefs}</c:strCache></c:strRef></c:cat><c:val><c:numRef><c:f>Sheet1!$${colLetter}$2:$${colLetter}$${s.values.length + 1}</c:f><c:numCache><c:formatCode>General</c:formatCode><c:ptCount val="${s.values.length}"/>${valPts}</c:numCache></c:numRef></c:val></c:ser>`;
+  }).join("");
+  const chartXml = XMLDECL + `<c:chartSpace xmlns:c="${NS_C}" xmlns:a="${NS_A}" xmlns:r="${NS_R}"><c:chart><c:autoTitleDeleted val="1"/><c:plotArea><c:barChart><c:barDir val="col"/><c:grouping val="clustered"/><c:varyColors val="0"/>${sers}<c:axId val="111111111"/><c:axId val="222222222"/></c:barChart><c:catAx><c:axId val="111111111"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="222222222"/></c:catAx><c:valAx><c:axId val="222222222"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="111111111"/></c:valAx></c:plotArea><c:plotVisOnly val="1"/></c:chart><c:externalData r:id="rId1"><c:autoUpdate val="0"/></c:externalData></c:chartSpace>`;
+  const chartRels = XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/package" Target="../embeddings/Microsoft_Excel_Worksheet${chartIdx}.xlsx"/></Relationships>`;
+
+  // Minimal valid xlsx workbook (Edit Data source), built with fflate at package time
+  const head = p.series.map((s) => esc(s.name));
+  const rowXml = (cells: string[], r: number) => `<row r="${r}">${cells.map((c, i) => `<c r="${String.fromCharCode(65 + i)}${r}" t="inlineStr"><is><t>${c}</t></is></c>`).join("")}</row>`;
+  const sheetRows = rowXml([esc("Category"), ...head], 1)
+    + p.categories.map((cat, ri) => rowXml([esc(String(cat)), ...p.series.map((s) => String(s.values[ri] ?? ""))], ri + 2)).join("");
+  const xlsx = zipSync({
+    "[Content_Types].xml": new TextEncoder().encode(XMLDECL + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`),
+    "_rels/.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
+    "xl/workbook.xml": new TextEncoder().encode(XMLDECL + `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>`),
+    "xl/_rels/workbook.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`),
+    "xl/worksheets/sheet1.xml": new TextEncoder().encode(XMLDECL + `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${sheetRows}</sheetData></worksheet>`),
+  }, { level: 6 });
+  const workbook = { name: `Microsoft_Excel_Worksheet${chartIdx}.xlsx`, data: xlsx };
+  return { chartXml, chartRels, workbook };
+}
+
+function chartGraphicFrame(block: NativeBlock, id: number, relId: string): string {
+  return `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="${id}" name="chart-${id}"/><p:cNvGraphicFramePr/><p:nvPr/></p:nvGraphicFramePr><p:xfrm><a:off x="${emu(block.frame.x)}" y="${emu(block.frame.y)}"/><a:ext cx="${emu(block.frame.w)}" cy="${emu(block.frame.h)}"/></p:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" r:id="${relId}"/></a:graphicData></a:graphic></p:graphicFrame>`;
+}
+
+
 // ---------------------------------------------------------------------------
 // Compile
 // ---------------------------------------------------------------------------
 
 export interface CompileOptions {
+  nativeCharts?: boolean;
+  structuredLayouts?: boolean;
   deckDir: string;
   registryPath: string;
   deckType: string;
@@ -412,7 +511,8 @@ export interface CompileResult {
   receipt: {
     slides: number;
     parts: number;
-    mode: "flat";
+    mode: "flat" | "structured";
+    native_objects?: number;
     fingerprint_linked: boolean;
     deck_type: string;
     warnings: CompileWarning[];
@@ -468,15 +568,22 @@ export function compileDeck(opts: CompileOptions): CompileResult {
 
   const slideParts: { name: string; data: Uint8Array }[] = [];
   const slideRels: { name: string; data: Uint8Array }[] = [];
+  const pageRoles: string[] = [];
+  const chartParts: { name: string; data: Uint8Array; rels: string }[] = [];
+  const workbooks: { name: string; data: Uint8Array }[] = [];
+  const pageRoleByPage = new Map<number, string>();
 
   files.forEach((f, idx) => {
     const pageIdx = idx + 1;
     const root = parseSvg(readFileSync(join(deckDir, f), "utf-8"));
     const grads = collectGradients(root);
-    const { shapes, images, links } = walkPage(root, tokens, grads, warnings);
-    const rels: string[] = [
-      `<Relationship Id="rIdLay1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>`,
-    ];
+    const { shapes, images, links, nativeBlocks } = walkPage(root, tokens, grads, warnings, opts.nativeCharts === true);
+    const role = root.attrs["data-slide-role"] ?? "content";
+    if (!pageRoles.includes(role)) pageRoles.push(role);
+    pageRoleByPage.set(pageIdx, role);
+    let graphicFrames = "";
+    let chartSeq = 0;
+    const rels: string[] = [];
     images.forEach((img, i) => {
       const imgPath = resolve(join(deckDir, img.file));
       if (!existsSync(imgPath)) { warnings.push({ rule: "W-IMAGE-MISSING", message: `image not found: ${img.file} (placeholder box emitted)` }); return; }
@@ -497,12 +604,35 @@ export function compileDeck(opts: CompileOptions): CompileResult {
       rels.push(`<Relationship Id="rIdNotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide${pageIdx}.xml"/>`);
     }
     const transition = root.attrs["data-slide-transition"];
-    slideParts.push({ name: `ppt/slides/slide${pageIdx}.xml`, data: new TextEncoder().encode(slideXml(shapes, tokens, transition)) });
+    if (opts.nativeCharts) {
+      let idSeq = 1000;
+      for (const nb of nativeBlocks) {
+        if (nb.block.kind === "table") {
+          graphicFrames += tableGraphicFrame(nb.block, ++idSeq, tokens);
+        } else if (nb.block.kind === "chart") {
+          const payloadKind = (nb.block.payload as { kind?: string }).kind;
+          if (payloadKind !== "bar") {
+            warnings.push({ rule: "W-NATIVE-UNSUPPORTED", message: `native chart kind "${payloadKind}" unsupported — fallback shapes kept` });
+            continue;
+          }
+          const chartIdx = chartParts.length + 1;
+          const { chartXml, chartRels, workbook } = buildChartPart(nb.block, chartIdx, tokens);
+          chartParts.push({ name: `ppt/charts/chart${chartIdx}.xml`, data: new TextEncoder().encode(chartXml), rels: chartRels });
+          workbooks.push({ name: `ppt/embeddings/${workbook.name}`, data: workbook.data });
+          const relId = `rIdChart${chartIdx}`;
+          rels.push(`<Relationship Id="${relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${chartIdx}.xml"/>`);
+          graphicFrames += chartGraphicFrame(nb.block, ++idSeq, relId);
+        }
+      }
+    }
+    slideParts.push({ name: `ppt/slides/slide${pageIdx}.xml`, data: new TextEncoder().encode(slideXml(shapes, tokens, transition, graphicFrames)) });
+    const layoutIdx = opts.structuredLayouts ? pageRoles.indexOf(pageRoleByPage.get(pageIdx) ?? "") + 1 : 1;
+    rels.push(`<Relationship Id="rIdLay1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout${layoutIdx}.xml"/>`);
     slideRels.push({ name: `ppt/slides/_rels/slide${pageIdx}.xml.rels`, data: new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join("")}</Relationships>`) });
   });
 
   const hasNotes = notesByPage.size > 0;
-  const { master, layout } = masterAndLayoutXml(tokens);
+  const { master, layouts } = masterAndLayoutXml(tokens, pageRoles, opts.structuredLayouts === true);
   const theme = themeXml(tokens);
 
   const presRels: string[] = [
@@ -516,13 +646,15 @@ export function compileDeck(opts: CompileOptions): CompileResult {
 
   const defaults = new Set(["rels", "xml"]);
   for (const m of media) defaults.add(extname(m.name).toLowerCase().replace(".", ""));
+  if (workbooks.length > 0) defaults.add("xlsx");
   const ctDefaults = [...defaults].map((e) => `<Default Extension="${e}" ContentType="${e === "rels" ? "application/vnd.openxmlformats-package.relationships+xml" : e === "xml" ? "application/xml" : `image/${e === "jpg" ? "jpeg" : e}`}"/>`).join("");
   const overrides = [
     `/ppt/presentation.xml|application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml`,
     `/ppt/slideMasters/slideMaster1.xml|application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml`,
-    `/ppt/slideLayouts/slideLayout1.xml|application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml`,
+    ...layouts.map((l) => `/ppt/slideLayouts/${l.name}|application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml`),
     `/ppt/theme/theme1.xml|application/vnd.openxmlformats-officedocument.theme+xml`,
-    ...slideParts.map((s, i) => `/${s.name}|application/vnd.openxmlformats-officedocument.presentationml.slide+xml`),
+    ...slideParts.map((s) => `/${s.name}|application/vnd.openxmlformats-officedocument.presentationml.slide+xml`),
+    ...chartParts.map((c) => `/${c.name}|application/vnd.openxmlformats-officedocument.drawingml.chart+xml`),
     ...(hasNotes ? [`/ppt/notesMasters/notesMaster1.xml|application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml`, ...notesByPage.size ? [...notesByPage.keys()].map((n) => `/ppt/notesSlides/notesSlide${n}.xml|application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml`) : []] : []),
     `/docProps/core.xml|application/vnd.openxmlformats-package.core-properties+xml`,
     `/docProps/app.xml|application/vnd.openxmlformats-officedocument.extended-properties+xml`,
@@ -540,11 +672,16 @@ export function compileDeck(opts: CompileOptions): CompileResult {
     "ppt/presentation.xml": new TextEncoder().encode(presentation),
     "ppt/_rels/presentation.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${presRels.join("")}</Relationships>`),
     "ppt/slideMasters/slideMaster1.xml": new TextEncoder().encode(master),
-    "ppt/slideMasters/_rels/slideMaster1.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`),
-    "ppt/slideLayouts/slideLayout1.xml": new TextEncoder().encode(layout),
-    "ppt/slideLayouts/_rels/slideLayout1.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`),
+    "ppt/slideMasters/_rels/slideMaster1.xml.rels": new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${layouts.map((_, i) => `<Relationship Id="rIdL${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/${layouts[i].name}"/>`).join("")}<Relationship Id="rIdTheme" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`),
+    ...Object.fromEntries(layouts.flatMap((l) => [
+      [`ppt/slideLayouts/${l.name}`, new TextEncoder().encode(l.xml)],
+      [`ppt/slideLayouts/_rels/${l.name}.rels`, new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`)],
+    ])),
     "ppt/theme/theme1.xml": new TextEncoder().encode(theme),
     ...Object.fromEntries([...slideParts, ...slideRels].map((p) => [p.name, p.data])),
+    ...Object.fromEntries(chartParts.map((c) => [c.name, c.data])),
+    ...Object.fromEntries(chartParts.map((c) => [`ppt/charts/_rels/${basename(c.name)}.rels`, new TextEncoder().encode(c.rels)])),
+    ...Object.fromEntries(workbooks.map((w) => [w.name, w.data])),
     ...Object.fromEntries(media.map((m) => [m.name, m.bytes])),
   };
   if (hasNotes) {
@@ -570,7 +707,8 @@ export function compileDeck(opts: CompileOptions): CompileResult {
     receipt: {
       slides: slideParts.length,
       parts: partCount,
-      mode: "flat",
+      mode: opts.structuredLayouts ? "structured" : "flat",
+      native_objects: chartParts.length,
       fingerprint_linked: true,
       deck_type: opts.deckType,
       warnings,
@@ -604,11 +742,11 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.2.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.3.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\
-      --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>]
+      --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--native-charts-and-tables] [--structured-layouts]
   bun scripts/svg-to-pptx.ts --deck <dir> --render-png --png-dir <dir>
 
 Export integrity: refuses to run when the report is missing, is not stage=final,
@@ -636,12 +774,14 @@ if (import.meta.main) {
     const registryPath = idx("--registry");
     const deckType = idx("--deck-type") ?? "business-report";
     const notesDir = idx("--notes-dir");
+    const nativeCharts = args.includes("--native-charts-and-tables");
+    const structuredLayouts = args.includes("--structured-layouts");
     if (!out) { console.error("❌ --out <file.pptx> is required"); process.exit(2); }
     if (!reportPath) { console.error("❌ --report <final-report.json> is required (fingerprint refusal)"); process.exit(2); }
     if (!registryPath) { console.error("❌ --registry <document-style-registry.json> is required"); process.exit(2); }
     try {
       const report = verifyReportAgainstDeck(reportPath, deckDir);
-      const { zip, receipt } = compileDeck({ deckDir, registryPath, deckType, notesDir });
+      const { zip, receipt } = compileDeck({ deckDir, registryPath, deckType, notesDir, nativeCharts, structuredLayouts });
       mkdirSync(resolve(out, ".."), { recursive: true });
       writeFileSync(resolve(out), zip);
       console.log(JSON.stringify({ ...receipt, out: resolve(out), gated_on: report.fingerprint }, null, 2));

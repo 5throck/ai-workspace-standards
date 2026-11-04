@@ -7783,8 +7783,8 @@
       "name": "pptx-export",
       "scope": "co-work",
       "capability": "pptx-export",
-      "content_hash": "98f4a5efc4f2cd19",
-      "version": "1.1.0",
+      "content_hash": "6cfc96b7c81d5ee2",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-work/skills/pptx-export/SKILL.md"
       ]
@@ -7823,7 +7823,7 @@
       "scope": "co-work",
       "capability": "svg-slide-authoring",
       "content_hash": "b7960ef927961b81",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-work/skills/svg-slide-authoring/SKILL.md"
       ]

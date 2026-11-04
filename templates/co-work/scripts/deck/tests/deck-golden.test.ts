@@ -315,7 +315,90 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     expect(receipt.parts).toBeGreaterThan(13); // notes master + notesSlide parts added
     rmSync(dir2, { recursive: true, force: true });
   });
+
+  test("P2 slice 3: native table + chart with embedded workbook compile; fallback kept by default", () => {
+    const NATIVE_PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="data" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="100" font-size="28" font-weight="bold" fill="#1F3864">Revenue beat plan for the third straight quarter</text>
+    <g data-block-id="b2" data-native="chart" data-frame="80,160,560,360">
+      <desc>{"kind":"bar","categories":["Jul","Aug","Sep"],"series":[{"name":"Revenue","values":[4.2,4.6,5.1]}]}</desc>
+      <rect x="180" y="350" width="90" height="210" fill="#1F3864"/>
+    </g>
+    <g data-block-id="b3" data-native="table" data-frame="700,160,500,360">
+      <desc>{"headers":["Metric","Q2","Q3"],"rows":[["Revenue","4.5M","5.1M"],["Churn","2.1%","2.1%"]]}</desc>
+      <rect x="700" y="160" width="500" height="360" fill="#FFFFFF"/>
+    </g>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-native"), [
+      { name: "01-native.svg", body: NATIVE_PAGE },
+    ], "Revenue beat plan for the third straight quarter\n");
+
+    // default mode: fallback shapes only, no chart parts
+    const def = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const defPkg = unzipSync(def.zip);
+    expect(Object.keys(defPkg).some((k) => k.startsWith("ppt/charts/"))).toBe(false);
+
+    // native mode: chart part + workbook + graphicFrame + a:tbl
+    const { zip, receipt } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", nativeCharts: true });
+    const pkg = unzipSync(zip);
+    expect(pkg["ppt/charts/chart1.xml"]).toBeDefined();
+    expect(pkg["ppt/charts/_rels/chart1.xml.rels"]).toBeDefined();
+    expect(pkg["ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx"]).toBeDefined();
+    const chartXml = new TextDecoder().decode(pkg["ppt/charts/chart1.xml"]!);
+    expect(chartXml).toContain("<c:barChart>");
+    expect(chartXml).toContain("<c:v>Revenue</c:v>");
+    expect(chartXml).toContain("<c:v>4.6</c:v>");
+    expect(chartXml).toContain("externalData");
+    // xlsx is a valid zip with a worksheet containing the data
+    const wbZip = unzipSync(pkg["ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx"]!);
+    const sheet = new TextDecoder().decode(wbZip["xl/worksheets/sheet1.xml"]!);
+    expect(sheet).toContain("Revenue") && expect(sheet).toContain("4.6");
+    const s1 = new TextDecoder().decode(pkg["ppt/slides/slide1.xml"]!);
+    expect(s1).toContain("graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/chart\"");
+    expect(s1).toContain("graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/table\"");
+    expect(s1).toContain("<a:tbl>");
+    expect(s1).toContain("<a:gridCol");
+    expect(s1).toContain("4.5M");
+    const ct = new TextDecoder().decode(pkg["[Content_Types].xml"]!);
+    expect(ct).toContain('Default Extension="xlsx"');
+    expect(ct).toContain("drawingml.chart+xml");
+    expect((receipt as { native_objects?: number }).native_objects).toBe(1);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("P2 slice 3: structured layouts emit role layouts and bind slides; gate blocks bad native payloads", () => {
+    const PAGES = [
+      { name: "01-title.svg", body: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="title" data-page-number="1"><g data-block-id="b1"><rect x="0" y="0" width="1280" height="720" fill="#1F3864"/><text x="640" y="360" font-size="48" font-weight="bold" fill="#FFFFFF">Q3 2026 Business Review</text></g></svg>` },
+      { name: "02-data.svg", body: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="data" data-page-number="2"><g data-block-id="b1"><text x="80" y="100" font-size="28" font-weight="bold" fill="#1F3864">Revenue beat plan for the third straight quarter</text></g></svg>` },
+    ];
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-struct"), PAGES, CONTENT_MD);
+    const { zip, receipt } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", structuredLayouts: true });
+    expect((receipt as { mode?: string }).mode).toBe("structured");
+    const pkg = unzipSync(zip);
+    expect(pkg["ppt/slideLayouts/slideLayout1.xml"]).toBeDefined();
+    expect(pkg["ppt/slideLayouts/slideLayout2.xml"]).toBeDefined();
+    const lay1 = new TextDecoder().decode(pkg["ppt/slideLayouts/slideLayout1.xml"]!);
+    expect(lay1).toContain('name="title"');
+    const lay2 = new TextDecoder().decode(pkg["ppt/slideLayouts/slideLayout2.xml"]!);
+    expect(lay2).toContain('name="data"');
+    const master = new TextDecoder().decode(pkg["ppt/slideMasters/slideMaster1.xml"]!);
+    expect(master).toContain("sldLayoutId id=\"2147483650\""); // two layouts registered
+    const rels2 = new TextDecoder().decode(pkg["ppt/slides/_rels/slide2.xml.rels"]!);
+    expect(rels2).toContain('Target="../slideLayouts/slideLayout2.xml"'); // data slide bound to its role layout
+
+    // gate: malformed desc JSON + missing data-frame block
+    const BAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1"><g data-block-id="b1"><g data-block-id="b2" data-native="chart"><desc>{broken}</desc></g><g data-block-id="b3" data-native="table"><desc>{"headers":["A"],"rows":[["1"]]}</desc></g></g></svg>`;
+    const dir2 = makeDeck(join(import.meta.dir, ".tmp-deck-badnative"), [{ name: "01-bad.svg", body: BAD }], CONTENT_MD);
+    const report = runCheck({ deckDir: dir2, contentPath: join(dir2, "deck_content.md"), stage: "final" });
+    const rules = report.pages.flatMap((p) => p.errors.map((e) => e.rule));
+    expect(rules).toContain("E-NATIVE-DATA");
+    expect(rules).toContain("E-NATIVE-FRAME");
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir2, { recursive: true, force: true });
+  });
 });
+
 
 
 
