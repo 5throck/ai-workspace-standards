@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.40.0
+// @version 1.41.0
+// v1.41.0 (2026-11-05, spec docs/designs/2026-11-05-cowork-deliverables-structure-design.md):
+//          §2.6a-2 new co-work branch — scaffold creates deliverables/{reports,drafts,
+//          research,references,presentations}/ with per-dir READMEs referencing
+//          docs/co-work.context.md Output Destination Mapping and the
+//          {topic}-YYYY-MM-DD[_ko] naming convention (Korean-default deliverable
+//          language carve-out). The co-consult block (§2.6a) is byte-identical.
+//          Additive: other variants unaffected.
 // v1.40.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §6.2 — Phase 1.5 preflight): hub consumption preflight after the
 //          Variant Readiness Gate — (1) the template's variant.json hub.consumes
@@ -1150,6 +1157,37 @@ if (variant === 'co-consult') {
     ].join('\n'));
   }
   console.log('  ✅ deliverables/{reports,drafts,research,presentations}/ created');
+}
+
+// ── 2.6a-2. Create deliverables/ subdirectories (co-work) ──────────────────────
+if (variant === 'co-work') {
+  const delRoot = join(projectDir, 'deliverables');
+  const delDirs = [
+    { name: 'reports', desc: 'Final deliverables, client-ready reports' },
+    { name: 'drafts', desc: 'Work-in-progress documents and drafts' },
+    { name: 'research', desc: 'Research findings, analytical outputs, data analysis results' },
+    { name: 'references', desc: 'Reference materials, source archives, citations, supporting documents' },
+    { name: 'presentations', desc: 'Client presentation decks' },
+  ];
+  for (const d of delDirs) {
+    const dir = join(delRoot, d.name);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'README.md'), [
+      `# deliverables/${d.name}/`,
+      '',
+      d.desc + '.',
+      '',
+      '## Output Destination',
+      '',
+      'See Output Destination Mapping in `docs/co-work.context.md` for per-agent paths and naming conventions.',
+      '',
+      '## Naming Convention',
+      '',
+      '`{topic}-YYYY-MM-DD[_ko].md` — deliverables are written in Korean by default (use the `_ko.md` suffix). English deliverables (explicit client request only) use `.md` without suffix.',
+      '',
+    ].join('\n'));
+  }
+  console.log('  ✅ deliverables/{reports,drafts,research,references,presentations}/ created');
 }
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────

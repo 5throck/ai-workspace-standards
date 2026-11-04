@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.40.0
+- **Version**: 1.41.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-01
+- **Last Updated**: 2026-11-05
 - **Last Reviewer**: automation-engineer
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -47,6 +47,7 @@
 | 2026-10-10 | production | production | v1.36.0 (eight-platform coverage): comma-separated `--platform` list with union pruning (lib/platform-prune.ts); single `codex` now drops CLAUDE.md/GEMINI.md. Spec: docs/designs/2026-10-10-eight-platform-coverage-design.md | docs-writer |
 | 2026-11-01 | production | production | v1.39.0 (spec docs/designs/2026-10-31-graft-trail-migration-design.md R2.5 addendum — trigger met: L0 trail init complete, PR #1783): §7.7 index build flips graft-first/bunx-fallback → plain `trail build` (trail 0.28.1); MANAGED_TOP_LEVEL_DIRS gains `.trail`, keeps `graft` (0.28.1 build still defaults its graph dir to `<repo>/graft` until the project's own `trail init` migrates it to `.trail/cache`) | automation-engineer |
 | 2026-11-02 | production | production | v1.40.0 (spec docs/designs/2026-11-01-hub-consolidation-design.md §6.2 — Phase 1.5 preflight): hub consumption preflight after the Variant Readiness Gate — the template's variant.json hub.consumes rows resolve against the hub_topology registry via the shared leg-3 logic (helpers/hub-topology.ts v1.1.0 checkConsumerMinimumVersions), and an unregistered hub-doctrine duplication in the template FAILs (checkHubDoctrineDuplication — sanctioned only as own-hub, common-contract stock, or a declared consumer's stale-read copy per §7.4). Registry absent → vacuous skip. Additive. | automation-engineer |
+| 2026-11-05 | production | production | v1.41.0 (spec docs/designs/2026-11-05-cowork-deliverables-structure-design.md): §2.6a-2 new co-work branch — scaffold creates deliverables/{reports,drafts,research,references,presentations}/ with per-dir READMEs referencing docs/co-work.context.md Output Destination Mapping and the {topic}-YYYY-MM-DD[_ko] naming convention (Korean-default deliverable language carve-out); co-consult block (§2.6a) byte-identical. Additive: other variants unaffected. | automation-engineer |
 
 ## Acceptance Criteria
 

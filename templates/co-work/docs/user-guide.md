@@ -92,15 +92,19 @@ Writes are always **serial** (one specialist at a time, to avoid file-lock confl
 
 ## 5. Where Your Output Goes
 
-Co-Work organizes deliverables under `docs/`, not a generic `deliverables/` folder:
+Co-Work organizes deliverables under `deliverables/` (same structure as co-consult):
 
 | Location | What goes there |
 |----------|------------------|
-| `docs/reports/` | Final, client-ready deliverables |
-| `docs/drafts/` | Work-in-progress documents and drafts awaiting review |
-| `docs/research/` | Research notes, source material, reference gathering |
+| `deliverables/reports/` | Final, client-ready deliverables |
+| `deliverables/drafts/` | Work-in-progress documents and drafts awaiting review |
+| `deliverables/research/` | Research findings, analytical outputs |
+| `deliverables/references/` | Reference materials, source archives, citations |
+| `deliverables/presentations/` | Client presentation decks (final PPTX) |
 | `memory/YYYY-MM-DD.md` | Session logs, meeting transcripts, decision records |
 | `CHANGELOG.md` | User-facing summary of notable changes (`[Unreleased]` section, added via `/changelog` or `/sync`) |
+
+Deliverables are written in Korean by default with the `_ko.md` suffix; see the Output Destination Mapping in `docs/co-work.context.md`.
 
 **Domain rules to keep in mind:**
 - All research findings must be logged to `memory/` with source citations.

@@ -14,7 +14,7 @@
   },
   "artifacts": [
     {
-      "path": "docs/drafts/",
+      "path": "deliverables/drafts/",
       "kind": "document",
       "description": "Working drafts: documents, analyses, minutes."
     }
@@ -23,19 +23,19 @@
     {
       "from": "pm",
       "to": "project-coordinator",
-      "artifact": "docs/drafts/",
+      "artifact": "deliverables/drafts/",
       "trigger": "Work-stream coordination dispatch"
     },
     {
       "from": "project-coordinator",
       "to": "content-writer",
-      "artifact": "docs/drafts/",
+      "artifact": "deliverables/drafts/",
       "trigger": "Drafting dispatch per document-style-registry.json"
     },
     {
       "from": "content-writer",
       "to": "ms365-expert",
-      "artifact": "docs/drafts/",
+      "artifact": "deliverables/drafts/",
       "trigger": "Draft complete; M365 delivery"
     }
   ],
