@@ -5,6 +5,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import { credentialValid, isAuthEnabled, presentedCredential, requestAuthorized } from "../../services/co-workspace/src/auth";
 import { dockerProbe, loadConfig } from "../../services/co-workspace/src/config";
 import { dockerCliEnv, hermesArgs, hermesEnv, hermesSpawnArgv, type HermesSpawnOptions } from "../../services/co-workspace/src/hermes";
@@ -178,10 +179,13 @@ describe("server — auth and quota enforcement", () => {
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
+    // T-20261104-003: absolute fixture root — no relative Projects/ tree under the
+    // runner cwd (project-loss hardening design §5.2).
     `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
+mkdirSync(\`\${projectsRoot}/\${name}/.hermes/skills\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake\\n");
 `,
   );
   const binDir = join(tmpdir(), `gw-p2-bin-${crypto.randomUUID().slice(0, 8)}`);
@@ -211,7 +215,11 @@ console.log('{"type":"result","session_id":"s1","exit_code":0,"text":"pong","tok
   });
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;
-  afterAll(() => server.stop(true));
+  afterAll(() => {
+    server.stop(true);
+    // T-20261104-003: never leave an empty Projects/ parent behind.
+    rmdirIfEmpty(join(workspaceDir, "Projects"));
+  });
 
   test("auth: exempt health passes keyless; protected routes 401 keyless, 200 keyed", async () => {
     expect((await fetch(`${base}/health`)).status).toBe(200);
