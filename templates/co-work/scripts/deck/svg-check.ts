@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.1.1
+ * @version 1.2.0
  * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, content-SSOT text-run diff, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
  */
@@ -16,7 +16,7 @@ import { basename, join, resolve } from "path";
 const ALLOWED_ELEMENTS = new Set([
   "svg", "g", "text", "tspan",
   "rect", "circle", "ellipse", "line", "polyline", "path",
-  "image", "defs", "linearGradient", "radialGradient", "stop",
+  "image", "defs", "linearGradient", "radialGradient", "stop", "a",
 ]);
 
 const FORBIDDEN_ELEMENTS = new Set([
@@ -30,6 +30,11 @@ const NAMED_COLORS = new Set([
   "orange", "purple", "pink", "brown", "cyan", "magenta", "navy",
 ]);
 const HEX_RE = /^#([0-9a-fA-F]{6})$/;
+// Hyperlink href contract: absolute http(s) URL, mailto:, or an internal 1-based slide jump.
+const EXTERNAL_HREF_RE = /^(https?:\/\/\S+|mailto:\S+)$/i;
+const INTERNAL_HREF_RE = /^#slide-[1-9]\d*$/;
+const LINKABLE_ELEMENTS = new Set(["text", "rect", "circle", "ellipse", "line", "polyline", "path", "image", "g"]);
+const TRANSITION_VALUES = new Set(["none", "fade", "push", "zoom", "wipe"]);
 const PERCENT_TARGET_ATTRS = new Set([
   "x", "y", "width", "height", "cx", "cy", "r", "rx", "ry",
   "x1", "y1", "x2", "y2", "fx", "fy", "dx", "dy", "font-size", "stroke-width",
@@ -160,14 +165,30 @@ function checkPage(source: string, fileName: string): PageReport {
   }
   if (!root.attrs["data-slide-role"]) err("E-MARKER", 'root <svg> requires data-slide-role (deck_types.slide_roles value)');
   if (!root.attrs["data-page-number"]) err("E-MARKER", 'root <svg> requires data-page-number (1-based)');
+  const trans = root.attrs["data-slide-transition"];
+  if (trans !== undefined && !TRANSITION_VALUES.has(trans.trim())) {
+    err("E-TRANSITION", `data-slide-transition="${trans}" is invalid (canonical: none|fade|push|zoom|wipe)`);
+  }
 
   // Depth is relative to root <svg>: its children are depth 1 within the tree.
-  const walk = (node: SvgNode, inTopGroup: boolean) => {
+  const walk = (node: SvgNode, inTopGroup: boolean, inLink = false) => {
     if (node.tag !== "svg") {
       if (FORBIDDEN_ELEMENTS.has(node.tag)) {
         err("E-WHITELIST", `<${node.tag}> is forbidden`);
       } else if (!ALLOWED_ELEMENTS.has(node.tag)) {
         err("E-WHITELIST", `<${node.tag}> is not in the canonical whitelist`);
+      }
+    }
+    if (node.tag === "a") {
+      if (inLink) err("E-HREF", "nested <a> elements are invalid — one link per wrapper");
+      const href = node.attrs["href"] ?? "";
+      if (!href) {
+        err("E-HREF", "<a> requires href (absolute https?:// or mailto: URL, or #slide-N internal jump)");
+      } else if (!EXTERNAL_HREF_RE.test(href) && !INTERNAL_HREF_RE.test(href)) {
+        err("E-HREF", `href="${href}" is not canonical (absolute https?:// or mailto: URL, or #slide-N internal jump)`);
+      }
+      if (!node.children.some((c) => LINKABLE_ELEMENTS.has(c.tag))) {
+        err("E-HREF", "<a> must wrap a visible element (text, shape, image, or g)");
       }
     }
     for (const [k, v] of Object.entries(node.attrs)) {
@@ -236,7 +257,8 @@ function checkPage(source: string, fileName: string): PageReport {
     if (isTopGroup && !node.attrs["data-block-id"]) {
       err("E-MARKER", `top-level <g> requires data-block-id="bN"`);
     }
-    for (const child of node.children) walk(child, inTopGroup || isTopGroup);
+    const nextInLink = inLink || node.tag === "a";
+    for (const child of node.children) walk(child, inTopGroup || isTopGroup, nextInLink);
   };
   for (const child of root.children) walk(child, false);
 
@@ -313,7 +335,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
 
 function help(): never {
   console.log(`
-svg-check.ts v1.1.1 — canonical SVG deck quality gate
+svg-check.ts v1.2.0 — canonical SVG deck quality gate
 
 Usage:
   bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]

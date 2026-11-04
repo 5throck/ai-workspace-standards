@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.1.0
+ * @version 1.2.0
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
@@ -170,17 +170,34 @@ function shapeRotation(node: SvgNode, warnings: CompileWarning[]): number {
 function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[]) {
   const shapes: ShapeXml[] = [];
   const images: { rel: string; file: string }[] = [];
+  const pageLinks = new Map<string, { relId: string; internal: boolean }>();
   let idSeq = 1;
   const nextId = () => ++idSeq;
+
+  /** Resolve (dedupe) an <a href> into a slide-level relationship id and emit its hlinkClick. */
+  const hlinkXml = (href: string | null): string => {
+    if (!href) return "";
+    let e = pageLinks.get(href);
+    if (!e) {
+      e = { relId: `rIdHlk${pageLinks.size + 1}`, internal: href.startsWith("#slide-") };
+      pageLinks.set(href, e);
+    }
+    return `<a:hlinkClick r:id="${e.relId}"${e.internal ? ' action="ppaction://hlinksldjump"' : ""}/>`;
+  };
 
   const xfrm = (x: number, y: number, w: number, h: number, rot = 0): string =>
     `<a:xfrm${rot ? ` rot="${rot}"` : ""}><a:off x="${emu(x)}" y="${emu(y)}"/><a:ext cx="${emu(Math.max(w, 1))}" cy="${emu(Math.max(h, 1))}"/></a:xfrm>`;
 
-  const spShell = (id: number, name: string, geom: string, fill: string, ln: string, xf: string): string =>
-    `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${esc(name)}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${xf}${geom}${fill}${ln}<a:effectLst/></p:spPr></p:sp>`;
+  const spShell = (id: number, name: string, geom: string, fill: string, ln: string, xf: string, linkXml = ""): string =>
+    `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${esc(name)}">${linkXml}</p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${xf}${geom}${fill}${ln}<a:effectLst/></p:spPr></p:sp>`;
 
-  const walk = (node: SvgNode, off: Offset) => {
+  const walk = (node: SvgNode, off: Offset, link: string | null = null) => {
     const attrs = node.attrs;
+    if (node.tag === "a") {
+      const aHref = attrs["href"] || null;
+      for (const c of node.children) walk(c, off, aHref);
+      return;
+    }
     let localOff = off;
     const t = attrs["transform"];
     if (t && node.tag === "g") {
@@ -199,7 +216,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const rx = parseFloat(attrs["rx"] ?? "0") || 0;
         const geom = rx > 0 ? `<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val ${Math.round((rx / Math.min(w, h)) * 100000)}"/></a:avLst></a:prstGeom>` : `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>`;
         const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
-        shapes.push({ xml: spShell(nextId(), `rect-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(x, y, w, h, rot)) });
+        shapes.push({ xml: spShell(nextId(), `rect-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(x, y, w, h, rot), link ? hlinkXml(link) : "") });
         break;
       }
       case "circle":
@@ -210,7 +227,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const ry = node.tag === "circle" ? parseFloat(attrs["r"] ?? "0") || 0 : parseFloat(attrs["ry"] ?? "0") || 0;
         const geom = `<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>`;
         const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
-        shapes.push({ xml: spShell(nextId(), `ellipse-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(cx - rx, cy - ry, rx * 2, ry * 2, rot)) });
+        shapes.push({ xml: spShell(nextId(), `ellipse-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(cx - rx, cy - ry, rx * 2, ry * 2, rot), link ? hlinkXml(link) : "") });
         break;
       }
       case "line": {
@@ -221,7 +238,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const id = nextId();
         const xf = `<a:xfrm${x2 < x1 ? ' flipH="1"' : ""}${y2 < y1 ? ' flipV="1"' : ""}><a:off x="${emu(Math.min(x1, x2))}" y="${emu(Math.min(y1, y2))}"/><a:ext cx="${emu(Math.abs(x2 - x1) || 1)}" cy="${emu(Math.abs(y2 - y1) || 1)}"/></a:xfrm>`;
         shapes.push({
-          xml: `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="line-${id}"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${xf}<a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:noFill/>${lineXml(node, gradients) || `<a:ln w="${emu(1)}"><a:solidFill><a:srgbClr val="${tokens.colors.text ?? "202020"}"/></a:solidFill></a:ln>`}<a:effectLst/></p:spPr></p:cxnSp>`,
+          xml: `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="line-${id}">${link ? hlinkXml(link) : ""}"<p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${xf}<a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:noFill/>${lineXml(node, gradients) || `<a:ln w="${emu(1)}"><a:solidFill><a:srgbClr val="${tokens.colors.text ?? "202020"}"/></a:solidFill></a:ln>`}<a:effectLst/></p:spPr></p:cxnSp>`,
         });
         break;
       }
@@ -244,7 +261,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const geom = `<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:rect l="0" t="0" r="${emu(bbox.w)}" b="${emu(bbox.h)}"/><a:pathLst><a:path w="${emu(bbox.w)}" h="${emu(bbox.h)}">${body}</a:path></a:pathLst></a:custGeom>`;
         if (!attrs["fill"]) warnings.push({ rule: "W-IMPLICIT-FILL", message: `${node.tag} without fill compiles as noFill (SVG default black is not applied) — set fill explicitly` });
         const fill = attrs["fill"] ? fillXml(node, gradients) : "<a:noFill/>";
-        shapes.push({ xml: spShell(nextId(), `${node.tag}-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(ox, oy, bbox.w, bbox.h, rot)) });
+        shapes.push({ xml: spShell(nextId(), `${node.tag}-${idSeq}`, geom, fill, lineXml(node, gradients), xfrm(ox, oy, bbox.w, bbox.h, rot), link ? hlinkXml(link) : "") });
         break;
       }
       case "image": {
@@ -259,7 +276,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const rel = `rIdImg${id}`;
         images.push({ rel, file: href });
         shapes.push({
-          xml: `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="image-${id}" descr="${esc(href)}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rel}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>${xfrm(x, y, w, h, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`,
+          xml: `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="image-${id}" descr="${esc(href)}">${link ? hlinkXml(link) : ""}</p:cNvPr><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rel}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>${xfrm(x, y, w, h, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`,
         });
         break;
       }
@@ -302,7 +319,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const paraXml = paras.map((p) => `<a:p><a:pPr algn="${algn}"/><a:r><a:rPr lang="en-US" sz="${Math.round(fs * 100)}"${bold}${italic}${underline}${strike}${spacing} dirty="0"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="${esc(font)}"/><a:ea typeface="${esc(tokens.fonts.eastasia_minor)}"/></a:rPr><a:t>${esc(p.text)}</a:t></a:r></a:p>`).join("");
         const id = nextId();
         shapes.push({
-          xml: `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="text-${id}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(boxX, top, boxW, boxH, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:effectLst/></p:spPr><p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paraXml}</p:txBody></p:sp>`,
+          xml: `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="text-${id}">${link ? hlinkXml(link) : ""}</p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(boxX, top, boxW, boxH, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:effectLst/></p:spPr><p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paraXml}</p:txBody></p:sp>`,
         });
         break;
       }
@@ -311,11 +328,12 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
     }
     for (const c of node.children) {
       if (c.tag === "defs" || c.tag === "tspan" || c.tag === "stop" || c.tag === "linearGradient" || c.tag === "radialGradient") continue;
-      walk(c, localOff);
+      walk(c, localOff, link);
     }
   };
   for (const c of root.children) walk(c, { tx: 0, ty: 0 });
-  return { shapes, images };
+  const links = [...pageLinks.entries()].map(([href, e]) => ({ href, relId: e.relId, internal: e.internal }));
+  return { shapes, images, links };
 }
 
 // nodeTextOf: local import-free copy for tspan text (avoids exporting from svg-check)
@@ -360,8 +378,11 @@ function masterAndLayoutXml(tokens: DeckTokens): { master: string; layout: strin
   return { master, layout };
 }
 
-function slideXml(shapes: ShapeXml[], tokens: DeckTokens): string {
-  return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+function slideXml(shapes: ShapeXml[], tokens: DeckTokens, transition?: string): string {
+  const trans = transition && transition !== "none"
+    ? `<p:transition spd="med"><p:${transition}/></p:transition>`
+    : "";
+  return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${trans}</p:sld>`;
 }
 
 function notesXml(slideNum: number, text: string): string {
@@ -452,7 +473,7 @@ export function compileDeck(opts: CompileOptions): CompileResult {
     const pageIdx = idx + 1;
     const root = parseSvg(readFileSync(join(deckDir, f), "utf-8"));
     const grads = collectGradients(root);
-    const { shapes, images } = walkPage(root, tokens, grads, warnings);
+    const { shapes, images, links } = walkPage(root, tokens, grads, warnings);
     const rels: string[] = [
       `<Relationship Id="rIdLay1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>`,
     ];
@@ -464,10 +485,19 @@ export function compileDeck(opts: CompileOptions): CompileResult {
       media.push({ name: `ppt/${mediaName}`, bytes: new Uint8Array(readFileSync(imgPath)) });
       rels.push(`<Relationship Id="${img.rel}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../${mediaName}"/>`);
     });
+    for (const l of links) {
+      if (l.internal) {
+        const target = l.href.match(/^#slide-(\d+)$/)![1];
+        rels.push(`<Relationship Id="${l.relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slide${target}.xml"/>`);
+      } else {
+        rels.push(`<Relationship Id="${l.relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${esc(l.href)}" TargetMode="External"/>`);
+      }
+    }
     if (notesByPage.has(pageIdx)) {
       rels.push(`<Relationship Id="rIdNotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide${pageIdx}.xml"/>`);
     }
-    slideParts.push({ name: `ppt/slides/slide${pageIdx}.xml`, data: new TextEncoder().encode(slideXml(shapes, tokens)) });
+    const transition = root.attrs["data-slide-transition"];
+    slideParts.push({ name: `ppt/slides/slide${pageIdx}.xml`, data: new TextEncoder().encode(slideXml(shapes, tokens, transition)) });
     slideRels.push({ name: `ppt/slides/_rels/slide${pageIdx}.xml.rels`, data: new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join("")}</Relationships>`) });
   });
 
@@ -574,7 +604,7 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.1.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.2.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\
