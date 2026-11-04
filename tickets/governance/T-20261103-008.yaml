@@ -15,12 +15,25 @@ title: >-
   adjudicated, the T-20261103-002 unit pin asserts these 3 as documented
   residual fails. Discovered 2026-11-03 during T-20261103-002 implementation.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-03T09:20:30.199+09:00'
 history:
   - at: '2026-11-03T09:20:30.199+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-04T23:42:01.163+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T23:42:01.192+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T23:42:01.218+09:00'
+    from: review
+    to: done
+result: >-
+  Duplicate: re-created as T-20261104-002 after the 2026-11-03 store rollback
+  wrongly reported the original lost. Original survived; ruling landed via
+  DEC-20261104-01. This id closed as the duplicate; -002 carries the
+  disposition.
 error: null

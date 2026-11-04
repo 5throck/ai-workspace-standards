@@ -15,12 +15,26 @@ title: >-
   residual fails. Re-created 2026-11-04 (original T-20261103-008 lost in the
   2026-11-03 store rollback).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-04T07:40:29.973+09:00'
 history:
   - at: '2026-11-04T07:40:29.973+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-04T23:41:54.842+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T23:41:54.864+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T23:41:54.882+09:00'
+    from: review
+    to: done
+result: >-
+  Ruling landed: variant-identity registration chosen via DEC-20261104-01
+  (docs/decisions/DEC-20261104-01.md, commit 74b3303bb); 3 co-abap
+  variant-identity rows added to docs/workspace-schema.json;
+  consumer-declaration and removal alternatives rejected with recorded
+  rationale.
 error: null

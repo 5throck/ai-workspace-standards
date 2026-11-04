@@ -2754,6 +2754,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261104-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -7604,7 +7609,7 @@
       ],
       "usage": {
         "sessions": 5,
-        "last_used": "2026-11-03"
+        "last_used": "2026-11-05"
       }
     },
     {
@@ -8037,7 +8042,7 @@
       ],
       "usage": {
         "sessions": 5,
-        "last_used": "2026-11-03"
+        "last_used": "2026-11-05"
       }
     },
     {
@@ -8736,7 +8741,7 @@
       ],
       "usage": {
         "sessions": 5,
-        "last_used": "2026-11-03"
+        "last_used": "2026-11-05"
       }
     },
     {
