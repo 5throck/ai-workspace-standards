@@ -1,4 +1,20 @@
-// @version 1.38.0
+// @version 1.39.0
+// v1.39.0 (2026-11-05, T-20261104-004 item 3 — spec
+//          docs/designs/2026-11-04-project-loss-hardening-design.md §5.3b
+//          decision (i)): new step 3.87 — ticket-store memory-drift check,
+//          BLOCKING. Every ticket id cited in memory/*.md
+//          (\b[TU]-\d{8}-\d{3,4}\b) must resolve via resolveTicketLocation
+//          (live stores + both archives); the pure check lives in
+//          helpers/ticket-drift.ts v1.0.0. Read-only, lock-free, placed with
+//          the other cheap gates in the 3.x band: every sync already runs
+//          after sessions write memory, and dev-sync is the workspace's
+//          strongest recurring gate — this is the check that would have caught
+//          the vanished original T-20261104-004 filing at the first
+//          post-citation sync (its id was cited at memory/2026-11-04.md:175).
+//          `ticket.ts doctor` carries the same check as the report-only
+//          diagnostic arm (design §5.3b decision (ii)). Absent memory/ =
+//          documented no-op (fresh scaffolds); session-start hook was rejected
+//          at the Design Gate (§4-B).
 // v1.38.0 (2026-11-04, U-20261104-003): new step 4.87 — agent frontmatter
 //          last_updated bump. A sync pass that mechanically rewrites an agent
 //          file's frontmatter (tier normalization, model-registry delivery,
@@ -321,6 +337,7 @@ import { runDeclaredGenerators } from './lib/generator-manifest.ts';
 import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
 import { localDateISO } from './lib/local-date.ts';
 import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
+import { driftCheck } from './helpers/ticket-drift.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -822,6 +839,38 @@ if (!generatorRun.ok) {
     console.error(`${RED}✗ Step 3.86: declared generator(s) FAILED — /sync aborted (see the [generator:<name>] rows above)${RESET}`);
     console.error('  Fix: run the failing generator by hand to inspect the full (unredacted) failure, then re-run /sync.');
     if (import.meta.main) process.exit(1);
+}
+
+// 3.87 Ticket-store memory-drift check (BLOCKING — v1.39.0, T-20261104-004
+//     item 3, spec docs/designs/2026-11-04-project-loss-hardening-design.md
+//     §5.3b decision (i)). Every ticket id CITED in memory/*.md
+//     (\b[TU]-\d{8}-\d{3,4}\b) must resolve via resolveTicketLocation (live
+//     stores + both archives). The original T-20261104-004 filing silently
+//     vanished while its id stayed cited in the same day's memory log — a
+//     within-session-detectable defect nobody could detect. This step is the
+//     PRIMARY, machine-enforced trigger (design §4-B option C): read-only,
+//     lock-free, cheap, placed with the other cheap gates in the 3.x band;
+//     every sync already runs after sessions write memory. `ticket.ts doctor`
+//     reports the same findings as the diagnostic arm (decision (ii)). The
+//     check is deliberately bounded to the citation pattern — free-text
+//     references that do not match the id shape are out of scope. Absent
+//     memory/ (fresh scaffold) is a documented no-op; absent stores make every
+//     cited id unresolved, which is exactly the silent-loss signal.
+if (fs.existsSync(path.join('memory'))) {
+    const drift = await driftCheck({
+        memoryDir: path.join('memory'),
+        serviceDir: path.join('tickets'),
+        governanceDir: path.join('tickets', 'governance'),
+    });
+    if (drift.unresolved.length > 0) {
+        console.error(`${RED}✗ Step 3.87: ticket-store memory-drift — ${drift.unresolved.length} cited ticket id(s) resolve in NO store or archive (of ${drift.cited} cited)${RESET}`);
+        for (const f of drift.unresolved) {
+            console.error(`   ${f.id} cited at ${f.file}:${f.line}`);
+        }
+        console.error('  Fix: restore the vanished ticket file (check tickets/governance/archive, git history of tickets/), or correct the citation in the named memory file if it is a typo.');
+        if (import.meta.main) process.exit(1);
+    }
+    console.log(`${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${drift.cited} distinct cited id(s), all resolve)${RESET}`);
 }
 
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check

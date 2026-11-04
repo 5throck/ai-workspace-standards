@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.38.0
+- **Version**: 1.39.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-04
+- **Last Updated**: 2026-11-05
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 

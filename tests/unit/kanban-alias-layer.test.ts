@@ -137,8 +137,12 @@ describe('validateKanbanAliases', () => {
 // ── schema tolerance: sev / blocked_reason / action history ──────────────────
 
 describe('validateTicket v1.10.0 optional fields (no migration)', () => {
+  // Title varies per probe: the store's v1.15.0 duplicate refusal (exact
+  // normalized-title match) would refuse repeated identical titles.
+  let probeSeq = 0;
   function baseTicket(): Ticket {
-    return createTicket(dir, { kind: 'manual', title: 'tolerance probe', priority: 'normal' });
+    probeSeq += 1;
+    return createTicket(dir, { kind: 'manual', title: `tolerance probe ${probeSeq}`, priority: 'normal' });
   }
 
   test('an existing ticket without sev/blocked_reason still parses', () => {
