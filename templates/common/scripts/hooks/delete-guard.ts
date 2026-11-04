@@ -75,7 +75,17 @@
  * shell parser; obfuscated deletes (scripts calling fs.rmSync, find -delete,
  * git clean) are out of scope by design (design N3; v2 candidates).
  *
- * @version 1.1.0
+ * @version 1.1.1
+ *
+ * v1.1.1 (2026-11-05, windows-latest CI + U-20261104-002 follow-through): the
+ * containment helpers are separator- and case-agnostic. A POSIX-literal root
+ * ('/ws') vs a path.sepped target (join() backslashes on win32) never matched
+ * under bare startsWith(root + sep) — the security-validator.ts U-20261104-002
+ * precedent's Windows twin — and win32 paths are case-insensitive, so a
+ * case-mismatched spelling of an in-workspace target must not read as
+ * "outside" (resolve-fallback targets bypass realpath case-normalization).
+ * Both paths are now resolve()-normalized and, on win32, case-folded before
+ * comparison; allowlist segments stay case-sensitive by design.
  *
  * v1.1.0 (2026-11-05, L1 promotion — forced by the propagation SSOT): the
  * gemini-settings propagation domain (scripts/propagation-map.json; dev-sync
@@ -239,10 +249,11 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
   return result;
 }
 
-/** Expand a leading `~` to the user's home directory (design §5.1 step 4). */
+/** Expand a leading `~` to the user's home directory (design §5.1 step 4).
+ * Accepts both `~/` and the platform separator (`~\\` on win32). */
 export function expandTilde(p: string): string {
   if (p === '~') return homedir();
-  if (p.startsWith('~/')) return join(homedir(), p.slice(2));
+  if (p.startsWith('~/') || p.startsWith('~' + sep)) return join(homedir(), p.slice(2));
   return p;
 }
 
@@ -257,10 +268,26 @@ export function canonicalize(p: string): string {
   }
 }
 
+/** Normalize a path for containment comparison (U-20261104-002 hardening,
+ * windows-sep class): lexical resolve() makes the comparison separator-agnostic
+ * (a POSIX-literal root and a path.sepped target converge), and on win32 the
+ * comparison is case-folded because the filesystem is case-insensitive — a
+ * case-mismatched spelling of an in-workspace target must not read as
+ * "outside the workspace" (non-existent targets take the resolve() fallback
+ * and get no realpath case-normalization). */
+export function normalizeForCompare(p: string): string {
+  const resolved = resolve(p);
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+}
+
 /** Inside check against the (canonicalized) workspace root: the root itself
- * or anything beneath it. */
+ * or anything beneath it. Separator- and case-agnostic (see
+ * normalizeForCompare); the root + sep prefix still rejects sibling
+ * directories whose names share the root's prefix (`/ws` vs `/ws-evil`). */
 export function isInsideWorkspace(root: string, target: string): boolean {
-  return target === root || target.startsWith(root + sep);
+  const r = normalizeForCompare(root);
+  const t = normalizeForCompare(target);
+  return t === r || t.startsWith(r + sep);
 }
 
 // ---------------------------------------------------------------------------
@@ -286,10 +313,15 @@ function detectWorkspaceRoot(): string {
 // ---------------------------------------------------------------------------
 
 /** Path-segment allowlist match, relative to the workspace root,
- * case-sensitive. The root itself has no segments → never allowlisted. */
+ * case-sensitive (deliberate: `Dist` must not pass as `dist`). The root
+ * itself has no segments → never allowlisted. Segments are computed from
+ * resolve()-normalized operands so the slice is separator-agnostic on win32
+ * (normalizeForCompare's case-fold applies to containment only). */
 export function isAllowlisted(root: string, target: string): boolean {
-  if (!isInsideWorkspace(root, target) || target === root) return false;
-  const relative = target.slice(root.length + sep.length);
+  const resolvedRoot = resolve(root);
+  const resolvedTarget = resolve(target);
+  if (!isInsideWorkspace(root, target) || resolvedTarget === resolvedRoot) return false;
+  const relative = resolvedTarget.slice(resolvedRoot.length + sep.length);
   return relative.split(sep).some((segment) => ALLOWLIST_SEGMENTS.has(segment));
 }
 

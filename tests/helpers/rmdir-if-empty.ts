@@ -7,14 +7,28 @@
  * repo root by a test run was the indirect trigger of the 2026-11-04 `rm -rf Projects`
  * incident.
  *
- * Swallows ENOTEMPTY (dir has content — leave it alone) and ENOENT (already gone);
- * rethrows anything else so real filesystem errors stay loud.
+ * Error contract (cross-platform, v1.1.0): missing target (ENOENT on lstat) and
+ * non-empty target (ENOTEMPTY on rmdir) are swallowed; everything else stays loud.
+ * The not-a-directory leg is enforced by type (lstat) rather than by errno:
+ * `fs.rmdir()` on a file is ENOTDIR on POSIX but ENOENT on win32 (Node docs,
+ * nodejs/node#18014 — the CRT's _wrmdir maps ERROR_FILE_NOT_FOUND to ENOENT), so an
+ * errno-matched swallow silently ate the loud leg on windows-latest.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
-import { rmdirSync } from "node:fs";
+import { lstatSync, rmdirSync } from "node:fs";
 
 export function rmdirIfEmpty(dir: string): void {
+  let isDirectory = false;
+  try {
+    isDirectory = lstatSync(dir).isDirectory();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return; // already gone
+    throw err;
+  }
+  if (!isDirectory) {
+    throw new Error(`rmdirIfEmpty: refusing to rmdir a non-directory: ${dir}`);
+  }
   try {
     rmdirSync(dir);
   } catch (err) {
