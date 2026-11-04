@@ -397,7 +397,71 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     rmSync(dir, { recursive: true, force: true });
     rmSync(dir2, { recursive: true, force: true });
   });
+
+  test("P3: line/pie chart kinds compile; data-ph binds placeholders in structured mode", () => {
+    const CHART_PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="data" data-page-number="1">
+  <g data-block-id="b1">
+    <g data-block-id="b2" data-native="chart" data-frame="80,160,560,360">
+      <desc>{"kind":"line","categories":["Jul","Aug","Sep"],"series":[{"name":"Revenue","values":[4.2,4.6,5.1]}]}</desc>
+    </g>
+    <g data-block-id="b3" data-native="chart" data-frame="700,160,500,360">
+      <desc>{"kind":"pie","categories":["Jul","Aug","Sep"],"series":[{"name":"Share","values":[4.2,4.6,5.1]}],"colors":["1F3864","C00000","6B6B6B"]}</desc>
+    </g>
+    <text x="80" y="600" font-size="24" font-weight="bold" fill="#1F3864" data-ph="title">Revenue beat plan for the third straight quarter</text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-p3"), [
+      { name: "01-charts.svg", body: CHART_PAGE },
+    ], "Revenue beat plan for the third straight quarter\n");
+    const { zip, receipt } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", nativeCharts: true, structuredLayouts: true });
+    expect((receipt as { native_objects?: number }).native_objects).toBe(2);
+    const pkg = unzipSync(zip);
+    const s1 = new TextDecoder().decode(pkg["ppt/slides/slide1.xml"]!);
+    // line + pie chart frames
+    // graphicData uri + inner c:chart xmlns each match once per frame → 2 frames x 2
+    expect(s1.match(/drawingml\/2006\/chart/g)?.length).toBe(4);
+    expect(s1.match(/<a:graphicData uri="http:\/\/schemas.openxmlformats.org\/drawingml\/2006\/chart"/g)?.length).toBe(2);
+    // data-ph text bound to title placeholder while keeping authored xfrm
+    expect(s1).toContain('<p:ph type="title" idx="0"/>');
+    expect(s1).toContain('sz="2400"'); // authored size preserved (binding does not restyle)
+
+    // chart part kinds: find both charts and verify plot kinds
+    const chartFiles = Object.keys(pkg).filter((k) => /^ppt\/charts\/chart\d+\.xml$/.test(k)).sort();
+    expect(chartFiles.length).toBe(2);
+    const kinds = chartFiles.map((f) => {
+      const x = new TextDecoder().decode(pkg[f]!);
+      if (x.includes("<c:lineChart>")) return "line";
+      if (x.includes("<c:pieChart>")) return "pie";
+      return "bar";
+    }).sort();
+    expect(kinds).toEqual(["line", "pie"]);
+    const pieXml = new TextDecoder().decode(pkg[chartFiles.find((f) => new TextDecoder().decode(pkg[f]!).includes("<c:pieChart>"))!]!);
+    expect(pieXml).toContain('<c:dPt><c:idx val="1"/>'); // per-point colors
+    expect(pieXml).not.toContain("catAx"); // pie has no axes
+    // workbook for pie also present (Edit Data)
+    const wb = Object.keys(pkg).filter((k) => k.startsWith("ppt/embeddings/") && k.endsWith(".xlsx"));
+    expect(wb.length).toBe(2);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("P3: invalid data-ph value blocks at the gate; flat export leaves ph unbound", () => {
+    const BAD_PH = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1"><g data-block-id="b1"><text x="80" y="100" font-size="24" fill="#202020" data-ph="kicker">Outlook remains positive</text></g></svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-ph"), [{ name: "01.svg", body: BAD_PH }], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const rules = report.pages.flatMap((p) => p.errors.map((e) => e.rule));
+    expect(rules).toContain("E-PH");
+    // flat mode: valid marker accepted but inert (no ph in output)
+    const GOOD = BAD_PH.replace('data-ph="kicker"', 'data-ph="title"');
+    writeFileSync(join(dir, "01.svg"), GOOD);
+    const report2 = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report2.summary.errors).toBe(0);
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+    expect(s1).not.toContain("<p:ph");
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
+
 
 
 

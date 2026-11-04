@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * @version 1.3.0
+ * @version 1.4.0
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
@@ -173,7 +173,7 @@ interface NativeBlock {
   payload: Record<string, unknown>;
 }
 
-function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[], nativeMode: boolean) {
+function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, GradientDef>, warnings: CompileWarning[], nativeMode: boolean, structured: boolean) {
   const shapes: ShapeXml[] = [];
   const images: { rel: string; file: string }[] = [];
   const pageLinks = new Map<string, { relId: string; internal: boolean }>();
@@ -336,8 +336,12 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const color = fillPaint.kind === "solid" ? fillPaint.color : tokens.colors.text ?? "202020";
         const paraXml = paras.map((p) => `<a:p><a:pPr algn="${algn}"/><a:r><a:rPr lang="en-US" sz="${Math.round(fs * 100)}"${bold}${italic}${underline}${strike}${spacing} dirty="0"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="${esc(font)}"/><a:ea typeface="${esc(tokens.fonts.eastasia_minor)}"/></a:rPr><a:t>${esc(p.text)}</a:t></a:r></a:p>`).join("");
         const id = nextId();
+        const phType = attrs["data-ph"];
+        const phXml = structured && (phType === "title" || phType === "body")
+          ? `<p:nvPr><p:ph type="${phType}" idx="${phType === "title" ? 0 : 1}"/></p:nvPr>`
+          : "<p:nvPr/>";
         shapes.push({
-          xml: `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="text-${id}">${link ? hlinkXml(link) : ""}</p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(boxX, top, boxW, boxH, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:effectLst/></p:spPr><p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paraXml}</p:txBody></p:sp>`,
+          xml: `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="text-${id}">${link ? hlinkXml(link) : ""}</p:cNvPr><p:cNvSpPr txBox="1"/>${phXml}</p:nvSpPr><p:spPr>${xfrm(boxX, top, boxW, boxH, rot)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:effectLst/></p:spPr><p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paraXml}</p:txBody></p:sp>`,
         });
         break;
       }
@@ -469,7 +473,28 @@ function buildChartPart(block: NativeBlock, chartIdx: number, tokens: DeckTokens
     const valPts = s.values.map((v, i) => `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join("");
     return `<c:ser><c:idx val="${si}"/><c:order val="${si}"/><c:tx><c:strRef><c:f>Sheet1!$${colLetter}$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>${esc(s.name)}</c:v></c:pt></c:strCache></c:strRef></c:tx><c:spPr><a:solidFill><a:srgbClr val="${String(fill).replace("#", "").toUpperCase()}"/></a:solidFill></c:spPr><c:cat><c:strRef><c:f>Sheet1!$A$2:$A$${p.categories.length + 1}</c:f><c:strCache><c:ptCount val="${p.categories.length}"/>${catRefs}</c:strCache></c:strRef></c:cat><c:val><c:numRef><c:f>Sheet1!$${colLetter}$2:$${colLetter}$${s.values.length + 1}</c:f><c:numCache><c:formatCode>General</c:formatCode><c:ptCount val="${s.values.length}"/>${valPts}</c:numCache></c:numRef></c:val></c:ser>`;
   }).join("");
-  const chartXml = XMLDECL + `<c:chartSpace xmlns:c="${NS_C}" xmlns:a="${NS_A}" xmlns:r="${NS_R}"><c:chart><c:autoTitleDeleted val="1"/><c:plotArea><c:barChart><c:barDir val="col"/><c:grouping val="clustered"/><c:varyColors val="0"/>${sers}<c:axId val="111111111"/><c:axId val="222222222"/></c:barChart><c:catAx><c:axId val="111111111"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="222222222"/></c:catAx><c:valAx><c:axId val="222222222"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="111111111"/></c:valAx></c:plotArea><c:plotVisOnly val="1"/></c:chart><c:externalData r:id="rId1"><c:autoUpdate val="0"/></c:externalData></c:chartSpace>`;
+  const lineSers = p.series.map((s, si) => {
+    const col = (si + 2);
+    const colLetter = String.fromCharCode(64 + col);
+    const fill = String(((p.colors && p.colors[si]) || (tokens.colors.primary ?? "1F3864"))).replace("#", "").toUpperCase();
+    const valPts = s.values.map((v, i) => `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join("");
+    return `<c:ser><c:idx val="${si}"/><c:order val="${si}"/><c:tx><c:strRef><c:f>Sheet1!$${colLetter}$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>${esc(s.name)}</c:v></c:pt></c:strCache></c:strRef></c:tx><c:spPr><a:ln w="28575" cap="rnd"><a:solidFill><a:srgbClr val="${fill}"/></a:solidFill></a:ln></c:spPr><c:marker><c:symbol val="none"/></c:marker><c:cat><c:strRef><c:f>Sheet1!$A$2:$A$${p.categories.length + 1}</c:f><c:strCache><c:ptCount val="${p.categories.length}"/>${catRefs}</c:strCache></c:strRef></c:cat><c:val><c:numRef><c:f>Sheet1!$${colLetter}$2:$${colLetter}$${s.values.length + 1}</c:f><c:numCache><c:formatCode>General</c:formatCode><c:ptCount val="${s.values.length}"/>${valPts}</c:numCache></c:numRef></c:val><c:smooth val="0"/></c:ser>`;
+  }).join("");
+  const pieSer = (() => {
+    const s = p.series[0];
+    const valPts = s.values.map((v, i) => `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join("");
+    const dPts = (p.colors || []).map((c, i) => `<c:dPt><c:idx val="${i}"/><c:bubble3D val="0"/><c:spPr><a:solidFill><a:srgbClr val="${String(c).replace("#", "").toUpperCase()}"/></a:solidFill></c:spPr></c:dPt>`).join("");
+    return `<c:ser><c:idx val="0"/><c:order val="0"/><c:tx><c:strRef><c:f>Sheet1!$B$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>${esc(s.name)}</c:v></c:pt></c:strCache></c:strRef></c:tx>${dPts}<c:cat><c:strRef><c:f>Sheet1!$A$2:$A$${p.categories.length + 1}</c:f><c:strCache><c:ptCount val="${p.categories.length}"/>${catRefs}</c:strCache></c:strRef></c:cat><c:val><c:numRef><c:f>Sheet1!$B$2:$B$${s.values.length + 1}</c:f><c:numCache><c:formatCode>General</c:formatCode><c:ptCount val="${s.values.length}"/>${valPts}</c:numCache></c:numRef></c:val></c:ser>`;
+  })();
+  let plotArea: string;
+  if (p.kind === "line") {
+    plotArea = `<c:lineChart><c:grouping val="standard"/><c:varyColors val="0"/>${lineSers}<c:axId val="111111111"/><c:axId val="222222222"/></c:lineChart><c:catAx><c:axId val="111111111"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="222222222"/></c:catAx><c:valAx><c:axId val="222222222"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="111111111"/></c:valAx>`;
+  } else if (p.kind === "pie") {
+    plotArea = `<c:pieChart><c:varyColors val="1"/>${pieSer}</c:pieChart>`;
+  } else {
+    plotArea = `<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/><c:varyColors val="0"/>${sers}<c:axId val="111111111"/><c:axId val="222222222"/></c:barChart><c:catAx><c:axId val="111111111"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="222222222"/></c:catAx><c:valAx><c:axId val="222222222"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="111111111"/></c:valAx>`;
+  }
+  const chartXml = XMLDECL + `<c:chartSpace xmlns:c="${NS_C}" xmlns:a="${NS_A}" xmlns:r="${NS_R}"><c:chart><c:autoTitleDeleted val="1"/><c:plotArea>${plotArea}</c:plotArea><c:plotVisOnly val="1"/></c:chart><c:externalData r:id="rId1"><c:autoUpdate val="0"/></c:externalData></c:chartSpace>`;
   const chartRels = XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/package" Target="../embeddings/Microsoft_Excel_Worksheet${chartIdx}.xlsx"/></Relationships>`;
 
   // Minimal valid xlsx workbook (Edit Data source), built with fflate at package time
@@ -577,7 +602,7 @@ export function compileDeck(opts: CompileOptions): CompileResult {
     const pageIdx = idx + 1;
     const root = parseSvg(readFileSync(join(deckDir, f), "utf-8"));
     const grads = collectGradients(root);
-    const { shapes, images, links, nativeBlocks } = walkPage(root, tokens, grads, warnings, opts.nativeCharts === true);
+    const { shapes, images, links, nativeBlocks } = walkPage(root, tokens, grads, warnings, opts.nativeCharts === true, opts.structuredLayouts === true);
     const role = root.attrs["data-slide-role"] ?? "content";
     if (!pageRoles.includes(role)) pageRoles.push(role);
     pageRoleByPage.set(pageIdx, role);
@@ -611,7 +636,7 @@ export function compileDeck(opts: CompileOptions): CompileResult {
           graphicFrames += tableGraphicFrame(nb.block, ++idSeq, tokens);
         } else if (nb.block.kind === "chart") {
           const payloadKind = (nb.block.payload as { kind?: string }).kind;
-          if (payloadKind !== "bar") {
+          if (!["bar", "line", "pie"].includes(String(payloadKind))) {
             warnings.push({ rule: "W-NATIVE-UNSUPPORTED", message: `native chart kind "${payloadKind}" unsupported — fallback shapes kept` });
             continue;
           }
@@ -742,7 +767,7 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.3.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.4.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\

@@ -6,7 +6,7 @@ description: >
   hand authoring with locked registry tokens. Use when: authoring or
   repairing slide pages for the co-work native PPTX deck capability, or
   deciding whether an SVG construct is canonical / compatible / invalid.
-version: 1.3.0
+version: 1.4.0
 last_reviewed: 2026-11-03
 status: active
 scope: co-work
