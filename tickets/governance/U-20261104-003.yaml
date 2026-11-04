@@ -1,0 +1,77 @@
+schemaVersion: 1
+id: U-20261104-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-04T06:07:21.746+09:00'
+history:
+  - at: '2026-11-04T06:07:21.746+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-04T06:32:12.277+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-04T11:16:57.246+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-04T11:16:57.246+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #1847 (merged): dev-sync v1.38.0 new step 4.87 — for each
+  sync-modified agent .md whose HEAD→worktree diff is confined to the
+  frontmatter block, top-level last_updated is re-stamped to the run date
+  (shared primitive helpers/agent-mechanical-date-bump.ts v1.0.0, L0+L1). No-op
+  syncs stay no-ops (unchanged content never bumped), body edits never bumped,
+  missing key never injected, new files skipped, idempotent — 16 unit cases +
+  E2E harness verified. The 34 co-newbiz warnings from mechanical sync commit
+  0b1a406c will not recur.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.28.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    A workspace-sync run (in this instance commit 0b1a406c, 2026-10-28, which
+    mechanically rewrote the tier: block in variant agents — e.g.
+    agents/compliance-officer.md — from a per-tool map to a scalar tier) does
+    not update the frontmatter last_updated field, leaving it at the older date
+    (2026-10-26) while the file's latest git commit is newer. Result:
+    agent-lifecycle-audit emits 34 identical "frontmatter last_updated is older
+    than the last git commit" warnings across the variant, which is recurring
+    noise that desensitizes teams to real drift. Expected: either (a) the sync
+    script bumps last_updated when it rewrites frontmatter fields, or (b) the
+    lifecycle audit distinguishes pure mechanical rewrites (no semantic change)
+    and does not warn on them. Reproduction: in the co-newbiz variant, run bun
+    run agent-lifecycle-audit → 34 warnings, all dated to the single 0b1a406c
+    sync commit.
+  affected_paths:
+    - scripts/dev-sync.ts
+  identity_source: cwd
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/dev-sync.ts=false
+  dedupe_key: 4bb8c8eb0b770ff3e50f63f355dc0d45b01a5e3a17e5bd4751315c68741255f0
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-04T06:07:21.746+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1847
+    template_version: unreleased
+    summary: >-
+      Fixed in PR #1847 (merged): dev-sync v1.38.0 new step 4.87 — for each
+      sync-modified agent .md whose HEAD→worktree diff is confined to the
+      frontmatter block, top-level last_updated is re-stamped to the run date
+      (shared primitive helpers/agent-mechanical-date-bump.ts v1.0.0, L0+L1).
+      No-op syncs stay no-ops (unchanged content never bumped), body edits never
+      bumped, missing key never injected, new files skipped, idempotent — 16
+      unit cases + E2E harness verified. The 34 co-newbiz warnings from
+      mechanical sync commit 0b1a406c will not recur.

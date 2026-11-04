@@ -45,14 +45,13 @@ history:
   - at: '2026-11-03T04:12:58.102+09:00'
     from: running
     to: review
-  - at: '2026-11-03T09:56:51.960+09:00'
+  - at: '2026-11-04T11:17:43.439+09:00'
     from: review
     to: done
 result: >-
-  Decision executed 2026-11-03: weekly skill-graph consolidation triage folded
-  into the 01:30 fleet-review+resync runner's FRIDAY FULL OVERRIDE (runner
-  prompt updated via CronUpdate, one prompt-line addition, no new schedule).
-  SKILL.md cadence note already updated (PR #1831, v1.3.0) to record the revival
-  home. DEC record for the decision included in the batch PR by the
-  security/docs dispatch; runner is the live trigger.
+  Decision executed 2026-11-03, fully landed by 2026-11-04: (1) weekly
+  skill-graph consolidation triage folded into the 01:30 fleet runner's FRIDAY
+  FULL OVERRIDE (runner prompt updated via automation tooling); (2) SKILL.md
+  v1.3.1 cadence note records the revival home (PR #1845); DEC-20261103-04
+  records the decision. Runner fires next Friday.
 error: null

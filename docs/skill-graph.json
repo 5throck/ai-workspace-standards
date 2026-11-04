@@ -2749,6 +2749,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261104-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
