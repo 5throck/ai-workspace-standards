@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.7.0
+ * @version 1.7.1
  * v1.7.0 (2026-10-29, U-20261028-018 + U-20261028-004 rider): the gitleaks
  *           invocation passes --config .gitleaks.toml (existsSync-guarded,
  *           pre-commit.ts guard shape) so push-time scans run under the same
@@ -255,7 +255,10 @@ async function main() {
   console.log("=== pre-push changed-path tests ===");
   const changedTestFiles = (await collectPushedChangedFiles(refUpdates))
     .map(f => f.replace(/\\/g, '/'))
-    .filter(f => f.startsWith('tests/') && f.endsWith('.test.ts'));
+    // Deleted test files appear in the pushed-range diff but cannot be
+    // re-run — bun test would fail with "filters did not match any test
+    // files" and block every deletion push (observed 2026-11-04, PR #1848).
+    .filter(f => f.startsWith('tests/') && f.endsWith('.test.ts') && existsSync(f));
   if (changedTestFiles.length > 0) {
     try {
       console.log(`Running ${changedTestFiles.length} changed test file(s)...`);
