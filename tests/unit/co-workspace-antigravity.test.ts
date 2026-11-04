@@ -5,6 +5,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import { agyArgs, parseAgyLine } from "../../services/co-workspace/src/antigravity";
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState } from "../../services/co-workspace/src/server";
@@ -74,10 +75,13 @@ describe("gateway server — antigravity runtime end to end (fake agy binary)", 
   mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
+    // T-20261104-003: absolute fixture root — no relative Projects/ tree under the
+    // runner cwd (project-loss hardening design §5.2).
     `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
+mkdirSync(\`\${projectsRoot}/\${name}/.hermes/skills\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake\\n");
 `,
   );
   const binDir = join(tmpdir(), `gw-agy-bin-${crypto.randomUUID().slice(0, 8)}`);
@@ -117,7 +121,11 @@ console.log('{"event":"result","result":{"conversation_id":"conv-agy","status":"
   });
   const server = createServer(createState(cfg));
   const base = `http://127.0.0.1:${server.port}`;
-  afterAll(() => server.stop(true));
+  afterAll(() => {
+    server.stop(true);
+    // T-20261104-003: never leave an empty Projects/ parent behind.
+    rmdirIfEmpty(join(workspaceDir, "Projects"));
+  });
 
   test("native chat runs the antigravity runtime and records the conversation", async () => {
     const provision = await fetch(`${base}/sessions`, {

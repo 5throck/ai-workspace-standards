@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -10,10 +10,35 @@ import {
   staleRunningTickets,
   loadCatalog,
   resolveServiceRef,
+  DuplicateTicketError,
 } from '../../scripts/helpers/ticket-store.ts';
 import { kstDate } from '../../scripts/helpers/kst-time.ts';
 
 let dir: string;
+
+/** Minimal VALID ticket file for store seeds — the v1.15.0 duplicate scan in
+ * createTicket reads the store with listTickets, which validates every .yaml
+ * present, so seed files can no longer be contentless dummies. */
+function validSeedTicketYaml(id: string): string {
+  const now = new Date().toISOString();
+  return [
+    'schemaVersion: 1',
+    `id: ${id}`,
+    'kind: manual',
+    'title: seed',
+    'priority: low',
+    'status: backlog',
+    'attempts: 0',
+    `created_at: '${now}'`,
+    'history:',
+    `  - at: '${now}'`,
+    '    from: null',
+    '    to: backlog',
+    'result: null',
+    'error: null',
+    '',
+  ].join('\n');
+}
 
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'ticket-store-test-'));
@@ -50,9 +75,11 @@ describe('createTicket', () => {
   test('sequences past an existing 4-digit id without wasting collision retries (v1.4.1, review M1)', () => {
     // v1.4.0 read a fixed 3-char slice, so a pre-existing T-<today>-1000.yaml
     // truncated to 1000 -> "100" and the next guess started at 101, colliding
-    // its way up; the parse now reads the full digit run.
+    // its way up; the parse now reads the full digit run. The seed is a VALID
+    // ticket file (v1.15.0): createTicket's duplicate scan reads the store with
+    // listTickets, which validates every .yaml it finds.
     const prefix = `T-${kstDate().replace(/-/g, '')}`;
-    writeFileSync(join(dir, `${prefix}-1000.yaml`), 'id: dummy\n');
+    writeFileSync(join(dir, `${prefix}-1000.yaml`), validSeedTicketYaml(`${prefix}-1000`));
     const t = createTicket(dir, { kind: 'manual', title: 'after 4-digit', priority: 'normal' });
     expect(t.id).toBe(`${prefix}-1001`);
   });
@@ -72,6 +99,85 @@ describe('createTicket', () => {
     expect(svc2.id).not.toBe(gov.id);
     expect(svc2.id).not.toBe(svc.id);
     expect(gov2.id).not.toBe(gov.id);
+  });
+});
+
+describe('createTicket durability (v1.15.0, T-20261104-004 item 3 — project-loss-hardening design §5.3)', () => {
+  test('creates a fully-formed file in ONE atomic step — no empty-file window, no temp residue', () => {
+    // The v1.14 wx-create-then-rename dance left a zero-byte .yaml if the process
+    // crashed between the two calls, wedging listTickets and consuming the id.
+    // The link-based create materializes the FULLY-FORMED file in one step.
+    const t = createTicket(dir, { kind: 'manual', title: 'durable create', priority: 'normal' });
+    const raw = readFileSync(join(dir, `${t.id}.yaml`), 'utf-8');
+    expect(raw.trim().length).toBeGreaterThan(0);
+    expect(raw).toContain(`id: ${t.id}`);
+    // the read path parses it without a validation error
+    const parsed = listTickets(dir).find((x) => x.id === t.id);
+    expect(parsed?.title).toBe('durable create');
+    // the temp file is unlinked on the success path — no residue
+    const leftovers = readdirSync(dir).filter((n) => n.includes('.tmp-'));
+    expect(leftovers).toEqual([]);
+  });
+
+  test('duplicate normalized title is refused with DuplicateTicketError naming the existing id', () => {
+    const a = createTicket(dir, { kind: 'manual', title: 'Fix  the  Login Bug', priority: 'normal' });
+    // case + whitespace-collapsed normalization: same title, different spelling
+    expect(() => createTicket(dir, { kind: 'manual', title: 'fix the login bug', priority: 'low' }))
+      .toThrow(DuplicateTicketError);
+    try {
+      createTicket(dir, { kind: 'manual', title: 'FIX THE LOGIN BUG', priority: 'high' });
+      throw new Error('unreachable: duplicate was not refused');
+    } catch (e) {
+      expect(e).toBeInstanceOf(DuplicateTicketError);
+      expect((e as DuplicateTicketError).existingId).toBe(a.id);
+    }
+    // the refusal happens BEFORE any id is allocated — the id namespace is not burned
+    const b = createTicket(dir, { kind: 'manual', title: 'different title entirely', priority: 'normal' });
+    expect(b.id).not.toBe(a.id);
+  });
+
+  test('duplicate detection spans BOTH stores — refusal works in either direction', () => {
+    const governance = join(dir, 'governance');
+    const gov = createTicket(governance, { kind: 'manual', title: 'cross-store dup', priority: 'normal' });
+    expect(() => createTicket(dir, { kind: 'manual', title: 'cross-store dup', priority: 'normal' }))
+      .toThrow(DuplicateTicketError);
+    const svc = createTicket(dir, { kind: 'manual', title: 'service-side original', priority: 'normal' });
+    expect(() => createTicket(governance, { kind: 'manual', title: 'service-side original', priority: 'normal' }))
+      .toThrow(DuplicateTicketError);
+    expect(gov.id).not.toBe(svc.id);
+  });
+
+  test('service tickets carry no title and stay exempt from the title-duplicate check', () => {
+    createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    const b = createTicket(dir, { kind: 'service', service: 'audit', priority: 'normal' });
+    expect(b.kind).toBe('service');
+  });
+
+  test('corrupt store noise does not wedge create — the tolerant duplicate scan skips invalid files', () => {
+    // A corrupt/invalid ticket file is a known store state (readTicketRaw
+    // repair path); it carries no trustworthy title, so the duplicate scan
+    // must skip it instead of failing every subsequent create with an
+    // unrelated schema error — while still catching real duplicates.
+    writeFileSync(join(dir, `T-20261105-001.yaml`), 'schemaVersion: 1\nid: T-20261105-001\nsev: SEV4\n');
+    const t = createTicket(dir, { kind: 'manual', title: 'created despite noise', priority: 'normal' });
+    expect(t.id).not.toBe('T-20261105-001');
+    // a real duplicate among the VALID files is still refused
+    expect(() => createTicket(dir, { kind: 'manual', title: 'created despite noise', priority: 'low' }))
+      .toThrow(DuplicateTicketError);
+  });
+
+  test('allowDuplicate override permits the legitimate re-file-after-archive case (DEC-20261104-02 ruling 5)', () => {
+    const a = createTicket(dir, { kind: 'manual', title: 're-file me', priority: 'normal' });
+    const b = createTicket(dir, { kind: 'manual', title: 're-file me', priority: 'normal' }, { allowDuplicate: true });
+    expect(b.id).not.toBe(a.id);
+    expect(listTickets(dir)).toHaveLength(2);
+  });
+
+  test('collision retry: a pre-existing id file advances the seq instead of colliding the link', () => {
+    const prefix = `T-${kstDate().replace(/-/g, '')}`;
+    writeFileSync(join(dir, `${prefix}-001.yaml`), validSeedTicketYaml(`${prefix}-001`));
+    const t = createTicket(dir, { kind: 'manual', title: 'after seed', priority: 'normal' });
+    expect(t.id).toBe(`${prefix}-002`);
   });
 });
 

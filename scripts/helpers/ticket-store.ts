@@ -1,6 +1,26 @@
 #!/usr/bin/env bun
-// @version 1.14.0
-// v1.14.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
+// @version 1.15.0
+// v1.15.0 (2026-11-05, spec docs/designs/2026-11-04-project-loss-hardening-design.md
+//          §5.3, T-20261104-004 item 3 — ticket-store durability): createTicket
+//          closes the empty-file crash window and learns duplicate refusal.
+//          (1) Atomic create-with-content: the wx-created EMPTY file + rename
+//          dance (a crash between the two left a zero-byte .yaml that wedged
+//          listTickets and silently consumed the id) is replaced by
+//          write-to-temp + linkSync(tmp, final) — link is atomic and fails
+//          EEXIST on an id collision, so the id probe and the content write are
+//          ONE step; the temp file is unlinked on both paths. Platforms that
+//          reject link() fall back to the historical wx+rename dance behind a
+//          documented try/catch (design §9 Windows divergence row).
+//          (2) The allocation loop now runs under withTicketLock, so the seq
+//          guess and the create serialize against archive/move (design §5.3).
+//          (3) Duplicate-content refusal (DEC-20261104-02 ruling 5): an exact
+//          normalized-title match (lowercase, whitespace-collapsed) across BOTH
+//          stores throws DuplicateTicketError naming the existing id — the
+//          2026-11-03 rollback duplicated T-20261103-008/-009 because re-filing
+//          a ticket whose original survived was silent. The override belongs to
+//          the CLI surface only (--allow-duplicate in scripts/ticket.ts); the
+//          store-level refusal is the default so the MCP create path inherits
+//          it. v1.14.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §4.5, Phase 3.5): createTicket gains the optional `hub` delegation-
 //          target metadata field (ticket-schema v1.11.0) — written verbatim from
 //          `ticket.ts create --hub <name>`; the UNAVAILABLE refusal itself lives
@@ -53,7 +73,7 @@
 // Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md (§A)
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync, rmSync, linkSync, unlinkSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { join, dirname, basename, relative, resolve, isAbsolute } from 'node:path';
 import { load, dump, JSON_SCHEMA } from 'js-yaml';
@@ -279,24 +299,107 @@ export interface CreateTicketInput {
   hub?: string;
 }
 
+export interface CreateTicketOptions {
+  /** v1.15.0 (DEC-20261104-02 ruling 5): bypass the duplicate-title refusal.
+   * Deliberately NOT a store-level flag by default — refusal is the default at
+   * the shared store so the MCP create path inherits it, and the override
+   * belongs to the human-facing CLI surface only (ticket.ts --allow-duplicate)
+   * for the legitimate re-file-after-archive case. */
+  allowDuplicate?: boolean;
+}
+
+/** v1.15.0 (project-loss-hardening design §5.3c, DEC-20261104-02 ruling 5) —
+ * typed duplicate-content refusal. Carries the id of the existing ticket so
+ * the CLI can point the operator at it directly. */
+export class DuplicateTicketError extends Error {
+  readonly existingId: string;
+  constructor(existingId: string, candidateTitle: string) {
+    super(
+      `[ticket-store] duplicate ticket refused: a ticket with the same normalized title already exists — ` +
+      `${existingId} ("${candidateTitle}"). Re-filing an existing ticket is the 2026-11-03 rollback ` +
+      `duplication shape; if this is the legitimate re-file-after-archive case, re-run with --allow-duplicate`,
+    );
+    this.name = 'DuplicateTicketError';
+    this.existingId = existingId;
+  }
+}
+
+/** Duplicate-title normalization (design §5.3c): lowercase + collapse whitespace.
+ * Exact normalized match only — similarity thresholds were rejected for v1 to
+ * keep false positives at zero. */
+function normalizeTitleForDuplicateCheck(title: string): string {
+  return title.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/** Scans BOTH stores (same sibling layout as nextSeqGuess) for an existing
+ * ticket whose normalized title equals the candidate's. Refusal condition per
+ * design §5.3c: exact normalized-title match, and when both sides carry
+ * `inputs`, the inputs must be equal too. Manual tickets carry no inputs, and
+ * service tickets carry no title, so in practice the title match is the
+ * deciding signal; the inputs clause only tightens the service-shaped edge.
+ * The scan is deliberately TOLERANT of store noise (per-file try/catch instead
+ * of listTickets' strict validate-all): a corrupt or invalid ticket file is a
+ * known store state with its own repair path (readTicketRaw), and one bad file
+ * must not wedge every subsequent create with an unrelated schema error — a
+ * file that does not validate carries no trustworthy title, so skipping it
+ * cannot mask a real duplicate. */
+function findDuplicateByTitle(dir: string, input: CreateTicketInput): Ticket | null {
+  if (input.title === undefined) return null;
+  const dirs = basename(dir) === 'governance'
+    ? [dir, dirname(dir)]
+    : [dir, join(dir, 'governance')];
+  const candidate = normalizeTitleForDuplicateCheck(input.title);
+  for (const d of dirs) {
+    if (!existsSync(d)) continue;
+    for (const f of readdirSync(d)) {
+      if (!f.endsWith('.yaml') || f.includes('.tmp-')) continue;
+      let t: Ticket;
+      try {
+        const obj = loadYamlCapped<unknown>(join(d, f));
+        validateTicket(obj);
+        t = obj;
+      } catch {
+        continue; // corrupt/invalid store noise — not a duplicate signal
+      }
+      if (t.title === undefined) continue;
+      if (normalizeTitleForDuplicateCheck(t.title) !== candidate) continue;
+      if (input.inputs !== undefined && t.inputs !== undefined) {
+        const a = JSON.stringify(input.inputs);
+        const b = JSON.stringify(t.inputs);
+        if (a !== b) continue;
+      }
+      return t;
+    }
+  }
+  return null;
+}
+
 /** Creates a ticket file with a collision-safe ID: computes a candidate seq from a
- * directory scan, then attempts an exclusive (`wx`) create, retrying on EEXIST. */
-export function createTicket(dir: string, input: CreateTicketInput): Ticket {
+ * directory scan, then attempts an atomic create-with-content via `linkSync`
+ * (fails EEXIST on an id collision — no empty-file window), retrying on EEXIST.
+ * v1.15.0: the whole operation runs under the shared ticket lock, and an exact
+ * normalized-title duplicate across both stores is refused (DuplicateTicketError)
+ * unless opts.allowDuplicate is set. */
+export function createTicket(dir: string, input: CreateTicketInput, opts: CreateTicketOptions = {}): Ticket {
+  return withTicketLock(dir, 'create', () => createTicketUnlocked(dir, input, opts));
+}
+
+/** Core create — caller MUST already hold the ticket lock (see withTicketLock). */
+function createTicketUnlocked(dir: string, input: CreateTicketInput, opts: CreateTicketOptions): Ticket {
   mkdirSync(dir, { recursive: true });
+  // v1.15.0: duplicate refusal BEFORE any id is allocated — the 2026-11-03
+  // rollback duplicated T-20261103-008/-009 by silently re-filing tickets whose
+  // originals had survived. Refusal is store-level (DEC-20261104-02 ruling 5).
+  if (!opts.allowDuplicate) {
+    const dup = findDuplicateByTitle(dir, input);
+    if (dup !== null) throw new DuplicateTicketError(dup.id, dup.title ?? '');
+  }
   const prefix = todayPrefix();
   const MAX_ATTEMPTS = 50;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const seq = nextSeqGuess(dir, prefix) + attempt;
     const id = `${prefix}-${String(seq).padStart(3, '0')}`;
     const path = ticketPath(dir, id);
-    let fd: number;
-    try {
-      fd = openSync(path, 'wx');
-    } catch (err: unknown) {
-      if ((err as NodeJS.ErrnoException).code === 'EEXIST') continue;
-      throw err;
-    }
-    closeSync(fd);
     const ticket: Ticket = {
       schemaVersion: CURRENT_SCHEMA_VERSION,
       id,
@@ -315,8 +418,35 @@ export function createTicket(dir: string, input: CreateTicketInput): Ticket {
       error: null,
     };
     validateTicket(ticket);
-    writeTicketAtomic(dir, ticket); // overwrite the empty wx-created file with real content
-    return ticket;
+    // v1.15.0: atomic create-with-content. linkSync atomically materializes the
+    // FULLY-FORMED file at the final path and fails with EEXIST when the id was
+    // taken concurrently — replacing both the wx probe and the content rename,
+    // so the empty-file crash window (a crash between wx-create and rename left
+    // a zero-byte .yaml that wedged listTickets and consumed the id) is closed.
+    const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}-${attempt}`;
+    writeFileSync(tmpPath, dump(ticket), 'utf-8');
+    try {
+      linkSync(tmpPath, path);
+      try { unlinkSync(tmpPath); } catch { /* best-effort temp cleanup */ }
+      return ticket;
+    } catch (err: unknown) {
+      try { unlinkSync(tmpPath); } catch { /* already unlinked or vanished */ }
+      if ((err as NodeJS.ErrnoException).code === 'EEXIST') continue;
+      // Documented fallback (design §5.3 / §9): a platform that rejects link()
+      // falls back to the historical wx + atomic-rename dance. The empty-file
+      // window re-opens only on those platforms and only on a crash between the
+      // two calls — recorded as an accepted residual risk, one code path.
+      let fd: number;
+      try {
+        fd = openSync(path, 'wx');
+      } catch (fallbackErr: unknown) {
+        if ((fallbackErr as NodeJS.ErrnoException).code === 'EEXIST') continue;
+        throw fallbackErr;
+      }
+      closeSync(fd);
+      writeTicketAtomic(dir, ticket); // overwrite the empty wx-created file with real content
+      return ticket;
+    }
   }
   throw new Error(`[ticket-store] could not allocate a ticket id after ${MAX_ATTEMPTS} attempts`);
 }

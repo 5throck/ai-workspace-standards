@@ -296,17 +296,31 @@ describe('apply-tier-normalization — collectTargets (real tree shape)', () => 
   });
 
   test('--projects adds the Projects/co-* agent files', () => {
-    // Projects/ is top-level-gitignored (/*/ in .gitignore) — fleet clones exist
-    // only on machines that host them; CI checkouts do not have the directory.
+    // T-20261104-003 (project-loss hardening design §5.2): the expected count is
+    // computed from the tree itself — the agent files the counter should see under
+    // Projects/<co-*>/agents — instead of keying on an existsSync dichotomy. An
+    // empty (deceptive) or absent Projects/ asserts 0 and passes; a populated one
+    // must match exactly. Projects/ is top-level-gitignored (/*/ in .gitignore) —
+    // fleet clones exist only on machines that host them.
     const projectsDir = join(REPO_ROOT, 'Projects');
-    if (!existsSync(projectsDir)) {
-      const { projectCount } = collectTargets(REPO_ROOT, { projects: true });
-      expect(projectCount).toBe(0);
-      return;
+    const agentFile = (name: string) =>
+      name.endsWith('.md') && !name.startsWith('README') && !name.startsWith('_');
+    const expected: string[] = [];
+    if (existsSync(projectsDir)) {
+      for (const entry of readdirSync(projectsDir).sort()) {
+        if (!entry.startsWith('co-')) continue;
+        const agentsDir = join(projectsDir, entry, 'agents');
+        if (!existsSync(agentsDir)) continue;
+        for (const file of readdirSync(agentsDir).filter(agentFile).sort()) {
+          expected.push(`Projects/${entry}/agents/${file}`);
+        }
+      }
     }
     const { projectCount, all } = collectTargets(REPO_ROOT, { projects: true });
-    expect(projectCount).toBeGreaterThan(0);
-    expect(all.some((rel) => rel.startsWith('Projects/co-'))).toBe(true);
+    expect(projectCount).toBe(expected.length);
+    if (expected.length > 0) {
+      expect(all.some((rel) => rel.startsWith('Projects/co-'))).toBe(true);
+    }
   });
 
   test('--only narrows by directory prefix', () => {

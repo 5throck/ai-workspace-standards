@@ -4,6 +4,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import { loadConfig } from "../../services/co-workspace/src/config";
 import { createServer, createState, tenantKeyFor } from "../../services/co-workspace/src/server";
 
@@ -15,10 +16,13 @@ mkdirSync(join(workspaceDir, "scripts"), { recursive: true });
 mkdirSync(binDir, { recursive: true });
 writeFileSync(
   join(workspaceDir, "scripts", "new-project.ts"),
+  // T-20261104-003: absolute fixture root — no relative Projects/ tree under the
+  // runner cwd (project-loss hardening design §5.2).
   `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}/.hermes/skills\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake tenant\\n");
+mkdirSync(\`\${projectsRoot}/\${name}/.hermes/skills\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake tenant\\n");
 `,
 );
 const hermesBin = join(binDir, "fake-hermes.ts");
@@ -51,7 +55,11 @@ const cookies = {
   alice: `gw_session=${state.users.createSession(alice.id)}`,
   bob: `gw_session=${state.users.createSession(bob.id)}`,
 };
-afterAll(() => server.stop(true));
+afterAll(() => {
+  server.stop(true);
+  // T-20261104-003: never leave an empty Projects/ parent behind.
+  rmdirIfEmpty(join(workspaceDir, "Projects"));
+});
 
 type Route = { name: string; url: string; body: (user: string) => unknown };
 const routes: Route[] = [

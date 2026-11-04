@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261104-004
+kind: manual
+title: >-
+  Incident hardening (2026-11-04 rm -rf Projects, 16 L2 checkouts lost, all
+  recovered): (1) PreToolUse Bash guard hook that blocks recursive deletes (rm
+  -rf / rm -r / trash) of any workspace dir containing .git children
+  (Projects/** first) unless preceded by a dry-run listing or routed through a
+  reviewed escape hatch; (2) fix the root contributor T-20261104-003
+  (co-workspace test suites leave an empty Projects/ parent — the deceptive
+  empty dir the PM believed it was deleting); (3) ticket-store durability — the
+  morning session FILED this ticket (T-20261104-004) and it silently vanished
+  from the store before closeout (2nd silent-loss occurrence after the 11-03
+  rollback that duplicated T-20261103-008/-009): add atomic writes +
+  referenced-id drift check (a ticket id cited in memory/YYYY-MM-DD.md must
+  resolve in the store) + duplicate-content detection on create; (4) codify the
+  recorded lesson into governance prose (never recursive deletes in the shared
+  workspace; always dry-run list first; never delete a path that can contain
+  .git children). Original filing lost — this is the re-creation.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-04T23:40:45.147+09:00'
+history:
+  - at: '2026-11-04T23:40:45.147+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

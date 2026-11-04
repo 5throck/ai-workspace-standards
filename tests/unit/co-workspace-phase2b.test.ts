@@ -5,6 +5,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { rmdirIfEmpty } from "../helpers/rmdir-if-empty";
 import { loadConfig, parseKeyList, readKeysFile } from "../../services/co-workspace/src/config";
 import { assertQuota, windowUsage } from "../../services/co-workspace/src/server";
 import { createServer, createState } from "../../services/co-workspace/src/server";
@@ -93,10 +94,13 @@ describe("server — key-file rotation via /admin/reload", () => {
   mkdirSync(keyDir, { recursive: true });
   writeFileSync(
     join(workspaceDir, "scripts", "new-project.ts"),
+    // T-20261104-003: absolute fixture root — no relative Projects/ tree under the
+    // runner cwd (project-loss hardening design §5.2).
     `import { mkdirSync, writeFileSync } from "node:fs";
+const projectsRoot = ${JSON.stringify(join(workspaceDir, "Projects"))};
 const name = process.argv[2];
-mkdirSync(\`Projects/\${name}\`, { recursive: true });
-writeFileSync(\`Projects/\${name}/AGENTS.md\`, "# fake\\n");
+mkdirSync(\`\${projectsRoot}/\${name}\`, { recursive: true });
+writeFileSync(\`\${projectsRoot}/\${name}/AGENTS.md\`, "# fake\\n");
 `,
   );
   const keysFile = join(keyDir, "api.keys");
@@ -130,7 +134,11 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
   const adminCookie = `gw_session=${state.users.createSession(admin!.id)}`;
   const server = createServer(state);
   const base = `http://127.0.0.1:${server.port}`;
-  afterAll(() => server.stop(true));
+  afterAll(() => {
+    server.stop(true);
+    // T-20261104-003: never leave an empty Projects/ parent behind.
+    rmdirIfEmpty(join(workspaceDir, "Projects"));
+  });
 
   const models = (key: string) => fetch(`${base}/v1/models`, { headers: { authorization: `Bearer ${key}` } });
 
@@ -312,8 +320,13 @@ console.log(JSON.stringify({ type: "result", session_id: "s1", exit_code: 0, tex
     mkdirSync(join(ws, "scripts"), { recursive: true });
     writeFileSync(
       join(ws, "scripts", "new-project.ts"),
+      // T-20261104-003: absolute fixture root via the fixture source — the child's
+      // env is allowlist-stripped and argv is fixed by the production scaffoldArgs,
+      // so the absolute path is embedded at fixture-build time (design §5.2).
       `const end = Date.now() + 1500; while (Date.now() < end);\n` +
-        `const { mkdirSync } = require("node:fs"); mkdirSync(\`Projects/\${process.argv[2]}\`, { recursive: true });\n`,
+        `const { mkdirSync } = require("node:fs");\n` +
+        `const projectsRoot = ${JSON.stringify(join(ws, "Projects"))};\n` +
+        `mkdirSync(projectsRoot + "/" + process.argv[2], { recursive: true });\n`,
     );
     const hermesBin = join(binDir, "fake-hermes.ts");
     writeFileSync(
@@ -339,6 +352,8 @@ console.log(JSON.stringify({ type: "result", session_id: "s9", exit_code: 0, tex
     const st = createState(cfgS);
     const srv = createServer(st);
     afterAll(() => srv.stop(true));
+    // T-20261104-003: never leave an empty Projects/ parent behind.
+    afterAll(() => rmdirIfEmpty(join(ws, "Projects")));
     const b2 = `http://127.0.0.1:${srv.port}`;
     const prov = await fetch(`${b2}/sessions`, {
       method: "POST",

@@ -23,8 +23,9 @@
  */
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
+import { rmdirIfEmpty } from '../helpers/rmdir-if-empty';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 
@@ -40,7 +41,19 @@ describe('root-target guards (incident 2026-09-12)', () => {
     // fast-fail pre-flight path deterministically, on any machine.
     if (!existsSync(join(workspaceRoot, 'Projects'))) {
       mkdirSync(join(workspaceRoot, 'Projects'), { recursive: true });
+      // T-20261104-003: we just created the parent — keep it NON-EMPTY for the
+      // suite's duration so the concurrently running hygiene pin never observes
+      // the deceptive empty-parent state mid-run. Removed again in afterAll.
+      writeFileSync(join(workspaceRoot, 'Projects', '.target-guard-sentinel'), 'project-target-guards fixture — removable\n');
     }
+  });
+
+  afterAll(() => {
+    // T-20261104-003: never leave the parent we may have created behind on a
+    // fresh checkout — drop the sentinel, then the parent if (and only if) it is
+    // empty. On a dev machine with a populated Projects/ both steps are no-ops.
+    rmSync(join(workspaceRoot, 'Projects', '.target-guard-sentinel'), { force: true });
+    rmdirIfEmpty(join(workspaceRoot, 'Projects'));
   });
 
   test('upgrade-project.ts rejects the workspace ROOT as <project-path>', () => {
@@ -127,10 +140,13 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
 
   beforeAll(() => {
     mkdirSync(outsideDir, { recursive: true });
-    const init = spawnSync('git', ['init', '-q', outsideDir], { encoding: 'utf-8' });
-    if (init.status !== 0) throw new Error(`git init failed for guard fixture: ${init.stderr}`);
+    // T-20261104-003: parent + first child are created back-to-back so the
+    // empty-parent window between them stays at zero (the git init below is
+    // the slow step and must not sit inside that window).
     mkdirSync(join(workspaceRoot, 'Projects'), { recursive: true });
     mkdirSync(insideDir, { recursive: true });
+    const init = spawnSync('git', ['init', '-q', outsideDir], { encoding: 'utf-8' });
+    if (init.status !== 0) throw new Error(`git init failed for guard fixture: ${init.stderr}`);
     try {
       symlinkSync(workspaceRoot, linkPath, 'dir');
       canSymlink = true;
@@ -145,6 +161,9 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     if (existsSync(linkPath)) rmSync(linkPath, { force: true });
     if (existsSync(insideDir)) rmSync(insideDir, { recursive: true, force: true });
     if (existsSync(outsideDir)) rmSync(outsideDir, { recursive: true, force: true });
+    // T-20261104-003: the parent is swept only when this suite emptied it —
+    // never when a real fleet checkout (or the first describe's sentinel) fills it.
+    rmdirIfEmpty(join(workspaceRoot, 'Projects'));
   });
 
   test('symlink resolving to the workspace ROOT hits the root guard (canonicalization)', () => {

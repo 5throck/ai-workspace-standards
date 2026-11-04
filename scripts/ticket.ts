@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.0
+// v1.15.0 (2026-11-05, spec docs/designs/2026-11-04-project-loss-hardening-design.md
+//          §5.3, T-20261104-004 item 3): two changes. (1) create gains
+//          --allow-duplicate — the ONLY surface for the store-level duplicate
+//          refusal (DuplicateTicketError on an exact normalized-title match
+//          across both stores, DEC-20261104-02 ruling 5): the store refuses by
+//          default so the MCP create path inherits it, and the override belongs
+//          to the human-facing CLI for the legitimate re-file-after-archive case.
+//          (2) doctor gains the referenced-id drift arm — cited ticket ids in
+//          memory/*.md that resolve in NO store or archive are reported
+//          (report-only here; the machine-enforced FATAL trigger is the dev-sync
+//          step, design §5.3b decision (i)). This is the diagnostic surface the
+//          runner closeout protocol already consults.
 // v1.14.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §4.5, Phase 3.5): create gains --hub <name> — writes the optional
 //          `hub` metadata field (ticket-schema v1.11.0) and gates delegated
@@ -67,7 +79,9 @@ import {
   resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
   archiveDirFor, archiveCandidates, archiveTickets, restoreTicket, DEFAULT_ARCHIVE_DAYS,
   repairTicketHistory, loadKanbanAliases, reprioritizeTicket, autoReadySev1Ticket,
+  DuplicateTicketError,
 } from './helpers/ticket-store.ts';
+import { driftCheck } from './helpers/ticket-drift.ts';
 import { dump } from 'js-yaml';
 import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
 import { PRIORITIES, corruptedProseFinding, resolvePriorityInput } from './helpers/ticket-schema.ts';
@@ -99,7 +113,7 @@ function resolveTicketDir(id: string): { dir: string; id: string } {
 
 const [, , cmd, ...rest] = process.argv;
 
-const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed', 'archived', 'apply']);
+const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed', 'archived', 'apply', 'allow-duplicate']);
 
 function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
   const positional: string[] = [];
@@ -252,8 +266,12 @@ try {
       const notBefore = notBeforeFlag as string | undefined;
       if (flags.manual) {
         const title = positional[0];
-        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD] [--hub co-<slug>]');
-        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore, hub: hubName });
+        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD] [--hub co-<slug>] [--allow-duplicate]');
+        // v1.15.0 (DEC-20261104-02 ruling 5): the store refuses an exact
+        // normalized-title duplicate by default (DuplicateTicketError naming the
+        // existing id); --allow-duplicate is the reviewed escape for the
+        // legitimate re-file-after-archive case.
+        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore, hub: hubName }, { allowDuplicate: flags['allow-duplicate'] === true });
         console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}${hubName ? ` (hub ${hubName})` : ''}`);
       } else {
         const serviceId = positional[0];
@@ -265,7 +283,7 @@ try {
           try { inputs = JSON.parse(flags.inputs as string); }
           catch { fail(`--inputs is not valid JSON: ${flags.inputs}`); }
         }
-        const t = createTicket(ticketsDir, { kind: 'service', service: serviceId, priority, inputs, hub: hubName });
+        const t = createTicket(ticketsDir, { kind: 'service', service: serviceId, priority, inputs, hub: hubName }, { allowDuplicate: flags['allow-duplicate'] === true });
         console.log(`✅ Created service ticket ${t.id} for '${serviceId}'${hubName ? ` (hub ${hubName})` : ''}`);
       }
       break;
@@ -507,6 +525,18 @@ try {
       } else {
         console.log(`\nCorrupted prose fragments (T-20261029-001 writer class) — repair needs a sanctioned re-render:`);
         for (const c of proseCorrupt) console.log(`\u{1F9F9}  ${c.id}: ${c.fields.join('; ')}`);
+      }
+      // Referenced-id drift arm (v1.15.0, project-loss-hardening design §5.3b):
+      // a ticket id cited in memory/*.md must resolve in a live store or an
+      // archive — the vanish vector that ate the original T-20261104-004 filing.
+      // Report-only here (the diagnostic surface the runner closeout protocol
+      // consults); the machine-enforced FATAL trigger is the dev-sync step.
+      const drift = await driftCheck({ memoryDir: join(workspaceRoot, 'memory'), serviceDir: ticketsDir, governanceDir });
+      if (drift.unresolved.length === 0) {
+        console.log(`No unresolved ticket-id citations in memory/ (${drift.cited} distinct id(s) cited, all resolve).`);
+      } else {
+        console.log(`\nUnresolved ticket-id citations in memory/ (${drift.unresolved.length} of ${drift.cited} cited) — silent-loss candidates, triage each:`);
+        for (const f of drift.unresolved) console.log(`🔎  ${f.id} cited at ${f.file}:${f.line} — resolves in NO store or archive`);
       }
       // Archive visibility (design 2026-10-04-ticket-archive-design.md): archived
       // tickets leave the live stores, so state them here instead of staying silent.
