@@ -7823,7 +7823,7 @@
       "scope": "co-work",
       "capability": "svg-slide-authoring",
       "content_hash": "b7960ef927961b81",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-work/skills/svg-slide-authoring/SKILL.md"
       ]

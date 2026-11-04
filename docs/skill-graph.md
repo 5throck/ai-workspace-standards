@@ -197,7 +197,7 @@
 | `co-work/pptx-export` | variant:co-work | 1.1.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `co-work/standup-synthesizer` | variant:co-work | 1.0.1 | co-work/project-coordinator | co-work/phase 4 | — | — | — |
 | `co-work/svg-quality-gate` | variant:co-work | 1.1.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
-| `co-work/svg-slide-authoring` | variant:co-work | 1.1.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
+| `co-work/svg-slide-authoring` | variant:co-work | 1.2.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
 | `common/gateguard` | common | 1.0.2 | — | — | — | — | — |

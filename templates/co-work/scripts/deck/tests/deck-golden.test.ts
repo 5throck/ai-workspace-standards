@@ -251,6 +251,71 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     expect(mixedWarnings).toContain("W-TSPAN-X");
     rmSync(dir, { recursive: true, force: true });
   });
+
+  test("P2: hyperlinks compile to rels+hlinkClick; transitions to p:transition", () => {
+    const LINK_PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1" data-slide-transition="fade">
+  <g data-block-id="b1">
+    <a href="https://example.com/report"><text x="80" y="140" font-size="24" fill="#1F3864">Read the full report online</text></a>
+    <a href="#slide-2"><rect x="80" y="200" width="300" height="60" fill="#1F3864"/></a>
+    <a href="mailto:team@example.com"><rect x="80" y="300" width="300" height="60" fill="#C00000"/></a>
+  </g>
+</svg>`;
+    const CONTENT_MD = "Read the full report online\n";
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-links"), [
+      { name: "01-links.svg", body: LINK_PAGE },
+      { name: "02-target.svg", body: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="2"><g data-block-id="b1"><text x="80" y="100" font-size="24" fill="#202020">Read the full report online</text></g></svg>` },
+    ], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+    const { zip, receipt } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    expect(receipt.slides).toBe(2);
+
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+    // data-slide-transition is consumed at compile time — the attribute itself never appears in output:
+    expect(s1).toContain("<p:transition spd=\"med\"><p:fade/></p:transition>");
+    expect(s1.match(/a:hlinkClick/g)?.length).toBe(3);
+    expect(s1).toContain('action="ppaction://hlinksldjump"');
+
+    const rels1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/_rels/slide1.xml.rels"]!);
+    expect(rels1).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.com/report" TargetMode="External"');
+    expect(rels1).toContain('Target="mailto:team@example.com" TargetMode="External"');
+    expect(rels1).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slide2.xml"');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("P2: invalid href schemes block at the gate; notes round-trip compiles", () => {
+    const BAD_LINK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <a href="javascript:alert(1)"><text x="80" y="100" font-size="24" fill="#202020">Suspicious link</text></a>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-badlink"), [
+      { name: "01-bad.svg", body: BAD_LINK },
+    ], "Suspicious link\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const rules = report.pages.flatMap((p) => p.errors.map((e) => e.rule));
+    expect(rules).toContain("E-HREF");
+    rmSync(dir, { recursive: true, force: true });
+
+    // notes round-trip: notesDir file maps to notesSlideN with the text preserved
+    const dir2 = makeDeck(join(import.meta.dir, ".tmp-deck-notes"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+    ], CONTENT_MD);
+    const report2 = runCheck({ deckDir: dir2, contentPath: join(dir2, "deck_content.md"), stage: "final" });
+    const reportPath = join(dir2, "report.json");
+    writeFileSync(reportPath, JSON.stringify(report2));
+    const notesDir = join(dir2, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Welcome the leadership team.\n");
+    const { zip, receipt } = compileDeck({ deckDir: dir2, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    expect(pkg["ppt/notesSlides/notesSlide1.xml"]).toBeDefined();
+    const notes1 = new TextDecoder().decode(pkg["ppt/notesSlides/notesSlide1.xml"]!);
+    expect(notes1).toContain("Welcome the leadership team.");
+    expect(receipt.parts).toBeGreaterThan(13); // notes master + notesSlide parts added
+    rmSync(dir2, { recursive: true, force: true });
+  });
 });
+
 
 

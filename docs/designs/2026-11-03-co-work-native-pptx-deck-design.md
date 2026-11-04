@@ -138,6 +138,8 @@ Key rules:
 | Structure | `g` with `transform="translate/rotate/scale"` | top-level `g` = logical content block; carries `data-block-id` |
 | Text presentation | `text-anchor="start\|middle\|end"`, `letter-spacing` (px number), `text-decoration="underline\|line-through\|none"` | compiled to paragraph `algn` / run `spc` / `u`·`strike`; the text box is repositioned from an estimated text width. `dominant-baseline` / `alignment-baseline` are **unsupported** — the checker warns (`W-UNSUPPORTED-BASELINE`) and the compiler ignores them; a `tspan` repeating its line-start `x` is the canonical wrap pattern; tspans mixing different `x` values warn (`W-TSPAN-X`, compiles as paragraph flow) |
 | Markers | `data-block-id` | future transition/animation anchor; required on top-level groups |
+| Hyperlinks | `<a href="...">` wrapping one visible element; href = absolute `https?://`/`mailto:` or `#slide-N` (1-based internal jump); nested `<a>` invalid | external -> hyperlink relationship (TargetMode External) + `a:hlinkClick`; internal -> slide relationship + `ppaction://hlinksldjump` |
+| Slide transition | `data-slide-transition="none|fade|push|zoom|wipe"` on root | consumed at compile; emits `p:transition`, never appears in output |
 
 Anything outside the whitelist is `invalid` (blocking), except expressions
 explicitly listed as `compatible` (deterministic normalization + non-blocking
@@ -231,10 +233,11 @@ review flow cover the new section unchanged.
 
 ## 10. Roadmap
 
-- **P2**: native Chart/Table (data-backed, Edit Data), hyperlinks, structured
-  Master/Layout mode derived from registry `deck_types` presets
-  (`p:sldLayout` inheritance), transition mapping (registry token → native
-  transition).
+- **P2**: native Chart/Table (data-backed, Edit Data — next slice; needs the
+  embedded-workbook contract), structured Master/Layout mode derived from
+  registry `deck_types` presets (`p:sldLayout` inheritance).
+  Landed 2026-11-04 (slice 2): hyperlinks (`<a>` external + `#slide-N`
+  internal) and slide transitions (`data-slide-transition` → `p:transition`).
 - **P3** (deferred, co-deck linkage — DEC-20261103-01): promote `html-to-svg`
   extraction to a common script enabling co-deck HTML decks → PPTX conversion
   including ppt-engine theme token linkage; TTS narration.
