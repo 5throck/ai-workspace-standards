@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261106-008
+kind: manual
+title: >-
+  test-runner budget: hub-bootstrap.test.ts joins FILE_TIME_BUDGETS
+  (windows-latest 2-consecutive-run evidence: run 42078112151 — the spawn-heavy
+  E2E tests 'status subcommand renders the state file' 15177.59ms and 'the scrub
+  does not mask REAL divergence' 16107.58ms exceeded the 15000ms default
+  per-test ceiling, killing the file; the SAME commit passed macos 1m55s and
+  windows in PR #1858's own CI — win32 runner FS-pressure class, test-runner
+  v1.5.0 documented precedent). Remedy per policy: explicit FILE_TIME_BUDGETS
+  row suite 300s / test 45000ms (~2.8x observed headroom, the v1.6.0 convention)
+  — NOT a raise on an existing offender; first-time entry for a new file. CI
+  evidence: runs 42078112151 (fail) vs 42065315290 (pass, same content) —
+  https://github.com/5throck/ai-workspace-standards/actions/runs/42078112151
+priority: normal
+status: running
+attempts: 0
+created_at: '2026-11-06T03:05:09.340+09:00'
+history:
+  - at: '2026-11-06T03:05:09.340+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T03:05:20.958+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T03:05:20.974+09:00'
+    from: waiting
+    to: running
+result: null
+error: null
