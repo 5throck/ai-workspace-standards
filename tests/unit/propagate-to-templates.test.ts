@@ -4,10 +4,10 @@
  *
  * @version 1.0.0
  */
-import { readFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, test, expect, beforeAll } from 'bun:test';
-import { isL2DriftEligible, collectDiffsL1L2 } from '../../scripts/propagate-to-templates.ts';
+import { isL2DriftEligible, collectDiffsL1L2, checkFileEncoding } from '../../scripts/propagate-to-templates.ts';
 
 // Minimal domain shape matching the interface
 function makeDomain(overrides: Record<string, unknown> = {}): any {
@@ -106,5 +106,31 @@ describe('collectDiffsL1L2 filters l2_drift_eligible: false domains', () => {
     // Here we verify the map's classification is correct.
     expect(mapDomains['scripts'].l2_drift_eligible).toBe(false);
     expect(mapDomains['gemini-settings'].l2_drift_eligible).toBeUndefined();
+  });
+});
+
+// ── v2.22.0: doc-only ?? heuristic skips inline code spans (T-20261105-002 follow-through) ──
+
+describe('checkFileEncoding doc-only ?? x inline-code stripping (v2.22.0)', () => {
+  function yamlWith(line: string): string {
+    const f = join(workspaceRoot, 'tests', '.temp', `enc-check-${Math.random().toString(36).slice(2)}.yaml`);
+    mkdirSync(join(workspaceRoot, 'tests', '.temp'), { recursive: true });
+    writeFileSync(f, `symptom: '${line}'\n`, 'utf-8');
+    return f;
+  }
+
+  test('quoted nullish coalescing inside backticks does NOT flag (U-20261105-001 regression)', () => {
+    const f = yamlWith('reads slide type via `s.type ?? \'\'standard\'\'` (L425)');
+    const v = checkFileEncoding(f);
+    expect(v).toEqual([]);
+    rmSync(f, { force: true });
+  });
+
+  test('raw ?? outside code spans in a doc file still flags', () => {
+    const f = yamlWith('the em-dash became ?? after the windows pass');
+    const v = checkFileEncoding(f);
+    expect(v).toHaveLength(1);
+    expect(v[0].count).toBe(1);
+    rmSync(f, { force: true });
   });
 });

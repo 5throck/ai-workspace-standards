@@ -1,5 +1,23 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-05, T-20261105-002 — the v1 gap this landing closes):
+//          post-activation drop findings were unrecoverable. Arm A compared
+//          the merge commit's OWN blob, so the documented "restore the named
+//          block(s) in the working tree — the repair lands forward" could
+//          never clear a finding: the damaged blob is immutable history and
+//          the finding refired on every sync (design §5.3's "a repaired file
+//          passes" premise did not hold for the shipped implementation).
+//          Repair-completion semantics (design §5.3 made implementable): a
+//          finding group whose damage is repaired AT THE CURRENT WORKING
+//          TREE is tier 'repaired-at-head' (INFO, not blocking) — verified by
+//          the new exported repairedAtHead(): every parent-owed block present
+//          in the working-tree content under the SAME strict rules as
+//          verifyUnion, PLUS one absorption tolerance for the pause-line
+//          class: an UN-HEADED parent block (heading === '') counts as
+//          restored when its trimmed text appears VERBATIM inside the
+//          working-tree content (it was absorbed into a headed block).
+//          Headed parent blocks keep the strict heading+firstLine rule —
+//          containment alone cannot fake a heading.
 // memory-union-verify.ts — memory session-block union-verify (merge-integrity
 // design §5.1, T-20261104-001). On 2026-11-04 two independent PR conflict
 // resolutions (#1842, #1845) silently corrupted memory/YYYY-MM-DD.md session
@@ -173,22 +191,59 @@ export function verifyUnion(opts: {
 }): UnionFinding[] {
   const { file, ours, theirs, merged } = opts;
   const findings: UnionFinding[] = [...verifyWellFormed({ file, content: merged })];
-  const mergedBlocks = parseBlocks(merged);
-  const matchesMerged = (block: MemoryBlock): boolean =>
-    mergedBlocks.some((m) => m.text === block.text) ||
-    mergedBlocks.some((m) => m.heading === block.heading && m.heading !== '' && m.firstLine === block.firstLine);
-  for (const [parent, content] of [['ours', ours], ['theirs', theirs]] as const) {
-    for (const block of parseBlocks(content)) {
-      if (matchesMerged(block)) continue;
-      const label = block.heading !== '' ? `## ${block.heading}` : '(no heading)';
-      findings.push({
-        kind: 'dropped-block',
-        file,
-        detail: `block dropped from the ${parent} side of the merge: ${label} — first line: ${JSON.stringify(block.firstLine.slice(0, 120))}`,
-      });
-    }
+  for (const { parent, block } of droppedBlocks(ours, theirs, merged)) {
+    const label = block.heading !== '' ? `## ${block.heading}` : '(no heading)';
+    findings.push({
+      kind: 'dropped-block',
+      file,
+      detail: `block dropped from the ${parent} side of the merge: ${label} — first line: ${JSON.stringify(block.firstLine.slice(0, 120))}`,
+    });
   }
   return findings;
+}
+
+/** The parent-owed blocks MISSING from `head` content under verifyUnion's
+ * strict rules (exact text, or heading+firstLine for headed blocks).
+ * Parent-labeled so repair tooling can attribute the debt. */
+export function droppedBlocks(
+  ours: string,
+  theirs: string,
+  head: string,
+): Array<{ parent: 'ours' | 'theirs'; block: MemoryBlock }> {
+  const headBlocks = parseBlocks(head);
+  const matchesHead = (block: MemoryBlock): boolean =>
+    headBlocks.some((m) => m.text === block.text) ||
+    headBlocks.some((m) => m.heading === block.heading && m.heading !== '' && m.firstLine === block.firstLine);
+  const dropped: Array<{ parent: 'ours' | 'theirs'; block: MemoryBlock }> = [];
+  for (const [parent, content] of [['ours', ours], ['theirs', theirs]] as const) {
+    for (const block of parseBlocks(content)) {
+      if (matchesHead(block)) continue;
+      dropped.push({ parent, block });
+    }
+  }
+  return dropped;
+}
+
+/**
+ * The T-20261105-002 repair-completion predicate: TRUE when every
+ * parent-owed block from droppedBlocks(ours, theirs, head) is accounted for
+ * in the working-tree/head content under the strict rules PLUS the
+ * absorption tolerance — an UN-HEADED parent block (the single-line
+ * pause-window-note class) counts as restored when its trimmed text appears
+ * VERBATIM inside the head content (absorbed into a headed session block).
+ * Headed parent blocks are NEVER satisfied by containment: a heading must
+ * match by heading+firstLine, so containment alone cannot fake a headed
+ * block's presence.
+ */
+export function repairedAtHead(opts: { ours: string; theirs: string; head: string }): boolean {
+  const { ours, theirs, head } = opts;
+  const dropped = droppedBlocks(ours, theirs, head);
+  if (dropped.length === 0) return true;
+  for (const { block } of dropped) {
+    if (block.heading !== '') return false; // headed debt: strict rule only
+    if (!head.includes(block.text)) return false; // un-headed debt: absorbed verbatim?
+  }
+  return true;
 }
 
 /** Scan-layer exemption — the verify-memory.ts:37-42 EXEMPT_PATTERNS set
@@ -244,7 +299,7 @@ export interface MergeScanResult {
   commit: string;
   file: string;
   findings: UnionFinding[];
-  tier: 'blocking' | 'historical';
+  tier: 'blocking' | 'historical' | 'repaired-at-head';
 }
 
 function git(args: string[], cwd: string): string | null {
@@ -364,7 +419,24 @@ export function unionScan(opts: {
         theirs: theirs ?? '',
         merged,
       });
-      if (findings.length > 0) results.push({ commit: target.commit, file, findings, tier });
+      if (findings.length > 0) {
+        // v1.1.0 repaired-at-head: findings computed against the merge's own
+        // blob, but the repair contract lands FORWARD — when the current
+        // working-tree file accounts for every parent-owed block
+        // (repairedAtHead), the group reports tier 'repaired-at-head'
+        // (INFO) instead of blocking. Unreadable worktree file = not
+        // proven repaired = original tier stands.
+        let effectiveTier: MergeScanResult['tier'] = tier;
+        try {
+          const worktreeContent = readFileSync(join(cwd, file), 'utf8');
+          if (repairedAtHead({ ours: ours ?? '', theirs: theirs ?? '', head: worktreeContent })) {
+            effectiveTier = 'repaired-at-head';
+          }
+        } catch {
+          // worktree file absent/unreadable — keep the original tier
+        }
+        results.push({ commit: target.commit, file, findings, tier: effectiveTier });
+      }
     }
   }
   return results;

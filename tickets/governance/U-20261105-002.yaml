@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: U-20261105-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-05T09:59:46.614+09:00
+history:
+  - at: 2026-11-05T09:59:46.614+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.28.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'gen-slides-pdf.ts has three render-path defects found during Stage 9-10 measure of a zen-theme 60-slide deck (2026-11-05): (1) When background_image.enabled=false, bgDrawn=false for all slides, and any slide with visualImage/visualTitle/visualDisplay takes the legacy full-bleed visual path (L1364) — zen''s visual region is the full page, so C_VIS_BG paints over the already-drawn card/bullets and bulTxtW computes negative (visR.x=0 < contentR.x). The v1.11.0 in-card-diagram fix only covers bgDrawn=true, so all 22 visual slides render incorrectly in PDF. (2) `footnotes` (per-slide citation lines, rendered in HTML by FootnoteBuilder) are never rendered by gen-slides-pdf — silent citation loss across 49 slides. (3) Punchline detection mismatch: decks emit `isPunchlineSlide` but the renderer checks `data.isPunchline` (L2265), so punchline slides render as plain standard slides. Repro: export PDF for a zen deck with background_image.enabled=false containing visualImage slides, footnotes fields, and an isPunchlineSlide flag.'
+  affected_paths:
+    - scripts/co-deck/gen-slides-pdf.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=false
+  dedupe_key: da2229a2ead228b3adb2e5d5cbfa7a98d0aa5e54321d1fd09a418d9482e92a5c
+  duplicates:
+    - project: co-deck
+      at: 2026-11-05T09:59:46.614+09:00

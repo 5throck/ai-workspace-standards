@@ -1,0 +1,46 @@
+schemaVersion: 1
+id: U-20261105-005
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-05T17:13:48.681+09:00
+history:
+  - at: 2026-11-05T17:13:48.681+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.28.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: |-
+    More gen-slides-pdf.ts defects in the zen/white-bubble path, beyond U-20261105-002, found when comparing PDF pages with the HTML deck:
+    1. pdf-lib CustomFontEmbedder.computeWidths writes a wrong /W table for full-embedded Pretendard. Viewers over-advance ':' and '-', so titles read "3-  Tier", "외식물가:   두 번째".
+    2. Text extraction (copy/search) garbles ASCII punctuation (':' becomes '㕕' etc.); a ToUnicode fix is in progress locally.
+    3. The card is a fixed wide bar (left-anchored, then centred), while the HTML card hugs its content (fit-content, max-width 88% of the inner area). Measured median width gap vs HTML: 32–45% of frame width.
+    4. The spec's px→pt factor (0.85) and title sizes (32px title / 64px cover and punchline / 56px divider in HTML vs 35.2/48/38.4/36.8 in spec) make PDF text about 13% larger than HTML.
+    5. On diagram slides the card runs from the top page edge to the bottom edge, with no margin band.
+    6. visualCaption and visualSource are never rendered; bold **segments** render as plain text, without weight or accent colour.
+    7. renderContactSlide maps only some contact* fields (contactPhone dropped).
+    8. When bgDrawn, the cover, punchline and contact pages had no card behind the text: transparent text box over the photo.
+    Expected: PDF card rects match HTML within ~2% of frame width, the text layer is correct, and caption, source, bold and contact fields are at parity with HTML.
+  affected_paths:
+    - scripts/co-deck/gen-slides-pdf.ts
+    - docs/html-themes/themes/zen/pdf_layout_spec.json
+  identity_source: client_roots
+  repro: 'Export co-deck presentations/2026-11-consumer-goods-market-shift and 2026-11-ai-market-research-lecture with gen-slides-pdf.ts v1.13.x, then compare with the HTML deck: Playwright card rects vs PDF card rects; pdftotext the titles. The local fix is gen-slides-pdf.ts v1.14.0 to v1.14.4 under LOCAL-PATCH(upstream-request: U-20261105-002) markers. It adds an optional CARD_RECTS_OUT env for comparison and per-deck lecture-profile layout_overrides calibration.font_px_to_pt 0.75 plus HTML-matched font sizes; those should move into the zen spec upstream. Result: median width/height gap 0.0%; worst is the cover at 8–9%, because the HTML uses a serif cover font that the PDF lacks.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=false
+    - info:in_last_delivery docs/html-themes/themes/zen/pdf_layout_spec.json=false
+  dedupe_key: f9a47e7ae9c6e44677fc3e91952d2aa921d9283801649223b3179c44893814f7
+  duplicates:
+    - project: co-deck
+      at: 2026-11-05T17:13:48.681+09:00

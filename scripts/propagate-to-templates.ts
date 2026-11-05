@@ -5,7 +5,19 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.21.0
+ * @version 2.22.0
+ *
+ * v2.22.0 (2026-11-05, T-20261105-002 follow-through): the doc-only `??`
+ *          CP949-corruption heuristic no longer fires on INLINE CODE SPANS —
+ *          backtick-delimited spans are stripped from each line before the
+ *          `??` match (the stripInlineCodeForEncodingCheck convention of
+ *          validate-docs-links v1.4.0 / validate-md-language v1.14.0). Live
+ *          trigger: upstream ticket U-20261105-001's symptom legitimately
+ *          quotes `s.type ?? 'standard'` (nullish coalescing) inside
+ *          backticks; the yaml is store content (never hand-edited) and its
+ *          staged landing FATAL-blocked propagate's encoding gate. Raw `??`
+ *          outside code spans still fails; the U+FFFD raw-byte pattern is
+ *          unchanged (mojibake can hide inside code).
  *
  * v2.21.0 (2026-10-29, upstream adjudication mechanical batch — spec
  *          docs/designs/2026-10-29-upstream-adjudication-mechanical-batch-design.md,
@@ -312,7 +324,7 @@ interface EncodingViolation {
   count: number;
 }
 
-function checkFileEncoding(filePath: string): EncodingViolation[] {
+export function checkFileEncoding(filePath: string): EncodingViolation[] {
   const ext = extname(filePath).toLowerCase();
   if (!TEXT_EXTENSIONS.has(ext)) return [];
   const isDocFile = DOC_ONLY_EXTENSIONS.has(ext);
@@ -330,7 +342,12 @@ function checkFileEncoding(filePath: string): EncodingViolation[] {
     let count = 0;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].includes('encoding-check-ignore')) continue;
-      const matches = lines[i].match(pattern);
+      // v2.22.0: the doc-only ?? heuristic scans a code-span-stripped copy of
+      // the line — quoted source (nullish coalescing inside backticks) is
+      // legitimate documentation content, not CP949 debris. The U+FFFD
+      // pattern still scans the RAW line.
+      const scanLine = docOnly ? stripInlineCodeForEncodingCheck(lines[i]) : lines[i];
+      const matches = scanLine.match(pattern);
       if (matches) {
         lineNumbers.push(i + 1);
         count += matches.length;
@@ -341,6 +358,15 @@ function checkFileEncoding(filePath: string): EncodingViolation[] {
     }
   }
   return violations;
+}
+
+/** Inline-code-span-stripped copy of one line for the doc-only ?? heuristic
+ *  (v2.22.0): every backtick-delimited span is replaced with a placeholder of
+ *  equal length so line/column intuition survives while quoted operators
+ *  (`a ?? b`) stop tripping the corruption detector. Non-greedy pairing
+ *  mirrors stripCodeForLanguageScan (validate-md-language v1.14.0). */
+export function stripInlineCodeForEncodingCheck(line: string): string {
+  return line.replace(/`[^`]*`/g, (span) => '\u0000'.repeat(span.length));
 }
 
 const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli']);
