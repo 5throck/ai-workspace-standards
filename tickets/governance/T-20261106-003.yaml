@@ -13,7 +13,7 @@ title: >-
   templates/common/.claude/settings.json (or file the explicit Phase-2 ticket if
   deferring is the ruling) + propagation-map domain
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-06T01:43:51.928+09:00'
 history:
@@ -29,5 +29,16 @@ history:
   - at: '2026-11-06T02:30:41.437+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-06T02:44:53.448+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1858: the Claude Code PreToolUse/Bash delete-guard entry added
+  to templates/common/.claude/settings.json; sync-variant-settings v1.4.0
+  MANAGED_SUBSTRINGS gains delete-guard and propagated to all 16 variant claude
+  settings (31 settings files with the gemini sync). The scaffold asymmetry is
+  closed — recursive-delete protection now enforces on Claude Code (the 11-04
+  incident platform). Claude-side variant propagation rides
+  sync-variant-settings per the pm-dispatch-gate precedent; no propagation-map
+  domain required.
 error: null

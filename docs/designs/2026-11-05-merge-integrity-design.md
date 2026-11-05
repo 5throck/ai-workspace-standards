@@ -2,7 +2,7 @@
 
 - **Status**: implemented (2026-11-05 — T-20261104-001 + T-20261105-001, PR #1856; two-tier step-3.88 rollout user-approved same day)
 - **Date**: 2026-11-05
-- **Tickets**: T-20261104-001 (memory auto-merge silent corruption), T-20261105-001 (win32 intake-lock EPERM flake)
+- **Tickets**: T-20261104-001 (memory auto-merge silent corruption), T-20261105-001 (win32 intake-lock EPERM flake), T-20261105-002 (v1 gap follow-through — repaired-at-head semantics + propagate inline-code stripping + archival-deletion tier, PR #1857/#1858; added 2026-11-06, T-20261106-006 item 1)
 - **Shared design cycle precedent**: docs/designs/2026-11-04-project-loss-hardening-design.md (format reference; that design also carried a multi-item scope under one ticket)
 - **Related**: T-20261104-004 (project-loss hardening — the memory-drift dev-sync step 3.87 this design sits next to), T-20261005-001 / T-20261022-022 (the win32 transient-FS retry precedent inside mcp-upstream-server.ts)
 

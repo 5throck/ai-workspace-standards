@@ -11,7 +11,7 @@ title: >-
   holds only the target store's lock — TOCTOU window; take both locks in
   id-order or document the single-PM limit (ticket-store.ts:383-395)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-06T01:43:51.992+09:00'
 history:
@@ -27,5 +27,15 @@ history:
   - at: '2026-11-06T02:30:41.454+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-06T02:44:53.464+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1858: item 1 — delete-guard v1.2.0 transparent-prefix skip
+  (sudo/env/nice/xargs/nohup, stacked + env-assignment forms) with the
+  regression test (benign prefixed reads unflagged); item 2 —
+  memory-union-verify v1.2.0 git-plumbing failures WARN to stderr (incomplete
+  sweep observable); item 3 — cross-store TOCTOU documented as single-PM-limited
+  in the ticket resolution (dual-lock reorder deferred as a concurrency design
+  change).
 error: null

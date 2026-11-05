@@ -3,24 +3,41 @@ id: T-20261102-003
 kind: manual
 title: Phase 3b attach-mode demand trigger review (ADR-0092 Addendum 17)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-02T09:52:40.667+09:00'
 history:
   - at: '2026-11-02T09:52:40.667+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-06T02:46:00.691+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T02:46:00.707+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T02:46:00.724+09:00'
+    from: review
+    to: done
+result: >-
+  Not triggered — evidence recorded 2026-11-06 (early closeout ahead of the
+  quarterly pass): exactly ONE delegation ticket exists since the pilot
+  (T-20261102-001, the co-develop → co-security DRILL, done; filed via
+  delegate-to-hub positive path, no real engagement), against the Addendum 17
+  bar of >= 3 per month hitting a hub-PM turnaround bottleneck. No hub-PM
+  turnaround bottleneck pattern, and no explicit user request for interactive
+  attach-mode sessions. Phase 3b stays closed; re-review rides the next
+  quarterly governance pass or an explicit user request.
 error: null
 description: >-
   Demand-trigger review for Phase 3b, per ADR-0092 Addendum 17
-  (docs/adr/0092-workspace-agent-service-design.md, Addendum 17) and the
-  sibling attach-mode design docs/designs/2026-11-01-coworkspace-attach-mode-design.md.
+  (docs/adr/0092-workspace-agent-service-design.md, Addendum 17) and the sibling
+  attach-mode design docs/designs/2026-11-01-coworkspace-attach-mode-design.md.
   Phase 3b starts ONLY on demand evidence: at least 3 delegation tickets per
-  month hitting a hub-PM turnaround bottleneck, OR an explicit user request
-  for interactive sessions. Evaluate at the next quarterly governance pass:
-  inspect the delegation ticket history since the pilot, record the evidence
-  in the resolution, and either open the Phase 3b implementation ticket or
-  close this review as not-triggered. This review does not touch the kanban
-  alias layer or the hub_topology registry, which are independent of the
-  attach-mode path (design §8.3 session-path kill scope).
+  month hitting a hub-PM turnaround bottleneck, OR an explicit user request for
+  interactive sessions. Evaluate at the next quarterly governance pass: inspect
+  the delegation ticket history since the pilot, record the evidence in the
+  resolution, and either open the Phase 3b implementation ticket or close this
+  review as not-triggered. This review does not touch the kanban alias layer or
+  the hub_topology registry, which are independent of the attach-mode path
+  (design §8.3 session-path kill scope).

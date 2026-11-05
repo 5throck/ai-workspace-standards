@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: T-20261106-002
+kind: manual
+title: >-
+  skill-graph: 32 capabilities converged-WITH-DIVERGENCE across the fleet
+  (weekly triage 2026-11-06) — consolidation candidates where variant copies
+  drift from the template SSOT. Top divergence: design-foundation (4 hash groups
+  over 14 projects), agent-lifecycle-manager (3/14), decision-record (3/14),
+  evidence-ledger (3/14); full inventory in
+  memory/skill-graph-metrics/snapshot-2026-11-06.json convergenceWithDivergence.
+  Ask: adjudicate which hash group is canonical per capability and schedule
+  re-derivation deliveries; triage-only (analytics discipline — never modifies
+  skills)
+priority: low
+status: done
+attempts: 0
+created_at: '2026-11-06T01:42:44.864+09:00'
+history:
+  - at: '2026-11-06T01:42:44.864+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T02:46:12.791+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T02:46:12.808+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T02:46:12.824+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated (2026-11-06, user-directed full-processing pass): for all 32
+  converged-with-divergence capabilities, the TEMPLATE SSOT hash group is
+  canonical per the SSOT doctrine (templates/common is the source of record;
+  variant copies are deliveries). No manual canonical-selection or re-derivation
+  scheduling is needed: variant copies that diverged (project-side local fixes,
+  stale deliveries) re-converge through the standard delivery machinery —
+  sync-overwrite-policy v1.76.0 classifies them (PROJECT_EVOLVED → CONFLICT
+  disposition with the §6 adjudicated-port procedure; IN_SYNC/UNTOUCHED pass).
+  Genuine project-side improvements inside divergent copies reach the template
+  via the upstream-request path (the U-20261105 cycle is the live example). No
+  action this cycle; the divergence inventory (snapshot-2026-11-06.json) stays
+  the standing watchlist. Analytics discipline honored: no skills modified.
+error: null
