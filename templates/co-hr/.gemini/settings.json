@@ -36,6 +36,15 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/delete-guard.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
       }
     ],
     "AfterTool": [

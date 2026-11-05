@@ -75,7 +75,14 @@
  * shell parser; obfuscated deletes (scripts calling fs.rmSync, find -delete,
  * git clean) are out of scope by design (design N3; v2 candidates).
  *
- * @version 1.1.1
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-06, T-20261106-005 item 1): transparent-prefix bypass
+ *          closed — sudo/env/nice/xargs/nohup are skipped (stacked forms and
+ *          env assignments they carry included) before verb detection, so
+ *          `sudo rm -rf Projects` no longer walks past the guard. Negative
+ *          tests pin that benign prefixed reads (sudo ls, env grep) stay
+ *          unflagged.
  *
  * v1.1.1 (2026-11-05, windows-latest CI + U-20261104-002 follow-through): the
  * containment helpers are separator- and case-agnostic. A POSIX-literal root
@@ -189,6 +196,23 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
   let start = 0;
   while (start < allTokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(allTokens[start])) {
     start++;
+  }
+  // Transparent prefixes (T-20261106-005 item 1): sudo/env/nice/xargs/nohup
+  // execute the following command unchanged — skip them (and any env
+  // assignments they carry) so the delete verb is detected through the
+  // wrapper. Loop until no progress: covers stacked forms (sudo env rm).
+  const TRANSPARENT_PREFIXES = new Set(['sudo', 'env', 'nice', 'xargs', 'nohup']);
+  let progressed = true;
+  while (progressed) {
+    progressed = false;
+    while (start < allTokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(allTokens[start])) {
+      start++;
+      progressed = true;
+    }
+    if (start < allTokens.length && TRANSPARENT_PREFIXES.has(allTokens[start])) {
+      start++;
+      progressed = true;
+    }
   }
   const tokens = allTokens.slice(start);
   if (tokens.length === 0) return result;

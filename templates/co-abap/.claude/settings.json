@@ -117,6 +117,16 @@
             "statusMessage": "Checking PM dispatch policy..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/delete-guard.ts",
+            "timeout": 10,
+            "statusMessage": "Checking recursive-delete guard..."
+          }
+        ]
       }
     ],
     "TeammateIdle": [
