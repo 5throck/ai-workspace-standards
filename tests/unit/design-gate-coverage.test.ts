@@ -13,7 +13,15 @@
  * over pinned historical windows of this repository's git history (the
  * 2026-10-28 FULL review's F-1 window) — immutable once merged.
  *
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-06, T-20261106-006 item 4): the v1.1.0 spec-name citation
+ *           join pins — resolveSpecCitations joins a subject "spec <name>"
+ *           only when <name> is exactly a registered spec id (unknown names
+ *           resolve to nothing — no silent pass); attributeTouchingCommit
+ *           spec-covers a no-ticket commit that cites a registered spec and
+ *           keeps ticket-citing commits on the prose join; the F-1 e2e pin
+ *           gains the specCitedCommits array contract.
  *
  * v1.1.0 (2026-10-28, DEC-20261028-04 retro-backfill): the F-1 window pin
  *           "genuinely uncovered F-1 tickets stay flagged (no
@@ -26,8 +34,10 @@ import { describe, test, expect } from 'bun:test';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import {
+  attributeTouchingCommit,
   extractTicketIds,
   joinCoverage,
+  resolveSpecCitations,
   touchesTemplateSurface,
 } from '../../scripts/design-gate-coverage.ts';
 import { designGateCoverageVerdict } from '../../scripts/review-baseline.ts';
@@ -132,6 +142,68 @@ describe('joinCoverage (Q4 registry-join semantics)', () => {
   });
 });
 
+describe('resolveSpecCitations + attributeTouchingCommit (v1.1.0 spec-name citation join, T-20261106-006 item 4)', () => {
+  // Real registered spec ids (docs/specs/registry.json / docs/specs/entries/<id>.json).
+  const specIds = ['2026-11-05-merge-integrity-design', '2026-11-04-project-loss-hardening-design'];
+
+  test('a subject citing an existing spec entry by name resolves the id', () => {
+    expect(resolveSpecCitations('docs: closeout (spec 2026-11-05-merge-integrity-design)', specIds))
+      .toEqual(['2026-11-05-merge-integrity-design']);
+  });
+
+  test('an unknown spec name does NOT silently pass — nothing resolves', () => {
+    expect(resolveSpecCitations('docs: closeout (spec 1999-01-01-never-registered-design)', specIds)).toEqual([]);
+    // And the commit stays unattributed: no spec coverage from a typo'd name.
+    const attributed = attributeTouchingCommit(
+      'fix(governance): stuff (spec 1999-01-01-never-registered-design)',
+      [],
+      specIds,
+    );
+    expect(attributed.specCites).toEqual([]);
+    expect(attributed.unattributed).toBe(true);
+    expect(attributed.specCovered).toBe(false);
+  });
+
+  test('the colon variant and case-insensitive "Spec" prefix join; results dedupe', () => {
+    expect(resolveSpecCitations('chore: Spec: 2026-11-04-project-loss-hardening-design (spec 2026-11-04-project-loss-hardening-design)', specIds))
+      .toEqual(['2026-11-04-project-loss-hardening-design']);
+  });
+
+  test('prose mentioning "spec registration"/"specs by name" resolves nothing (word-boundary safety)', () => {
+    expect(resolveSpecCitations('chore: spec registration + ticket states; specs by name adjudicated', specIds)).toEqual([]);
+  });
+
+  test('a no-ticket commit citing a registered spec is spec-covered, not unattributed', () => {
+    const attributed = attributeTouchingCommit(
+      'fix(governance): closeout (spec 2026-11-05-merge-integrity-design)',
+      [],
+      specIds,
+    );
+    expect(attributed.tickets).toEqual([]);
+    expect(attributed.specCites).toEqual(['2026-11-05-merge-integrity-design']);
+    expect(attributed.specCovered).toBe(true);
+    expect(attributed.unattributed).toBe(false);
+  });
+
+  test('a ticket-citing commit stays on the prose join — a spec citation never covers tickets', () => {
+    const attributed = attributeTouchingCommit(
+      'fix(governance): closeout (T-20261104-003) (spec 2026-11-05-merge-integrity-design)',
+      ['T-20261106-001'],
+      specIds,
+    );
+    expect(attributed.tickets.sort()).toEqual(['T-20261104-003', 'T-20261106-001']);
+    expect(attributed.specCites).toEqual(['2026-11-05-merge-integrity-design']);
+    expect(attributed.specCovered).toBe(false);
+    expect(attributed.unattributed).toBe(false);
+  });
+
+  test('a commit citing neither a ticket nor a spec stays unattributed (v1.0.0 behavior preserved)', () => {
+    const attributed = attributeTouchingCommit('chore(templates): workspace sync (10 files)', [], specIds);
+    expect(attributed.unattributed).toBe(true);
+    expect(attributed.specCovered).toBe(false);
+  });
+});
+
 describe('designGateCoverageVerdict (review-baseline battery #9 classifier)', () => {
   test('a fully-covered window is green', () => {
     const v = designGateCoverageVerdict({
@@ -182,6 +254,7 @@ describe('design-gate-coverage e2e — the F-1 window (T-20261028-001 acceptance
     touchingCommits: number;
     uncovered: string[];
     unattributedCommits: Array<{ sha: string }>;
+    specCitedCommits: Array<{ sha: string; specs: string[] }>;
     tickets: Array<{ id: string; covered: boolean; specs: Array<{ id: string }> }>;
     commits: Array<{ sha: string; touching: boolean; tickets: string[] }>;
   };
@@ -249,6 +322,13 @@ describe('design-gate-coverage e2e — the F-1 window (T-20261028-001 acceptance
     for (const c of report.commits) expect(c.sha).toMatch(/^[0-9a-f]{8}$/);
   });
 
+  test('the v1.1.0 specCitedCommits section is a well-formed array (contract for battery #9 consumers)', () => {
+    // The F-1 window cites no spec name in any subject — nothing may appear
+    // spec-covered there; the array contract itself is the v1.2.0 pin.
+    expect(Array.isArray(report.specCitedCommits)).toBe(true);
+    expect(report.specCitedCommits).toEqual([]);
+  });
+
   test('the CLI always exits 0 — report-only, nothing auto-closes (design D8)', () => {
     expect(runCoverage(['--since', F1_SINCE, '--until', F1_UNTIL]).status).toBe(0);
   });
@@ -269,6 +349,7 @@ describe('design-gate-coverage e2e — a fully covered window yields an empty un
       touchingCommits: number;
       uncovered: string[];
       unattributedCommits: unknown[];
+      specCitedCommits: unknown[];
       tickets: Array<{ id: string; covered: boolean }>;
     };
     expect(report.touchingCommits).toBe(1);
@@ -276,6 +357,7 @@ describe('design-gate-coverage e2e — a fully covered window yields an empty un
     expect(report.tickets.every((t) => t.covered)).toBe(true);
     expect(report.uncovered).toEqual([]);
     expect(report.unattributedCommits).toEqual([]);
+    expect(report.specCitedCommits).toEqual([]);
   }, 120_000);
 });
 
