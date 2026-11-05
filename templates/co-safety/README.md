@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 898e419b138c407bf87e9572aecdc9eb0d2f7d0d815136c6fabe96e28dcd7426
+content_hash: 691e376d61142429138548e0fa22327b7b4b2fbaa4466ada8b11586c455a6d9b
 ---
 
 # co-safety
@@ -43,10 +43,10 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **cosmetics-agent** | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch rele | medium | sonnet |
 | **datacenter-agent** | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lit | medium | sonnet |
 | **defense-agent** | Defense & Explosives Safety specialist — manages ammunition propellant mixing ES | medium | sonnet |
-| **ehschem-agent** | Chemical Plant Safety specialist (화학공장 안전) — 정유/석유화학/정밀화학 plant operations | medium | sonnet |
-| **ehsconst-agent** | Construction Safety specialist (건설안전) — Korean construction industry safety mana | medium | sonnet |
+| **ehschem-agent** | Chemical Plant Safety specialist — refining/petrochemical/fine-chemicals plant operations | medium | sonnet |
+| **ehsconst-agent** | Construction Safety specialist — Korean construction industry safety mana | medium | sonnet |
 | **food-agent** | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monit | medium | sonnet |
-| **gasterm-agent** | Gas Terminal Safety specialist (가스터미널 안전) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전 | medium | sonnet |
+| **gasterm-agent** | Gas Terminal Safety specialist — LNG/LPG/hydrogen base and filling-station safety management per the High-Pressure Gas Safety Control Act | medium | sonnet |
 | **gcp-agent** | Good Clinical Practice specialist — clinical trial management, IRB, informed con | medium | sonnet |
 | **gdp-agent** | Good Distribution Practice specialist — pharmaceutical supply chain, storage, tr | medium | sonnet |
 | **glp-agent** | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + O | medium | sonnet |
@@ -54,7 +54,7 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **gvp-agent** | Good Pharmacovigilance Practice specialist — post-market drug safety surveillanc | medium | sonnet |
 | **logistics-agent** | Port Logistics & Automated Warehouse Safety specialist — manages port crane lift | medium | sonnet |
 | **meddevice-agent** | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971 | medium | sonnet |
-| **powergen-agent** | Power Generation Safety specialist (발전설비 안전) — 화력/신재생 발전소 안전 관리 per 전기사업법 + 전기안전 | medium | sonnet |
+| **powergen-agent** | Power Generation Safety specialist — thermal/renewable power plant safety management per the Electric Utility Act + electrical safety regulations | medium | sonnet |
 | **railway-agent** | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high- | medium | sonnet |
 | **semicon-agent** | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas h | medium | sonnet |
 | **shipbuilding-agent** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | medium | sonnet |
@@ -126,4 +126,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-06*

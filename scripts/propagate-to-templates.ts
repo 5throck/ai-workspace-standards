@@ -5,7 +5,23 @@
  * Replaces publish-to-template.ts (deprecated v1.8.0). Single authoritative script
  * for all L0→L1 propagation. Config-driven via propagation-map.json (SSOT for exclusions).
  *
- * @version 2.22.0
+ * @version 2.23.0
+ *
+ * v2.23.0 (2026-11-06, T-20261106-004 class A — spec
+ *          docs/designs/2026-11-06-validator-nightly-remediation-design.md):
+ *          applyGovernanceTransforms AGENTS.md branch gains B-A16 — the §6
+ *          common-skills table's three L0-only rows (create-variant /
+ *          promote-variant / simulate-pipeline) are stripped from the L1
+ *          rendition. The delivery contract does not ship those skills, so
+ *          the delivered rows dangle in scaffolded AGENTS.md and the audit §29
+ *          pointer-integrity gate blocked every nightly scaffold's initial
+ *          commit (run 41993138298, Test 4 no-HEAD). The L0 source keeps the
+ *          rows (root ships the skills); L1 is now clean by construction and
+ *          the transform-aware platform-parity checker recomputes the same
+ *          transform, so no parity drift. Same PR strips the stale rows from
+ *          the one variant snapshot that still carried them
+ *          (templates/co-architect/AGENTS.md — CI evidence: only its leg
+ *          failed).
  *
  * v2.22.0 (2026-11-05, T-20261105-002 follow-through): the doc-only `??`
  *          CP949-corruption heuristic no longer fires on INLINE CODE SPANS —
@@ -1649,6 +1665,24 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
       'see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.',
       'see ADR-0078; the LLM Work Routing Policy section above is the project-applicable policy summary.'
     );
+
+    // B-A16 (v2.23.0, T-20261106-004 class A — spec
+    //        docs/designs/2026-11-06-validator-nightly-remediation-design.md):
+    //        the §6 common-skills table carries three L0-only rows
+    //        (create-variant / promote-variant / simulate-pipeline) for
+    //        workspace-root-only tooling the delivery contract deliberately
+    //        does not ship. Delivered verbatim they dangle in every L1-derived
+    //        AGENTS.md and the audit §29 pointer-integrity gate blocks the
+    //        initial scaffold commit (nightly run 41993138298, Test 4 no-HEAD).
+    //        Strip the three literal rows from the L1 rendition — the L0
+    //        source keeps them (root legitimately ships the skills and its own
+    //        audit resolves there), and variant AGENTS.md snapshots regenerate
+    //        from this cleaned L1 base. Same-Night evidence: only the
+    //        co-architect snapshot still carried the stale rows; its strip
+    //        lands in the same PR so L0→L1→L2 converge.
+    content = content.replace(/^\| `create-variant` \| `skills\/create-variant\/` \| New variant scaffolding — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
+    content = content.replace(/^\| `promote-variant` \| `skills\/promote-variant\/` \| Variant promotion to official — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
+    content = content.replace(/^\| `simulate-pipeline` \| `skills\/simulate-pipeline\/` \| E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline \(merged skill\) — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
 
     // B-A13 die-guard: the two injection anchors are structural — if either
     // drifts, the placeholder zones silently vanish again (the exact failure
