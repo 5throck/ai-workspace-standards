@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261106-001
+kind: manual
+title: >-
+  skill-graph: k-ecos / k-kosis / k-krx identical convergence across >=3
+  projects (weekly triage 2026-11-06, threshold 3, converged identical set) —
+  co-abap-origin Korean-market skills now carried identically by 3+ variants;
+  promotion/consolidation decision for human triage (promote to common/curated
+  list, or accept as fleet-distributed domain assets). Note: delegate-to-hub
+  also converged >=3 but is ALREADY promoted template-side (hub-spoke program) —
+  no action. Triage-only; never executes promotions (skill-graph-analytics
+  discipline)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-06T01:42:44.833+09:00'
+history:
+  - at: '2026-11-06T01:42:44.833+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

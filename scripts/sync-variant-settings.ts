@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-06, T-20261106-003 — delete-guard scaffold wiring asymmetry):
+//          MANAGED_SUBSTRINGS gains 'delete-guard' — the Claude Code
+//          PreToolUse/Bash delete-guard entry (templates/common/.claude/
+//          settings.json) now propagates to every variant's .claude/settings
+//          like the pm-dispatch-gate class. Closes the asymmetry where
+//          scaffolds enforced recursive-delete protection on Gemini (the
+//          gemini-settings propagation delivered the entry) but not on Claude
+//          Code — the platform class of the 2026-11-04 rm -rf Projects
+//          incident.
 // v1.3.0 (2026-11-01, design docs/designs/2026-11-01-hub-consolidation-design.md Phase 0):
 //           VARIANTS is no longer a hardcoded literal — the set derives from
 //           templates/*/variant.json (the L2 variant set, the authoritative delivery
@@ -78,7 +87,7 @@ export const SYNC_TARGETS: ReadonlyArray<{ platform: Platform; event: string }> 
 
 /** A variant hook entry is "managed" when its command contains one of these
  * substrings — the stable identity used to pair common and variant entries. */
-export const MANAGED_SUBSTRINGS: readonly string[] = ['pm-role-bootstrap', 'pm-dispatch-gate'];
+export const MANAGED_SUBSTRINGS: readonly string[] = ['pm-role-bootstrap', 'pm-dispatch-gate', 'delete-guard'];
 
 export function isManaged(command: string): boolean {
   return MANAGED_SUBSTRINGS.some((s) => command.includes(s));

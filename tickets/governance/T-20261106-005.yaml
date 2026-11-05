@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261106-005
+kind: manual
+title: >-
+  robustness batch (Phase I 2026-11-06 low/normal trio): (1) delete-guard verb
+  detection reads tokens[0] only — sudo rm / /bin/rm / xargs rm / env rm bypass;
+  skip a transparent-prefix allowlist (sudo/env/nice/xargs/nohup) + negative
+  tests (delete-guard.ts:195); (2) memory-union Arm A fails open on git plumbing
+  error — git() null reads as 'no merges'; distinguish from empty and WARN/FATAL
+  (memory-union-verify.ts:305-309); (3) ticket-store cross-store duplicate scan
+  holds only the target store's lock — TOCTOU window; take both locks in
+  id-order or document the single-PM limit (ticket-store.ts:383-395)
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-06T01:43:51.992+09:00'
+history:
+  - at: '2026-11-06T01:43:51.992+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T02:24:24.955+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T02:24:24.971+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-06T02:30:41.454+09:00'
+    from: running
+    to: review
+result: null
+error: null

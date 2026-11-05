@@ -27,7 +27,7 @@ title: >-
   against the working tree answers only the Arm B malformed finding, which this
   ticket's repair will also restructure into a headed block).
 priority: urgent
-status: running
+status: done
 attempts: 0
 created_at: '2026-11-05T23:58:58.417+09:00'
 history:
@@ -40,5 +40,21 @@ history:
   - at: '2026-11-06T00:16:13.060+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-11-06T01:19:22.955+09:00'
+    from: running
+    to: review
+  - at: '2026-11-06T01:19:34.524+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1857 (merged 2026-11-06): memory-union-verify v1.1.0
+  repaired-at-head semantics (droppedBlocks + repairedAtHead with
+  un-headed-block verbatim-absorption tolerance; unionScan re-tiers repaired
+  groups INFO, fail-closed on unreadable worktree), dev-sync v1.41.0 step 3.88
+  tier separation (unrepaired post-activation drops stay FATAL),
+  propagate-to-templates v2.22.0 inline-code stripping in the encoding gate
+  (U-20261105-001's quoted nullish coalescing no longer FATAL-blocks), and
+  memory/2026-11-02.md's c8aba5d61-dropped pause line restored as a headed
+  block. Live-verified: the landing sync crossed the previously-fatal step 3.88;
+  repo-wide /sync blocker lifted. +8 tests; all four gates green.
 error: null
