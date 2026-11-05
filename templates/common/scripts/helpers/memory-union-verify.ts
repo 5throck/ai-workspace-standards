@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-11-06, T-20261105-002 follow-through — first post-merge sync
+//          finding): the deleted-file arm (archive-memory 7-day retention
+//          deletes a flat log; merge e73b51057 landed that deletion
+//          post-activation) pushed an unconditional FATAL 'file deleted while
+//          a parent still carries session blocks'. Archival deletions are the
+//          documented retention cycle — now tiered 'repaired-at-head' (INFO)
+//          when the MEMORY.md index row for the deleted log survives (the
+//          tombstone is the positive evidence); no tombstone keeps the
+//          original tier (a genuine clobber deletion stays FATAL).
 // v1.1.0 (2026-11-05, T-20261105-002 — the v1 gap this landing closes):
 //          post-activation drop findings were unrecoverable. Arm A compared
 //          the merge commit's OWN blob, so the documented "restore the named
@@ -398,15 +407,32 @@ export function unionScan(opts: {
       const merged = showBlob(target.commit, file, cwd);
       if (merged === null) {
         if (ours !== null || theirs !== null) {
+          // v1.1.1 archived-retention tier: a flat log deleted while a parent
+          // carries blocks is the DOCUMENTED archive-memory 7-day retention
+          // cycle when its MEMORY.md index row survives (the tombstone IS the
+          // positive evidence — the same positive-evidence-only posture as
+          // filterTransientCheckouts). No tombstone row = original tier.
+          let deletedTier: MergeScanResult['tier'] = tier;
+          try {
+            const memoryIndex = readFileSync(join(cwd, 'memory', 'MEMORY.md'), 'utf8');
+            const base = file.replace(/^memory\//, '').replace(/\.md$/, '');
+            if (new RegExp(`^\\| ${base} \\|`, 'm').test(memoryIndex)) {
+              deletedTier = 'repaired-at-head'; // sanctioned archival — INFO tier shared
+            }
+          } catch {
+            // MEMORY.md unreadable — keep the original tier (fail-closed)
+          }
           results.push({
             commit: target.commit,
             file,
-            tier,
+            tier: deletedTier,
             findings: [
               {
                 kind: 'dropped-block',
                 file,
-                detail: 'file deleted in the merge commit while a parent still carries session blocks',
+                detail: deletedTier === 'repaired-at-head'
+                  ? 'file deleted in the merge commit — archive-memory 7-day retention (MEMORY.md tombstone row present; INFO, ages out with the window)'
+                  : 'file deleted in the merge commit while a parent still carries session blocks',
               },
             ],
           });

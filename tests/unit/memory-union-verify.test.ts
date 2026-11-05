@@ -486,4 +486,34 @@ describe('unionScan repaired-at-head tier (T-20261105-002)', () => {
     expect(repaired[0].tier).toBe('repaired-at-head');
     expect(repaired[0].findings.some((f) => f.kind === 'dropped-block')).toBe(true);
   });
+
+  test('archival deletion with a MEMORY.md tombstone re-tiers repaired-at-head; clobber deletion stays blocking (v1.1.1)', () => {
+    localGit(['init', '-q', '-b', 'main']);
+    localGit(['config', 'user.name', 'test']);
+    localGit(['config', 'user.email', 'test@example.com']);
+    localGit(['config', 'commit.gpgsign', 'false']);
+    const logRel = join(memoryDir, '2026-11-06.md');
+    const idxRel = join(memoryDir, 'MEMORY.md');
+    writeFileSync(logRel, `${block('A', 'alpha')}\n`);
+    writeFileSync(idxRel, '| Date | Summary |\n|---|---|\n');
+    localCommit('base');
+    localGit(['checkout', '-q', '-b', 'side']);
+    writeFileSync(logRel, `${block('A', 'alpha')}\n---\n${block('S', 'side')}\n`);
+    localCommit('side appends S');
+    localGit(['checkout', '-q', 'main']);
+    rmSync(logRel); // archive-memory 7-day retention deletes the log
+    localCommit('archive deletes the log');
+    spawnSync('git', ['merge', '--no-commit', '--no-ff', 'side'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    localGit(['rm', '-q', '2026-11-06.md'.replace(/^/, 'memory/')]);
+    localCommit('merge side (archival deletion survives)');
+    // WITH the MEMORY.md tombstone row for the deleted log → sanctioned archival
+    writeFileSync(idxRel, '| Date | Summary |\n|---|---|\n| 2026-11-06 | archived — retention cycle |\n');
+    const archived = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(archived).toHaveLength(1);
+    expect(archived[0].tier).toBe('repaired-at-head');
+    // WITHOUT the tombstone → a genuine clobber deletion stays blocking
+    writeFileSync(idxRel, '| Date | Summary |\n|---|---|\n');
+    const clobber = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(clobber[0].tier).toBe('blocking');
+  });
 });
