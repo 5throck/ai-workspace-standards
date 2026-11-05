@@ -2,12 +2,18 @@
  * Tests for propagate-to-templates.ts — isL2DriftEligible() policy and
  * collectDiffsL1L2() filter behavior.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-11-06, T-20261106-004 class A): new describe block pins
+ *         applyGovernanceTransforms B-A16 — the three L0-only §6 skill rows
+ *         (create-variant / promote-variant / simulate-pipeline) are stripped
+ *         from the AGENTS.md L1 rendition, shipped-skill rows are kept, and
+ *         non-AGENTS.md governance files are untouched (spec
+ *         docs/designs/2026-11-06-validator-nightly-remediation-design.md).
  */
 import { mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, test, expect, beforeAll } from 'bun:test';
-import { isL2DriftEligible, collectDiffsL1L2, checkFileEncoding } from '../../scripts/propagate-to-templates.ts';
+import { isL2DriftEligible, collectDiffsL1L2, checkFileEncoding, applyGovernanceTransforms } from '../../scripts/propagate-to-templates.ts';
 
 // Minimal domain shape matching the interface
 function makeDomain(overrides: Record<string, unknown> = {}): any {
@@ -132,5 +138,48 @@ describe('checkFileEncoding doc-only ?? x inline-code stripping (v2.22.0)', () =
     expect(v).toHaveLength(1);
     expect(v[0].count).toBe(1);
     rmSync(f, { force: true });
+  });
+});
+
+// ── B-A16: L0-only §6 skill rows stripped from the L1 AGENTS.md rendition ──────
+// T-20261106-004 class A (spec docs/designs/2026-11-06-validator-nightly-remediation-design.md):
+// the three L0-only skill rows dangle in every scaffolded AGENTS.md and the audit §29
+// pointer-integrity gate blocks the initial scaffold commit. The L1 rendition must drop
+// them while the L0 source keeps them.
+describe('applyGovernanceTransforms B-A16 — L0-only §6 rows stripped from AGENTS.md L1 rendition', () => {
+  const l0Rows = [
+    '| `create-variant` | `skills/create-variant/` | New variant scaffolding — workspace-root (L0) only, not shipped in scaffolds |',
+    '| `promote-variant` | `skills/promote-variant/` | Variant promotion to official — workspace-root (L0) only, not shipped in scaffolds |',
+    '| `simulate-pipeline` | `skills/simulate-pipeline/` | E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline (merged skill) — workspace-root (L0) only, not shipped in scaffolds |',
+  ].join('\n') + '\n';
+
+  const keptRow = '| `security-scan` | `skills/security-scan/` | Security and secret detection |\n';
+  // Fixture carries the structural anchors the B-AGENTS branch requires (§1/§2
+  // roster span, §3.6 and §5 injection anchors) — applyGovernanceTransforms
+  // die()s on their absence by design (B-A13 guard).
+  const agentsFixture = [
+    '## §1: Agent Ecosystem Overview\n\nroster\n\n---\n\n## §2: Individual Agent Definitions\n\nroster\n\n---\n\n## §3: PM Gateway Workflow\n',
+    '\n### §3.6 3-Tier Strategy\n',
+    '\n## §5: Execution Plan Templates\n',
+    '\n## §6: Skills\n\n| Skill | Location | Purpose |\n|-------|----------|---------|\n',
+    l0Rows,
+    keptRow,
+  ].join('');
+
+  test('the three L0-only rows are removed from the AGENTS.md L1 rendition', () => {
+    const l1 = applyGovernanceTransforms(agentsFixture, 'AGENTS.md');
+    expect(l1).not.toContain('skills/create-variant/');
+    expect(l1).not.toContain('skills/promote-variant/');
+    expect(l1).not.toContain('skills/simulate-pipeline/');
+  });
+
+  test('shipped-skill rows are kept', () => {
+    const l1 = applyGovernanceTransforms(agentsFixture, 'AGENTS.md');
+    expect(l1).toContain(keptRow.trimEnd());
+  });
+
+  test('non-AGENTS.md governance files are not stripped (L0-only rows are AGENTS.md-specific)', () => {
+    const l1 = applyGovernanceTransforms(agentsFixture, 'CLAUDE.md');
+    expect(l1).toContain('skills/create-variant/');
   });
 });

@@ -2,11 +2,18 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.10.0
+ * @version 1.11.0
+ * v1.11.0 (2026-11-06, T-20261106-004 class B): Test 25 normalizes the raw-template
+ *         governance_workflow expectation through applySubstitutions() (the same
+ *         placeholder map the scaffold's substitution pass applies) before the
+ *         includes() assertion — the co-architect override line contains a backtick
+ *         `docs/<variant>.context.md` path that the scaffold rewrites to the actual
+ *         variant name, so comparing the raw template text against post-substitution
+ *         output failed on placeholder spelling, not on the rendered contract.
  * v1.10.0 (2026-10-02): Test 27 footer pin 2.13 → 2.14 — templates/common/docs/context.md gained a
  * footer bump for the Supported Surfaces delivery (T-20261001-021); the pin lagged the bump and
  * tripped the scripts E2E suite in CI as the 2026-09-30 T-20260926-011 pin class did.
- * @last_updated 2026-09-29
+ * @last_updated 2026-11-06
  *
  * v1.9.0 (2026-09-29, T-20260929-002): Test 4 also asserts the initial
  *         scaffold commit (HEAD exists) seeded by new-project.ts v1.33.0.
@@ -107,6 +114,7 @@ import { $ } from 'bun';
 import { load as yamlLoad } from 'js-yaml';
 import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
 import { parseSkillRegistryRows } from './helpers/skills-registry.ts';
+import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 
@@ -811,7 +819,22 @@ try {
           const fm = (yamlLoad(tmplMatch[1]) ?? {}) as Record<string, unknown>;
           const overrides = (fm['variant_overrides'] ?? {}) as Record<string, unknown>;
           const gw = typeof overrides['governance_workflow'] === 'string' ? (overrides['governance_workflow'] as string) : '';
-          const contentLine = gw.split('\n').map(l => l.trim()).find(l => l !== '' && !l.startsWith('#'));
+          let contentLine = gw.split('\n').map(l => l.trim()).find(l => l !== '' && !l.startsWith('#'));
+          // The scaffold's substitution pass (scripts/helpers/substitute-placeholders.ts)
+          // rewrites backtick `<variant>` paths (and the rest of the placeholder map) in
+          // the rendered body. Normalize the raw-template expectation through the same
+          // exported map — with the params this harness's scaffold run uses — so the
+          // assertion tests the ADR-0039/ADR-0034 contract (override rendered into the
+          // body), not placeholder spelling (T-20261106-004 class B).
+          if (contentLine) {
+            contentLine = applySubstitutions(contentLine, {
+              projectName: `Test-${projectName}`,
+              description: 'A new project',
+              characteristics: '',
+              variantName: variantArg,
+              countryDisplayName: '',
+            });
+          }
           if (contentLine && !pmContent.includes(contentLine)) {
             problems.push(`variant_overrides.governance_workflow not rendered into body (missing line: "${contentLine.slice(0, 60)}…")`);
           }

@@ -7608,8 +7608,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-05"
+        "sessions": 6,
+        "last_used": "2026-11-06"
       }
     },
     {
@@ -8041,8 +8041,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-05"
+        "sessions": 6,
+        "last_used": "2026-11-06"
       }
     },
     {
@@ -8740,8 +8740,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-05"
+        "sessions": 6,
+        "last_used": "2026-11-06"
       }
     },
     {
@@ -11699,12 +11699,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-architect/AGENTS.md",
-      "to": "skill:root/create-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/AGENTS.md",
       "to": "skill:root/explain-me",
       "source": "workflow-doc"
     },
@@ -11723,19 +11717,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-architect/AGENTS.md",
-      "to": "skill:root/promote-variant",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/AGENTS.md",
       "to": "skill:root/security-scan",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/AGENTS.md",
-      "to": "skill:root/simulate-pipeline",
       "source": "workflow-doc"
     },
     {
