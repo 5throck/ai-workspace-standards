@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261106-003
+kind: manual
+title: >-
+  validator-hardening (Phase I 2026-11-06 M-1, delete-guard scaffold wiring
+  asymmetry): the delete-guard hook file IS delivered to scaffolds via
+  gemini-settings propagation, but the Claude Code PreToolUse wiring is not —
+  templates/common/.claude/settings.json has gateguard only, so scaffolded
+  projects enforce recursive-delete protection on Gemini (deny) but not Claude
+  Code (ask) — and Claude Code was the platform class of the 11-04 incident.
+  Design line 336 deferred scaffold wiring to Phase 2 without a ticket. Fix: add
+  the PreToolUse/Bash delete-guard entry to
+  templates/common/.claude/settings.json (or file the explicit Phase-2 ticket if
+  deferring is the ruling) + propagation-map domain
+priority: high
+status: review
+attempts: 0
+created_at: '2026-11-06T01:43:51.928+09:00'
+history:
+  - at: '2026-11-06T01:43:51.928+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T02:24:24.924+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T02:24:24.939+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-06T02:30:41.437+09:00'
+    from: running
+    to: review
+result: null
+error: null

@@ -434,6 +434,25 @@ describe('delete-guard pure helpers', () => {
     expect(analyzeSegment('du Projects').isListing).toBe(false);
   });
 
+  test('analyzeSegment: transparent prefixes no longer bypass detection (T-20261106-005 item 1)', () => {
+    const expectDelete = (cmd: string, operands: string[]) => {
+      const r = analyzeSegment(cmd);
+      expect(r.isRecursiveDelete).toBe(true);
+      expect(r.deleteOperands).toEqual(operands);
+    };
+    expectDelete('sudo rm -rf Projects', ['Projects']);
+    expectDelete('env rm -rf Projects', ['Projects']);
+    expectDelete('nice rm -rf Projects', ['Projects']);
+    expectDelete('xargs rm -rf Projects', ['Projects']);
+    expectDelete('nohup rm -rf Projects', ['Projects']);
+    expectDelete('sudo env rm -rf Projects', ['Projects']);
+    expectDelete('FOO=1 sudo rm -rf Projects', ['Projects']);
+    // negatives: benign prefixed reads stay unflagged
+    expect(analyzeSegment('sudo ls Projects').isRecursiveDelete).toBe(false);
+    expect(analyzeSegment('env grep -r x Projects').isRecursiveDelete).toBe(false);
+    expect(analyzeSegment('nice du -s Projects').isListing).toBe(true);
+  });
+
   test('expandTilde expands ~ and ~/...', () => {
     expect(expandTilde('~')).not.toBe('~');
     expect(expandTilde('~/x')).toBe(join(expandTilde('~'), 'x'));
