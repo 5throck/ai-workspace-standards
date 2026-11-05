@@ -11,12 +11,30 @@ title: >-
   no action. Triage-only; never executes promotions (skill-graph-analytics
   discipline)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-06T01:42:44.833+09:00'
 history:
   - at: '2026-11-06T01:42:44.833+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-06T02:46:00.741+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T02:46:00.757+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T02:46:00.775+09:00'
+    from: review
+    to: done
+result: >-
+  Adjudicated (2026-11-06, user-directed full-processing pass): k-ecos / k-kosis
+  / k-krx ACCEPT as fleet-distributed domain assets — no promotion to common.
+  Rationale: the three are Korean-market-domain capabilities needed exactly by
+  the market-adjacent variants carrying them; promotion to templates/common
+  would ship them to all 16 variants including non-market ones, violating the
+  context-commonization doctrine (ADR-0050: common carries genuinely-shared
+  capability). The >= 3 convergence is promotion-CANDIDACY review signal, not
+  promotion itself; candidacy declined with this rationale as the decision of
+  record. Analytics discipline honored: no skills modified.
 error: null
