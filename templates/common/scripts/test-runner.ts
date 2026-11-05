@@ -1,6 +1,13 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.9.0
+ * @version 1.10.0
+ *
+ * v1.10.0 (2026-11-06, T-20261106-008): `hub-bootstrap.test.ts` joins
+ *          FILE_TIME_BUDGETS (suite 300s / test 45s) — windows-latest run
+ *          42078112151: the spawn-heavy bootstrap E2E tests hit 15.1s/16.1s
+ *          against the 15000ms default per-test ceiling (win32 FS pressure;
+ *          the same commit passed macos 1m55s). First-time row for a new
+ *          file under the v1.9.0 ticket-evidence policy.
  *
  * v1.9.0 (2026-10-31, T-20261030-002 stage 2 — spec
  *         docs/designs/2026-10-31-test-budget-split-design.md): the evidence
@@ -148,6 +155,12 @@ const DEFAULT_TEST_TIMEOUT_MS = 15000;
  * split/trim review. The BUDGET-HEADROOM WARN (60% of suite budget) makes
  * slow burn-in visible in every CI log instead of at raise time. */
 const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
+  // T-20261106-008 (windows-latest, run 42078112151): spawn-heavy hub-bootstrap
+  // E2E — two tests at 15.1s/16.1s exceeded the 15000ms default ceiling on
+  // win32 FS pressure while the same commit passed macos in 1m55s (~2.8x
+  // headroom at 45s). First-time entry for a new file, not a raise on an
+  // offender.
+  'hub-bootstrap.test.ts': { suite: 300000, test: 45000 },
   'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
   'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence

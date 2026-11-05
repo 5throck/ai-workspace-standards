@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-05T23:02:28.050Z
+**Generated**: 2026-11-05T23:30:45.062Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -201,7 +201,7 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun |
 | test-new-project.ts | 1.11.0 | scripts/test-new-project.ts | bun, js-yaml |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.9.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.10.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
 | ticket.ts | 1.15.0 | scripts/ticket.ts | js-yaml |
