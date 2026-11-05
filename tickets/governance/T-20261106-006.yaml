@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261106-006
+kind: manual
+title: >-
+  records registry batch (Phase I 2026-11-06): (1) add T-20261105-002 to the
+  2026-11-05-merge-integrity-design spec entry (design doc exists; spec names
+  only T-20261104-001 — one-line fix, kills a recurring D8 row); (2) correct
+  T-20261104-003 result's corrupted merge hash 268e268e21c64 -> 268e21c64; (3)
+  D8 batch adjudication: 81 rows = 56 template-touching join artifacts
+  (hub-spoke/hardening day, cite specs by name) + 25 tickets
+  (U-20261105-001..007 governance batch + T-20261103/T-20261104/T-20261105
+  blocks) — batch-adjudicate E-classes or register specs; (4) optional: teach
+  design-gate-coverage the 'spec <name>' subject-citation join — collapses ~10
+  adjudication rows/day (3-week recurring case)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-06T01:43:52.023+09:00'
+history:
+  - at: '2026-11-06T01:43:52.023+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
