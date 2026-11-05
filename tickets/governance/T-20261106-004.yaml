@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261106-004
+kind: manual
+title: >-
+  validator-hardening (Phase I 2026-11-06 E2E nightly red, run 41993138298 — 3
+  failure classes): class A (Major, single root cause): scaffold AGENTS.md §6
+  references skills/create-variant|promote-variant|simulate-pipeline — L0-only
+  skills deliberately not shipped — templates/common/AGENTS.md:252-254 rows
+  survive into scaffolded AGENTS.md and audit.ts:2184/:3375 pointer-integrity
+  FAILs them (>=3 scaffold groups; downstream: blocked initial scaffold commit
+  -> Test 4 no-HEAD); fix = strip/annotate the three L0-only rows for scaffold
+  delivery (or teach audit the L0-only annotation); class B: Test 25
+  variant_overrides.governance_workflow not rendered into scaffolded pm.md body
+  (1 variant, independent rendering regression); class C: scaffold README.md
+  Korean content without lang: ko declaration (2 variants — the variant README
+  source ships Korean and survives scaffold copy). Acceptance: nightly green
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-06T01:43:51.959+09:00'
+history:
+  - at: '2026-11-06T01:43:51.959+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
