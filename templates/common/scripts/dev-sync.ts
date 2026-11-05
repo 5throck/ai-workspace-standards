@@ -1,4 +1,15 @@
-// @version 1.40.0
+// @version 1.41.0
+// v1.41.0 (2026-11-05, T-20261105-002): step 3.88 gains the repaired-at-head
+//          tier — memory-union-verify v1.1.0 re-tiers a post-activation drop
+//          finding group as 'repaired-at-head' (INFO) when the current
+//          working-tree file accounts for every parent-owed block
+//          (repairedAtHead, with the un-headed-block absorption tolerance).
+//          The gate stays FATAL for unrepaired post-activation drops;
+//          repaired groups print an INFO line so the repair stays visible in
+//          the run log. Completes design §5.3's "a repaired file passes"
+//          premise (the 2026-11-05-merge-integrity-design v1 implementation
+//          compared the merge commit's own blob, making forward repairs
+//          impossible — live-blocked since merge c8aba5d61).
 // v1.40.0 (2026-11-05, T-20261104-001 — spec
 //          docs/designs/2026-11-05-merge-integrity-design.md §5.1): new step
 //          3.88 — memory session-block union-verify, BLOCKING. On 2026-11-04
@@ -932,6 +943,7 @@ if (fs.existsSync(path.join('memory'))) {
     const merges = unionScan({ sinceDays: 7, maxCommits: 20, activationIso: GATE_3_88_ACTIVATED_AT });
     const blocking = merges.filter((r) => r.tier === 'blocking');
     const historical = merges.filter((r) => r.tier === 'historical');
+    const repaired = merges.filter((r) => r.tier === 'repaired-at-head');
     if (blocking.length > 0) {
         console.error(`${RED}✗ Step 3.88: memory union-verify — ${blocking.length} post-activation merge finding group(s)${RESET}`);
         for (const r of blocking) {
@@ -947,6 +959,12 @@ if (fs.existsSync(path.join('memory'))) {
             for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
         }
     }
+    if (repaired.length > 0) {
+        console.log(`${GREEN}ℹ️  Step 3.88: ${repaired.length} repaired-at-head merge finding group(s) (INFO — the merge-time drop is restored in the current working tree; ages out with the window):${RESET}`);
+        for (const r of repaired) {
+            for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
+        }
+    }
     const wf = wellFormedScan({ memoryDir: path.join('memory') });
     if (wf.length > 0) {
         console.error(`${RED}✗ Step 3.88: memory structural integrity — ${wf.length} malformed memory log(s) at HEAD${RESET}`);
@@ -957,7 +975,7 @@ if (fs.existsSync(path.join('memory'))) {
         console.error(`  Fix: repair the named file(s) structurally (restore the missing '---' separator(s) / '## Session Summary' block heading), then re-run /sync.`);
         if (import.meta.main) process.exit(1);
     }
-    console.log(`${GREEN}✓ Step 3.88: memory union-verify passed (Arm A: ${merges.length} finding group(s), ${blocking.length} blocking / ${historical.length} historical; Arm B: worktree clean)${RESET}`);
+    console.log(`${GREEN}✓ Step 3.88: memory union-verify passed (Arm A: ${merges.length} finding group(s), ${blocking.length} blocking / ${historical.length} historical / ${repaired.length} repaired-at-head; Arm B: worktree clean)${RESET}`);
 }
 
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check

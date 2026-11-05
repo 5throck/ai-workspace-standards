@@ -2,6 +2,7 @@ import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import {
   parseBlocks,
   verifyUnion,
@@ -11,6 +12,7 @@ import {
   listMemoryMerges,
   unionScan,
   wellFormedScan,
+  repairedAtHead,
 } from '../../scripts/helpers/memory-union-verify.ts';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -401,5 +403,87 @@ describe('wellFormedScan (Arm B worktree sweep)', () => {
 
   test('absent memory dir → empty (documented no-op)', () => {
     expect(wellFormedScan({ memoryDir: join(root, 'nope') })).toEqual([]);
+  });
+});
+
+// ── repairedAtHead + the repaired-at-head tier (T-20261105-002 v1.1.0) ───────
+
+describe('repairedAtHead (T-20261105-002 repair-completion predicate)', () => {
+  const PAUSE = 'governance ticket batch paused for tonight (user request); resumes 2026-11-03 04:00 KST';
+
+  test('un-headed parent block absorbed verbatim into a headed head block → repaired', () => {
+    const ours = `${block('A', 'alpha')}\n---\n${PAUSE}\n`;
+    const head = `${block('A', 'alpha')}\n---\n## Session Summary\n\n${PAUSE}\n\n## Changes\n\nnone.\n`;
+    expect(repairedAtHead({ ours, theirs: ours, head })).toBe(true);
+  });
+
+  test('block fully absent from head → not repaired', () => {
+    const ours = `${block('A', 'alpha')}\n---\n${PAUSE}\n`;
+    const head = `${block('A', 'alpha')}\n`;
+    expect(repairedAtHead({ ours, theirs: ours, head })).toBe(false);
+  });
+
+  test('headed parent block restored by heading+firstLine → repaired (strict path unchanged)', () => {
+    const dropped = block('B', 'beta');
+    const ours = `${block('A', 'alpha')}\n---\n${dropped}\n`;
+    const head = `${block('A', 'alpha')}\n---\n${dropped}\n`;
+    expect(repairedAtHead({ ours, theirs: ours, head })).toBe(true);
+  });
+
+  test('headed parent block present only as a substring → NOT repaired (containment cannot fake a heading)', () => {
+    const dropped = block('B', 'beta');
+    const ours = `${block('A', 'alpha')}\n---\n${dropped}\n`;
+    // head merely quotes B's body text inside an unrelated block — no heading match
+    const head = `${block('A', 'alpha')}\n---\n## Session Summary\n\nB beta quoted: beta — decision recorded.\n`;
+    expect(repairedAtHead({ ours, theirs: ours, head })).toBe(false);
+  });
+
+  test('no dropped blocks → vacuously repaired', () => {
+    const clean = block('A', 'alpha');
+    expect(repairedAtHead({ ours: clean, theirs: clean, head: clean })).toBe(true);
+  });
+});
+
+describe('unionScan repaired-at-head tier (T-20261105-002)', () => {
+  function localGit(args: string[]): void {
+    spawnSync('git', args, { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+  }
+  function localCommit(msg: string): void {
+    localGit(['add', '-A']);
+    localGit(['commit', '-q', '-m', msg]);
+  }
+  /** Same dropping-merge shape as setupDroppingMerge (scoped there), local here. */
+  function localDroppingMerge(): void {
+    localGit(['init', '-q', '-b', 'main']);
+    localGit(['config', 'user.name', 'test']);
+    localGit(['config', 'user.email', 'test@example.com']);
+    localGit(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\nSHARED-TAIL\n`);
+    localCommit('base');
+    localGit(['checkout', '-q', '-b', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('C', 'gamma')}\n---\nSHARED-TAIL-C\n`);
+    localCommit('side appends C');
+    localGit(['checkout', '-q', 'main']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    localCommit('main appends B');
+    spawnSync('git', ['merge', '--no-commit', '--no-ff', 'side'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    localGit(['add', '-A']);
+    localCommit('merge side (resolution drops C)');
+  }
+
+  test('a repaired worktree re-tiers the dropping merge repaired-at-head; unrepaired stays blocking', () => {
+    localDroppingMerge();
+    // unrepaired worktree → blocking
+    const unrepaired = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(unrepaired).toHaveLength(1);
+    expect(unrepaired[0].tier).toBe('blocking');
+    // repair: absorb the dropped block C into a headed block in the worktree
+    const c = block('C', 'gamma');
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n---\n${c}\n---\nSHARED-TAIL-C\n`);
+    const repaired = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(repaired).toHaveLength(1);
+    expect(repaired[0].tier).toBe('repaired-at-head');
+    expect(repaired[0].findings.some((f) => f.kind === 'dropped-block')).toBe(true);
   });
 });

@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: T-20261105-002
+kind: manual
+title: >-
+  merge-integrity gate 3.88 v1 gap: post-activation drop findings are
+  unrecoverable — Arm A (unionScan) compares the merge commit's own blob
+  (showBlob(target.commit)), so the documented repair ('restore the named
+  block(s) in the working tree and re-commit — the repair lands forward') cannot
+  clear a post-activation merge finding: the damaged blob is immutable history
+  and the finding refires on every sync regardless of working-tree repair.
+  Design §5.3's premise ('corruption repaired before the next sync crosses step
+  3.88 — a repaired file passes') does not hold for the shipped implementation.
+  Live evidence: merge c8aba5d61 (2026-11-05T07:46:31+09:00, 46 min
+  post-activation) dropped the 2026-11-02 pause-window line; the runner restored
+  it in the working tree (2026-11-05 late pass) and dev-sync step 3.88 still
+  answers FATAL from c8aba5d61's blob. Impact: EVERY /sync repo-wide is
+  FATAL-blocked until c8aba5d61 ages out of the maxCommits:20 window (estimated
+  days of merges) — the 2026-11-05 bookkeeping landing (7 co-deck upstream
+  tickets U-20261105-001..007 + session memory blocks) is staged-but-unlandable
+  as of this filing. Fix direction needs a design amendment (one of): (a)
+  repaired-forward semantics — Arm A compares parents against CURRENT HEAD's
+  file (not the merge blob) for merges already repaired at HEAD; (b) a
+  repair-ledger file (the v1-rejected state ledger) keyed by commit; (c) a
+  --acknowledge-repaired escape consumed by a disclosed repair commit. Interim
+  working-tree state is repaired (the pause line is back at the head of
+  memory/2026-11-02.md) and satisfies Arm A's fingerprint (verified: verifyUnion
+  against the working tree answers only the Arm B malformed finding, which this
+  ticket's repair will also restructure into a headed block).
+priority: urgent
+status: running
+attempts: 0
+created_at: '2026-11-05T23:58:58.417+09:00'
+history:
+  - at: '2026-11-05T23:58:58.417+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T00:16:13.041+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T00:16:13.060+09:00'
+    from: waiting
+    to: running
+result: null
+error: null
