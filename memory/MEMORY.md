@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-06](2026-11-06.md) | fix(governance): memory-union gate repaired-at-head semantics + propagate inline-code stripping (T-20261105-002) |
 | [2026-11-05](2026-11-05.md) | docs(governance): project-loss hardening design approval + ticket hygiene (T-20261104-004 re-filed; -002/-008/-009 closed) |
 | [2026-11-04](2026-11-04.md) | chore(templates): workspace sync (26 files) |
 | [2026-11-03](2026-11-03.md) | fix(hub-spoke): Phase 4 remediation - lock leak fix, test fixture exclusion, hook integrity lib |
@@ -14,7 +15,7 @@
 | [2026-10-31](2026-10-31.md) | docs(review): daily fleet review 2026-10-31 |
 | [2026-10-31](2026-10-31.md) | fix(templates): correct co-safety promotion checklist numeric claims to manifest truth (T-20261031-001) |
 | [2026-10-30](2026-10-30.md) | docs(review): daily fleet review 2026-10-30 |
-| [2026-10-29](2026-10-29.md) | fix(agents): templates-root discovery for stub resolution in project context (canary finding) |
+| 2026-10-29 | fix(agents): templates-root discovery for stub resolution in project context (canary finding) |
 | 2026-10-28 | docs(governance): promote co-design design-system suite assets + bilingual user-guide parity to variant template (T-20261027-011, T-20261027-012) |
 | 2026-10-27 | feat(governance): tier normalization — scalar agent tier, models SSOT resolution, agent_tiers removal (T-20261026-018, ADR-0102) |
 | 2026-10-26 | feat(governance): upstream hardening — agent stub detector, variant-context gate, citation fix (U-20261026-001..003) |
