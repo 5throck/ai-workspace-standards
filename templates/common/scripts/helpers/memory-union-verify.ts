@@ -1,5 +1,22 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.0
+// v1.2.0 (2026-11-06, T-20261106-007 — the gate-deadlock closure): the
+//          archive↔union-verify fight. Merge e73b51057 deleted
+//          memory/2026-10-29.md (archive-memory 7-day retention, post-
+//          activation); the gate's prescribed repair ("restore in the
+//          working tree") is immediately undone by the SAME pipeline's
+//          archive step (step 3.8 re-moves the file to memory/archive/
+//          before step 3.88 reads it), and with the file absent from the
+//          working tree the repaired-at-head check could not run — the
+//          finding was permanently FATAL. Fix: the repaired-at-head check
+//          now falls back to memory/archive/<basename> when the worktree
+//          file is absent — the archive is the documented end-state for
+//          aged logs and its content IS the parent blocks (relocated, not
+//          destroyed). Also (T-20261106-005 item 2): listMemoryMerges no
+//          longer silently fails open on git plumbing errors — a failed
+//          log/ls traversal now emits a stderr WARN naming the failed
+//          command so an incomplete sweep is observable instead of
+//          indistinguishable from an empty window.
 // v1.1.1 (2026-11-06, T-20261105-002 follow-through — first post-merge sync
 //          finding): the deleted-file arm (archive-memory 7-day retention
 //          deletes a flat log; merge e73b51057 landed that deletion
@@ -77,7 +94,7 @@
 // layer (same posture as step 3.87).
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 /** One parsed session block (verify-memory.ts:108-117 conventions). */
 export interface MemoryBlock {
@@ -311,9 +328,16 @@ export interface MergeScanResult {
   tier: 'blocking' | 'historical' | 'repaired-at-head';
 }
 
+/** Git plumbing failures are no longer silent (T-20261106-005 item 2): a
+ *  failed call WARNs to stderr so an incomplete sweep is observable instead
+ *  of indistinguishable from an empty window. Return contract unchanged:
+ *  null = "no data" (fail-open at the caller). */
 function git(args: string[], cwd: string): string | null {
   const res = Bun.spawnSync(['git', ...args], { cwd, stdout: 'pipe', stderr: 'pipe' });
-  if (res.exitCode !== 0) return null;
+  if (res.exitCode !== 0) {
+    console.warn(`⚠️  memory-union-verify: git ${args[0]} failed (exit ${res.exitCode}) — sweep results may be incomplete`);
+    return null;
+  }
   return res.stdout.toString();
 }
 
@@ -459,7 +483,19 @@ export function unionScan(opts: {
             effectiveTier = 'repaired-at-head';
           }
         } catch {
-          // worktree file absent/unreadable — keep the original tier
+          // v1.2.0 archive-location fallback (T-20261106-007): the worktree
+          // file may be absent because step 3.8's archive-memory just moved
+          // it to memory/archive/ — the documented end-state for aged logs.
+          // The archived content IS the parent blocks (relocated, not
+          // destroyed), so the repaired-at-head check runs against it.
+          try {
+            const archivedContent = readFileSync(join(cwd, 'memory', 'archive', basename(file)), 'utf8');
+            if (repairedAtHead({ ours: ours ?? '', theirs: theirs ?? '', head: archivedContent })) {
+              effectiveTier = 'repaired-at-head';
+            }
+          } catch {
+            // neither worktree nor archive readable — keep the original tier
+          }
         }
         results.push({ commit: target.commit, file, findings, tier: effectiveTier });
       }

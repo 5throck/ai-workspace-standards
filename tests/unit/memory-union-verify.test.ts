@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -515,5 +515,32 @@ describe('unionScan repaired-at-head tier (T-20261105-002)', () => {
     writeFileSync(idxRel, '| Date | Summary |\n|---|---|\n');
     const clobber = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
     expect(clobber[0].tier).toBe('blocking');
+  });
+
+  test('archive-location fallback: a repaired log that the archive step then moved re-tiers repaired-at-head (T-20261106-007)', () => {
+    localDroppingMerge();
+    // the documented repair first: restore the file with every parent block
+    const repairedContent = [
+      block('A', 'alpha'),
+      block('B', 'beta'),
+      'SHARED-TAIL-B',
+      block('C', 'gamma'),
+      'SHARED-TAIL-C',
+    ].join('\n---\n');
+    writeFileSync(join(memoryDir, '2026-11-04.md'), repairedContent + '\n');
+    // then the archive step (step 3.8) moves it — the repair now lives in memory/archive/
+    mkdirSync(join(memoryDir, 'archive'), { recursive: true });
+    renameSync(join(memoryDir, '2026-11-04.md'), join(memoryDir, 'archive', '2026-11-04.md'));
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('repaired-at-head');
+  });
+
+  test('a log absent from BOTH the worktree and the archive stays blocking (no positive evidence)', () => {
+    localDroppingMerge();
+    rmSync(join(memoryDir, '2026-11-04.md'));
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('blocking');
   });
 });
