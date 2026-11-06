@@ -32,10 +32,6 @@
   ],
   "skills": [
     {
-      "name": "agent-lifecycle-manager",
-      "file": "skills/agent-lifecycle-manager/SKILL.md"
-    },
-    {
       "name": "asset-integrity-check",
       "file": "skills/asset-integrity-check/SKILL.md"
     },

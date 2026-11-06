@@ -6,7 +6,6 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `agent-lifecycle-manager` | 1.3.1 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
 | `arc-flash-analyzer` | 1.0.0 | active | powergen-agent | — | — | co-safety only — Arc flash hazard analysis per IEEE 1584 |
 | `asset-integrity-check` | 1.0.0 | active | asset-integrity-agent | — | — | co-safety only — Coordinate mechanical integrity and preventative maintenance checks |
 | `audit-preparation` | 1.0.0 | active | audit-agent | — | — | co-safety only — Prepare documentation and evidence for regulatory EHS audits |

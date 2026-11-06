@@ -4,11 +4,11 @@ description: >
   Improves code structure and design while preserving behavior using systematic
   refactoring techniques. Use when: cleaning up code, reducing duplication, improving
   maintainability, or paying down technical debt.
-version: 1.1.0
+version: 1.2.0
 scope: co-develop
 status: active
 owner: pm
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-06
 prerequisites: none
 relates_to:
   - skill: code-review
@@ -457,7 +457,7 @@ L2/L3 copies carried it).
 
 | Spoke | Derivation binding |
 |---|---|
-| co-game | Renders `scope: co-game`; body and edges otherwise identical. |
+| co-game | Ships byte-identical to co-develop, including `scope: co-develop` (merge ruling 2026-11-06, DEC-20261106-03: diverged same-version copies are merged, not split by version bump); no per-spoke scope rendering. |
 | co-learning | Not adopted — absent from Projects/co-learning and its template. The fleet skill-graph projection carries only a dangling reference node for it (content_hash null); it is not an installed consumer. |
 | co-abap | Not adopted — co-abap carries no refactoring capability; its `abap-dev` skill is a domain-specific asset outside this generic spine. |
 

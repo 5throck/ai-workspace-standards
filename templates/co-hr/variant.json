@@ -164,9 +164,7 @@
       },
       {
         "name": "consulting-report-writing",
-        "used_by_agents": [
-          "pm"
-        ],
+        "used_by_agents": [],
         "phases": [
           3
         ]

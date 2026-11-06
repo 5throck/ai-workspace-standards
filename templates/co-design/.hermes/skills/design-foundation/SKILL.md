@@ -8,10 +8,10 @@ description: >
   creating a project design guide (docs/design.md), setting up a design token
   system, or reviewing a project's design foundation completeness. Does NOT
   prescribe colors, fonts, spacing, or trends — those are project decisions.
-version: 1.2.0
-last_reviewed: 2026-11-02
+version: 1.3.0
+last_reviewed: 2026-11-06
 status: active
-scope: common
+scope: co-design
 owner: architect
 prerequisites: none
 relates_to:

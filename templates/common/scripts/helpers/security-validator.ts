@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /**
  * Security Validator - Extends Chain Security Protection
- * @version 1.2.1
+ * @version 1.3.0
+ * v1.3.0 (2026-11-06, DEC-20261106-03): isSourceCommentLine() — the audit shell-injection
+ *         source scan skips matches that sit on a comment line (false positives).
  *
  * Implements A-11 security requirements for extends chain validation.
  * Prevents path traversal attacks, arbitrary code injection, and DoS vulnerabilities.
@@ -508,6 +510,18 @@ export interface SourceShellInjectionPattern {
 // functions whose name contains one of these fragments (see calibration
 // notes above).
 const SUBPROCESS_SINK_NAME_FRAGMENT = ['run', 'exec', 'spawn', 'shell'].join('|');
+
+/**
+ * True when the line containing `matchIndex` in `content` is a comment line
+ * (`//`, `*`, `/*`, after leading whitespace). Used by the audit shell-injection
+ * heuristic to avoid flagging examples quoted in comments.
+ */
+export function isSourceCommentLine(content: string, matchIndex: number): boolean {
+  const lineStart = content.lastIndexOf('\n', matchIndex - 1) + 1;
+  const nl = content.indexOf('\n', matchIndex);
+  const line = content.slice(lineStart, nl === -1 ? content.length : nl).trimStart();
+  return line.startsWith('//') || line.startsWith('*') || line.startsWith('/*');
+}
 
 export const sourceShellInjectionPatterns: SourceShellInjectionPattern[] = [
   {

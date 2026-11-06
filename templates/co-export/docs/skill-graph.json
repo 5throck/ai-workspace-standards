@@ -1338,6 +1338,12 @@
       "type": "used_by",
       "from": "roo-qualification-worksheet",
       "to": "fta-origin-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "roo-qualification-worksheet",
+      "to": "fta-origin-analyst",
       "source": "skill_manifest"
     },
     {

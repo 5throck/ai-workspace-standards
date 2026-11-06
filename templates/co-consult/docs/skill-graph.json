@@ -505,12 +505,6 @@
     {
       "type": "used_by",
       "from": "company-intelligence",
-      "to": "pm",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "company-intelligence",
       "to": "sme",
       "source": "required_skills"
     },
@@ -1264,6 +1258,12 @@
       "type": "used_by",
       "from": "mece-logic-auditor",
       "to": "strategy-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "mece-logic-auditor",
+      "to": "strategy-analyst",
       "source": "skill_manifest"
     },
     {
@@ -1751,6 +1751,12 @@
       "from": "project-delivery",
       "to": "workstream-lead",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sample-driven-report-writing",
+      "to": "communications-lead",
+      "source": "required_skills"
     },
     {
       "type": "used_by",

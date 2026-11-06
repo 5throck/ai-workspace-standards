@@ -15,9 +15,9 @@ examples:
 phases: [1]
 handoff_to: [design-lead]
 handoff_from: [pm]
-required_skills: []
-version: "1.1.1"
-last_updated: "2026-10-28"
+required_skills: [accessibility-audit, ui-ux-design-intelligence]
+version: "1.1.2"
+last_updated: 2026-11-06
 lifecycle:
   phase: production
   created: "2026-08-12"

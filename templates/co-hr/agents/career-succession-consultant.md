@@ -14,9 +14,9 @@ examples:
 phases: [2]
 handoff_to: [org-design-consultant]
 handoff_from: [pm]
-required_skills: [career-path-succession-planning]
-version: "1.1.1"
-last_updated: "2026-10-28"
+required_skills: [career-path-succession-planning, competency-modeling]
+version: "1.1.2"
+last_updated: 2026-11-06
 lifecycle:
   phase: production
   created: "2026-08-23"

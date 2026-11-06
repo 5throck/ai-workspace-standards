@@ -3,6 +3,8 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Changed
+- **[2026-11-06]**: CI warning cleanup (DEC-20261106-03): settings.json hook dedupe (co-design, co-export, co-game, co-hr, co-news, co-security, co-work); agent `required_skills` aligned with skill `used_by_agents` across co-abap, co-consult, co-design, co-develop, co-export, co-game, co-hr, co-news, co-safety, co-security, co-work; missing agent sections written for co-architect (10), co-learning exam-bank-steward, co-work deck-builder (+ roster row); merged skills agent-lifecycle-manager 1.4.0 and standup-synthesizer 1.1.0 (now common-only; variant copies in co-safety, co-architect, co-work removed), refactoring + test-driven-development 1.2.0 (co-develop = co-game), design-foundation 1.3.0 co-design fork, industry-research-pack 1.0.1; KR.md last_verified 2026-11-06 in 8 variants; co-learning lifecycle.betaEngagements; doc link fixes in co-abap and co-architect.
 
 ## [0.28.0] - 2026-11-02
 ### Changed

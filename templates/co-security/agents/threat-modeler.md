@@ -1,7 +1,7 @@
 ---
 name: threat-modeler
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 formal_name: Threat Modeler
 role: STRIDE analysis, ATT&CK mapping, and risk scoring specialist
 tier: high
@@ -24,7 +24,7 @@ lifecycle:
 phases: [1, 2]
 handoff_to: [pm]
 handoff_from: [pm]
-required_skills: []
+required_skills: [samm-maturity, stride-threat-matrix]
 ---
 
 ## Role

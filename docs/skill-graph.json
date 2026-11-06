@@ -439,8 +439,8 @@
       "name": "architect",
       "scope": "co-abap",
       "capability": "architect",
-      "content_hash": "7034ab3592004b01",
-      "version": "1.1.1",
+      "content_hash": "d1860ebbbd344f59",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/architect.md"
       ]
@@ -452,8 +452,8 @@
       "name": "co-analyst",
       "scope": "co-abap",
       "capability": "co-analyst",
-      "content_hash": "b917e0b7fa587b5e",
-      "version": "1.1.1",
+      "content_hash": "42c310d97f09576c",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/co-analyst.md"
       ]
@@ -465,8 +465,8 @@
       "name": "code-writer",
       "scope": "co-abap",
       "capability": "code-writer",
-      "content_hash": "abbe5ab6d3d1abae",
-      "version": "1.1.1",
+      "content_hash": "7561e2631e45e9e6",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/code-writer.md"
       ]
@@ -478,8 +478,8 @@
       "name": "dba",
       "scope": "co-abap",
       "capability": "dba",
-      "content_hash": "b12282fc2e57a2f8",
-      "version": "1.1.1",
+      "content_hash": "9772211f447f7aef",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/dba.md"
       ]
@@ -491,8 +491,8 @@
       "name": "devops-admin",
       "scope": "co-abap",
       "capability": "devops-admin",
-      "content_hash": "85a8bf4ac078e286",
-      "version": "1.1.1",
+      "content_hash": "59a99f2f21f61a70",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/devops-admin.md"
       ]
@@ -504,8 +504,8 @@
       "name": "fi-analyst",
       "scope": "co-abap",
       "capability": "fi-analyst",
-      "content_hash": "51f3d571e3024abc",
-      "version": "1.1.1",
+      "content_hash": "7d0b35b2d1e8b328",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/fi-analyst.md"
       ]
@@ -590,8 +590,8 @@
       "name": "le-analyst",
       "scope": "co-abap",
       "capability": "le-analyst",
-      "content_hash": "38a1fe267efcfe9f",
-      "version": "1.1.1",
+      "content_hash": "62b7e1971bee7261",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/le-analyst.md"
       ]
@@ -603,8 +603,8 @@
       "name": "mm-analyst",
       "scope": "co-abap",
       "capability": "mm-analyst",
-      "content_hash": "44df77b0be73a4ae",
-      "version": "1.1.1",
+      "content_hash": "a7b511e5baec95e4",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/mm-analyst.md"
       ]
@@ -617,7 +617,7 @@
       "scope": "co-abap",
       "capability": "pm",
       "content_hash": "aef5c9bdcc78d9d0",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/pm.md",
         "templates/co-consult/agents/pm.md",
@@ -637,8 +637,8 @@
       "name": "pp-analyst",
       "scope": "co-abap",
       "capability": "pp-analyst",
-      "content_hash": "862d366b4fcb2f31",
-      "version": "1.1.1",
+      "content_hash": "a0f3f030877accb4",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/pp-analyst.md"
       ]
@@ -663,8 +663,8 @@
       "name": "sap-investigator",
       "scope": "co-abap",
       "capability": "sap-investigator",
-      "content_hash": "5d32d4b8b7eacf73",
-      "version": "1.1.1",
+      "content_hash": "d897d4c1d1e6fbc7",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/sap-investigator.md"
       ]
@@ -689,8 +689,8 @@
       "name": "sd-analyst",
       "scope": "co-abap",
       "capability": "sd-analyst",
-      "content_hash": "6c172cbba7da46a0",
-      "version": "1.1.1",
+      "content_hash": "620364b1265aa1f2",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/sd-analyst.md"
       ]
@@ -715,8 +715,8 @@
       "name": "test-runner",
       "scope": "co-abap",
       "capability": "test-runner",
-      "content_hash": "85db0b2cde004245",
-      "version": "1.1.1",
+      "content_hash": "1185805a765743a7",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-abap/agents/test-runner.md"
       ]
@@ -754,8 +754,8 @@
       "name": "automation-engineer",
       "scope": "co-architect",
       "capability": "automation-engineer",
-      "content_hash": "5b37a0dad2ba6526",
-      "version": "1.0.0",
+      "content_hash": "f3c4b5402cf4f100",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/automation-engineer.md"
       ]
@@ -767,8 +767,8 @@
       "name": "bylaw-expert",
       "scope": "co-architect",
       "capability": "bylaw-expert",
-      "content_hash": "0c8b0b59b1790549",
-      "version": "1.0.0",
+      "content_hash": "cbaf9b351e902cbd",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/bylaw-expert.md"
       ]
@@ -806,8 +806,8 @@
       "name": "design-storyteller",
       "scope": "co-architect",
       "capability": "design-storyteller",
-      "content_hash": "b9650449b02a8bc0",
-      "version": "1.0.0",
+      "content_hash": "cf7ccbd823983d9d",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/design-storyteller.md"
       ]
@@ -819,8 +819,8 @@
       "name": "drafting-architect",
       "scope": "co-architect",
       "capability": "drafting-architect",
-      "content_hash": "b6f844823facdee7",
-      "version": "1.0.0",
+      "content_hash": "899d79727276cbc4",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/drafting-architect.md"
       ]
@@ -832,8 +832,8 @@
       "name": "interior-designer",
       "scope": "co-architect",
       "capability": "interior-designer",
-      "content_hash": "bb634f8309867b42",
-      "version": "1.0.0",
+      "content_hash": "88c328497e664d92",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/interior-designer.md"
       ]
@@ -845,8 +845,8 @@
       "name": "mep-engineer",
       "scope": "co-architect",
       "capability": "mep-engineer",
-      "content_hash": "f9382d539ec97efb",
-      "version": "1.0.0",
+      "content_hash": "a6b0cb8858aa2a9a",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/mep-engineer.md"
       ]
@@ -871,8 +871,8 @@
       "name": "pm",
       "scope": "co-architect",
       "capability": "pm",
-      "content_hash": "ed1b187f70721160",
-      "version": "1.2.0",
+      "content_hash": "4077f48ae3b43210",
+      "version": "1.2.1",
       "mirrors": [
         "templates/co-architect/agents/pm.md"
       ]
@@ -923,8 +923,8 @@
       "name": "sketchup-modeler",
       "scope": "co-architect",
       "capability": "sketchup-modeler",
-      "content_hash": "9e4810bc28b196ca",
-      "version": "1.0.0",
+      "content_hash": "820cb98002a2961d",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/sketchup-modeler.md"
       ]
@@ -949,8 +949,8 @@
       "name": "structural-engineer",
       "scope": "co-architect",
       "capability": "structural-engineer",
-      "content_hash": "67732893ffb3d46b",
-      "version": "1.0.0",
+      "content_hash": "40f331970f55a6f9",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/structural-engineer.md"
       ]
@@ -1014,8 +1014,8 @@
       "name": "visualization-expert",
       "scope": "co-architect",
       "capability": "visualization-expert",
-      "content_hash": "97af7707cc30925e",
-      "version": "1.0.0",
+      "content_hash": "df50f142c0c8c7b0",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/visualization-expert.md"
       ]
@@ -1027,8 +1027,8 @@
       "name": "zwcad-drafter",
       "scope": "co-architect",
       "capability": "zwcad-drafter",
-      "content_hash": "1f1339f831563ce7",
-      "version": "1.0.0",
+      "content_hash": "2284e980148f9b63",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/zwcad-drafter.md"
       ]
@@ -1053,8 +1053,8 @@
       "name": "communications-lead",
       "scope": "co-consult",
       "capability": "communications-lead",
-      "content_hash": "88db71e6b69c5481",
-      "version": "1.1.1",
+      "content_hash": "d853207c355a8ae7",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-consult/agents/communications-lead.md"
       ]
@@ -1131,8 +1131,8 @@
       "name": "strategy-analyst",
       "scope": "co-consult",
       "capability": "strategy-analyst",
-      "content_hash": "541f146b69d80f35",
-      "version": "1.1.1",
+      "content_hash": "1a6e21fed01bda8a",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-consult/agents/strategy-analyst.md"
       ]
@@ -1404,8 +1404,8 @@
       "name": "ux-researcher",
       "scope": "co-design",
       "capability": "ux-researcher",
-      "content_hash": "1a8d22e1e02ab4ca",
-      "version": "1.1.1",
+      "content_hash": "d34040375fede42b",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-design/agents/ux-researcher.md"
       ]
@@ -1417,8 +1417,8 @@
       "name": "visual-designer",
       "scope": "co-design",
       "capability": "visual-designer",
-      "content_hash": "19bc59c2eb3ccff6",
-      "version": "1.1.1",
+      "content_hash": "b57bc12e39467c9c",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-design/agents/visual-designer.md"
       ]
@@ -1561,8 +1561,8 @@
       "name": "fta-origin-analyst",
       "scope": "co-export",
       "capability": "fta-origin-analyst",
-      "content_hash": "4b4e034d038ddc4a",
-      "version": "1.1.1",
+      "content_hash": "7b190bfb5d79b892",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-export/agents/fta-origin-analyst.md"
       ]
@@ -1691,8 +1691,8 @@
       "name": "game-debugger",
       "scope": "co-game",
       "capability": "game-debugger",
-      "content_hash": "e24b9a780efdd61b",
-      "version": "1.1.1",
+      "content_hash": "b0d1cf65f08ea5b0",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/game-debugger.md"
       ]
@@ -1717,8 +1717,8 @@
       "name": "game-developer",
       "scope": "co-game",
       "capability": "game-developer",
-      "content_hash": "80ac32b459f632c1",
-      "version": "1.1.1",
+      "content_hash": "462a275191a75be8",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/game-developer.md"
       ]
@@ -1756,8 +1756,8 @@
       "name": "sound-designer",
       "scope": "co-game",
       "capability": "sound-designer",
-      "content_hash": "acb08724212b6539",
-      "version": "1.1.1",
+      "content_hash": "0f6fca5e2af0e779",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/sound-designer.md"
       ]
@@ -1808,8 +1808,8 @@
       "name": "career-succession-consultant",
       "scope": "co-hr",
       "capability": "career-succession-consultant",
-      "content_hash": "101f19af103d7c8b",
-      "version": "1.1.1",
+      "content_hash": "f31da691d811e42c",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/career-succession-consultant.md"
       ]
@@ -1900,8 +1900,8 @@
       "name": "learning-development-specialist",
       "scope": "co-hr",
       "capability": "learning-development-specialist",
-      "content_hash": "9d2c4b2f38140e13",
-      "version": "1.1.1",
+      "content_hash": "51d660bd714f4af9",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/learning-development-specialist.md"
       ]
@@ -1926,8 +1926,8 @@
       "name": "performance-management-consultant",
       "scope": "co-hr",
       "capability": "performance-management-consultant",
-      "content_hash": "fbeafde6d66bbf61",
-      "version": "1.1.1",
+      "content_hash": "e4f2376612b81aa1",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/performance-management-consultant.md"
       ]
@@ -1978,8 +1978,8 @@
       "name": "exam-bank-steward",
       "scope": "co-learning",
       "capability": "exam-bank-steward",
-      "content_hash": "cdaae8b93ae412b1",
-      "version": "1.1.1",
+      "content_hash": "dc9764bc6871db24",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-learning/agents/exam-bank-steward.md"
       ]
@@ -2056,8 +2056,8 @@
       "name": "style-editor",
       "scope": "co-news",
       "capability": "style-editor",
-      "content_hash": "1b5131d0e3897f3c",
-      "version": "1.1.1",
+      "content_hash": "3df7d09c72c3a9f8",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-news/agents/style-editor.md"
       ]
@@ -2303,8 +2303,8 @@
       "name": "safety-workflow-manager",
       "scope": "co-safety",
       "capability": "safety-workflow-manager",
-      "content_hash": "ea3b2b10879667ab",
-      "version": "1.1.1",
+      "content_hash": "0c419374d0401b24",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-safety/agents/safety-workflow-manager.md"
       ]
@@ -2316,8 +2316,8 @@
       "name": "patch-engineer",
       "scope": "co-security",
       "capability": "patch-engineer",
-      "content_hash": "0efd55135ec62234",
-      "version": "1.1.1",
+      "content_hash": "07fef9a0e4c0031a",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/patch-engineer.md"
       ]
@@ -2329,8 +2329,8 @@
       "name": "pentester",
       "scope": "co-security",
       "capability": "pentester",
-      "content_hash": "0a53ef6ce3895108",
-      "version": "1.1.1",
+      "content_hash": "6f0a84af48739454",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/pentester.md"
       ]
@@ -2342,8 +2342,8 @@
       "name": "red-team-lead",
       "scope": "co-security",
       "capability": "red-team-lead",
-      "content_hash": "d798bf57ff788700",
-      "version": "1.1.1",
+      "content_hash": "abc5c4906c4bc31f",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/red-team-lead.md"
       ]
@@ -2355,8 +2355,8 @@
       "name": "report-writer",
       "scope": "co-security",
       "capability": "report-writer",
-      "content_hash": "a58a5c45fc3837fb",
-      "version": "1.1.1",
+      "content_hash": "c4eb71de62704c70",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/report-writer.md"
       ]
@@ -2368,8 +2368,8 @@
       "name": "threat-modeler",
       "scope": "co-security",
       "capability": "threat-modeler",
-      "content_hash": "ece9817ea213edfe",
-      "version": "1.1.1",
+      "content_hash": "944c59ed93f3b832",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/threat-modeler.md"
       ]
@@ -2407,8 +2407,8 @@
       "name": "deck-builder",
       "scope": "co-work",
       "capability": "deck-builder",
-      "content_hash": "3ec680c822472562",
-      "version": "1.0.0",
+      "content_hash": "c0167a85c4edadef",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-work/agents/deck-builder.md"
       ]
@@ -2755,6 +2755,11 @@
     },
     {
       "id": "dec:DEC-20261104-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-03",
       "type": "decision",
       "layer": "L0"
     },
@@ -4856,14 +4861,6 @@
       "label": "Content Creation"
     },
     {
-      "id": "phase:co-work/4",
-      "type": "phase",
-      "layer": "variant:co-work",
-      "scope": "co-work",
-      "ordinal": 4,
-      "label": "Coordination & Delivery"
-    },
-    {
       "id": "procedure.co-abap.custom-dev-delivery",
       "type": "procedure",
       "layer": "variant:co-abap"
@@ -5510,19 +5507,6 @@
       ]
     },
     {
-      "id": "skill:co-architect/standup-synthesizer",
-      "type": "skill",
-      "layer": "variant:co-architect",
-      "name": "standup-synthesizer",
-      "scope": "co-architect",
-      "capability": "standup-synthesizer",
-      "content_hash": "75a2f0bbbd8aae79",
-      "version": "1.0.0",
-      "mirrors": [
-        "templates/co-architect/skills/standup-synthesizer/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-architect/zwcad-ai-drawing",
       "type": "skill",
       "layer": "variant:co-architect",
@@ -5664,8 +5648,8 @@
       "name": "industry-research-pack",
       "scope": "co-consult",
       "capability": "industry-research-pack",
-      "content_hash": "7792bf22198187fe",
-      "version": "1.0.0",
+      "content_hash": "a99cf7ffc3bb1f7f",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-consult/skills/industry-research-pack/SKILL.md"
       ]
@@ -5984,7 +5968,7 @@
       "scope": "co-design",
       "capability": "design-foundation",
       "content_hash": "5cc8c4108e26a610",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-design/skills/design-foundation/SKILL.md"
       ]
@@ -6048,10 +6032,11 @@
       "name": "refactoring",
       "scope": "co-develop",
       "capability": "refactoring",
-      "content_hash": "f9c59c97a00f25c5",
-      "version": "1.1.0",
+      "content_hash": "5f2a152153b459d8",
+      "version": "1.2.0",
       "mirrors": [
-        "templates/co-develop/skills/refactoring/SKILL.md"
+        "templates/co-develop/skills/refactoring/SKILL.md",
+        "templates/co-game/skills/refactoring/SKILL.md"
       ]
     },
     {
@@ -6074,10 +6059,11 @@
       "name": "test-driven-development",
       "scope": "co-develop",
       "capability": "test-driven-development",
-      "content_hash": "ced5b4713cb781eb",
-      "version": "1.1.0",
+      "content_hash": "e19f762943c56644",
+      "version": "1.2.0",
       "mirrors": [
-        "templates/co-develop/skills/test-driven-development/SKILL.md"
+        "templates/co-develop/skills/test-driven-development/SKILL.md",
+        "templates/co-game/skills/test-driven-development/SKILL.md"
       ]
     },
     {
@@ -6250,19 +6236,6 @@
       ]
     },
     {
-      "id": "skill:co-game/refactoring",
-      "type": "skill",
-      "layer": "variant:co-game",
-      "name": "refactoring",
-      "scope": "co-game",
-      "capability": "refactoring",
-      "content_hash": "ac456953a305a80b",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-game/skills/refactoring/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-game/sound-synth",
       "type": "skill",
       "layer": "variant:co-game",
@@ -6273,19 +6246,6 @@
       "version": "1.0.0",
       "mirrors": [
         "templates/co-game/skills/sound-synth/SKILL.md"
-      ]
-    },
-    {
-      "id": "skill:co-game/test-driven-development",
-      "type": "skill",
-      "layer": "variant:co-game",
-      "name": "test-driven-development",
-      "scope": "co-game",
-      "capability": "test-driven-development",
-      "content_hash": "31bdc8f895a4e8ae",
-      "version": "1.1.0",
-      "mirrors": [
-        "templates/co-game/skills/test-driven-development/SKILL.md"
       ]
     },
     {
@@ -6856,19 +6816,6 @@
       "outputs": [
         "price-corridor",
         "opp-price-point"
-      ]
-    },
-    {
-      "id": "skill:co-safety/agent-lifecycle-manager",
-      "type": "skill",
-      "layer": "variant:co-safety",
-      "name": "agent-lifecycle-manager",
-      "scope": "co-safety",
-      "capability": "agent-lifecycle-manager",
-      "content_hash": "a5b6fdf832174881",
-      "version": "1.3.1",
-      "mirrors": [
-        "templates/co-safety/skills/agent-lifecycle-manager/SKILL.md"
       ]
     },
     {
@@ -7795,19 +7742,6 @@
       ]
     },
     {
-      "id": "skill:co-work/standup-synthesizer",
-      "type": "skill",
-      "layer": "variant:co-work",
-      "name": "standup-synthesizer",
-      "scope": "co-work",
-      "capability": "standup-synthesizer",
-      "content_hash": "283abcb3fc21457d",
-      "version": "1.0.1",
-      "mirrors": [
-        "templates/co-work/skills/standup-synthesizer/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-work/svg-quality-gate",
       "type": "skill",
       "layer": "variant:co-work",
@@ -8104,7 +8038,7 @@
       "scope": "root",
       "capability": "agent-lifecycle-manager",
       "content_hash": "230ce8c036a46601",
-      "version": "1.3.1",
+      "version": "1.4.0",
       "mirrors": [
         "skills/agent-lifecycle-manager/SKILL.md",
         "templates/common/skills/agent-lifecycle-manager/SKILL.md",
@@ -8710,8 +8644,8 @@
       "name": "standup-synthesizer",
       "scope": "root",
       "capability": "standup-synthesizer",
-      "content_hash": "c74ddbdf4afc867f",
-      "version": "1.0.0",
+      "content_hash": "78faf9d2096937e5",
+      "version": "1.1.0",
       "mirrors": [
         "skills/standup-synthesizer/SKILL.md",
         "templates/common/skills/standup-synthesizer/SKILL.md",
@@ -10889,6 +10823,18 @@
     {
       "type": "references",
       "from": "agent:co-work/deck-builder",
+      "to": "skill:co-work/pptx-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/deck-builder",
+      "to": "skill:co-work/svg-quality-gate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/deck-builder",
       "to": "skill:co-work/svg-slide-authoring",
       "source": "prose"
     },
@@ -11771,12 +11717,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-architect/docs/co-architect.context.md",
-      "to": "skill:co-architect/standup-synthesizer",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/docs/co-architect.context.md",
       "to": "skill:co-architect/zwcad-ai-drawing",
       "source": "workflow-doc"
     },
@@ -11818,6 +11758,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-architect/docs/co-architect.context.md",
+      "to": "skill:root/standup-synthesizer",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-architect/README.md",
       "to": "skill:co-architect/cad-server-manager",
       "source": "workflow-doc"
@@ -11838,12 +11784,6 @@
       "type": "cites_skill",
       "from": "doc:co-architect/README.md",
       "to": "skill:co-architect/generate-room-elevation",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/README.md",
-      "to": "skill:co-architect/standup-synthesizer",
       "source": "workflow-doc"
     },
     {
@@ -12000,6 +11940,12 @@
       "type": "cites_skill",
       "from": "doc:co-architect/README.md",
       "to": "skill:root/source-command-commit-push-pr",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/README.md",
+      "to": "skill:root/standup-synthesizer",
       "source": "workflow-doc"
     },
     {
@@ -13931,19 +13877,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill:co-develop/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide_ko.md",
       "to": "skill:co-game/code-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide_ko.md",
-      "to": "skill:co-game/refactoring",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide_ko.md",
-      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -13979,19 +13925,19 @@
     {
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill:co-develop/refactoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:co-game/code-review",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide.md",
-      "to": "skill:co-game/refactoring",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/docs/user-guide.md",
-      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -14022,6 +13968,12 @@
       "type": "cites_skill",
       "from": "doc:co-game/docs/user-guide.md",
       "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "skill:co-develop/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -14040,12 +13992,6 @@
       "type": "cites_skill",
       "from": "doc:co-game/README.md",
       "to": "skill:co-game/sound-synth",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-game/README.md",
-      "to": "skill:co-game/test-driven-development",
       "source": "workflow-doc"
     },
     {
@@ -15149,12 +15095,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
-      "to": "skill:co-safety/agent-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/AGENTS.md",
       "to": "skill:co-safety/meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -15180,6 +15120,12 @@
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
       "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "skill:root/agent-lifecycle-manager",
       "source": "workflow-doc"
     },
     {
@@ -15389,12 +15335,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/docs/co-safety.context.md",
-      "to": "skill:co-safety/agent-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/docs/co-safety.context.md",
       "to": "skill:co-safety/permit-to-work",
       "source": "workflow-doc"
     },
@@ -15414,6 +15354,12 @@
       "type": "cites_skill",
       "from": "doc:co-safety/docs/co-safety.context.md",
       "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/docs/co-safety.context.md",
+      "to": "skill:root/agent-lifecycle-manager",
       "source": "workflow-doc"
     },
     {
@@ -16139,6 +16085,18 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/agents/deck-builder.md",
+      "to": "skill:co-work/pptx-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/deck-builder.md",
+      "to": "skill:co-work/svg-quality-gate",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/deck-builder.md",
       "to": "skill:co-work/svg-slide-authoring",
       "source": "workflow-doc"
     },
@@ -16175,12 +16133,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/README.md",
-      "to": "skill:co-work/standup-synthesizer",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/README.md",
       "to": "skill:root/api-documentation",
       "source": "workflow-doc"
     },
@@ -16200,6 +16152,12 @@
       "type": "cites_skill",
       "from": "doc:co-work/README.md",
       "to": "skill:root/research-analysis",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/README.md",
+      "to": "skill:root/standup-synthesizer",
       "source": "workflow-doc"
     },
     {
@@ -16733,13 +16691,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-architect.distribution-integration",
-      "to": "skill:co-architect/standup-synthesizer",
+      "to": "skill:root/documentation-writing",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-architect.distribution-integration",
-      "to": "skill:root/documentation-writing",
+      "to": "skill:root/standup-synthesizer",
       "source": "procedure_schema"
     },
     {
@@ -18529,13 +18487,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
-      "to": "skill:co-game/arcade-physics",
+      "to": "skill:co-develop/test-driven-development",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-concept-design",
-      "to": "skill:co-game/test-driven-development",
+      "to": "skill:co-game/arcade-physics",
       "source": "procedure_schema"
     },
     {
@@ -18643,13 +18601,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-release-verification",
-      "to": "skill:co-game/code-review",
+      "to": "skill:co-develop/test-driven-development",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-release-verification",
-      "to": "skill:co-game/test-driven-development",
+      "to": "skill:co-game/code-review",
       "source": "procedure_schema"
     },
     {
@@ -18693,13 +18651,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
-      "to": "skill:co-game/code-review",
+      "to": "skill:co-develop/test-driven-development",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.game-security-bootstrap",
-      "to": "skill:co-game/test-driven-development",
+      "to": "skill:co-game/code-review",
       "source": "procedure_schema"
     },
     {
@@ -18769,6 +18727,12 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-game.gameplay-feature-loop",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-game.gameplay-feature-loop",
       "to": "skill:co-game/arcade-physics",
       "source": "procedure_schema"
     },
@@ -18776,12 +18740,6 @@
       "type": "step_uses_skill",
       "from": "procedure.co-game.gameplay-feature-loop",
       "to": "skill:co-game/code-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-game.gameplay-feature-loop",
-      "to": "skill:co-game/test-driven-development",
       "source": "procedure_schema"
     },
     {
@@ -20303,13 +20261,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-work.distribution-integration",
-      "to": "skill:co-work/standup-synthesizer",
+      "to": "skill:root/documentation-writing",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-work.distribution-integration",
-      "to": "skill:root/documentation-writing",
+      "to": "skill:root/standup-synthesizer",
       "source": "procedure_schema"
     },
     {
@@ -20512,25 +20470,45 @@
       "type": "used_by",
       "from": "skill:co-abap/abap-dev",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/abap-dev",
       "to": "agent:co-abap/code-writer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/code-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/abap-dev",
       "to": "agent:co-abap/sap-investigator",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/sap-investigator.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/abap-dev",
       "to": "agent:co-abap/test-runner",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -20721,13 +20699,23 @@
       "type": "used_by",
       "from": "skill:co-abap/desktop-app-fallback",
       "to": "agent:co-abap/code-writer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/code-writer.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/desktop-app-fallback",
       "to": "agent:co-abap/test-runner",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "phase",
@@ -20745,13 +20733,12 @@
       "type": "used_by",
       "from": "skill:co-abap/dump-monitor",
       "to": "agent:co-abap/devops-admin",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-abap/dump-monitor",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/devops-admin.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -20858,19 +20845,34 @@
       "type": "used_by",
       "from": "skill:co-abap/performance-tuning",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/performance-tuning",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/performance-tuning",
       "to": "agent:co-abap/sap-investigator",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/sap-investigator.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "phase",
@@ -20894,19 +20896,23 @@
       "type": "used_by",
       "from": "skill:co-abap/post-write-chain",
       "to": "agent:co-abap/code-writer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-abap/post-write-chain",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/code-writer.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/post-write-chain",
       "to": "agent:co-abap/test-runner",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "phase",
@@ -20924,19 +20930,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-co",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 7
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-co",
       "to": "agent:co-abap/co-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/co-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-co",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 6
+      }
     },
     {
       "type": "produces",
@@ -21043,19 +21064,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-fi",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-fi",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-fi",
       "to": "agent:co-abap/fi-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/fi-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -21174,19 +21210,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-le",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 6
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-le",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 5
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-le",
       "to": "agent:co-abap/le-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/le-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -21269,19 +21320,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-mm",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 4
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-mm",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-mm",
       "to": "agent:co-abap/mm-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/mm-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -21364,19 +21430,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-pp",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 5
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-pp",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 4
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-pp",
       "to": "agent:co-abap/pp-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/pp-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -21459,19 +21540,34 @@
       "type": "used_by",
       "from": "skill:co-abap/sap-sd",
       "to": "agent:co-abap/architect",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/architect.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-sd",
       "to": "agent:co-abap/dba",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/dba.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-abap/sap-sd",
       "to": "agent:co-abap/sd-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-abap/agents/sd-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -21531,12 +21627,6 @@
         "field": "relates_to",
         "index": 0
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-abap/source-command-celebrate",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
     },
     {
       "type": "phase",
@@ -21626,12 +21716,6 @@
       "from": "skill:co-architect/generate-room-elevation",
       "to": "skill:co-architect/zwcad-ai-drawing",
       "source": "prose"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-architect/standup-synthesizer",
-      "to": "output_type.closure_record",
-      "source": "procedure_schema"
     },
     {
       "type": "used_by",
@@ -21747,12 +21831,6 @@
         "field": "relates_to",
         "index": 1
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-consult/company-intelligence",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
     },
     {
       "type": "used_by",
@@ -22817,7 +22895,12 @@
       "type": "used_by",
       "from": "skill:co-consult/mece-logic-auditor",
       "to": "agent:co-consult/strategy-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/strategy-analyst.md",
+        "field": "required_skills",
+        "index": 4
+      }
     },
     {
       "type": "phase",
@@ -23043,7 +23126,12 @@
       "type": "used_by",
       "from": "skill:co-consult/sample-driven-report-writing",
       "to": "agent:co-consult/communications-lead",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-consult/agents/communications-lead.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "phase",
@@ -24329,7 +24417,12 @@
       "type": "used_by",
       "from": "skill:co-design/ui-ux-design-intelligence",
       "to": "agent:co-design/ux-researcher",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/ux-researcher.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -24471,6 +24564,28 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:co-develop/refactoring",
+      "to": "agent:co-game/game-debugger",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-develop/refactoring",
+      "to": "agent:co-game/game-developer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-developer.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
       "type": "produces",
       "from": "skill:co-develop/refactoring",
       "to": "output_type.tooling_adjustments",
@@ -24480,6 +24595,18 @@
       "type": "phase",
       "from": "skill:co-develop/refactoring",
       "to": "phase:co-develop/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/refactoring",
+      "to": "phase:co-game/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/refactoring",
+      "to": "phase:co-game/5",
       "source": "skill_manifest"
     },
     {
@@ -24501,12 +24628,6 @@
       }
     },
     {
-      "type": "used_by",
-      "from": "skill:co-develop/swe-solve",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
-    },
-    {
       "type": "phase",
       "from": "skill:co-develop/swe-solve",
       "to": "phase:co-develop/4",
@@ -24524,6 +24645,51 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "agent:co-game/game-debugger",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "agent:co-game/game-developer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-developer.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "agent:co-game/test-runner",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "output_type.prototyping_environment",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
+    },
+    {
       "type": "produces",
       "from": "skill:co-develop/test-driven-development",
       "to": "output_type.test_scaffold",
@@ -24533,6 +24699,18 @@
       "type": "phase",
       "from": "skill:co-develop/test-driven-development",
       "to": "phase:co-develop/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "phase:co-game/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-develop/test-driven-development",
+      "to": "phase:co-game/5",
       "source": "skill_manifest"
     },
     {
@@ -25248,7 +25426,12 @@
       "type": "used_by",
       "from": "skill:co-export/roo-qualification-worksheet",
       "to": "agent:co-export/fta-origin-analyst",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-export/agents/fta-origin-analyst.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "phase",
@@ -25333,7 +25516,12 @@
       "type": "used_by",
       "from": "skill:co-game/arcade-physics",
       "to": "agent:co-game/game-debugger",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -25391,6 +25579,24 @@
     {
       "type": "composes_with",
       "from": "skill:co-game/arcade-physics",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-game/arcade-physics",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-game/arcade-physics",
       "to": "skill:co-game/code-review",
       "source": "relates_to",
       "symmetric": true,
@@ -25426,24 +25632,6 @@
     {
       "type": "composes_with",
       "from": "skill:co-game/arcade-physics",
-      "to": "skill:co-game/test-driven-development",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-game/skills/arcade-physics/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-game/arcade-physics",
-      "to": "skill:co-game/test-driven-development",
-      "source": "prose"
-    },
-    {
-      "type": "composes_with",
-      "from": "skill:co-game/arcade-physics",
       "to": "skill:root/documentation-writing",
       "source": "relates_to",
       "symmetric": true,
@@ -25469,13 +25657,23 @@
       "type": "used_by",
       "from": "skill:co-game/code-review",
       "to": "agent:co-game/game-debugger",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-debugger.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-game/code-review",
       "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/game-developer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -25504,6 +25702,17 @@
     {
       "type": "follows",
       "from": "skill:co-game/code-review",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-game/skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-game/code-review",
       "to": "skill:co-game/arcade-physics",
       "source": "relates_to",
       "provenance": {
@@ -25513,57 +25722,15 @@
       }
     },
     {
-      "type": "follows",
-      "from": "skill:co-game/code-review",
-      "to": "skill:co-game/test-driven-development",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-game/skills/code-review/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/refactoring",
-      "to": "agent:co-game/game-debugger",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/refactoring",
-      "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/refactoring",
-      "to": "phase:co-game/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/refactoring",
-      "to": "phase:co-game/5",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "composes_with",
-      "from": "skill:co-game/refactoring",
-      "to": "skill:co-game/code-review",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-game/skills/refactoring/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
       "type": "used_by",
       "from": "skill:co-game/sound-synth",
       "to": "agent:co-game/sound-designer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-game/agents/sound-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -25590,69 +25757,6 @@
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-game/skills/sound-synth/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/test-driven-development",
-      "to": "agent:co-game/game-debugger",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-game/agents/game-debugger.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/test-driven-development",
-      "to": "agent:co-game/game-developer",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-game/test-driven-development",
-      "to": "agent:co-game/test-runner",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-game/agents/test-runner.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-game/test-driven-development",
-      "to": "output_type.prototyping_environment",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-game/test-driven-development",
-      "to": "output_type.regression_report",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/test-driven-development",
-      "to": "phase:co-game/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-game/test-driven-development",
-      "to": "phase:co-game/5",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "follows",
-      "from": "skill:co-game/test-driven-development",
-      "to": "skill:co-game/code-review",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-game/skills/test-driven-development/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
@@ -25908,19 +26012,34 @@
       "type": "used_by",
       "from": "skill:co-hr/competency-modeling",
       "to": "agent:co-hr/career-succession-consultant",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/career-succession-consultant.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-hr/competency-modeling",
       "to": "agent:co-hr/learning-development-specialist",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/learning-development-specialist.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-hr/competency-modeling",
       "to": "agent:co-hr/performance-management-consultant",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-hr/agents/performance-management-consultant.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "phase",
@@ -25957,12 +26076,6 @@
       "from": "skill:co-hr/competency-modeling",
       "to": "skill:co-hr/performance-system-design",
       "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-hr/consulting-report-writing",
-      "to": "agent:co-hr/pm",
-      "source": "skill_manifest"
     },
     {
       "type": "phase",
@@ -26855,7 +26968,12 @@
       "type": "used_by",
       "from": "skill:co-news/style-lint-checklist",
       "to": "agent:co-news/style-editor",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-news/agents/style-editor.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "phase",
@@ -27592,30 +27710,6 @@
       }
     },
     {
-      "type": "references",
-      "from": "skill:co-safety/agent-lifecycle-manager",
-      "to": "skill:co-deck/version",
-      "source": "prose"
-    },
-    {
-      "type": "composes_with",
-      "from": "skill:co-safety/agent-lifecycle-manager",
-      "to": "skill:co-safety/skill-lifecycle-manager",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-safety/skills/agent-lifecycle-manager/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-safety/agent-lifecycle-manager",
-      "to": "skill:co-safety/skill-lifecycle-manager",
-      "source": "prose"
-    },
-    {
       "type": "composes_with",
       "from": "skill:co-safety/audit-preparation",
       "to": "skill:co-safety/hazop-analysis",
@@ -27768,7 +27862,12 @@
       "type": "used_by",
       "from": "skill:co-safety/evidence-collection-hot-work-permit",
       "to": "agent:co-safety/safety-workflow-manager",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-safety/agents/safety-workflow-manager.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -27952,7 +28051,12 @@
       "type": "used_by",
       "from": "skill:co-safety/permit-to-work",
       "to": "agent:co-safety/safety-workflow-manager",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-safety/agents/safety-workflow-manager.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -28030,7 +28134,12 @@
       "type": "used_by",
       "from": "skill:co-safety/risk-assessment",
       "to": "agent:co-safety/safety-workflow-manager",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-safety/agents/safety-workflow-manager.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "follows",
@@ -28080,12 +28189,6 @@
       "source": "prose"
     },
     {
-      "type": "references",
-      "from": "skill:co-safety/skill-lifecycle-manager",
-      "to": "skill:co-safety/agent-lifecycle-manager",
-      "source": "prose"
-    },
-    {
       "type": "composes_with",
       "from": "skill:co-safety/skill-lifecycle-manager",
       "to": "skill:co-safety/script-lifecycle-manager",
@@ -28096,6 +28199,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-safety/skill-lifecycle-manager",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -28124,13 +28233,13 @@
     {
       "type": "references",
       "from": "skill:co-safety/team-builder",
-      "to": "skill:co-safety/agent-lifecycle-manager",
+      "to": "skill:co-safety/skill-lifecycle-manager",
       "source": "prose"
     },
     {
       "type": "references",
       "from": "skill:co-safety/team-builder",
-      "to": "skill:co-safety/skill-lifecycle-manager",
+      "to": "skill:root/agent-lifecycle-manager",
       "source": "prose"
     },
     {
@@ -28296,7 +28405,12 @@
       "type": "used_by",
       "from": "skill:co-security/samm-maturity",
       "to": "agent:co-security/threat-modeler",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/threat-modeler.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "produces",
@@ -28338,13 +28452,23 @@
       "type": "used_by",
       "from": "skill:co-security/sarif-exporter",
       "to": "agent:co-security/pentester",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/pentester.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-security/sarif-exporter",
       "to": "agent:co-security/report-writer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/report-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -28421,13 +28545,23 @@
       "type": "used_by",
       "from": "skill:co-security/spdx-sbom",
       "to": "agent:co-security/patch-engineer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/patch-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-security/spdx-sbom",
       "to": "agent:co-security/report-writer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/report-writer.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "produces",
@@ -28469,7 +28603,12 @@
       "type": "used_by",
       "from": "skill:co-security/stride-threat-matrix",
       "to": "agent:co-security/threat-modeler",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/threat-modeler.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -28522,13 +28661,23 @@
       "type": "used_by",
       "from": "skill:co-security/verify-authorization",
       "to": "agent:co-security/pentester",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/pentester.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-security/verify-authorization",
       "to": "agent:co-security/red-team-lead",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-security/agents/red-team-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "phase",
@@ -28580,24 +28729,6 @@
       "type": "phase",
       "from": "skill:co-work/pptx-export",
       "to": "phase:co-work/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-work/standup-synthesizer",
-      "to": "agent:co-work/project-coordinator",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-work/standup-synthesizer",
-      "to": "output_type.closure_record",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-work/standup-synthesizer",
-      "to": "phase:co-work/4",
       "source": "skill_manifest"
     },
     {
@@ -30673,13 +30804,23 @@
       "type": "used_by",
       "from": "skill:root/accessibility-audit",
       "to": "agent:co-design/ux-researcher",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/ux-researcher.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:root/accessibility-audit",
       "to": "agent:co-design/visual-designer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/visual-designer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -31538,6 +31679,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/standup-synthesizer",
+      "to": "output_type.closure_record",
+      "source": "procedure_schema"
     },
     {
       "type": "references",

@@ -526,12 +526,6 @@
       "source": "skill_manifest"
     },
     {
-      "type": "used_by",
-      "from": "swe-solve",
-      "to": "pm",
-      "source": "skill_manifest"
-    },
-    {
       "type": "follows",
       "from": "test-driven-development",
       "to": "code-review",

@@ -1,7 +1,7 @@
 ---
 name: patch-engineer
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 formal_name: Patch Engineer
 role: Cross-platform patch deployment and remediation specialist
 tier: medium
@@ -24,7 +24,7 @@ lifecycle:
 phases: [4, 6]
 handoff_to: [report-writer]
 handoff_from: [pentester]
-required_skills: []
+required_skills: [spdx-sbom]
 ---
 
 ## Role

@@ -9,12 +9,12 @@ description: >
   metadata/frontmatter, validating agent structures, attaching or detaching skills to agents,
   or managing agent roles and 3-tier configurations.
 owner: pm
-version: 1.3.1
-last_reviewed: 2026-09-21
-relates_to: 
+version: 1.4.0
+last_reviewed: 2026-11-06
+relates_to:
   - skill: skill-lifecycle-manager
     type: composes_with
-metadata: 
+metadata:
   type: process
   triggers:
     - create agent
@@ -25,7 +25,6 @@ metadata:
     - hire agent
     - fire agent
     - deprecate agent
-prerequisites: none
 ---
 
 ## Overview

@@ -680,6 +680,12 @@
       "type": "used_by",
       "from": "style-lint-checklist",
       "to": "style-editor",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "style-lint-checklist",
+      "to": "style-editor",
       "source": "skill_manifest"
     },
     {

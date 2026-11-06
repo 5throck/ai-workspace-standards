@@ -1,10 +1,10 @@
 ---
 name: standup-synthesizer
 description: Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
-version: 1.0.1
-last_reviewed: 2026-10-08
+version: 1.1.0
+last_reviewed: 2026-11-06
 status: active
-scope: co-work
+scope: common
 owner: pm
 prerequisites: Bun runtime, git
 metadata:
@@ -24,7 +24,7 @@ Automates the creation of 24-hour team standup digests by aggregating commit log
 ## When to Use
 - Daily standup meetings or async team check-ins.
 - Summarizing 24-hour project progress for executive review.
-- Automated daily digest dispatch in `co-work` variant templates.
+- Automated daily digest dispatch in variant templates (e.g. `co-work`, `co-architect`).
 
 ## Execution Steps
 

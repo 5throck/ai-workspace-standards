@@ -4,7 +4,7 @@
 
 - **Script**: lifecycle-sync-audit
 - **Status**: active
-- **Version**: 1.20.1
+- **Version**: 1.21.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-10-31
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.

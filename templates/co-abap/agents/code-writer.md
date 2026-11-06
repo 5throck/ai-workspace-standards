@@ -14,14 +14,14 @@ examples:
     assistant: "Let me use the code-writer agent for the implementation."
   - user: "Modify the program per the execution plan step 2"
     assistant: "I'll dispatch the code-writer agent for this serial implementation step."
-required_skills: [abap-code-review]
+required_skills: [abap-code-review, abap-dev, post-write-chain, desktop-app-fallback]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-10-12"
   governance: docs/lifecycle/agents/code-writer.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 ## Role

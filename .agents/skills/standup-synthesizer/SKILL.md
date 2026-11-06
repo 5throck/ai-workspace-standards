@@ -1,8 +1,8 @@
 ---
 name: standup-synthesizer
 description: Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
-version: 1.0.0
-last_reviewed: 2026-08-06
+version: 1.1.0
+last_reviewed: 2026-11-06
 status: active
 scope: common
 owner: pm
@@ -24,7 +24,7 @@ Automates the creation of 24-hour team standup digests by aggregating commit log
 ## When to Use
 - Daily standup meetings or async team check-ins.
 - Summarizing 24-hour project progress for executive review.
-- Automated daily digest dispatch in `co-work` variant templates.
+- Automated daily digest dispatch in variant templates (e.g. `co-work`, `co-architect`).
 
 ## Execution Steps
 
@@ -67,5 +67,5 @@ Automates the creation of 24-hour team standup digests by aggregating commit log
 ```
 
 ## Related Skills
-- [sync](../sync/SKILL.md) — Main lifecycle commit & push pipeline
-- [meeting-facilitation](../meeting-facilitation/SKILL.md) — Multi-agent meeting facilitation framework
+- The global `sync` skill (workspace-root `skills/sync/SKILL.md`) — main lifecycle commit & push pipeline
+- The global `meeting-facilitation` skill (workspace-root `skills/meeting-facilitation/SKILL.md`) — multi-agent meeting facilitation framework

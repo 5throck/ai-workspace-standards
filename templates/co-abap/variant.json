@@ -188,8 +188,7 @@
         "layer": "variant",
         "used_by_agents": [
           "code-writer",
-          "test-runner",
-          "pm"
+          "test-runner"
         ],
         "phases": [
           3,
@@ -216,7 +215,6 @@
         "name": "dump-monitor",
         "layer": "variant",
         "used_by_agents": [
-          "pm",
           "devops-admin"
         ],
         "phases": [
@@ -241,9 +239,7 @@
       {
         "name": "source-command-celebrate",
         "layer": "variant",
-        "used_by_agents": [
-          "pm"
-        ],
+        "used_by_agents": [],
         "phases": [
           6
         ],
@@ -421,7 +417,11 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": ["KR", "US", "JP"],
+    "supported": [
+      "KR",
+      "US",
+      "JP"
+    ],
     "default": null
   }
 }

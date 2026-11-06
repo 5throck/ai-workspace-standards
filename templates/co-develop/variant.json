@@ -90,9 +90,7 @@
       {
         "name": "swe-solve",
         "layer": "workspace",
-        "used_by_agents": [
-          "pm"
-        ],
+        "used_by_agents": [],
         "phases": [
           4
         ],

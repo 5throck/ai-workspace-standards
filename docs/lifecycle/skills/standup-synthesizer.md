@@ -3,14 +3,15 @@
 ## Metadata
 - **Skill**: standup-synthesizer
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Created**: 2026-08-16
-- **Last Updated**: 2026-08-16
+- **Last Updated**: 2026-11-06
 
 ## Description
 Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull request reviews, and ticket queue events over a 24-hour window.
 
 ## Changelog
+- 2026-11-06: Version 1.1.0 aligned with the root and common SKILL.md after the CI warning cleanup skill merge (DEC-20261106-03)
 - 2026-08-16: Lifecycle document created from SKILL.md frontmatter (backfill)
 
 ## Dependencies

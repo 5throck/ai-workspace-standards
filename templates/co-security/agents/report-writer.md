@@ -1,7 +1,7 @@
 ---
 name: report-writer
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 formal_name: Report Writer
 role: Pentest reports and executive summary documentation specialist
 tier: medium
@@ -24,7 +24,7 @@ lifecycle:
 phases: [5, 6]
 handoff_to: [pm]
 handoff_from: [patch-engineer]
-required_skills: [finding-reconciliation]
+required_skills: [finding-reconciliation, sarif-exporter, spdx-sbom]
 ---
 
 ## Role

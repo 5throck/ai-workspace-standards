@@ -38,6 +38,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **project-coordinator** | [`agents/project-coordinator.md`](agents/project-coordinator.md) | Low | Schedule management, stakeholder communication, and delivery logistics specialist |
 | **storyteller** (optional) | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Organizational culture, change narratives, and institutional knowledge specialist |
 | **technical-writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | API documentation, technical guides, and developer resources creator |
+| **deck-builder** | [`agents/deck-builder.md`](agents/deck-builder.md) | Medium | Native PPTX deck authoring specialist (canonical SVG + DrawingML export chain) |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -99,6 +100,14 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Tier** | medium |
 | **Phases** | 3 |
 | **Role** | API documentation, technical guides, and developer resources creator |
+### deck-builder
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/deck-builder.md`](agents/deck-builder.md) |
+| **Tier** | medium |
+| **Phases** | 3 |
+| **Role** | Native PPTX deck authoring specialist (canonical SVG + DrawingML export chain) |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 

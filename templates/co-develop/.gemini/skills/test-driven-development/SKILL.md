@@ -4,11 +4,11 @@ description: >
   Implements software using Test-Driven Development (TDD) methodology with red-green-refactor
   cycle. Use when: developing new features, fixing bugs with tests, or ensuring code
   reliability through test-first approach.
-version: 1.1.0
+version: 1.2.0
 scope: co-develop
 status: active
 owner: pm
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-06
 prerequisites: none
 relates_to:
   - skill: code-review
@@ -375,7 +375,7 @@ rather than parameterized.
 
 | Spoke | Derivation binding |
 |---|---|
-| co-game | Renders `scope: co-game`; body and edges otherwise identical. |
+| co-game | Ships byte-identical to co-develop, including `scope: co-develop` (merge ruling 2026-11-06, DEC-20261106-03: diverged same-version copies are merged, not split by version bump); no per-spoke scope rendering. |
 | co-learning | Not adopted — absent from Projects/co-learning and its template. The fleet skill-graph projection carries only a dangling reference node for it (content_hash null); it is not an installed consumer. |
 | co-abap | Not adopted — co-abap carries no TDD capability; its SAP quality chain (RunUnitTests/ATC via the test-runner agent) is a domain-specific workflow outside this generic spine. |
 

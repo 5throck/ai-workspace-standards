@@ -395,7 +395,19 @@
       "type": "used_by",
       "from": "abap-dev",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "architect",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "code-writer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -556,6 +568,12 @@
       "type": "used_by",
       "from": "abap-dev",
       "to": "sap-investigator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "sap-investigator",
       "source": "skill_manifest"
     },
     {
@@ -658,6 +676,12 @@
       "type": "used_by",
       "from": "abap-dev",
       "to": "test-runner",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "abap-dev",
+      "to": "test-runner",
       "source": "skill_manifest"
     },
     {
@@ -682,6 +706,12 @@
       "type": "used_by",
       "from": "desktop-app-fallback",
       "to": "code-writer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "desktop-app-fallback",
+      "to": "code-writer",
       "source": "skill_manifest"
     },
     {
@@ -695,6 +725,12 @@
       "from": "desktop-app-fallback",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "desktop-app-fallback",
+      "to": "test-runner",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -723,6 +759,12 @@
       "type": "used_by",
       "from": "dump-monitor",
       "to": "devops-admin",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "dump-monitor",
+      "to": "devops-admin",
       "source": "skill_manifest"
     },
     {
@@ -741,12 +783,6 @@
       "type": "phase",
       "from": "dump-monitor",
       "to": "phase6",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "dump-monitor",
-      "to": "pm",
       "source": "skill_manifest"
     },
     {
@@ -843,7 +879,19 @@
       "type": "used_by",
       "from": "performance-tuning",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "architect",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "dba",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -873,7 +921,19 @@
       "type": "used_by",
       "from": "performance-tuning",
       "to": "sap-investigator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "performance-tuning",
+      "to": "sap-investigator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-chain",
+      "to": "code-writer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -896,8 +956,8 @@
     {
       "type": "used_by",
       "from": "post-write-chain",
-      "to": "pm",
-      "source": "skill_manifest"
+      "to": "test-runner",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1347,13 +1407,31 @@
       "type": "used_by",
       "from": "sap-co",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "architect",
       "source": "skill_manifest"
     },
     {
       "type": "used_by",
       "from": "sap-co",
       "to": "co-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "co-analyst",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-co",
+      "to": "dba",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1466,13 +1544,31 @@
       "type": "used_by",
       "from": "sap-fi",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "architect",
       "source": "skill_manifest"
     },
     {
       "type": "used_by",
       "from": "sap-fi",
       "to": "dba",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-fi",
+      "to": "fi-analyst",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1597,13 +1693,31 @@
       "type": "used_by",
       "from": "sap-le",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "architect",
       "source": "skill_manifest"
     },
     {
       "type": "used_by",
       "from": "sap-le",
       "to": "dba",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-le",
+      "to": "le-analyst",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1692,13 +1806,31 @@
       "type": "used_by",
       "from": "sap-mm",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "architect",
       "source": "skill_manifest"
     },
     {
       "type": "used_by",
       "from": "sap-mm",
       "to": "dba",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "dba",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-mm",
+      "to": "mm-analyst",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1787,7 +1919,19 @@
       "type": "used_by",
       "from": "sap-pp",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "architect",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "dba",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1840,6 +1984,12 @@
       "type": "used_by",
       "from": "sap-pp",
       "to": "pp-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-pp",
+      "to": "pp-analyst",
       "source": "skill_manifest"
     },
     {
@@ -1882,7 +2032,19 @@
       "type": "used_by",
       "from": "sap-sd",
       "to": "architect",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "architect",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "dba",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1947,6 +2109,12 @@
       "type": "used_by",
       "from": "sap-sd",
       "to": "sd-analyst",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sap-sd",
+      "to": "sd-analyst",
       "source": "skill_manifest"
     },
     {
@@ -1965,12 +2133,6 @@
       "type": "phase",
       "from": "source-command-celebrate",
       "to": "phase6",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "source-command-celebrate",
-      "to": "pm",
       "source": "skill_manifest"
     },
     {

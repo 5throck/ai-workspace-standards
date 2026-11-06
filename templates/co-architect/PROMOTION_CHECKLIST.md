@@ -30,7 +30,7 @@
 
 ## Post-Run Manual Completion (this batch)
 
-- [x] variant.json manifests rebuilt from the generated tree and reconciled to the shipped state: 24 agents (incl. pm) and 6 variant skills, each with `file` fields (intermediate pipeline listings still carrying L1-identical source skills inherited from the L3 project were dropped before commit)
+- [x] variant.json manifests rebuilt from the generated tree and reconciled to the shipped state: 24 agents (incl. pm) and 5 variant skills, each with `file` fields (intermediate pipeline listings still carrying L1-identical source skills inherited from the L3 project were dropped before commit)
 - [x] Lifecycle reset to honest beta state (the generator inherited the project's stale stable-era lifecycle: statusSince 2026-06-17, stablePromotedOn set)
 - [x] `skills/SKILLS.md` index rebuilt from actual template dirs — now the curated variant-exclusive registry (6 rows)
 - [x] Stale `skills/accessibility-audit` copy dropped (hub-doctrine per registry — L3 carried the L1 common stock with `scope: common`; design §6.3 declare-first: no stale copies; consumer reads the hub canonical v1.1.0)
@@ -42,7 +42,7 @@
 | # | Criterion | Status | Evidence / Notes |
 |---|-----------|--------|------------------|
 | 1 | Agent roster completeness | Pending | 24 agents on disk and manifested; golden-reference structural WARNs on a subset of agents (missing Responsibilities/Output Format/Constraints sections) — non-blocking, tracked for template maturation |
-| 2 | Skills coverage | Pending | 6 variant skills manifested (CAD tooling + standup-synthesizer); design-domain skills consumed from co-design hub (registry: accessibility-audit 1.1.0, ui-ux-design-intelligence 1.0.2, service-design 1.1.0, token-usage-lint 1.1.1, tokens.json 1.0.0) |
+| 2 | Skills coverage | Pending | 5 variant skills manifested (CAD tooling); standup-synthesizer is now common-inherited (1.1.0); design-domain skills consumed from co-design hub (registry: accessibility-audit 1.1.0, ui-ux-design-intelligence 1.0.2, service-design 1.1.0, token-usage-lint 1.1.1, tokens.json 1.0.0) |
 | 3 | Documentation completeness | Pending | README en/ko, user-guide en/ko, AGENTS.md (regenerated with VARIANT-* markers), docs/co-architect.context.md present |
 | 4 | Audit pass rate | Pending | `bun scripts/audit.ts` 0 errors — verify at next sync |
 | 5 | Real engagements | Pending | Minimum 1 successful end-to-end engagement on the template |

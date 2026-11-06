@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /**
  * generate-scripts-mirror.ts — L1 SCRIPTS.md registry-table generator (L0-only)
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-11-06, DEC-20261106-03): L0+L2 (variant-scoped, e.g. co-abap sap-*) root rows are
+ *         NOT mirrored into templates/common — only L0 was excluded before.
  *
  * Regenerates the registry-table span of templates/common/scripts/SCRIPTS.md
  * from the root registry (scripts/SCRIPTS.md) plus the template scripts tree.
@@ -204,7 +206,7 @@ export function buildMirrorRegistrySpan(rootContent: string, templateScriptsDir:
   }
 
   // R1-rule + R2-rule: keep non-L0 root rows byte-for-byte, in root file order.
-  const surviving: RegistryRow[] = table.rows.filter((r) => normalizeLayer(r.line) !== 'L0');
+  const surviving: RegistryRow[] = table.rows.filter((r) => !['L0', 'L0+L2'].includes(normalizeLayer(r.line)));
   const rootKeys = new Set(table.rows.map((r) => r.key));
 
   // R3-rule: template-tree .ts files with no root registry row → synthesized rows.

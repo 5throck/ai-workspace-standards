@@ -128,10 +128,6 @@
       "file": "skills/generate-room-elevation/SKILL.md"
     },
     {
-      "name": "standup-synthesizer",
-      "file": "skills/standup-synthesizer/SKILL.md"
-    },
-    {
       "name": "zwcad-ai-drawing",
       "file": "skills/zwcad-ai-drawing/SKILL.md"
     }

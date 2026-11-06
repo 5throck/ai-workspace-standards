@@ -14,13 +14,14 @@ examples:
     assistant: "Let me get the architect agent to analyze and select the appropriate pattern."
   - user: "Create an execution plan for modifying ZCL_EXAMPLE"
     assistant: "I'll use the architect agent to produce the full execution plan."
+required_skills: [abap-dev, performance-tuning, sap-sd, sap-fi, sap-mm, sap-pp, sap-le, sap-co]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/architect.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 ## Role
