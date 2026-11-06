@@ -195,3 +195,27 @@ evidence; nothing consumes the new artifacts programmatically.
 
 None. Both vehicle decisions are made with recorded alternatives; the skill
 content authoring route (skill-lifecycle-manager) is stated, not open.
+
+## 9. Addendum (2026-11-06, D8 batch adjudication — T-20261106-006 item 3)
+
+Two subsequent extraction instances belong to this same learning-extraction
+program and inherit its semantics (distillation of proven variant-side work
+into reusable fleet references; no engine or template code changes; the same
+promotion-deferral trigger — promotion waits for an adoption demand):
+
+- **T-20261103-005** — `docs/patterns/scheduled-jobs-runtime-pattern.md` v1.1:
+  co-newbiz P7 operator-control layer (run-now as enqueue-only with
+  still-queued-request reuse, 180s-heartbeat health semantics,
+  registered-handler-key-only create boundary). Extracted by Step 2f
+  2026-11-03; landed docs-only via PR #1844.
+- **T-20261103-006** — security-scan skill auth-surface audit step
+  (v1.3.0): stack-neutral, documentation/procedure-level sweep step for
+  default-open auth surfaces, with co-newbiz #796's default-closed shape as
+  the reference remediation. Extracted by Step 2f 2026-11-03; landed via
+  PR #1845. (The same PR also carried an unrelated skill-graph cadence
+  decision, adjudicated separately — not part of this program.)
+
+Neither instance modifies engine or template code; both are exactly the
+class this design was written to govern. Recorded here so the
+design-gate-coverage ticket join resolves them (they previously surfaced as
+uncovered D8 rows because no registered design doc named their ids).
