@@ -1,7 +1,7 @@
 ---
 name: image-curator
-version: "1.4.1"
-last_updated: "2026-10-28"
+version: "1.4.2"
+last_updated: 2026-11-06
 role: Image search, evaluation, and download specialist for slide decks
 status: active
 tier: low
@@ -16,7 +16,7 @@ examples:
 phases: [3.5]
 handoff_to: [html-build]
 handoff_from: [storyline, pm]
-required_skills: []
+required_skills: [version]
 lifecycle:
   phase: production
   created: "2026-05-29"

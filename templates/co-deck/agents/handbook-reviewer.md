@@ -1,7 +1,7 @@
 ---
 name: handbook-reviewer
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 role: Handbook quality gate specialist — runs validation scripts, applies fixes, ensures AUTHORING_GUIDELINES compliance
 status: active
 tier: medium
@@ -17,7 +17,7 @@ examples:
 phases: [H-5]
 handoff_to: [pm]
 handoff_from: [handbook-writer]
-required_skills: [handbook]
+required_skills: [handbook, version]
 lifecycle:
   phase: production
   created: "2026-05-29"

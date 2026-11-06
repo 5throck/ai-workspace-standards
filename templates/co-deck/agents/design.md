@@ -1,7 +1,7 @@
 ---
 name: design
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 role: Visual design specialist for lecture slide aesthetics and brand alignment
 status: active
 tier: medium
@@ -15,7 +15,7 @@ examples:
 phases: [3]
 handoff_to: [html-build]
 handoff_from: [storyline, pm]
-required_skills: [design]
+required_skills: [design, version]
 lifecycle:
   phase: production
   created: "2026-05-29"

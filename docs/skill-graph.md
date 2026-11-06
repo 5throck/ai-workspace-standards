@@ -55,7 +55,7 @@
 | `co-deck/research` | variant:co-deck | 1.2.1 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
 | `co-deck/slide-layout-gate` | variant:co-deck | 1.0.0 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
 | `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
-| `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-abap/pm | — | — | — | — |
+| `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | co-deck/pm | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/design-foundation` | variant:co-design | 1.2.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
 | `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with) | — | — |
@@ -818,7 +818,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `devops-admin` | agent | divergence | co-abap@1.1.1 #85a8bf4a; co-price@2.2.1 #20aad471 |
 | `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #64b97e47 |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #b82c7f15; co-work@1.1.1 #36b74196 |
-| `pm` | agent | version-drift | co-abap@1.1.1 #aef5c9bd; co-architect@1.2.0 #ed1b187f; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.2 #e12dc360; root@1.2.2 #99e82f53 |
+| `pm` | agent | version-drift | co-abap@1.1.1 #aef5c9bd; co-architect@1.2.0 #ed1b187f; co-deck@1.2.2 #adc7308a; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.2 #e12dc360; root@1.2.2 #99e82f53 |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #079d7d9d; co-work@1.1.1 #63cd0f0a |
 | `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #eac0f710; co-design@1.1.1 #32d6f634 |
 | `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #7bffa2b7; co-game@1.1.1 #bab2ce39; co-price@2.2.1 #94b3b224 |
