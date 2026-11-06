@@ -2774,6 +2774,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261106-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -7552,7 +7557,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },
@@ -7732,8 +7737,8 @@
       "name": "pptx-export",
       "scope": "co-work",
       "capability": "pptx-export",
-      "content_hash": "b891db1179d48f22",
-      "version": "1.4.0",
+      "content_hash": "ca456411bbdce080",
+      "version": "2.0.0",
       "mirrors": [
         "templates/co-work/skills/pptx-export/SKILL.md"
       ]
@@ -7972,7 +7977,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },
@@ -8400,11 +8405,7 @@
         ".agents/skills/project-resync/SKILL.md",
         ".codex/skills/project-resync/SKILL.md",
         ".hermes/skills/project-resync/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-30"
-      }
+      ]
     },
     {
       "id": "skill:root/project-review",
@@ -8441,11 +8442,7 @@
         ".agents/skills/project-to-variant/SKILL.md",
         ".codex/skills/project-to-variant/SKILL.md",
         ".hermes/skills/project-to-variant/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-30"
-      }
+      ]
     },
     {
       "id": "skill:root/promote-variant",
@@ -8671,7 +8668,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },

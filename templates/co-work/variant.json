@@ -139,10 +139,15 @@
       {
         "name": "svg-to-pptx",
         "path": "scripts/deck/svg-to-pptx.ts",
+        "status": "deprecated-pending-removal"
+      },
+      {
+        "name": "ppt-master-adapter",
+        "path": "scripts/deck/ppt-master-adapter.ts",
         "status": "active"
       }
     ],
     "external": [],
-    "notes": "First co-work script_manifest (spec 2026-11-03-co-work-native-pptx-deck-design). svg-check is the canonical-SVG quality gate (imported by svg-to-pptx for the shared parser); svg-to-pptx compiles gate-passed decks into natively editable DrawingML PPTX (flat mode) with fingerprint refusal. Deps: fflate (packaging), @resvg/resvg-js (preview PNGs for the visual acceptance gate)."
+    "notes": "svg-check is the canonical-SVG quality gate (fingerprint = OUR content SSOT gate); ppt-master-adapter (1.0.0, 2026-11-07) is the ONLY coupling point to the ppt-master v6.8.0 (MIT) conversion chain consumed as-is (design 2026-11-06-deck-emitter-ppt-master-rebase-design, DEC-20261106-04; LOCAL-PATCH(upstream-request: U-20261106-003) for the interim clone path); svg-to-pptx is deprecated-pending-removal — retained through the Phase 1 parity window (golden pins in scripts/deck/tests/deck-golden.test.ts still exercise it), removal in Phase 2 after the differential gate-parity run. Deps: fflate (legacy compiler packaging), fast-xml-parser (adapter well-formedness check), @resvg/resvg-js (preview PNGs). External dep: ppt-master pin v6.8.0 per project external-deps.json (gitignored clone via scripts/deck/fetch-ppt-master.ts; PyMuPDF/AGPL excluded)."
   }
 }
