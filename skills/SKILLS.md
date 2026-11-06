@@ -17,7 +17,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `agent-lifecycle-manager` | 1.3.1 | active | pm | 2026-09-21 | — | PM-led hiring/firing workflows + skill attach/detach rules |
+| `agent-lifecycle-manager` | 1.4.0 | active | pm | 2026-11-06 | — | PM-led hiring/firing workflows + skill attach/detach rules |
 | `create-variant` | 1.4.3 | active | pm | 2026-10-31 | — | Workspace operator only — not deployed to L2 |
 | `decision-write-integrity` | 1.0.0 | active | pm | 2026-10-28 | — | Fleet process skill distilled from co-newbiz ADR-0186 gate-integrity: HARD BLOCK/ACK/DISPLAY taxonomy, off/shadow/enforce rollout, snapshot-hash propose-then-confirm, rationale substance, maker/checker, AI-divergence recording. L0-only (T-20261028-008) |
 | `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
@@ -44,7 +44,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
 | `design-foundation` | 1.1.0 | active | architect | 2026-09-26 | — | Style-neutral design system derivation framework: principles, decision record, 3-layer token architecture ([data-theme] theming). Spec: templates/common/docs/design-foundation.md |
 | `zod-contract-gate` | 1.0.2 | active | architect | 2026-08-06 | — | Defines Zod runtime schema validation patterns and contract safety rules |
-| `standup-synthesizer` | 1.0.0 | active | pm | 2026-08-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
+| `standup-synthesizer` | 1.1.0 | active | pm | 2026-11-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.2 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.3 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
 | `project-resync` | 1.7.0 | active | pm | 2026-10-27 | — | Whole-fleet bidirectional carrier cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport (LOCAL-WORK + merged-window landings) → per-project review cadence → root sync → upgrades. Operator skill; distinct from `sync` |
@@ -71,7 +71,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | skill | version | status | owner | last_reviewed | removal-date | variant |
 |-------|---------|--------|-------|---------------|--------------|---------|
 | `change-impact-assessment` | 1.0.0 | active | change-management-partner | 2026-06-13 | — | co-consult only |
-| `industry-research-pack` | 1.0.0 | active | pm | 2026-10-08 | — | co-consult only |
+| `industry-research-pack` | 1.0.1 | active | pm | 2026-11-06 | — | co-consult only |
 | `design` | 1.2.1 | active | design | 2026-08-24 | — | co-deck only |
 | `design-review` | 1.1.0 | active | pm | 2026-11-02 | — | co-design only |
 | `financial-modeling` | 1.0.1 | active | strategy-analyst | 2026-08-26 | — | co-consult only |
@@ -183,7 +183,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `psm-moc` | 1.0.0 | active | psm-agent | — | — | co-safety only |
 | `pyrophoric-gas-emergency-responder` | 1.0.0 | active | semicon-agent | — | — | co-safety only |
 | `rack-fall-protection-planner` | 1.0.0 | active | datacenter-agent | — | — | co-safety only |
-| `refactoring` | 1.1.0 | active | pm | 2026-11-02 | — | co-develop, co-game |
+| `refactoring` | 1.2.0 | active | pm | 2026-11-06 | — | co-develop, co-game |
 | `risk-assessment` | 1.0.0 | active | risk-assessment-agent | — | — | co-safety only |
 | `rolling-stock-maintenance-loto-planner` | 1.0.0 | active | railway-agent | — | — | co-safety only |
 | `roo-qualification-worksheet` | 1.0.0 | active | fta-origin-analyst | 2026-08-25 | — | co-export only |
@@ -210,7 +210,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `tank-integrity-validator` | 1.0.0 | active | gasterm-agent | — | — | co-safety only |
 | `tar-planning` | 1.1.0 | active | ehschem-agent | — | — | co-safety only |
 | `temperature-excursion-analyzer` | 1.0.0 | active | gdp-agent | — | — | co-safety only |
-| `test-driven-development` | 1.1.0 | active | pm | 2026-11-02 | — | co-develop, co-game |
+| `test-driven-development` | 1.2.0 | active | pm | 2026-11-06 | — | co-develop, co-game |
 | `thermal-burn-prevention-planner` | 1.0.0 | active | food-agent | — | — | co-safety only |
 | `tool-box-meeting` | 1.0.0 | active | safety-workflow-manager | — | — | co-safety only |
 | `trade-documentation-checklist` | 1.0.0 | active | trade-documentation-specialist | 2026-08-08 | — | co-export only |

@@ -4,7 +4,7 @@ lang_reason: legal
 code: KR
 name: Republic of Korea
 status: active
-last_verified: 2026-09-26
+last_verified: 2026-11-06
 ---
 
 # Country Profile: KR — Republic of Korea
@@ -56,6 +56,6 @@ country profile.
 | Asset | Purpose |
 |-------|---------|
 | `CAD_COUNTRY=KR` (env, default) | selects `src/cad_intelligence/ontology/profiles/KR.yaml` — concept labels + 건축용어 glossary |
-| `cad-space-recognition` v1.5.0 | vision-first recognition with Korean review flow and KR glossary (`references/GLOSSARY-ko.md`) |
-| `reading-rules.json` R01–R26 | plan-reading rules; currently all `jurisdiction: *` — KR-specific rules are tagged `jurisdiction: [KR]` |
+| `cad-space-recognition` v1.6.0 | vision-first recognition with Korean review flow and KR glossary (`references/GLOSSARY-ko.md`) |
+| `reading-rules.json` R01–R28 | plan-reading rules; currently all `jurisdiction: *` — KR-specific rules are tagged `jurisdiction: [KR]` |
 | `LAW_API_OC` (env) | 법제처 Open API key for statute lookup in compliance work |

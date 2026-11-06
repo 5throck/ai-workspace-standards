@@ -14,14 +14,14 @@ examples:
     assistant: "Let me use the test-runner agent to run RunATCCheck."
   - user: "Verify the unit tests pass after the code-writer's changes"
     assistant: "I'll dispatch the test-runner agent for the Phase 3 validation."
-required_skills: [abap-code-review]
+required_skills: [abap-code-review, abap-dev, post-write-chain, desktop-app-fallback]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/test-runner.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 ## Role

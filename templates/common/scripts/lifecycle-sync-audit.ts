@@ -24,7 +24,8 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.20.1
+ * @version 1.21.0
+ * v1.21.0 (2026-11-06, DEC-20261106-03): Check B skips L0+L2 (variant-scoped) registry rows.
  * v1.20.1 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *          R2.5/R2.6 annotation, U-20261031-009): Check I docstring annotation only —
  *          arm-(b) findings whose excess commands reference graft-era helpers are
@@ -239,7 +240,7 @@ const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'CONSTITUTION.md'));
 interface RegistryEntry {
   version: string;
   /** Deployment layer: 'common' (both L0 + L1), 'L0-only' (workspace root only), 'L1-only' (generated projects only). Defaults to 'common' when column is absent. */
-  layer: 'common' | 'L0-only' | 'L1-only';
+  layer: 'common' | 'L0-only' | 'L1-only' | 'L0+L2';
 }
 
 /**
@@ -312,6 +313,7 @@ function parseScriptsMdRegistry(
     let layer: RegistryEntry['layer'] = 'common';
     if (rawLayer === 'L0-only' || rawLayer === 'L0') layer = 'L0-only';
     else if (rawLayer === 'L1-only') layer = 'L1-only';
+    else if (rawLayer === 'L0+L2') layer = 'L0+L2';
 
     result.set(filename, { version, layer });
   }
@@ -1194,8 +1196,8 @@ function runCheckB(): SyncIssue[] {
   for (const [filename, rootEntry] of rootRegistry) {
     const { version: rootVersion, layer } = rootEntry;
 
-    if (layer === 'L0-only') {
-      continue; // legitimate — L0-only scripts intentionally absent from templates
+    if (layer === 'L0-only' || layer === 'L0+L2') {
+      continue; // legitimate (L0+L2 = variant-scoped, lives in templates/co-*) — L0-only scripts intentionally absent from templates
     }
 
     // layer === 'common' or 'L1-only': should exist in templates/common/

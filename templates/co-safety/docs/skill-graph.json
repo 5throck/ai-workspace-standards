@@ -5,7 +5,7 @@
     {
       "id": "agent-lifecycle-manager",
       "type": "skill",
-      "layer": "variant:co-safety"
+      "layer": "L0"
     },
     {
       "id": "arc-flash-analyzer",
@@ -411,24 +411,6 @@
   "edges": [
     {
       "type": "composes_with",
-      "from": "agent-lifecycle-manager",
-      "to": "skill-lifecycle-manager",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-safety/skills/agent-lifecycle-manager/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "references",
-      "from": "agent-lifecycle-manager",
-      "to": "skill-lifecycle-manager",
-      "source": "prose"
-    },
-    {
-      "type": "composes_with",
       "from": "audit-preparation",
       "to": "hazop-analysis",
       "source": "relates_to",
@@ -621,6 +603,12 @@
       "type": "used_by",
       "from": "evidence-collection-hot-work-permit",
       "to": "safety-workflow-manager",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "evidence-collection-hot-work-permit",
+      "to": "safety-workflow-manager",
       "source": "skill_manifest"
     },
     {
@@ -771,6 +759,12 @@
       "from": "permit-to-work",
       "to": "risk-assessment",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "permit-to-work",
+      "to": "safety-workflow-manager",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -956,6 +950,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "used_by",
+      "from": "risk-assessment",
+      "to": "safety-workflow-manager",
+      "source": "required_skills"
     },
     {
       "type": "used_by",

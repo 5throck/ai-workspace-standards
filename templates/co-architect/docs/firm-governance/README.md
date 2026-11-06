@@ -30,7 +30,7 @@ A **Project Context Card (PCC)** is the single source of truth flowing between a
 | # | Document | Purpose | Owner |
 |---|----------|---------|-------|
 | 1 | [pcc-v1-template.md](./pcc-v1-template.md) | Project Context Card template v1.1 (single source of truth; includes DrawingSummaries) | Technical Writer |
-| 2 | [communication-agent-design.md](./communication-agent-design.md) | Communication Agent spec, prompt system, test cases (Phase 1 first deploy) | Analyst |
+| 2 | `communication-agent-design.md` (kept in the source project; not shipped with this template) | Communication Agent spec, prompt system, test cases (Phase 1 first deploy) | Analyst |
 | 3 | [agent-team-implementation-roadmap.md](./agent-team-implementation-roadmap.md) | 6-month, 3-phase rollout plan with milestones and success criteria | Project Coordinator |
 | 4 | [usage-boundaries.md](./usage-boundaries.md) | **Binding governance** — what agents CAN/CANNOT do, liability, prohibitions | PM Office |
 | 5 | [regulatory-db-integration-research.md](./regulatory-db-integration-research.md) | Regulatory DB integration research (A-05) — MOLEG (Ministry of Government Legislation) Open API recommendation, freshness gate | Analyst |

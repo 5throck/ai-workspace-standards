@@ -236,7 +236,8 @@ C:\git\ (raíz del workspace - este repo)
     ├── co-abap/             # ✅ Estable — equipo de agentes para desarrollo SAP ABAP
     ├── co-hr/               # 🔶 Beta — equipo de agentes para consultoría de RR. HH. y relaciones laborales (perfil de país KR incluido)
     ├── co-safety/           # 🔶 Beta — equipo de agentes para plataforma de cumplimiento EHS/GxP (incluye perfil de país KR)
-    └── co-price/            # 🔶 Beta — simulador de gestión y consultoría de precios multi-industria (dataset de muestra K-Beauty, perfil de país KR incluido)
+    ├── co-price/            # 🔶 Beta — simulador de gestión y consultoría de precios multi-industria (dataset de muestra K-Beauty, perfil de país KR incluido)
+    └── co-architect/        # 🔶 Beta — equipo de agentes para colaboración en estudios de arquitectura (perfil de país KR incluido)
 ```
 
 Cada subproyecto vive en su propio directorio y repositorio git:
@@ -285,6 +286,7 @@ Cada sesión de IA comienza ejecutando esta lista de verificación (definida en 
 Cada variante de plantilla en este workspace proporciona un **flujo de trabajo multi-agente y equipo de agentes** altamente optimizado y especializado para su propósito específico.
 
 - **co-develop**: Un pipeline de gobernanza lineal de 6 fases para el desarrollo y verificación de software.
+- **co-learning**: Flujo de trabajo de aprendizaje y evaluación — redacción de bancos de preguntas auditados contra sesgos, revisión del registro de remediación y operaciones de exámenes (beta; derivado de co-develop).
 - **co-design**: Un flujo de trabajo nativo de diseño iterativo de 5 fases enfocado en el prototipado rápido y la validación continua del usuario.
 - **co-work**: Un flujo de trabajo de colaboración asíncrona de 6 fases enfocado en la redacción paralela y la revisión continua de los stakeholders.
 - **co-security**: Un flujo de trabajo de compromiso de seguridad de 6 fases que cubre operaciones de Red Team, modelado de amenazas y automatización de parches basada en Ansible.
@@ -297,6 +299,7 @@ Cada variante de plantilla en este workspace proporciona un **flujo de trabajo m
 - **co-hr**: Un flujo de consultoría de RR. HH. y relaciones laborales de 4 fases que cubre admisión del encargo, auditoría de cumplimiento de la legislación laboral de la jurisdicción objetivo (perfiles de país bajo docs/countries/ — perfil KR incluido), diseño de HRM/HRD y reestructuración organizativa/gestión del cambio, con integración de investigación regulatoria k-law/k-kosis (habilidades de alcance KR, adjuntas solo a proyectos con país KR) en un equipo de 12 agentes
 - **co-safety**: Un flujo de trabajo EHS/GxP de 6 fases que cubre seguridad laboral coreana (OSHA-KR, SAPA), gestión de seguridad de procesos (PSM), calidad farmacéutica GxP (GMP/GLP/GDP/GCP/GVP), seguridad de dispositivos médicos (KGMP-MD, ISO 13485) y 15 dominios industriales (química, construcción, semiconductores, baterías, astilleros, siderurgia, etc.) con más de 40 agentes especializados; el contenido de jurisdicción se incorpora mediante perfiles de país bajo docs/countries/ (perfil KR incluido)
 - **co-price**: Un flujo de trabajo simulador de gestión y consultoría de precios multi-industria que cubre estrategia de precios, estrategia financiera, auditoría CPA, inteligencia de mercado y dirección de encargos en un equipo de 15 agentes, con un dataset de muestra K-Beauty incluido y un perfil de país KR bajo docs/countries/
+- **co-architect**: Un flujo de trabajo de colaboración para estudios de arquitectura que integra diseño (UI/UX, diseño de servicios, prototipado), investigación (análisis, contenido), coordinación de proyectos (planificación, adquisición) e ingeniería (modelado 3D en SketchUp, dibujo 2D en ZWCAD, revisión estructural/MEP) con un roster de 24 agentes en 5 equipos y 6 flujos nombrados (market-research, design-exploration, project-acquisition, design-delivery, permit-compliance, interior-execution); el contenido jurisdiccional se adjunta mediante perfiles de país en docs/countries/ (perfil KR incluido).
 
 **💡 Cómo revisar los detalles del flujo de trabajo**
 Las plantillas de agentes específicas y las fases de gobernanza se gestionan dentro de los documentos de cada proyecto generado. Después de crear un proyecto, revise:
@@ -324,6 +327,7 @@ Los nuevos proyectos se generan a partir de variantes de plantillas versionadas.
 | `co-hr` | 🔶 Beta | Consultoría de RR. HH. y relaciones laborales — PM, Analista de Cumplimiento Laboral, Especialista en Relaciones Laborales, Oficial de Seguridad y Salud, Especialista en Adquisición de Talento, Analista de Compensación y Beneficios, Consultor de Gestión del Desempeño, Especialista en L&D, Consultor de Carrera y Sucesión, Consultor de Diseño Organizacional, Socio de Gestión del Cambio, Analista de Datos. Alcance del derecho laboral mediante perfiles de país (perfil KR incluido) |
 | `co-safety` | 🔶 Beta | Plataforma de cumplimiento EHS/GxP — PM/CSO, más de 40 agentes especializados (emergencia, cumplimiento, legal, formación, PSM, riesgo, auditoría, 15 dominios industriales y 5 dominios GxP), integración de investigación regulatoria k-law (alcance KR); contenido de jurisdicción mediante perfiles de país (perfil KR incluido) |
 | `co-price` | 🔶 Beta | Simulador de gestión y consultoría de precios multi-industria — PM, Líder de Estrategia Financiera, Auditor CPA, Estratega de Precios, Analista de Inteligencia de Mercado, Director de Encargo, con dataset de muestra K-Beauty incluido; perfil de país KR incluido |
+| `co-architect` | 🔶 Beta | Flujo de colaboración para estudios de arquitectura — 5 equipos (Diseño, Investigación, Coordinación de Proyectos, Ingeniería, Ingeniería de Plataforma) con 24 agentes que cubren diseño UI/UX, modelado 3D en SketchUp, dibujo 2D en ZWCAD, revisión estructural/MEP y 6 flujos nombrados, desde la investigación de mercado hasta la ejecución de interiores; perfil de país KR incluido |
 
 ### Selección de versión y variante
 

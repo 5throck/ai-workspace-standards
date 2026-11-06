@@ -8,8 +8,8 @@ This directory contains variant-specific skills for the `co-game` template.
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `arcade-physics` | 1.0.0 | active | pm | 2026-08-25 | — | Minimal Arcade-class physics on the ECS core: MovementSystem integration, gravity/damping, AABB collision response (backlog Low row) |
 | `code-review` | 1.1.0 | active | pm | 2026-11-02 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
-| `refactoring` | 1.1.0 | active | pm | 2026-11-02 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
-| `test-driven-development` | 1.1.0 | active | pm | 2026-11-02 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `refactoring` | 1.2.0 | active | pm | 2026-11-06 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
+| `test-driven-development` | 1.2.0 | active | pm | 2026-11-06 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | Web Audio API / jsfxr procedural 8-bit retro sound effect generation rules |
 
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.13.0
+ * @version 1.14.0
+ *         v1.14.0 (2026-11-06, DEC-20261106-03): Ghost-entry check skips L0+L2 rows whose
+ *         script exists under templates/co-X/scripts/ (variant-scoped, co-abap registry rows).
  *         v1.13.0 (2026-10-27, U-20261026-010): --check-drift equal-version divergence
  *         blocks only in mirror contexts (L0/L1). In L2/L3 (variant templates and
  *         Projects/*) it prints a WARNING with the upgrade-project remedy and exits 0,
@@ -369,6 +371,22 @@ function getActualScripts(): string[] {
 
 const L0_ONLY_LAYERS = new Set(["L0", "L0-only"]);
 
+/**
+ * DEC-20261106-03: an `L0+L2` registry row names a variant-scoped script that
+ * lives in templates/co-*\/scripts/ (no scripts/ copy). It is not a ghost when
+ * that variant copy exists on disk.
+ */
+function variantScriptDirs(): string[] {
+  const tplDir = join(process.cwd(), "templates");
+  if (!existsSync(tplDir)) return [];
+  return readdirSync(tplDir)
+    .filter((d) => d.startsWith("co-"))
+    .map((d) => join(tplDir, d, "scripts"));
+}
+function variantScopedScriptExists(script: string): boolean {
+  return variantScriptDirs().some((d) => existsSync(join(d, script)));
+}
+
 function isLayerRelevant(entry: RegistryEntry): boolean {
   if (contextLayer === "L0") return true;
   // In L1/L2/L3, skip entries whose layer marks them as workspace-only
@@ -613,6 +631,7 @@ function verify(): boolean {
   // In L0, check all entries. In L1/L2/L3, skip L0-only entries (intentionally absent).
   for (const entry of registry) {
     if (!isLayerRelevant(entry)) continue;
+    if (entry.layer === "L0+L2" && variantScopedScriptExists(entry.script)) continue;
     if (!existsSync(join(scriptsDir, entry.script))) {
       errors.push(
         `Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`

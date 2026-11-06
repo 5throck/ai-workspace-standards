@@ -12,13 +12,14 @@ examples:
     assistant: "I'll dispatch the dba agent to design the table and optimize the indexes."
   - user: "Tune this slow SQL query querying BSEG/ACDOCA"
     assistant: "Let me use the dba agent to analyze index utilization and rewrite the SQL."
+required_skills: [performance-tuning, sap-sd, sap-fi, sap-mm, sap-pp, sap-le, sap-co]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/dba.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 ## Role

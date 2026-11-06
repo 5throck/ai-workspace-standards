@@ -2,7 +2,7 @@
 name: automation-engineer
 role: Implementation specialist for MCP server / Python backend / CAD-automation tooling
 status: active
-version: "1.0.0"
+version: "1.0.1"
 team: platform-engineering
 tier: medium
 tier_ceiling_exempt: co-architect platform layer owns CAD-intelligence build/verify automation (src/cad_intelligence tooling, designLint, drawing-set QA) — substantive engineering beyond the L0 low baseline; deliberate source-project tier, promoted 2026-11-01 (Batch E5)
@@ -25,7 +25,7 @@ required_skills: []
 lifecycle:
   phase: production
   created: "2026-06-02"
-  last_updated: "2026-06-02"
+  last_updated: "2026-11-06"
   governance: docs/lifecycle/agents/automation-engineer.md
 ---
 
@@ -64,7 +64,7 @@ This ensures no code is written without proper design review and approval (see `
 4. **Error handling**: Use the existing `ZWCADConnectionError`/`BoundaryViolationError`/`LayerOperationError` exception classes where appropriate; don't invent parallel error-handling conventions.
 5. **No `--no-verify`**: Never bypass audit hooks.
 
-## Output
+## Output Format
 
 For each file changed, report:
 ```

@@ -1,4 +1,6 @@
-// @version 1.41.0
+// @version 1.42.0
+// v1.42.0 (2026-11-06, DEC-20261106-03): hoisted compound Bun-shell interpolations
+//          (git show HEAD:<rel>, gh api pulls endpoint/jq) into named consts — no behaviour change.
 // v1.41.0 (2026-11-05, T-20261105-002): step 3.88 gains the repaired-at-head
 //          tier — memory-union-verify v1.1.0 re-tiers a post-activation drop
 //          finding group as 'repaired-at-head' (INFO) when the current
@@ -1594,7 +1596,8 @@ try {
         for (const rel of changedPaths) {
             if (!isAgentMdPath(rel)) continue;
             let headText: string | null = null;
-            const headRes = await $`git show ${'HEAD:' + rel}`.quiet().nothrow();
+            const headRef = 'HEAD:' + rel;
+            const headRes = await $`git show ${headRef}`.quiet().nothrow();
             if (headRes.exitCode === 0) headText = headRes.stdout.toString();
             // exitCode !== 0 → untracked/new file: not a mechanical rewrite of
             // an existing agent, skip (a new file's date is authored content).
@@ -2085,7 +2088,9 @@ if (!existingPrUrl && isGraphqlBlocked(existingPrRes)) {
     const originUrl = await $`git remote get-url origin`.quiet().nothrow();
     const slugMatch = originUrl.stdout.toString().trim().match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
     if (slugMatch) {
-        const rest = await $`gh api ${`repos/${slugMatch[1]}/pulls?head=${slugMatch[1].split('/')[0]}:${branch}&state=open`} --jq ${'.[0].html_url // ""'}`.quiet().nothrow();
+        const prsEndpoint = `repos/${slugMatch[1]}/pulls?head=${slugMatch[1].split('/')[0]}:${branch}&state=open`;
+        const prsJqExpr = '.[0].html_url // ""';
+        const rest = await $`gh api ${prsEndpoint} --jq ${prsJqExpr}`.quiet().nothrow();
         if (rest.exitCode === 0) {
             const restUrl = rest.stdout.toString().trim();
             if (restUrl) {

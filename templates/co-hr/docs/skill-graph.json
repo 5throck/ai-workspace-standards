@@ -539,6 +539,12 @@
       "type": "used_by",
       "from": "competency-modeling",
       "to": "career-succession-consultant",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "career-succession-consultant",
       "source": "skill_manifest"
     },
     {
@@ -557,6 +563,12 @@
       "type": "used_by",
       "from": "competency-modeling",
       "to": "learning-development-specialist",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "learning-development-specialist",
       "source": "skill_manifest"
     },
     {
@@ -564,6 +576,12 @@
       "from": "competency-modeling",
       "to": "org-design-framework",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "competency-modeling",
+      "to": "performance-management-consultant",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -587,12 +605,6 @@
       "type": "phase",
       "from": "consulting-report-writing",
       "to": "phase3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "consulting-report-writing",
-      "to": "pm",
       "source": "skill_manifest"
     },
     {

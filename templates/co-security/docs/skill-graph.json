@@ -695,6 +695,12 @@
       "type": "used_by",
       "from": "samm-maturity",
       "to": "threat-modeler",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "samm-maturity",
+      "to": "threat-modeler",
       "source": "skill_manifest"
     },
     {
@@ -713,6 +719,12 @@
       "type": "used_by",
       "from": "sarif-exporter",
       "to": "pentester",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sarif-exporter",
+      "to": "pentester",
       "source": "skill_manifest"
     },
     {
@@ -726,6 +738,12 @@
       "from": "sarif-exporter",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "sarif-exporter",
+      "to": "report-writer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -784,6 +802,12 @@
       "type": "used_by",
       "from": "spdx-sbom",
       "to": "patch-engineer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "patch-engineer",
       "source": "skill_manifest"
     },
     {
@@ -797,6 +821,12 @@
       "from": "spdx-sbom",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "spdx-sbom",
+      "to": "report-writer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -879,6 +909,12 @@
       "type": "used_by",
       "from": "stride-threat-matrix",
       "to": "threat-modeler",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "stride-threat-matrix",
+      "to": "threat-modeler",
       "source": "skill_manifest"
     },
     {
@@ -909,6 +945,12 @@
       "type": "used_by",
       "from": "verify-authorization",
       "to": "pentester",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "verify-authorization",
+      "to": "pentester",
       "source": "skill_manifest"
     },
     {
@@ -922,6 +964,12 @@
       "from": "verify-authorization",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "verify-authorization",
+      "to": "red-team-lead",
+      "source": "required_skills"
     },
     {
       "type": "used_by",

@@ -139,10 +139,10 @@ uv run python src/agent/server.py --server
 ```
 
 ### 2. Launch the Web Studio UI
-Open the file [src/agent/index.html](../../src/agent/index.html) in any web browser. You can select one of the drawing presets or describe what you want to draw.
+Open the file `src/agent/index.html` in any web browser. You can select one of the drawing presets or describe what you want to draw.
 
 ### 3. ZWCAD Integration
-If you are on Windows and have ZWCAD installed, open ZWCAD and run `APPLOAD` to load [src/lisp/zwcad.lsp](../../src/lisp/zwcad.lsp). This automatically bootstraps the backend server and adds the `CA_AISTUDIO` command to ZWCAD.
+If you are on Windows and have ZWCAD installed, open ZWCAD and run `APPLOAD` to load `src/lisp/zwcad.lsp`. This automatically bootstraps the backend server and adds the `CA_AISTUDIO` command to ZWCAD.
 
 ---
 

@@ -2,8 +2,8 @@
 name: sound-designer
 role: Procedural audio design specialist — sound effects, BGM loops, audio architecture
 status: active
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 capabilities:
   - asset-pipeline
   - audio-design
@@ -22,7 +22,7 @@ examples:
 phases: [3]
 handoff_to: [game-developer]
 handoff_from: [game-designer, arcade-designer, puzzle-designer]
-required_skills: []
+required_skills: [sound-synth]
 lifecycle:
   phase: production
   created: "2026-08-12"

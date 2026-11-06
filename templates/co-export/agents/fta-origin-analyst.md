@@ -27,10 +27,10 @@ examples:
 phases: [1, 2]
 handoff_to: [trade-documentation-specialist]
 handoff_from: [pm, hs-classification-specialist]
-required_skills: [fta-origin-determination]
+required_skills: [fta-origin-determination, roo-qualification-worksheet]
 capabilities: [engagement-context, deliverable-standards, analysis, reporting]
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 lifecycle:
   phase: beta
   created: "2026-08-08"

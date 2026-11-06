@@ -2,7 +2,7 @@
 code: KR
 name: Republic of Korea
 status: draft
-last_verified: 2026-10-12
+last_verified: 2026-11-06
 ---
 # Country Profile: KR — Republic of Korea
 

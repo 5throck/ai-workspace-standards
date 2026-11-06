@@ -2,8 +2,8 @@
 name: game-debugger
 role: Bug root cause analysis, fix proposals, and bug pattern documentation specialist for game engine
 status: active
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 capabilities:
   - debugging
   - testing
@@ -22,7 +22,7 @@ examples:
 phases: [4]
 handoff_to: [test-runner, pm]
 handoff_from: [pm]
-required_skills: [test-driven-development]
+required_skills: [test-driven-development, arcade-physics, code-review, refactoring]
 lifecycle:
   phase: production
   created: "2026-08-12"

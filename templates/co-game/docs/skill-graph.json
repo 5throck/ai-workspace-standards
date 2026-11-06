@@ -288,6 +288,12 @@
       "type": "used_by",
       "from": "arcade-physics",
       "to": "game-debugger",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "arcade-physics",
+      "to": "game-debugger",
       "source": "skill_manifest"
     },
     {
@@ -412,7 +418,19 @@
       "type": "used_by",
       "from": "code-review",
       "to": "game-debugger",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "game-debugger",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "code-review",
+      "to": "game-developer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -918,7 +936,19 @@
       "type": "used_by",
       "from": "refactoring",
       "to": "game-debugger",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "game-debugger",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "refactoring",
+      "to": "game-developer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -983,6 +1013,12 @@
       "type": "used_by",
       "from": "sound-synth",
       "to": "sound-designer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "sound-synth",
+      "to": "sound-designer",
       "source": "skill_manifest"
     },
     {
@@ -1031,6 +1067,12 @@
       "from": "test-driven-development",
       "to": "game-debugger",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "test-driven-development",
+      "to": "game-developer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",

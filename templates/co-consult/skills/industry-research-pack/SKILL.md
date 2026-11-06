@@ -9,11 +9,10 @@ description: >
   cross-validation against a named second source, warning marks for
   single-source figures, and a search-quota-exhaustion fallback. Judgments are
   rendered AGAINST the user's hypotheses, not in support of them.
-version: 1.0.0
-last_reviewed: 2026-10-08
+version: 1.0.1
+last_reviewed: 2026-11-06
 status: active
 owner: pm
-l2_propagate: false
 prerequisites:
   - research-analysis
   - evidence-ledger

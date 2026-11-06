@@ -17,9 +17,9 @@ examples:
 phases: [4]
 handoff_to: [visual-editor]
 handoff_from: [reporter]
-required_skills: [financial-journalism-style, ai-tell-reduction]
-version: "1.1.1"
-last_updated: "2026-10-28"
+required_skills: [financial-journalism-style, ai-tell-reduction, style-lint-checklist]
+version: "1.1.2"
+last_updated: 2026-11-06
 lifecycle:
   phase: beta
   created: "2026-08-12"

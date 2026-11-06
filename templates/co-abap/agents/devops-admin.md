@@ -12,13 +12,14 @@ examples:
     assistant: "I'll dispatch the devops-admin agent to create and configure the transport."
   - user: "Install ZADT_VSP WebSocket infrastructure on this SAP system"
     assistant: "Let me use the devops-admin agent to deploy the required tools."
+required_skills: [dump-monitor]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-25"
   governance: docs/lifecycle/agents/devops-admin.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 ## Role

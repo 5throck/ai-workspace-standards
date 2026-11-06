@@ -11,13 +11,14 @@ examples:
     assistant: "I'll dispatch the co-analyst agent to query COSP/COSS and produce the cost variance AS-IS analysis."
   - user: "CO analyst — why are internal order settlements failing for order 600001?"
     assistant: "Let me use the co-analyst agent to examine AUFK/COEP settlement data and draft the PRD."
+required_skills: [sap-co]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/co-analyst.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 # CO Analyst — Controlling

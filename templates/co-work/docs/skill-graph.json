@@ -163,6 +163,18 @@
     {
       "type": "references",
       "from": "deck-builder",
+      "to": "pptx-export",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "deck-builder",
+      "to": "svg-quality-gate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "deck-builder",
       "to": "svg-slide-authoring",
       "source": "prose"
     },
@@ -390,18 +402,6 @@
       "from": "standup-synthesizer",
       "to": "output_type.closure_record",
       "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "standup-synthesizer",
-      "to": "phase4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "standup-synthesizer",
-      "to": "project-coordinator",
-      "source": "skill_manifest"
     },
     {
       "type": "used_by",

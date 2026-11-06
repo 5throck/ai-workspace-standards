@@ -2,19 +2,14 @@
 extends: ../../../agents/pm.md
 name: pm
 variant: co-architect
-formal_name: Project Manager (PM) Agent
 status: active
-version: "1.2.0"
-last_updated: 2026-11-01
+version: "1.2.1"
+last_updated: 2026-11-06
 capabilities:
   - communication
   - task-management
 tier: medium
-color: yellow
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
-examples:
-  - user: "Start a new feature implementation"
-    assistant: "I'll orchestrate Phase 0 (Project Initiation) and Phase 1-2 (Planning & Architecture, including design approval)"
 variant_overrides:
   role: |
     ## Role

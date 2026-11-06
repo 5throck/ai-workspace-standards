@@ -11,13 +11,14 @@ examples:
     assistant: "I'll dispatch the mm-analyst agent to query EKKO/EKPO/MSEG and produce the AS-IS procurement analysis."
   - user: "We need an MM analyst to look at the inventory valuation discrepancy in plant 1000"
     assistant: "Let me use the mm-analyst agent to examine MARD/MBEW stock data and draft the GAP analysis."
+required_skills: [sap-mm]
 lifecycle:
   phase: production
   created: "2026-08-15"
   last_updated: "2026-08-21"
   governance: docs/lifecycle/agents/mm-analyst.md
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 ---
 
 # MM Analyst — Materials Management

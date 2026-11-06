@@ -1,7 +1,7 @@
 ---
 name: agent-lifecycle-manager
 status: active
-scope: co-safety
+scope: common
 description: >
   Manages the creation, validation, and maintenance of AI agent files across the project,
   including PM-led hiring (creation) and firing (deprecation/removal) of agents with their
@@ -9,8 +9,8 @@ description: >
   metadata/frontmatter, validating agent structures, attaching or detaching skills to agents,
   or managing agent roles and 3-tier configurations.
 owner: pm
-version: 1.3.1
-last_reviewed: 2026-10-09
+version: 1.4.0
+last_reviewed: 2026-11-06
 relates_to:
   - skill: skill-lifecycle-manager
     type: composes_with
@@ -27,7 +27,6 @@ metadata:
     - deprecate agent
 ---
 
-audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema
 ## Overview
 
 This skill provides a systematic approach to creating, validating, and maintaining AI agent files (`agents/*.md`). It ensures all agents follow proper structure, have correct YAML frontmatter (status, tier, role, etc.), and are properly registered in the central `AGENTS.md` registry.
@@ -78,19 +77,14 @@ name: agent-name
 role: "Brief 2-4 word title"
 status: active
 description: "Short sentence on what the agent does"
-tier:
-  claude: high | medium | low
-  gemini: high | medium | low
-  antigravity: high | medium | low
-  gemini-cli: high | medium | low
-  codex: high | medium | low
+tier: high | medium | low
 ---
 ```
 
 **Validation**:
 - All required fields must be present.
 - `status` must be valid.
-- `tier` mappings must strictly follow the 3-tier strategy rules.
+- `tier` is one scalar line (`high`, `medium`, or `low`) — the agent author's cost-ceiling declaration (ADR-0102). The platform→model mapping is NOT declared here; `docs/workspace-schema.json` → `models` resolves tier→model per platform at dispatch/validation time.
 
 ---
 
@@ -103,6 +97,7 @@ tier:
 - Focus on specific behavioral guidelines and domain constraints.
 - Do NOT repeat global rules (like UTF-8 enforcement or standard PR procedures) that are already covered in workspace standards.
 - **If the agent role involves research, investigation, or presenting external information**: explicitly include the Source Attribution principle in the agent's constraints or behavioral guidelines — require source citation for factual claims and use `⚠️ Unverified` disclosure for unverifiable information.
+- **`## Legal Basis` section is conditional (U-20261026-004)**: include it ONLY for agents whose mandate rests on statutes, regulations, or certification/permit regimes (regulatory-dd, legal-counsel, compliance, licensing). Sibling-ownership Boundary content that does not cite a statute belongs in Role or Constraints instead. Do not propagate the section to non-regulatory agents by skeleton inertia — a `## Legal Basis` with no statutory grounding is noise, and no validator excuses it.
 
 ---
 
@@ -121,17 +116,16 @@ tier:
 
 **Purpose**: Keep every tier declaration surface in sync when a tier changes.
 
-Tier is declared in multiple places, and `docs/workspace-schema.json` → `agent_tiers` is the single source of truth (the `agent-model-gate` hook reads it at runtime). **Update surfaces in this order**:
+Tier is declared in exactly one place: the agent file's scalar `tier: high|medium|low` frontmatter line (ADR-0102). The schema's only tier-related block is `models`, which maps tier→model per platform — never edit it to change an agent's tier. **Update surfaces in this order**:
 
-1. `docs/workspace-schema.json` → `agent_tiers` (SSOT — change this first)
-2. `agents/<name>.md` frontmatter `tier:` block (all 5 platforms, same value)
-3. `AGENTS.md` §1 Agent Roster and §4.1 Subagent Roster Tier cells
-4. `docs/lifecycle/agents/<name>.md` `**Tier**:` field (and any stale tier prose)
+1. `agents/<name>.md` frontmatter scalar `tier:` line (the declaration — change this first)
+2. `AGENTS.md` §1 Agent Roster and §4.1 Subagent Roster Tier cells
+3. `docs/lifecycle/agents/<name>.md` `**Tier**:` field (and any stale tier prose)
 
 Then run the tier drift check — it must pass before the change lands:
 
 ```bash
-bun scripts/lifecycle-sync-audit.ts   # Check F: agent tiers vs agent_tiers SSOT
+bun scripts/lifecycle-sync-audit.ts   # Check F: tier cross-surface parity (frontmatter anchor)
 ```
 
 ---
@@ -151,7 +145,7 @@ To verify a specific agent:
 bun scripts/agent-verify.ts <agent-name>
 ```
 
-To verify tier consistency across all declaration surfaces (schema SSOT, frontmatter, AGENTS.md rosters, lifecycle records):
+To verify tier consistency across all tier surfaces (frontmatter, AGENTS.md rosters, lifecycle records):
 ```bash
 bun scripts/lifecycle-sync-audit.ts   # Check F
 ```
@@ -160,7 +154,7 @@ bun scripts/lifecycle-sync-audit.ts   # Check F
 - [ ] No orphaned agents (every `.md` file in `agents/` is listed in `AGENTS.md`)
 - [ ] Frontmatter passes all audit checks
 - [ ] Tier mappings are correctly structured
-- [ ] Tier drift check passes (Check F: frontmatter, rosters, and lifecycle record all match `agent_tiers`)
+- [ ] Tier drift check passes (Check F: rosters and lifecycle record all agree with the frontmatter scalar `tier:`)
 - [ ] **Recommended**: Consider declaring the skill's deployment scope — is it needed in all variant projects (common) or workspace-root-only? Workspace-only skills should not be placed in `templates/common/skills/`.
 - [ ] **If research/investigation role**: agent content includes source citation requirements and uncertainty disclosure (`⚠️ Unverified`)
 - [ ] **If numerical computation role** (aerospace, finance, precision control, scientific): agent content includes Computational Integrity Standards — states that calculations must be delegated to external tools (Fortran, Python+NumPy, etc.) and never performed by AI directly
@@ -192,7 +186,7 @@ Before proceeding, verify the role does not duplicate an existing agent: review 
 - Name: kebab-case, maps 1:1 to `agents/<name>.md`
 - Responsibilities: 2–4 concrete duties, distinct from every existing agent
 - Phases: which workflow phases the agent leads or supports
-- Tier: assign per the 3-tier strategy (`docs/workspace-schema.json` → `agent_tiers` is SSOT)
+- Tier: assign per the 3-tier strategy (one scalar `tier:` line in the agent frontmatter; the schema `models` block resolves the model per platform — ADR-0102)
 
 ### Step H3: Assemble the Initial Skill Package
 
@@ -221,7 +215,7 @@ PM dispatches **automation-engineer** (never edits files directly):
 
 ```bash
 bun scripts/agent-lifecycle-audit.ts   # all-agent audit
-bun scripts/lifecycle-sync-audit.ts    # Check F: tier SSOT consistency
+bun scripts/lifecycle-sync-audit.ts    # Check F: tier cross-surface parity
 ```
 
 Both must pass before the hiring is considered complete.

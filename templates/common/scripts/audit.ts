@@ -1,4 +1,10 @@
-// @version 2.62.0
+// @version 2.63.0
+// v2.63.0 (2026-11-06, DEC-20261106-03, docs/designs/2026-11-06-ci-warning-cleanup-design.md):
+//          (a) shell-injection source scan skips comment-line matches
+//          (helpers/security-validator.ts isSourceCommentLine); (c) workspace-root
+//          "docs/context.md not found" is INFO; (d) USER RULING 2026-11-06: the
+//          context-commonization heuristic (ADR-0050 Part 3) is INFO, not WARN
+//          (check and output retained). New Info() reporter.
 // v2.62.0 (2026-11-04, U-20261104-001): §28 standing audit-hook regression
 //          check no longer emits a permanent false-positive WARN in variant/
 //          PROJECT layouts. The §28 sweep core (templates co-* variant.json
@@ -289,7 +295,7 @@ import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
 import { canonicalOrderViolation } from './spec-register.ts';
 import { AGENT_LAYER1_SECTIONS } from './helpers/golden-reference-loader.ts';
 import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
-import { sourceShellInjectionPatterns } from './helpers/security-validator.ts';
+import { sourceShellInjectionPatterns, isSourceCommentLine } from './helpers/security-validator.ts';
 import { collectTemplateAuditHooks } from './helpers/audit-hook-sweep.ts';
 import { splitIntoSections, getContentLines, stripMarkerZones } from './helpers/context-sections.ts';
 import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
@@ -376,6 +382,10 @@ function Warn(msg: string) {
 // U-20261006-004: a gate that determines it does not apply in this context is
 // SKIPPED, not PASSED — the verdict is counted separately so the summary can
 // distinguish "all gates ran and passed" from "some gates did not run".
+// DEC-20261106-03: informational result — printed, never a WARN annotation.
+function Info(msg: string) {
+    console.log(`${CYAN}[INFO] ${msg}${RESET}`);
+}
 function Skip(msg: string) {
     console.log(`${CYAN}[SKIP] ${msg}${RESET}`);
     skippedChecks++;
@@ -843,7 +853,7 @@ if (!LIFECYCLE_ONLY) {
         }
     }
 } else if (isWorkspaceRoot) {
-    Warn('docs/context.md not found - skipping project-level checks (workspace root)');
+    Info('docs/context.md not found - workspace root: project-level checks not applicable');
 } else {
     Fail('docs/context.md missing — every scaffolded L2/L3 project must carry an immutable docs/context.md (SSOT: templates/common/docs/context.md). This usually means the project was created before create-l3-scaffold.ts copied this file (fixed in v1.10.1) — copy templates/common/docs/context.md into docs/context.md to repair it.');
 }
@@ -1777,6 +1787,7 @@ function checkShellInjectionPatterns() {
                 const matches = content.matchAll(sourcePattern.pattern);
                 for (const foundMatch of matches) {
                     const matchIndex = foundMatch.index ?? 0;
+                    if (isSourceCommentLine(content, matchIndex)) continue;
                     const upToMatch = content.slice(0, matchIndex);
                     const lineNo = upToMatch.split('\n').length;
                     const remediationText = sourcePattern.remediation;
@@ -2283,7 +2294,7 @@ function checkProjectDocMarkerDrift() {
 }
 checkProjectDocMarkerDrift();
 
-// Cross-variant context commonization check (WARN-only, first-pass heuristic).
+// Cross-variant context commonization check (INFO-only since 2026-11-06, DEC-20261106-03, first-pass heuristic).
 // Flags docs/<variant>.context.md sections that duplicate the SAME-heading section in
 // another variant's context.md by >50% content overlap — a candidate for promotion into
 // the shared docs/context.md (ADR-0050 Part 3), or extraction into a shared skill if only
@@ -2350,14 +2361,14 @@ function checkVariantContextCommonization() {
             flaggedHeadings++;
             const range = minSim === maxSim ? `${(minSim * 100).toFixed(0)}%` : `${(minSim * 100).toFixed(0)}-${(maxSim * 100).toFixed(0)}%`;
             const variantList = [...involved].sort().join(', ');
-            Warn(`Context commonization candidate: "${heading}" section is >50% similar (${range} overlap) across ${involved.size}/${totalVariantCount} variants: ${variantList} — consider promoting to docs/context.md if shared by most variants, or a shared skill if only a subset (ADR-0050 Part 3)`);
+            Info(`Context commonization candidate: "${heading}" section is >50% similar (${range} overlap) across ${involved.size}/${totalVariantCount} variants: ${variantList} — consider promoting to docs/context.md if shared by most variants, or a shared skill if only a subset (ADR-0050 Part 3)`);
         }
     }
 
     if (flaggedHeadings === 0) {
         Pass('Context commonization check: no high-similarity cross-variant sections found');
     } else {
-        Warn(`Context commonization check: ${flaggedHeadings} section heading(s) flagged across variants (WARN-only, first-pass heuristic — see ADR-0050 Part 3)`);
+        Info(`Context commonization check: ${flaggedHeadings} section heading(s) flagged across variants (INFO-only, first-pass heuristic — see ADR-0050 Part 3 Addendum, DEC-20261106-03)`);
     }
 }
 checkVariantContextCommonization();
