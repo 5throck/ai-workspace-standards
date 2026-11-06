@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.3.1"
-last_updated: "2026-10-28"
+version: "1.3.2"
+last_updated: "2026-11-06"
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
@@ -133,6 +133,30 @@ The deterministic `build-theme-deck.ts` builder handles the following; html-buil
 | Output file naming (`lecture_<topic>_vN.html`) | Version snapshot before edit |
 
 **Key boundary:** `renderSlide()` is implemented inside each theme's `template.html` and is NOT part of the builder. The builder replaces `<!-- INJECT:* -->` markers and inlines assets; the template's runtime code handles slide DOM construction.
+
+### Canonical rebuild order (U-20261105-007)
+
+Every deck rebuild MUST follow this order — a rebuild silently drops the video
+players and any local style patch otherwise:
+
+```
+1. build    bun scripts/co-deck/build-theme-deck.ts --project presentations/<name>
+2. patch    tests/patch-zen-white-bubble.ts (only for zen + white-bubble decks, or as configured)
+3. inject   bun scripts/co-deck/inject-video-players.ts presentations/<name>/lecture_vN.html
+```
+
+Notes:
+
+- Step 3 is run automatically by `build-theme-deck.ts` after every successful build
+  (any slide carrying `videoId` gets the idempotent player injection; video-less decks
+  are untouched). The manual command remains the fallback and is always safe to re-run —
+  the injector strips its previous marker block before re-injecting.
+- `--download-videos` on the build command pre-fetches the deck's YouTube videos into
+  `presentations/assets/videos/yt-<id>.mp4` (via QuickDL) BEFORE the injection step, so
+  the offline play-mode fallback binds local files. Skip-if-exists — re-running never
+  re-downloads a good file.
+- A rebuild regenerates the HTML from templates: re-apply the style patch (step 2) and
+  let step 3 re-inject — never assume a previous build's patches survive.
 
 ## Constraints
 

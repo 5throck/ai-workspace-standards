@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: 1.6.0
+version: 1.6.1
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -149,6 +149,8 @@ initPPT({ transition: 'fade', showTimer: true, showThumbnails: false,
 - **Backward compatibility**: if the old single `narration.autoAdvance` or `narration.autoAdvanceInterval` fields are present, silently ignore them
 
 **Image paths:** Photos live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix. Diagrams (SVG/PNG) live in the shared pool at `presentations/assets/diagrams/`. Use `../assets/diagrams/<stem>.png` for diagram slides. Paths are auto-rewritten by `gen-visual-images.ts` when run.
+
+**Canonical rebuild order (U-20261105-007):** every rebuild follows build → style patch → video inject — a rebuild silently drops video players and style patches otherwise. `build-theme-deck.ts` runs the video injection itself after a successful build (idempotent, video-less decks untouched); pass `--download-videos` to pre-fetch the deck's YouTube videos into `presentations/assets/videos/yt-<id>.mp4` before injection so offline playback binds local files. Re-apply the style patch after every rebuild.
 
 ---
 
