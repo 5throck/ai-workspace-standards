@@ -18,7 +18,7 @@
 
 - [x] variant.json exists with valid schema
 - [x] All 12 agents present (change-management-partner, communications-lead, data-analyst, delivery-manager, i18n-specialist, industry-expert, pm, sme, solutions-architect, strategy-analyst, technology-specialist, workstream-lead)
-- [x] All 19 skills present
+- [x] All 18 skills present
 - [x] inherits_common correctly points to templates/common
 - [x] Agent manifest with dispatch notes documented
 

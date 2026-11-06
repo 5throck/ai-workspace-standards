@@ -4,7 +4,7 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 ### Removed
-- **[2026-11-06]**: **BREAKING (co-consult 1.0.0 → 1.1.0)** — HWP/HWPX tooling removed from workspace templates (DEC-20261106-02; spec `2026-11-06-co-work-hwpx-consolidation-design`, superseded). co-consult loses the `hwp-document-processing` skill (SSOT + 5 platform mirrors), `scripts/co-consult/hwp-extract.ts`, `scripts/co-consult/hwpx-generate.ts`, `python/extract_hwp.py`, `python/generate_hwpx.py`, and the `olefile` / `python-hwpx` requirements (pandas stays). `sample-driven-report-writing` 1.1.0 drafts deliverables in Markdown; conversion to the client's format happens outside the workspace. No co-work replacement ships. common `i18n-layout` 1.0.1 and `i18n-specialist` 1.3.2 drop the routing to the removed skill (co-architect mirrors synced).
+- **[2026-11-06]**: **BREAKING (co-consult 1.0.0 → 1.1.0)** — HWP/HWPX tooling removed from workspace templates (DEC-20261106-02; spec `2026-11-06-co-work-hwpx-consolidation-design`, superseded). co-consult loses the `hwp-document-processing` skill (SSOT + 5 platform mirrors), `scripts/co-consult/hwp-extract.ts`, `scripts/co-consult/hwpx-generate.ts`, `python/extract_hwp.py`, `python/generate_hwpx.py`, and the `olefile` / `python-hwpx` requirements (pandas stays). PROMOTION_CHECKLIST and the root lifecycle record re-counted to 18 skills / 7 scripts. `sample-driven-report-writing` 1.1.0 drafts deliverables in Markdown; conversion to the client's format happens outside the workspace. No co-work replacement ships. common `i18n-layout` 1.0.1 and `i18n-specialist` 1.3.2 drop the routing to the removed skill (co-architect mirrors synced).
 
 ## [0.28.0] - 2026-11-02
 ### Changed
