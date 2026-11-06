@@ -29,8 +29,6 @@ pip install -r requirements.txt
 ```
 
 - `pandas>=2.0,<3.0` — Data processing (all scripts)
-- `olefile>=0.46,<1.0` — HWP 5.0 binary parsing (extract pipeline)
-- `python-hwpx>=6.0,<7` — HWPX file generation
 
 ## Usage
 

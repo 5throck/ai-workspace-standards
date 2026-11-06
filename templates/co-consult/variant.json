@@ -3,7 +3,7 @@
   "description": "Strategy consulting variant for AI-assisted business consulting engagements. Includes specialized consulting agents covering research, strategy, change management, communications, solutions design, and delivery.",
   "variant_type": "consulting",
   "status": "stable",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "inherits_common": "templates/common",
   "created_at": "2026-06-03T00:00:00.000Z",
   "lifecycle": {
@@ -89,10 +89,6 @@
     {
       "name": "financial-statement-analysis",
       "file": "skills/financial-statement-analysis/SKILL.md"
-    },
-    {
-      "name": "hwp-document-processing",
-      "file": "skills/hwp-document-processing/SKILL.md"
     },
     {
       "name": "industry-research-pack",
@@ -350,18 +346,6 @@
         "platform_parity": "required"
       },
       {
-        "name": "hwp-document-processing",
-        "layer": "variant",
-        "used_by_agents": [
-          "communications-lead"
-        ],
-        "phases": [
-          3,
-          4
-        ],
-        "platform_parity": "required"
-      },
-      {
         "name": "sample-driven-report-writing",
         "layer": "variant",
         "used_by_agents": [
@@ -415,14 +399,6 @@
       {
         "name": "financial-report",
         "path": "scripts/co-consult/financial-report.ts"
-      },
-      {
-        "name": "hwp-extract",
-        "path": "scripts/co-consult/hwp-extract.ts"
-      },
-      {
-        "name": "hwpx-generate",
-        "path": "scripts/co-consult/hwpx-generate.ts"
       }
     ],
     "external": []

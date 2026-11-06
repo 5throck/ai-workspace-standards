@@ -59,7 +59,7 @@ describe('variant agent sections: resolve-and-check (registry completeness R2.2)
     // re-delivers the `domain: _shared` frontmatter key (U-20261027-004);
     // 1.3.1 re-delivers the `model:` field removal (spec
     // 2026-10-28-platform-agent-mirror-design §4.4 PR-2 patch bump).
-    expect(content).toMatch(/^version: "1\.3\.1"$/m);
+    expect(content).toMatch(/^version: "1\.3\.2"$/m);
     expect(content).toMatch(/^domain: _shared$/m);
   });
 

@@ -2,7 +2,7 @@
   "type": "module",
   "name": "co-consult",
   "version": "1.0.0",
-  "description": "co-consult variant — consulting deliverable scripts (DOCX/PDF report generation, HWP/HWPX pipeline, financial statement analysis)",
+  "description": "co-consult variant — consulting deliverable scripts (DOCX/PDF report generation, financial statement analysis)",
   "private": true,
   "scripts": {
     "audit": "bun scripts/audit.ts",

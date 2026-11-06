@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 4e790c3f0dc79f712e4df8ca33c442753a83e5c28531770a8c7f0e1f6b0967c0
+translated_from_hash: eab841d87082f24c5b621bfa4744f04dbea179aafd500f25f6d4cd6354260409
 lang: ko
 lang_reason: source-material
 ---
@@ -70,8 +70,7 @@ lang_reason: source-material
 - **company-intelligence**: 종합적인 기업/기업집단 인텔리전스; 5개 병렬 리서치 에이전트를 하나의 보고서로 통합.
 - **financial-statement-analysis**: 활성 국가 프로필 공시 시스템(KR: DART) 기반 재무제표 분석 전체 파이프라인 — 수집 → 검증 → 정규화 → KPI → ROIC 트리 → 보고서.
 - **mece-logic-auditor**: 컨설팅 문제 해결 프레임워크를 위한 MECE 이슈 트리 감사 및 전략적 추론 평가.
-- **hwp-document-processing**: 한글 문서 형식 HWP 5.0(읽기/검증만 가능)과 HWPX(읽기/쓰기/생성/검증 모두 가능)를 처리합니다 — 정부/기관 산출물이 한글 문서 형식을 요구할 때 사용합니다.
-- **sample-driven-report-writing**: 산출물 샘플(HWP/PDF/DOCX)의 구조와 섹션별 필수 표/차트 요건을 추출한 뒤, 샘플의 정확한 형식에 맞춰 보고서 내용을 작성합니다.
+- **sample-driven-report-writing**: 산출물 샘플(PDF/DOCX/Markdown)의 구조와 섹션별 필수 표/차트 요건을 추출한 뒤, 샘플의 정확한 형식에 맞춰 보고서 내용을 작성합니다.
 
 ## 협업 방법
 
@@ -106,4 +105,4 @@ lang_reason: source-material
 
 ---
 
-*최근 갱신: 2026-10-06*
+*최근 갱신: 2026-11-06*

@@ -27,7 +27,7 @@
 | 6 | **Real engagements** | N/A per ADR-0099 — migration fast-track | Variant migrated from a conversion-eligible source project (tested in 2+ engagements per `skills/project-to-variant`); the migration basis replaces the beta-engagement attestation. |
 | 7 | **README accuracy** | Done | README.md / README_ko.md carry the ✅ Stable v1.0.0 badge and current inventories (12 agents, 19 skills); tier/roster drift found by the 2026-10-05 scoped review fixed 2026-10-05 (T-20261005-025/-028); skills count reconciled 2026-10-09 (T-20261009-009). |
 | 8 | **Minimum beta duration** | N/A per ADR-0099 — migration fast-track | co-consult entered directly at stable on its creation date (2026-06-03); no beta window applies under the migration fast-track. |
-| 9 | **Zero unresolved bugs** | Done | No open bug reports recorded at promotion (2026-06-03). Defects surfaced by the 2026-10-05 scoped review (report chain, HWP pipeline) are remediation tickets (T-20261005-026/-027), not unresolved promotion bugs. |
+| 9 | **Zero unresolved bugs** | Done | No open bug reports recorded at promotion (2026-06-03). Defects surfaced by the 2026-10-05 scoped review are remediation tickets (T-20261005-026/-027), not unresolved promotion bugs. |
 | 10 | **User feedback** | N/A per ADR-0099 — migration fast-track | Not separately logged; under the migration fast-track the source project's conversion-eligibility bar (2+ engagements) replaces beta-user feedback. |
 
 ## Review History

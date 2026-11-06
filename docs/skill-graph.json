@@ -2472,8 +2472,8 @@
       "name": "i18n-specialist",
       "scope": "common",
       "capability": "i18n-specialist",
-      "content_hash": "391dcb5bbb5cfcfd",
-      "version": "1.3.1",
+      "content_hash": "64b97e47581e6757",
+      "version": "1.3.2",
       "mirrors": [
         "templates/common/agents/i18n-specialist.md"
       ]
@@ -2755,6 +2755,16 @@
     },
     {
       "id": "dec:DEC-20261104-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-02",
       "type": "decision",
       "layer": "L0"
     },
@@ -5645,19 +5655,6 @@
       ]
     },
     {
-      "id": "skill:co-consult/hwp-document-processing",
-      "type": "skill",
-      "layer": "variant:co-consult",
-      "name": "hwp-document-processing",
-      "scope": "co-consult",
-      "capability": "hwp-document-processing",
-      "content_hash": "049f0f6f5ad7b2a2",
-      "version": "2.0.1",
-      "mirrors": [
-        "templates/co-consult/skills/hwp-document-processing/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-consult/industry-research-pack",
       "type": "skill",
       "layer": "variant:co-consult",
@@ -5747,8 +5744,8 @@
       "name": "sample-driven-report-writing",
       "scope": "co-consult",
       "capability": "sample-driven-report-writing",
-      "content_hash": "cac881727dab4fc6",
-      "version": "1.0.0",
+      "content_hash": "e3ece9a10780be5f",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-consult/skills/sample-driven-report-writing/SKILL.md"
       ]
@@ -7931,8 +7928,8 @@
       "name": "i18n-layout",
       "scope": "common",
       "capability": "i18n-layout",
-      "content_hash": "7a078ebadc5c908f",
-      "version": "1.0.0",
+      "content_hash": "3991611b47f6aac6",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/i18n-layout/SKILL.md"
       ]
@@ -11085,6 +11082,12 @@
       "source": "skills_used"
     },
     {
+      "type": "supersedes",
+      "from": "dec:DEC-20261106-02",
+      "to": "dec:DEC-20261106-01",
+      "source": "prose"
+    },
+    {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
       "to": "skill:common/decision-record",
@@ -12648,12 +12651,6 @@
       "type": "cites_skill",
       "from": "doc:co-consult/README.md",
       "to": "skill:co-consult/financial-statement-analysis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/README.md",
-      "to": "skill:co-consult/hwp-document-processing",
       "source": "workflow-doc"
     },
     {
@@ -22623,42 +22620,6 @@
       }
     },
     {
-      "type": "used_by",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "agent:co-consult/communications-lead",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "phase:co-consult/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "phase:co-consult/4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:co-consult/consulting-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:co-consult/sample-driven-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:common/i18n-layout",
-      "source": "prose"
-    },
-    {
       "type": "references",
       "from": "skill:co-consult/industry-research-pack",
       "to": "skill:co-consult/company-intelligence",
@@ -23089,12 +23050,6 @@
       "type": "references",
       "from": "skill:co-consult/sample-driven-report-writing",
       "to": "skill:co-consult/financial-statement-analysis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/sample-driven-report-writing",
-      "to": "skill:co-consult/hwp-document-processing",
       "source": "prose"
     },
     {
@@ -28802,12 +28757,6 @@
         "field": "required_skills",
         "index": 2
       }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/i18n-layout",
-      "to": "skill:co-consult/hwp-document-processing",
-      "source": "prose"
     },
     {
       "type": "references",
