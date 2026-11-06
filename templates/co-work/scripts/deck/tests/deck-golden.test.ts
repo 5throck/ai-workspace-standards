@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { unzipSync } from "fflate";
 import { XMLValidator } from "fast-xml-parser";
-import { runCheck, fingerprintFiles } from "../svg-check.ts";
+import { runCheck, fingerprintFiles, decodeXmlEntities } from "../svg-check.ts";
 import { compileDeck, renderPngs, verifyReportAgainstDeck } from "../svg-to-pptx.ts";
 
 const REGISTRY = join(import.meta.dir, "../../../docs/document-style-registry.json");
@@ -157,6 +157,20 @@ describe("svg-check (canonical gate)", () => {
     expect(report.summary.errors).toBe(0);
     expect(report.content_diff.unmatched_runs.length).toBe(0);
     rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.1 U1: decodeXmlEntities is single-pass per XML semantics (&amp;lt; → literal '&lt;')", () => {
+    // One replacement sweep — decoded output is never re-scanned. A loop-until-stable
+    // decoder would collapse `&amp;lt;` to `<`, corrupting authored text that
+    // legitimately spells out an entity. svg-to-pptx v1.4.2 reuses this exact
+    // function on the export leg, so both sides share one semantics (U-20261106-002).
+    expect(decodeXmlEntities("P&amp;L")).toBe("P&L");
+    expect(decodeXmlEntities("a&lt;b&gt;c&quot;d&apos;e&amp;f")).toBe("a<b>c\"d'e&f");
+    expect(decodeXmlEntities("&amp;lt;")).toBe("&lt;");       // second & survives the single pass
+    expect(decodeXmlEntities("&amp;amp;")).toBe("&amp;");     // not "&"
+    expect(decodeXmlEntities("P&L")).toBe("P&L");             // bare & passes through
+    expect(decodeXmlEntities("no entities here")).toBe("no entities here");
+    expect(decodeXmlEntities("&unknown;")).toBe("&unknown;"); // non-built-in left verbatim
   });
 
   test("fingerprint tracks deck bytes", () => {
@@ -545,6 +559,151 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
         throw new Error(`${part} is not well-formed: ${err.msg ?? "validation failed"}`);
       }
     }
+  });
+
+  test("v1.4.2 pin: authored &amp; compiles to exactly ONE escape level in slide XML (no double escape)", () => {
+    // svg-to-pptx v1.4.1 extracted raw parser node.text (entities undecoded) and then
+    // esc()'d it for DrawingML — an authored `P&amp;L` compiled to the double-escaped
+    // `P&amp;amp;L`, so PowerPoint displayed "P&amp;L" (U-20261106-002). v1.4.2 decodes
+    // the five XML built-ins before escaping — export-leg parity with svg-check
+    // v1.5.0 R1. Covers the direct-text, tspan, and native-table desc-payload paths.
+    const ESCAPED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">P&amp;L review ahead</text>
+    <text x="80" y="180" font-size="18" fill="#202020">Plan the &quot;scale&quot; phase</text>
+    <text x="80" y="240" font-size="18" fill="#202020">a &lt; b and c &gt; d</text>
+    <text x="80" y="300" font-size="18" fill="#202020">It&apos;s Q&amp;A time</text>
+    <text x="80" y="360" font-size="18" fill="#202020"><tspan x="80" dy="0">Line one &amp; more</tspan><tspan x="80" dy="24">It&apos;s &quot;quoted&quot; &lt;here&gt;</tspan></text>
+  </g>
+  <g data-block-id="b2" data-native="table" data-frame="80,420,520,160">
+    <desc>{"headers":["R&amp;D spend"],"rows":[["FY25","12.4"]]}</desc>
+    <rect x="80" y="420" width="520" height="160" fill="#EEF2F8"/>
+  </g>
+</svg>`;
+    const contract = [
+      "# Entity parity deck content",
+      "",
+      "## Page 1 (content)",
+      "P&L review ahead",
+      'Plan the "scale" phase',
+      "a < b and c > d",
+      "It's Q&A time",
+      'Line one & more It\'s "quoted" <here>',
+      "",
+    ].join("\n");
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-export-entities"), [
+      { name: "01-entities.svg", body: ESCAPED },
+    ], contract);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0); // the gate decodes runs, so the escaped page matches the plain contract
+
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", nativeCharts: true });
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+
+    // exactly ONE escape level: raw slide XML carries the single-escaped spelling,
+    // which decodes exactly once to the authored text ("P&L", not "P&amp;L")
+    expect(s1).toContain("<a:t>P&amp;L review ahead</a:t>");
+    expect(s1).toContain("<a:t>Plan the &quot;scale&quot; phase</a:t>");
+    expect(s1).toContain("<a:t>a &lt; b and c &gt; d</a:t>");
+    expect(s1).toContain("<a:t>It&apos;s Q&amp;A time</a:t>");
+    expect(s1).toContain("<a:t>Line one &amp; more</a:t>");
+    expect(s1).toContain("<a:t>It&apos;s &quot;quoted&quot; &lt;here&gt;</a:t>");
+    expect(s1).toContain("<a:tbl>"); // native table compiled (nativeCharts: true)
+    expect(s1).toContain("<a:t>R&amp;D spend</a:t>"); // desc payload decoded before JSON.parse
+
+    // the v1.4.1 artifact — a second escape level — must not appear anywhere in the part
+    expect(s1).not.toMatch(/&amp;(amp|lt|gt|quot|apos);/);
+
+    // decode-once semantics over every text body in the part
+    const decoded = [...s1.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map((m) => decodeXmlEntities(m[1]));
+    expect(decoded).toContain("P&L review ahead");
+    expect(decoded).toContain("R&D spend");
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.4.2 pin: bare & compiles exactly like the escaped spelling (decode is a no-op, esc runs once)", () => {
+    // The plain-text contract admits bare `&` pages (svg-check T3); the export leg
+    // must land them on the identical slide XML as the `&amp;` spelling — decode
+    // no-op + a single esc() pass (U-20261106-002: "both match the plain-text
+    // contract" applies to the exporter too, not just the gate).
+    const BARE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">P&L review ahead</text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-export-bare"), [
+      { name: "01-bare.svg", body: BARE },
+    ], "P&L review ahead\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+    expect(s1).toContain("<a:t>P&amp;L review ahead</a:t>"); // single escape level
+    expect(s1).not.toMatch(/&amp;(amp|lt|gt|quot|apos);/);    // no double escape
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.4.2 pin: nested-tspan fallback decodes entities (nodeTextOf parity with gate nodeText)", () => {
+    // When a tspan has no own text, the exporter falls back to nodeTextOf over its
+    // children — that fallback must decode entities too, mirroring svg-check's
+    // nodeText, or a nested run would double-escape while its siblings do not.
+    const NESTED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="110" y="360" font-size="20" fill="#1F3864">M&amp;A highlights<tspan x="110" dy="32"><tspan>deals closed in Q&amp;A season</tspan></tspan></text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-export-nested"), [
+      { name: "01-nested.svg", body: NESTED },
+    ], "M&A highlights deals closed in Q&A season\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0); // gate nodeText joins the nested subtree decoded
+
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+    expect(s1).toContain("<a:t>M&amp;A highlights</a:t>");                       // direct text path
+    expect(s1).toContain("<a:t>deals closed in Q&amp;A season</a:t>");          // fallback path (outer tspan has no own text)
+    expect(s1).not.toMatch(/&amp;(amp|lt|gt|quot|apos);/);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.4.2 pin: text-box width is measured from decoded text (entity overhead excluded)", () => {
+    // estTextWidth sized boxes from the raw 20-char entity spelling, over-estimating
+    // by the 4-char `&amp;` overhead; v1.4.2 measures the decoded run, so the
+    // authored-entity and bare-& pages get IDENTICAL box geometry.
+    const entity = (body: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">${body}</text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-export-measure"), [
+      { name: "01-escaped.svg", body: entity("P&amp;L review ahead") },
+      { name: "02-bare.svg", body: entity("P&L review ahead") },
+    ], "P&L review ahead\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const pkg = unzipSync(zip);
+    const extOf = (n: number) => {
+      const s = new TextDecoder().decode(pkg[`ppt/slides/slide${n}.xml`]!);
+      const m = s.match(/name="text-\d+"[\s\S]*?<a:ext cx="(\d+)"/);
+      expect(m).toBeDefined();
+      return parseInt(m![1], 10);
+    };
+    const cxEscaped = extOf(1);
+    const cxBare = extOf(2);
+    expect(cxBare).toBe(cxEscaped); // geometry is entity-spelling independent
+
+    // expected width from the DECODED 16-char run: 16 × 0.58em × 24px → 223px
+    const ems = [..."P&L review ahead"].reduce((a, ch) => a + (ch.codePointAt(0)! > 0x2e80 ? 1.0 : 0.58), 0);
+    const expectedDecoded = Math.ceil(Math.ceil(ems * 24) * 9525);
+    expect(cxEscaped).toBe(expectedDecoded);
+    // the raw-entity spelling (20 chars) would size the box differently — the
+    // assertion above can actually detect a regression to raw-text measurement
+    const emsRaw = [..."P&amp;L review ahead"].reduce((a, ch) => a + (ch.codePointAt(0)! > 0x2e80 ? 1.0 : 0.58), 0);
+    expect(expectedDecoded).not.toBe(Math.ceil(Math.ceil(emsRaw * 24) * 9525));
+    rmSync(dir, { recursive: true, force: true });
   });
 });
 
