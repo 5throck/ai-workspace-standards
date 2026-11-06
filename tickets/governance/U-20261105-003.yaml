@@ -3,14 +3,25 @@ id: U-20261105-003
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-05T15:23:34.262+09:00
+created_at: '2026-11-05T15:23:34.262+09:00'
 history:
-  - at: 2026-11-05T15:23:34.262+09:00
+  - at: '2026-11-05T15:23:34.262+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-06T10:35:44.003+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T10:35:44.003+09:00'
+    from: review
+    to: done
+result: >-
+  True parser parity: new shared lib/layout-overrides.ts accepts flat + dotted +
+  nested-indented layout_overrides dialects (same-path dotted/nested forms MERGE
+  so mixed-form profiles keep working); estimate-layout.ts and gen-slides-pdf.ts
+  both import it, private parser bodies removed — lint and renderer can no
+  longer diverge.
 error: null
 upstream:
   project: co-deck
@@ -19,7 +30,23 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Silent parser asymmetry between estimate-layout.ts and gen-slides-pdf.ts for layout_overrides in lecture-profile.md. estimate-layout.ts supports flat/dotted keys (e.g. `colors.card_dark: [248,246,241]`, `content_constraints.standard.max_body_chars: 140`) via its dotted-key parser + deepMerge. gen-slides-pdf.ts''s parseLayoutOverrides key regex is single-segment `[\w_-]+` (L185), so dotted keys are silently skipped — no error, no warning. Consequence observed 2026-11-05: a `colors.card_dark` dotted override passed the layout gate (exit 0) but never reached the PDF renderer, producing navy cards with illegible SVG ink labels (≈1.12:1) on 14 slides of a zen+classic deck; remediation required a mixed-form profile (dotted line for the gate parser + nested colors: block for the render parser), documented in the profile comment. Expected: both parsers accept the same key dialect, or gen-slides-pdf warns on unrecognized dotted keys. Repro: put a dotted `colors.<key>: <rgb>` override in a project lecture-profile.md, run the lint (passes) and then gen-slides-pdf (override absent).'
+  symptom: >-
+    Silent parser asymmetry between estimate-layout.ts and gen-slides-pdf.ts for
+    layout_overrides in lecture-profile.md. estimate-layout.ts supports
+    flat/dotted keys (e.g. `colors.card_dark: [248,246,241]`,
+    `content_constraints.standard.max_body_chars: 140`) via its dotted-key
+    parser + deepMerge. gen-slides-pdf.ts's parseLayoutOverrides key regex is
+    single-segment `[\w_-]+` (L185), so dotted keys are silently skipped — no
+    error, no warning. Consequence observed 2026-11-05: a `colors.card_dark`
+    dotted override passed the layout gate (exit 0) but never reached the PDF
+    renderer, producing navy cards with illegible SVG ink labels (≈1.12:1) on 14
+    slides of a zen+classic deck; remediation required a mixed-form profile
+    (dotted line for the gate parser + nested colors: block for the render
+    parser), documented in the profile comment. Expected: both parsers accept
+    the same key dialect, or gen-slides-pdf warns on unrecognized dotted keys.
+    Repro: put a dotted `colors.<key>: <rgb>` override in a project
+    lecture-profile.md, run the lint (passes) and then gen-slides-pdf (override
+    absent).
   affected_paths:
     - scripts/co-deck/gen-slides-pdf.ts
   identity_source: cwd
@@ -30,4 +57,13 @@ upstream:
   dedupe_key: b80fe16adb6e2ffdb1ef51e4a3745841c14a2041a0c335a213d974bd7508925e
   duplicates:
     - project: co-deck
-      at: 2026-11-05T15:23:34.262+09:00
+      at: '2026-11-05T15:23:34.262+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1866
+    summary: >-
+      True parser parity: new shared lib/layout-overrides.ts accepts flat +
+      dotted + nested-indented layout_overrides dialects (same-path
+      dotted/nested forms MERGE so mixed-form profiles keep working);
+      estimate-layout.ts and gen-slides-pdf.ts both import it, private parser
+      bodies removed — lint and renderer can no longer diverge.

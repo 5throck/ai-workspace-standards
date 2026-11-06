@@ -3,14 +3,27 @@ id: U-20261105-006
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-05T17:13:48.755+09:00
+created_at: '2026-11-05T17:13:48.755+09:00'
 history:
-  - at: 2026-11-05T17:13:48.755+09:00
+  - at: '2026-11-05T17:13:48.755+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-06T09:32:06.918+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T09:32:06.918+09:00'
+    from: review
+    to: done
+result: >-
+  Diagram-stage SVG caption/source duplication: diagram-helpers.ts v1.3.0
+  stripDiagramFooterText (idempotent footer-band strip + viewBox re-fit) +
+  svgTextDuplicatesSlide unicode-aware echo audit; gen-visual-images.ts v3.3.0
+  strip-before-write + WARN; diagram-specialist agent contract v1.3.0 forbids
+  caption/source/bullet-echo in SVGs (slidedata fields are single source of
+  truth). Also fixed pre-existing homedir mis-import crash. Geometry/canvas
+  prompt-contract items not programmatically verifiable.
 error: null
 upstream:
   project: co-deck
@@ -19,20 +32,44 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: |-
+  symptom: >-
     The diagram stage (Stage 3.5) produces SVGs that break slides:
-    1. SVGs embed their own caption, takeaway and source lines, while html-build and the PDF also render slidedata visualCaption and visualSource, so the same caption or source appears twice on a slide. Some SVG labels also repeat the slide's bullets verbatim.
-    2. diagram_type "pyramid" was drawn as stacked trapezoids with differing slopes and a flat top, not a single triangle cut into layers.
-    3. Some SVGs place shapes outside the viewBox (journey-six-parts at x=-23 and x=1193 in a 1170 viewBox). Chart tick labels show float noise ("1.2000000000000002").
-    4. Canvases are 1100–1160px wide with 12–14px labels. zen shows visuals at min(760px,72vw), so labels display at about 8–9px.
-    5. Comparison cards touch each other with no gap; sub text sits on the divider line.
-    Expected: SVGs carry no caption/source text (slidedata owns them), and labels don't duplicate bullets. Pyramids are true triangles with layer labels fitted to the width at their height. All geometry is inside the viewBox, and ticks are rounded. Canvases are about 960px wide with labels of 18px or more and subs of 15px or more. A text-bbox overflow audit runs in 2–3 fonts before delivery.
+
+    1. SVGs embed their own caption, takeaway and source lines, while html-build
+    and the PDF also render slidedata visualCaption and visualSource, so the
+    same caption or source appears twice on a slide. Some SVG labels also repeat
+    the slide's bullets verbatim.
+
+    2. diagram_type "pyramid" was drawn as stacked trapezoids with differing
+    slopes and a flat top, not a single triangle cut into layers.
+
+    3. Some SVGs place shapes outside the viewBox (journey-six-parts at x=-23
+    and x=1193 in a 1170 viewBox). Chart tick labels show float noise
+    ("1.2000000000000002").
+
+    4. Canvases are 1100–1160px wide with 12–14px labels. zen shows visuals at
+    min(760px,72vw), so labels display at about 8–9px.
+
+    5. Comparison cards touch each other with no gap; sub text sits on the
+    divider line.
+
+    Expected: SVGs carry no caption/source text (slidedata owns them), and
+    labels don't duplicate bullets. Pyramids are true triangles with layer
+    labels fitted to the width at their height. All geometry is inside the
+    viewBox, and ticks are rounded. Canvases are about 960px wide with labels of
+    18px or more and subs of 15px or more. A text-bbox overflow audit runs in
+    2–3 fonts before delivery.
   affected_paths:
     - agents/diagram-specialist.md
     - skills/diagram/SKILL.md
     - scripts/co-deck/diagram-helpers.ts
   identity_source: client_roots
-  repro: 'Look at presentations/assets/diagrams/_versions/2026-11-05/ in the co-deck project (originals) against the fixed files. Generators and the audit are in presentations/assets/diagrams/_fix-scripts-2026-11-05/: audit.mjs (resvg getBBox under Pretendard, Noto Sans KR and MaruBuri), pyramids.py, strip_caps.mjs, dupcheck.py.'
+  repro: >-
+    Look at presentations/assets/diagrams/_versions/2026-11-05/ in the co-deck
+    project (originals) against the fixed files. Generators and the audit are in
+    presentations/assets/diagrams/_fix-scripts-2026-11-05/: audit.mjs (resvg
+    getBBox under Pretendard, Noto Sans KR and MaruBuri), pyramids.py,
+    strip_caps.mjs, dupcheck.py.
   triage: ready
   flagged: false
   triage_reasons:
@@ -43,4 +80,15 @@ upstream:
   dedupe_key: 4b671f39a24f0465add0804dcc0d9e472176ecbc6ff47125e73bd7af9418f072
   duplicates:
     - project: co-deck
-      at: 2026-11-05T17:13:48.755+09:00
+      at: '2026-11-05T17:13:48.755+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1864
+    summary: >-
+      Diagram-stage SVG caption/source duplication: diagram-helpers.ts v1.3.0
+      stripDiagramFooterText (idempotent footer-band strip + viewBox re-fit) +
+      svgTextDuplicatesSlide unicode-aware echo audit; gen-visual-images.ts
+      v3.3.0 strip-before-write + WARN; diagram-specialist agent contract v1.3.0
+      forbids caption/source/bullet-echo in SVGs (slidedata fields are single
+      source of truth). Also fixed pre-existing homedir mis-import crash.
+      Geometry/canvas prompt-contract items not programmatically verifiable.
