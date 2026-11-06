@@ -1,0 +1,48 @@
+schemaVersion: 1
+id: U-20261106-003
+kind: manual
+title: Upstream request from co-work
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-06T23:25:11.382+09:00'
+history:
+  - at: '2026-11-06T23:25:11.382+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-07T09:20:00.000+09:00'
+    action: 'amendment (requester, co-work PM session): install-location convention added — external deps install under a dedicated project-root external/<id>/ directory (gitignored), NEVER under deliverable/working directories such as presentations/ (co-work deck artifacts home); rationale: tooling clones are not deliverable artifacts and deliverable dirs must stay clean for user-facing outputs. Normative home: docs/designs/2026-11-07-external-deps-machinery-design.md (D1/D5) — resolver must encode the location rule in scaffold fetch + upgrade validation.'
+    actor: pm/co-work
+    from: waiting
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-work
+  variant: co-work
+  template_version: 0.28.0
+  source: project/co-work
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Feature request at L0/L1 (not a defect): the co-work deck capability is being rebased onto the external open-source project ppt-master (github.com/hugohe3/ppt-master, MIT, Python) as its SVG-to-PPTX conversion engine, replacing the hand-rolled compiler at scripts/deck/svg-to-pptx.ts (which produced 8 classes of PowerPoint-invalid output over 3 days of fixes — packages unopenable in PowerPoint despite passing XSD, structural, python-pptx, and visual-acceptance checks; user-confirmed repair prompt). User directive: ppt-master must NEVER be vendored into template trees. Required L0/L1 machinery that does not exist today: (1) scaffold-time fetch — scripts/new-project.ts should git-clone the external repo from github at a pinned release tag into the project's deck workspace (project-level, gitignored or per external-dependency manifest); (2) upgrade-time update — scripts/upgrade-project.ts should check the upstream repo for a newer release tag, run the compatibility contract tests, and
+    move the pin (update-in-place for existing projects); (3) an external-dependency manifest convention (pinned version, repo URL, compatibility-test entry point) so the pin is declarative, not hardcoded; (4) variant-promotion/template-sync exclusion — propagate-to-templates and upgrade-project tree-sync must never deliver or accept ppt-master parts as template content in any co-* variant; (5) the mechanism should be generic so other co-* variants can declare their own external git dependencies the same way. Local co-work work proceeds meanwhile: the preprocessor/adapter (our artifacts -> ppt-master project format) is project-side; only the fetch/update/exclusion machinery is the L0/L1 ask.
+  affected_paths:
+    - scripts/deck/svg-to-pptx.ts
+    - scripts/deck/tests/deck-golden.test.ts
+    - skills/pptx-export/SKILL.md
+    - skills/svg-quality-gate/SKILL.md
+    - skills/svg-slide-authoring/SKILL.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/deck/svg-to-pptx.ts=false
+    - info:in_last_delivery scripts/deck/tests/deck-golden.test.ts=false
+    - info:in_last_delivery skills/pptx-export/SKILL.md=true
+    - info:in_last_delivery skills/svg-quality-gate/SKILL.md=true
+    - info:in_last_delivery skills/svg-slide-authoring/SKILL.md=true
+  dedupe_key: 872d8e6fc5c9973331321af3d720baf319f478156058994566b1f27c7919d1ac
+  duplicates:
+    - project: co-work
+      at: '2026-11-06T23:25:11.382+09:00'
