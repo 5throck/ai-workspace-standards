@@ -1,14 +1,18 @@
-// @version 3.2.0 — visualImage in slidedata.json now references SVG path (HTML primary delivery format); PNG still generated alongside for PDF use. Previous 3.1.0: unified output to shared pool.
+// @version 3.3.0 — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
+// (caption/source lines are slidedata-owned; generators must not draw them) and
+// svgTextDuplicatesSlide() audits each diagram for echoes of the slide's caption/source/
+// bullets (WARN, non-fatal). Previous 3.2.0: visualImage references SVG path (HTML
+// primary delivery format); PNG still generated alongside for PDF use.
 // Generate right-panel visual images via SVG rendering (no browser required).
 // Project-specific diagram generators live in presentations/<project>/diagram-defs.ts.
-// Shared utilities (svgWrap, svgToPng, palettes) live in diagram-helpers.ts.
+// Shared utilities (svgWrap, svgToPng, palettes, strip/audit) live in diagram-helpers.ts.
 //
 // Usage:
 //   bun scripts/co-deck/gen-visual-images.ts --project presentations/<project>
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
-import { svgToPng, fontPath } from './diagram-helpers.ts';
+import { svgToPng, fontPath, stripDiagramFooterText, svgTextDuplicatesSlide } from './diagram-helpers.ts';
 
 const args    = process.argv.slice(2);
 const getArg  = (flag: string) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : undefined; };
@@ -80,10 +84,19 @@ for (const { slide: slideIdx, data } of targets) {
   }
 
   try {
-    const svg = gen();
+    // U-20261105-006: generators are project-owned LLM-authored functions that may
+    // still draw caption/takeaway/source footer lines; slidedata visualCaption /
+    // visualSource own that text (html-build + PDF render it). Strip deterministically
+    // before writing, then audit for echoes of the slide's own text.
+    const svg = stripDiagramFooterText(gen());
     writeFileSync(svgPath, svg, 'utf-8');
     const png = svgToPng(svg);
     writeFileSync(pngPath, png);
+
+    const dupHits = svgTextDuplicatesSlide(svg, data);
+    for (const hit of dupHits) {
+      console.warn(`   ⚠️  Slide ${slideIdx}: SVG ${hit.kind} echoes slide text — regenerate without it: "${hit.text.slice(0, 50)}"`);
+    }
 
     // Update slidedata visualImage path to shared pool SVG reference (HTML primary delivery format)
     const svgPoolPath = '../assets/diagrams/' + stem + '.svg';

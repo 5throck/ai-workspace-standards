@@ -1183,8 +1183,8 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "94f3d80e03bedfde",
-      "version": "1.2.1",
+      "content_hash": "55a14df281b722fa",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
       ]
@@ -1222,8 +1222,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "2b856a0c45d8d25c",
-      "version": "1.3.1",
+      "content_hash": "0ed66305bc7f2170",
+      "version": "1.3.2",
       "mirrors": [
         "templates/co-deck/agents/html-build.md"
       ]
@@ -5837,8 +5837,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "8c0bd02ef4a996d7",
-      "version": "1.6.0",
+      "content_hash": "f5d8051aa1a3e7a8",
+      "version": "1.6.1",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],

@@ -1,7 +1,7 @@
 ---
 name: diagram-specialist
-version: "1.2.1"
-last_updated: "2026-10-28"
+version: "1.3.0"
+last_updated: "2026-11-06"
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier: medium
@@ -90,7 +90,10 @@ visual_spec:
     - label: "모델 학습"
       order: 2
   accent: primary | secondary | neutral   # maps to design_spec.md color role
-  caption: "AI 학습 사이클 4단계"         # optional — rendered below diagram
+  caption: "AI 학습 사이클 4단계"         # optional — NOT drawn into the SVG (U-20261105-006):
+                                          #   the storyline agent copies it into slidedata
+                                          #   visualCaption, which html-build and the PDF
+                                          #   render. SVG caption text would duplicate it.
 
   # --- ChartRenderer fields (type: chart) ---
   chart_type: bar | line | pie
@@ -99,8 +102,9 @@ visual_spec:
     series:
       - name: "시장 규모(조원)"
         values: [12.3, 18.7, 29.4]
-  source: "출처: 한국IDC, 2025"   # required for charts — renders as PDF caption
-  caption: "AI 시장 규모 추이"     # optional
+  source: "출처: 한국IDC, 2025"   # required for charts — goes into slidedata visualSource
+                                  #   (rendered by html-build + PDF); NEVER drawn inside the SVG
+  caption: "AI 시장 규모 추이"     # optional — slidedata visualCaption, not SVG text
 ```
 
 ### design_spec.md (color + typography)
@@ -205,7 +209,34 @@ Chart visual rules:
 - Value labels on bars/lines: `--text-primary`, 11px bold
 - Grid lines: `--card-border`, 0.5px, horizontal only
 - Legend: bottom-center, 12px, `--text-secondary`
-- `source` field: renders as 9px italic caption bottom-right, `--text-muted`
+- `source` field: stays out of the SVG (U-20261105-006) — write it to the slide's slidedata `visualSource`; html-build and the PDF render it
+
+## SVG Content Prohibitions (U-20261105-006)
+
+Generated SVGs must NOT contain:
+
+- **Caption / takeaway / source / footer text lines** — slidedata `visualCaption` /
+  `visualSource` are the single source of truth; html-build and the PDF render them, so
+  any such line inside the SVG appears twice on the slide. `gen-visual-images.ts` strips
+  footer-band caption/source text deterministically (`stripDiagramFooterText()` in
+  `diagram-helpers.ts` v1.3.0) and audits the result.
+- **Labels echoing slide bullets verbatim** — element labels describe the element; they
+  are not a re-render of the slide's bullet text. `svgTextDuplicatesSlide()` warns on
+  overlaps with `visualCaption`/`visualSource`/`bullets`; regenerate rather than
+  hand-strip content labels.
+
+Geometry and legibility rules (checked at review, enforced in the generators):
+
+- `pyramid` is a single triangle cut into layers (one apex, uniform slope) — not stacked
+  trapezoids with differing slopes or a flat top; layer labels are fitted to the width
+  available at their height.
+- All shapes and text stay inside the viewBox (no negative coordinates, no x/w beyond
+  the canvas).
+- Chart tick labels are rounded (no float noise such as `1.2000000000000002`).
+- Diagram canvases are about 960px wide with labels of 18px or larger and sub-labels of
+  15px or larger — zen renders visuals at `min(760px, 72vw)`, so 12–14px labels on an
+  1100px canvas display at roughly 8–9px.
+- `comparison` columns have a visible gap; sub text never sits on the divider line.
 
 ## Workflow
 

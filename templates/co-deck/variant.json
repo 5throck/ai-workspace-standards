@@ -363,6 +363,10 @@
       {
         "name": "inject-video-players",
         "path": "scripts/co-deck/inject-video-players.ts"
+      },
+      {
+        "name": "download-videos",
+        "path": "scripts/co-deck/download-videos.ts"
       }
     ],
     "external": []
