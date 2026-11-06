@@ -1,7 +1,21 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.71.0
+ * @version 1.72.0
+ *
+ * v1.72.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
+ *          D4 — implements upstream ticket U-20261106-003): new FAIL arm
+ *          `external-dep-vendoring` — if any external-deps.json manifest
+ *          install_dir path exists as a real directory (or any file below one)
+ *          inside templates/common or a templates/co-* tree, validation FAILS.
+ *          This is the vendoring guard: the fastest way to detect a
+ *          `presentations/ppt-master/` accidentally committed into a template —
+ *          external code is cloned at scaffold time into a gitignored
+ *          project-local directory and never vendors into a template. Variant
+ *          promotion inherits the guard (it runs through this validation).
+ *          Detection core: scripts/lib/external-deps.ts v1.0.0
+ *          (findVendoredInstallDirs + extractInstallDirsLoose, loose parse so
+ *          the guard works on legacy/interim manifest shapes too).
  *
  * v1.71.0 (2026-11-05, design docs/designs/2026-11-04-project-loss-hardening-design
  *          §5.4 / T-20261104-004 item 4): new WARN arm `agents-md-destructive-file-ops-pin`
@@ -530,6 +544,7 @@ import { PLATFORM_AGENT_ADAPTERS } from './sync-agent-mirrors.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
+import { extractInstallDirsLoose, findVendoredInstallDirs } from './lib/external-deps.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
@@ -2462,6 +2477,55 @@ function checkVariantScopedSkillLeak(): void {
     fail('root', 'B-11', `variant-exclusive skill '${skill}' (owner: ${ownerBySkill.get(skill)}) exists in templates/common/${leak}/`, `Delete templates/common/${leak}/ — mirror copies of a variant-scoped skill contradict its variant-overlay re-delivery at scaffold time and break delivery-derivation parity (the 2026-09-27 sound-synth orphan class)`);
   }
   if (leaks.length === 0) pass('templates/common (skills/ + 5 platform mirrors): no variant-scoped skill leaks');
+}
+
+// Check: external-dep-vendoring (v1.72.0, design
+// docs/designs/2026-11-07-external-deps-machinery-design.md D4, upstream
+// U-20261106-003) — the vendoring guard. The fastest way to detect a
+// `presentations/ppt-master/` accidentally committed into a template tree: if
+// ANY manifest install_dir path exists as a real directory (or any file below
+// one) inside templates/common or templates/<variant>, FAIL. External code is
+// cloned at scaffold time into a gitignored project-local directory — it never
+// vendors into a template. Variant promotion inherits the guard because it runs
+// through this validation.
+function checkExternalDepVendoring(): void {
+  if (!JSON_MODE) console.log('\n=== Check external-dep-vendoring: no manifest install_dir vendored into a template tree (D4) ===');
+  // Union of every declared install_dir (common seed + all variant seeds) — a
+  // superset is the safe direction for a guard.
+  const installDirs = new Set<string>();
+  const seeds: Array<{ variant: string; path: string }> = [
+    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'external-deps.json') },
+  ];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) {
+        seeds.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'external-deps.json') });
+      }
+    }
+  }
+  for (const seed of seeds) {
+    if (!existsSync(seed.path)) continue;
+    try {
+      for (const dir of extractInstallDirsLoose(readFileSync(seed.path, 'utf-8'))) installDirs.add(dir);
+    } catch { /* unreadable seed — the strict manifest validation owns that failure */ }
+  }
+  if (installDirs.size === 0) {
+    pass('external-dep-vendoring: no external-deps seeds declare install_dirs (guard vacuous)');
+    return;
+  }
+  let totalHits = 0;
+  for (const tplDir of [join(TEMPLATES_DIR, 'common'), ...seeds.filter((s) => s.variant !== 'common').map((s) => join(TEMPLATES_DIR, s.variant))]) {
+    const hits = findVendoredInstallDirs(tplDir, [...installDirs]);
+    for (const hit of hits) {
+      totalHits++;
+      fail('root', 'external-dep-vendoring',
+        `template tree ${tplDir} contains a vendored external-dependency path: ${hit}/`,
+        `Delete ${join(tplDir, hit)} — external code is cloned at scaffold time into the gitignored project-local install_dir (design 2026-11-07-external-deps-machinery D4); it never vendors into a template`);
+    }
+  }
+  if (totalHits === 0) {
+    pass(`external-dep-vendoring: no install_dir path vendored in templates/common or any co-* template (${installDirs.size} declared dir(s))`);
+  }
 }
 
 // Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
@@ -6318,6 +6382,7 @@ function main(): number {
   checkTwinCommonSectionParity(); // VA-06: CLAUDE/GEMINI/CODEX twins carry the shared policy set
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
+  checkExternalDepVendoring();    // v1.72.0: no manifest install_dir vendored into a template tree (design D4)
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
   checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
   checkSkillRegistrySync();       // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)

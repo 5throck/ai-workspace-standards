@@ -1010,6 +1010,24 @@
           ]
         },
         {
+          "asset": "security-audit",
+          "domain": "co-security",
+          "hub_variant": "co-security",
+          "category": "hub-doctrine",
+          "verticals": [
+            "co-develop"
+          ],
+          "origin": "Projects/co-security (hub project); vendored from cloudflare/security-audit-skill (MIT) pinned c1c8a8c1471069fb0e188eeaff69b8e8db6564a8 (design 2026-11-07-security-audit-skill-adoption-design, DEC-20261107-01)",
+          "canonical_path": "templates/co-security/skills/security-audit/SKILL.md",
+          "version": "1.1.0",
+          "consumers": [
+            {
+              "variant": "co-develop",
+              "minimum_version": "1.1.0"
+            }
+          ]
+        },
+        {
           "asset": "architect",
           "domain": "co-develop",
           "hub_variant": "co-develop",

@@ -143,6 +143,11 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "security-audit",
+      "type": "skill",
+      "layer": "variant:co-security"
+    },
+    {
       "id": "security-scan",
       "type": "skill",
       "layer": "L0"
@@ -791,6 +796,30 @@
       "from": "sarif-exporter",
       "to": "verify-authorization",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "security-audit",
+      "to": "finding-reconciliation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/security-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "security-audit",
+      "to": "sarif-exporter",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/security-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",

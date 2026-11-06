@@ -9,6 +9,7 @@ Curated registry for the co-security variant-exclusive skills (T-20260924-009). 
 | `finding-reconciliation` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — deduplicate SARIF/scan findings by code location |
 | `samm-maturity` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only — OWASP SAMM self-assessment and maturity roadmap |
 | `sarif-exporter` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — export findings and threat matrices to SARIF v2.1.0 |
+| `security-audit` | 1.1.0 | active | security-expert | 2026-11-07 | — | co-security only — six-phase adversarial security audit workflow, vendored from cloudflare/security-audit-skill (MIT, pinned c1c8a8c1) |
 | `spdx-sbom` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only — SPDX 2.3 SBOM generation from dependency manifests |
 | `stride-threat-matrix` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only — STRIDE threat matrix generation with DREAD scoring |
 | `verify-authorization` | 1.1.0 | active | pm | 2026-11-02 | — | co-security only — hard gate for signed authorization documents + hub-delegation authorization registry check (AUTH-YYYY-NNN) |

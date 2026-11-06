@@ -1,0 +1,5 @@
+{
+  "$comment": "External-dependency manifest (L1 seed — design docs/designs/2026-11-07-external-deps-machinery-design.md D1, upstream U-20261106-003). schema_version 1; dependencies is an empty array here: every scaffolded project receives the CONVENTION from day one, and variant templates extend it (merge on id — templates/<variant>/external-deps.json). Fields per dependency: id (unique merge key), repo (https URL, no credentials), pin (release tag — the contract), commit (resolved sha, advisory drift tripwire — written back at fetch/update), install (git command template with {pin}/{repo}/{dir} placeholders), install_dir (project-relative clone destination, MUST be gitignored), consumer (advisory), compatibility_test (run from the project root; exit 0 = pass — required before any pin move), propagation (enum; 'never' is the only value). Scaffold fetch: new-project.ts §7.9 (WARN posture; --strict-external-deps hard-fails). Upgrade update pass: upgrade-project.ts EXTERNAL DEPS (compat-gated pin move; --external-deps-only retries). install_dir content never propagates in either direction (D4).",
+  "schema_version": 1,
+  "dependencies": []
+}

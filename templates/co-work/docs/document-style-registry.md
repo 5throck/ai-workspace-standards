@@ -93,7 +93,7 @@ To add a new document type:
 
 The top-level `decks` object carries style tokens for the **native PPTX deck capability** (canonical-SVG authoring + DrawingML compilation; spec `2026-11-03-co-work-native-pptx-deck-design`, DEC-20261103-01). It is consumed by:
 
-- `templates/co-work/scripts/svg-to-pptx.ts` — derives the PPTX `clrScheme` / `fontScheme` (via `colors.clr_scheme_mapping`) and slide size (via `canvas`) for the flat-mode package.
+- `templates/co-work/skills/pptx-export` chain — the retired `svg-to-pptx.ts` consumed these tokens for the PPTX `clrScheme` / `fontScheme` / slide size; since the 2026-11-06 ppt-master rebase (Phase 1, design 2026-11-06-deck-emitter-ppt-master-rebase-design) the tokens remain the locked authoring vocabulary (slide size `canvas`, colors, fonts) validated by the ppt-master delivery check.
 - `templates/co-work/skills/svg-slide-authoring` — locked tokens (colors, fonts, canvas) that deck-builder must not invent per run.
 
 | Token group | Contents | PPTX mapping |

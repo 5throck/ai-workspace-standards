@@ -2,7 +2,7 @@
 
 - **Spec ID**: 2026-11-03-co-work-native-pptx-deck-design
 - **Date**: 2026-11-03
-- **Status**: Implemented (user-approved 2026-11-03; P1 capability + P2 text-model slice landed same day — P3 roadmap items remain demand-gated; registry status: implemented)
+- **Status**: Implemented (user-approved 2026-11-03; P1 capability + P2 text-model slice landed same day — P3 roadmap items remain demand-gated; registry status: implemented). **Superseded-by (scoped)**: the compile/export tier of this spec (§5 compiler, §13 native-object emission, notes subsystem) is superseded by `docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md` + `docs/decisions/DEC-20261106-04.md` (clean-room reversal; ppt-master v6.8.0 adopted as the conversion engine; user PowerPoint probe evidence 2026-11-07). The authoring tier (canonical-SVG contract) and gate tier (svg-check fingerprint discipline) of this spec remain implemented and in force; this document is amended, not deleted.
 - **Decision record**: docs/decisions/DEC-20261103-01.md (placement, tech route, clean-room ruling, agent model, style SSOT)
 - **Owner**: architect (PM Gateway dispatch)
 - **Tier**: L2 (templates/co-work only — no L0/L1 file changes)

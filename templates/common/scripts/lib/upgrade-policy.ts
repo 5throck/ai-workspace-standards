@@ -1,4 +1,14 @@
-// @version 1.36.0
+// @version 1.37.0
+// v1.37.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
+//          — implements upstream ticket U-20261106-003): resolveClaim gains the
+//          `external-deps.json` claim — policy PROJECT_STATE, pass EXTERNAL
+//          DEPS. The manifest is template-seeded (templates/common +
+//          templates/<variant>) but project-operated (the upgrade pass rewrites
+//          pin/commit on a compat-gated pin move), so a generic SYNC claim would
+//          escalate every pass rewrite to CONFLICT (the delivered-baseline
+//          matrix has no baseline for it). The dedicated EXTERNAL DEPS pass owns
+//          delivery (seed add-if-missing + interim-manifest reconcile) and all
+//          rewrites; TEMPLATE TREE SYNC never touches the file.
 // v1.36.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          Phase 1 batch D): PLACEHOLDER_ALLOWLIST gains the 2 co-develop
 //          generic-dev-spine agent canonicals that carry derivation tokens
@@ -593,6 +603,13 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   if (rel.endsWith('.cmd')) return { policy: 'TEMPLATE_ONLY', pass: '(platform profile)' };
 
   if (PROJECT_STATE_FILES.has(rel)) return { policy: 'PROJECT_STATE', pass: '(project state)' };
+  // external-deps.json (design docs/designs/2026-11-07-external-deps-machinery-design.md
+  // D1/D3, upstream U-20261106-003): the manifest is template-SEEDED (common + variant)
+  // but project-OPERATED — the pass rewrites pin/commit on a compat-gated pin move, so a
+  // generic SYNC claim would escalate every rewrite to CONFLICT. The dedicated EXTERNAL
+  // DEPS pass owns delivery (seed add-if-missing + interim-manifest reconcile) and all
+  // rewrites; TEMPLATE TREE SYNC never touches it.
+  if (rel === 'external-deps.json') return { policy: 'PROJECT_STATE', pass: 'EXTERNAL DEPS' };
   if (underDir(rel, 'memory')) return { policy: 'PROJECT_STATE', pass: '(project memory)' };
   if (rel === 'docs/countries/ACTIVE.md') return { policy: 'PROJECT_STATE', pass: '(country runtime state)' };
 

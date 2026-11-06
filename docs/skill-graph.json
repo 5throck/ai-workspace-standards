@@ -2407,8 +2407,8 @@
       "name": "deck-builder",
       "scope": "co-work",
       "capability": "deck-builder",
-      "content_hash": "c0167a85c4edadef",
-      "version": "1.0.1",
+      "content_hash": "97e7de69813dce4f",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-work/agents/deck-builder.md"
       ]
@@ -2770,6 +2770,11 @@
     },
     {
       "id": "dec:DEC-20261106-03",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-04",
       "type": "decision",
       "layer": "L0"
     },
@@ -7552,7 +7557,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },
@@ -7687,6 +7692,19 @@
       ]
     },
     {
+      "id": "skill:co-security/security-audit",
+      "type": "skill",
+      "layer": "variant:co-security",
+      "name": "security-audit",
+      "scope": "co-security",
+      "capability": "security-audit",
+      "content_hash": "d0a399554626f79e",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/co-security/skills/security-audit/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-security/spdx-sbom",
       "type": "skill",
       "layer": "variant:co-security",
@@ -7732,8 +7750,8 @@
       "name": "pptx-export",
       "scope": "co-work",
       "capability": "pptx-export",
-      "content_hash": "b891db1179d48f22",
-      "version": "1.4.0",
+      "content_hash": "746ccef2756b487a",
+      "version": "2.0.1",
       "mirrors": [
         "templates/co-work/skills/pptx-export/SKILL.md"
       ]
@@ -7745,8 +7763,8 @@
       "name": "svg-quality-gate",
       "scope": "co-work",
       "capability": "svg-quality-gate",
-      "content_hash": "9467bc4ac156367c",
-      "version": "1.1.0",
+      "content_hash": "1d22c1db3a94615b",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-work/skills/svg-quality-gate/SKILL.md"
       ]
@@ -7758,8 +7776,8 @@
       "name": "svg-slide-authoring",
       "scope": "co-work",
       "capability": "svg-slide-authoring",
-      "content_hash": "06b1b6358a1f4af7",
-      "version": "1.5.0",
+      "content_hash": "7605537c81e79f16",
+      "version": "1.5.1",
       "mirrors": [
         "templates/co-work/skills/svg-slide-authoring/SKILL.md"
       ]
@@ -7972,7 +7990,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },
@@ -8400,11 +8418,7 @@
         ".agents/skills/project-resync/SKILL.md",
         ".codex/skills/project-resync/SKILL.md",
         ".hermes/skills/project-resync/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-30"
-      }
+      ]
     },
     {
       "id": "skill:root/project-review",
@@ -8441,11 +8455,7 @@
         ".agents/skills/project-to-variant/SKILL.md",
         ".codex/skills/project-to-variant/SKILL.md",
         ".hermes/skills/project-to-variant/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-30"
-      }
+      ]
     },
     {
       "id": "skill:root/promote-variant",
@@ -8671,7 +8681,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-06"
       }
     },
@@ -16113,6 +16123,12 @@
       "type": "cites_skill",
       "from": "doc:co-work/docs/document-style-registry.md",
       "to": "skill:co-deck/version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/document-style-registry.md",
+      "to": "skill:co-work/pptx-export",
       "source": "workflow-doc"
     },
     {
@@ -28559,6 +28575,36 @@
       "from": "skill:co-security/sarif-exporter",
       "to": "skill:root/security-scan",
       "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-security/security-audit",
+      "to": "skill:co-deck/research",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-security/security-audit",
+      "to": "skill:co-security/finding-reconciliation",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/security-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-security/security-audit",
+      "to": "skill:co-security/sarif-exporter",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-security/skills/security-audit/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",

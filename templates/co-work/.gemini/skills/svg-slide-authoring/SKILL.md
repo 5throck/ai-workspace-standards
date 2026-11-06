@@ -6,12 +6,12 @@ description: >
   hand authoring with locked registry tokens. Use when: authoring or
   repairing slide pages for the co-work native PPTX deck capability, or
   deciding whether an SVG construct is canonical / compatible / invalid.
-version: 1.5.0
-last_reviewed: 2026-11-06
+version: 1.5.1
+last_reviewed: 2026-11-07
 status: active
 scope: co-work
 owner: pm
-prerequisites: Bun runtime, templates/co-work/scripts/deck/svg-check.ts, document-style-registry.json (decks section)
+prerequisites: Python 3.10+, templates/co-work/scripts/deck/svg_check.py, document-style-registry.json (decks section)
 metadata:
   type: capability
   triggers:
@@ -27,7 +27,8 @@ metadata:
 ## Context
 
 The co-work deck capability compiles per-page SVG into natively editable
-DrawingML PPTX (`svg-to-pptx.ts`). The SVG a page uses is NOT arbitrary
+DrawingML PPTX (ppt-master-adapter.ts + the ppt-master chain since the
+2026-11-06 rebase; Phase 2 moved the gate to python `svg_check.py`). The SVG a page uses is NOT arbitrary
 browser SVG: it is **project-canonical SVG** — a closed language whose
 element/attribute whitelist has exact DrawingML mappings. Three input states:
 
@@ -40,7 +41,7 @@ element/attribute whitelist has exact DrawingML mappings. Three input states:
 ## When to Use
 
 - Authoring slide pages for a PPTX deck (with `deck-builder`)
-- Repairing pages that failed `svg-check.ts`
+- Repairing pages that failed `svg_check.py`
 - Deciding whether a construct is allowed before writing it
 
 ## Canonical Language
@@ -136,14 +137,14 @@ render procedure rather than editing the page.
 
 1. **Resolve tokens**: read the registry `decks` section for the chosen deck type; write the locked values into the design brief once.
 2. **Author P01** fully (title page): role, canvas, one focal point, locked tokens.
-3. **Early gate** (rosters > 6): run `bun templates/co-work/scripts/deck/svg-check.ts --deck <dir> --content <deck_content.md> --stage early --json` after P01–P05; fix all blocking errors and selected warnings before continuing.
+3. **Early gate** (rosters > 6): run `python3 templates/co-work/scripts/deck/svg_check.py --deck <dir> --content <deck_content.md> --stage early --json` after P01–P05; fix all blocking errors and selected warnings before continuing.
 4. **Author remaining pages** one at a time — carry the method (hierarchy rhythm, spacing, block naming) from the sample pages.
 5. **Final gate**: same command with `--stage final`; repair failures (max 2 rounds per page, then PM escalation).
 
 ## Output Format
 
 - `<NN>-<slug>.svg` per page (e.g. `01-title.svg`), zero-padded, in the deck working directory
-- All passing `svg-check.ts` with zero errors before export
+- All passing `svg_check.py` with zero errors before export
 
 ## Related Skills
 

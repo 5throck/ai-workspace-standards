@@ -1,5 +1,23 @@
 #!/usr/bin/env bun
-// @version 1.90.0
+// @version 1.91.0
+// v1.91.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
+//          — implements upstream ticket U-20261106-003): new EXTERNAL DEPS pass
+//          AFTER the TEMPLATE TREE SYNC pass (D3) — per dependency: git
+//          ls-remote upstream tag check (semver-aware; a tag not newer than the
+//          pin short-circuits to "current") → compatibility_test from the
+//          project root on a newer tag → pin move (manifest pin+commit rewrite,
+//          install_dir re-fetch) on test pass, or hold + WARN on fail. Every
+//          dependency yields a decision-log row. --dry-run compatible (reports
+//          what it would do, touches nothing; the upstream ls-remote itself is
+//          read-only). NEW --external-deps-only flag runs JUST this pass
+//          (documented scaffold-retry path, D2; exit 1 on failures). The pass
+//          also seeds external-deps.json from the template seed when absent and
+//          reconciles a legacy/interim manifest shape into the generic schema
+//          (D1/D8 — the co-work LOCAL-PATCH instance retires on the next real
+//          run), validates install_dir .gitignore coverage with auto-append
+//          (D5), and TEMPLATE TREE SYNC / VARIANT ASSET DIRS now hard-skip any
+//          path under a manifest install_dir (D4 — external code never flows
+//          template → project). Core in scripts/lib/external-deps.ts v1.0.0.
 // v1.90.0 (2026-11-03, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §15.4, ticket T-20261103-003-2): hub-consumption preflight legs —
 //          after the templatesDir invariants and before the --preflight
@@ -1069,6 +1087,19 @@ import {
   type TombstoneEntry,
 } from './lib/upgrade-policy.ts';
 import { missingDependencies, scanDeliveredScripts } from './lib/dependency-guard.ts';
+import {
+  parseExternalDepsManifest,
+  checkUpstreamTags,
+  checkPinDrift,
+  runCompatibilityTest,
+  installDependency,
+  ensureGitignoreCoverage,
+  isUnderAnyInstallDir,
+  extractInstallDirsLoose,
+  ENTRY_FIELDS,
+  type ExternalDepEntry,
+  type ExternalDepsManifest,
+} from './lib/external-deps.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
 import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
 import {
@@ -1121,6 +1152,11 @@ let yesFlag = false;
 let skipContextCommonization = false;
 let forceContextSync = false;
 let acceptCiPermDiff = false;
+// v1.91.0 (external-deps design D2/D3): run JUST the EXTERNAL DEPS pass — the
+// documented retry path for a scaffold whose §7.9 fetch WARNed (network down,
+// git missing). Report-only decision log (the persisted manifest write belongs
+// to a full upgrade); exit 1 when any dependency failed, 0 otherwise.
+let externalDepsOnly = false;
 // A3 (delivery-bookkeeping-engine design, spec 2026-10-29-...-design): opt-in
 // CHANGELOG entry scaffolding, default OFF — CHANGELOG.md is project-owned
 // (PIPELINE_ARTIFACT_PATHS member) and an unconditional engine write would
@@ -1165,6 +1201,8 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
   if (args[i] === '--accept-ci-perm-diff') { acceptCiPermDiff = true; continue; }
+  // v1.91.0 (external-deps design D2/D3): EXTERNAL DEPS pass only.
+  if (args[i] === '--external-deps-only') { externalDepsOnly = true; continue; }
   // A3 (delivery-bookkeeping-engine design): opt-in CHANGELOG entry
   // scaffolding for THIS delivery — apply-mode only, no value argument.
   if (args[i] === '--changelog-entry') { changelogEntry = true; continue; }
@@ -1256,7 +1294,7 @@ function applyClearTombstoneArg(raw: string): void {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -1586,6 +1624,26 @@ if (preflight) {
   process.exit(failures === 0 ? 0 : 1);
 }
 if (!existsSync(commonDir)) { console.error(`ERROR: Common templates directory not found: ${commonDir}`); process.exit(1); }
+
+// ── --external-deps-only: run JUST the EXTERNAL DEPS pass (v1.91.0, design D2/D3) ──
+// The documented retry path for a scaffold whose §7.9 fetch WARNed. Deliberately
+// placed BEFORE the pre-upgrade snapshot/stash: this is a fetch-only flavor —
+// no stash, no full delivery machinery, no persisted delivery manifest (its
+// decision rows are reported on stdout instead). Exit 1 when any dependency
+// failed (so CI can gate on it), 0 otherwise; --dry-run reports without writing.
+if (externalDepsOnly) {
+  const onlyDecisions: string[] = [];
+  const outcome = runExternalDepsPass({
+    projectDir, commonDir, templatesDir, dryRun,
+    record: (_path, _policy, _pass, verdict, detail, severity) => {
+      onlyDecisions.push(`[${severity ?? 'INFO'}] ${verdict}: ${detail}`);
+    },
+  });
+  console.log(`\n--- EXTERNAL DEPS pass (--external-deps-only) complete ---`);
+  console.log(`  changes: ${outcome.changed}  failures: ${outcome.failures}${dryRun ? '  (dry-run — nothing written)' : ''}`);
+  for (const d of onlyDecisions) console.log(`  ${d}`);
+  process.exit(outcome.failures > 0 ? 1 : 0);
+}
 
 // ── Script version comparison ──────────────────────────────────────────────────
 const scriptsSnapshot = join(projectDir, 'scripts-snapshot.json');
@@ -2356,6 +2414,187 @@ function mergeGitattributes(dest: string, src: string): void {
   if (!dryRun) writeFileSync(dest, merged, 'utf8');
   console.log(`  ⚠️  Preserved ${projectOnly.length} project-specific attribute line${projectOnly.length === 1 ? '' : 's'} that the template overwrite would have dropped`);
   console.log(`  ${dryTag}WROTE: .gitattributes`);
+}
+
+// ── External-dependency install_dirs (v1.91.0, design D4) ─────────────────────
+// Best-effort parse (extractInstallDirsLoose — must work even on a legacy/
+// interim manifest shape like co-work's LOCAL-PATCH instance, which used
+// install_path); strict validation is the EXTERNAL DEPS pass's job. Consumed by
+// the TEMPLATE TREE SYNC / VARIANT ASSET DIRS hard-skips: no template file may
+// deliver into an external clone's directory (external code never flows
+// template → project, D4).
+const externalInstallDirs: string[] = (() => {
+  const p = join(projectDir, 'external-deps.json');
+  if (!existsSync(p)) return [];
+  return extractInstallDirsLoose(readFileSync(p, 'utf8'));
+})();
+
+/**
+ * EXTERNAL DEPS pass (v1.91.0, design 2026-11-07-external-deps-machinery D3,
+ * upstream U-20261106-003). Runs in the main flow (after TEMPLATE TREE SYNC /
+ * IDENTITY SEED) and standalone under --external-deps-only. Structure:
+ *   1. Seed delivery — project manifest absent → copy the effective template
+ *      seed (variant > common) add-if-missing.
+ *   2. Parse + strict validation; a legacy/interim shape is RECONCILED into the
+ *      generic schema (D1/D8): template seed entries authoritative, per-id
+ *      operative pin/commit preserved, non-schema fields dropped with a WARN
+ *      decision row.
+ *   3. install_dir .gitignore coverage validation with auto-append (D5).
+ *   4. Per dependency (D3): git ls-remote upstream tag check (semver-aware) →
+ *      current short-circuits to a hold no-op (with a pin-drift tripwire
+ *      report); a newer tag runs compatibility_test from the project root —
+ *      pass moves the pin (manifest rewrite + install_dir re-fetch), fail holds
+ *      + WARN. Dry-run reports what it WOULD do without writing (the
+ *      ls-remote itself is read-only). Every dependency yields a decision row.
+ */
+interface ExternalDepsPassCtx {
+  projectDir: string;
+  commonDir: string;
+  templatesDir: string;
+  dryRun: boolean;
+  record: (path: string, policy: string, pass: string, verdict: string, detail: string, severity?: 'INFO' | 'WARN' | 'ERROR') => void;
+}
+
+function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failures: number } {
+  const { projectDir, commonDir, templatesDir, dryRun, record } = ctx;
+  const dryTag = dryRun ? '[DRY RUN] ' : '';
+  console.log('--- EXTERNAL DEPS: pinned external-dependency manifest (design 2026-11-07-external-deps-machinery, D3) ---');
+  let changed = 0;
+  let failures = 0;
+  const MANIFEST_REL = 'external-deps.json';
+  const manifestPath = join(projectDir, MANIFEST_REL);
+  const variantSeed = join(templatesDir, MANIFEST_REL);
+  const commonSeed = join(commonDir, MANIFEST_REL);
+  const seedPath = existsSync(variantSeed) ? variantSeed : (existsSync(commonSeed) ? commonSeed : '');
+
+  // 1. Seed delivery (add-if-missing) — D1 placement table: existing projects
+  //    receive the manifest convention via this pass.
+  if (!existsSync(manifestPath)) {
+    if (!seedPath) {
+      console.log('  (no external-deps.json on the project or template side — pass vacuous)');
+      return { changed, failures };
+    }
+    console.log(`  NEW    ${MANIFEST_REL}  (template seed delivered)`);
+    if (!dryRun) copyFileSync(seedPath, manifestPath);
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'NEW', 'template seed delivered (project copy absent)');
+    console.log(`  ${dryTag}COPIED: ${MANIFEST_REL}`);
+    changed++;
+  }
+
+  // 2. Parse; reconcile a legacy/interim shape (D8 — the co-work LOCAL-PATCH
+  //    instance retires here on the next real upgrade run).
+  let manifest: ExternalDepsManifest | null = null;
+  try {
+    manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf8'), MANIFEST_REL);
+  } catch (err) {
+    const reason = (err as Error).message;
+    let seedManifest: ExternalDepsManifest | null = null;
+    if (seedPath) {
+      try { seedManifest = parseExternalDepsManifest(readFileSync(seedPath, 'utf8'), 'template seed'); } catch { seedManifest = null; }
+    }
+    if (!seedManifest) {
+      console.log(`  ⚠️  SKIP   ${MANIFEST_REL}  (not a valid external-deps manifest${seedPath ? ' and the template seed is also invalid' : ' and no template seed exists to reconcile from'}: ${reason})`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `invalid manifest, reconciliation unavailable: ${reason}`, 'WARN');
+      failures++;
+      return { changed, failures };
+    }
+    // Operative state (per-id pin/commit) survives the reconcile — the running
+    // version is the project's fact; the seed owns everything else.
+    const legacyById = new Map<string, Record<string, unknown>>();
+    const droppedLegacyKeys = new Set<string>();
+    try {
+      const legacyDoc = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dependencies?: Array<Record<string, unknown>> };
+      for (const dep of (Array.isArray(legacyDoc?.dependencies) ? legacyDoc.dependencies : [])) {
+        if (dep && typeof dep['id'] === 'string') legacyById.set(dep['id'], dep);
+      }
+    } catch { /* unreadable legacy doc — reconcile from the seed alone */ }
+    const reconciled: ExternalDepEntry[] = seedManifest.dependencies.map((entry) => {
+      const merged: ExternalDepEntry = { ...entry };
+      const legacy = legacyById.get(entry.id);
+      if (legacy) {
+        if (typeof legacy['pin'] === 'string' && legacy['pin']) merged.pin = legacy['pin'];
+        if (typeof legacy['commit'] === 'string' && /^[0-9a-f]{40}$/.test(legacy['commit'])) merged.commit = legacy['commit'];
+        for (const k of Object.keys(legacy)) {
+          if (!(ENTRY_FIELDS as readonly string[]).includes(k)) droppedLegacyKeys.add(k);
+        }
+      }
+      return merged;
+    });
+    const droppedNote = droppedLegacyKeys.size > 0 ? `; non-schema fields not promoted (dropped): ${[...droppedLegacyKeys].sort().join(', ')}` : '';
+    console.log(`  RECONCILE ${MANIFEST_REL}  (legacy/interim manifest superseded by the template seed — operative pin/commit preserved per id${droppedNote})`);
+    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify({ schema_version: 1, dependencies: reconciled }, null, 2)}\n`, 'utf8');
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'MERGE', `interim/legacy manifest reconciled into the generic schema (design D1/D8) — template seed authoritative, operative pin/commit preserved per id${droppedNote}`, 'WARN');
+    console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
+    changed++;
+    manifest = { schema_version: 1, dependencies: reconciled };
+  }
+
+  // 3. install_dir .gitignore coverage (D5) — an external clone committed into
+  //    the project defeats the entire distribution model.
+  const gi = ensureGitignoreCoverage(projectDir, manifest!.dependencies.map((d) => d.install_dir), { dryRun });
+  if (gi.appended.length > 0) {
+    console.log(`  GITIGNORE  appended coverage for: ${gi.appended.join(', ')}${dryRun ? '  (would append)' : ''}`);
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', `.gitignore coverage appended for install_dir(s): ${gi.appended.join(', ')} (D5 — an external clone must never be committed)`, 'WARN');
+    changed++;
+  }
+
+  // 4. Per-dependency upstream check → compat test → pin move / hold (D3).
+  for (const dep of manifest!.dependencies) {
+    const upstream = checkUpstreamTags(dep);
+    if (!upstream.ok) {
+      console.log(`  ⚠️  ${dep.id}: upstream tag check FAILED — ${upstream.error}; pin ${dep.pin} held`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: upstream check failed (${upstream.error}) — pin ${dep.pin} held`, 'WARN');
+      failures++;
+      continue;
+    }
+    if (!upstream.newer) {
+      const drift = checkPinDrift(dep, projectDir);
+      const driftNote = drift.checked && drift.drifted
+        ? `; PIN DRIFT: clone HEAD ${drift.resolved?.slice(0, 12) ?? '?'} != recorded ${dep.commit?.slice(0, 12) ?? '?'} (the pin tag remains the contract)`
+        : '';
+      console.log(`  OK     ${dep.id}: pin ${dep.pin} is current (upstream tags: ${upstream.tags.length}) — hold, no-op${driftNote}`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: upstream check — pin ${dep.pin} is current (latest of ${upstream.tags.length} upstream tags) — hold, no-op${driftNote}`, drift.checked && drift.drifted ? 'WARN' : undefined);
+      continue;
+    }
+    const target = upstream.newer;
+    if (dryRun) {
+      console.log(`  UPDATE ${dep.id}: newer tag ${target} available (pin ${dep.pin}) — compatibility_test would run from the project root (${dep.compatibility_test ?? '<none declared>'}); pin would move on pass, hold + WARN on fail`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', `dep ${dep.id}: newer tag ${target} — compatibility_test would run from the project root; pin ${dep.pin} would move to ${target} on pass, hold + WARN on fail`);
+      continue;
+    }
+    const compat = runCompatibilityTest(dep, projectDir);
+    if (!compat.ok) {
+      console.log(`  ⚠️  ${dep.id}: compatibility test ${compat.ran ? `FAILED (${compat.error})` : `did not run (${compat.error})`} — pin ${dep.pin} HELD, no changes`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: newer tag ${target} REJECTED — compatibility_test ${compat.ran ? `failed (${compat.error})` : `did not run (${compat.error})`}; pin ${dep.pin} held`, 'WARN');
+      failures++;
+      continue;
+    }
+    const refreshed = installDependency({ ...dep, pin: target }, projectDir);
+    if (refreshed.status === 'failed') {
+      console.log(`  ⚠️  ${dep.id}: pin-move fetch to ${target} failed — ${refreshed.error}; pin ${dep.pin} HELD`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: pin-move fetch to ${target} failed (${refreshed.error}); pin ${dep.pin} held`, 'WARN');
+      failures++;
+      continue;
+    }
+    try {
+      const doc = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dependencies?: Array<Record<string, unknown>> };
+      const row = doc.dependencies?.find((d) => d['id'] === dep.id);
+      if (row) {
+        row['pin'] = target;
+        if (refreshed.commit) row['commit'] = refreshed.commit;
+        writeFileSync(manifestPath, `${JSON.stringify(doc, null, 2)}\n`, 'utf8');
+      }
+    } catch (err) {
+      console.log(`  ⚠️  ${dep.id}: manifest rewrite failed (${(err as Error).message}) — clone refreshed to ${target}; fix the manifest manually`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: manifest rewrite failed after the pin-move fetch (${(err as Error).message}) — manual fix required`, 'WARN');
+      failures++;
+      continue;
+    }
+    console.log(`  ✅ ${dep.id}: compatibility test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit?.slice(0, 12) ?? '?'})`);
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'ADOPT', `dep ${dep.id}: compatibility_test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit ?? 'unknown'} recorded)`);
+    changed++;
+  }
+  return { changed, failures };
 }
 
 // ── LOCKED files ───────────────────────────────────────────────────────────────
@@ -3174,7 +3413,12 @@ if (existsSync(variantScriptsSrc)) {
         missingRows.push(`| \`${childRel}\` | L2-only | ${version} | active | Variant-delivered script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`);
       }
     };
-    scanVariantScripts(variantScriptsDst, variant);
+    // v1.91.0 guard: projects without a scripts/<variant>/ directory (co-work's
+    // variant scripts live at scripts/deck/, delivered via the top-level scripts/
+    // passes) crashed this walk with a raw ENOENT (reproduced at v1.90.0 HEAD —
+    // the block predates the external-deps wave; the guard is the minimal fix
+    // that unblocks any dry-run/apply of such projects).
+    if (existsSync(variantScriptsDst)) scanVariantScripts(variantScriptsDst, variant);
     if (missingRows.length > 0 && appendRegistryRows(projectRegPath, missingRows)) {
       console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
     }
@@ -3903,6 +4147,9 @@ if (variantAssetDirs.length > 0) {
       }
       const claim = resolveClaim(relPath, variant);
       if (claim.pass !== VARIANT_ASSET_DIRS_PASS) { skippedForeignClaim++; continue; }
+      // v1.91.0 (external-deps design D4): propagation exclusion — an external
+      // clone under a manifest install_dir never flows template → project.
+      if (externalInstallDirs.length > 0 && isUnderAnyInstallDir(relPath, externalInstallDirs)) { skippedForeignClaim++; continue; }
       if (!existsSync(dstPath)) {
         // D2 (U-20261028-001): tombstone guard before the copy — a deleted,
         // previously delivered variant asset is not silently re-delivered.
@@ -4132,6 +4379,16 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
   for (const { rel, abs } of iterEffectiveTemplateFiles(commonDir, variantTplDir)) {
     const claim = resolveClaim(rel, variant);
     if (!claim || claim.pass !== TEMPLATE_TREE_SYNC_PASS) continue;
+
+    // v1.91.0 (external-deps design D4): propagation exclusion — no template
+    // file may deliver into an external-dependency install_dir (external code
+    // never flows template → project; the vendoring guard in
+    // validate-templates.ts closes the template-side direction).
+    if (externalInstallDirs.length > 0 && isUnderAnyInstallDir(rel, externalInstallDirs)) {
+      console.log(`  SKIP   ${rel}  (external-dep install_dir — propagation exclusion, design 2026-11-07-external-deps-machinery D4)`);
+      recordDecision(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, 'SKIP', 'path under an external-deps.json install_dir — template→project delivery excluded (design D4)');
+      continue;
+    }
 
     // Country-profile parity with scaffold-time pruning (ADR-0057/0058): don't re-inject a
     // country profile that doesn't match the project's detected country. Region-neutral
@@ -4508,6 +4765,25 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     console.log(`  ${dryTag}COPIED: docs/project.md`);
     treeChanged++;
   }
+}
+
+// ── EXTERNAL DEPS: pinned external-dependency manifest pass (v1.91.0, D3) ─────
+// Runs AFTER the TEMPLATE TREE SYNC pass (design 2026-11-07-external-deps-
+// machinery D3) — the tree delivery is settled, so the manifest rewrites here
+// can never be clobbered by a same-run delivery. Core in runExternalDepsPass()
+// (shared with the --external-deps-only early branch above).
+{
+  const depsOutcome = runExternalDepsPass({
+    projectDir, commonDir, templatesDir, dryRun,
+    record: (path, policy, pass, verdict, detail, severity) => {
+      recordDecision(path, policy, pass, verdict as DecisionVerdict, detail, undefined, severity as DeliveryDecision['severity'] | undefined);
+    },
+  });
+  treeChanged += depsOutcome.changed;
+  if (depsOutcome.failures > 0) {
+    console.log(`  ⚠️  EXTERNAL DEPS: ${depsOutcome.failures} failure(s) this run — see the WARN rows above (retry: bun scripts/upgrade-project.ts <project> --external-deps-only)`);
+  }
+  console.log('');
 }
 
 // ── ENV_SAMPLE SYNC: .env.sample (country-aware template delivery, merge-based) ───────────

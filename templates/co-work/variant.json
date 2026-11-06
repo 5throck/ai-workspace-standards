@@ -1,6 +1,6 @@
 {
   "name": "co-work",
-  "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration. Includes the native PPTX deck capability (spec 2026-11-03-co-work-native-pptx-deck-design): deck-builder agent authors per-page canonical SVG under deterministic quality gates and exports natively editable DrawingML via svg-check/svg-to-pptx.",
+  "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration. Includes the native PPTX deck capability (spec 2026-11-03-co-work-native-pptx-deck-design, export tier rebased onto ppt-master per design 2026-11-06-deck-emitter-ppt-master-rebase-design): deck-builder agent authors per-page canonical SVG under deterministic quality gates (python svg_check.py) and exports natively editable DrawingML via ppt-master-adapter.ts + the ppt-master chain.",
   "variant_type": "collaboration",
   "status": "stable",
   "version": "1.1.0",
@@ -133,16 +133,31 @@
     "local": [
       {
         "name": "svg-check",
-        "path": "scripts/deck/svg-check.ts",
+        "path": "scripts/deck/svg_check.py",
         "status": "active"
       },
       {
-        "name": "svg-to-pptx",
-        "path": "scripts/deck/svg-to-pptx.ts",
+        "name": "svg-check-ts-oracle",
+        "path": "scripts/deck/svg-check.ts",
+        "status": "parity-oracle"
+      },
+      {
+        "name": "ppt-master-adapter",
+        "path": "scripts/deck/ppt-master-adapter.ts",
+        "status": "active"
+      },
+      {
+        "name": "render-previews",
+        "path": "scripts/deck/render_previews.py",
+        "status": "active"
+      },
+      {
+        "name": "svg-check-parity",
+        "path": "scripts/deck/tests/test_svg_check_parity.py",
         "status": "active"
       }
     ],
     "external": [],
-    "notes": "First co-work script_manifest (spec 2026-11-03-co-work-native-pptx-deck-design). svg-check is the canonical-SVG quality gate (imported by svg-to-pptx for the shared parser); svg-to-pptx compiles gate-passed decks into natively editable DrawingML PPTX (flat mode) with fingerprint refusal. Deps: fflate (packaging), @resvg/resvg-js (preview PNGs for the visual acceptance gate)."
+    "notes": "svg_check.py (2.0.0, python 3.10+ stdlib) is the canonical-SVG quality gate since 2026-11-07 — faithful port of svg-check.ts 1.5.x, switched only after tests/test_svg_check_parity.py proved byte-identical fingerprints and identical verdicts over the 100-page main deck, the 12-page exec cut, and the golden fixture (Phase 2 of design 2026-11-06-deck-emitter-ppt-master-rebase-design). svg-check.ts is retired from production and retained ONLY as the differential parity oracle for that harness (status parity-oracle — not invoked by the pipeline). svg-to-pptx.ts was DELETED 2026-11-07: superseded as the export engine by ppt-master-adapter.ts + the ppt-master v6.8.0 (MIT) chain consumed as-is (design D1/D6, DEC-20261106-04; LOCAL-PATCH(upstream-request: U-20261106-003) for the interim clone path); its golden pins were superseded — entity/notes/ID pins live in the python parity suite, export pins are carried by ppt-master's own validators (pptx_opc_validation.py, pptx_delivery_check.py). render_previews.py (1.0.0) renders white-underlay previews (resvg-py engine, bun+@resvg/resvg-js subprocess fallback) — replaces the retired svg-to-pptx --render-png mode. Deps: python 3.10+ stdlib (gate, parity harness), resvg-py (previews), fflate + fast-xml-parser (adapter), @resvg/resvg-js (preview fallback). External dep: ppt-master pin v6.8.0 per project external-deps.json (gitignored clone via scripts/deck/fetch-ppt-master.ts; PyMuPDF/AGPL excluded)."
   }
 }
