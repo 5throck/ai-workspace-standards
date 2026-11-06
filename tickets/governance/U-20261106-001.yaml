@@ -1,0 +1,86 @@
+schemaVersion: 1
+id: U-20261106-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-06T14:24:07.483+09:00'
+history:
+  - at: '2026-11-06T14:24:07.483+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-06T15:01:11.784+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T15:01:11.784+09:00'
+    from: review
+    to: done
+result: >-
+  Execution-plan PM-row requirement landed: Row 0 design
+  2026-11-06-exec-plan-pm-row-requirement-design (PR #1871), Row 1 applied the
+  R2 rule to BOTH SSOT copies — L0
+  docs/governance/agents/execution-plan-templates.md and the intentionally
+  divergent L1 mirror templates/common copy (the one co-newbiz receives): PM
+  rows mandatory with Agent=pm / Tier=Medium per agents/pm.md / Model=inherit
+  (<session model alias>) matching the PM-running-on header / Platform filled;
+  blank or em-dash PM rows invalidate the plan; only E1-E5 exemption rows may be
+  blank; /sync rows pinned in boilerplate and parity table; 5.3 examples now
+  model the compliant shape. Restatement surfaces verified as SSOT pointers,
+  untouched.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.28.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Execution plan tables produced by the PM leave PM's own rows (design-gate
+    decision, verification, /sync) with Tier/Model as "—" or omit them entirely.
+    Expected: the template requires PM rows to always be present with every
+    column filled — Agent PM, Tier per agents/pm.md (Medium), Model "inherit
+    (<session model alias>)" since PM is the session itself and may run on a
+    higher-tier session model, Platform filled. Should apply to all co-* variant
+    templates (execution-plan-templates.md §5.1, and the plan-table guidance in
+    CLAUDE.md/GEMINI.md/CODEX.md/AGENTS.md if restated there).
+  affected_paths:
+    - docs/governance/agents/execution-plan-templates.md
+    - CLAUDE.md
+    - AGENTS.md
+    - agents/pm.md
+  identity_source: client_roots
+  repro: >-
+    In co-newbiz on 2026-11-06, the PM drafted a plan with rows "PM | — | — |"
+    for design gate, verification and /sync. The user flagged it and asked that
+    PM rows never be omitted and always show Tier/Model. User confirmed PM may
+    run on the higher session model per rules.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - >-
+      info:in_last_delivery
+      docs/governance/agents/execution-plan-templates.md=false
+    - info:in_last_delivery CLAUDE.md=false
+    - info:in_last_delivery AGENTS.md=true
+    - info:in_last_delivery agents/pm.md=false
+  dedupe_key: 23de4e9bd4aa52cc23490dfe3d6739be4e6405b4e4fb0ec6a1fbb24610fe91fb
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-06T14:24:07.483+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1872
+    summary: >-
+      Execution-plan PM-row requirement landed: Row 0 design
+      2026-11-06-exec-plan-pm-row-requirement-design (PR #1871), Row 1 applied
+      the R2 rule to BOTH SSOT copies — L0
+      docs/governance/agents/execution-plan-templates.md and the intentionally
+      divergent L1 mirror templates/common copy (the one co-newbiz receives): PM
+      rows mandatory with Agent=pm / Tier=Medium per agents/pm.md /
+      Model=inherit (<session model alias>) matching the PM-running-on header /
+      Platform filled; blank or em-dash PM rows invalidate the plan; only E1-E5
+      exemption rows may be blank; /sync rows pinned in boilerplate and parity
+      table; 5.3 examples now model the compliant shape. Restatement surfaces
+      verified as SSOT pointers, untouched.

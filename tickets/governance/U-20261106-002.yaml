@@ -1,0 +1,151 @@
+schemaVersion: 1
+id: U-20261106-002
+kind: manual
+title: Upstream request from co-work
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-06T14:55:54.324+09:00'
+history:
+  - at: '2026-11-06T14:55:54.324+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-06T15:02:06.251+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T18:48:55.342+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T18:48:55.342+09:00'
+    from: review
+    to: done
+result: >-
+  svg-to-pptx entity double-escape fixed: exporter now decodes the five XML
+  built-ins via svg-check's exported decodeXmlEntities (v1.5.1) before escaping
+  at every text-read site — plain text, tspan runs, nested-tspan fallback
+  (nodeTextOf rewritten), and native <desc> JSON — so authored P&amp;L and bare
+  P&L both compile to slide XML P&amp;L (displays P&L), matching gate R1
+  semantics; box width now measured from decoded text (entity overhead no longer
+  inflates EMU). svg-to-pptx v1.4.1→1.4.2. Repro on origin/main copies: before =
+  <a:t>P&amp;amp;L...</a:t> + 533400 EMU overwide box, after = correct text +
+  width. 5 new test groups in deck-golden (single-pass, five entities, bare-&,
+  nested, width parity); deck suite 25 pass; unit + audit green. Design doc
+  2026-11-06-svg-pptx-entity-decode-design registered implemented (new spec —
+  the deck-pipeline-hardening spec records the exporter as unchanged in that
+  batch).
+error: null
+upstream:
+  project: co-work
+  variant: co-work
+  template_version: 0.28.0
+  source: project/co-work
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Authoring hygiene migration (bare `&` → `&amp;`) regresses PPTX display
+    text. svg-check v1.5.0 R1 decodes the five XML built-ins in gate run
+    extraction, but the exporter svg-to-pptx.ts (v1.4.1) extracts raw parser
+    text: parseSvg() in svg-check.ts stores text chunks verbatim (no entity
+    decode), and svg-to-pptx.ts line ~308 uses node.text / tspan .text directly,
+    then esc() escapes `&` again. Observed: pages authored `P&amp;L` produce
+    slide XML `<a:t>3년 P&amp;amp;L</a:t>` (deck
+    gtms-startup-market-research-2026-11-05_ko, slides 28/54) — PowerPoint
+    displays the literal string "P&amp;L" instead of "P&L". Expected: decode the
+    five XML built-ins in exporter text extraction before escaping, so authored
+    `P&amp;L` and bare `P&L` both compile to slide XML `P&amp;L` (displays
+    "P&L"), matching gate R1 semantics ("both match the plain-text contract").
+    Side effect of the current gap: estTextWidth over-estimates boxes by the
+    entity overhead. Gate and previews (resvg) are correct; only the export leg
+    diverges.
+  affected_paths:
+    - templates/co-work/scripts/deck/svg-to-pptx.ts
+    - templates/co-work/scripts/deck/svg-check.ts
+  identity_source: cwd
+  local_workaround_diff: >-
+    Reference only (not applied — specialist mandate limited to page SVGs).
+    Export decodeXmlEntities from svg-check.ts and apply it in the exporter's
+    text extraction before escaping:
+
+
+    --- a/templates/co-work/scripts/deck/svg-check.ts
+
+    +++ b/templates/co-work/scripts/deck/svg-check.ts
+
+    @@ -152,7 +152,7 @@
+
+    -function decodeXmlEntities(s: string): string {
+
+    +export function decodeXmlEntities(s: string): string {
+
+
+    --- a/templates/co-work/scripts/deck/svg-to-pptx.ts
+
+    +++ b/templates/co-work/scripts/deck/svg-to-pptx.ts
+
+    @@
+
+    -import { fingerprintFiles, parseSvg, type CheckReport, type SvgNode } from
+    "./svg-check.ts";
+
+    +import { decodeXmlEntities, fingerprintFiles, parseSvg, type CheckReport,
+    type SvgNode } from "./svg-check.ts";
+
+    @@
+
+    -        const direct = node.text.replace(/\s+/g, " ").trim();
+
+    +        const direct = decodeXmlEntities(node.text).replace(/\s+/g, "
+    ").trim();
+
+    @@
+
+    -          const t2 = ts.text.replace(/\s+/g, " ").trim() ||
+    (ts.children.map(nodeTextOf).join(" ").trim());
+
+    +          const t2 = decodeXmlEntities(ts.text).replace(/\s+/g, " ").trim()
+    || (ts.children.map(nodeTextOf).join(" ").trim());
+
+
+    Note: the nested-children fallback (nodeTextOf over ts.children) also needs
+    decode coverage if nested markup-in-text is ever legal. Single-pass decode
+    per XML semantics (&amp;lt; → literal "&lt;"), mirroring svg-check.ts v1.5.0
+    R1.
+  repro: >-
+    1. Author a page text run containing `P&amp;L` (well-formed XML). 2. Run
+    svg-check --stage final (passes 0/0 — R1 decode makes it match the
+    plain-text SSOT). 3. Export with svg-to-pptx.ts. 4. Unzip the pptx; the
+    slide part contains `P&amp;amp;L` inside <a:t>; PowerPoint renders
+    "P&amp;L". Reproduced on the 100-page deck
+    2026-11-05-gtms-startup-market-research (slides 28, 54), gate fingerprint
+    sha256:1090a076bd5765502ef56fa0ea20c139b36e7d61c1e2306df9ea90f553d2affc,
+    exporter receipt 100 slides / 423 parts / mode structured.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/co-work/scripts/deck/svg-to-pptx.ts'
+    - 'path_not_template_managed: templates/co-work/scripts/deck/svg-check.ts'
+    - first_request_from_project
+    - info:in_last_delivery templates/co-work/scripts/deck/svg-to-pptx.ts=false
+    - info:in_last_delivery templates/co-work/scripts/deck/svg-check.ts=false
+  dedupe_key: acedab14e4c2cf477d80ff6a020003354d57679a792ee7ee37f879aad50ad814
+  duplicates:
+    - project: co-work
+      at: '2026-11-06T14:55:54.324+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1873
+    summary: >-
+      svg-to-pptx entity double-escape fixed: exporter now decodes the five XML
+      built-ins via svg-check's exported decodeXmlEntities (v1.5.1) before
+      escaping at every text-read site — plain text, tspan runs, nested-tspan
+      fallback (nodeTextOf rewritten), and native <desc> JSON — so authored
+      P&amp;L and bare P&L both compile to slide XML P&amp;L (displays P&L),
+      matching gate R1 semantics; box width now measured from decoded text
+      (entity overhead no longer inflates EMU). svg-to-pptx v1.4.1→1.4.2. Repro
+      on origin/main copies: before = <a:t>P&amp;amp;L...</a:t> + 533400 EMU
+      overwide box, after = correct text + width. 5 new test groups in
+      deck-golden (single-pass, five entities, bare-&, nested, width parity);
+      deck suite 25 pass; unit + audit green. Design doc
+      2026-11-06-svg-pptx-entity-decode-design registered implemented (new spec
+      — the deck-pipeline-hardening spec records the exporter as unchanged in
+      that batch).
