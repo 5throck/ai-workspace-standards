@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261106-010
+kind: manual
+title: >-
+  Per-session isolated worktree convention for concurrent agent sessions.
+  Three branch-flip collisions occurred on 2026-11-06 between concurrent
+  agent sessions sharing one checkout: the PR #1863 force-repoint incident;
+  a co-work session committing onto the d8-retro-specs branch, sweeping
+  registry artifacts into its commit; and checkout flips requiring
+  two-phase stash dances in the PR #1867/#1869 landings. Proposal to
+  evaluate: each dispatched agent session works in an isolated
+  `git worktree` — the pattern already proven twice in this workspace (the
+  co-deck render batch landed via an isolated worktree with zero
+  contention; the co-work restore inspection was read-only in a worktree) —
+  together with a sync-skill variant for landing from a worktree and a
+  checkout-recovery convention for when a foreign session flips the shared
+  tree. Decision owner: workspace-root PM + lifecycle-manager. This ticket
+  requests triage, not implementation.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-06T14:20:59.000+09:00'
+history:
+  - at: '2026-11-06T14:20:59.000+09:00'
+    from: null
+    to: backlog
