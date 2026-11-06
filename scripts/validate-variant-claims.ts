@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-11-07 — spec
+//          docs/designs/2026-11-07-variant-claims-external-spawn-targets-design.md):
+//          check p DECLARED-EXTERNAL-PREFIX exemption — script_manifest may
+//          declare `spawn_target_externals` entries {prefix, provided_by,
+//          rationale}; a spawn literal starting with a declared prefix skips
+//          static existence checking (delegated to the external-deps
+//          machinery: D2 scaffold fetch + D3 compatibility tests) and each
+//          matched prefix emits an informational warning with its skip count.
+//          Malformed entries exempt nothing (fail-safe). Check i unchanged —
+//          templates/co-work declares fast-xml-parser in package.json instead.
 // v1.6.0 (2026-10-29, U-20261028-022 — spec
 //          docs/designs/2026-10-29-owner-decision-batch-design.md §4): check u
 //          — PROMOTION_CHECKLIST Phase A vs variant.json phaseAComplete. The
@@ -88,7 +98,14 @@
  *   p. Spawn targets          — script-extension string literals in
  *                               script_manifest.local scripts (spawn/exec family
  *                               targets) must resolve to existing files under
- *                               the template's layout conventions. (D9 item 6)
+ *                               the template's layout conventions, EXCEPT
+ *                               literals under a script_manifest
+ *                               spawn_target_externals declared prefix
+ *                               ({prefix, provided_by, rationale}) — their
+ *                               existence is delegated to the external-deps
+ *                               machinery (D2/D3) and each skip is surfaced as
+ *                               an informational warning. (D9 item 6 +
+ *                               2026-11-07-variant-claims-external-spawn-targets)
  *   q. Cross-layer imports    — relative imports escaping scripts/<variant>/
  *                               must resolve in templates/common/scripts/
  *                               (post-scaffold flat-sync contract); flagged
@@ -140,7 +157,7 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as yamlLoad } from 'js-yaml';
 
-const VERSION = '1.6.0';
+const VERSION = '1.7.0';
 const WORKSPACE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
@@ -1482,6 +1499,38 @@ function stripCommentLines(text: string, ext: string): string[] {
   return out;
 }
 
+// v1.7.0 (2026-11-07-variant-claims-external-spawn-targets-design): a
+// script_manifest may declare spawn_target_externals entries
+// {prefix, provided_by, rationale} — a spawn literal starting with a declared
+// prefix is exempt from static existence checking (its existence is delegated
+// to the external-deps machinery: D2 scaffold fetch + D3 compatibility tests).
+// Fail-safe: only non-empty string prefixes exempt; malformed entries warn and
+// exempt nothing, so their literals keep failing.
+interface SpawnExternal {
+  prefix: string;
+  providedBy: string;
+}
+
+function declaredSpawnExternals(sm: Record<string, unknown>): { externals: SpawnExternal[]; malformed: number } {
+  const raw = sm.spawn_target_externals;
+  if (raw === undefined || raw === null) return { externals: [], malformed: 0 };
+  if (!Array.isArray(raw)) return { externals: [], malformed: 1 };
+  const externals: SpawnExternal[] = [];
+  let malformed = 0;
+  for (const e of raw) {
+    if (!e || typeof e !== 'object' || Array.isArray(e) || typeof (e as Record<string, unknown>).prefix !== 'string' || ((e as Record<string, unknown>).prefix as string).trim() === '') {
+      malformed++;
+      continue;
+    }
+    const r = e as Record<string, unknown>;
+    externals.push({
+      prefix: r.prefix as string,
+      providedBy: typeof r.provided_by === 'string' && r.provided_by.trim() !== '' ? r.provided_by : '(no provided_by declared)',
+    });
+  }
+  return { externals, malformed };
+}
+
 function checkP(): { skipped?: string } {
   const CHECK = 'p';
   const sm = variant.script_manifest;
@@ -1490,6 +1539,17 @@ function checkP(): { skipped?: string } {
   }
   const local = (sm as Record<string, unknown>).local;
   if (!Array.isArray(local) || local.length === 0) return { skipped: 'script_manifest.local is empty' };
+
+  const { externals, malformed } = declaredSpawnExternals(sm as Record<string, unknown>);
+  if (malformed > 0) {
+    warn(
+      CHECK,
+      rel(variantPath),
+      `spawn_target_externals carries ${malformed} malformed entr${malformed === 1 ? 'y' : 'ies'} (each needs {prefix: <non-empty string>, provided_by, rationale}) — exempting nothing (fail-safe; design 2026-11-07-variant-claims-external-spawn-targets)`,
+    );
+  }
+  // Per-prefix skip counters, surfaced as informational warnings after the scan.
+  const skippedByPrefix = new Map<string, number>();
 
   for (const entry of local) {
     if (!entry || typeof entry !== 'object') continue;
@@ -1510,6 +1570,7 @@ function checkP(): { skipped?: string } {
         if (!SPAWN_TARGET_EXT_RE.test(lit)) continue;
         if (!looksLikePathLiteral(lit)) continue;
         if (lit.startsWith('/') || lit.includes('://') || lit.includes('${')) continue;
+        const matchedExternal = externals.find((x) => lit.startsWith(x.prefix));
 
         if (/\b(?:join|resolve)\s*\(/.test(line)) {
           if (!ANCHORED_JOIN_RE.test(line)) continue; // runtime-anchored base (e.g. join(projectDir, …)) — not a template target
@@ -1528,7 +1589,11 @@ function checkP(): { skipped?: string } {
           }
           if (walked) {
             if (!existsSync(cur)) {
-              add(CHECK, rel(abs), `spawn/exec target "${lit}" resolves to missing file ${rel(cur)} (script-dir-anchored join/resolve walk)`, i + 1);
+              if (matchedExternal) {
+                skippedByPrefix.set(matchedExternal.prefix, (skippedByPrefix.get(matchedExternal.prefix) ?? 0) + 1);
+              } else {
+                add(CHECK, rel(abs), `spawn/exec target "${lit}" resolves to missing file ${rel(cur)} (script-dir-anchored join/resolve walk)`, i + 1);
+              }
             }
             continue;
           }
@@ -1543,6 +1608,10 @@ function checkP(): { skipped?: string } {
           resolve(scriptDir, '..', '..', 'python', lit),
         ];
         if (candidates.some((c) => existsSync(c))) continue;
+        if (matchedExternal) {
+          skippedByPrefix.set(matchedExternal.prefix, (skippedByPrefix.get(matchedExternal.prefix) ?? 0) + 1);
+          continue;
+        }
         add(
           CHECK,
           rel(abs),
@@ -1551,6 +1620,18 @@ function checkP(): { skipped?: string } {
         );
       }
     });
+  }
+
+  // Every exemption is visible: one informational warning per matched prefix
+  // (warnings never affect the exit code — a dead reference under a declared
+  // prefix degrades to a warning, an undeclared one stays a hard finding).
+  for (const [prefix, count] of skippedByPrefix) {
+    const ext = externals.find((x) => x.prefix === prefix);
+    warn(
+      CHECK,
+      rel(variantPath),
+      `external-declared spawn prefix "${prefix}" (provided_by: ${ext?.providedBy ?? '?'}) — skipped ${count} spawn-target literal(s); existence is delegated to the external-deps machinery (D2 scaffold fetch + D3 compatibility tests)`,
+    );
   }
   return {};
 }
