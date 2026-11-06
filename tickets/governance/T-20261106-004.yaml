@@ -15,7 +15,7 @@ title: >-
   Korean content without lang: ko declaration (2 variants — the variant README
   source ships Korean and survives scaffold copy). Acceptance: nightly green
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-06T01:43:51.959+09:00'
 history:
@@ -28,5 +28,15 @@ history:
   - at: '2026-11-06T08:02:03.404+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-06T08:37:43.197+09:00'
+    from: review
+    to: done
+result: >-
+  E2E nightly red remediated: class A via B-A16 L0-only-row-strip governance
+  transform in propagate-to-templates.ts v2.23.0 (+ co-architect snapshot
+  strip), class B fixed Test 25 expectation drift via applySubstitutions
+  normalization (test-new-project.ts v1.11.0), class C anglicized co-safety EN
+  README roster rows + hash refresh; design
+  2026-11-06-validator-nightly-remediation implemented; E2E scaffold legs 41/41
+  x3, unit full green, audit green; landed as PR #1861 (merged).
 error: null
