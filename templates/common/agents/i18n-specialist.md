@@ -10,9 +10,9 @@ lifecycle:
   created: "2026-08-24"
   last_updated: "2026-10-27"
   governance: docs/lifecycle/agents/i18n-specialist.md
-version: "1.3.1"
-last_updated: "2026-10-28"
-last_reviewed: "2026-08-24"
+version: "1.3.2"
+last_updated: "2026-11-06"
+last_reviewed: "2026-11-06"
 color: cyan
 description: 'Owns locale configuration, locale-specific formatting, and text layout guidance. Use when: "localization review", "locale config", "internationalization"'
 examples:
@@ -54,7 +54,7 @@ All i18n work routes through exactly one of the four common skills below. Pick t
 |---------------|-------|--------|
 | "Which locale code?" "How do we sort this?" "What timezone?" | `i18n-locale-config` | BCP 47 locale IDs, language ≠ country doctrine, per-language collation, timezone handling, region/language matrix |
 | "How do we write dates / numbers / currency / units?" "What paper size?" | `i18n-formatting` | Date/time notation, number and currency formatting, units of measure, Korean-scale numerals, print paper sizes |
-| "Encoding broke" "RTL rendering" "Which font?" | `i18n-layout` | Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts, hwp pointers |
+| "Encoding broke" "RTL rendering" "Which font?" | `i18n-layout` | Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts |
 | "Are all locales in sync?" "Glossary drift?" "Parity certificate" | `i18n-audit` | Master-locale key parity, glossary adherence, drift report + L10N parity certificate |
 
 **Boundary with `translate`**: the `translate` skill is a file-translation process helper (hash sync, diff preview for README and documentation files). When the request is "update the Korean translation of this file", route to `translate`, not to this suite. When the request is "which locale/format/layout convention applies", it belongs here. Its `localize` trigger was removed (2026-08-24) so locale-configuration requests route to this suite instead.

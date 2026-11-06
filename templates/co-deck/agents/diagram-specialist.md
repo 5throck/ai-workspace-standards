@@ -1,7 +1,7 @@
 ---
 name: diagram-specialist
-version: "1.3.0"
-last_updated: "2026-11-06"
+version: "1.3.1"
+last_updated: 2026-11-06
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier: medium
@@ -17,7 +17,7 @@ examples:
 phases: [3.5]
 handoff_to: [html-build]
 handoff_from: [storyline, pm]
-required_skills: []
+required_skills: [version]
 lifecycle:
   phase: production
   created: "2026-05-29"

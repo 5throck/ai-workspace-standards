@@ -733,6 +733,12 @@
       "type": "used_by",
       "from": "prep-pdf",
       "to": "pdf-export",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "prep-pdf",
+      "to": "pdf-export",
       "source": "skill_manifest"
     },
     {
@@ -763,6 +769,12 @@
       "from": "presenter-mode",
       "to": "explain-me",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "presenter-mode",
+      "to": "html-build",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1392,6 +1404,12 @@
       "type": "used_by",
       "from": "slide-layout-gate",
       "to": "pdf-export",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "slide-layout-gate",
+      "to": "pdf-export",
       "source": "skill_manifest"
     },
     {
@@ -1572,12 +1590,6 @@
       "source": "prose"
     },
     {
-      "type": "used_by",
-      "from": "theme-authoring",
-      "to": "pm",
-      "source": "skill_manifest"
-    },
-    {
       "type": "references",
       "from": "theme-authoring",
       "to": "storyline",
@@ -1593,7 +1605,19 @@
       "type": "used_by",
       "from": "version",
       "to": "design",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "design",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "diagram-specialist",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1605,7 +1629,19 @@
       "type": "used_by",
       "from": "version",
       "to": "handbook-reviewer",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "handbook-reviewer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "handbook-writer",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1623,13 +1659,31 @@
       "type": "used_by",
       "from": "version",
       "to": "html-build",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "html-build",
       "source": "skill_manifest"
     },
     {
       "type": "used_by",
       "from": "version",
       "to": "image-curator",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "image-curator",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "measure",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1642,6 +1696,12 @@
       "from": "version",
       "to": "output_type.version_record",
       "source": "procedure_schema"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "pdf-export",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1737,7 +1797,19 @@
       "type": "used_by",
       "from": "version",
       "to": "research",
+      "source": "required_skills"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "research",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "source-verifier",
+      "source": "required_skills"
     },
     {
       "type": "used_by",
@@ -1750,6 +1822,12 @@
       "from": "version",
       "to": "storyline",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "version",
+      "to": "storyline",
+      "source": "required_skills"
     },
     {
       "type": "used_by",

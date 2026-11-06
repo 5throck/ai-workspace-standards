@@ -1,7 +1,7 @@
 ---
 name: handbook-writer
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-06
 role: Handbook content creation specialist — chapter structure, section prose, and AUTHORING_GUIDELINES compliance
 status: active
 tier: medium
@@ -19,7 +19,7 @@ examples:
 phases: [H-2, H-3, H-4]
 handoff_to: [handbook-reviewer]
 handoff_from: [research, pm]
-required_skills: [handbook]
+required_skills: [handbook, version]
 lifecycle:
   phase: production
   created: "2026-05-29"

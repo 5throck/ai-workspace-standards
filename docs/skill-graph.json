@@ -1170,8 +1170,8 @@
       "name": "design",
       "scope": "co-deck",
       "capability": "design",
-      "content_hash": "1c042332eeea896a",
-      "version": "1.1.1",
+      "content_hash": "cae8a9bacfc6c802",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/design.md"
       ]
@@ -1183,8 +1183,8 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "55a14df281b722fa",
-      "version": "1.3.0",
+      "content_hash": "6b87b51d388280e7",
+      "version": "1.3.1",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
       ]
@@ -1196,8 +1196,8 @@
       "name": "handbook-reviewer",
       "scope": "co-deck",
       "capability": "handbook-reviewer",
-      "content_hash": "04fe871194e275f2",
-      "version": "1.1.1",
+      "content_hash": "566a0e00683052f4",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/handbook-reviewer.md"
       ]
@@ -1209,8 +1209,8 @@
       "name": "handbook-writer",
       "scope": "co-deck",
       "capability": "handbook-writer",
-      "content_hash": "15a299740267b660",
-      "version": "1.1.1",
+      "content_hash": "c1e4cbcb42623e48",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/handbook-writer.md"
       ]
@@ -1222,8 +1222,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "0ed66305bc7f2170",
-      "version": "1.3.2",
+      "content_hash": "5e86a4e6f23b69e4",
+      "version": "1.3.3",
       "mirrors": [
         "templates/co-deck/agents/html-build.md"
       ]
@@ -1235,8 +1235,8 @@
       "name": "image-curator",
       "scope": "co-deck",
       "capability": "image-curator",
-      "content_hash": "8043070e6b7ceb37",
-      "version": "1.4.1",
+      "content_hash": "ffcb1d4c628108b1",
+      "version": "1.4.2",
       "mirrors": [
         "templates/co-deck/agents/image-curator.md"
       ]
@@ -1248,8 +1248,8 @@
       "name": "measure",
       "scope": "co-deck",
       "capability": "measure",
-      "content_hash": "21f6ccea608b5a25",
-      "version": "2.1.1",
+      "content_hash": "b5576bf33e339c8c",
+      "version": "2.1.2",
       "mirrors": [
         "templates/co-deck/agents/measure.md"
       ]
@@ -1261,8 +1261,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "dc5626705190c214",
-      "version": "2.2.1",
+      "content_hash": "052528e06eaf7093",
+      "version": "2.2.2",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
       ]
@@ -1274,8 +1274,8 @@
       "name": "research",
       "scope": "co-deck",
       "capability": "research",
-      "content_hash": "8b06fce83a9195c4",
-      "version": "1.1.1",
+      "content_hash": "ee87afe6be8b93ad",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/research.md"
       ]
@@ -1287,8 +1287,8 @@
       "name": "source-verifier",
       "scope": "co-deck",
       "capability": "source-verifier",
-      "content_hash": "97e9c14e750fd6e5",
-      "version": "1.1.1",
+      "content_hash": "7e20b64117fc2084",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/source-verifier.md"
       ]
@@ -1300,8 +1300,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "a241611eb62d6e65",
-      "version": "1.1.1",
+      "content_hash": "00f7eb668c433fb7",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/storyline.md"
       ]
@@ -2472,8 +2472,8 @@
       "name": "i18n-specialist",
       "scope": "common",
       "capability": "i18n-specialist",
-      "content_hash": "391dcb5bbb5cfcfd",
-      "version": "1.3.1",
+      "content_hash": "64b97e47581e6757",
+      "version": "1.3.2",
       "mirrors": [
         "templates/common/agents/i18n-specialist.md"
       ]
@@ -2755,6 +2755,16 @@
     },
     {
       "id": "dec:DEC-20261104-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261106-02",
       "type": "decision",
       "layer": "L0"
     },
@@ -5645,19 +5655,6 @@
       ]
     },
     {
-      "id": "skill:co-consult/hwp-document-processing",
-      "type": "skill",
-      "layer": "variant:co-consult",
-      "name": "hwp-document-processing",
-      "scope": "co-consult",
-      "capability": "hwp-document-processing",
-      "content_hash": "049f0f6f5ad7b2a2",
-      "version": "2.0.1",
-      "mirrors": [
-        "templates/co-consult/skills/hwp-document-processing/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-consult/industry-research-pack",
       "type": "skill",
       "layer": "variant:co-consult",
@@ -5747,8 +5744,8 @@
       "name": "sample-driven-report-writing",
       "scope": "co-consult",
       "capability": "sample-driven-report-writing",
-      "content_hash": "cac881727dab4fc6",
-      "version": "1.0.0",
+      "content_hash": "e3ece9a10780be5f",
+      "version": "1.1.0",
       "mirrors": [
         "templates/co-consult/skills/sample-driven-report-writing/SKILL.md"
       ]
@@ -7931,8 +7928,8 @@
       "name": "i18n-layout",
       "scope": "common",
       "capability": "i18n-layout",
-      "content_hash": "7a078ebadc5c908f",
-      "version": "1.0.0",
+      "content_hash": "3991611b47f6aac6",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/i18n-layout/SKILL.md"
       ]
@@ -11085,6 +11082,12 @@
       "source": "skills_used"
     },
     {
+      "type": "supersedes",
+      "from": "dec:DEC-20261106-02",
+      "to": "dec:DEC-20261106-01",
+      "source": "prose"
+    },
+    {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
       "to": "skill:common/decision-record",
@@ -12648,12 +12651,6 @@
       "type": "cites_skill",
       "from": "doc:co-consult/README.md",
       "to": "skill:co-consult/financial-statement-analysis",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-consult/README.md",
-      "to": "skill:co-consult/hwp-document-processing",
       "source": "workflow-doc"
     },
     {
@@ -22623,42 +22620,6 @@
       }
     },
     {
-      "type": "used_by",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "agent:co-consult/communications-lead",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "phase:co-consult/3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "phase:co-consult/4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:co-consult/consulting-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:co-consult/sample-driven-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/hwp-document-processing",
-      "to": "skill:common/i18n-layout",
-      "source": "prose"
-    },
-    {
       "type": "references",
       "from": "skill:co-consult/industry-research-pack",
       "to": "skill:co-consult/company-intelligence",
@@ -23089,12 +23050,6 @@
       "type": "references",
       "from": "skill:co-consult/sample-driven-report-writing",
       "to": "skill:co-consult/financial-statement-analysis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "skill:co-consult/sample-driven-report-writing",
-      "to": "skill:co-consult/hwp-document-processing",
       "source": "prose"
     },
     {
@@ -23729,7 +23684,12 @@
       "type": "used_by",
       "from": "skill:co-deck/prep-pdf",
       "to": "agent:co-deck/pdf-export",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/pdf-export.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "phase",
@@ -23780,7 +23740,12 @@
       "type": "used_by",
       "from": "skill:co-deck/presenter-mode",
       "to": "agent:co-deck/html-build",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/html-build.md",
+        "field": "required_skills",
+        "index": 2
+      }
     },
     {
       "type": "phase",
@@ -23832,7 +23797,12 @@
       "type": "used_by",
       "from": "skill:co-deck/slide-layout-gate",
       "to": "agent:co-deck/pdf-export",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/pdf-export.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "produces",
@@ -23930,12 +23900,6 @@
       }
     },
     {
-      "type": "used_by",
-      "from": "skill:co-deck/theme-authoring",
-      "to": "agent:co-abap/pm",
-      "source": "skill_manifest"
-    },
-    {
       "type": "references",
       "from": "skill:co-deck/theme-authoring",
       "to": "skill:co-deck/design",
@@ -23957,67 +23921,122 @@
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/design",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/design.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/diagram-specialist",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/diagram-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/handbook-reviewer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/handbook-reviewer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/handbook-writer",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/handbook-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/html-build",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/html-build.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/image-curator",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/image-curator.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/measure",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/measure.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/pdf-export",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/pdf-export.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/research",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/research.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/source-verifier",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/source-verifier.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "used_by",
       "from": "skill:co-deck/version",
       "to": "agent:co-deck/storyline",
-      "source": "skill_manifest"
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-deck/agents/storyline.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -28802,12 +28821,6 @@
         "field": "required_skills",
         "index": 2
       }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/i18n-layout",
-      "to": "skill:co-consult/hwp-document-processing",
-      "source": "prose"
     },
     {
       "type": "references",

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-11-01",
+  "last_updated": "2026-11-06",
   "description": "Central version registry for all template variants",
   "variants": {
     "co-develop": {
@@ -52,7 +52,7 @@
       ]
     },
     "co-consult": {
-      "latest": "1.0.0",
+      "latest": "1.1.0",
       "status": "stable",
       "released": "2026-06-02",
       "changelog": [

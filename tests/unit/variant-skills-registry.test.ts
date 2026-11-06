@@ -17,7 +17,7 @@
  * customized forks of common skills (variant-maintained), the other 53 are
  * co-safety-exclusive (design §1 classification, R1.5).
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 import { describe, test, expect } from 'bun:test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -28,7 +28,7 @@ import { parseSkillRegistryRows, splitRootRegistry, collectCatalogEntries, forma
 const templatesDir = resolve(import.meta.dir, '..', '..', 'templates');
 
 const EXPECTED_COUNTS: Record<string, number> = {
-  'co-consult': 19,
+  'co-consult': 18,
   'co-deck': 10,
   'co-security': 6,
   'co-develop': 4,

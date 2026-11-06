@@ -3,6 +3,10 @@
 All notable changes to the template variants are documented here.
 
 ## [Unreleased]
+### Fixed
+- **[2026-11-06]**: co-deck `required_skills` now covers every agent named in a skill's `used_by_agents` (validate-variant-claims check [o], 15 warnings → 0): `version` added to 11 agents, `prep-pdf` + `slide-layout-gate` to pdf-export, `presenter-mode` to html-build; `theme-authoring` instead drops pm from `used_by_agents` (pm uses `extends`, which forbids `required_skills` — C-SK-02); 11 agents patch-bumped, co-deck skill graph regenerated.
+### Removed
+- **[2026-11-06]**: **BREAKING (co-consult 1.0.0 → 1.1.0)** — HWP/HWPX tooling removed from workspace templates (DEC-20261106-02; spec `2026-11-06-co-work-hwpx-consolidation-design`, superseded). co-consult loses the `hwp-document-processing` skill (SSOT + 5 platform mirrors), `scripts/co-consult/hwp-extract.ts`, `scripts/co-consult/hwpx-generate.ts`, `python/extract_hwp.py`, `python/generate_hwpx.py`, and the `olefile` / `python-hwpx` requirements (pandas stays). PROMOTION_CHECKLIST and the root lifecycle record re-counted to 18 skills / 7 scripts. `sample-driven-report-writing` 1.1.0 drafts deliverables in Markdown; conversion to the client's format happens outside the workspace. No co-work replacement ships. common `i18n-layout` 1.0.1 and `i18n-specialist` 1.3.2 drop the routing to the removed skill (co-architect mirrors synced).
 
 ## [0.28.0] - 2026-11-02
 ### Changed
