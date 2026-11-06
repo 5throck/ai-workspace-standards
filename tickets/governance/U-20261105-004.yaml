@@ -3,14 +3,26 @@ id: U-20261105-004
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-05T17:13:48.598+09:00
+created_at: '2026-11-05T17:13:48.598+09:00'
 history:
-  - at: 2026-11-05T17:13:48.598+09:00
+  - at: '2026-11-05T17:13:48.598+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-06T09:32:06.886+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T09:32:06.886+09:00'
+    from: review
+    to: done
+result: >-
+  zen/white-bubble HTML rendering: base.css .bullet-item flex-column split fixed
+  (block + hanging indent, strong stays inline) + text-align left guard;
+  white-bubble opaque bubble card incl. cover, word-break keep-all,
+  zen-visual-panel alignment, card max-height, keyword accent — ported from
+  project-verified LOCAL-PATCH. Pixel-level 1600x900 outcomes unverified on host
+  (Playwright Chromium absent); intent-identical port.
 error: null
 upstream:
   project: co-deck
@@ -19,22 +31,56 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: |-
-    zen + white-bubble HTML rendering defects found on two 2026-11 decks (103 and 60 slides), checked slide by slide in a browser:
-    1. base.css `.bullet-item { display:flex }`: a bullet with <strong> splits into 2–3 flex columns (text, strong, text), so wrapped bullets look broken and the card grows past the slide frame.
-    2. Once the bullet is display:block, it inherits the card's text-align:center, so bullets render centred with the marker floating mid-line.
-    3. The white-bubble card selector `.slide:not([data-type="cover"]) .slide-content` leaves the cover card transparent. Punchline and contact had no opaque card either.
-    4. Korean titles and punchlines break mid-word ("동/결하라", "아/니라"): word-break:keep-all is missing.
-    5. `.zen-visual-panel` (the visualDisplay in-card text box, with .visual-heading and .visual-item) has no zen/white-bubble styling. The heading renders at title size, items hug the card's left edge out of line with the bullets, and there is no box.
-    6. Dense slides (bullets plus diagram) overflow the slide frame: the card has no max-height and .zen-visual no height cap.
-    7. The `**keyword**` accent is hardcoded orange instead of var(--accent-color), so a deck with a different accent (red #B03A2E) showed orange.
-    Expected: bullets with bold wrap inline and left-aligned with a hanging indent; an opaque card on every slide type; keep-all; a styled panel aligned with the bullets column; the card stays inside the frame; emphasis follows --accent-color.
+  symptom: >-
+    zen + white-bubble HTML rendering defects found on two 2026-11 decks (103
+    and 60 slides), checked slide by slide in a browser:
+
+    1. base.css `.bullet-item { display:flex }`: a bullet with <strong> splits
+    into 2–3 flex columns (text, strong, text), so wrapped bullets look broken
+    and the card grows past the slide frame.
+
+    2. Once the bullet is display:block, it inherits the card's
+    text-align:center, so bullets render centred with the marker floating
+    mid-line.
+
+    3. The white-bubble card selector `.slide:not([data-type="cover"])
+    .slide-content` leaves the cover card transparent. Punchline and contact had
+    no opaque card either.
+
+    4. Korean titles and punchlines break mid-word ("동/결하라", "아/니라"):
+    word-break:keep-all is missing.
+
+    5. `.zen-visual-panel` (the visualDisplay in-card text box, with
+    .visual-heading and .visual-item) has no zen/white-bubble styling. The
+    heading renders at title size, items hug the card's left edge out of line
+    with the bullets, and there is no box.
+
+    6. Dense slides (bullets plus diagram) overflow the slide frame: the card
+    has no max-height and .zen-visual no height cap.
+
+    7. The `**keyword**` accent is hardcoded orange instead of
+    var(--accent-color), so a deck with a different accent (red #B03A2E) showed
+    orange.
+
+    Expected: bullets with bold wrap inline and left-aligned with a hanging
+    indent; an opaque card on every slide type; keep-all; a styled panel aligned
+    with the bullets column; the card stays inside the frame; emphasis follows
+    --accent-color.
   affected_paths:
     - docs/html-themes/styles/white-bubble/style.css
     - docs/html-themes/styles/base.css
     - docs/html-themes/themes/zen/theme.css
   identity_source: client_roots
-  repro: 'Build any zen + white-bubble deck whose bullets contain **bold** and whose slides carry visualDisplay text panels (e.g. co-deck presentations/2026-11-ai-market-research-lecture slides 10 and 53), then open it at 1600x900. The local fix is in docs/html-themes/styles/white-bubble/style.css, appended blocks marked LOCAL-PATCH(upstream-request: U-20261105-002); the fix was filed under that existing ID. Verified with Playwright at 1600x900 and 1280x720: 0 flex bullets, card inside frame with a 56px margin, panel left edge == bullets left edge.'
+  repro: >-
+    Build any zen + white-bubble deck whose bullets contain **bold** and whose
+    slides carry visualDisplay text panels (e.g. co-deck
+    presentations/2026-11-ai-market-research-lecture slides 10 and 53), then
+    open it at 1600x900. The local fix is in
+    docs/html-themes/styles/white-bubble/style.css, appended blocks marked
+    LOCAL-PATCH(upstream-request: U-20261105-002); the fix was filed under that
+    existing ID. Verified with Playwright at 1600x900 and 1280x720: 0 flex
+    bullets, card inside frame with a 56px margin, panel left edge == bullets
+    left edge.
   triage: ready
   flagged: false
   triage_reasons:
@@ -44,4 +90,14 @@ upstream:
   dedupe_key: 85ef5b2fe2aa84b0b158bd62a587e5146fee400993e392e1ace3c944079c8dfa
   duplicates:
     - project: co-deck
-      at: 2026-11-05T17:13:48.598+09:00
+      at: '2026-11-05T17:13:48.598+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1864
+    summary: >-
+      zen/white-bubble HTML rendering: base.css .bullet-item flex-column split
+      fixed (block + hanging indent, strong stays inline) + text-align left
+      guard; white-bubble opaque bubble card incl. cover, word-break keep-all,
+      zen-visual-panel alignment, card max-height, keyword accent — ported from
+      project-verified LOCAL-PATCH. Pixel-level 1600x900 outcomes unverified on
+      host (Playwright Chromium absent); intent-identical port.

@@ -3,14 +3,25 @@ id: U-20261105-001
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-05T09:59:46.587+09:00
+created_at: '2026-11-05T09:59:46.587+09:00'
 history:
-  - at: 2026-11-05T09:59:46.587+09:00
+  - at: '2026-11-05T09:59:46.587+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-06T10:35:43.946+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T10:35:43.946+09:00'
+    from: review
+    to: done
+result: >-
+  Layout-gate false FAILs: slide-type resolution extracted to shared
+  lib/slide-type.ts slideTypeOf() recognizing boolean flags
+  (isCover/isDivider/isPunchline/isContact/isProfile) + html-build long forms +
+  legacy type string; estimate-layout.ts v1.5.0. Repro: 11 false violations ->
+  0.
 error: null
 upstream:
   project: co-deck
@@ -19,7 +30,17 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'co-deck layout gate lint produces false FAILs on healthy decks. estimate-layout.ts reads slide type via `s.type ?? ''standard''` (L425), but current co-deck slidedata.json files use boolean flags (isCover / isDivider / isPunchline / isContact / isProfile) instead of a `type` string. Result: every special slide (cover/divider/punchline/contact/profile) falsely FAILs the min-content check — measured on 2026-11-05: 20 of 46 raw lint FAILs were this false positive, blocking Stage 11 PDF export on a healthy 60-slide deck. Expected: lint recognizes the boolean-flag schema used by all current decks. Repro: run `bun scripts/co-deck/estimate-layout.ts --lint` against any recently built co-deck project slidedata.json.'
+  symptom: >-
+    co-deck layout gate lint produces false FAILs on healthy decks.
+    estimate-layout.ts reads slide type via `s.type ?? 'standard'` (L425), but
+    current co-deck slidedata.json files use boolean flags (isCover / isDivider
+    / isPunchline / isContact / isProfile) instead of a `type` string. Result:
+    every special slide (cover/divider/punchline/contact/profile) falsely FAILs
+    the min-content check — measured on 2026-11-05: 20 of 46 raw lint FAILs were
+    this false positive, blocking Stage 11 PDF export on a healthy 60-slide
+    deck. Expected: lint recognizes the boolean-flag schema used by all current
+    decks. Repro: run `bun scripts/co-deck/estimate-layout.ts --lint` against
+    any recently built co-deck project slidedata.json.
   affected_paths:
     - scripts/co-deck/estimate-layout.ts
   identity_source: cwd
@@ -30,4 +51,13 @@ upstream:
   dedupe_key: 56e66066521a293a65535c67750d26fac2d7ad1a526fa09a79c91a4a2482056f
   duplicates:
     - project: co-deck
-      at: 2026-11-05T09:59:46.587+09:00
+      at: '2026-11-05T09:59:46.587+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1866
+    summary: >-
+      Layout-gate false FAILs: slide-type resolution extracted to shared
+      lib/slide-type.ts slideTypeOf() recognizing boolean flags
+      (isCover/isDivider/isPunchline/isContact/isProfile) + html-build long
+      forms + legacy type string; estimate-layout.ts v1.5.0. Repro: 11 false
+      violations -> 0.

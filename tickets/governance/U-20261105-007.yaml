@@ -3,7 +3,7 @@ id: U-20261105-007
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-05T17:13:48.830+09:00'
 history:
@@ -13,7 +13,20 @@ history:
   - at: '2026-11-06T08:29:00.417+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-06T09:32:17.319+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T09:32:17.319+09:00'
+    from: review
+    to: done
+result: >-
+  Video pipeline gap: new scripts/co-deck/download-videos.ts v1.0.0 (TS port of
+  download_all_videos.py per ADR-0036, QuickDL-backed, idempotent);
+  build-theme-deck.ts v0.2.x runs build then automatic idempotent inject after
+  every build (ordering structural, cannot be skipped) + --download-videos
+  opt-in; rebuild order documented in html-build agent + skill docs. Note:
+  upstream content-gap items beyond pipeline mechanics (video availability
+  offline) remain project-side.
 error: null
 upstream:
   project: co-deck
@@ -84,3 +97,14 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-05T17:13:48.830+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1864
+    summary: >-
+      Video pipeline gap: new scripts/co-deck/download-videos.ts v1.0.0 (TS port
+      of download_all_videos.py per ADR-0036, QuickDL-backed, idempotent);
+      build-theme-deck.ts v0.2.x runs build then automatic idempotent inject
+      after every build (ordering structural, cannot be skipped) +
+      --download-videos opt-in; rebuild order documented in html-build agent +
+      skill docs. Note: upstream content-gap items beyond pipeline mechanics
+      (video availability offline) remain project-side.

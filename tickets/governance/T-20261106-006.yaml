@@ -13,7 +13,7 @@ title: >-
   design-gate-coverage the 'spec <name>' subject-citation join — collapses ~10
   adjudication rows/day (3-week recurring case)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-06T01:43:52.023+09:00'
 history:
@@ -24,16 +24,37 @@ history:
     action: correct-record
     actor: automation-engineer
     from: item 2 pending — T-20261104-003 result merge hash 268e268e21c64
-    to: item 2 done — hash corrected to 268e21c64 (verified PR #1855 merge commit; PR #1862)
+    to: item 2 done — hash corrected to 268e21c64 (verified PR
   - at: '2026-11-06T08:40:19.433+09:00'
     action: progress
     actor: automation-engineer
     from: item 4 optional — design-gate-coverage 'spec <name>' join
-    to: item 4 done — design-gate-coverage v1.1.0 specCitedCommits join + regression tests (PR #1862)
+    to: >-
+      item 4 done — design-gate-coverage v1.1.0 specCitedCommits join +
+      regression tests (PR
   - at: '2026-11-06T09:09:05.620+09:00'
     action: progress
     actor: automation-engineer
     from: item 3 — 81-row D8 batch adjudication
     to: item 3 pending — auditor dispatch in flight on a separate branch
-result: null
+  - at: '2026-11-06T09:52:22.357+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-06T09:52:22.378+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-06T09:52:22.398+09:00'
+    from: review
+    to: done
+result: >-
+  All items landed: item 1 spec-registry addition (earlier session); item 2
+  record correction 268e268e21c64->268e21c64 via sanctioned action-history
+  append (PR #1862); item 4 design-gate-coverage v1.1.0 spec-name citation join
+  with 7-case unit pin (PR #1862); item 3 D8 batch adjudication 26 residual rows
+  -> 7 spec-cited / 14 E-class / 5 documented residuals with spec-registration
+  recommendations (PR #1865, record
+  docs/reports/2026-11-06-d8-batch-adjudication.md). Residual 5 rows
+  (T-20261103-004, T-20261103-007, U-20261104-001/-002/-003) intentionally not
+  force-exempted — recommended retro spec registrations recorded in the
+  adjudication record §B3.
 error: null
