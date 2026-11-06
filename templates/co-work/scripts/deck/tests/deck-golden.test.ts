@@ -894,5 +894,98 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     }
     rmSync(dir, { recursive: true, force: true });
   });
+
+  // -------------------------------------------------------------------------
+  // v1.6.0 pins — notes placeholder STRUCTURE (python-pptx/PowerPoint reference
+  // model). v≤1.5.1 emitted an EMPTY notesMaster spTree and an invented notesSlide
+  // idx scheme (body idx=1, sldNum idx=10, no sldImg): the notes page could not
+  // inherit header/date/slide-image/footer/number placeholders and PowerPoint
+  // raised the repair prompt on notes-bearing decks.
+  // -------------------------------------------------------------------------
+
+  const PH_RE = /<p:ph ([^/]*)\/>/g;
+
+  test("v1.6.0 pin: notesMaster spTree carries the six reference placeholders (hdr, dt, sldImg, body, ftr, sldNum) + p:bg", () => {
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v160-master"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+    ], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const notesDir = join(dir, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Master structure fixture.\n");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    const master = new TextDecoder().decode(pkg["ppt/notesMasters/notesMaster1.xml"]!);
+    const phs = [...master.matchAll(PH_RE)].map((m) => m[1]);
+    const types = phs.map((attrs) => (attrs.match(/type="([^"]+)"/) ?? [])[1]);
+    for (const t of ["hdr", "dt", "sldImg", "body", "ftr", "sldNum"]) {
+      expect(types).toContain(t); // all six reference placeholder types present
+    }
+    const masterIdx = phs.map((attrs) => (attrs.match(/idx="([^"]+)"/) ?? [])[1]).filter(Boolean).sort();
+    expect(masterIdx).toEqual(["1", "2", "3", "4", "5"]); // reference idx set: dt=1 sldImg=2 body=3 ftr=4 sldNum=5 (hdr carries no idx)
+    // reference model fidelity: notesMaster carries p:bg and the body placeholder
+    // keeps its five-level master-text body
+    expect(master).toContain('<p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg>');
+    expect(master).toContain("Click to edit Master text styles");
+    expect(master).toContain("Fifth level"); // nine-level notesStyle structure carried by the body txBody
+    const masterIds = [...master.matchAll(/<p:cNvPr id="(\d+)"/g)].map((m) => parseInt(m[1], 10));
+    expect(new Set(masterIds).size).toBe(masterIds.length);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.6.0 pin: notesSlide is the 3-placeholder reference scheme and every ph idx pairs with the notesMaster", () => {
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v160-slide"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+      { name: "02-content.svg", body: PAGE_CONTENT },
+    ], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const notesDir = join(dir, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Welcome the leadership team.\n");
+    writeFileSync(join(notesDir, "02-speaker.md"), "Second page notes text.\n");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    const master = new TextDecoder().decode(pkg["ppt/notesMasters/notesMaster1.xml"]!);
+    const masterTypes = new Set([...master.matchAll(/<p:ph ([^/]*)\/>/g)].map((m) => (m[1].match(/type="([^"]+)"/) ?? [])[1]));
+    const masterIdx = new Set(
+      [...master.matchAll(/<p:ph ([^/]*)\/>/g)]
+        .map((m) => (m[1].match(/idx="([^"]+)"/) ?? [])[1])
+        .filter(Boolean),
+    );
+    const fldGuids: string[] = [];
+    for (const n of [1, 2]) {
+      const slide = new TextDecoder().decode(pkg[`ppt/notesSlides/notesSlide${n}.xml`]!);
+      const phs = [...slide.matchAll(PH_RE)].map((m) => m[1]);
+      const entries = phs.map((attrs) => ({
+        type: (attrs.match(/type="([^"]+)"/) ?? [])[1],
+        idx: (attrs.match(/idx="([^"]+)"/) ?? [])[1],
+      }));
+      // exact reference triple: sldImg idx=2, body idx=3, sldNum idx=5
+      expect(entries.map((e) => `${e.type}@${e.idx ?? "-"}`).sort()).toEqual(["body@3", "sldImg@2", "sldNum@5"]);
+      // pairing rule: every notesSlide ph idx is a member of the notesMaster's idx set
+      for (const e of entries) {
+        expect(masterTypes.has(e.type)).toBe(true);
+        if (e.idx) expect(masterIdx.has(e.idx)).toBe(true);
+      }
+      // sldImg placeholder carries an EMPTY spPr (thumbnail slot inherits the master geometry)
+      const sldImgSp = slide.match(/<p:sp>(?:(?!<\/p:sp>)[\s\S])*type="sldImg"(?:(?!<\/p:sp>)[\s\S])*<\/p:sp>/)![0];
+      expect(sldImgSp).toContain("<p:spPr/>");
+      // note text lives in the body placeholder shape
+      const bodySp = slide.match(/<p:sp>(?:(?!<\/p:sp>)[\s\S])*type="body"(?:(?!<\/p:sp>)[\s\S])*<\/p:sp>/)![0];
+      expect(bodySp).toContain(n === 1 ? "Welcome the leadership team." : "Second page notes text.");
+      // sldNum placeholder keeps its slidenum field GUID
+      const sldNumSp = slide.match(/<p:sp>(?:(?!<\/p:sp>)[\s\S])*type="sldNum"(?:(?!<\/p:sp>)[\s\S])*<\/p:sp>/)![0];
+      expect(sldNumSp).toContain('type="slidenum"');
+      for (const m of slide.matchAll(/<a:fld id="([^"]*)"/g)) {
+        expect(m[1]).toMatch(ST_GUID);
+        fldGuids.push(m[1]);
+      }
+      // cNvPr ids unique per tree (group=1, placeholders 2/3/4)
+      const ids = [...slide.matchAll(/<p:cNvPr id="(\d+)"/g)].map((m) => parseInt(m[1], 10));
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+    expect(new Set(fldGuids).size).toBe(fldGuids.length); // per-slide unique field GUIDs preserved
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
 
