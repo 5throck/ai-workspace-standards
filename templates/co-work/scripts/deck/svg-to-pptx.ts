@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * @version 1.5.0
+ * @version 1.5.1
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Decodes the five XML built-in entities in extracted text before DrawingML escaping. Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
+// v1.5.1 (2026-11-06): authoritative ECMA-376 XSD validation (xmllint --schema against the official OfficeOpenXML-XMLSchema-Transitional distribution) caught the two defects manual rule-checking missed. (1) theme1.xml root/child elements were emitted in the PresentationML namespace (`p:theme`, `p:themeElements`, `p:clrScheme`, …); dml-main.xsd declares the global element `theme` (CT_OfficeStyleSheet) ONLY in the DrawingML namespace — theme part is now `a:theme`/`a:*` with the p: declaration dropped. (2) p:notesMasterId carried an illegal `id` attribute — CT_NotesMasterIdListEntry (pml.xsd) allows only the required r:id attribute, and the emitted id="2147483649" also collided with slideMaster1's sldLayoutId space (2147483649+); attribute removed. Golden pins updated + two new pin classes in deck-golden.test.ts.
 // v1.5.0 (2026-11-06): ECMA-376 schema-validity fixes — packages were xmllint-well-formed but PowerPoint-rejected. (1) notesSlide slide-number field: a:fld/@id is ST_Guid; the literal `{GET-NUM}` placeholder is replaced by a deterministic GUID. (2) structured layouts: placeholder cNvPr ids start at 2 (v1.4.2 emitted id="0" and a duplicate id="1" colliding with the spTree group). (3) presentation.xml: p:notesMasterIdLst emitted after sldMasterIdLst when notesSlides exist (CT_Presentation sequence; the notesMaster rel was added but never referenced). (4) notesSlide rels: explicit notesMaster relationship added alongside the slide back-reference (ISO/IEC 29500-1 §13.3.6). Golden-test pins for all four classes in deck-golden.test.ts.
 // v1.4.2 (2026-11-06, U-20261106-002): XML built-in entities decode in extracted text (text/tspan/desc payload, via svg-check's decodeXmlEntities) BEFORE esc() — authored `P&amp;L` no longer double-escapes to `P&amp;amp;L` in slide XML (parity with svg-check v1.5.0 R1).
 // v1.4.1 (2026-11-06): connector cNvPr close-tag fix — malformed DrawingML (unclosed <p:cNvPr> + stray quote) triggered a PowerPoint repair prompt on every deck containing line shapes.
@@ -394,7 +395,10 @@ function themeXml(tokens: DeckTokens): string {
     `<a:${name}><a:latin typeface="${esc(latin)}"/><a:ea typeface="${esc(ea)}"/><a:cs typeface=""/></a:${name}>`;
   const gradStops = (c1: string, c2: string) =>
     `<a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="50000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="50000"/></a:schemeClr></a:gs>`;
-  return XMLDECL + `<p:theme xmlns:a="${NS_A}" xmlns:p="${NS_P}" name="co-work-deck"><p:themeElements><p:clrScheme name="co-work"><a:dk1><a:srgbClr val="${dk1}"/></a:dk1><a:lt1><a:srgbClr val="${lt1}"/></a:lt1><a:dk2><a:srgbClr val="${dk2}"/></a:dk2><a:lt2><a:srgbClr val="${lt2}"/></a:lt2>${accents}<a:hlink><a:srgbClr val="${c.primary ?? "1F3864"}"/></a:hlink><a:folHlink><a:srgbClr val="${c.muted ?? "6B6B6B"}"/></a:folHlink></p:clrScheme><p:fontScheme name="co-work">${scheme("majorFont", tokens.fonts.major, tokens.fonts.eastasia_major)}${scheme("minorFont", tokens.fonts.minor, tokens.fonts.eastasia_minor)}</p:fontScheme><p:fmtScheme name="co-work"><p:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="0" scaled="1"/></a:gradFill></p:fillStyleLst><p:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="28575"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></p:lnStyleLst><p:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></p:effectStyleLst><p:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/></a:schemeClr></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill></p:bgFillStyleLst></p:fmtScheme></p:themeElements></p:theme>`;
+  // v1.5.1: theme part root is `a:theme` in the DrawingML namespace (ECMA-376 dml-main.xsd
+  // declares element `theme` type CT_OfficeStyleSheet globally in the DrawingML main ns).
+  // v1.5.0 emitted `p:theme` in the PresentationML namespace → PowerPoint repair prompt.
+  return XMLDECL + `<a:theme xmlns:a="${NS_A}" name="co-work-deck"><a:themeElements><a:clrScheme name="co-work"><a:dk1><a:srgbClr val="${dk1}"/></a:dk1><a:lt1><a:srgbClr val="${lt1}"/></a:lt1><a:dk2><a:srgbClr val="${dk2}"/></a:dk2><a:lt2><a:srgbClr val="${lt2}"/></a:lt2>${accents}<a:hlink><a:srgbClr val="${c.primary ?? "1F3864"}"/></a:hlink><a:folHlink><a:srgbClr val="${c.muted ?? "6B6B6B"}"/></a:folHlink></a:clrScheme><a:fontScheme name="co-work">${scheme("majorFont", tokens.fonts.major, tokens.fonts.eastasia_major)}${scheme("minorFont", tokens.fonts.minor, tokens.fonts.eastasia_minor)}</a:fontScheme><a:fmtScheme name="co-work"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="0" scaled="1"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="28575"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/></a:schemeClr></a:solidFill><a:gradFill><a:gsLst>${gradStops("a", "b")}</a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`;
 }
 
 const ROLE_LAYOUT_CONVENTIONS: Record<string, { type: string; title: [number, number, number, number]; body: [number, number, number, number] | null }> = {
@@ -687,7 +691,10 @@ export function compileDeck(opts: CompileOptions): CompileResult {
   // v1.4.2 emitted the notesMaster relationship but never referenced it from
   // presentation.xml — a PowerPoint repair trigger.
   const notesMasterIdLst = hasNotes
-    ? `<p:notesMasterIdLst><p:notesMasterId id="2147483649" r:id="rIdNotesMaster"/></p:notesMasterIdLst>`
+    // v1.5.1: CT_NotesMasterIdListEntry (ECMA-376 pml.xsd) carries ONLY the required r:id
+    // attribute — no `id`. v1.5.0 emitted id="2147483649", which xmllint rejected AND which
+    // collided with the slideMaster's sldLayoutId space (2147483649+).
+    ? `<p:notesMasterIdLst><p:notesMasterId r:id="rIdNotesMaster"/></p:notesMasterIdLst>`
     : "";
   const presentation = XMLDECL + `<p:presentation xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" saveSubsetFonts="1"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>${notesMasterIdLst}<p:sldIdLst>${slideParts.map((_, i) => `<p:sldId id="${256 + i}" r:id="rIdS${i + 1}"/>`).join("")}</p:sldIdLst><p:sldSz cx="${emu(tokens.canvas.width_px)}" cy="${emu(tokens.canvas.height_px)}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`;
 
@@ -792,7 +799,7 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.5.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.5.1 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\

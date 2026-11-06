@@ -788,7 +788,15 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     // CT_Presentation sequence: sldMasterIdLst, notesMasterIdLst, (handoutMasterIdLst), sldIdLst
     const order = pres.match(/<p:(sldMasterIdLst|notesMasterIdLst|sldIdLst)/g) ?? [];
     expect(order).toEqual(["<p:sldMasterIdLst", "<p:notesMasterIdLst", "<p:sldIdLst"]);
-    expect(pres).toContain('<p:notesMasterId id="2147483649" r:id="rIdNotesMaster"/>');
+    // v1.5.1: CT_NotesMasterIdListEntry carries ONLY r:id — the v1.5.0 pin enshrined an
+    // illegal `id="2147483649"` attribute that xmllint --schema rejected and that collided
+    // with slideMaster1's sldLayoutId space (2147483649+).
+    expect(pres).toContain('<p:notesMasterId r:id="rIdNotesMaster"/>');
+    // Attribute-level assertion: CT_NotesMasterIdListEntry allows ONLY r:id. (A `\bid=`
+    // regex would false-positive on the legal r:id attribute — `\b` matches after `:`.)
+    const nmAttrs = [...(pres.match(/<p:notesMasterId\b([^>]*)/)?.[1] ?? "").matchAll(/\s([a-zA-Z0-9:]+)=/g)].map((m) => m[1]);
+    expect(nmAttrs).toContain("r:id");
+    expect(nmAttrs).not.toContain("id");
     const presRels = new TextDecoder().decode(pkg["ppt/_rels/presentation.xml.rels"]!);
     expect(presRels).toContain('Id="rIdNotesMaster" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="notesMasters/notesMaster1.xml"');
     const notesRels = new TextDecoder().decode(pkg["ppt/notesSlides/_rels/notesSlide1.xml.rels"]!);
@@ -796,6 +804,40 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     expect(notesRels).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"');
     const slideRels = new TextDecoder().decode(pkg["ppt/slides/_rels/slide1.xml.rels"]!);
     expect(slideRels).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide1.xml"');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.1 pin: theme part is DrawingML-namespaced (a:theme root) and master id spaces do not collide", () => {
+    // v1.5.0 emitted `p:theme`/`p:*` (PresentationML namespace) — dml-main.xsd declares the
+    // global element `theme` (CT_OfficeStyleSheet) only in the DrawingML main namespace, so
+    // PowerPoint refused the theme part and raised the repair prompt on EVERY deck.
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v151-theme"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+    ], CONTENT_MD);
+    // Notes fixture so p:notesMasterIdLst is emitted and the illegal-id pin below is
+    // actually exercised (v1.5.1 pin previously compiled notes-free and passed vacuously).
+    const notesDir = join(dir, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Theme pin fixture note.\n");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    const theme = new TextDecoder().decode(pkg["ppt/theme/theme1.xml"]!);
+    expect(theme).toContain('<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"');
+    expect(theme).toContain("<a:themeElements><a:clrScheme");
+    expect(theme).toContain("<a:fmtScheme");
+    expect(theme.trimEnd().endsWith("</a:theme>")).toBe(true);
+    expect(theme).not.toMatch(/<(p:theme|p:themeElements|p:clrScheme|p:fontScheme|p:fmtScheme)[\s>]/);
+    // id-space hygiene: no notesMasterId id attr anywhere; sldLayoutId space stays disjoint
+    // from every id presentation.xml declares for masters (which now carry no id for notes).
+    const pres = new TextDecoder().decode(pkg["ppt/presentation.xml"]!);
+    // notesMasterId must EXIST (notes fixture above) and carry ONLY r:id — attribute-level
+    // check, not a `\bid=` regex (which false-positives on the legal r:id attribute).
+    const nmAttrs151 = [...(pres.match(/<p:notesMasterId\b([^>]*)/)?.[1] ?? "").matchAll(/\s([a-zA-Z0-9:]+)=/g)].map((m) => m[1]);
+    expect(nmAttrs151).toContain("r:id");
+    expect(nmAttrs151).not.toContain("id");
+    const masterIds = [...pres.matchAll(/<p:(?:sldMasterId|notesMasterId) [^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+    const layoutIds = [...new TextDecoder().decode(pkg["ppt/slideMasters/slideMaster1.xml"]!).matchAll(/<p:sldLayoutId [^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+    for (const id of layoutIds) expect(masterIds).not.toContain(id);
     rmSync(dir, { recursive: true, force: true });
   });
 
