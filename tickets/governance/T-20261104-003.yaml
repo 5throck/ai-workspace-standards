@@ -28,8 +28,13 @@ history:
   - at: '2026-11-05T06:24:22.085+09:00'
     from: review
     to: done
+  - at: '2026-11-06T08:07:19.882+09:00'
+    action: correct-record
+    actor: automation-engineer
+    from: merge hash 268e268e21c64
+    to: merge hash 268e21c64
 result: >-
-  Fixed in PR #1855 (merge 268e268e21c64): co-workspace suites moved to absolute
+  Fixed in PR #1855 (merge 268e21c64): co-workspace suites moved to absolute
   fixture roots with rmdirIfEmpty sweeps (incl. 4 additional relative-scaffold
   suites found in follow-up); apply-tier-normalization --projects leg computes
   its own expected count; project-target-guards.test.ts (the actual CI-side

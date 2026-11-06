@@ -54,6 +54,13 @@ changed tickets/ file paths, joins them against docs/specs/registry.json
 doc naming the ticket in prose counts; the registry is the SSOT), and emits a
 coverage table (covered-by-spec / uncovered / unattributed commit) for the
 review to adjudicate E1–E5. Report-only: nothing auto-closes, exit 0 always.
+v1.1.0 (T-20261106-006 item 4): subject-citation join — a template-touching
+commit citing an EXISTING registered spec by name ("spec <name>", where <name>
+is a registry id, equivalently the docs/specs/entries/<name>.json filename) is
+spec-covered: it leaves unattributedCommits and reports under the new
+specCitedCommits section (collapses the recurring ~10/day "closeouts citing
+specs by name" adjudication row); an UNKNOWN spec name never passes, and a
+spec citation never covers ticket rows (the prose join is unchanged).
 Reproduces the 2026-10-28 FULL review's F-1 finding mechanically (the
 reconciliation rode PR T-20261028-001). Consumed as review-baseline battery #9
 (--json over a 24h window). L0-only — reads git history + docs/specs; no L1

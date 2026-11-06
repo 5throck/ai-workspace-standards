@@ -3,13 +3,16 @@ id: U-20261105-007
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-05T17:13:48.830+09:00
+created_at: '2026-11-05T17:13:48.830+09:00'
 history:
-  - at: 2026-11-05T17:13:48.830+09:00
+  - at: '2026-11-05T17:13:48.830+09:00'
     from: null
     to: backlog
+  - at: '2026-11-06T08:29:00.417+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,15 +22,38 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: |-
+  symptom: >-
     Pipeline and content gaps found while revising two decks:
-    1. Videos: the decks reference YouTube IDs, but no pipeline step downloads them for offline HTML playback. The project had to copy download_all_videos.py and inject_video_players.py from an earlier deck by hand. The rebuild order (build → style patch → video inject) is not documented, and a rebuild silently drops the players.
-    2. tests/patch-zen-white-bubble.ts defaults to --version v1. With a v2 build it patches the wrong file and leaves v2 unpatched, with no warning.
-    3. Storyline emits a visualDisplay text panel that repeats the slide's bullets verbatim, and captions equal to the title or a bullet. Nothing checks for this.
-    4. Bullet density: many content slides had 2–3 bullets. The user's standard is 4–5; estimate-layout's default min_bullets is 3.
-    5. Images: slides whose visual is an SVG got no background photo (about 21 per deck). Nothing checks photo reuse across decks made the same day (one file was shared between two decks).
-    6. The instructor profile is not carried over from the most recent filled lecture-profile; new decks start blank.
-    Expected: an offline video download and inject step in html-build, with the rebuild order documented and the inject idempotent. The patch script follows the build version or errors. A duplicate-text lint covers visualDisplay, caption, title and bullets. min_bullets is configurable per profile (4 here). Background coverage and cross-deck hash dedupe run in the image gate. Instructor defaults come from the newest filled profile.
+
+    1. Videos: the decks reference YouTube IDs, but no pipeline step downloads
+    them for offline HTML playback. The project had to copy
+    download_all_videos.py and inject_video_players.py from an earlier deck by
+    hand. The rebuild order (build → style patch → video inject) is not
+    documented, and a rebuild silently drops the players.
+
+    2. tests/patch-zen-white-bubble.ts defaults to --version v1. With a v2 build
+    it patches the wrong file and leaves v2 unpatched, with no warning.
+
+    3. Storyline emits a visualDisplay text panel that repeats the slide's
+    bullets verbatim, and captions equal to the title or a bullet. Nothing
+    checks for this.
+
+    4. Bullet density: many content slides had 2–3 bullets. The user's standard
+    is 4–5; estimate-layout's default min_bullets is 3.
+
+    5. Images: slides whose visual is an SVG got no background photo (about 21
+    per deck). Nothing checks photo reuse across decks made the same day (one
+    file was shared between two decks).
+
+    6. The instructor profile is not carried over from the most recent filled
+    lecture-profile; new decks start blank.
+
+    Expected: an offline video download and inject step in html-build, with the
+    rebuild order documented and the inject idempotent. The patch script follows
+    the build version or errors. A duplicate-text lint covers visualDisplay,
+    caption, title and bullets. min_bullets is configurable per profile (4
+    here). Background coverage and cross-deck hash dedupe run in the image gate.
+    Instructor defaults come from the newest filled profile.
   affected_paths:
     - agents/html-build.md
     - agents/storyline.md
@@ -37,8 +63,13 @@ upstream:
     - scripts/co-deck/inject-video-players.ts
     - scripts/co-deck/estimate-layout.ts
   identity_source: client_roots
-  repro: 'The co-deck project on 2026-11-05: presentations/2026-11-consumer-goods-market-shift (local download_all_videos.py and inject_video_players.py, VERSIONS.md rebuild note) and presentations/2026-11-ai-market-research-lecture. Run tests/patch-zen-white-bubble.ts without --version after building v2.'
-  triage: inbox
+  repro: >-
+    The co-deck project on 2026-11-05:
+    presentations/2026-11-consumer-goods-market-shift (local
+    download_all_videos.py and inject_video_players.py, VERSIONS.md rebuild
+    note) and presentations/2026-11-ai-market-research-lecture. Run
+    tests/patch-zen-white-bubble.ts without --version after building v2.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: tests/patch-zen-white-bubble.ts'
@@ -52,4 +83,4 @@ upstream:
   dedupe_key: 56192e1f9ba09cbe219fedd2c57c9e80b37003d52a3c8a7b2fed707710fd3bda
   duplicates:
     - project: co-deck
-      at: 2026-11-05T17:13:48.830+09:00
+      at: '2026-11-05T17:13:48.830+09:00'

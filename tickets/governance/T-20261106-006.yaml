@@ -20,5 +20,20 @@ history:
   - at: '2026-11-06T01:43:52.023+09:00'
     from: null
     to: backlog
+  - at: '2026-11-06T08:40:19.332+09:00'
+    action: correct-record
+    actor: automation-engineer
+    from: item 2 pending — T-20261104-003 result merge hash 268e268e21c64
+    to: item 2 done — hash corrected to 268e21c64 (verified PR #1855 merge commit; PR #1862)
+  - at: '2026-11-06T08:40:19.433+09:00'
+    action: progress
+    actor: automation-engineer
+    from: item 4 optional — design-gate-coverage 'spec <name>' join
+    to: item 4 done — design-gate-coverage v1.1.0 specCitedCommits join + regression tests (PR #1862)
+  - at: '2026-11-06T09:09:05.620+09:00'
+    action: progress
+    actor: automation-engineer
+    from: item 3 — 81-row D8 batch adjudication
+    to: item 3 pending — auditor dispatch in flight on a separate branch
 result: null
 error: null

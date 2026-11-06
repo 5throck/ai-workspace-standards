@@ -1,7 +1,22 @@
 #!/usr/bin/env bun
 /**
  * design-gate-coverage.ts — windowed Design-Gate coverage check (T-20261028-001).
- * @version 1.0.0
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-11-06, T-20261106-006 item 4): subject-citation join — a
+ *         template-touching commit that cites an EXISTING registered spec by
+ *         name ("spec <name>", where <name> is a docs/specs/registry.json id,
+ *         equivalently the docs/specs/entries/<name>.json filename) is covered
+ *         at the commit level: it no longer lands in unattributedCommits and
+ *         is reported under a new specCitedCommits section instead. This
+ *         collapses the recurring D8 adjudication row where a closeout commit
+ *         references its design by spec name instead of ticket ids (~10 rows/
+ *         day over the 3 weeks since D8 shipped, T-20261106-006 item 3's
+ *         "cite specs by name" class). Safety rails: an UNKNOWN spec name
+ *         never passes (candidates resolve only against the registry's id
+ *         set — the SSOT per design §10 Q4); the TICKET-level join is
+ *         unchanged (a spec citation does not cover tickets — those rows
+ *         still need their own registered-prose or E1–E5 adjudication).
  *
  * v1.0.0 (2026-10-28, T-20261028-001 — spec
  *         docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
@@ -28,7 +43,9 @@
  *      prose mention counts (the registry is the SSOT; the design-doc mention
  *      is the search path). A design doc that is not registered does NOT count.
  *      A template-touching commit citing no ticket id at all is flagged
- *      unattributed.
+ *      unattributed — unless it cites an EXISTING registered spec by name
+ *      ("spec <name>", v1.1.0 join: resolved against the registry id set only;
+ *      unknown names never pass), in which case the commit row is spec-covered.
  *
  * WHAT IT DOES NOT DO:
  *   - It never mutates the tree (read-only: git log + docs/specs reads).
@@ -82,6 +99,12 @@ const ROOT_INSTRUCTION_FILES = new Set([
 /** Ticket ids in commit messages, PR bodies, and tickets/ file paths. */
 const TICKET_ID_RE = /\b([TU]-\d{8}-\d{2,3})\b/g;
 
+/** Spec-name citation candidates in commit subjects/bodies (v1.1.0): the word
+ *  "spec" (optionally colon-suffixed, case-insensitive) followed by a
+ *  dash/alnum slug. Candidates resolve ONLY against the registered spec id
+ *  set — an unknown name is discarded (never silently passes). */
+const SPEC_CITE_RE = /\bspec:?\s+([a-z0-9][a-z0-9-]*[a-z0-9])/gi;
+
 interface CommitRecord {
   sha: string;
   subject: string;
@@ -100,12 +123,15 @@ interface CoverageReport {
   window: { since: string; until: string };
   scannedCommits: number;
   touchingCommits: number;
-  commits: Array<{ sha: string; subject: string; tickets: string[]; touching: boolean }>;
+  commits: Array<{ sha: string; subject: string; tickets: string[]; touching: boolean; specs: string[] }>;
   tickets: TicketCoverage[];
   /** Ticket ids cited by template-touching commits with no registered-spec coverage. */
   uncovered: string[];
   /** Template-touching commits that cite no ticket id at all. */
   unattributedCommits: Array<{ sha: string; subject: string }>;
+  /** v1.1.0: template-touching commits covered by a registered spec-name
+   *  citation ("spec <name>") — previously unattributed adjudication rows. */
+  specCitedCommits: Array<{ sha: string; subject: string; specs: string[] }>;
 }
 
 function usage(): never {
@@ -148,6 +174,44 @@ export function extractTicketIds(text: string): string[] {
   return [...out];
 }
 
+/** Resolve "spec <name>" citation candidates against the registered spec id
+ *  set (pure; exported for tests). A candidate joins ONLY when it is exactly a
+ *  registry id — the docs/specs/entries/<name>.json filename is the same id —
+ *  so an unknown/typo'd name resolves to nothing and the commit stays
+ *  uncovered (v1.1.0: no silent pass). Order-stable, deduplicated. */
+export function resolveSpecCitations(text: string, specIds: Iterable<string>): string[] {
+  const known = new Set(specIds);
+  const out: string[] = [];
+  for (const m of text.matchAll(SPEC_CITE_RE)) {
+    const name = m[1].toLowerCase();
+    if (known.has(name) && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
+/** Commit-level attribution for one template-touching commit (pure; exported
+ *  for tests; v1.1.0 wiring shared with buildReport so the CLI and the unit
+ *  pin cannot diverge). A commit citing ticket ids joins through the
+ *  ticket-level prose join as before — a spec citation never covers tickets.
+ *  A commit citing NO ticket id and NO resolvable spec stays unattributed;
+ *  one citing a resolvable spec is spec-covered (leaves unattributedCommits,
+ *  reported under specCitedCommits). */
+export function attributeTouchingCommit(
+  subjectBody: string,
+  pathTicketIds: Iterable<string>,
+  specIds: Iterable<string>,
+): { tickets: string[]; specCites: string[]; unattributed: boolean; specCovered: boolean } {
+  const tickets = new Set<string>([...extractTicketIds(subjectBody), ...pathTicketIds]);
+  const specCites = resolveSpecCitations(subjectBody, specIds);
+  const noTickets = tickets.size === 0;
+  return {
+    tickets: [...tickets],
+    specCites,
+    unattributed: noTickets && specCites.length === 0,
+    specCovered: noTickets && specCites.length > 0,
+  };
+}
+
 /** Registry-join over the window's cited tickets (pure; exported for tests).
  *  A cited ticket is COVERED when any registered spec's design doc names it —
  *  prose mention counts (design §10 Q4: the registry is the SSOT, the
@@ -187,10 +251,9 @@ export function touchesTemplateSurface(paths: string[]): boolean {
   return false;
 }
 
-/** Collect registered-spec design-doc text keyed by spec id (the coverage SSOT
- *  is the registry entry; the doc text is the mention search path). */
-function loadRegisteredDocTexts(): Map<string, { status: string; file: string; text: string }> {
-  const docs = new Map<string, { status: string; file: string; text: string }>();
+/** Read the spec registry (the coverage SSOT). Exits 1 on an unparseable
+ *  registry — both joins depend on it. */
+function loadRegistry(): Array<{ id: string; status: string; file: string }> {
   let registry: { specs?: Array<{ id: string; status: string; file: string }> };
   try {
     registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
@@ -198,7 +261,14 @@ function loadRegisteredDocTexts(): Map<string, { status: string; file: string; t
     console.error(`unreadable spec registry (${REGISTRY_PATH}): ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   }
-  for (const spec of registry.specs ?? []) {
+  return registry.specs ?? [];
+}
+
+/** Collect registered-spec design-doc text keyed by spec id (the coverage SSOT
+ *  is the registry entry; the doc text is the mention search path). */
+function loadRegisteredDocTexts(): Map<string, { status: string; file: string; text: string }> {
+  const docs = new Map<string, { status: string; file: string; text: string }>();
+  for (const spec of loadRegistry()) {
     if (!spec?.file) continue;
     const abs = join(workspaceRoot, spec.file);
     if (!existsSync(abs)) continue; // registered but file pruned — contributes nothing to the join
@@ -252,8 +322,11 @@ function buildReport(since: string, until: string): CoverageReport {
 
   // 3′. Registered spec docs (coverage SSOT = the registry; the docs are the
   //     mention search path). Read once; the join below is scoped to the
-  //     window's cited tickets.
+  //     window's cited tickets. The registry's id set also drives the v1.1.0
+  //     spec-name citation join (a subject "spec <name>" resolves only against
+  //     these ids).
   const specDocs = loadRegisteredDocTexts();
+  const specIds = loadRegistry().map((s) => s.id.toLowerCase());
 
   // 3. Window attribution first: the ticket ids this window's template-touching
   //    commits and merge-commit PR bodies actually cite. Only THESE join against
@@ -267,23 +340,28 @@ function buildReport(since: string, until: string): CoverageReport {
     tickets: [],
     uncovered: [],
     unattributedCommits: [],
+    specCitedCommits: [],
   };
   const citedTickets = new Set<string>(mergeTickets);
   for (const c of commits) {
     const touching = touchesTemplateSurface(c.paths);
-    const tickets = new Set<string>([
-      ...extractTicketIds(c.subject),
-      ...extractTicketIds(c.body),
-      ...c.paths.filter((p) => p.startsWith('tickets/')).flatMap((p) => extractTicketIds(p)),
-    ]);
-    report.commits.push({ sha: c.sha, subject: c.subject, tickets: [...tickets], touching });
+    const attributed = attributeTouchingCommit(
+      `${c.subject}\n${c.body}`,
+      c.paths.filter((p) => p.startsWith('tickets/')).flatMap((p) => extractTicketIds(p)),
+      specIds,
+    );
+    report.commits.push({ sha: c.sha, subject: c.subject, tickets: attributed.tickets, touching, specs: attributed.specCites });
     if (!touching) continue;
     report.touchingCommits++;
-    if (tickets.size === 0) {
+    if (attributed.specCovered) {
+      report.specCitedCommits.push({ sha: c.sha, subject: c.subject, specs: attributed.specCites });
+      continue;
+    }
+    if (attributed.unattributed) {
       report.unattributedCommits.push({ sha: c.sha, subject: c.subject });
       continue;
     }
-    for (const id of tickets) citedTickets.add(id);
+    for (const id of attributed.tickets) citedTickets.add(id);
   }
 
   // 4. Registry-join (design §10 Q4 default) over the window's cited tickets.
@@ -308,8 +386,13 @@ function printReport(r: CoverageReport): void {
     }
     console.log('');
   }
+  if (r.specCitedCommits.length > 0) {
+    console.log('Template-touching commits covered by a registered spec-name citation (v1.1.0 join):');
+    for (const c of r.specCitedCommits) console.log(`  ✅ ${c.sha}  ${c.subject}  spec: ${c.specs.join(', ')}`);
+    console.log('');
+  }
   if (r.unattributedCommits.length > 0) {
-    console.log('Template-touching commits citing no ticket id:');
+    console.log('Template-touching commits citing no ticket id (and no registered spec name):');
     for (const c of r.unattributedCommits) console.log(`  ❌ ${c.sha}  ${c.subject}`);
     console.log('');
   }

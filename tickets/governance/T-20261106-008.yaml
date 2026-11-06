@@ -14,7 +14,7 @@ title: >-
   evidence: runs 42078112151 (fail) vs 42065315290 (pass, same content) —
   https://github.com/5throck/ai-workspace-standards/actions/runs/42078112151
 priority: normal
-status: running
+status: done
 attempts: 0
 created_at: '2026-11-06T03:05:09.340+09:00'
 history:
@@ -27,5 +27,16 @@ history:
   - at: '2026-11-06T03:05:20.974+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-11-06T07:27:41.522+09:00'
+    from: running
+    to: review
+  - at: '2026-11-06T08:37:43.175+09:00'
+    from: review
+    to: done
+result: >-
+  FILE_TIME_BUDGETS first-time entry for hub-bootstrap.test.ts (suite 300s /
+  test 45000ms) per test-runner v1.6.0 convention; previous session's staged
+  implementation had a duplicate const FILE_TIME_BUDGETS declaration
+  (parse-fatal), repaired in-branch; test-runner v1.10.0; unit 3396 pass, audit
+  green; landed as PR #1860 (merged ae05a5cde lineage).
 error: null
