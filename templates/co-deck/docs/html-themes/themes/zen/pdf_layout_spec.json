@@ -9,7 +9,7 @@
   },
   "calibration": {
     "viewport_px": 720,
-    "font_px_to_pt": 0.85,
+    "font_px_to_pt": 0.75,
     "_viewport_px_note": "Slide height in px (1280x720). Used for region px→mm/pt conversion."
   },
   "regions": {
@@ -53,15 +53,19 @@
   "fonts": {
     "section_px": 11.2,
     "slide_num_px": 11.2,
-    "title_px": 35.2,
-    "bullet_px": 15.2,
-    "punchline_px": 38.4
+    "title_px": 32,
+    "bullet_px": 16,
+    "punchline_px": 64,
+    "ts_title_px": 64,
+    "div_title_px": 56
   },
   "line_heights": {
-    "title_px": 42.24,
-    "bullet_px": 22.8,
-    "bullet_gap_px": 15.2,
-    "punchline_px": 42.24
+    "title_px": 38.4,
+    "bullet_px": 26.4,
+    "bullet_gap_px": 9.6,
+    "punchline_px": 76.8,
+    "ts_title_px": 76.8,
+    "div_title_px": 67.2
   },
   "image_zones": {
     "standard": {

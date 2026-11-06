@@ -1,11 +1,30 @@
-// @version 1.9.0 — CJK fallback font + contact slide LinkedIn fix.
-//   When primary font (Pretendard/MaruBuri) lacks glyphs for CJK characters (e.g. 한자),
-//   automatically falls back to NotoSansKR (system or project font). Fixes tofu/box
-//   rendering on profile slides with 한자 bio text. Also fixed: renderContactSlide now
-//   renders contactLinkedIn field from slidedata.json.
-//   v1.8.0: Increased PDF body/bullet font sizes for readability. bullet_pt raised
-//   from 11-13pt to 14-15pt across all themes; bullet_px/line_heights adjusted proportionally.
-//   Auto-calibrate FONT_PT_MULT tuned from 0.85→0.94 to produce readable estimates.
+// @version 1.10.0 — render-path parity batch (U-20261105-002/-003/-005):
+//   • U-20261105-002(a): full-bleed visual path — when the theme's visual
+//     region overlaps the content region from the left (zen: visual = full
+//     page), the visual is drawn as a BACKGROUND before title/bullets instead
+//     of an in-card right panel drawn AFTER them (which painted C_VIS_BG over
+//     the text and squeezed bulTxtW negative). Works with and without
+//     background_image.enabled.
+//   • U-20261105-002(b): per-slide `footnotes` (abbreviation citations,
+//     FootnoteBuilder parity) now render as a small bottom-left line.
+//   • U-20261105-002(c): punchline dispatch accepts `isPunchlineSlide`
+//     alongside the legacy `isPunchline` (html-build contract key).
+//   • U-20261105-003: lecture-profile parsing moved to lib/layout-overrides.ts
+//     (shared with estimate-layout.ts) — dotted layout_overrides keys
+//     (`colors.card_dark: [...]`, `content_constraints.standard.max_body_chars`)
+//     are no longer silently dropped.
+//   • U-20261105-005(1,2): CustomFontEmbedder patch (lib/pdf-font-patch.ts) —
+//     /W table + ToUnicode now cover OpenType shaped (calt-alternate) glyphs,
+//     fixing viewer over-advance of ':'/'-' and garbled text extraction; /W
+//     entries rounded to integers per PDF 32000-1 §9.7.4.3.
+//   • U-20261105-005(6b): bold `**segments**` render with bold weight + accent
+//     color in titles/bullets (HTML appendInline parity).
+//   • U-20261105-005(7): renderContactSlide renders `contactPhone`.
+//   • U-20261105-005(8): when a background image was drawn on a slide, the
+//     full-bleed C_BG surface fill in divider/punchline/profile/contact
+//     renderers is skipped (it painted over the photo).
+//   v1.9.0: CJK fallback font + contact slide LinkedIn fix.
+//   v1.8.0: Increased PDF body/bullet font sizes for readability.
 //   v1.7.0: Background image support. When lecture-profile.md → background_image.enabled
 //   is true, renders full-bleed background image (cover-crop) with semi-transparent overlay.
 //   Supports scope: all | divider-cover | individual. Reads background image config from
@@ -18,7 +37,7 @@
 // Usage:
 //   bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
 //   bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
-//   --auto-calibrate  estimate fonts/line_heights from CSS and print layout_overrides YAML (no PDF)
+//   --auto-calibrate  estimate layout_overrides from CSS and print layout_overrides YAML (no PDF)
 //   --project  project folder (relative to workspace root)
 //   --out      output PDF filename (default: <folder>.pdf or <folder>_sample<N>.pdf)
 //   --sample   limit to first N slides only (omit for full deck)
@@ -32,6 +51,9 @@ import fontkit, { create as fontkitCreate } from '@pdf-lib/fontkit';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { platform, homedir } from 'os';
+import { deepMerge, parseFrontmatter, parseScalar } from './lib/layout-overrides';
+import { patchCustomFontEmbedder } from './lib/pdf-font-patch';
+import { wrapMarkdownWords } from './lib/markdown';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -60,42 +82,10 @@ function deepMerge(base: any, override: any): any {
 const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
 
 // ── Frontmatter parser ────────────────────────────────────────────────────────
-
-function parseFrontmatter(content: string): Record<string, any> {
-  // Normalize CRLF/CR line endings (Windows-saved lecture-profile.md) so the
-  // `---` delimiter regex matches; otherwise frontmatter is silently dropped
-  // and theme/style reset to defaults.
-  const normalized = content.replace(/\r\n?/g, '\n');
-  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return {};
-  const frontmatterContent = match[1];
-  const lines = frontmatterContent.split('\n');
-  const result: Record<string, any> = {};
-  for (const line of lines) {
-    const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
-    const styleMatch = line.match(/^\s{2}style:\s*(\S+)/);
-    if (themeMatch) result.theme = themeMatch[1];
-    if (styleMatch) result.style = styleMatch[1];
-  }
-  const overrides = parseLayoutOverrides(frontmatterContent);
-  if (Object.keys(overrides).length > 0) {
-    result.layout_overrides = overrides;
-  }
-  return result;
-}
-
-function parseScalar(raw: string): any {
-  // RGB array: [R, G, B]
-  const arrMatch = raw.match(/^\[(\d+),\s*(\d+),\s*(\d+)\]$/);
-  if (arrMatch) return [Number(arrMatch[1]), Number(arrMatch[2]), Number(arrMatch[3])];
-  // Number
-  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
-  // Boolean
-  if (raw === 'true') return true;
-  if (raw === 'false') return false;
-  // String (strip optional quotes)
-  return raw.replace(/^["']|["']$/g, '');
-}
+// parseFrontmatter / parseLayoutOverrides / parseScalar moved to
+// scripts/co-deck/lib/layout-overrides.ts (U-20261105-003): the two consumers
+// (estimate-layout.ts layout gate + this renderer) must accept the SAME
+// layout_overrides dialect (flat + dotted + nested-indented keys).
 
 function parseIndentedBlock(lines: string[], baseIndent: number): { value: Record<string, any>, consumed: number } {
   const result: Record<string, any> = {};
@@ -128,42 +118,6 @@ function parseIndentedBlock(lines: string[], baseIndent: number): { value: Recor
   }
 
   return { value: result, consumed: i };
-}
-
-function parseLayoutOverrides(frontmatter: string): Record<string, any> {
-  const lines = frontmatter.split('\n');
-
-  // Find the layout_overrides: line (uncommented)
-  let startIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trim();
-    if (trimmed === 'layout_overrides:' && !lines[i].trimStart().startsWith('#')) {
-      startIdx = i;
-      break;
-    }
-  }
-  if (startIdx === -1) return {};
-
-  // Collect subsequent indented uncommented lines
-  const block: string[] = [];
-  for (let i = startIdx + 1; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;  // skip blank/comment
-    // Stop if we hit a top-level key (no leading spaces)
-    if (line.length > 0 && line[0] !== ' ') break;
-    block.push(line);
-  }
-
-  // Determine the base indent from the first non-blank block line so that
-  // parseIndentedBlock sees the correct depth (block lines are already indented
-  // relative to the YAML root, not to column 0).
-  const minIndent = block.reduce((min, l) => {
-    const ind = l.search(/\S/);
-    return ind >= 0 ? Math.min(min, ind) : min;
-  }, Infinity);
-  const baseIndent = minIndent === Infinity ? 0 : minIndent;
-  return parseIndentedBlock(block, baseIndent).value;
 }
 
 // ── Background image config parser ───────────────────────────────────────────
@@ -244,8 +198,9 @@ function resolveBgImagePath(
   if (!globalBgPath) return null;
 
   if (bgConfig.scope === 'divider-cover') {
-    // Only title, divider, punchline slides
-    if (!data.isTitleSlide && !data.isDividerSlide && !data.isPunchline) return null;
+    // Only title, divider, punchline slides (isPunchlineSlide = html-build
+    // contract key, isPunchline = legacy renderer key — U-20261105-002c).
+    if (!data.isTitleSlide && !data.isDividerSlide && !data.isPunchline && !data.isPunchlineSlide) return null;
   }
 
   // scope === 'all' or divider-cover with matching slide type
@@ -409,6 +364,43 @@ class Renderer {
     for (const line of lines) {
       if (line) {
         this.cell(wMm, hMm, line, xMm, y, align);
+      }
+      y += hMm;
+    }
+    return y;
+  }
+
+  // Multi-line cell with **bold** inline runs (U-20261105-005 item 6b):
+  // bold words draw with the bold face + accentColour, regular words with the
+  // current colour. Line breaking runs per-word so mixed-weight lines wrap
+  // correctly. Returns Y position after last line (mm from top) — same
+  // contract as multiCell.
+  multiCellMarkdown(
+    wMm: number, hMm: number, text: string, xMm: number, yMm: number,
+    sizePt: number, accentColour: RGB, align: 'L' | 'R' | 'C' = 'L',
+  ): number {
+    const prevColour = this.curColor;
+    const measure = (word: string, bold: boolean) => {
+      this.setFont(bold, sizePt);
+      return this.stringWidth(word);
+    };
+    const lines = wrapMarkdownWords(text, measure, wMm);
+    let y = yMm;
+    for (const line of lines) {
+      if (line.length > 0) {
+        // Measure the whole line for alignment (per-word, weight-correct).
+        const lineW = line.reduce((acc, t) => acc + measure(t.word, t.bold), 0);
+        let drawX = xMm;
+        if (align === 'C') drawX = xMm + (wMm - lineW) / 2;
+        else if (align === 'R') drawX = xMm + wMm - lineW;
+        let curX = drawX;
+        for (const tok of line) {
+          this.setFont(tok.bold, sizePt);
+          this.setColor(tok.bold ? accentColour : prevColour);
+          this.drawLine(tok.word, curX, y, hMm);
+          curX += measure(tok.word, tok.bold);
+        }
+        this.setColor(prevColour);
       }
       y += hMm;
     }
@@ -595,6 +587,7 @@ interface SlideData {
   isTitleSlide?:  boolean;
   isDividerSlide?: boolean;
   isPunchline?:   boolean;
+  isPunchlineSlide?: boolean;  // html-build contract key (U-20261105-002c)
   isProfileSlide?: boolean;
   speakerName?:   string;
   speakerTitle?:  string;
@@ -606,6 +599,7 @@ interface SlideData {
   contactLinkedIn?:  string;
   contactPhone?:     string;
   contactNote?:      string;
+  footnotes?:        string[];  // per-slide abbreviation citations (U-20261105-002b)
 }
 
 // ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
@@ -767,6 +761,7 @@ interface RenderCtx {
   sizes:    ReturnType<typeof buildSizes>;
   declared: string[];                 // slide_types[type].regions
   region:   (name: string) => ResolvedRegion;
+  bgDrawn:  boolean;                  // full-bleed bg image already painted on this slide
 }
 
 async function renderTitleSlide(ctx: RenderCtx) {
@@ -867,7 +862,9 @@ async function renderDividerSlide(ctx: RenderCtx) {
   // for the cover, so the divider must too — otherwise it renders as a darker slab
   // (#0A0E16) that differs from every other slide. Then (if declared) draws the
   // section header bar, then places a part/title/desc block (left + optional image).
-  r.fillRect(CX, CY, CW, CH, C_BG);
+  // Skipped when a full-bleed background image was already painted (U-20261105-005
+  // item 8) — the fill would cover the photo.
+  if (!ctx.bgDrawn) r.fillRect(CX, CY, CW, CH, C_BG);
 
   const titleR = region('title');
   const visR   = region('visual');
@@ -936,7 +933,8 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   let y = box.y + Math.max(0, (box.h - blockH) / 2);
 
   // Full-bleed dark background (HTML .slide[data-type=”punchline”] is radial navy).
-  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
+  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
   // part-tag (gold, uppercase) — e.g. “PART 01 · 패러다임 전환”
   const sec = strip(data.section);
@@ -978,7 +976,8 @@ function renderProfileSlide(ctx: RenderCtx) {
   //   flex column, centered, text-align:center, padding: 4rem
   //   profile-eyebrow (section) → profile-name → profile-affiliation (accent) → profile-bio
   //   No slide-title element.
-  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
+  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
   const bandW = coords.CW * 0.80;
   const bandX = coords.CX + (coords.CW - bandW) / 2;
@@ -1021,7 +1020,8 @@ function renderContactSlide(ctx: RenderCtx) {
     GAP_CONT_THANKS_LINE, GAP_CONT_LINE_NOTE,
   } = sizes;
 
-  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
+  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
+  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
 
   const bandW = coords.CW * 0.80;                 // centered 80% band (HTML centers everything)
   const bandX = coords.CX + (coords.CW - bandW) / 2;
@@ -1030,8 +1030,9 @@ function renderContactSlide(ctx: RenderCtx) {
   const name   = strip(data.contactName);
   const email  = strip(data.contactEmail);
   const linkedin = strip(data.contactLinkedIn);
+  const phone  = strip(data.contactPhone);   // U-20261105-005 item 7: was dropped
   const note   = strip(data.contactNote);
-  const nLines = (name ? 1 : 0) + (email ? 1 : 0) + (linkedin ? 1 : 0) || 1;
+  const nLines = (name ? 1 : 0) + (email ? 1 : 0) + (linkedin ? 1 : 0) + (phone ? 1 : 0) || 1;
 
   r.setFont(false, T_CONT_NOTE);
   const noteLines = note ? Math.max(1, r.wrapText(note, bandW).length) : 1;
@@ -1050,6 +1051,7 @@ function renderContactSlide(ctx: RenderCtx) {
   if (name)     { r.cell(bandW, LH_CONT_LINE, name,     bandX, y, 'C'); y += LH_CONT_LINE; }
   if (email)    { r.cell(bandW, LH_CONT_LINE, email,    bandX, y, 'C'); y += LH_CONT_LINE; }
   if (linkedin) { r.cell(bandW, LH_CONT_LINE, linkedin, bandX, y, 'C'); y += LH_CONT_LINE; }
+  if (phone)    { r.cell(bandW, LH_CONT_LINE, phone,    bandX, y, 'C'); y += LH_CONT_LINE; }
 
   // note / CTA — GOLD (HTML .contact-next is accent gold)
   y += GAP_CONT_LINE_NOTE;
@@ -1081,8 +1083,55 @@ async function renderStandardSlide(ctx: RenderCtx) {
   const rawVisual = data.visual && data.visual.toLowerCase() !== 'none' ? data.visual : undefined;
   const visualDisplay = data.visualDisplay || (!data.visualImage ? rawVisual : undefined);
   const hasRight = !!(data.visualImage || visualDisplay || data.visualTitle) && !!visR;
+
+  // U-20261105-002(a): OVERLAP-AWARE visual path selection. When the theme's
+  // visual region starts at or left of the content region (zen declares
+  // visual = full page), the visual is a BACKGROUND, not an in-card right
+  // panel: it must be painted BEFORE the title/bullets and the text keeps the
+  // full content width. The previous single path drew the visual panel AFTER
+  // the text, so C_VIS_BG covered title/bullets and bulTxtW computed negative
+  // (visR.x = 0 < contentR.x) whenever background_image.enabled=false — the
+  // v1.9-era in-card-diagram fix only covered the bgDrawn=true case.
+  const visualIsBackground = hasRight && visR!.x <= contentR.x;
+
   const titleW   = titleR.w;
-  const bulTxtW  = hasRight ? Math.min(contentR.w, visR!.x - contentR.x - 6) : contentR.w;
+  const bulTxtW  = hasRight && !visualIsBackground
+    ? Math.max(6, Math.min(contentR.w, visR!.x - contentR.x - 6))
+    : contentR.w;
+
+  // ── Background-mode visual first (under the text) ──
+  if (visualIsBackground) {
+    const ip = imgPath(data.visualImage, imgDir ?? '');
+    if (ip) {
+      // Full-bleed cover-crop of the visual image across the whole visual
+      // region (zen: the entire page) — mirrors the HTML background-image:
+      // cover; center rendering.
+      await r.placeImageCover(doc, ip, visR!.x, visR!.y, visR!.w, visR!.h);
+      // Readability scrim behind the text band (HTML zen-overlay parity):
+      // translucent dark wash under the title/bullets, not an opaque fill.
+      r.fillRectOverlay(contentR.x - coords.px2mm(24), coords.CY, contentR.w + coords.px2mm(48), coords.CH, C_DARK, 0.45);
+    } else if (visualDisplay || data.visualTitle) {
+      // Text-panel-only visual (no image): C_VIS_BG surface + centered panel
+      // text, drawn under the title/bullets.
+      r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
+      const vt = strip(data.visualTitle);
+      const vd = strip((visualDisplay ?? '').replace(/<br\s*\/?>/gi, '\n'));
+      const gap = 5;
+      const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
+      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - visPad * 2, T_VIS_T, LH_VIS_TITLE, true)  : 0;
+      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - visPad * 2, T_VIS_B, LH_VIS_BODY, false) : 0;
+      const totalH = hVt + (vt && vd ? gap : 0) + hVb;
+      let vy = visR!.y + visPad + Math.max(0, (visR!.h - visPad * 2 - totalH) / 2);
+      if (vt) {
+        r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
+        vy = r.multiCell(visR!.w - visPad * 2, LH_VIS_TITLE, vt, visR!.x + visPad, vy, 'L') + gap;
+      }
+      if (vd) {
+        r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
+        r.multiCell(visR!.w - visPad * 2, LH_VIS_BODY, vd, visR!.x + visPad, vy, 'L');
+      }
+    }
+  }
 
   // HTML .slide-content uses justify-content: center — vertically center the
   // [title + gap + bullets] block as a unit in the available area below the header.
@@ -1092,14 +1141,14 @@ async function renderStandardSlide(ctx: RenderCtx) {
   const availH       = cardBottom - availStart;
 
   const bullets  = data.bullets ?? [];
-  const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
+  const titleH   = r.estimateTextHeight(strip(data.title), hasRight && !visualIsBackground ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
   const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BULLET, LH_BULLET_GAP);
   const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
   const blockH   = titleH + blockGap + totalBh;
   const blockY   = availStart + Math.max(0, (availH - blockH) * 0.5);
 
   r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  const afterTitle = r.multiCell(titleW, LH_TITLE, strip(data.title), titleR.x, blockY, 'L');
+  const afterTitle = r.multiCellMarkdown(titleW, LH_TITLE, data.title, titleR.x, blockY, T_TITLE, C_ACCENT, 'L');
 
   let by = afterTitle + blockGap;
   for (const b of bullets) {
@@ -1108,11 +1157,13 @@ async function renderStandardSlide(ctx: RenderCtx) {
     if (by > cardBottom) break;
     r.drawEllipse(contentR.x, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
     r.setFont(false, T_BUL); r.setColor(C_BODY);
-    const afterBul = r.multiCell(bulTxtW - 6, LH_BULLET, txt, contentR.x + 6, by, 'L');
+    const afterBul = r.multiCellMarkdown(bulTxtW - 6, LH_BULLET, b, contentR.x + 6, by, T_BUL, C_ACCENT, 'L');
     by = afterBul + LH_BULLET_GAP;
   }
 
-  if (hasRight) {
+  // ── In-card right-panel visual (non-overlapping themes) — after the text,
+  // safe because visR sits strictly right of the content column. ──
+  if (hasRight && !visualIsBackground) {
     const ip = imgPath(data.visualImage, imgDir ?? '');
     if (ip) {
       const pad = visR!.w * 0.052;
@@ -1764,6 +1815,14 @@ async function main() {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
+  // U-20261105-005 items 1+2: /W + ToUnicode must cover OpenType SHAPED
+  // (calt-alternate) glyphs — Pretendard substitutes ':'/'-' contextual
+  // alternates in running text, and pdf-lib's default glyph cache (unshaped
+  // glyphForCodePoint set) omits them, so viewers fell back to /DW and
+  // over-advanced ':' and '-'. Idempotent prototype patch, must run before
+  // the first embedFont (glyph cache producer captured at construction).
+  patchCustomFontEmbedder();
+
   const regularFont = await pdfDoc.embedFont(readFileSync(fontR));
   const boldFont    = await pdfDoc.embedFont(readFileSync(fontB));
 
@@ -1819,6 +1878,10 @@ async function main() {
     const data = slideData[idx];
     const page = pdfDoc.addPage([mm(PW), mm(PH)]);
     renderer.setPage(page);
+    // Whether a full-bleed background image was painted on THIS slide
+    // (U-20261105-005 item 8: full-bleed surface fills in the slide-type
+    // renderers must then be skipped — they painted over the photo).
+    let bgDrawn = false;
 
     renderer.fillRect(0, 0, PW, PH, C_DARK);
     renderer.fillRect(CX, CY, CW, CH, C_BG);
@@ -1827,6 +1890,7 @@ async function main() {
     if (bgImageConfig) {
       const bgPath = resolveBgImagePath(data, idx, bgImageConfig, imgDir, globalBgPath, slideBgEntries);
       if (bgPath) {
+        bgDrawn = true;
         try {
           // Draw full-bleed background image (cover-crop to entire page)
           const pageWmm = PW;  // page width in mm (same as PW from coords)
@@ -1857,7 +1921,10 @@ async function main() {
     let type: 'title' | 'divider' | 'punchline' | 'profile' | 'contact' | 'standard';
     if (data.isTitleSlide && has('title'))           type = 'title';
     else if (data.isDividerSlide && has('divider'))  type = 'divider';
-    else if (data.isPunchline && has('punchline'))   type = 'punchline';
+    // isPunchlineSlide = html-build contract key; isPunchline = legacy
+    // renderer key (U-20261105-002c — decks emit the former, the renderer
+    // only checked the latter, so punchline slides rendered as standard).
+    else if ((data.isPunchline || data.isPunchlineSlide) && has('punchline')) type = 'punchline';
     else if (data.isProfileSlide && has('profile'))  type = 'profile';
     else if (data.isContactSlide && has('contact'))  type = 'contact';
     else                                             type = 'standard';
@@ -1869,6 +1936,7 @@ async function main() {
     const ctx: RenderCtx = {
       r: renderer, doc: pdfDoc, data, n, total: TOTAL, imgDir,
       spec: layoutSpec, coords, colors, sizes, declared, region,
+      bgDrawn,
     };
 
     if (type === 'title')          await renderTitleSlide(ctx);
@@ -1877,6 +1945,23 @@ async function main() {
     else if (type === 'profile')   renderProfileSlide(ctx);
     else if (type === 'contact')   renderContactSlide(ctx);
     else                           await renderStandardSlide(ctx);
+
+    // Per-slide footnotes (U-20261105-002b): abbreviation citation lines that
+    // the HTML deck renders via the shared FootnoteBuilder (ppt-engine.js)
+    // as a small wrap-enabled bottom-left line. PDF parity: same join, same
+    // placement (left/right 1.1rem, bottom 3.5rem), muted color.
+    if (data.footnotes && data.footnotes.length > 0) {
+      const footTxt = data.footnotes.map(f => strip(f)).filter(Boolean).join('  ·  ');
+      if (footTxt) {
+        const footPx = 10.88;               // CSS 0.68rem
+        const footPt = footPx * (layoutSpec.calibration?.font_px_to_pt ?? 0.85);
+        const sidePad  = coords.px2mm(17.6); // 1.1rem
+        const footYTop = coords.PH - coords.px2mm(56) - coords.px2mm(18); // bottom 3.5rem band
+        renderer.setFont(false, footPt);
+        renderer.setColor(colors.C_MUTED);
+        renderer.multiCell(coords.CW - sidePad * 2, coords.px2mm(18), footTxt, sidePad, footYTop, 'L');
+      }
+    }
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
       console.log(`  Slide ${idx + 1}/${TOTAL}... [${type}]`);

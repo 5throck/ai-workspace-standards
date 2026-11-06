@@ -1,4 +1,13 @@
-// @version 1.4.0 — --lint gains minimum content checks (U-20261029-006):
+// @version 1.5.0 — boolean-flag slide schema + shared override parser:
+//   • lintSlideContent resolves the slide type via lib/slide-type.ts
+//     slideTypeOf() — recognizes the boolean-flag schema current decks emit
+//     (isCover/isDivider/isPunchline/isContact/isProfile) in addition to the
+//     legacy `type` string; every special slide previously fell through to
+//     `standard` and falsely failed the min-content checks (U-20261105-001).
+//   • frontmatter/layout_overrides parsing moved to lib/layout-overrides.ts
+//     (shared with gen-slides-pdf.ts — dotted-key dialect parity,
+//     U-20261105-003).
+// v1.4.0 — --lint gains minimum content checks (U-20261029-006):
 // min_bullets / min_body_chars read per type from the merged content_constraints;
 // standard slides default to 3 bullets / 40 body chars when the theme declares
 // no minimum (explicit 0 disables); slides carrying videoId are exempt.
@@ -14,6 +23,8 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { platform, homedir } from 'os';
+import { deepMerge, parseFrontmatter } from './lib/layout-overrides';
+import { slideTypeOf, type SlideSchemaItem } from './lib/slide-type';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,107 +43,6 @@ interface LayoutSpec {
   image_zones?: Record<string, Region>;
   content_constraints?: Record<string, Record<string, number>>;
   print?: Record<string, any>;
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function deepMerge(base: any, override: any): any {
-  if (!override) return base;
-  const result = { ...base };
-  for (const key of Object.keys(override)) {
-    if (override[key] === null) {
-      result[key] = null;
-    } else if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
-      result[key] = deepMerge(base[key] ?? {}, override[key]);
-    } else {
-      result[key] = override[key];
-    }
-  }
-  return result;
-}
-
-function parseFrontmatter(content: string): Record<string, any> {
-  // Normalize CRLF/CR line endings (Windows-saved lecture-profile.md) so the
-  // `---` delimiter regex matches; otherwise frontmatter is silently dropped
-  // and theme/style reset to defaults.
-  const normalized = content.replace(/\r\n?/g, '\n');
-  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return {};
-  const fm = match[1];
-  const lines = fm.split('\n');
-  const result: Record<string, any> = {};
-  for (const line of lines) {
-    const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
-    const styleMatch = line.match(/^\s{2}style:\s*(\S+)/);
-    if (themeMatch) result.theme = themeMatch[1];
-    if (styleMatch) result.style = styleMatch[1];
-  }
-  // Extract layout_overrides using a simple indented-block parser
-  const overrides = parseLayoutOverrides(fm);
-  if (Object.keys(overrides).length > 0) {
-    result.layout_overrides = overrides;
-  }
-  return result;
-}
-
-function parseLayoutOverrides(frontmatterContent: string): Record<string, any> {
-  const result: Record<string, any> = {};
-  const lines = frontmatterContent.split('\n');
-
-  // Block entry/termination by INDENTATION relative to the layout_overrides
-  // parent (U-20261029-003): the old terminator /^\s{2}[a-z]/ matched the
-  // block's own first child when children sit at 2-space indent, so standard
-  // blocks parsed as {}. Children are any line indented deeper than the
-  // parent; the block ends at the first non-empty line dedented to/below it.
-  let inBlock = false;
-  let parentIndent = -1;
-  let baseIndent = -1;
-
-  for (const line of lines) {
-    if (!inBlock) {
-      const entry = line.match(/^(\s*)layout_overrides:\s*$/);
-      if (entry) {
-        inBlock = true;
-        parentIndent = entry[1].length;
-      }
-      continue;
-    }
-    if (!line.trim()) continue;
-    const indent = line.match(/^(\s+)/)?.[1].length ?? 0;
-    if (indent <= parentIndent) break;
-    if (baseIndent < 0) baseIndent = indent;
-    if (indent < baseIndent) break;
-
-    const trimmed = line.slice(baseIndent);
-    if (!trimmed.trim()) continue;
-
-    // Parse nested key: value
-    const parts = trimmed.split(':').map(s => s.trim());
-    if (parts.length >= 2) {
-      const key = parts[0];
-      const rawVal = parts.slice(1).join(':').trim();
-      const val = parseScalar(rawVal);
-      // Handle nesting (e.g., "fonts.title_pt" → nested object)
-      const keys = key.split('.');
-      let target = result;
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!target[keys[i]]) target[keys[i]] = {};
-        target = target[keys[i]];
-      }
-      target[keys[keys.length - 1]] = val;
-    }
-  }
-
-  return result;
-}
-
-function parseScalar(raw: string): any {
-  const arrMatch = raw.match(/^\[(\d+),\s*(\d+),\s*(\d+)\]$/);
-  if (arrMatch) return [Number(arrMatch[1]), Number(arrMatch[2]), Number(arrMatch[3])];
-  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
-  if (raw === 'true') return true;
-  if (raw === 'false') return false;
-  return raw.replace(/^["']|["']$/g, '');
 }
 
 // ── Font validation ──────────────────────────────────────────────────────────
@@ -334,8 +244,7 @@ function generateSummary(
 
 // ── Slide content lint (--lint gate) ─────────────────────────────────────────
 
-interface SlideDataItem {
-  type?: string;
+interface SlideDataItem extends SlideSchemaItem {
   title?: string;
   subtitle?: string;
   sub?: string;
@@ -421,7 +330,9 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
 
   slides.forEach((s, i) => {
     const num = i + 1;
-    const type = s.type ?? 'standard';
+    // Boolean-flag schema (isCover/isDivider/isPunchline/isContact/isProfile,
+    // U-20261105-001) + legacy `type` string via the shared detector.
+    const type = slideTypeOf(s);
 
     if (!slideTypes[type]) {
       rows.push(`| ${num} | ${type} | slide type declared in spec? | — | — | FAIL |`);
