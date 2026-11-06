@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * @version 1.4.2
+ * @version 1.5.0
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Decodes the five XML built-in entities in extracted text before DrawingML escaping. Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
+// v1.5.0 (2026-11-06): ECMA-376 schema-validity fixes — packages were xmllint-well-formed but PowerPoint-rejected. (1) notesSlide slide-number field: a:fld/@id is ST_Guid; the literal `{GET-NUM}` placeholder is replaced by a deterministic GUID. (2) structured layouts: placeholder cNvPr ids start at 2 (v1.4.2 emitted id="0" and a duplicate id="1" colliding with the spTree group). (3) presentation.xml: p:notesMasterIdLst emitted after sldMasterIdLst when notesSlides exist (CT_Presentation sequence; the notesMaster rel was added but never referenced). (4) notesSlide rels: explicit notesMaster relationship added alongside the slide back-reference (ISO/IEC 29500-1 §13.3.6). Golden-test pins for all four classes in deck-golden.test.ts.
 // v1.4.2 (2026-11-06, U-20261106-002): XML built-in entities decode in extracted text (text/tspan/desc payload, via svg-check's decodeXmlEntities) BEFORE esc() — authored `P&amp;L` no longer double-escapes to `P&amp;amp;L` in slide XML (parity with svg-check v1.5.0 R1).
 // v1.4.1 (2026-11-06): connector cNvPr close-tag fix — malformed DrawingML (unclosed <p:cNvPr> + stray quote) triggered a PowerPoint repair prompt on every deck containing line shapes.
 
@@ -407,8 +408,12 @@ const ROLE_LAYOUT_CONVENTIONS: Record<string, { type: string; title: [number, nu
 
 function layoutForRole(role: string, tokens: DeckTokens, layoutIndex: number): string {
   const conv = ROLE_LAYOUT_CONVENTIONS[role] ?? ROLE_LAYOUT_CONVENTIONS.content;
-  const ph = (phType: string, idx: number, box: [number, number, number, number], sz: number) =>
-    `<p:sp><p:nvSpPr><p:cNvPr id="${idx}" name="${phType} placeholder ${idx}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="${phType}" sz="quarter" idx="${idx}"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="${emu(box[0])}" y="${emu(box[1])}"/><a:ext cx="${emu(box[2])}" cy="${emu(box[3])}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:pPr algn="${phType === "title" ? "l" : "l"}"/><a:endParaRPr lang="en-US" sz="${sz}"/></a:p></p:txBody></p:sp>`;
+  // Placeholder shape ids start at 2: the spTree group owns id=1, and cNvPr ids
+  // must be unique and non-zero within the shape tree (v1.4.2 emitted id="0" for
+  // the title placeholder and a duplicate id="1" for the body placeholder —
+  // PowerPoint repair-triggering, LibreOffice tolerated).
+  const ph = (phType: string, phIdx: number, box: [number, number, number, number], sz: number) =>
+    `<p:sp><p:nvSpPr><p:cNvPr id="${phIdx + 2}" name="${phType} placeholder ${phIdx}"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="${phType}" sz="quarter" idx="${phIdx}"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="${emu(box[0])}" y="${emu(box[1])}"/><a:ext cx="${emu(box[2])}" cy="${emu(box[3])}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:pPr algn="l"/><a:endParaRPr lang="en-US" sz="${sz}"/></a:p></p:txBody></p:sp>`;
   const title = ph("title", 0, conv.title, 3200);
   const body = conv.body ? ph("body", 1, conv.body, 1800) : "";
   const spTree = `<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${title}${body}</p:spTree>`;
@@ -437,9 +442,17 @@ function slideXml(shapes: ShapeXml[], tokens: DeckTokens, transition?: string, g
   return XMLDECL + `<p:sld xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="${tokens.colors.background ?? "FFFFFF"}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes.map((s) => s.xml).join("")}${graphicFrames}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${trans}</p:sld>`;
 }
 
+/** Deterministic ST_Guid for a slide-number field: {8-4-4-4-12 hex}. a:fld/@id is
+ *  typed ST_Guid — a non-GUID literal (v1.4.2 leaked `{GET-NUM}`) is a schema
+ *  violation PowerPoint rejects at open (LibreOffice/xmllint tolerate it). */
+function slideNumFieldGuid(slideNum: number): string {
+  const hex = slideNum.toString(16).toUpperCase();
+  return `{B4A6C7E8-4D5E-4F61-8A2B-${hex.padStart(12, "0")}}`;
+}
+
 function notesXml(slideNum: number, text: string): string {
   const paras = text.split(/\n+/).filter((l) => l.trim()).map((l) => `<a:p><a:r><a:rPr lang="en-US" dirty="0"/><a:t>${esc(l.trim())}</a:t></a:r></a:p>`).join("") || "<a:p><a:endParaRPr lang=\"en-US\"/></a:p>";
-  const phSldNum = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Slide Number Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{GET-NUM}" type="slidenum"><a:rPr lang="en-US"/><a:t>${slideNum}</a:t></a:fld></a:p></p:txBody></p:sp>`;
+  const phSldNum = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Slide Number Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="${slideNumFieldGuid(slideNum)}" type="slidenum"><a:rPr lang="en-US"/><a:t>${slideNum}</a:t></a:fld></a:p></p:txBody></p:sp>`;
   const phBody = `<p:sp><p:nvSpPr><p:cNvPr id="3" name="Notes Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>${paras}</p:txBody></p:sp>`;
   return XMLDECL + `<p:notes xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${phBody}${phSldNum}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:notes>`;
 }
@@ -669,7 +682,14 @@ export function compileDeck(opts: CompileOptions): CompileResult {
   ];
   if (hasNotes) presRels.push(`<Relationship Id="rIdNotesMaster" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="notesMasters/notesMaster1.xml"/>`);
 
-  const presentation = XMLDECL + `<p:presentation xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" saveSubsetFonts="1"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${slideParts.map((_, i) => `<p:sldId id="${256 + i}" r:id="rIdS${i + 1}"/>`).join("")}</p:sldIdLst><p:sldSz cx="${emu(tokens.canvas.width_px)}" cy="${emu(tokens.canvas.height_px)}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`;
+  // notesMasterIdLst is REQUIRED in CT_Presentation sequence order (sldMasterIdLst,
+  // notesMasterIdLst, handoutMasterIdLst, sldIdLst, …) whenever notesSlides exist;
+  // v1.4.2 emitted the notesMaster relationship but never referenced it from
+  // presentation.xml — a PowerPoint repair trigger.
+  const notesMasterIdLst = hasNotes
+    ? `<p:notesMasterIdLst><p:notesMasterId id="2147483649" r:id="rIdNotesMaster"/></p:notesMasterIdLst>`
+    : "";
+  const presentation = XMLDECL + `<p:presentation xmlns:a="${NS_A}" xmlns:r="${NS_R}" xmlns:p="${NS_P}" saveSubsetFonts="1"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>${notesMasterIdLst}<p:sldIdLst>${slideParts.map((_, i) => `<p:sldId id="${256 + i}" r:id="rIdS${i + 1}"/>`).join("")}</p:sldIdLst><p:sldSz cx="${emu(tokens.canvas.width_px)}" cy="${emu(tokens.canvas.height_px)}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`;
 
   const defaults = new Set(["rels", "xml"]);
   for (const m of media) defaults.add(extname(m.name).toLowerCase().replace(".", ""));
@@ -716,7 +736,10 @@ export function compileDeck(opts: CompileOptions): CompileResult {
     zipMap["ppt/notesMasters/_rels/notesMaster1.xml.rels"] = new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`);
     for (const [n, text] of notesByPage) {
       zipMap[`ppt/notesSlides/notesSlide${n}.xml`] = new TextEncoder().encode(notesXml(n, text));
-      zipMap[`ppt/notesSlides/_rels/notesSlide${n}.xml.rels`] = new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide${n}.xml"/></Relationships>`);
+      // A notesSlide part is associated with BOTH its slide and the notesMaster
+      // (ISO/IEC 29500-1 §13.3.6: explicit notesMaster relationship required);
+      // v1.4.2 emitted only the slide back-reference — PowerPoint repair trigger.
+      zipMap[`ppt/notesSlides/_rels/notesSlide${n}.xml.rels`] = new TextEncoder().encode(XMLDECL + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide${n}.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"/></Relationships>`);
     }
   }
 
@@ -769,7 +792,7 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.4.2 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.5.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\

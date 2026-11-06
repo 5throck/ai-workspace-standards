@@ -705,9 +705,152 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     expect(expectedDecoded).not.toBe(Math.ceil(Math.ceil(emsRaw * 24) * 9525));
     rmSync(dir, { recursive: true, force: true });
   });
+
+  // -------------------------------------------------------------------------
+  // v1.5.0 pins — ECMA-376 SCHEMA validity (xmllint passes on all of these
+  // defects; PowerPoint enforces the schema, not just well-formedness).
+  // -------------------------------------------------------------------------
+
+  const ST_GUID = /^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}$/;
+
+  test("v1.5.0 pin: notesSlide a:fld/@id is a ST_Guid — the {GET-NUM} placeholder must never leak", () => {
+    // v1.4.2 emitted `<a:fld id="{GET-NUM}" type="slidenum">` — a template
+    // placeholder never replaced. a:fld/@id is typed ST_Guid ({8-4-4-4-12 hex});
+    // PowerPoint rejects the part (repair), LibreOffice/xmllint tolerate it.
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v150-fld"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+    ], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const notesDir = join(dir, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Welcome the leadership team.\n");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    const notes1 = new TextDecoder().decode(pkg["ppt/notesSlides/notesSlide1.xml"]!);
+    expect(notes1).toContain('type="slidenum"'); // field actually emitted
+    for (const m of notes1.matchAll(/<a:fld id="([^"]*)"/g)) {
+      expect(m[1]).toMatch(ST_GUID);
+    }
+    for (const [part, bytes] of Object.entries(pkg)) {
+      if (part.endsWith(".xlsx")) continue; // embedded workbook zip, opaque here
+      expect(new TextDecoder().decode(bytes)).not.toContain("GET-NUM");
+    }
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.0 pin: graphicFrame carries p:xfrm (not a:xfrm) and table grid/cells satisfy CT_Table", () => {
+    const NATIVE_PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="data" data-page-number="1">
+  <g data-block-id="b1">
+    <g data-block-id="b2" data-native="table" data-frame="700,160,500,360">
+      <desc>{"headers":["Metric","Q2","Q3"],"rows":[["Revenue","4.5M","5.1M"],["Churn","2.1%","2.1%"]]}</desc>
+      <rect x="700" y="160" width="500" height="360" fill="#FFFFFF"/>
+    </g>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v150-frame"), [
+      { name: "01-native.svg", body: NATIVE_PAGE },
+    ], "Revenue beat plan\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", nativeCharts: true });
+    const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
+    for (const m of s1.matchAll(/<p:graphicFrame>[\s\S]*?<\/p:graphicFrame>/g)) {
+      const g = m[0];
+      expect(g).toContain("<p:xfrm>"); // CT_GraphicalObjectFrame: transform is p:xfrm
+      const afterNv = g.split("</p:nvGraphicFramePr>")[1] ?? "";
+      expect(afterNv).not.toContain("<a:xfrm>"); // a:xfrm inside graphicFrame is schema-invalid
+    }
+    const tbl = s1.match(/<a:tbl>[\s\S]*?<\/a:tbl>/)![0];
+    const gridCols = tbl.match(/<a:gridCol w="\d+"\/>/g) ?? [];
+    expect(gridCols.length).toBe(3); // three headers
+    for (const row of tbl.matchAll(/<a:tr[^>]*>([\s\S]*?)<\/a:tr>/g)) {
+      const cells = row[1].match(/<a:tc>/g) ?? [];
+      expect(cells.length).toBe(3);
+    }
+    for (const tc of tbl.matchAll(/<a:tc>([\s\S]*?)<\/a:tc>/g)) {
+      expect(tc[1]).toContain("<a:txBody>"); // CT_TableCell: txBody required
+      expect(tc[1].indexOf("<a:txBody>")).toBeLessThan(tc[1].indexOf("<a:tcPr>")); // sequence order
+    }
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.0 pin: notes wire-up is complete — presentation notesMasterIdLst + notesSlide→{slide,notesMaster} round-trip", () => {
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v150-notes"), [
+      { name: "01-title.svg", body: PAGE_TITLE },
+    ], CONTENT_MD);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    const notesDir = join(dir, "notes");
+    mkdirSync(notesDir, { recursive: true });
+    writeFileSync(join(notesDir, "01-speaker.md"), "Welcome the leadership team.\n");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", notesDir });
+    const pkg = unzipSync(zip);
+    const pres = new TextDecoder().decode(pkg["ppt/presentation.xml"]!);
+    // CT_Presentation sequence: sldMasterIdLst, notesMasterIdLst, (handoutMasterIdLst), sldIdLst
+    const order = pres.match(/<p:(sldMasterIdLst|notesMasterIdLst|sldIdLst)/g) ?? [];
+    expect(order).toEqual(["<p:sldMasterIdLst", "<p:notesMasterIdLst", "<p:sldIdLst"]);
+    expect(pres).toContain('<p:notesMasterId id="2147483649" r:id="rIdNotesMaster"/>');
+    const presRels = new TextDecoder().decode(pkg["ppt/_rels/presentation.xml.rels"]!);
+    expect(presRels).toContain('Id="rIdNotesMaster" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="notesMasters/notesMaster1.xml"');
+    const notesRels = new TextDecoder().decode(pkg["ppt/notesSlides/_rels/notesSlide1.xml.rels"]!);
+    expect(notesRels).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide1.xml"');
+    expect(notesRels).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"');
+    const slideRels = new TextDecoder().decode(pkg["ppt/slides/_rels/slide1.xml.rels"]!);
+    expect(slideRels).toContain('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide1.xml"');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.0 pin: [Content_Types].xml covers every part; every Override targets a packaged part", () => {
+    // Compile the richest fixture (many pages, notes-free) and assert package-wide
+    // CT completeness — v1.4.2 was correct here; the pin guards regressions.
+    const dir = join(import.meta.dir, "fixtures/sample-business-report");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const pkg = unzipSync(zip);
+    const ct = new TextDecoder().decode(pkg["[Content_Types].xml"]!);
+    const defaults = new Set([...ct.matchAll(/<Default Extension="([^"]+)"/g)].map((m) => m[1].toLowerCase()));
+    const overrideParts = [...ct.matchAll(/<Override PartName="([^"]+)"[^>]*ContentType="([^"]+)"/g)];
+    const covered = new Set<string>();
+    for (const [, pn, contentType] of overrideParts) {
+      const part = pn.replace(/^\//, "");
+      expect(pkg[part]).toBeDefined(); // no dangling Override
+      covered.add(part);
+      if (contentType.includes("presentationml.presentation.main+xml")) {
+        expect(part).toBe("ppt/presentation.xml");
+      }
+    }
+    expect(overrideParts.some(([, , ct2]) => ct2.includes("presentationml.presentation.main+xml"))).toBe(true);
+    for (const part of Object.keys(pkg)) {
+      if (part.endsWith(".rels")) {
+        expect(defaults.has("rels")).toBe(true);
+        continue;
+      }
+      const ext = part.split(".").pop()!.toLowerCase();
+      if (!defaults.has(ext)) expect(covered.has(part)).toBe(true); // Override fallback
+    }
+    // (committed fixture — nothing to clean up)
+  });
+
+  test("v1.5.0 pin: every layout/master/notesMaster shape id is unique and non-zero within its part", () => {
+    // v1.4.2 structured layouts emitted placeholder cNvPr id="0" (invalid: ids are
+    // positive unique ST_DrawingElementId within the shape tree) and a body
+    // placeholder id="1" duplicating the spTree group id — PowerPoint repair trigger.
+    const PAGES = [
+      { name: "01-title.svg", body: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="title" data-page-number="1"><g data-block-id="b1"><rect x="0" y="0" width="1280" height="720" fill="#1F3864"/><text x="640" y="360" font-size="48" font-weight="bold" fill="#FFFFFF">Q3 2026 Business Review</text></g></svg>` },
+      { name: "02-data.svg", body: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="data" data-page-number="2"><g data-block-id="b1"><text x="80" y="100" font-size="28" font-weight="bold" fill="#1F3864">Revenue beat plan for the third straight quarter</text></g></svg>` },
+    ];
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-v150-ids"), PAGES, CONTENT_MD);
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report", structuredLayouts: true });
+    const pkg = unzipSync(zip);
+    const shapeTreeParts = Object.keys(pkg).filter((k) =>
+      /^ppt\/(slides\/slide\d+|slideLayouts\/slideLayout\d+|slideMasters\/slideMaster\d+|notesSlides\/notesSlide\d+|notesMasters\/notesMaster\d+)\.xml$/.test(k));
+    expect(shapeTreeParts.length).toBeGreaterThanOrEqual(4);
+    for (const part of shapeTreeParts) {
+      const xml = new TextDecoder().decode(pkg[part]!);
+      const ids = [...xml.matchAll(/<p:cNvPr id="(\d+)"/g)].map((m) => parseInt(m[1], 10));
+      expect(ids.length).toBeGreaterThan(0);
+      expect(Math.min(...ids)).toBeGreaterThan(0); // no id="0"
+      expect(new Set(ids).size).toBe(ids.length);  // no duplicates
+    }
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
-
-
-
-
 
