@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.3.2"
-last_updated: "2026-11-06"
+version: "1.3.3"
+last_updated: 2026-11-06
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
@@ -15,7 +15,7 @@ examples:
 phases: [4]
 handoff_to: [measure]
 handoff_from: [design, pm]
-required_skills: [html-build]
+required_skills: [html-build, version, presenter-mode]
 lifecycle:
   phase: production
   created: "2026-05-29"

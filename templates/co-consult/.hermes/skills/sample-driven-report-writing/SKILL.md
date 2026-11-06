@@ -3,15 +3,15 @@ name: sample-driven-report-writing
 status: active
 scope: co-consult
 description: >
-  Analyzes a deliverable sample (HWP/PDF/DOCX) to extract its table-of-contents
+  Analyzes a deliverable sample (PDF/DOCX/Markdown) to extract its table-of-contents
   structure AND, for each section, whether tables and/or charts are mandatory —
   then researches and drafts report content that matches the sample's exact
   structure and visual-element requirements. Use when: writing any consulting
   deliverable that must conform to a supplied sample or government/institutional
   template format.
 owner: communications-lead
-version: 1.0.0
-last_reviewed: 2026-08-11
+version: 1.1.0
+last_reviewed: 2026-11-06
 prerequisites: consulting-report-writing
 metadata:
   type: domain
@@ -42,7 +42,7 @@ It replaces engagement-specific hardcoding (a fixed chapter table, a fixed page 
 1. **Phase 1 — Sample Analysis**: Ingest the reference deliverable, extract its structure (TOC, mandatory tables/charts per section, placeholder slots, page budget), and produce a Writing Spec artifact. Confirm the spec with the engagement lead before proceeding.
 2. **Phase 2 — Research**: Dispatch analytical inputs (financial, legal, industry) mapped to each chapter per the Writing Spec.
 3. **Phase 3 — Draft**: Assign chapter owners by content type, draft in parallel against the Writing Spec, replace all placeholders, enforce table-to-narrative ratio and mandatory visual elements.
-4. **Phase 4 — Validate & Render**: Structural validation, visual-element audit, render to the sample's specified format (`.hwpx` / `.docx` / `.pdf`). Max 2 revision cycles before PM escalation.
+4. **Phase 4 — Validate & Render**: Structural validation, visual-element audit, render the draft as `.docx` / `.pdf`; any other client-required format is produced outside the workspace from the Markdown draft. Max 2 revision cycles before PM escalation.
 
 Detailed instructions for each phase are below.
 
@@ -54,10 +54,9 @@ Ingest the actual sample and produce a **Writing Spec** artifact (`memory/<engag
 
 | Sample format | Tool | Notes |
 |---|---|---|
-| `.hwp` (HWP 5.0 binary) | `bun scripts/co-consult/hwp-extract.ts <file.hwp>` → `hwp-document-processing` | Extracts BodyText paragraph records; no Hancom Office required |
 | `.pdf` | `md-to-ooxml` text extraction / WebFetch / manual read | If image-only PDF, OCR first |
 | `.docx` | `md-to-ooxml` / `md-to-report` reader | |
-| `.hwpx` (open XML) | `python/generate_hwpx.py` (read mode) / `hwpx-validate` | |
+| Other formats (e.g. Korean office formats) | Not processed in the workspace — convert to PDF/DOCX/Markdown outside the workspace first | |
 
 If only a paper/PDF scan exists, ask the engagement lead for the editable source — analysis fidelity drops sharply on scans.
 
@@ -67,7 +66,7 @@ For each chapter/section visible in the sample, record in the Writing Spec:
 
 1. **Chapter/section number and title** (English + original-language).
 2. **Table-of-contents position** and approximate page span in the sample.
-3. **Table mandatory-flag**: count table markers in that section (`표 N-N`, `<table>`, HWP table records, pipe-tables). If the sample contains one or more tables in this section, mark it `requires-table`. Record the typical column structure.
+3. **Table mandatory-flag**: count table markers in that section (`표 N-N`, `<table>`, pipe-tables). If the sample contains one or more tables in this section, mark it `requires-table`. Record the typical column structure.
 4. **Chart/figure mandatory-flag**: count figure/chart markers (`그림 N-N`, `차트`, `그래프`, embedded images). Mark `requires-chart` where present. Record the chart type (trend line, bar, pie, etc.).
 5. **Narrative-only sections**: sections with neither table nor chart markers — prose is the expected output.
 6. **Placeholder/guideline slots**: every guideline-instruction block (`[작성 가이드라인]`, `[기재 방향]`, `예시N)`) and example block that the sample/template uses to instruct the author. These MUST be replaced with real content in the draft — list them so none survive.
@@ -98,12 +97,11 @@ Dispatch analytical inputs against the Writing Spec's section list:
 
 ## Phase 4 — Validate & Render
 
-1. **Structural validation** (via `hwp-document-processing`): chapter order matches the sample TOC; no guideline/example placeholder leftovers survive; per-chapter page count is within ±15% of the Writing Spec page budget.
+1. **Structural validation**: chapter order matches the sample TOC; no guideline/example placeholder leftovers survive; per-chapter page count is within ±15% of the Writing Spec page budget.
 2. **Visual-element audit**: re-scan the draft for each section's mandatory-flag — every `requires-table` / `requires-chart` section must contain its element. This is the check most likely to fail; iterate.
 3. **Render the final format**:
-   - `.hwpx` (government submission) → `bun scripts/co-consult/hwpx-generate.ts <draft.md> <output.hwpx>`, then `hwpx-validate` (must report "All schema validations passed").
-   - `.docx` / `.pdf` (internal/client review) → `bun scripts/co-consult/md-to-report.ts <draft.md>` (LibreOffice-backed PDF).
-   - The submission format is whatever the sample specifies — do not substitute.
+   - Deliverables are drafted in Markdown. `.docx` / `.pdf` (internal/client review) → `bun scripts/co-consult/md-to-report.ts <draft.md>` (LibreOffice-backed PDF).
+   - If the client requires another format (e.g. a Korean office format), the Markdown draft is converted to that format outside the workspace; the workspace does not produce or validate it.
 4. Max 2 revision cycles before PM escalation.
 
 ## Writing Principles (preserved)
@@ -113,20 +111,19 @@ Dispatch analytical inputs against the Writing Spec's section list:
 3. **Table-to-narrative ratio** — every table earns at least half a page of interpretation.
 4. **Disclosure fallback (KR profile: DART)** — explicitly label company-provided unofficial materials.
 5. **Client-data handling** — drafts contain financials and PII; review for sensitive data before any `git add`/commit.
-6. **File naming** — `{company}-{report-type}-{YYYY-MM-DD}_ko.md` (draft) → final format per sample, in `deliverables/reports/`.
+6. **File naming** — `{company}-{report-type}-{YYYY-MM-DD}_ko.md` (draft) → `.docx` / `.pdf` (or client format converted outside the workspace), in `deliverables/reports/`.
 
 ## Output Format
 
 - **Writing Spec** (`memory/<engagement>-writing-spec-<date>.md`) — TOC + per-section table/chart flags + page budget + placeholder-slot list
 - Full deliverable draft (Markdown, chapter order matching the Writing Spec exactly)
 - Chapter-by-chapter page count vs. target
-- Final deliverable in the sample's specified format (`.hwpx` / `.docx` / `.pdf`), validated
+- Final deliverable as `.docx` / `.pdf` (or the Markdown draft for conversion to the client's required format outside the workspace), validated
 - `memory/YYYY-MM-DD.md` engagement summary entry
 
 ## Related Skills
 
 - `consulting-report-writing` — prerequisite; general report-writing standards
-- `hwp-document-processing` — sample ingestion (`.hwp` / `.hwpx`) and structural / placeholder / page-count validation
 - `k-dart`, `financial-statement-analysis` — financial research inputs (with DART-fallback procedure)
 - `k-law` — legal / regulatory research input
 - `company-intelligence`, `competitive-intelligence` — company / industry research inputs

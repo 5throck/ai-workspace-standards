@@ -8,6 +8,8 @@
 
 ## Decision
 
+> **Erratum (2026-11-06)**: the parenthetical "co-consult's HWP promotion resolved to deprecation" below was inaccurate — T-20261005-026 promoted the co-consult Python HWP scripts into the template. Superseded by `docs/designs/2026-11-06-co-work-hwpx-consolidation-design.md`, which moves HWPX tooling to co-work in TypeScript.
+
 Promote the PATTERN as a TypeScript generalization, not the engagement script:
 
 - `Projects/co-deck/presentations/2026-10-ai-industry-research/inject_video_players.py` is engagement output (zen-theme-hardcoded CSS, Korean UI strings, a `#slide-3` selector, per-deck extras: footnotes/part-label/font tweaks) — the backport gate (ADR-0031 Safety Rule 6) forbids promoting engagement copies. It also currently carries a JS syntax-error remnant in its working tree — exactly the defect class the procedure's `node --check` gate exists for.

@@ -36,7 +36,7 @@
     },
     "i18n-specialist": {
       "source": "agents/i18n-specialist.md",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "overridable": true,
       "override_type_allowed": [
         "additive",
@@ -126,7 +126,7 @@
     },
     "i18n-layout": {
       "source": "skills/i18n-layout/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts, hwp pointers (constitution §4.4)"
     },
@@ -412,7 +412,7 @@
       "gemini_source": ".gemini/skills/i18n-layout/SKILL.md",
       "agents_source": ".agents/skills/i18n-layout/SKILL.md",
       "codex_source": ".codex/skills/i18n-layout/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Text layout and encoding guidance — UTF-8/legacy code pages, BOM hazards, line endings, RTL/bidi, script-specific font selection (Hangul focus)",
       "propagated_to_common": true
     },

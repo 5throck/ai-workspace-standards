@@ -86,16 +86,6 @@
       "layer": "variant:co-consult"
     },
     {
-      "id": "hwp-document-processing",
-      "type": "skill",
-      "layer": "variant:co-consult"
-    },
-    {
-      "id": "i18n-layout",
-      "type": "skill",
-      "layer": "common"
-    },
-    {
       "id": "i18n-specialist",
       "type": "agent",
       "layer": "variant:co-consult"
@@ -1026,42 +1016,6 @@
       "source": "decision_model"
     },
     {
-      "type": "used_by",
-      "from": "hwp-document-processing",
-      "to": "communications-lead",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "hwp-document-processing",
-      "to": "consulting-report-writing",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "hwp-document-processing",
-      "to": "i18n-layout",
-      "source": "prose"
-    },
-    {
-      "type": "phase",
-      "from": "hwp-document-processing",
-      "to": "phase3",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "hwp-document-processing",
-      "to": "phase4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "references",
-      "from": "hwp-document-processing",
-      "to": "sample-driven-report-writing",
-      "source": "prose"
-    },
-    {
       "type": "references",
       "from": "industry-research-pack",
       "to": "company-intelligence",
@@ -1796,12 +1750,6 @@
       "type": "references",
       "from": "sample-driven-report-writing",
       "to": "financial-statement-analysis",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "sample-driven-report-writing",
-      "to": "hwp-document-processing",
       "source": "prose"
     },
     {

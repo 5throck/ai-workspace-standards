@@ -1,7 +1,7 @@
 ---
 name: measure
-version: "2.1.1"
-last_updated: "2026-10-28"
+version: "2.1.2"
+last_updated: 2026-11-06
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
 tier: low
@@ -16,7 +16,7 @@ examples:
 phases: [4]
 handoff_to: [pdf-export]
 handoff_from: [html-build]
-required_skills: [prep-pdf]
+required_skills: [prep-pdf, version]
 lifecycle:
   phase: production
   created: "2026-05-29"

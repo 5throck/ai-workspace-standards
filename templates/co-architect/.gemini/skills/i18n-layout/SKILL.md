@@ -6,12 +6,12 @@ description: >
   script-specific font selection (Hangul focus). Use when: encoding is
   corrupted or mojibake appears, an RTL locale must render correctly,
   fonts must be chosen for a script, or CRLF/BOM issues surface.
-version: 1.0.0
+version: 1.0.1
 owner: pm
 status: active
-last_reviewed: 2026-08-24
+last_reviewed: 2026-11-06
 scope: common
-metadata: 
+metadata:
   type: process
   triggers:
     - character encoding
@@ -20,7 +20,6 @@ metadata:
     - font selection
     - CRLF
     - BOM
-prerequisites: none
 ---
 
 ## Purpose
@@ -90,14 +89,10 @@ Latin and Hangul/Han glyphs have different natural heights; mixed-script lines n
 
 ## HWP Documents
 
-HWP (Korean word processor) document handling is a document-processing domain, not a layout rule: it is owned by the co-consult variant's `hwp-document-processing` skill. Route HWP extraction, conversion, and authoring questions there — do not duplicate its procedures here. The layout-relevant reminder: HWP content exported to this workspace converts to UTF-8 at the boundary (see Legacy Korean code pages above).
+HWP/HWPX authoring and conversion tooling is not provided by workspace templates. The layout-relevant reminder: HWP content brought into this workspace converts to UTF-8 at the boundary (see Legacy Korean code pages above).
 
 ## Boundary
 
 - Locale IDs, collation, timezones: `i18n-locale-config`.
 - Per-locale value formatting (dates, numbers, currency): `i18n-formatting`.
 - Translating a specific file (hash sync, diff preview): the `translate` skill.
-
-## Related Skills
-
-<!-- Link related skills here -->

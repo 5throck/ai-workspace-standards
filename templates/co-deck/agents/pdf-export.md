@@ -1,7 +1,7 @@
 ---
 name: pdf-export
-version: "2.2.1"
-last_updated: "2026-10-28"
+version: "2.2.2"
+last_updated: 2026-11-06
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
 tier: low
@@ -16,7 +16,7 @@ examples:
 phases: [4, 5]
 handoff_to: []
 handoff_from: [measure, pm]
-required_skills: [pdf-export]
+required_skills: [pdf-export, version, prep-pdf, slide-layout-gate]
 lifecycle:
   phase: production
   created: "2026-05-29"

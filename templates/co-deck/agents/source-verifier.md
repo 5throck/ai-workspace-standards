@@ -1,9 +1,9 @@
 ---
 name: source-verifier
-version: "1.1.1"
+version: "1.1.2"
 role: Research source credibility and URL existence verification specialist
 status: active
-last_updated: "2026-10-28"
+last_updated: 2026-11-06
 tier: medium
 color: yellow
 description: >-
@@ -16,7 +16,7 @@ examples:
 phases: [1.5]
 handoff_to: [storyline, research, pm]
 handoff_from: [research, pm]
-required_skills: []
+required_skills: [version]
 lifecycle:
   phase: production
   created: "2026-05-29"
