@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261106-009
+kind: manual
+title: >-
+  D8 B3 residual retro spec-registration batch — backfill design paperwork for
+  the 5 residual rows of docs/reports/2026-11-06-d8-batch-adjudication.md §B3
+  (code already landed, no registered design doc naming the ticket ids).
+  Records-only: 3 retro design docs written and registered (source manual,
+  status implemented) — 2026-11-03-git-aware-scan-design (covers
+  T-20261103-004, git-aware-scan helper, PR #1842);
+  2026-11-03-gitleaks-test-fixture-allowlist-design (covers T-20261103-007,
+  thin promotion stub for DEC-20261103-03, PR #1840);
+  2026-11-04-upstream-fix-triplet-design (covers U-20261104-001 PR #1846,
+  U-20261104-003 PR #1847, U-20261104-002 PR #1848). D8 checker
+  (design-gate-coverage, adjudication window) verified: uncovered 19 → 14;
+  all 5 B3 rows now resolve covered-by-spec; the remaining 14 rows are
+  exactly the set adjudicated in the record (9 x E5 sync commits, 4
+  spec-cited commits, 1 x E3 ticket T-20261101-004). NO code changes; NO
+  ticket-status changes to the 5 covered ids. Tracking only — close after
+  the registration PR merges (PM action post-merge).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-06T13:45:01.000+09:00'
+history:
+  - at: '2026-11-06T13:45:01.000+09:00'
+    from: null
+    to: backlog
