@@ -1,15 +1,16 @@
 #!/usr/bin/env bun
 /**
- * @version 1.4.1
- * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
+ * @version 1.4.2
+ * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Decodes the five XML built-in entities in extracted text before DrawingML escaping. Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
+// v1.4.2 (2026-11-06, U-20261106-002): XML built-in entities decode in extracted text (text/tspan/desc payload, via svg-check's decodeXmlEntities) BEFORE esc() — authored `P&amp;L` no longer double-escapes to `P&amp;amp;L` in slide XML (parity with svg-check v1.5.0 R1).
 // v1.4.1 (2026-11-06): connector cNvPr close-tag fix — malformed DrawingML (unclosed <p:cNvPr> + stray quote) triggered a PowerPoint repair prompt on every deck containing line shapes.
 
 import { unzipSync, zipSync } from "fflate";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { basename, extname, join, resolve } from "path";
-import { fingerprintFiles, parseSvg, type CheckReport, type SvgNode } from "./svg-check.ts";
+import { decodeXmlEntities, fingerprintFiles, parseSvg, type CheckReport, type SvgNode } from "./svg-check.ts";
 
 const EMU_PER_PX = 9525;
 const emu = (px: number) => Math.round(px * EMU_PER_PX);
@@ -207,7 +208,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
       const descNode = node.children.find((c) => c.tag === "desc");
       if (kind && descNode) {
         let payload: Record<string, unknown> = {};
-        try { payload = JSON.parse(descNode.text); } catch { /* gate owns payload validity */ }
+        try { payload = JSON.parse(decodeXmlEntities(descNode.text)); } catch { /* gate owns payload validity */ }
         nativeBlocks.push({ block: { kind, frame: { x: fx, y: fy, w: fw, h: fh }, payload }, skipNode: node });
         if (nativeMode) return; // native mode: marked block shapes are replaced by the graphicFrame
       }
@@ -305,7 +306,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const baseline = (parseFloat(attrs["y"] ?? "0") || 0) + localOff.ty;
         const x = (parseFloat(attrs["x"] ?? "0") || 0) + localOff.tx;
         const top = baseline - fs * 0.8;
-        const direct = node.text.replace(/\s+/g, " ").trim();
+        const direct = decodeXmlEntities(node.text).replace(/\s+/g, " ").trim();
         const tspans = node.children.filter((c) => c.tag === "tspan");
         const paras: { text: string; dy: number }[] = [];
         if (direct) paras.push({ text: direct, dy: 0 });
@@ -313,7 +314,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         for (const ts of tspans) {
           const dy = parseFloat(ts.attrs["dy"] ?? "0") || 0;
           acc += dy;
-          const t2 = ts.text.replace(/\s+/g, " ").trim() || (ts.children.map(nodeTextOf).join(" ").trim());
+          const t2 = decodeXmlEntities(ts.text).replace(/\s+/g, " ").trim() || (ts.children.map(nodeTextOf).join(" ").trim());
           if (t2) paras.push({ text: t2, dy: acc });
         }
         const lastDy = paras.length ? paras[paras.length - 1].dy : 0;
@@ -359,9 +360,9 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
   return { shapes, images, links, nativeBlocks };
 }
 
-// nodeTextOf: local import-free copy for tspan text (avoids exporting from svg-check)
+// nodeTextOf: parity copy of svg-check's nodeText — entity-decoding depth-first text join
 function nodeTextOf(node: SvgNode): string {
-  const own = node.text.replace(/\s+/g, " ").trim();
+  const own = decodeXmlEntities(node.text).replace(/\s+/g, " ").trim();
   const kids = node.children.map(nodeTextOf).filter(Boolean).join(" ");
   return [own, kids].filter(Boolean).join(" ").trim();
 }
@@ -768,7 +769,7 @@ export async function renderPngs(opts: { deckDir: string; pngDir: string; width?
 
 function help(): never {
   console.log(`
-svg-to-pptx.ts v1.4.0 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
+svg-to-pptx.ts v1.4.2 — canonical SVG deck → natively editable DrawingML PPTX (flat mode)
 
 Usage:
   bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> \\

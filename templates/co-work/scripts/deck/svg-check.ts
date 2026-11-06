@@ -1,9 +1,13 @@
 #!/usr/bin/env bun
 /**
- * @version 1.5.0
+ * @version 1.5.1
  * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, bidirectional content-SSOT text-run diff (SVG⊆SSOT errors + unrendered SSOT runs as W-CONTENT-UNRENDERED warnings), XML entity decoding in run extraction, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design; hardening spec 2026-11-06-deck-pipeline-hardening-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
  *
+ * v1.5.1 (2026-11-06, U-20261106-002): decodeXmlEntities is exported so the
+ *           PPTX exporter (svg-to-pptx v1.4.2) reuses the identical single-pass
+ *           decoder on its extraction leg — one decoder, one semantics for both
+ *           gate and export. No behavior change inside the gate itself.
  * v1.5.0 (2026-11-06, spec docs/designs/2026-11-06-deck-pipeline-hardening-design.md):
  *           (R1) the five XML built-in entities are decoded in extracted text
  *           runs before the SSOT diff — pages may spell `P&L` bare or as
@@ -157,7 +161,7 @@ const XML_ENTITIES: Record<string, string> = {
  * the content contract stays plain text (decoding it could corrupt an SSOT
  * that legitimately contains the literal characters `&amp;`).
  */
-function decodeXmlEntities(s: string): string {
+export function decodeXmlEntities(s: string): string {
   return s.replace(/&(amp|lt|gt|quot|apos);/g, (_, e: string) => XML_ENTITIES[e]);
 }
 
