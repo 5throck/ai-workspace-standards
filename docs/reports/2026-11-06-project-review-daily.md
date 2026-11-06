@@ -16,6 +16,11 @@ Unit suite: 3388 pass / 4 skip / 0 fail (246 files). Orphan sweep: skills/agents
 
 ## D8 adjudication (81 rows, report-only)
 
+> Per-row batch adjudication landed 2026-11-06 as the follow-up record
+> `docs/reports/2026-11-06-d8-batch-adjudication.md` (T-20261106-006 item 3):
+> v1.1.0 join absorbed most of the 81; the 26-row residual mapped to 7 spec-cited
+> / 14 E-class / 5 residual (retro spec registration recommended for the 5).
+
 | Row class | Rows | Disposition |
 |---|---|---|
 | Join artifact / workspace-sync churn (hardening-day commits, `chore(templates)` syncs, closeouts citing specs by name) | ~56 template-touching commits | COVERED/E-class — batch-adjudicated; the recurring "teach the checker spec-name citations" recommendation now has a 3-week case (C-1) |

@@ -3,7 +3,7 @@
 - **Status**: implemented (registry SSOT; approved for implementation per DEC-20261104-02 ruling 5, 2026-11-05 — header reconciled with the registry per T-20261029-002)
 - **Date**: 2026-11-04
 - **Ticket**: T-20261104-004 (incident hardening; re-created after the original filing silently vanished — itself a covered failure mode, §5)
-- **Related tickets**: T-20261104-003 (empty `Projects/` test parent), T-20261104-001 (memory auto-merge corruption — same silent-loss class, out of scope here), T-20261103-008/-009 (11-03 rollback duplication)
+- **Related tickets**: T-20261104-003 (empty `Projects/` test parent), T-20261104-001 (memory auto-merge corruption — same silent-loss class, out of scope here), T-20261103-008, T-20261103-009 (11-03 rollback duplication; ids spelled out in full 2026-11-06 per T-20261106-006 item 3 so the design-gate-coverage join resolves the abbreviated "T-20261103-008/-009" form it previously could not see)
 - **Incident record**: memory/2026-11-04.md, "INCIDENT" decision block (line 175)
 - **Format reference**: docs/designs/2026-11-04-coabap-variant-identity-disposition-design.md
 
@@ -28,7 +28,7 @@ Four defects contributed or were exposed:
    create `Projects/<name>/` under a relative cwd and never remove the parent
    (T-20261104-003). The same leftover also flakes `apply-tier-normalization.test.ts`.
 3. The ticket store silently lost a filed ticket (the original T-20261104-004) and an
-   earlier rollback duplicated two tickets (T-20261103-008/-009 originals wrongly
+   earlier rollback duplicated two tickets (T-20261103-008 and T-20261103-009 originals wrongly
    presumed lost). A cited-in-memory ticket id that does not resolve in the store was
    detectable within the same session and nobody could detect it.
 4. The recorded lesson ("never run recursive deletes in the shared workspace; always
@@ -52,7 +52,7 @@ Four defects contributed or were exposed:
 | `createTicket` is NOT under the ticket lock and creates an empty file first (crash window) | scripts/helpers/ticket-store.ts:284–322 (`openSync(path, 'wx')` at :294, content rename at :318); lock wrapper at :153–200 wraps only existing-ticket mutations |
 | Ticket ids cited in memory are the detection surface | memory/2026-11-04.md:175 ("ticket filed: T-20261104-004"), :181 |
 | Memory-file parse contract (block/heading shape) | scripts/verify-memory.ts:108–117 |
-| Rollback duplication of T-20261103-008/-009 | tickets/governance/T-20261104-004.yaml:12–14; memory/2026-11-03.md contains the same session block twice (lines ~499 and ~836) — the 11-03 rollback artifact |
+| Rollback duplication of T-20261103-008, T-20261103-009 | tickets/governance/T-20261104-004.yaml:12–14; memory/2026-11-03.md contains the same session block twice (lines ~499 and ~836) — the 11-03 rollback artifact |
 | Workspace-root detection precedent (fail-closed boundary, symlink-canonicalized) | scripts/helpers/security-validator.ts:149–161 (`detectWorkspaceRoot`), :171–177 (`canonicalize`) |
 | PreToolUse hook input/decision conventions | scripts/hooks/gateguard-fact-force.ts:191–206 (fail-open stdin/JSON), :269–279 (deny/ask JSON + exit codes) |
 | Session-scoped marker-file precedent (stateful hook via tmpdir) | scripts/hooks/pm-role-bootstrap.ts:14–16, :24 (`PM_GATE_STATE_DIR`, `<session_id>.json`) |
