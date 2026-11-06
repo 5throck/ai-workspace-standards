@@ -621,6 +621,7 @@
       "mirrors": [
         "templates/co-abap/agents/pm.md",
         "templates/co-consult/agents/pm.md",
+        "templates/co-deck/agents/pm.md",
         "templates/co-design/agents/pm.md",
         "templates/co-develop/agents/pm.md",
         "templates/co-game/agents/pm.md",
@@ -1264,19 +1265,6 @@
       "version": "2.2.2",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
-      ]
-    },
-    {
-      "id": "agent:co-deck/pm",
-      "type": "agent",
-      "layer": "variant:co-deck",
-      "name": "pm",
-      "scope": "co-deck",
-      "capability": "pm",
-      "content_hash": "adc7308afe6f32f1",
-      "version": "1.2.2",
-      "mirrors": [
-        "templates/co-deck/agents/pm.md"
       ]
     },
     {
@@ -10429,6 +10417,12 @@
     },
     {
       "type": "accountable_for",
+      "from": "agent:co-abap/pm",
+      "to": "procedure.co-deck.lecture-deck-production",
+      "source": "raci_matrix"
+    },
+    {
+      "type": "accountable_for",
       "from": "agent:co-abap/security-monitor",
       "to": "procedure.co-abap.security-closeout-review",
       "source": "raci_matrix"
@@ -10503,12 +10497,6 @@
       "type": "accountable_for",
       "from": "agent:co-deck/pdf-export",
       "to": "procedure.co-deck.deck-publish-and-version",
-      "source": "raci_matrix"
-    },
-    {
-      "type": "accountable_for",
-      "from": "agent:co-deck/pm",
-      "to": "procedure.co-deck.lecture-deck-production",
       "source": "raci_matrix"
     },
     {
@@ -17339,7 +17327,7 @@
     {
       "type": "step_by_agent",
       "from": "procedure.co-deck.slidedata-derived-doc-sync",
-      "to": "agent:co-deck/pm",
+      "to": "agent:co-abap/pm",
       "source": "procedure_schema",
       "actor_type": "agent"
     },
@@ -23909,17 +23897,6 @@
       "provenance": {
         "file": "templates/co-deck/skills/storyline/SKILL.md",
         "field": "prerequisites"
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:co-deck/theme-authoring",
-      "to": "agent:co-deck/pm",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-deck/agents/pm.md",
-        "field": "required_skills",
-        "index": 0
       }
     },
     {

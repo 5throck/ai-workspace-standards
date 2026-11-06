@@ -1590,18 +1590,6 @@
       "source": "prose"
     },
     {
-      "type": "used_by",
-      "from": "theme-authoring",
-      "to": "pm",
-      "source": "required_skills"
-    },
-    {
-      "type": "used_by",
-      "from": "theme-authoring",
-      "to": "pm",
-      "source": "skill_manifest"
-    },
-    {
       "type": "references",
       "from": "theme-authoring",
       "to": "storyline",

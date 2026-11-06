@@ -265,9 +265,7 @@
       {
         "name": "theme-authoring",
         "layer": "workspace",
-        "used_by_agents": [
-          "pm"
-        ],
+        "used_by_agents": [],
         "phases": [],
         "platform_parity": "required"
       },
