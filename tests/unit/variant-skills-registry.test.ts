@@ -32,7 +32,7 @@ const templatesDir = resolve(import.meta.dir, '..', '..', 'templates');
 const EXPECTED_COUNTS: Record<string, number> = {
   'co-consult': 18,
   'co-deck': 10,
-  'co-security': 6,
+  'co-security': 7,
   'co-develop': 4,
   'co-abap': 13,
   'co-export': 11,

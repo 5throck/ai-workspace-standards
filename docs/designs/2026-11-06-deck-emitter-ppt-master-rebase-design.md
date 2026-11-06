@@ -2,7 +2,7 @@
 
 - **Spec ID**: 2026-11-06-deck-emitter-ppt-master-rebase-design
 - **Date**: 2026-11-06
-- **Status**: Accepted — compatibility spike complete (verdict: feasible with a small adapter; spike report §3 filled) and user gate passed (probe PPTX opened in real PowerPoint without repair prompts, 2026-11-07); decision record DEC-20261106-04 filed; Phase 1 (adapter + emit via their chain) implemented 2026-11-07 (registry status flip `draft → implemented` at the landing commit)
+- **Status**: Accepted — compatibility spike complete (verdict: feasible with a small adapter; spike report §3 filled) and user gate passed (probe PPTX opened in real PowerPoint without repair prompts, 2026-11-07); decision record DEC-20261106-04 filed; Phase 1 (adapter + emit via their chain) implemented 2026-11-07 (registry status flip `draft → implemented` at the landing commit); **Phase 2 (Bun deck-runtime retirement) implemented 2026-11-07** — differential gate parity EXACT (python `svg_check.py` 2.0.0 vs bun `svg-check.ts` 1.5.1: identical verdicts and byte-identical fingerprints over the 100-page main deck `aa3baf43…`, 12-page exec cut `a454f49a…`, and golden fixture `c0748b55…`, plus the checker semantics pins ported from the deleted deck-golden.test.ts — harness `scripts/deck/tests/test_svg_check_parity.py`, 9/9), svg-to-pptx.ts deleted, svg-check.ts retired to parity-oracle, previews productionized as `render_previews.py` (resvg-py engine — evaluated against the resvg-js renders, mean per-channel |Δ| ≤ 3.35)
 - **Decision record**: docs/decisions/DEC-20261106-04.md — clean-room reversal + MIT adoption posture; to be filed at the user gate (next number after DEC-20261106-03)
 - **Supersedes (partial)**: the compile/export tier of docs/designs/2026-11-03-co-work-native-pptx-deck-design.md (§5 compiler, §13 native-object emission, notes subsystem). That spec's authoring + gate tiers remain in force; its Status header is amended, not deleted (D4)
 - **Related upstream ticket**: U-20261106-003 (L1: external-dependency manifest + scaffold/upgrade support; status waiting, triage ready)
@@ -259,9 +259,27 @@ mitigation list before Phase 1 is approved.
    emission; failure holds the pin (D2/D8).
 3. **Differential gate parity** (Phase 2 switch criterion): python port vs
    Bun svg-check over all 100 pages + golden fixtures — identical verdicts,
-   then and only then the Bun runtime retires (D6).
+   then and only then the Bun runtime retires (D6). **Implemented 2026-11-07:
+   parity EXACT** — harness `scripts/deck/tests/test_svg_check_parity.py`
+   (in the consuming project) runs both implementations over the 100-page
+   main deck (`sha256:aa3baf43…`), the 12-page exec cut
+   (`sha256:a454f49a…`), and the golden fixture deck
+   (`sha256:c0748b55…`): identical error/warning counts (0/0 on all
+   three), identical per-page issue sets, byte-identical fingerprints;
+   plus the checker semantics pins ported from the deleted
+   deck-golden.test.ts (entity decode, single-pass decoder, unrendered-run
+   warning, bare-`&` compat, verdict parity) — 9/9 checks. The Bun runtime
+   retired accordingly: svg-to-pptx.ts deleted; svg-check.ts kept on disk
+   only as the harness's differential parity oracle.
 4. **Preview continuity**: resvg (Phase 1) / resvg-py evaluation (Phase 2)
-   renders still feed the existing visual-judge acceptance.
+   renders still feed the existing visual-judge acceptance. **Implemented
+   2026-11-07**: `render_previews.py` 1.0.0 productionizes the
+   white-underlay method on the **resvg-py** engine (evaluated against the
+   previous @resvg/resvg-js renders over the shipped deck: mean per-channel
+   |Δ| 0.34–3.35, ≤1.9% of pixels differ by >16 — antialiasing-level only;
+   white underlay + bare-`&` sanitize verified; bun+resvg-js subprocess
+   fallback retained as the interim engine). Main deck re-rendered 100/100
+   at 1280×720, corner-pixel sanity confirmed.
 5. **Governance gates**: `bun test` (deck golden tests updated for the
    deprecation pins), `bun scripts/validate-templates.ts`,
    `bun scripts/audit.ts` green at implementation; spec registry updated

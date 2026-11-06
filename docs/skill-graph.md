@@ -186,12 +186,13 @@
 | `co-security/finding-reconciliation` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5, co-security/phase 6 | co-security/sarif-exporter (composes_with), co-security/spdx-sbom (follows) | — | — |
 | `co-security/samm-maturity` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | — | — | — |
 | `co-security/sarif-exporter` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
+| `co-security/security-audit` | variant:co-security | 1.1.0 | — | — | co-security/finding-reconciliation (composes_with), co-security/sarif-exporter (composes_with) | — | — |
 | `co-security/spdx-sbom` | variant:co-security | 1.1.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
 | `co-security/stride-threat-matrix` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
 | `co-security/verify-authorization` | variant:co-security | 1.1.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
-| `co-work/pptx-export` | variant:co-work | 2.0.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
-| `co-work/svg-quality-gate` | variant:co-work | 1.1.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
-| `co-work/svg-slide-authoring` | variant:co-work | 1.5.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
+| `co-work/pptx-export` | variant:co-work | 2.0.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
+| `co-work/svg-quality-gate` | variant:co-work | 1.2.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
+| `co-work/svg-slide-authoring` | variant:co-work | 1.5.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
 | `common/gateguard` | common | 1.0.2 | — | — | — | — | — |
@@ -609,7 +610,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-work/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/agents/deck-builder.md` | doc | `co-work/pptx-export`, `co-work/svg-quality-gate`, `co-work/svg-slide-authoring` | — | — |
 | `doc:co-work/docs/co-work.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-work/docs/document-style-registry.md` | doc | `co-deck/version`, `co-work/svg-slide-authoring` | — | — |
+| `doc:co-work/docs/document-style-registry.md` | doc | `co-deck/version`, `co-work/pptx-export`, `co-work/svg-slide-authoring` | — | — |
 | `doc:co-work/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
 | `doc:co-work/README.md` | doc | `root/api-documentation`, `root/documentation-writing`, `root/meeting-facilitation`, `root/research-analysis`, `root/standup-synthesizer` | — | — |
 | `doc:CODEX.md` | doc | `root/meeting-facilitation` | — | — |
@@ -849,7 +850,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-145 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+146 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -887,7 +888,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-07), window 90 days. Skill nodes with usage: 6.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (6): co-safety/meeting-facilitation, co-safety/sync, common/sync, root/meeting-facilitation, root/sync, root/ticket-run
-- **unused** (0 sessions in 90 days) (239): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 199 more
+- **unused** (0 sessions in 90 days) (240): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 200 more
 
 ## Ambiguous Name Resolutions
 

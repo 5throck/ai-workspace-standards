@@ -152,7 +152,7 @@
     }
   },
   "decks": {
-    "description": "Native PPTX deck tokens for the canonical-SVG deck capability (spec 2026-11-03-co-work-native-pptx-deck-design). Colors follow the registry unit convention (6-digit hex, no # prefix); canonical SVG authoring adds the # prefix. Consumed by svg-to-pptx.ts (clrScheme/fontScheme derivation) and svg-slide-authoring (locked tokens).",
+    "description": "Native PPTX deck tokens for the canonical-SVG deck capability (spec 2026-11-03-co-work-native-pptx-deck-design). Colors follow the registry unit convention (6-digit hex, no # prefix); canonical SVG authoring adds the # prefix. Formerly consumed by svg-to-pptx.ts (clrScheme/fontScheme derivation; retired 2026-11-07 in the ppt-master rebase, Phase 2) and still consumed by svg-slide-authoring (locked tokens).",
     "canvas": {
       "width_px": 1280,
       "height_px": 720,
