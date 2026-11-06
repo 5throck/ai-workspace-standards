@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * @version 1.4.0
+ * @version 1.4.1
  * @description Compiles authored canonical SVG deck pages into a natively editable DrawingML PPTX package (flat mode: one clean master + blank layout, clrScheme/fontScheme from the document-style-registry decks tokens). Refuses to run without a fingerprint-matching final svg-check report (spec 2026-11-03-co-work-native-pptx-deck-design).
  * @usage bun scripts/svg-to-pptx.ts --deck <dir> --out <file.pptx> --report <final-report.json> --registry <document-style-registry.json> --deck-type <key> [--notes-dir <dir>] [--render-png --png-dir <dir>]
  */
+// v1.4.1 (2026-11-06): connector cNvPr close-tag fix — malformed DrawingML (unclosed <p:cNvPr> + stray quote) triggered a PowerPoint repair prompt on every deck containing line shapes.
 
 import { unzipSync, zipSync } from "fflate";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
@@ -256,7 +257,7 @@ function walkPage(root: SvgNode, tokens: DeckTokens, gradients: Map<string, Grad
         const id = nextId();
         const xf = `<a:xfrm${x2 < x1 ? ' flipH="1"' : ""}${y2 < y1 ? ' flipV="1"' : ""}><a:off x="${emu(Math.min(x1, x2))}" y="${emu(Math.min(y1, y2))}"/><a:ext cx="${emu(Math.abs(x2 - x1) || 1)}" cy="${emu(Math.abs(y2 - y1) || 1)}"/></a:xfrm>`;
         shapes.push({
-          xml: `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="line-${id}">${link ? hlinkXml(link) : ""}"<p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${xf}<a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:noFill/>${lineXml(node, gradients) || `<a:ln w="${emu(1)}"><a:solidFill><a:srgbClr val="${tokens.colors.text ?? "202020"}"/></a:solidFill></a:ln>`}<a:effectLst/></p:spPr></p:cxnSp>`,
+          xml: `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="line-${id}">${link ? hlinkXml(link) : ""}</p:cNvPr><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr>${xf}<a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:noFill/>${lineXml(node, gradients) || `<a:ln w="${emu(1)}"><a:solidFill><a:srgbClr val="${tokens.colors.text ?? "202020"}"/></a:solidFill></a:ln>`}<a:effectLst/></p:spPr></p:cxnSp>`,
         });
         break;
       }

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { unzipSync } from "fflate";
+import { XMLValidator } from "fast-xml-parser";
 import { runCheck, fingerprintFiles } from "../svg-check.ts";
 import { compileDeck, renderPngs, verifyReportAgainstDeck } from "../svg-to-pptx.ts";
 
@@ -459,6 +460,32 @@ describe("svg-to-pptx (DrawingML compiler)", () => {
     const s1 = new TextDecoder().decode(unzipSync(zip)["ppt/slides/slide1.xml"]!);
     expect(s1).not.toContain("<p:ph");
     rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.4.1 regression pin: every generated slide XML part is well-formed (connector cNvPr close tag)", () => {
+    // v1.4.0 emitted `<p:cNvPr id=".." name="line-N">"<p:cNvCxnSpPr/>` for line shapes —
+    // an unclosed <p:cNvPr> plus a stray quote, i.e. malformed DrawingML that made
+    // PowerPoint raise a repair prompt on every deck containing line shapes.
+    // This pin compiles the golden fixture deck (agenda + data pages carry <line>) and
+    // strict-parses every generated slide part with fast-xml-parser's XMLValidator.
+    const dir = join(import.meta.dir, "fixtures/sample-business-report");
+    const { zip } = compileDeck({ deckDir: dir, registryPath: REGISTRY, deckType: "business-report" });
+    const pkg = unzipSync(zip);
+
+    const slideParts = Object.keys(pkg).filter((k) => /^ppt\/slides\/slide\d+\.xml$/.test(k));
+    expect(slideParts.length).toBeGreaterThanOrEqual(6);
+
+    const connectorSlides = slideParts.filter((k) => new TextDecoder().decode(pkg[k]!).includes("straightConnector1"));
+    expect(connectorSlides.length).toBeGreaterThanOrEqual(1); // regression target is exercised
+
+    for (const part of slideParts) {
+      const xml = new TextDecoder().decode(pkg[part]!);
+      const validation = XMLValidator.validate(xml);
+      if (validation !== true) {
+        const err = validation as { msg?: string };
+        throw new Error(`${part} is not well-formed: ${err.msg ?? "validation failed"}`);
+      }
+    }
   });
 });
 
