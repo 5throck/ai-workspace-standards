@@ -1,17 +1,17 @@
 ---
 name: pptx-export
 description: >
-  PPTX export chain for canonical SVG decks: fingerprint-verified svg-check
+  PPTX export chain for canonical SVG decks: fingerprint-verified svg_check.py
   content gate (our SSOT) → ppt-master-adapter translation → the ppt-master
   conversion chain verbatim → their delivery/OPC validation → postflight
   receipt. Use when: exporting a finished deck, interpreting the
   delivery/OPC receipts, or producing previews for visual-judge acceptance.
-version: 2.0.0
+version: 2.0.1
 last_reviewed: 2026-11-07
 status: active
 scope: co-work
 owner: pm
-prerequisites: Bun runtime, @resvg/resvg-js (previews), external dependency ppt-master v6.8.0 (MIT) cloned per external-deps.json (presentations/ppt-master/), python venv with their install list (PyMuPDF/AGPL excluded), templates/co-work/scripts/deck/ppt-master-adapter.ts, passing final svg-check report
+prerequisites: Bun runtime (adapter), Python 3.10+ (gate and previews — svg_check.py stdlib-only, render_previews.py with resvg-py), external dependency ppt-master v6.8.0 (MIT) cloned per external-deps.json (presentations/ppt-master/), python venv with their install list (PyMuPDF/AGPL excluded), templates/co-work/scripts/deck/ppt-master-adapter.ts, passing final svg_check.py report
 metadata:
   type: capability
   triggers:
@@ -41,13 +41,13 @@ are content, not software redistribution — no per-deck notice is required.
 
 ## Context
 
-v2.0.0 is an engine swap: the hand-rolled DrawingML compiler
-(svg-to-pptx.ts) is **deprecated** — it produced eight classes of
+v2.0.0 was an engine swap: the hand-rolled DrawingML compiler
+(svg-to-pptx.ts) is **retired and deleted** (Phase 2, 2026-11-07) — it produced eight classes of
 PowerPoint-invalid output that no local oracle predicted (no
 PowerPoint-validation oracle exists in this environment; DEC-20261106-04).
 The export pipeline is now: **our content gate → their chain**, with all
 coupling in one adapter. Everything upstream of the emitter stays ours:
-content SSOT (`deck_content.md`), authoring doctrine, the svg-check
+content SSOT (`deck_content.md`), authoring doctrine, the svg_check.py
 fingerprint gate, previews, and delivery verification. The fingerprint
 discipline is OUR internal content gate — it is not a PowerPoint-validity
 claim; PowerPoint validity is carried by their validators plus the
@@ -55,17 +55,17 @@ user-side manual open.
 
 ## When to Use
 
-- After the final `svg-check` gate reports zero errors on the current bytes
+- After the final `svg_check.py` gate reports zero errors on the current bytes
   (any SVG edit invalidates the fingerprint — re-run the gate first)
 - Re-export after postflight-flagged fixes; refresh the fingerprint report
   each time
 
 ## Execution Steps (in order — no step may be skipped)
 
-1. **svg-check gate (ours, content SSOT fingerprint)** — must be green on
+1. **svg_check.py gate (ours, content SSOT fingerprint)** — must be green on
    the current bytes:
    ```bash
-   bun scripts/deck/svg-check.ts --deck <deck-dir> --content <deck_content.md> --stage final --json
+   python3 scripts/deck/svg_check.py --deck <deck-dir> --content <deck_content.md> --stage final --json
    ```
    Any SVG edit invalidates the fingerprint; re-run the gate. Notes-stem
    parity and `content_diff.unrendered_runs` checks (v1.4.0 checklist)
@@ -113,13 +113,18 @@ user-side manual open.
    delivery-receipt JSON + package verification (xmllint every part 0
    errors, python-pptx open with expected slide/notes counts, native
    tables present as `a:tbl`, entity single-escape spot checks).
-6. **Previews** (visual acceptance): unchanged from v1.4.0 — previews
-   render from **OUR SVGs** via resvg **with the white-underlay method**
-   (temp sanitized copy: bare `&` → `&amp;` + full-bleed white underlay
-   rect when missing; render; discard the copy). This part of the old
-   procedure survives because resvg renders our authored bytes, not their
-   package. Their `svg_final/` previews exist in the project dir for
-   reference only.
+6. **Previews** (visual acceptance): render from **OUR SVGs** via
+   `render_previews.py` — the white-underlay method, now productionized
+   (v2.0.1; resvg-py engine, bun + @resvg/resvg-js fallback):
+   ```bash
+   python3 scripts/deck/render_previews.py --deck <deck-dir>
+   ```
+   Per page it makes a sanitized temp copy (bare `&` → `&amp;`), injects a
+   full-bleed white underlay rect when the page lacks a background rect,
+   renders `previews/NN-<slug>.png` (1280px wide), and discards the copy —
+   sources are never modified. This survives from the old procedure because
+   resvg renders our authored bytes, not their package. Their `svg_final/`
+   previews exist in the project dir for reference only.
 
 ## Output Format
 
@@ -134,11 +139,6 @@ user-side manual open.
   is this skill's mandatory input
 - `svg-slide-authoring` — owns the canonical language the chain compiles
 
-- `<final.pptx>` — natively editable DrawingML from their emitter
-- delivery receipt: `status: passed`, package part counts, fonts, transitions
-- OPC receipt: `relationship problems: 0`
-- `previews/NN-<slug>.png` (resvg, white underlay) — visual-judge input
-
 ## Hard Boundaries
 
 - **No ppt-master file is ever modified** — the clone is read-only by
@@ -146,7 +146,7 @@ user-side manual open.
 - Only their deterministic scripts are wired; their LLM/agent authoring
   stages are never invoked.
 - **PyMuPDF/AGPL is never installed** (DEC-20261106-04 condition 4).
-- No export without a fingerprint-matching final svg-check report (our
+- No export without a fingerprint-matching final svg_check.py report (our
   gate), and no delivery without their delivery check `passed` + OPC `0`.
 - No page repair inside the export path; pages are fixed upstream by
   deck-builder and re-gated.
@@ -166,6 +166,5 @@ user-side manual open.
 - Superseded (scoped): compile/export tier of `docs/designs/2026-11-03-co-work-native-pptx-deck-design.md` (authoring + gate tiers remain in force)
 - Upstream: https://github.com/hugohe3/ppt-master (MIT) — pin v6.8.0
 - Manifest: project `external-deps.json`; fetch: `scripts/deck/fetch-ppt-master.ts` (LOCAL-PATCH U-20261106-003)
-- `svg-quality-gate` skill — our content SSOT gate (fingerprint)
+- `svg-quality-gate` skill — our content SSOT gate (fingerprint; python checker `svg_check.py` 2.0.0 since Phase 2)
 - `svg-slide-authoring` skill — owns the canonical language
-- `svg-to-pptx.ts` — DEPRECATED (pending removal in Phase 2, after the differential gate-parity run)

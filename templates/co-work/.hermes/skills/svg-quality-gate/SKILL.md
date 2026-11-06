@@ -3,15 +3,15 @@ name: svg-quality-gate
 description: >
   Deterministic quality gate for canonical SVG deck pages: dual gates (early
   method sample P01-P05 + final whole-deck), three-severity model (error
-  blocks / warning passes / no auto-fix), content-SSOT text-run diff, and
-  SHA-256 fingerprint reports required for export. Use when: running or
-  interpreting svg-check.ts on a deck, or deciding whether a deck may export.
-version: 1.1.0
-last_reviewed: 2026-11-03
+  blocks / warning passes / no auto-fix), bidirectional content-SSOT text-run
+  diff, and SHA-256 fingerprint reports required for export. Use when: running
+  or interpreting svg_check.py on a deck, or deciding whether a deck may export.
+version: 1.2.0
+last_reviewed: 2026-11-07
 status: active
 scope: co-work
 owner: pm
-prerequisites: Bun runtime, templates/co-work/scripts/deck/svg-check.ts
+prerequisites: Python 3.10+, templates/co-work/scripts/deck/svg_check.py
 metadata:
   type: process
   triggers:
@@ -53,13 +53,13 @@ corrected for delivery, it is an error.
 
 1. **Early gate** (first 5 pages as a method sample; skip for rosters ≤ 6):
    ```bash
-   bun templates/co-work/scripts/deck/svg-check.ts --deck <deck-dir> \
+   python3 templates/co-work/scripts/deck/svg_check.py --deck <deck-dir> \
      --content <deck-dir>/deck_content.md --stage early --json
    ```
    Classify the complete issue set: method-level (fix the authoring method, not just the page), page-local, and not-yet-exercised capabilities. Fix every blocking error and selected advisory warnings in ONE consolidated pass before authoring further pages.
 2. **Final gate** (whole deck):
    ```bash
-   bun templates/co-work/scripts/deck/svg-check.ts --deck <deck-dir> \
+   python3 templates/co-work/scripts/deck/svg_check.py --deck <deck-dir> \
      --content <deck-dir>/deck_content.md --stage final --json
    ```
    Zero errors required to proceed. The report's SHA-256 fingerprint must match the bytes at export time — any edit after the final gate invalidates it; re-run the gate.
@@ -73,7 +73,7 @@ corrected for delivery, it is an error.
   "deck": "<dir>",
   "pages": [ { "file": "01-title.svg", "errors": [], "warnings": [] } ],
   "summary": { "pages": 10, "errors": 0, "warnings": 1 },
-  "content_diff": { "unmatched_runs": [] },
+  "content_diff": { "unmatched_runs": [], "unrendered_runs": 0 },
   "fingerprint": "sha256:<hex>",
   "generated_at": "<ISO-8601>"
 }
@@ -91,7 +91,11 @@ corrected for delivery, it is an error.
 
 ## Verification Policy (no Office tooling)
 
-LibreOffice (and PowerPoint automation) is never installed or invoked by this pipeline. Visual acceptance renders the authored SVG via `@resvg/resvg-js` (`svg-to-pptx.ts --render-png`); package correctness rests on the exporter's structural postflight plus this gate's empirical contract — checker rules thicken as real PowerPoint breakage surfaces, not by rendering packages through an Office emulator.
+LibreOffice (and PowerPoint automation) is never installed or invoked by this pipeline. Visual acceptance renders the authored SVG via `render_previews.py` (white-underlay resvg previews; resvg-py engine, bun + @resvg/resvg-js fallback); package correctness rests on the exporter's validators plus this gate's empirical contract — checker rules thicken as real PowerPoint breakage surfaces, not by rendering packages through an Office emulator.
+
+## Checker implementation (v1.2.0, Phase 2)
+
+The gate is the python checker `svg_check.py` 2.0.0 — a faithful port of the retired bun `svg-check.ts` 1.5.x (design 2026-11-06-deck-emitter-ppt-master-rebase-design D6). Same rule IDs, same messages, same JSON shape, byte-identical fingerprints; the differential harness `scripts/deck/tests/test_svg_check_parity.py` (in the consuming project) keeps the two implementations pinned — any divergence fails it. `svg-check.ts` is retained only as that harness's parity oracle.
 
 ## References
 

@@ -7750,7 +7750,7 @@
       "name": "pptx-export",
       "scope": "co-work",
       "capability": "pptx-export",
-      "content_hash": "97cb38542536960c",
+      "content_hash": "746ccef2756b487a",
       "version": "2.0.1",
       "mirrors": [
         "templates/co-work/skills/pptx-export/SKILL.md"

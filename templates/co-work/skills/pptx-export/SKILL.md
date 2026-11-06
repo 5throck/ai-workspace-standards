@@ -113,6 +113,11 @@ user-side manual open.
    delivery-receipt JSON + package verification (xmllint every part 0
    errors, python-pptx open with expected slide/notes counts, native
    tables present as `a:tbl`, entity single-escape spot checks).
+   Optional openability leg (design 2026-11-07-external-deps-machinery D6):
+   `python3 scripts/deck/check_openability.py --pptx <final.pptx> --expect <json>`
+   with an expectation file `{"slides": N, "notes": M|null, "tables": {"slideNum": n}|null}`
+   — asserts the counts; graceful SKIP (exit 0, explicit `SKIP:` line) when
+   python-pptx is absent, so minimal CI environments stay green.
 6. **Previews** (visual acceptance): render from **OUR SVGs** via
    `render_previews.py` — the white-underlay method, now productionized
    (v2.0.1; resvg-py engine, bun + @resvg/resvg-js fallback):

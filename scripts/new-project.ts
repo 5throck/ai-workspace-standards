@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.41.0
+// @version 1.42.0
+// v1.42.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
+//          — implements upstream ticket U-20261106-003): §7.9 EXTERNAL DEPS
+//          FETCH — after project materialization (§7.8), read the scaffolded
+//          project's external-deps.json (delivered by the new template seeds,
+//          templates/common + templates/<variant>) and install each pinned
+//          external git dependency into its gitignored install_dir (D2): WARN
+//          posture on failure — a network-dependent scaffold must not leave
+//          the user without a project; the documented retry is
+//          `bun scripts/upgrade-project.ts <project> --external-deps-only`.
+//          --strict-external-deps flips to hard-fail for CI/provisioning.
+//          install_dir lines are appended to .gitignore (D5) and the resolved
+//          commit is written back as the advisory manifest field (D1). Core in
+//          scripts/lib/external-deps.ts v1.0.0 (fetchProjectExternalDeps) so
+//          the unit tests exercise the identical path without a full scaffold.
 // v1.41.0 (2026-11-05, spec docs/designs/2026-11-05-cowork-deliverables-structure-design.md):
 //          §2.6a-2 new co-work branch — scaffold creates deliverables/{reports,drafts,
 //          research,references,presentations}/ with per-dir READMEs referencing
@@ -268,6 +282,7 @@ import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
 import { pruneUnselectedProfiles } from './lib/platform-prune.ts';
 import { appendRegistryRows } from './helpers/registry-append.ts';
+import { fetchProjectExternalDeps } from './lib/external-deps.ts';
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectName = '';
@@ -277,6 +292,9 @@ let platform = 'all'; // canonical --platform value (list-normalized below)
 let country = '';
 let projectDescription = '';
 let projectType = '';
+// v1.42.0 (external-deps design D2): opt-in hard-fail for the §7.9 external-dep
+// fetch — CI/provisioning contexts that must not proceed without deps.
+let strictExternalDeps = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -307,6 +325,9 @@ for (let i = 0; i < args.length; i++) {
     continue;
   }
   if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
+  // v1.42.0 (external-deps design D2): hard-fail posture for the §7.9 fetch.
+  // Exempt from the catch-all below like --yes: consumed here, no value.
+  if (args[i] === '--strict-external-deps') { strictExternalDeps = true; continue; }
   if (args[i] === '--country' && args[i + 1]) {
     country = args[++i];
     // Validate country pattern: ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN)
@@ -327,10 +348,10 @@ for (let i = 0; i < args.length; i++) {
   // explicit-but-typo'd intent (`--varaint`, `--platfrom`) must never be
   // silently dropped. `--yes` is exempt — the auto-confirm prompt scan below
   // consumes it from process.argv directly (it never takes a value here).
-  if (args[i].startsWith('--') && args[i] !== '--yes') {
+  if (args[i].startsWith('--') && args[i] !== '--yes' && args[i] !== '--strict-external-deps') {
     console.error(`❌ Unknown flag: '${args[i]}'.`);
-    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform <profile>[,<profile>...]|all | --country <CODE>');
-    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
+    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform <profile>[,<profile>...]|all | --country <CODE> | --strict-external-deps');
+    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp] [--strict-external-deps]');
     if (import.meta.main) {
       process.exit(1);
     }
@@ -1908,6 +1929,55 @@ try {
   }
 } catch (err) {
   console.log(`  ⚠️  Version manifest generation errored (non-fatal): ${(err as Error).message}`);
+}
+
+// ── 7.9. External-dependency fetch (design 2026-11-07-external-deps-machinery-
+// ──────  design.md, D2/D5 — implements upstream ticket U-20261106-003) ────────
+// Project materialization is complete (seeds delivered, package installed);
+// install every pinned external git dependency the delivered external-deps.json
+// declares. Failure posture is WARN, not fail (D2): a network-dependent
+// scaffold must not leave the user without a project — the documented retry is
+// `bun scripts/upgrade-project.ts <project> --external-deps-only` (same update
+// pass, fetch-only flavor). --strict-external-deps flips to hard-fail for
+// CI/provisioning contexts that must not proceed without deps. Windows hosts
+// need git on PATH (no code-level workaround, design §3). The core lives in
+// scripts/lib/external-deps.ts fetchProjectExternalDeps() so the unit tests
+// exercise the identical path without a full scaffold.
+console.log('\nFetching external dependencies…');
+try {
+  const fetchResult = fetchProjectExternalDeps(projectDir, { strict: strictExternalDeps });
+  if (!fetchResult.manifestPresent) {
+    console.log('  ℹ️  No external-deps.json in the scaffolded project — nothing to fetch');
+  } else if (fetchResult.manifestError) {
+    console.warn(`  ⚠️  external-deps.json is not a valid external-deps manifest — fetch skipped: ${fetchResult.manifestError}`);
+    if (strictExternalDeps) {
+      console.error(`❌ --strict-external-deps: manifest validation failed — aborting scaffold post-materialization.`);
+      process.exit(1);
+    }
+  } else {
+    for (const dep of fetchResult.results) {
+      if (dep.ok) {
+        console.log(`  ✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? '<unknown commit>'}`);
+      } else {
+        console.warn(`  ⚠️  ${dep.id}: external dependency NOT fetched — ${dep.error}`);
+        console.warn(`       Retry after scaffold: bun scripts/upgrade-project.ts "${projectDir}" --external-deps-only`);
+        console.warn('       (Windows hosts: git must be on PATH — design 2026-11-07-external-deps-machinery §3)');
+      }
+    }
+    for (const dir of fetchResult.gitignoreAppended) {
+      console.log(`  🙈 .gitignore: appended ${dir}/ (D5 — an external clone must never be committed)`);
+    }
+    if (strictExternalDeps && !fetchResult.ok) {
+      console.error('\n❌ --strict-external-deps: one or more external dependencies failed to fetch — see the WARN rows above.');
+      if (import.meta.main) process.exit(1);
+    }
+  }
+} catch (err) {
+  console.log(`  ⚠️  External-dependency fetch errored (non-fatal): ${(err as Error).message}`);
+  if (strictExternalDeps) {
+    console.error(`❌ --strict-external-deps: fetch errored — ${(err as Error).message}`);
+    if (import.meta.main) process.exit(1);
+  }
 }
 
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────

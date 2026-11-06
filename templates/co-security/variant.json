@@ -55,6 +55,10 @@
       "file": "skills/sarif-exporter/SKILL.md"
     },
     {
+      "name": "security-audit",
+      "file": "skills/security-audit/SKILL.md"
+    },
+    {
       "name": "spdx-sbom",
       "file": "skills/spdx-sbom/SKILL.md"
     },

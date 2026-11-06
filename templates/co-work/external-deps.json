@@ -1,0 +1,17 @@
+{
+  "$comment": "co-work variant seed — extends templates/common/external-deps.json (merge on id, D1 of design docs/designs/2026-11-07-external-deps-machinery-design.md). ppt-master is the first consumer of the generic facility (origin: docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md D2 + DEC-20261106-04 — MIT adoption, consumed as-is behind scripts/deck/ppt-master-adapter.ts; their scripts are never modified, and the AGPL PyMuPDF/fitz exclusion is adapter-level policy recorded in DEC-20261106-04, not a manifest concern). The clone is read-only by convention; their LLM/agent authoring stages are never wired.",
+  "schema_version": 1,
+  "dependencies": [
+    {
+      "id": "ppt-master",
+      "repo": "https://github.com/hugohe3/ppt-master",
+      "pin": "v6.8.0",
+      "commit": "5e8856be0da8e6bc85c4aa28acc614478f7b7137",
+      "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
+      "install_dir": "presentations/ppt-master",
+      "consumer": "deck pipeline (scripts/deck/ppt-master-adapter.ts)",
+      "compatibility_test": "python3 scripts/deck/tests/test_svg_check_parity.py",
+      "propagation": "never"
+    }
+  ]
+}

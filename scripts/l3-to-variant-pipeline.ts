@@ -11,8 +11,20 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.22.0
+ * @version 1.23.0
  * @phase: Complete pipeline orchestration
+ *
+ * v1.23.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
+ *          D4 — implements upstream ticket U-20261106-003): PHASE 2.6 (new,
+ *          after the country-scoped skill exclusion) — external-dependency
+ *          install_dir exclusion. The L3 project's external-deps.json
+ *          install_dirs are read from the PROJECT side and parsed loosely
+ *          (scripts/lib/external-deps.ts v1.0.0 extractInstallDirsLoose), and
+ *          every reconciled-manifest path under one is dropped from
+ *          keepInVariant: no path under an external clone directory (e.g.
+ *          presentations/ppt-master/) ever flows project → template. The
+ *          vendoring guard (validate-templates.ts v1.72.0 external-dep-vendoring)
+ *          remains the template-side backstop; promotion inherits it in Phase 6.
  *
  * v1.22.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
  *          §6.1/§6.2 — Phase 1.5 pipeline conformance): hub-topology asset
@@ -888,6 +900,61 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
       console.log(`  keepInVariant: ${keptCountBefore} → ${reconciledManifest!.keepInVariant.length} file(s)`);
     }
     console.log(`✅ PHASE 2.5 COMPLETE`);
+  }
+
+  // ============================================================================
+  // PHASE 2.6: EXTERNAL-DEPENDENCY INSTALL_DIR EXCLUSION (v1.23.0, design
+  // docs/designs/2026-11-07-external-deps-machinery-design.md D4, upstream
+  // U-20261106-003)
+  //
+  // Propagation never crosses the template boundary (D4): no path under any
+  // external-deps.json manifest install_dir may flow project → template. The
+  // gitignored external clone (e.g. presentations/ppt-master/) is upstream
+  // code consumed at a pin — promoting it would vendor a fork into the
+  // template tree (the vendoring guard in validate-templates.ts then FAILs).
+  // The manifest is read from the PROJECT side and parsed loosely
+  // (extractInstallDirsLoose) so the exclusion works even on legacy/interim
+  // manifest shapes; strict validation is the upgrade pass's job.
+  // ============================================================================
+
+  try {
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`PHASE 2.6: External-Dependency install_dir Exclusion`);
+    console.log(`${'─'.repeat(60)}`);
+
+    const { existsSync: ex26, readFileSync: rfs26 } = await import('node:fs');
+    const { join: j26 } = await import('node:path');
+    const { extractInstallDirsLoose } = await import('./lib/external-deps.ts');
+
+    const projManifestPath = j26(config.l3ProjectPath, 'external-deps.json');
+    const installDirs = ex26(projManifestPath) ? extractInstallDirsLoose(rfs26(projManifestPath, 'utf-8')) : [];
+    if (installDirs.length === 0) {
+      console.log(`ℹ️  No external-deps.json install_dirs at the L3 source — nothing to exclude`);
+    } else {
+      const before26 = reconciledManifest!.keepInVariant.length;
+      const excluded26: string[] = [];
+      reconciledManifest!.keepInVariant = reconciledManifest!.keepInVariant.filter((file) => {
+        const target26 = file.targetPath.replace(/\\/g, '/').replace(/^\.\//, '');
+        const under = installDirs.some((dir) => target26 === dir || target26.startsWith(`${dir}/`));
+        if (under) excluded26.push(target26);
+        return !under;
+      });
+      for (const rel of excluded26) {
+        console.log(`  ⏭️  excluded ${rel} — path under an external-deps.json install_dir (never flows project → template, design D4)`);
+      }
+      if (excluded26.length === 0) {
+        console.log(`  ✅ ${installDirs.length} install_dir(s) declared — no reconciled manifest paths under them`);
+      } else {
+        console.log(`  keepInVariant: ${before26} → ${reconciledManifest!.keepInVariant.length} file(s)`);
+      }
+    }
+    console.log(`✅ PHASE 2.6 COMPLETE`);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    // Fail-closed on exclusion machinery errors would strand every promotion on
+    // a helper hiccup; the vendoring guard (validate-templates) still runs in
+    // Phase 6 and FAILs if anything vendored anyway. Warn-and-continue here.
+    console.warn(`⚠️  PHASE 2.6 errored (non-fatal — the vendoring guard remains the backstop): ${errorMsg}`);
   }
 
   // ============================================================================
