@@ -1,8 +1,23 @@
 #!/usr/bin/env bun
 /**
- * @version 1.4.0
- * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, content-SSOT text-run diff, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design).
+ * @version 1.5.0
+ * @description Deterministic quality gate for canonical SVG deck pages: whitelist enforcement, three-severity model, bidirectional content-SSOT text-run diff (SVG⊆SSOT errors + unrendered SSOT runs as W-CONTENT-UNRENDERED warnings), XML entity decoding in run extraction, and SHA-256 fingerprint reports required for PPTX export (spec 2026-11-03-co-work-native-pptx-deck-design; hardening spec 2026-11-06-deck-pipeline-hardening-design).
  * @usage bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]
+ *
+ * v1.5.0 (2026-11-06, spec docs/designs/2026-11-06-deck-pipeline-hardening-design.md):
+ *           (R1) the five XML built-in entities are decoded in extracted text
+ *           runs before the SSOT diff — pages may spell `P&L` bare or as
+ *           `P&amp;L`; both match the plain-text contract (resvg previously
+ *           aborted on bare `&`, forcing the escaped spelling that then failed
+ *           the raw-text diff). text_runs in the report are now decoded.
+ *           (R2) bidirectional diff — contract runs under a `## Page <n>`
+ *           heading that no page renders produce a W-CONTENT-UNRENDERED
+ *           warning on the matching page (catches the stale-substring case:
+ *           an outdated page run that is a substring of a longer updated SSOT
+ *           run passed the one-directional check). Warnings only —
+ *           punchlines/hints may legitimately lag; content_diff gains an
+ *           additive unrendered_runs count so a future locked-deck mode can
+ *           promote it to an error.
  */
 
 import { createHash } from "crypto";
@@ -47,6 +62,7 @@ export interface CheckIssue {
 
 export interface PageReport {
   file: string;
+  page_number?: number; // data-page-number of the root <svg> (undefined when missing/invalid — itself an E-MARKER error)
   errors: CheckIssue[];
   warnings: CheckIssue[];
   text_runs: string[];
@@ -57,7 +73,7 @@ export interface CheckReport {
   deck: string;
   pages: PageReport[];
   summary: { pages: number; errors: number; warnings: number };
-  content_diff: { unmatched_runs: string[] };
+  content_diff: { unmatched_runs: string[]; unrendered_runs: number };
   fingerprint: string;
   generated_at: string;
 }
@@ -130,15 +146,68 @@ export function parseSvg(source: string): SvgNode {
   return root.children[0];
 }
 
+const XML_ENTITIES: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'",
+};
+
+/**
+ * Decode the five XML built-in entities in extracted text (v1.5.0 R1).
+ * Single pass — replaced text is never re-scanned, so `&amp;lt;` decodes to the
+ * literal text `&lt;` per XML semantics. Applied to SVG-side text runs only;
+ * the content contract stays plain text (decoding it could corrupt an SSOT
+ * that legitimately contains the literal characters `&amp;`).
+ */
+function decodeXmlEntities(s: string): string {
+  return s.replace(/&(amp|lt|gt|quot|apos);/g, (_, e: string) => XML_ENTITIES[e]);
+}
+
 /** Depth-first text content of a node (visible characters only, run-joined with spaces). */
 function nodeText(node: SvgNode): string {
-  const own = node.text.replace(/\s+/g, " ").trim();
+  const own = decodeXmlEntities(node.text).replace(/\s+/g, " ").trim();
   const kids = node.children.map(nodeText).filter(Boolean).join(" ");
   return [own, kids].filter(Boolean).join(" ").trim();
 }
 
 function normalizeText(s: string): string {
   return s.replace(/[#*_`>|]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Loose normalization for the reverse (SSOT → page) diff only (v1.5.0 R2).
+ * Strips sentence punctuation and leading list markers so authored splits
+ * still match — e.g. the contract line "1. Revenue performance" authored as
+ * two runs ("1" + "Revenue performance"), or "Sep: 5.1M" vs "Sep 5 1M".
+ * Applied identically to both sides, so equality/substring semantics hold.
+ */
+function normalizeLoose(s: string): string {
+  return normalizeText(s)
+    .replace(/[.,:;!?"'()[\]]+/g, " ")
+    .replace(/^[-+]\s+/, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Section a content contract by `## Page <n>` headings (v1.5.0 R2). Each
+ * non-empty body line of a section is a run candidate. Contracts without
+ * page headings return an empty map — the reverse diff is skipped for
+ * free-form contracts (the forward check still applies).
+ */
+export function parseContractSections(raw: string): Map<number, string[]> {
+  const sections = new Map<number, string[]>();
+  let current: number | null = null;
+  for (const line of raw.split(/\r?\n/)) {
+    const h = line.match(/^#{2,3}\s+Page\s+(\d+)\b/i);
+    if (h) {
+      current = parseInt(h[1], 10);
+      if (!sections.has(current)) sections.set(current, []);
+      continue;
+    }
+    if (current === null) continue;
+    const t = line.trim();
+    if (t) sections.get(current)!.push(t);
+  }
+  return sections;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +248,8 @@ function checkPage(source: string, fileName: string): PageReport {
   }
   if (!root.attrs["data-slide-role"]) err("E-MARKER", 'root <svg> requires data-slide-role (deck_types.slide_roles value)');
   if (!root.attrs["data-page-number"]) err("E-MARKER", 'root <svg> requires data-page-number (1-based)');
+  const parsedPageNumber = parseInt(root.attrs["data-page-number"] ?? "", 10);
+  const pageNumber = Number.isFinite(parsedPageNumber) && parsedPageNumber > 0 ? parsedPageNumber : undefined;
   const trans = root.attrs["data-slide-transition"];
   if (trans !== undefined && !TRANSITION_VALUES.has(trans.trim())) {
     err("E-TRANSITION", `data-slide-transition="${trans}" is invalid (canonical: none|fade|push|zoom|wipe)`);
@@ -328,7 +399,7 @@ function checkPage(source: string, fileName: string): PageReport {
   };
   collectRuns(root);
 
-  return { file: fileName, errors, warnings, text_runs: runs };
+  return { file: fileName, page_number: pageNumber, errors, warnings, text_runs: runs };
 }
 
 // ---------------------------------------------------------------------------
@@ -353,18 +424,46 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
   const entries = files.map((f) => ({ name: f, bytes: readFileSync(join(deckDir, f)) }));
   const pages = entries.map((e) => checkPage(e.bytes.toString("utf-8"), e.name));
 
-  // Content SSOT diff: every normalized SVG text run must exist in the normalized content contract.
+  // Content SSOT diff, forward direction (v1.4.0): every normalized SVG text run must
+  // exist in the normalized content contract. v1.5.0 adds the reverse direction:
+  // contract runs that no page renders warn (W-CONTENT-UNRENDERED) — catches the
+  // stale-substring case where an outdated page run is a substring of a longer,
+  // updated SSOT run and therefore passes the forward check.
   const unmatched: string[] = [];
+  let unrenderedRuns = 0;
   if (opts.contentPath) {
     const contentPath = resolve(opts.contentPath);
     if (!existsSync(contentPath)) throw new Error(`content contract not found: ${contentPath}`);
-    const contract = normalizeText(readFileSync(contentPath, "utf-8"));
+    const contractRaw = readFileSync(contentPath, "utf-8");
+    const contract = normalizeText(contractRaw);
     for (const p of pages) {
       for (const run of p.text_runs) {
         const n = normalizeText(run);
         if (n && !contract.includes(n)) {
           unmatched.push(`${p.file}: "${n}"`);
           p.errors.push({ rule: "E-CONTENT-DIFF", message: `text run "${n}" not found in the content contract (${basename(contentPath)}) — slide text comes verbatim from deck_content.md` });
+        }
+      }
+    }
+    // Reverse direction (v1.5.0 R2): SSOT runs not rendered by any page. Advisory
+    // only — punchlines/hints may legitimately lag the SSOT — but counted in
+    // content_diff.unrendered_runs so the exporter/skill can surface it (and a
+    // future locked-deck mode can promote the count to a blocking error).
+    const pageJoins = pages.map((p) => ({
+      page: p,
+      join: p.text_runs.map(normalizeLoose).filter(Boolean).join(" "),
+    }));
+    for (const [num, lines] of parseContractSections(contractRaw)) {
+      const target = pages.find((p) => p.page_number === num);
+      if (!target) continue; // section without a page: deck-completeness, not text drift
+      for (const line of lines) {
+        const loose = normalizeLoose(line);
+        if (loose.length < 2) continue;
+        const rendered = pageJoins.some((j) => j.join.includes(loose));
+        if (!rendered) {
+          const preview = loose.length > 60 ? `${loose.slice(0, 57)}...` : loose;
+          target.warnings.push({ rule: "W-CONTENT-UNRENDERED", message: `contract run not rendered by any page: "${preview}" — update the page or the content contract (advisory; punchlines and hints may legitimately lag the SSOT)` });
+          unrenderedRuns++;
         }
       }
     }
@@ -377,7 +476,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
     deck: deckDir,
     pages,
     summary: { pages: pages.length, errors, warnings },
-    content_diff: { unmatched_runs: unmatched },
+    content_diff: { unmatched_runs: unmatched, unrendered_runs: unrenderedRuns },
     fingerprint: fingerprintFiles(entries),
     generated_at: new Date().toISOString(),
   };
@@ -389,7 +488,7 @@ export function runCheck(opts: { deckDir: string; contentPath: string | null; st
 
 function help(): never {
   console.log(`
-svg-check.ts v1.4.0 — canonical SVG deck quality gate
+svg-check.ts v1.5.0 — canonical SVG deck quality gate
 
 Usage:
   bun scripts/svg-check.ts --deck <dir> --content <deck_content.md> --stage early|final [--json] [--out <report.json>]

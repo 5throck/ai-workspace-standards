@@ -9,9 +9,9 @@ Curated registry for the co-work skills (T-20260925-005). One row per skill dire
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `standup-synthesizer` | 1.0.1 | active | pm | 2026-10-08 | — | co-work only — Automated daily standup digest synthesizer aggregating git commit logs, issue status updates, pull… Forked from root `skills/standup-synthesizer` (variant-maintained): Related-Skills entries rendered as prose because the root copy's relative `../` links do not resolve in a scaffolded co-work project. |
-| `svg-slide-authoring` | 1.4.0 | active | pm | 2026-11-03 | — | co-work only — Canonical SVG slide authoring language (closed whitelist, px viewBox, #RRGGBB, locked registry tokens). Used by deck-builder; spec 2026-11-03-co-work-native-pptx-deck-design. |
+| `svg-slide-authoring` | 1.5.0 | active | pm | 2026-11-06 | — | co-work only — Canonical SVG slide authoring language (closed whitelist, px viewBox, #RRGGBB, locked registry tokens). Used by deck-builder; spec 2026-11-03-co-work-native-pptx-deck-design; v1.5.0 composition patterns (two-column default, punchline band, data-hook, full-bleed background rect) + XML-entity spelling guidance per spec 2026-11-06-deck-pipeline-hardening-design. |
 | `svg-quality-gate` | 1.1.0 | active | pm | 2026-11-03 | — | co-work only — Dual quality gate (early method sample + final), three-severity model, content-SSOT text-run diff, SHA-256 fingerprint reports. Runs scripts/svg-check.ts. |
-| `pptx-export` | 1.3.0 | active | pm | 2026-11-03 | — | co-work only — Fingerprint-verified svg-to-pptx compilation into natively editable DrawingML + postflight receipt + PNG previews for the visual-judge gate. |
+| `pptx-export` | 1.4.0 | active | pm | 2026-11-06 | — | co-work only — Fingerprint-verified svg-to-pptx compilation into natively editable DrawingML + postflight receipt + PNG previews for the visual-judge gate; v1.4.0 required white-underlay preview procedure + notes-stem parity checklist per spec 2026-11-06-deck-pipeline-hardening-design. |
 
 ## Usage
 

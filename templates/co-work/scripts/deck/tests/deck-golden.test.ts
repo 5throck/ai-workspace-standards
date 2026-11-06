@@ -100,6 +100,65 @@ describe("svg-check (canonical gate)", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  test("v1.5.0 T1: XML entities decode in run extraction — escaped page matches plain-text contract", () => {
+    // Bare & (P&L, Q&A) aborts resvg preview rendering, so pages must be able to
+    // carry the escaped spelling — the gate decodes the five XML built-ins before
+    // diffing so &amp; matches the plain-text SSOT (spec 2026-11-06-deck-pipeline-hardening-design R1).
+    const ESCAPED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">P&amp;L review ahead</text>
+    <text x="80" y="180" font-size="18" fill="#202020">Plan for the &quot;scale&quot; phase</text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-entities"), [
+      { name: "01-entities.svg", body: ESCAPED },
+    ], "P&L review ahead\nPlan for the \"scale\" phase\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+    // text_runs report the decoded spelling (what the renderer draws)
+    expect(report.pages[0].text_runs).toContain("P&L review ahead");
+    expect(report.pages[0].text_runs).toContain("Plan for the \"scale\" phase");
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.0 T2: SSOT-only run warns W-CONTENT-UNRENDERED and counts in unrendered_runs; gate still passes", () => {
+    // Reverse diff (spec 2026-11-06-deck-pipeline-hardening-design R2): the one-directional
+    // check passed decks whose page run was a stale substring of a longer updated SSOT run.
+    // A contract run no page renders now warns per page — advisory only (punchlines/hints
+    // may legitimately lag), counted additively in content_diff.unrendered_runs.
+    const PAGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">Rendered headline lands on the page</text>
+  </g>
+</svg>`;
+    const contract = "## Page 1 (content)\nRendered headline lands on the page\nUnrendered contract line lives only in the SSOT\n";
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-unrendered"), [
+      { name: "01-only.svg", body: PAGE },
+    ], contract);
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0); // warnings pass — gate verdict unchanged
+    const warns = report.pages[0].warnings.filter((w) => w.rule === "W-CONTENT-UNRENDERED");
+    expect(warns.length).toBe(1);
+    expect(warns[0].message).toContain("Unrendered contract line");
+    expect(report.content_diff.unrendered_runs).toBe(1);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("v1.5.0 T3: bare & page still passes the diff (backward compat)", () => {
+    const BARE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" data-slide-role="content" data-page-number="1">
+  <g data-block-id="b1">
+    <text x="80" y="120" font-size="24" fill="#202020">P&L review ahead</text>
+  </g>
+</svg>`;
+    const dir = makeDeck(join(import.meta.dir, ".tmp-deck-bare-amp"), [
+      { name: "01-bare.svg", body: BARE },
+    ], "P&L review ahead\n");
+    const report = runCheck({ deckDir: dir, contentPath: join(dir, "deck_content.md"), stage: "final" });
+    expect(report.summary.errors).toBe(0);
+    expect(report.content_diff.unmatched_runs.length).toBe(0);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   test("fingerprint tracks deck bytes", () => {
     const a = fingerprintFiles([{ name: "a.svg", bytes: Buffer.from("x") }]);
     const b = fingerprintFiles([{ name: "a.svg", bytes: Buffer.from("y") }]);

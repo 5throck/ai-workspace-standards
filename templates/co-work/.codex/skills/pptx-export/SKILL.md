@@ -6,8 +6,8 @@ description: >
   and per-page PNG previews for the visual acceptance gate. Use when:
   exporting a finished deck, interpreting a postflight report, or producing
   previews for visual-judge acceptance.
-version: 1.3.0
-last_reviewed: 2026-11-03
+version: 1.4.0
+last_reviewed: 2026-11-06
 status: active
 scope: co-work
 owner: pm
@@ -39,6 +39,12 @@ tokens.
 - After the final `svg-check` gate reports zero errors
 - Re-export after postflight-flagged fixes (re-gate first — any SVG edit invalidates the fingerprint)
 
+## Pre-Export Checklist (required — run before every export)
+
+1. **Fresh final gate**: `svg-check --stage final` ran on the current bytes (any SVG edit invalidates the fingerprint; the exporter refuses on mismatch).
+2. **Notes-stem parity** (v1.4.0): every `notes/*.md` stem must match a page SVG stem 1:1 (`01-title.svg` ↔ `01-title.md`). The exporter matches notes to slides by stem and **silently skips** mismatches — a renamed or renumbered page leaves its speaker notes behind without any error. Diff `ls notes/` against the page list; rename the stragglers before exporting.
+3. **Surface unrendered SSOT runs** (pairs with svg-check v1.5.0): read `content_diff.unrendered_runs` in the final report JSON. These are advisory warnings (the gate passes), but they are exactly the stale-page signal — contract text updated upstream that no page renders. Review each one against the deck's intent before delivery.
+
 ## Execution Steps
 
 1. **Export** (fingerprint refusal is built in):
@@ -53,11 +59,33 @@ tokens.
    The exporter refuses to run when: the report is missing, its `stage` is not `final`, its `summary.errors` > 0, or its SHA-256 fingerprint does not match the current SVG bytes.
 2. **Flags**: `--native-charts-and-tables` replaces `data-native` blocks (chart/table payloads in `<desc>`) with native objects — charts carry an embedded workbook (Edit Data; kinds: bar, line, pie); `--structured-layouts` emits one role layout per used slide role and binds slides to them. Default export keeps fallback shapes + flat blank layout.
 3. **Read the postflight receipt** (printed on success): slide count, part counts, warnings (external images, generic-only font stacks), report linkage. Consume the receipt — do not re-derive it from the package.
-4. **Previews for visual acceptance**:
+4. **Previews for visual acceptance** — REQUIRED procedure (white-underlay render, v1.4.0):
+   `renderPngs` feeds raw SVG bytes straight to resvg. Two failure modes are known:
+   (a) a bare `&` in text (`P&L`, `Q&A`) is not well-formed XML and **aborts the render**;
+   (b) a page without a full-bleed background rect renders a **transparent backdrop**
+   (black in most viewers) — this silently failed 12/13 judge pages on 2026-11-06 before
+   the method below was codified. Always render via a **temp sanitized copy**:
    ```bash
-   bun templates/co-work/scripts/deck/svg-to-pptx.ts --deck <deck-dir> --render-png --png-dir <deck-dir>/previews
+   # 1. build the sanitized temp copy (per page):
+   #    - escape bare & -> &amp; (an & not already opening one of the five XML entities
+   #      or a numeric reference), so resvg can parse the page
+   #    - if the page has no full-bleed background rect covering (0,0,1280,720),
+   #      inject <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/> as the
+   #      first child of the root <svg> (z-order: bottom)
+   # 2. render from the temp copy (PNG stems match page stems):
+   bun templates/co-work/scripts/deck/svg-to-pptx.ts \
+     --deck <temp-dir> --render-png --png-dir <deck-dir>/previews
+   # 3. discard the temp copy — it is a render input only, never an artifact:
+   #    the fingerprint continues to cover the authored bytes, and the gate is
+   #    never re-run against the sanitized pages
    ```
-   Renders each authored page to PNG (`@resvg/resvg-js`) for the existing visual-judge gate (per the delivery protocol's visual acceptance pass). Note the stated limit: the resvg preview is close to, but not pixel-identical with, PowerPoint's own renderer; visual-judge verdicts are the acceptance gate on these previews.
+   The resulting PNGs feed the visual-judge gate (per the delivery protocol's visual
+   acceptance pass). Prefer fixing the page itself — new pages SHOULD carry a full-bleed
+   background rect per the `svg-slide-authoring` composition guidance; the underlay
+   procedure exists for legacy pages (the exported master carries white, so the PPTX
+   itself is never transparent). Note the stated limit: the resvg preview is close to,
+   but not pixel-identical with, PowerPoint's own renderer; visual-judge verdicts are
+   the acceptance gate on these previews.
 5. **Deliver**: the `.pptx` path + postflight receipt + preview PNGs. Any follow-up PowerPoint advisory goes to `ms365-expert`.
 
 ## Output Format
@@ -84,5 +112,6 @@ tokens.
 ## References
 
 - Spec: `docs/designs/2026-11-03-co-work-native-pptx-deck-design.md` (§3, §5, §11)
+- Hardening spec: `docs/designs/2026-11-06-deck-pipeline-hardening-design.md` (preview underlay D3, notes-stem parity D4, unrendered-run surfacing D2)
 - Registry tokens: `templates/co-work/docs/document-style-registry.json` (`decks`)
 - Gates: `svg-quality-gate` skill; authoring: `svg-slide-authoring` skill

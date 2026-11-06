@@ -6,8 +6,8 @@ description: >
   hand authoring with locked registry tokens. Use when: authoring or
   repairing slide pages for the co-work native PPTX deck capability, or
   deciding whether an SVG construct is canonical / compatible / invalid.
-version: 1.4.0
-last_reviewed: 2026-11-03
+version: 1.5.0
+last_reviewed: 2026-11-06
 status: active
 scope: co-work
 owner: pm
@@ -59,7 +59,7 @@ element/attribute whitelist has exact DrawingML mappings. Three input states:
 | Family | Canonical form | Notes |
 |--------|---------------|-------|
 | Structure | `g` (top-level = logical content block) | every top-level `g` requires `data-block-id="bN"` (unique, 1-based per page) |
-| Text | `text` with explicit `x`, `y`, `font-size`, `fill` | `y` is the baseline. `font-family` allowed (registry fonts only). `font-weight="bold"` / `font-style="italic"` allowed |
+| Text | `text` with explicit `x`, `y`, `font-size`, `fill` | `y` is the baseline. `font-family` allowed (registry fonts only). `font-weight="bold"` / `font-style="italic"` allowed. **Escape XML entities in text** (`&amp;`, `&lt;`, `&gt;`, `&quot;`, `&apos;`): a bare `&` (`P&L`, `Q&A`) aborts resvg preview rendering; the gate decodes entities before diffing, so either spelling passes since svg-check v1.5.0 — prefer the escaped one |
 | Text runs | `tspan` with `x` + `dy` stacking | dy-stacked tspans compile to paragraphs in one text body; a tspan repeating its line-start `x` (the wrap pattern) is canonical; tspans mixing different `x` values warn (`W-TSPAN-X`) |
 | Text presentation | `text-anchor="start\|middle\|end"`, `letter-spacing` (px number), `text-decoration="underline\|line-through\|none"` | anchor/spacing/decoration compile to `algn`/`spc`/`u`·`strike`; `dominant-baseline`/`alignment-baseline` are unsupported (`W-UNSUPPORTED-BASELINE`) — pre-adjust `y` instead |
 | Geometry | `rect` (+`rx` ≤ half of min side), `circle`, `ellipse`, `line`, `polyline` | explicit numeric `x/y/width/height` or point lists — no percentages |
@@ -90,6 +90,48 @@ Colors, fonts, and canvas come from `templates/co-work/docs/document-style-regis
 4. **Comfortable density.** One key message per page; trim or split rather than overpack; leave breathing room around text blocks.
 5. **Contrast first.** `text` on `background` (dark-on-light) or inverted for divider/title pages; never mid-tone on mid-tone.
 
+## Composition Patterns (v2.0 practice)
+
+Codified from the v2.0 deck rebuild (22 rebuilt pages + a 100-slide intent table,
+Nov 2026). Worked references: the shipped deck's `previews/` renders — cite them by
+pattern name when judging or repairing a page; do not copy page assets into this
+template.
+
+### Two-column default (content slides)
+
+Content-role slides split the canvas: **left text ≈55%** (x ≈ 80–690) / **right visual
+≈45%** (x ≈ 720–1200). The visual column carries the page's focal element (chart-like
+geometry, oversized stat, image block); the text column carries the headline and
+supporting lines. Documented exceptions:
+
+| Exception | Composition |
+|---------|-------------|
+| `title` / `agenda` / `divider` / `closing` roles | full-width composition — no text/visual split |
+| data-hero | a single oversized stat owns the page; the supporting sentence stays subordinate |
+| punchline band | full-width statement band; no competing elements on it |
+| native-table (`data-native="table"`) | table block takes full canvas width; text stacks above it |
+
+### Punchline band
+
+Single-takeaway divider/takeaway pages render one short bold statement on a
+full-width band filled with a locked surface token (accent or primary). The band IS
+the focal point — nothing else competes on it.
+
+### Data-hook
+
+An oversized stat (72px class) is the page focal point; the supporting sentence sits
+smaller and muted below/next to it. This is "every slide needs one focal point"
+(concept 3 above) made concrete for data pages.
+
+### Full-bleed background rect (new pages SHOULD)
+
+Start every new page with a full-bleed background rect as its first block child:
+`<rect x="0" y="0" width="1280" height="720" fill="<background token>"/>`. Pages
+without one render a transparent backdrop in resvg previews (black in most viewers).
+Legacy pages are exempt — the exported slide master carries white, so the PPTX is
+never transparent; to preview legacy pages, use the `pptx-export` white-underlay
+render procedure rather than editing the page.
+
 ## Execution Steps
 
 1. **Resolve tokens**: read the registry `decks` section for the chosen deck type; write the locked values into the design brief once.
@@ -112,5 +154,6 @@ Colors, fonts, and canvas come from `templates/co-work/docs/document-style-regis
 ## References
 
 - Spec: `docs/designs/2026-11-03-co-work-native-pptx-deck-design.md` (§4 canonical spec, §3 pipeline)
+- Hardening spec: `docs/designs/2026-11-06-deck-pipeline-hardening-design.md` (entity decode D1, composition patterns D5, full-bleed background guidance D3)
 - Registry: `templates/co-work/docs/document-style-registry.json` (`decks`)
 - Gate: `svg-quality-gate` skill; export: `pptx-export` skill
