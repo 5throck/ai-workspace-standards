@@ -56,7 +56,7 @@ Format (top level an object with a schema-version field and a
       "pin": "v6.8.0",                                    // release tag — the version we run
       "commit": "5e8856be0da8e6bc85c4aa28acc614478f7b7137", // resolved sha, advisory (D2/D3 write it back)
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}", // {pin}/{repo}/{dir} placeholders
-      "install_dir": "presentations/ppt-master",          // project-relative, MUST be gitignored (D5)
+      "install_dir": "external/ppt-master",          // project-relative, MUST be gitignored (D5)
       "consumer": "deck pipeline (scripts/deck/ppt-master-adapter.ts)",
       "compatibility_test": "bun test tests/external/ppt-master-contract.test.ts", // run from project root; exit 0 = pass
       "propagation": "never"                              // enum; "never" is the only value for now
@@ -134,7 +134,7 @@ next upgrade — that is exactly how co-work's `LOCAL-PATCH` interim retires
   paths — external code never flows template → project either.
 - `validate-templates.ts` **FAILs** if any path inside a template tree
   matches a manifest `install_dir` (a vendoring guard: the fastest way to
-  detect a `presentations/ppt-master/` accidentally committed into
+  detect an `external/ppt-master/` accidentally committed into
   `templates/co-work/`). Variant promotion inherits the guard because it
   runs through the same validation.
 - The manifest files themselves (`templates/common/external-deps.json`,

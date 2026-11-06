@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.71.0
+- **Version**: 1.72.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-05
+- **Last Updated**: 2026-11-07
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-07 | production | production | v1.71.0 → v1.72.0 (design docs/designs/2026-11-07-external-deps-machinery-design.md D4 — implements upstream ticket U-20261106-003): new FAIL arm `external-dep-vendoring` — if any external-deps.json manifest install_dir path exists as a real directory (or any file below one) inside templates/common or a templates/co-* tree, validation FAILS (the vendoring guard: the fastest way to detect a `presentations/ppt-master/` accidentally committed into a template; external code is cloned at scaffold time into a gitignored project-local directory and never vendors into a template; variant promotion inherits the guard because it runs through this validation). Detection core: scripts/lib/external-deps.ts v1.0.0 (findVendoredInstallDirs + extractInstallDirsLoose, loose parse so the guard works on legacy/interim manifest shapes). Detection logic unit-pinned by tests/unit/external-deps.test.ts. | automation-engineer |
 | 2026-11-05 | production | production | v1.70.0 → v1.71.0 (design docs/designs/2026-11-04-project-loss-hardening-design.md §5.4, T-20261104-004 item 4): new WARN arm `agents-md-destructive-file-ops-pin` — every template AGENTS.md §7 (templates/common + every co-* variant) must carry the "Destructive File Operations" baseline bullet (the 2026-11-04 rm -rf Projects incident lesson: never recursive-delete a workspace path that does or could contain .git children; dry-run list first; reviewed ALLOW_RECURSIVE_DELETE=1 escape only). Missing §7 section or missing marker phrase warns, machine-pinning the multi-file §7 propagation wave (PM-04b checks only the COMMON-AGENTS zone). Unit-pinned by tests/unit/validate-templates-destructive-file-ops-pin.test.ts. | automation-engineer |
 | 2026-11-01 | production | production | v1.69.0 → v1.70.0 (spec docs/designs/2026-11-01-hub-consolidation-design.md §2.4 Phase 1): additive checkHubTopology() — hub-topology-shape (fail-closed), hub-dup-unregistered (L1-common excluded; 20-row pre-registry duplicate soak declared via known_unregistered_duplicates, retires in hub-promotion batches B–D), hub-identity-clobber, hub-consumer-min-version; backed by new helpers/hub-topology.ts v1.0.0 (shared derivation also consumed by audit.ts v2.61.0 hub-resolve and hub-promotion.ts v1.0.0). | automation-engineer |
 | 2026-11-01 | production | production | v1.68.0 → v1.69.0 (T-20261101-003, spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md §R2.2): MM-01 LITERAL alternation retires the retained `gpt-5\.6-(?:sol\|terra\|luna)` alternatives — the L3 tier-vocabulary convergence window closed 2026-11-01 (all 16 projects at 0.26.0, 0 gpt-5.6 literals in delivered md surfaces), so the old ids now FAIL loudly outside managed sections instead of being tolerated. The generalized Codex family arm in lib/model-literal-patterns.ts (Check MM / sync side) is unchanged. No other check changes. | automation-engineer |

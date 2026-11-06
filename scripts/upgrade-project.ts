@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.91.0
+// @version 1.91.1
+// v1.91.1 (2026-11-07): variant SCRIPTS sync mkdir guard — dest scripts/<variant>/
+//          may not exist in projects (co-work has no scripts/co-work/); the
+//          registry copyFileSync crashed with a raw copyfile ENOENT (Node names
+//          the SOURCE in `path`; the missing dest dir is the actual cause).
+//          Exposed by templates/co-work/scripts/co-work/SCRIPTS.md (lifecycle
+//          Check V registry). Surrounding variant-script copies already guard
+//          or require an existing project file — this was the only gap.
 // v1.91.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
 //          — implements upstream ticket U-20261106-003): new EXTERNAL DEPS pass
 //          AFTER the TEMPLATE TREE SYNC pass (D3) — per dependency: git
@@ -3428,6 +3435,11 @@ if (existsSync(variantScriptsSrc)) {
   const variantRegDst = join(variantScriptsDst, 'SCRIPTS.md');
   if (existsSync(variantRegSrc) && (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst))) {
     console.log(`  UPDATE scripts/${variant}/SCRIPTS.md  (registry)`);
+    // v1.91.1 mkdir guard: the project may not have a scripts/<variant>/ directory
+    // at all (co-work's variant scripts live at scripts/deck/), so the dest dir
+    // for this registry copy cannot be assumed. Node's copyfile ENOENT names the
+    // SOURCE in `path` — the missing dest dir is the actual cause.
+    if (!dryRun) mkdirSync(dirname(variantRegDst), { recursive: true });
     if (!dryRun) copyFileSync(variantRegSrc, variantRegDst);
     console.log(`  ${dryTag}COPIED: scripts/${variant}/SCRIPTS.md`);
     syncChanged++;
