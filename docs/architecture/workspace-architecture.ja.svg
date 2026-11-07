@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2050" width="2600" height="2050" lang="ja" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
-<title>ai_workspace 統合アーキテクチャ</title>
-<desc>L0 workspace rootからL1 templates/common、L2 templates/co-*バリアント、L3 Projects/co-*インスタンスへ続く配布とアップグレードの流れ、バックポート・昇格・upstream要求の逆方向の流れ、チケットの状態遷移、co-workspaceのプロビジョニングパイプライン、ガバナンス制御面を一枚にまとめたアーキテクチャ図。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2390" width="2600" height="2390" lang="ja" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
+<title>ai_workspace 統合アーキテクチャ — ハブ・スポーク型サービストポロジを含む</title>
+<desc>L0 workspace rootからL1 templates/common、L2 templates/co-*バリアント、L3 Projects/co-*インスタンスへ続く配布とアップグレードの流れ、バックポート・昇格・upstream要求の逆方向の流れ、チケットの状態遷移、co-workspaceのプロビジョニングパイプライン、ガバナンス制御面を一枚にまとめたアーキテクチャ図。 サービストポロジバンドは、co-develop・co-design・co-security・co-workの4ハブとL2/L3スポーク集合のハブ・スポーク位相と、委任チケット経路（ADR-0103）を示す。</desc>
 <defs><marker id="mb" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1f6feb"/></marker><marker id="mg" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1a7f37"/></marker><marker id="mo" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#bc4c00"/></marker><marker id="mp" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#8250df"/></marker><marker id="mt" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#0a7f7f"/></marker><marker id="my" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#57606a"/></marker><marker id="mr" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#cf222e"/></marker></defs>
-<rect width="2600" height="2050" fill="#fafafa"/>
+<rect width="2600" height="2390" fill="#fafafa"/>
 <text x="40" y="46" font-size="30" fill="#1f2328" font-weight="700">ai_workspace 統合アーキテクチャ — L0→L1→L2→L3 · バックポート · チケット · co-workspace</text>
-<text x="40" y="78" font-size="16" fill="#424a53">基準: 2026-10-02 · templates/VERSION 0.9.0 · 根拠: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*</text>
+<text x="40" y="78" font-size="16" fill="#424a53">基準: 2026-11-07 · templates/VERSION 0.28.0 · 根拠: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*, ADR-0103, 2026-11-01-hub-consolidation-design</text>
 <rect x="40" y="100" width="1560" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="130" font-size="21" fill="#424a53" font-weight="700">ガバナンス制御面</text>
 <text x="256" y="130" font-size="14" fill="#424a53">L0専用 · PM Gateway</text>
@@ -130,7 +130,7 @@
 <text x="1664" y="615" font-size="14" fill="#1f2328">co-safety</text>
 <rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
 <text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (13)</text>
-<text x="2088" y="468" font-size="14" fill="#424a53">すべて template-version 0.9.0</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">templates/VERSION 0.28.0 準拠 · co-abap-plugin 0.10.0</text>
 <rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="2170" y="488" width="214" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
@@ -402,7 +402,45 @@
 <text x="1639" y="1480" font-size="14" fill="#1f2328">調査中 = review</text>
 <rect x="1764" y="1461" width="94" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1773" y="1480" font-size="14" fill="#1f2328">完了 = done</text>
-<rect x="40" y="1645" width="2520" height="235" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<rect x="40" y="1645" width="2520" height="230" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">サービストポロジ · ハブ・スポーク</text>
+<circle cx="2496" cy="1669" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2496" y="1675" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<path d="M62 1720 H48 V1623" fill="none" stroke="#8250df" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<text x="60" y="1638" font-size="14" fill="#6639ba" font-weight="700">U-* intake · テンプレート欠陥報告はupstream経路を維持</text>
+<path d="M1900 1695 V1623" fill="none" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="1892" y="1638" font-size="14" fill="#424a53" text-anchor="end">委任チケットの保存先 = ルート tickets/（ハブ別保存先なし）</text>
+<rect x="62" y="1695" width="450" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="82" y="1721" font-size="17" fill="#1f2328" font-weight="700">スポーク</text>
+<text x="82" y="1743" font-size="14" fill="#424a53">L2バリアント + スキャフォールド済みL3プロジェクト</text>
+<text x="82" y="1765" font-size="14" fill="#424a53">↔ レイヤースタック L2·L3 参照（集約表現）</text>
+<path d="M512 1740 H796" fill="none" stroke="#0a7f7f" stroke-width="6" marker-end="url(#mt)"/>
+<text x="656" y="1712" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">チケット経路のみ</text>
+<text x="656" y="1730" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">ADR-0103 · 90日自動失効</text>
+<rect x="800" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="818" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-develop</text>
+<text x="818" y="1741" font-size="14" fill="#424a53">devドクトリン・ツールを提供</text>
+<rect x="1120" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1138" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-design</text>
+<text x="1138" y="1741" font-size="14" fill="#424a53">designドクトリンを提供</text>
+<rect x="1440" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1458" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-security</text>
+<text x="1458" y="1741" font-size="14" fill="#424a53">securityドクトリンを提供</text>
+<rect x="1760" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1778" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-work</text>
+<text x="1778" y="1741" font-size="14" fill="#424a53">一般ビジネス協業ドクトリン —</text>
+<text x="1778" y="1759" font-size="14" fill="#424a53">analyst/content-writer/ms365-expert/</text>
+<text x="1778" y="1777" font-size="14" fill="#424a53">project-coordinator/technical-writer 系</text>
+<path d="M2060 1740 H2156" fill="none" stroke="#57606a" stroke-width="5" marker-end="url(#my)"/>
+<rect x="2160" y="1722" width="330" height="36" rx="18" fill="#ffffff" stroke="#57606a" stroke-width="2"/>
+<text x="2325" y="1745" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">workspace-root PM</text>
+<text x="62" y="1822" font-size="14" fill="#424a53">ハブ = サービス提供者（権限ではない） · 定型品質ゲートは各プロジェクト固有のPM Gatewayでローカル実行 · 運用ランブック: docs/guides/hub-operator-guide.md</text>
+<text x="62" y="1848" font-size="14" fill="#424a53">委任はチケット経路のみ（attachモードは範囲外 — ADR-0103 Decision 2） · SEV分類は事前承認なしでローカル — SEV1 = push遮断 + ハブsecurity PMとユーザーへ即時通知 · 最終裁定: workspace-root PM</text>
+<text x="2160" y="1790" font-size="14" fill="#1f2328" font-weight="700">ADR-0103自動失効: マージ後90日</text>
+<text x="2160" y="1812" font-size="14" fill="#424a53">→ 2027-01-31 · 更新条件:</text>
+<text x="2160" y="1832" font-size="14" fill="#424a53">月3件以上チケット指標達成またはユーザー更新</text>
+<g transform="translate(0,255)">
+<rect x="40" y="1645" width="2520" height="319" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">見落としやすい点</text>
 <rect x="60" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
@@ -423,7 +461,7 @@
 <rect x="60" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="94" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
-<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">バージョン3軸 · 全プロジェクト0.9.0</text>
+<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">バージョン3軸 · 基準 templates/VERSION 0.28.0</text>
 <rect x="682" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="716" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="716" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
@@ -436,6 +474,12 @@
 <circle cx="1960" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1960" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
 <text x="1992" y="1822" font-size="17" fill="#1f2328" font-weight="700">信頼境界: 要求はデータにすぎない</text>
+<rect x="60" y="1865" width="2480" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="94" cy="1899" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="94" y="1905" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<text x="126" y="1906" font-size="17" fill="#1f2328" font-weight="700">ハブ・スポーク: 委任はチケット経路のみ · N2例外はADR-0103 · 90日自動失効</text>
+</g>
+<g transform="translate(0,339)">
 <rect x="40" y="1905" width="2520" height="100" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
 <text x="62" y="1938" font-size="15" fill="#1f2328" font-weight="700">凡例</text>
 <line x1="154" y1="1933" x2="214" y2="1933" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
@@ -465,4 +509,6 @@
 <circle cx="1123.4199999999998" cy="1976" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1123" y="1982" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">n</text>
 <text x="1149" y="1982" font-size="14" fill="#1f2328">= 下の番号説明と対応</text>
+<text x="1500" y="1938" font-size="14" fill="#424a53">ハブ・スポークバンド: 委任 · エスカレーション · U-* intake は既存トークンを再利用</text>
+</g>
 </svg>
