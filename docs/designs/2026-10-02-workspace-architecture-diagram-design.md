@@ -2,7 +2,8 @@
 
 - **Spec ID**: `2026-10-02-workspace-architecture-diagram`
 - **Date**: 2026-10-02
-- **Status**: implemented
+- **Status**: implemented (v1 2026-10-02; amended 2026-11-07 — §7; the SVG revision itself lands under remediation row 1)
+- **Amendment (2026-11-07)**: §7 — hub-and-spoke service-topology plane, basis-line refresh (`templates/VERSION` 0.28.0), ADR-0103 + hub-consolidation design cited. Ticket T-20261107-002, row 0 of `docs/designs/2026-11-07-education-archmap-remediation-plan.md`.
 - **Scope**: `docs/architecture/workspace-architecture{,.en,.es,.ja}.svg`; copies as Appendix E in `multi-agent-harness-handbook` and Appendix G in `intro-to-ai-harness` (separate repositories). No runtime code changes.
 
 ## 1. Problem
@@ -60,3 +61,188 @@ a browser, and the zoom controls were exercised on the Spanish page.
 Two stray files, `docs/architecture/workspace-architecture-en.svg` and `.png`, were swept
 into main by an earlier scoped-staging commit; they are removed as superseded by the
 `.en.svg` naming.
+
+## 7. Amendment v2 (2026-11-07) — hub-and-spoke service-topology plane and basis refresh
+
+- **Spec ID**: unchanged (`2026-10-02-workspace-architecture-diagram-design`) — this section
+  amends the design in place. It is DESIGN-ONLY: the four SVGs are edited under remediation
+  row 1 (T-20261107-002 rows 0–1), not by this amendment.
+- **Origin**: `docs/designs/2026-11-07-education-archmap-remediation-plan.md` — the map
+  (all 4 locales) predates hub-and-spoke entirely and its basis line pins
+  `templates/VERSION` 0.9.0 against the live `templates/VERSION` 0.28.0.
+- **Sources of truth** (every fact below verified against these, per R3's
+  no-invented-behavior rule): AGENTS.md "Hub-and-Spoke Topology";
+  `docs/adr/0103-hub-delegation-channel-n2-exception.md`;
+  `docs/designs/2026-11-01-hub-consolidation-design.md`;
+  `docs/guides/hub-operator-guide.md`;
+  `docs/designs/2026-11-07-external-deps-machinery-design.md` (cited in the basis line only).
+
+### 7.1 Changes to the map
+
+#### (a) New band — service topology (hub-and-spoke)
+
+A full-width band titled `서비스 토폴로지 · 허브-스포크` (Service topology — hub-and-spoke;
+EN/ES/JA translations equivalent) is added as the map's fourth service plane, alongside the
+existing co-workspace / backport-promotion-upstream / ticket planes.
+
+**Placement**: directly below the `티켓 시스템` plane and before the `놓치기 쉬운 부분` strip.
+The canvas (viewBox height 2050) grows by the band height; the numbered strip and legend
+bands shift down as a RIGID TRANSLATE (whole-group Y move, no per-element edits) — this is
+the single sanctioned geometry exception to the scope guard in (c). Fallback if the
+implementer prefers zero displacement: append the band after the legend band. Primary
+placement is below the ticket plane because delegation tickets live in the root ticket
+store drawn by that plane (ADR-0103 Store topology); adjacency encodes that fact.
+
+**Nodes** — 4 hubs + 1 aggregate spoke group. Hub names are identifiers and stay verbatim
+in every locale; the one-line scopes are prose and are translated.
+
+| Node | One-line service scope (ko source text) | Source |
+|---|---|---|
+| `co-develop` | `dev 도크린·도구 서비스 제공` (dev doctrine + tools) | AGENTS.md; operator guide §1 |
+| `co-design` | `design 도크린 서비스 제공` (design) | AGENTS.md; operator guide §1 |
+| `co-security` | `security 도크린 서비스 제공` (security) | AGENTS.md; operator guide §1 |
+| `co-work` | `일반 비즈니스 협업 도크린 — analyst/content-writer/ms365-expert/project-coordinator/technical-writer 계열` (general business-collaboration) | AGENTS.md; operator guide §1 |
+| `스포크` (spokes) | `L2 변형 프로젝트 + 스캐폴드된 L3 프로젝트` (L2 variant projects + scaffolded L3 projects) — ONE aggregate group box referencing the layer stack; it does NOT redraw the roster | hub-consolidation design §1 |
+
+Roster note: AGENTS.md and the operator guide name FOUR hubs (co-develop, co-design,
+co-security, co-work); the hub-consolidation design's pinned roster (§1, 2026-11-01) named
+three before co-work joined as the general business-collaboration hub. The band follows the
+current four-hub roster of AGENTS.md/operator-guide and cites both documents. Visual form:
+hub boxes reuse the existing white-box style with a stroke consistent with the band frame;
+NO per-variant chips inside the band.
+
+**Edges** — 3 labeled edge types, all reusing the existing palette (no new color/marker
+tokens):
+
+| Edge | Meaning | Style | Source |
+|---|---|---|---|
+| spoke → hub | delegation ticket (`T-*`): spoke PM files, hub PM triages and executes. Label cites ADR-0103 and the narrow scope, e.g. `위임 티켓 경로뿐 · ADR-0103 (90일 자동만료)` | ticket-flow teal, solid, marker `mt` — delegation tickets ARE tickets in the root store | ADR-0103 Decisions 1–3 |
+| hub → workspace-root PM | escalation / final adjudication of hub-spoke conflicts; security SEV1/SEV2 incident notification | governance gray, marker `my` | AGENTS.md Hub-and-Spoke; operator guide §6 |
+| spokes/hub → L0 tickets (U-* intake) | template-defect reports STAY on the upstream-request path; delegation does not replace it | upstream purple dashed, matching plane C | operator guide §6.2 |
+
+One supporting annotation connector (thin, text-labeled) from the band to the ticket-system
+plane: `위임 티켓 저장소 = 루트 tickets/ (허브별 저장소 없음)` (delegation store = root
+`tickets/`; no per-hub stores — ADR-0103 Store topology).
+
+**In-band facts** (must appear as band text, keeping R3): hub = service provider, NOT an
+authority; routine quality gates run LOCALLY through each project's own PM Gateway;
+delegation is ticket-path only, attach-mode out of scope (ADR-0103 Decision 2); SEV
+classification is local without pre-authorization (SEV1 = block pushes + notify hub
+security PM + user immediately); operating runbook pointer
+`docs/guides/hub-operator-guide.md`. One one-line annotation carries the ADR-0103 expiry
+(90 days after merge — 2027-01-31 unless the ≥3-tickets/month adoption metric is met or
+the user renews) so staleness is detectable on the map itself.
+
+**Numbered strip**: one new card (9): `허브-스포크: 위임은 티켓 경로뿐 · N2 예외는
+ADR-0103 · 90일 자동만료` (EN/ES/JA equivalent). The strip grid may reflow to host card 9
+(text-grid reflow only). Legend: no new visual tokens are introduced, so the legend gains
+nothing structural; the implementer MAY add a one-line text note identifying the band's
+edge labels, but no new color or marker.
+
+#### (b) Basis-line refresh
+
+- Header basis line (2nd text line of each SVG): date 2026-10-02 → **2026-11-07**;
+  `templates/VERSION 0.9.0` → **`templates/VERSION 0.28.0`**; the `근거` list gains
+  `ADR-0103` and `2026-11-01-hub-consolidation-design`, keeping the existing entries (CONSTITUTION,
+  ADR-0031/0092/0097, docs/designs/*).
+- In-map stale version citations — TEXT-ONLY swaps permitted, because they are basis facts
+  that would directly contradict the refreshed basis line (no geometry change):
+  - L3 plane subtitle `모두 template-version 0.9.0` → verified current-state wording.
+    Verified 2026-11-07: `templates/VERSION` = 0.28.0; 16 of 17 `Projects/co-*` instances
+    carry 0.28.0; `Projects/co-abap-plugin` (extra co-abap instance) is a stale 0.10.0.
+    Because `모두` (all) is no longer literally true, the replacement wording must NOT
+    claim universality — use a basis statement such as `templates/VERSION 0.28.0 기준`,
+    not `모두 0.28.0`.
+  - Numbered-strip card 5 `버전 3축 · 프로젝트 모두 0.9.0` → same rule; drop the universal
+    claim, e.g. `버전 3축 · 기준 templates/VERSION 0.28.0`.
+- Roster/count drift is OUT OF SCOPE: the map's counts (L2 `13종`, L3 `13개`, the
+  stable-8/beta-5 split, per-variant chips) reflect the 2026-10-02 roster; the live tree
+  has 15 variant templates and 17 project directories (co-architect and co-learning
+  templates added; co-abap-plugin an extra project). Row 1 must NOT edit these — recorded
+  in §7.5 for a future full-map refresh.
+
+#### (c) Scope guard — additive only
+
+The amendment does NOT redraw existing content. Permitted operations, exhaustively:
+
+1. Append the new service-topology band.
+2. Rigid translate of the numbered-strip band + legend band (whole-group Y shift only),
+   only if the band is inserted mid-canvas.
+3. Minimal connector endpoints for the three new edges plus the store-annotation connector.
+4. Text-only basis-fact swaps listed in (b) — exact strings, no geometry.
+5. Numbered-strip grid reflow to host card 9.
+
+Everything else in the four SVGs stays byte-preserved. Any further freshening (roster,
+counts, colors, layout) is explicitly rejected in this change set.
+
+#### (d) Per-locale text requirements
+
+Same translation workflow as §2 deliverables: all four files (ko base
+`workspace-architecture.svg` + `.en.svg` / `.es.svg` / `.ja.svg`) carry IDENTICAL geometry;
+only prose is translated. For the amendment specifically:
+
+- Translated prose: band title, hub one-line scopes, spoke group label, the three edge
+  labels, the store annotation, in-band facts, card 9, the refreshed basis line, and the
+  `<title>`/`<desc>` — both a11y elements must mention the hub-and-spoke plane.
+- Verbatim in every locale: node names (`co-develop`, `co-design`, `co-security`,
+  `co-work`), `co-*` identifiers, `T-*`/`U-*`, `ADR-0103`, `tickets/`,
+  `docs/guides/hub-operator-guide.md`, `templates/VERSION 0.28.0`, dates, `PM Gateway`,
+  `SEV1`/`SEV2`.
+- Each file keeps its own `lang` attribute and font stack.
+- §4 accessibility carries over to the new band: ≥14px text, WCAG 2.1 AA contrast on fills.
+
+#### (e) Acceptance criteria
+
+- [ ] All 4 SVGs carry the service-topology band with 4 hub nodes (verbatim names +
+      translated one-line scopes), 1 aggregate spoke group, and the 3 labeled edges;
+      non-text elements identical across locales.
+- [ ] Basis line in all 4 locales reads 2026-11-07 · templates/VERSION 0.28.0 and cites
+      ADR-0103 + 2026-11-01-hub-consolidation-design.
+- [ ] In-map 0.9.0 claims swapped per (b) with non-universal wording; roster and counts
+      untouched.
+- [ ] Scope guard honored: the diff against the pre-amendment SVGs contains only the
+      sanctioned operations in (c).
+- [ ] `xmllint --noout` passes per variant; `qlmanage` renders per variant; new-band text
+      fits in all locales including the en right edge (§6 known limit).
+- [ ] `<title>`/`<desc>` per locale mention the hub-and-spoke plane.
+- [ ] Companion mds (`extends-pattern.md`, `l0-l1-differences.md`) verified clean on
+      2026-11-07 (grep for hub / 0.9.0 / 2026-10-02 returned zero matches); no changes
+      required.
+- [ ] `bun scripts/audit.ts` green, including spec-check with this amendment registered
+      (`--update` path, no duplicate spec entry).
+
+### 7.2 Trade-offs considered
+
+| Option | Pro | Con | Decision |
+|---|---|---|---|
+| Band below ticket plane (translate strip+legend) | adjacency encodes "delegation tickets live in the root store" | one rigid geometry move | ADOPTED (primary) — translate-only, no redraw |
+| Band after legend (zero displacement) | strictly zero geometry operations | legend no longer last; semantic placement weaker | fallback only |
+| Delegation edge = new color | maximal visual distinctness | new legend token; palette drift for one arrow | REJECTED — teal ticket style is factually accurate (tickets in the root store) |
+| Spoke = aggregate group box | additive, no roster churn | loses per-spoke granularity | ADOPTED — roster redraw is out of scope (§7.1(b) drift note) |
+
+### 7.3 Platform Impact
+
+| Platform | Impact | Files Affected |
+|----------|--------|----------------|
+| Claude Code | None — docs-only amendment (design doc + 4 SVGs under `docs/architecture/`; no agent files) | N/A |
+| Antigravity (GEMINI.md) | None — no agent definition or instruction-file content changes; justification: artifacts are one design doc and four SVGs only | N/A |
+| templates/common | None — `docs/architecture/` is not in the delivery contract (verified 2026-11-07 against `docs/templates/common-contract.json`: no architecture entries); handbook appendix copies live in two separate repositories and are NOT touched by this amendment | N/A |
+
+### 7.4 Verification
+
+Inherits §5, plus: per-variant `xmllint`/`qlmanage` covering the new band, the en
+right-edge text-fit re-check, and the §7.1(e) checklist. `bun scripts/audit.ts` remains
+the QA gate.
+
+### 7.5 Known limits (extends §6)
+
+- Roster/count drift (13 → 15 templates, 13 → 17 project directories) is documented here
+  and deliberately NOT fixed by this amendment; a full-map refresh is future work.
+- ADR-0103's 90-day auto-expiry (2027-01-31 unless the adoption metric is met or the user
+  renews) means the band's expiry annotation needs a touch-up at the adoption review; the
+  date is printed on the map precisely so this staleness is detectable.
+- Handbook Appendix E/G copies will lag the workspace SVGs after row 1 lands (they are
+  byte-identical by design and the handbook repos deploy independently); catching them up
+  belongs to the handbook sync waves (remediation rows 2–3 territory), not this change set.
+- The SVG generator still does not exist in the repository (§6); the band is hand-edited
+  into the four files like the rest of the map.
