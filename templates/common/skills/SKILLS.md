@@ -49,7 +49,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `handbook-sync-audit` | 1.0.5 | active | pm | 2026-08-29 | — | Verifies generated handbooks stay aligned with their sources: upstream content reflection, structural linkage, freshness |
 | `i18n-audit` | 1.0.0 | active | pm | 2026-08-29 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |
 | `i18n-formatting` | 1.0.0 | active | pm | 2026-08-24 | — | Locale-specific date/time, number, and currency formatting, units of measure, Korean-scale numerals, print paper sizes |
-| `i18n-layout` | 1.0.1 | active | pm | 2026-11-06 | — | Text layout and encoding guidance: UTF-8, legacy code pages, BOM hazards, RTL/bidi, script-specific fonts |
+| `i18n-layout` | 1.1.0 | active | pm | 2026-11-06 | — | Text layout and encoding guidance: UTF-8, legacy code pages, BOM hazards, RTL/bidi, script-specific fonts |
 | `i18n-locale-config` | 1.0.0 | active | pm | 2026-08-24 | — | BCP 47 locale IDs, language-vs-country doctrine, collation order, timezone handling, region/language matrix |
 | `k-dart` | 2.1.2 | active | strategy-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. FSS DART OpenAPI queries: corporate disclosures, financial statements, major reports |
 | `k-ecos` | 1.0.0 | active | financial-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. Bank of Korea ECOS Open API: Korean macro-financial statistics |

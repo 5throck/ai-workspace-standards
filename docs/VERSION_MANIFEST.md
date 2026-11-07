@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-07T17:17:26.900Z
+**Generated**: 2026-11-07T23:16:10.183Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -57,7 +57,7 @@
 | handbook-sync-audit | 1.0.5 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |
 | i18n-audit | 1.0.0 | active | templates/common/skills/i18n-audit/SKILL.md | common | i18n audit, locale parity, translation parity, glossary audit, L10N parity | pm |
 | i18n-formatting | 1.0.0 | active | templates/common/skills/i18n-formatting/SKILL.md | common | date format, number format, currency format, unit conversion, paper size, korean numerals | pm |
-| i18n-layout | 1.0.1 | active | templates/common/skills/i18n-layout/SKILL.md | common | character encoding, RTL, bidi, font selection, CRLF, BOM | pm |
+| i18n-layout | 1.1.0 | active | templates/common/skills/i18n-layout/SKILL.md | common | character encoding, RTL, bidi, font selection, CRLF, BOM | pm |
 | i18n-locale-config | 1.0.0 | active | templates/common/skills/i18n-locale-config/SKILL.md | common | locale config, locale code, BCP 47, collation, collation order, timezone | pm |
 | k-dart | 2.1.2 | active | templates/common/skills/k-dart/SKILL.md | common | k-dart, /k-dart, DART, DART OpenAPI, `DART 공시`, `공시검색`, `기업개황`, `재무제표`, `재무정보`, `재무제표 조회`, financial statement, corporate disclosure | strategy-analyst |
 | k-ecos | 1.0.0 | active | templates/common/skills/k-ecos/SKILL.md | common | k-ecos, /k-ecos, ECOS, `한국은행`, `한국은행 Open API`, `경제통계시스템`, `기준금리`, `환율`, `본원통화`, `100대 통계지표`, Bank of Korea statistics, Korean monetary statistics | financial-analyst |
