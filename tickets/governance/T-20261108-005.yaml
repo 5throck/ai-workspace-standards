@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261108-005
+kind: manual
+title: >-
+  records hygiene batch (Phase I 2026-11-08): (1) sweep the 5 root platform
+  mirrors carrying stale graft v1.0.0 status:active (competing with trail — the
+  U-20261107-004 corruption class at the root itself; fold into U-20261107-004
+  remediation: run sync-skills.ts or delete); (2) add a Prior: version-note to
+  the skills/SKILLS.md trail row (v1.2.0 learnings doctrine traceable only via
+  memory addendum); (3) delete the leftover remote branch
+  pr/20261108-003041-docs-trail-fleet-standard (PR #1903 merged); (4) optionally
+  backfill a records-registry note anchoring the checkout-recovery PRs
+  #1901/#1902 (memory-repair class, currently un-ticketed)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-08T02:02:21.385+09:00'
+history:
+  - at: '2026-11-08T02:02:21.385+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
