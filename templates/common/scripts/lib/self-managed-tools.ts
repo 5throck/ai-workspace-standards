@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-06/08, T-20261108-004 — E2E nightly red, co-work scaffold
+//          only, 14/15 variants green): PROJECT-MODE external-deps vendoring
+//          — when <rootDir>/external-deps.json exists, its install_dirs
+//          (extractInstallDirsLoose from ./external-deps.ts, data-driven)
+//          join the path set with trailing slash, so vendored upstream
+//          content (external/<id>/skills/... — scaffold-time clones per
+//          DEC-20261106-04 "consumed as-is") is self-managed: no owner
+//          frontmatter, no lifecycle record, no falsified provenance.
+//          Workspace root has no external-deps.json (inert at L0).
 // v1.2.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md,
 //           U-20261031-009): trail-era default paths — the vendor renamed graft to
 //           trail (0.28, @trailhq/trail-code) and `trail init` creates `.trail/` +
@@ -32,6 +41,7 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { extractInstallDirsLoose } from './external-deps.ts';
 
 export interface SelfManagedTool {
   name: string;
@@ -137,7 +147,21 @@ function buildPathSet(tools: SelfManagedTool[]): Set<string> {
 
 function pathSet(rootDir = process.cwd()): Set<string> {
   loadSelfManagedTools(rootDir);
-  return cache!.pathSet;
+  const set = new Set(cache!.pathSet);
+  // v1.3.0 project-mode external-deps vendoring (T-20261108-004): union the
+  // install_dirs from <rootDir>/external-deps.json (data-driven, extracted
+  // by scripts/lib/external-deps.ts extractInstallDirsLoose). Absent file =
+  // inert (workspace root). Dirs carry the trailing-slash directory entry
+  // convention isSelfManagedPath matches.
+  try {
+    const depsRaw = readFileSync(join(rootDir, 'external-deps.json'), 'utf-8');
+    for (const dir of extractInstallDirsLoose(depsRaw)) {
+      set.add(dir.endsWith('/') ? dir : `${dir}/`);
+    }
+  } catch {
+    // no external-deps.json / unreadable — inert
+  }
+  return set;
 }
 
 /** True when `rel` (repo-relative, forward slashes) IS a registered path or lives
