@@ -2,27 +2,34 @@ schemaVersion: 1
 id: T-20261108-001
 kind: manual
 title: >-
-  Trail learnings/context-graph fleet standard (user-directed promotion): audit
-  found the trail feature non-uniform — root fully applied (learnings tracked,
-  cache/statusline gitignored via .trail/.gitignore), trail section in only 2/17
-  template AGENTS.md files (COMMON-AGENTS zone OUTSIDE — section at
-  templates/common/AGENTS.md:295 does not propagate), and in Projects only 3/16
-  AGENTS.md sections + 2/16 .trail dirs (co-newbiz the only real user).
-  Standardize: (1) move the trail section into the COMMON-AGENTS propagated zone
-  so all 16 variants inherit, (2) decide+design the .trail wiring delivery
-  policy (template-shipped skeleton vs operator trail-init — root .gitignore
-  comment says self-managed), (3) codify learnings-tracking standard (learnings
-  tracked, cache/statusline excluded), (4) converge the 16 delivered projects
-  via upgrade visits. Source evidence: .trail/ layout,
-  templates/common/AGENTS.md:295, Projects/co-newbiz/.trail (reference
-  deployment).
+  Trail fleet standard promotion (repo context graph + learnings) — implement
+  per design 2026-11-08-trail-fleet-standard-design; gated on the design's four
+  user rulings (variant wave scope, skeleton delivery, TB-01 root severity,
+  statusline scope)
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: '2026-11-08T00:20:20.411+09:00'
+created_at: '2026-11-08T00:35:06.790+09:00'
 history:
-  - at: '2026-11-08T00:20:20.411+09:00'
+  - at: '2026-11-08T00:35:06.790+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T01:06:48.388+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T01:06:48.412+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T01:06:48.433+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented 2026-11-08 (DEC-20261108-01 R1-R4, single wave) on PR #1903: 15
+  variant AGENTS.md trail blocks (17/17 byte-parity); templates/common/.trail
+  skeleton + SessionStart hook entry propagated to 15 variants
+  (sync-variant-settings v1.5.0); upgrade-policy v1.38.0 ADD_IF_MISSING seeds
+  for the .trail wiring trio; validate-templates v1.75.0 TB-01 arm (Error
+  variants / WARN root); skills/trail SKILL.md v1.2.0 learnings doctrine; 25
+  unit tests green; full audit + validate-templates + verify-scripts + lifecycle
+  audits pass.
 error: null

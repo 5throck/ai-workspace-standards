@@ -2789,6 +2789,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261108-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -8758,8 +8763,8 @@
       "name": "trail",
       "scope": "root",
       "capability": "trail",
-      "content_hash": "b66e87ebb8635306",
-      "version": "1.1.0",
+      "content_hash": "3cb8bb0f6a75240b",
+      "version": "1.2.0",
       "mirrors": [
         "skills/trail/SKILL.md"
       ]

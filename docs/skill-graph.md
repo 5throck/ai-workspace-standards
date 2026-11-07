@@ -249,7 +249,7 @@
 | `root/team-builder` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/ticket-run` | L0 | 1.0.0 | — | — | root/sync | — | — |
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
-| `root/trail` | L0 | 1.1.0 | — | — | — | — | — |
+| `root/trail` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
@@ -457,6 +457,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261106-04` | decision | — | — | — |
 | `dec:DEC-20261107-01` | decision | — | — | — |
 | `dec:DEC-20261107-02` | decision | — | — | — |
+| `dec:DEC-20261108-01` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -847,7 +848,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 56 | (expected until docs `references` edges are mined) |
 | agent | 23 | co-abap/i18n-specialist, co-architect/architect, co-architect/automation-engineer, co-architect/design-storyteller, co-architect/mep-engineer, co-architect/prototype-engineer, co-architect/sketchup-modeler, co-architect/structural-engineer, co-architect/typography-expert, co-architect/ux-researcher, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 25 | (expected until docs `references` edges are mined) |
+| decision | 26 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/trail |
 
 ## Skills Without `used_by` (G6)

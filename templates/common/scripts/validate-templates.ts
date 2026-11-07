@@ -1,8 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.74.0
+ * @version 1.75.0
  *
+ * v1.75.0 (2026-11-08, spec docs/designs/2026-11-08-trail-fleet-standard-design.md
+ *          §5.4 — DEC-20261108-01 R1/R3): new arm `trail-block-parity` (TB-01) —
+ *          the AGENTS.md trail marker block (`trail:start/end`) is pinned across
+ *          the template tree: root (tool-written reference) == templates/common
+ *          (canonical L1 seed) == every variant, byte-identical after line
+ *          normalization. Error on template missing/duplicate/diverged; WARN on
+ *          root divergence (root's block is tool-owned — reconcileWiring
+ *          re-appends it, so a vendor text update lands at root first and the
+ *          WARN names the re-sync instead of fighting upsertSection). The block
+ *          sits outside every COMMON-zoned / WORKSPACE-MANAGED zone, so the pre-arm
+ *          state (2 of 16 template files, unvalidated) was invisible drift.
+ *          Primitives: scripts/lib/trail-block-parity.ts (new, unit-tested).
  * v1.74.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
  *          §5.4 E2 + Addendum, DEC-20261107-02, T-20261107-005): new arm
  *          `external-dep-license` — every external-deps.json seed (common +
@@ -570,6 +582,7 @@ import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
 import { extractInstallDirsLoose, findVendoredInstallDirs, parseExternalDepsManifest, evaluateLicensePolicy, evaluateInstallDirConvention, scanExcludedComponents } from './lib/external-deps.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
+import { extractTrailBlock, compareTrailBlock } from './lib/trail-block-parity.ts';
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
 import {
@@ -5669,6 +5682,72 @@ function checkCommonAgentsBlockParity(): void {
   }
 }
 
+// Check TB-01: trail marker-block parity (design docs/designs/2026-11-08-trail-fleet-standard-design.md
+// §5.4; DEC-20261108-01 R1+R3). The AGENTS.md trail block
+// (`<!-- trail:start -->…<!-- trail:end -->`) is TOOL-OWNED — trail init's
+// reconcileWiring re-appends it (upsertSection on the tool's markers,
+// skills/trail/SKILL.md) — but its PRESENCE and BYTES across the template tree
+// are workspace-pinned. The block sits outside every COMMON-*/WORKSPACE-MANAGED
+// zone, so PM-04b/VA-05/MM-01 cannot see it: the pre-arm state was 2 of 16
+// template AGENTS.md files carrying it with zero validation. Contract: root
+// AGENTS.md (tool-written reference) == templates/common/AGENTS.md (canonical
+// L1 seed) == every variant copy, byte-identical after line normalization
+// (managed-block-parity's normalizeBlockContent — the PM-04b contract).
+// Severity (R3): Error on templates (common missing/diverged, variant
+// missing/duplicate/diverged); WARN on root divergence (root's block is
+// tool-owned — a vendor text update lands there first and the WARN names the
+// re-sync; the workspace must not fight upsertSection with a hard gate).
+// Primitives: lib/trail-block-parity.ts (unit-tested).
+function checkTrailBlockParity(): void {
+  if (!JSON_MODE) console.log('\n=== Check TB-01: trail marker-block parity (root → common → every variant AGENTS.md) ===');
+
+  const rootContent = readFileSync(join(ROOT, 'AGENTS.md'), 'utf-8');
+  const rootBlock = extractTrailBlock(rootContent);
+  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
+  const commonContent = readFileSync(commonPath, 'utf-8');
+  const commonBlock = extractTrailBlock(commonContent);
+
+  if (rootBlock === null) {
+    warn('root', 'trail-block-parity', 'AGENTS.md carries no trail marker block (tool-owned block absent — run `trail init` or restore it)', 'Re-run `trail init` in the workspace root (the tool re-appends its block; do NOT hand-write the prose)');
+  } else if (commonBlock === null) {
+    fail('common', 'trail-block-parity', 'templates/common/AGENTS.md carries no trail marker block', `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/AGENTS.md`);
+  } else if (normalizeForTrail(rootBlock) !== normalizeForTrail(commonBlock)) {
+    warn('common', 'trail-block-parity', 'templates/common/AGENTS.md trail block diverges from the root (tool-owned) block — a vendor update landed at root; re-sync the template wave', `Copy the root AGENTS.md trail block over templates/common/AGENTS.md's, then re-verify variant parity`);
+  }
+
+  if (commonBlock === null) return;
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
+    .map(e => e.name)
+    .sort();
+
+  let checked = 0;
+  for (const variant of variants) {
+    const variantContent = readFileSync(join(TEMPLATES_DIR, variant, 'AGENTS.md'), 'utf-8');
+    const violation = compareTrailBlock(commonBlock, variantContent);
+    if (violation === 'missing') {
+      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every variant`, `Append the templates/common/AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/${variant}/AGENTS.md`);
+    } else if (violation === 'duplicate') {
+      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md carries MULTIPLE trail marker blocks — a hand copy landed next to a tool-managed copy`, `Delete all but one block, keeping the copy that is byte-identical to templates/common/AGENTS.md's`);
+    } else if (violation === 'mismatch') {
+      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md trail block diverges from templates/common/AGENTS.md`, `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`);
+    } else {
+      checked++;
+    }
+  }
+  if (checked > 0) {
+    pass(`trail-block-parity: ${checked}/${variants.length} variant AGENTS.md files carry the trail block with content parity`);
+  }
+}
+
+/** Line normalization for trail-block comparison (mirrors managed-block-parity's
+ *  normalizeBlockContent: CRLF → LF, strip trailing whitespace, collapse blank
+ *  edges). Local alias keeps the arm's import surface minimal. */
+function normalizeForTrail(raw: string): string {
+  return raw.replace(/\r\n/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').replace(/^\n+/, '').replace(/\n+$/, '');
+}
+
 // Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
 // Standard defined in docs/governance/variant-contract.md "User-Guide Standard".
 // Unlike Variant Contract required files, templates/common/ does NOT satisfy this
@@ -6682,6 +6761,7 @@ function checkAgentsMdDestructiveFileOpsPin(): void {
   checkSkeletonRegistry();                                       // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
   checkL1ImportClosure();                                        // IC-01: delivered-tree static import closure (T-20261026-011, spec 2026-10-26-project-review-remediation-design D4, ADR-0073 Amd. 4)
   checkCommonAgentsBlockParity();                                // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
+  checkTrailBlockParity();                                       // TB-01: trail marker block, root → common → every variant AGENTS.md (design 2026-11-08-trail-fleet-standard-design §5.4, DEC-20261108-01 R1/R3)
   checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
   checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
   checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies

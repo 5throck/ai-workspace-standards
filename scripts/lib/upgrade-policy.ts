@@ -1,4 +1,17 @@
-// @version 1.37.0
+// @version 1.38.0
+// v1.38.0 (2026-11-08, spec docs/designs/2026-11-08-trail-fleet-standard-design.md
+//          — DEC-20261108-01 R2): ADD_IF_MISSING_FILES gains the three .trail
+//          skeleton wiring files (`.trail/hook.cjs`, `.trail/README.md`,
+//          `.trail/.gitignore` — the vendor's tracked-but-tool-owned commit-once
+//          wiring, shipped byte-identical at templates/common/.trail/).
+//          ADD_IF_MISSING (seed-when-absent, withhold-when-present) is
+//          load-bearing here: without the claim these paths fall through to the
+//          generic VARIANT ASSET DIRS branch with wholesale SYNC, which would
+//          clobber a `trail init`-refreshed hook.cjs (self-managed surface —
+//          docs/self-managed-surfaces.json). The TRAIL_RETIRED_SEEDS guard is
+//          untouched: it withholds graft-era seeds, not these trail-era ones.
+//          TRAVERSAL_SKIP_DIRS intentionally does NOT list `.trail` — the walk
+//          must see the skeleton to deliver it.
 // v1.37.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
 //          — implements the upstream external-dependency machinery): resolveClaim gains the
 //          `external-deps.json` claim — policy PROJECT_STATE, pass EXTERNAL
@@ -515,7 +528,17 @@ const TEMPLATE_ONLY_FILES = new Set([
  *  the guard: if a future change ever put docs/project.md template-side, the
  *  deny-list fallback (SYNC) would wholesale-copy over user content, and this
  *  claim still blocks that (the co-abap docs/context.md regression class). */
-const ADD_IF_MISSING_FILES = new Set(['docs/project.md']);
+const ADD_IF_MISSING_FILES = new Set([
+  'docs/project.md',
+  // Trail skeleton wiring (design 2026-11-08-trail-fleet-standard-design §5.2,
+  // DEC-20261108-01 R2): seed-when-absent, withhold-when-present — a project
+  // whose copies exist (scaffold-delivered or `trail init`-refreshed) keeps
+  // them byte-for-byte. Unlike docs/project.md this claim FIRES: the files
+  // exist template-side at templates/common/.trail/ from this design on.
+  '.trail/hook.cjs',
+  '.trail/README.md',
+  '.trail/.gitignore',
+]);
 
 /** Project runtime / generated state — exists in projects but is never template-delivered. */
 const PROJECT_STATE_FILES = new Set([

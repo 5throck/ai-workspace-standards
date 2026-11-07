@@ -94,6 +94,15 @@
             "statusMessage": "Loading PM bootstrap..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.trail/hook.cjs\" session-start || exit 0",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreToolUse": [
