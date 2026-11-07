@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-08](2026-11-08.md) | chore(tickets): U-20261107-004 triage + T-20261108-001 intake record |
 | [2026-11-07](2026-11-07.md) | feat: deck emitter rebase onto ppt-master v6.8.0 - adapter boundary, phase 1 |
 | [2026-11-06](2026-11-06.md) | fix(governance): memory-union gate repaired-at-head semantics + propagate inline-code stripping (T-20261105-002) |
 | [2026-11-05](2026-11-05.md) | docs(governance): project-loss hardening design approval + ticket hygiene (T-20261104-004 re-filed; -002/-008/-009 closed) |
@@ -13,8 +14,8 @@
 | [2026-11-03](2026-11-03.md) | fix(hub-spoke): Phase 4 remediation - lock leak fix, test fixture exclusion, hook integrity lib |
 | [2026-11-02](2026-11-02.md) | feat(hub-spoke): Phase 1 batch E5 - co-architect variant template creation with consumer declaration |
 | [2026-11-01](2026-11-01.md) | chore(parity): drop concurrent-session changelog entry from PR surface |
-| [2026-10-31](2026-10-31.md) | docs(review): daily fleet review 2026-10-31 |
-| [2026-10-31](2026-10-31.md) | fix(templates): correct co-safety promotion checklist numeric claims to manifest truth (T-20261031-001) |
+| 2026-10-31 | docs(review): daily fleet review 2026-10-31 |
+| 2026-10-31 | fix(templates): correct co-safety promotion checklist numeric claims to manifest truth (T-20261031-001) |
 | 2026-10-30 | docs(review): daily fleet review 2026-10-30 |
 | 2026-10-29 | fix(agents): templates-root discovery for stub resolution in project context (canary finding) |
 | 2026-10-28 | docs(governance): promote co-design design-system suite assets + bilingual user-guide parity to variant template (T-20261027-011, T-20261027-012) |
