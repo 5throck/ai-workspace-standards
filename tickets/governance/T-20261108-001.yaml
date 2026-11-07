@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261108-001
+kind: manual
+title: >-
+  Trail fleet standard promotion (repo context graph + learnings) — implement
+  per design 2026-11-08-trail-fleet-standard-design; gated on the design's four
+  user rulings (variant wave scope, skeleton delivery, TB-01 root severity,
+  statusline scope)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-08T00:35:06.790+09:00'
+history:
+  - at: '2026-11-08T00:35:06.790+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
