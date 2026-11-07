@@ -16,7 +16,7 @@ title: >-
   Decision owner: workspace-root PM + lifecycle-manager. This ticket requests
   triage, not implementation.
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-06T14:20:59.000+09:00'
 history:
@@ -26,3 +26,23 @@ history:
   - at: '2026-11-07T08:32:48.403+09:00'
     from: backlog
     to: waiting
+  - at: '2026-11-07T09:26:53.554+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-07T09:26:53.572+09:00'
+    from: review
+    to: done
+result: >-
+  ADOPTED (hybrid, PM decision per ticket's decision-owner mandate): per-session
+  isolated worktree convention landed — Row 0 design
+  2026-11-07-session-worktree-convention-design (PR #1879), Row 1 normative text
+  into docs/governance/agents/workflows.md §4.1 (hybrid rule table: multi-file
+  WRITE under concurrency evidence = required worktree; read-only recommended;
+  single-file/PM bookkeeping = shared checkout with verify-branch discipline) +
+  sync skill v1.9.0 Worktree Landing Variant (9-step procedure, both
+  live-validated mechanics) (PR #1880). Enforcement: advisory convention + PM
+  dispatch-time brief duty, no machine gate (design §5 rationale). Pattern
+  dogfooded live in both landings: zero contention, foreign dirt never staged.
+  Friction recorded: skill version bump requires hand edit of
+  docs/templates/common-contract.json (pipeline does not refresh it) — flagged
+  for skill-lifecycle checklist.
