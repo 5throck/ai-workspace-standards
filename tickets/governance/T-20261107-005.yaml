@@ -12,12 +12,33 @@ title: >-
   docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md,
   DEC-20261106-04.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-07T20:43:13.124+09:00'
 history:
   - at: '2026-11-07T20:43:13.124+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-07T22:14:24.075+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-07T22:14:24.098+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-07T22:14:24.117+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented the external-deps standard (T-20261107-005) in PR
+  https://github.com/5throck/ai-workspace-standards/pull/1897: schema v2
+  manifest (license/usage/adapter/excluded_components/license_decision),
+  EXTERNAL_DEP_LICENSE_POLICY single source of truth (R2 classes incl.
+  review-standalone GPL), R3 install-dir collision/convention hard-fail, project
+  CLI scripts/external-deps.ts (list/install/verify/check-updates),
+  validate-templates external-dep-license arm, pre-commit E3 + CI E4 legs, Check
+  11 manifest-fed allowlist, v1->v2 migration in the upgrade pass, reconcile
+  data-loss fix prerequisite (c6491f7ec), seeds at v2. Follow-up drift scan
+  filed as T-20261107-006 (R4). Verified by unit tests (external-deps 71 + CLI
+  13 + reconcile 11 + Check 11 4), validate-templates, and a co-work dry run
+  (project-only entries preserved with WARN rows).
 error: null
