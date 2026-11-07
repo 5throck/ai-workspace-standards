@@ -82,7 +82,9 @@ function listScriptFiles(dir: string): string[] {
 }
 
 function relScript(path: string): string {
-  return path.slice(REPO_ROOT.length + 1);
+  // Forward-slash normalized so the pinned/allowlist keys match on Windows
+  // (path.join there emits backslashes — CI 2026-11-07).
+  return path.slice(REPO_ROOT.length + 1).replace(/\\/g, '/');
 }
 
 /**

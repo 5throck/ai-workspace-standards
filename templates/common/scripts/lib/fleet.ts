@@ -195,7 +195,12 @@ export function listFleetProjects(root: string = defaultRoot()): string[] {
   if (!existsSync(dir)) return [];
   const out: string[] = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && isFleetMember(e.name, exclusions)) out.push(join('Projects', e.name));
+    if (e.isDirectory() && isFleetMember(e.name, exclusions)) {
+      // Forward-slash normalized (design §5 "Projects/<name>"): every node fs
+      // API accepts '/' on Windows, and platform-independent output keeps the
+      // CLI/JSON contracts and consumer string handling deterministic.
+      out.push(join('Projects', e.name).replace(/\\/g, '/'));
+    }
   }
   return out.sort();
 }
