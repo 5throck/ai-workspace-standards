@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: T-20261107-001
+kind: manual
+title: >-
+  co-workspace baked-CLI deliberate bump (P1, design
+  2026-10-03-coworkspace-cli-refresh-design): issue #1818 drift signal —
+  Dockerfile pins @anthropic-ai/claude-code 2.1.311 → 2.1.319, @openai/codex
+  0.164.0 → 0.167.0. PR body records new versions + in-build --version probe
+  evidence; post-merge stack refresh via docker/rebuild.sh --runtime (P3).
+priority: low
+status: done
+attempts: 0
+created_at: '2026-11-07T11:37:35.357+09:00'
+history:
+  - at: '2026-11-07T11:37:35.357+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-07T11:59:23.745+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-07T11:59:23.766+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-07T11:59:23.790+09:00'
+    from: review
+    to: done
+result: >-
+  Deliberate bump landed and deployed: PR #1885 (merge e9052f2e9) — claude-code
+  2.1.311→2.1.319, codex 0.164.0→0.167.0, in-build probes green (docker build
+  exit 0). P3 stack refresh executed from an isolated worktree at origin/main
+  (shared checkout was foreign-branch-occupied; CO_WORKSPACE_WORKSPACE_DIR_HOST
+  explicitly pinned to the real clone): gateway image rebuilt, gateway+broker
+  containers recreated (healthy), turn runtime image rebuilt from
+  ~/.hermes/hermes-agent — CLI parity verified IN BOTH images (2.1.319 /
+  codex-cli 0.167.0). Issue #1818 auto-closed at merge; runbook comment posted.
+  co-newbiz-web (unrelated) untouched.
+error: null
