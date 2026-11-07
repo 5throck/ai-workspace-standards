@@ -7567,7 +7567,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-07"
       }
     },
@@ -8000,7 +8000,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-07"
       }
     },
@@ -8691,7 +8691,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-07"
       }
     },
@@ -8730,11 +8730,7 @@
         ".agents/skills/ticket-run/SKILL.md",
         ".codex/skills/ticket-run/SKILL.md",
         ".hermes/skills/ticket-run/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-10-31"
-      }
+      ]
     },
     {
       "id": "skill:root/token-usage-lint",

@@ -3,13 +3,16 @@ id: U-20261107-004
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-07T23:20:30.014+09:00
+created_at: '2026-11-07T23:20:30.014+09:00'
 history:
-  - at: 2026-11-07T23:20:30.014+09:00
+  - at: '2026-11-07T23:20:30.014+09:00'
     from: null
     to: backlog
+  - at: '2026-11-07T23:54:44.483+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,7 +22,20 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The graft → trail migration (workspace root ef7aef74e on 2026-11-01; co-newbiz 03a8856d on 2026-11-07) left graft-named remnants that are still active. (1) A user-level Stop hook runs `node ~/.claude/helpers/graft-hooks.cjs stop`. The file is still named graft but prints trail messages. (2) A `graft` skill still loads in sessions next to the `trail` skill, with overlapping triggers ("for ANY task here ... get your context from graft before grepping"), so agents see two competing context-tool instructions. (3) `.trail/cache/INDEX.md` still describes per-file wiring cards under `graft/`. Expected: graft-named hooks, skills, helper files and docs references are removed or renamed fleet-wide, so only trail remains. Workspace root, templates (L1 common / L2 variants) and every scaffolded project should be checked, plus the user-level ~/.claude setup guidance.'
+  symptom: >-
+    The graft → trail migration (workspace root ef7aef74e on 2026-11-01;
+    co-newbiz 03a8856d on 2026-11-07) left graft-named remnants that are still
+    active. (1) A user-level Stop hook runs `node
+    ~/.claude/helpers/graft-hooks.cjs stop`. The file is still named graft but
+    prints trail messages. (2) A `graft` skill still loads in sessions next to
+    the `trail` skill, with overlapping triggers ("for ANY task here ... get
+    your context from graft before grepping"), so agents see two competing
+    context-tool instructions. (3) `.trail/cache/INDEX.md` still describes
+    per-file wiring cards under `graft/`. Expected: graft-named hooks, skills,
+    helper files and docs references are removed or renamed fleet-wide, so only
+    trail remains. Workspace root, templates (L1 common / L2 variants) and every
+    scaffolded project should be checked, plus the user-level ~/.claude setup
+    guidance.
   affected_paths:
     - .trail/cache/INDEX.md
     - CLAUDE.md
@@ -27,8 +43,12 @@ upstream:
     - .claude/skills/graft
     - skills/graft
   identity_source: client_roots
-  repro: In co-newbiz (or any migrated project), open a Claude Code session. The skill list shows both `graft` and `trail`. At turn end, the Stop hook error says "node ~/.claude/helpers/graft-hooks.cjs stop". Run grep -rn graft .trail/cache/INDEX.md to see the leftover graft/ references.
-  triage: inbox
+  repro: >-
+    In co-newbiz (or any migrated project), open a Claude Code session. The
+    skill list shows both `graft` and `trail`. At turn end, the Stop hook error
+    says "node ~/.claude/helpers/graft-hooks.cjs stop". Run grep -rn graft
+    .trail/cache/INDEX.md to see the leftover graft/ references.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: .trail/cache/INDEX.md'
@@ -42,4 +62,4 @@ upstream:
   dedupe_key: b84d96762422b2ad78fd3bc4f8267e772da323b6167ae99d0965d59b726a5157
   duplicates:
     - project: co-newbiz
-      at: 2026-11-07T23:20:30.014+09:00
+      at: '2026-11-07T23:20:30.014+09:00'
