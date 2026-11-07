@@ -16,7 +16,7 @@ FROM oven/bun:1.4 AS bun
 
 # 2026-10-03 CLI provider-key design + T-20261003-023(a): node/npm stage for the claude/codex
 # CLI install below (their installers expect node; bun's global install does not run their
-# postinstall reliably). Pinned to the versions live-probed on 2026-10-03.
+# postinstall reliably). Pinned to the versions live-probed on 2026-11-07.
 FROM node:22-slim AS node
 
 FROM nousresearch/hermes-agent:${HERMES_TAG}
@@ -40,7 +40,7 @@ COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
 # -f: the hermes base image already carries an npm at /usr/local/bin/npm
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
- && npm install -g --prefix=/usr/local --omit=dev @anthropic-ai/claude-code@2.1.311 @openai/codex@0.164.0 \
+ && npm install -g --prefix=/usr/local --omit=dev @anthropic-ai/claude-code@2.1.319 @openai/codex@0.167.0 \
  && claude --version >/dev/null && codex --version >/dev/null
 
 # Antigravity CLI (agy) — baked via Google's official installer (user-provided URL,
