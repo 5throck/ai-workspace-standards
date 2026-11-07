@@ -7984,8 +7984,8 @@
       "name": "sync",
       "scope": "common",
       "capability": "sync",
-      "content_hash": "cf4947762b4c2b5c",
-      "version": "1.8.0",
+      "content_hash": "a0e1df01c91ed3ae",
+      "version": "1.9.0",
       "mirrors": [
         "templates/common/skills/sync/SKILL.md"
       ],
@@ -8670,8 +8670,8 @@
       "name": "sync",
       "scope": "root",
       "capability": "sync",
-      "content_hash": "83013972d72488dc",
-      "version": "1.8.0",
+      "content_hash": "e760363f744ceb2e",
+      "version": "1.9.0",
       "mirrors": [
         "skills/sync/SKILL.md",
         ".claude/skills/sync/SKILL.md",

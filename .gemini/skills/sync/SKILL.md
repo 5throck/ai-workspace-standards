@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.8.0
-last_reviewed: 2026-10-08
+version: 1.9.0
+last_reviewed: 2026-11-07
 status: active
 scope: common
 l2_propagate: true
@@ -108,6 +108,20 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 | 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
 4. If audit fails, fix the reported issue before re-running.
+
+## Worktree Landing Variant
+
+When concurrency evidence exists (shared tree dirty, shared checkout off `main`, or any open PR), land multi-file write batches from an isolated worktree instead of the shared checkout. Full rule set and rationale: `docs/designs/2026-11-07-session-worktree-convention-design.md` (T-20261106-010). PM bookkeeping (ticket moves, memory-log-only, CHANGELOG entries) and trivial single-file changes stay on the shared checkout.
+
+1. **Concurrency check**: run `git status --porcelain`, `git branch --show-current`, and `gh pr list --state open`. Any hit selects this variant.
+2. **Create the worktree**: `git fetch origin && git worktree add ../<repo-name>-worktrees/<slug> -b pr/<YYYYMMDD>-<slug> origin/main`. Keep the path outside the repository tree: no `.gitignore` change is needed and worktrees never appear in the repo's own untracked-file surface.
+3. **Install**: `cd <worktree-path> && bun install`. A fresh worktree has no `node_modules`.
+4. **Work**: perform all writes inside the worktree. Never edit shared-checkout paths from the worktree session.
+5. **Stage + PR body**: stage task files explicitly (step 0 scoped-staging rules unchanged). Write the PR body to `$(git rev-parse --git-dir)/sync-pr-body.md`. Inside a worktree, `git rev-parse --git-dir` resolves to the worktree's private git dir (`<repo>/.git/worktrees/<name>`), so the body file is per-worktree and never collides with a concurrent session's file.
+6. **Sync**: run `bun scripts/dev-sync.ts --body-file "$(git rev-parse --git-dir)/sync-pr-body.md" "$ARGUMENTS"` **from the worktree root**. The CWD guard (step 0 of the pipeline) compares CWD against the script's own copy's parent directory (`import.meta.dir` anchor), and each worktree owns a full checkout including `scripts/dev-sync.ts`, so the guard passes by construction. This supersedes the 2026-11-03 "in-worktree dev-sync is impossible" observation, which was a CWD/script-root mismatch, not a fundamental incompatibility. On the pre-created branch, the pipeline commits there (step 2 branch behavior applies unchanged).
+7. **PR**: the pipeline pushes and opens or updates the PR as usual. CI runs against the branch - identical to a shared-checkout landing.
+8. **Cleanup**: after the PR opens (or merges, per the finishing-branch discipline), run `git worktree remove <worktree-path>` from the shared checkout. The shared tree is never touched during the session.
+9. **Report**: state the worktree path, the branch, and the concurrency evidence observed at start in the task report.
 
 ## Session Evidence Duty (`## Skills Used`)
 
