@@ -78,6 +78,17 @@ jobs:
         # waiver can never decay into a silent ignore-all.
         run: bun scripts/dependency-audit.ts
 
+      - name: External-dependency manifest gate
+        # External-deps standard §5.4 E4 (design
+        # docs/designs/2026-11-07-external-deps-standard-design.md,
+        # DEC-20261107-02): offline `verify --manifest-only` over the project's
+        # external-deps.json — strict schema parse, license policy (deny-class
+        # and license-undeclared entries fail), R3 external/<id> convention,
+        # .gitignore coverage, adapter presence, excluded components. No
+        # network, no clone. Skipped when the project has no manifest or no CLI.
+        if: ${{ hashFiles('external-deps.json') != '' && hashFiles('scripts/external-deps.ts') != '' }}
+        run: bun scripts/external-deps.ts verify --manifest-only
+
 
   secret-scan:
     name: Secret Scan

@@ -1,5 +1,26 @@
 #!/usr/bin/env bun
-// @version 1.92.0
+// @version 1.94.0
+// v1.94.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §5.4 E5 / §5.6, T-20261107-005): EXTERNAL DEPS pass — (a) schema
+//          v1 → v2 migration: seed ids get the v2 contract fields from the
+//          template seed with the project's pin/commit kept; project-only ids
+//          keep their entry with NO license (never invented; WARN row, verify
+//          fails until a human declares it); always written as v2; one decision
+//          row per entry. (b) E5 pre-install gate (lib/external-deps.ts v1.1.0
+//          preInstallGate — license policy + R3 install-dir convention) runs
+//          before the upstream check: a gated entry is never fetched or moved
+//          (WARN row, counted as a failure). Review-class licenses without a
+//          license_decision emit a WARN row.
+// v1.93.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §2 item 8 / §5.6 / Addendum A.3, T-20261107-005): EXTERNAL DEPS
+//          reconcile data-loss fix — the legacy/interim reconcile built its
+//          result from the template SEED entries only (a project entry whose id
+//          was not in the seed was silently dropped) and wrote a literal
+//          schema_version 1. The core moves to helpers/external-deps-reconcile.ts
+//          v1.0.0: project-only entries are PRESERVED (valid ones join the pass;
+//          invalid ones are kept verbatim with a WARN row), schema_version comes
+//          from the schema the reconciled document conforms to, and a project
+//          file that is not valid JSON is never overwritten (SKIP + WARN).
 // v1.92.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
 //          §6.2, DEC-20261107-01): fleet membership SSOT B1 guard — an
 //          inside-Projects target that is NOT a fleet member
@@ -1054,6 +1075,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated, bumpNestedLifecycleLastUpdated, scaffoldChangelogEntry } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
+import { reconcileExternalDepsManifest, splitValidEntries } from './helpers/external-deps-reconcile.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
@@ -1113,8 +1135,9 @@ import {
   ensureGitignoreCoverage,
   isUnderAnyInstallDir,
   extractInstallDirsLoose,
-  ENTRY_FIELDS,
-  type ExternalDepEntry,
+  migrateManifestV1ToV2,
+  preInstallGate,
+  evaluateLicensePolicy,
   type ExternalDepsManifest,
 } from './lib/external-deps.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
@@ -2541,8 +2564,11 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
   // 2. Parse; reconcile a legacy/interim shape (D8 — the co-work interim
   //    instance was reconciled by the first real upgrade run, 2026-11-07).
   let manifest: ExternalDepsManifest | null = null;
+  // Effective manifest text: under --dry-run the seed delivery above did not
+  // copy, so the would-be delivered seed stands in for the absent project file.
+  const manifestRaw = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : readFileSync(seedPath, 'utf8');
   try {
-    manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf8'), MANIFEST_REL);
+    manifest = parseExternalDepsManifest(manifestRaw, MANIFEST_REL);
   } catch (err) {
     const reason = (err as Error).message;
     let seedManifest: ExternalDepsManifest | null = null;
@@ -2555,35 +2581,64 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
       failures++;
       return { changed, failures };
     }
-    // Operative state (per-id pin/commit) survives the reconcile — the running
-    // version is the project's fact; the seed owns everything else.
-    const legacyById = new Map<string, Record<string, unknown>>();
-    const droppedLegacyKeys = new Set<string>();
-    try {
-      const legacyDoc = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dependencies?: Array<Record<string, unknown>> };
-      for (const dep of (Array.isArray(legacyDoc?.dependencies) ? legacyDoc.dependencies : [])) {
-        if (dep && typeof dep['id'] === 'string') legacyById.set(dep['id'], dep);
-      }
-    } catch { /* unreadable legacy doc — reconcile from the seed alone */ }
-    const reconciled: ExternalDepEntry[] = seedManifest.dependencies.map((entry) => {
-      const merged: ExternalDepEntry = { ...entry };
-      const legacy = legacyById.get(entry.id);
-      if (legacy) {
-        if (typeof legacy['pin'] === 'string' && legacy['pin']) merged.pin = legacy['pin'];
-        if (typeof legacy['commit'] === 'string' && /^[0-9a-f]{40}$/.test(legacy['commit'])) merged.commit = legacy['commit'];
-        for (const k of Object.keys(legacy)) {
-          if (!(ENTRY_FIELDS as readonly string[]).includes(k)) droppedLegacyKeys.add(k);
-        }
-      }
-      return merged;
-    });
-    const droppedNote = droppedLegacyKeys.size > 0 ? `; non-schema fields not promoted (dropped): ${[...droppedLegacyKeys].sort().join(', ')}` : '';
-    console.log(`  RECONCILE ${MANIFEST_REL}  (legacy/interim manifest superseded by the template seed — operative pin/commit preserved per id${droppedNote})`);
-    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify({ schema_version: 1, dependencies: reconciled }, null, 2)}\n`, 'utf8');
-    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'MERGE', `interim/legacy manifest reconciled into the generic schema (design D1/D8) — template seed authoritative, operative pin/commit preserved per id${droppedNote}`, 'WARN');
+    // v1.93.0 (external-deps standard §5.6 / Addendum A.3): the reconcile core
+    // lives in helpers/external-deps-reconcile.ts — seed entries authoritative
+    // per id with the project's operative pin/commit preserved, project-only
+    // entries PRESERVED (never silently dropped), schema_version taken from the
+    // schema the reconciled document conforms to (never a literal), and a
+    // project file that is not valid JSON is never overwritten.
+    const rec = reconcileExternalDepsManifest(manifestRaw, seedManifest);
+    if (!rec.ok) {
+      console.log(`  ⚠️  SKIP   ${MANIFEST_REL}  (${rec.error})`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `invalid manifest not overwritten: ${rec.error}`, 'WARN');
+      failures++;
+      return { changed, failures };
+    }
+    const droppedNote = rec.droppedLegacyKeys.length > 0 ? `; non-schema fields not promoted (dropped): ${rec.droppedLegacyKeys.join(', ')}` : '';
+    const keptNote = rec.preservedProjectOnly.length > 0 ? `; project-only entr${rec.preservedProjectOnly.length === 1 ? 'y' : 'ies'} preserved: ${rec.preservedProjectOnly.join(', ')}` : '';
+    const invalidNote = rec.invalidProjectOnly.length > 0
+      ? `; project-only entr${rec.invalidProjectOnly.length === 1 ? 'y' : 'ies'} kept VERBATIM but invalid (excluded from this pass — manual fix required): ${rec.invalidProjectOnly.map((e) => `${e.id} (${e.reason})`).join('; ')}`
+      : '';
+    console.log(`  RECONCILE ${MANIFEST_REL}  (legacy/interim manifest reconciled with the template seed — operative pin/commit preserved per id${keptNote}${invalidNote}${droppedNote})`);
+    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify(rec.document, null, 2)}\n`, 'utf8');
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'MERGE', `interim/legacy manifest reconciled into the generic schema (design D1/D8, standard §5.6) — template seed authoritative per id, operative pin/commit preserved, schema_version ${rec.document.schema_version}${keptNote}${invalidNote}${droppedNote}`, 'WARN');
+    for (const bad of rec.invalidProjectOnly) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `project-only entry ${bad.id} preserved verbatim but invalid — excluded from the pass: ${bad.reason}`, 'WARN');
+    }
     console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
     changed++;
-    manifest = { schema_version: 1, dependencies: reconciled };
+    manifest = rec.manifest;
+  }
+
+  // 2b. v1.94.0 — schema v1 → v2 migration (external-deps standard §5.6). For
+  //     an id in the template seed the v2 contract fields (license, usage,
+  //     adapter, excluded_components, license_decision) come from the seed and
+  //     the project's own fields (pin/commit included) are kept; an id NOT in
+  //     the seed keeps its entry with NO license — an attestation is never
+  //     invented, so `verify` FAILs until a human declares it. One decision row
+  //     per entry. The migrated document is always written as schema v2.
+  if (manifest && manifest.schema_version === 1) {
+    let seedForMigration: ExternalDepsManifest = { schema_version: 2, dependencies: [] };
+    if (seedPath) {
+      try { seedForMigration = parseExternalDepsManifest(readFileSync(seedPath, 'utf8'), 'template seed'); } catch { /* invalid seed — migrate without attestations */ }
+    }
+    const currentRaw = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : manifestRaw;
+    const mig = migrateManifestV1ToV2(currentRaw, seedForMigration);
+    console.log(`  MIGRATE ${MANIFEST_REL}  schema v1 → v2 (standard §5.6)${mig.migrated.length ? ` — contract fields from the seed for: ${mig.migrated.join(', ')}` : ''}${mig.unattested.length ? ` — NOT attested (no seed entry; declare license/usage/adapter by hand): ${mig.unattested.join(', ')}` : ''}`);
+    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify(mig.document, null, 2)}\n`, 'utf8');
+    if (mig.migrated.length === 0 && mig.unattested.length === 0) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', 'schema v1 → v2 (empty manifest — schema_version bump only; standard §5.6)');
+    }
+    for (const id of mig.migrated) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', `dep ${id}: schema v1 → v2 — license/usage/adapter/excluded_components/license_decision taken from the template seed; project pin/commit preserved (standard §5.6)`);
+    }
+    for (const id of mig.unattested) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${id}: schema v1 → v2 — no template seed entry, license NOT declared (never invented); \`bun scripts/external-deps.ts verify\` fails until a human adds license/usage/adapter (standard §5.6)`, 'WARN');
+    }
+    console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
+    changed++;
+    const split = splitValidEntries(mig.document['dependencies'] as unknown[], 2);
+    manifest = { schema_version: 2, dependencies: split.valid };
   }
 
   // 3. install_dir .gitignore coverage (D5) — an external clone committed into
@@ -2597,6 +2652,20 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
 
   // 4. Per-dependency upstream check → compat test → pin move / hold (D3).
   for (const dep of manifest!.dependencies) {
+    // v1.94.0 — E5 (external-deps standard §5.4): license gate + R3 install-dir
+    // convention BEFORE any fetch or pin move. A gated entry is never moved.
+    const gate = preInstallGate(dep);
+    if (!gate.ok) {
+      console.log(`  ⚠️  ${dep.id}: pre-install gate FAILED — ${gate.reasons.join('; ')}; no upstream check, no pin move`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: pre-install gate failed (license policy / install-dir convention) — ${gate.reasons.join('; ')}; pin ${dep.pin} held, nothing fetched`, 'WARN');
+      failures++;
+      continue;
+    }
+    const licVerdict = evaluateLicensePolicy(dep);
+    if (licVerdict.severity === 'warn') {
+      console.log(`  ⚠️  ${licVerdict.message}`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: ${licVerdict.message}`, 'WARN');
+    }
     const upstream = checkUpstreamTags(dep);
     if (!upstream.ok) {
       console.log(`  ⚠️  ${dep.id}: upstream tag check FAILED — ${upstream.error}; pin ${dep.pin} held`);
