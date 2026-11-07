@@ -7,6 +7,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-11-08](2026-11-08.md) | docs(designs): trail fleet standard — Row 0 design (T-20261108-001) |
+| [2026-11-08](2026-11-08.md) | chore(tickets): U-20261107-004 triage + T-20261108-001 intake record |
 | [2026-11-07](2026-11-07.md) | feat: deck emitter rebase onto ppt-master v6.8.0 - adapter boundary, phase 1 |
 | [2026-11-06](2026-11-06.md) | fix(governance): memory-union gate repaired-at-head semantics + propagate inline-code stripping (T-20261105-002) |
 | [2026-11-05](2026-11-05.md) | docs(governance): project-loss hardening design approval + ticket hygiene (T-20261104-004 re-filed; -002/-008/-009 closed) |
