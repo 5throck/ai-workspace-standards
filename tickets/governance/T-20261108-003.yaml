@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261108-003
+kind: manual
+title: >-
+  learning (pollination): sweep 11 template copies of i18n-layout whose HWP
+  routing is now false — all say 'HWP/HWPX authoring and conversion tooling is
+  not provided by workspace templates'
+  (templates/common/.agents/skills/i18n-layout/SKILL.md:92 + 5 co-architect
+  platform copies, all :92) while co-work landed the fleet's first HWP
+  capability (kordoc/rhwp adapter + hwp-document-processing skill, PR #38,
+  scope: co-work per DEC-20261107-01 hub-and-spoke). Bump i18n-layout to 1.1.0
+  routing HWP work to the co-work hub skill so scaffolded projects get correct
+  D7 routing. Evidence: templates/co-work copy already routes correctly
+  (Projects/co-work/skills/i18n-layout/SKILL.md:92). Extracted by Step 2f
+  2026-11-08 (co-work #37 reviewed, nothing to extract — openability checker
+  already promoted; co-newbiz ADR-0193 kill-criteria series domain-only)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-08T02:00:30.394+09:00'
+history:
+  - at: '2026-11-08T02:00:30.394+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

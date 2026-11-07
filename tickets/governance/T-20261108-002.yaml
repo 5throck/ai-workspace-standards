@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261108-002
+kind: manual
+title: >-
+  learning (L0 tooling): port co-work #38's bounded non-git external-deps
+  install extension into workspace scripts/lib/external-deps.ts —
+  NON_GIT_INSTALL_ARGV0 allowlist (bun/npm/curl/wget), checksum field (npm
+  dist-integrity sha512-<base64> or 64-hex sha256), classifyInstallArgv0 single
+  admission gate, {pin}/{dir} placeholder rule, semver-looking pin check; keep
+  the git path byte-compatible (7 negative controls). Unblocks U-20261107-002
+  (non-git external-deps forms — the blocked human decision becomes a governed
+  mechanism). Evidence:
+  Projects/co-work/scripts/lib/external-deps.ts:205-216,223,253,313 vs workspace
+  scripts/lib/external-deps.ts:248 ('non-git sources are out of scope', v1.1.0).
+  Extracted by Step 2f 2026-11-08 (co-work #38 HWP adapter itself is
+  project-local by design — engine-aware kordoc/rhwp split; consumption is via
+  routing)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-08T02:00:30.360+09:00'
+history:
+  - at: '2026-11-08T02:00:30.360+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
