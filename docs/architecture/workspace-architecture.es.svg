@@ -96,8 +96,8 @@
 <rect x="902" y="524" width="245" height="28" rx="14" fill="#ffffff" stroke="#cf222e" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="911" y="543" font-size="14" fill="#1f2328">Especialistas L0 no se propagan</text>
 <rect x="1400" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
-<text x="1418" y="444" font-size="21" fill="#0550ae" font-weight="700">L2 · templates/co-* (13)</text>
-<text x="1418" y="468" font-size="14" fill="#424a53">stable 8 (continua) · beta 5 (discontinua)</text>
+<text x="1418" y="444" font-size="21" fill="#0550ae" font-weight="700">L2 · templates/co-* (15)</text>
+<text x="1418" y="468" font-size="14" fill="#424a53">stable 8 (continua) · beta 7 (discontinua)</text>
 <rect x="1418" y="488" width="74" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
 <text x="1427" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="1500" y="488" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
@@ -106,61 +106,65 @@
 <text x="1612" y="507" font-size="14" fill="#1f2328">co-deck</text>
 <rect x="1685" y="488" width="87" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
 <text x="1694" y="507" font-size="14" fill="#1f2328">co-design</text>
-<rect x="1418" y="524" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
-<text x="1427" y="543" font-size="14" fill="#1f2328">co-develop</text>
-<rect x="1521" y="524" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
-<text x="1530" y="543" font-size="14" fill="#1f2328">co-game</text>
-<rect x="1607" y="524" width="103" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
-<text x="1616" y="543" font-size="14" fill="#1f2328">co-security</text>
-<rect x="1718" y="524" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
-<text x="1727" y="543" font-size="14" fill="#1f2328">co-work</text>
-<rect x="1418" y="560" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
-<text x="1427" y="579" font-size="14" fill="#1f2328">co-export</text>
-<rect x="1516" y="560" width="167" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
-<text x="1525" y="579" font-size="14" fill="#1f2328">co-hr</text>
-<rect x="1569" y="563" width="103" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
-<text x="1573" y="579" font-size="14" fill="#a40e26" font-weight="700">sin proyecto</text>
-<rect x="1418" y="596" width="187" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
-<text x="1427" y="615" font-size="14" fill="#1f2328">co-news</text>
-<rect x="1491" y="599" width="103" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
-<text x="1495" y="615" font-size="14" fill="#a40e26" font-weight="700">sin proyecto</text>
-<rect x="1613" y="596" width="79" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
-<text x="1622" y="615" font-size="14" fill="#1f2328">co-price</text>
-<rect x="1700" y="596" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
-<text x="1709" y="615" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="1418" y="520" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1427" y="539" font-size="14" fill="#1f2328">co-develop</text>
+<rect x="1521" y="520" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1530" y="539" font-size="14" fill="#1f2328">co-game</text>
+<rect x="1607" y="520" width="103" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1616" y="539" font-size="14" fill="#1f2328">co-security</text>
+<rect x="1718" y="520" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1727" y="539" font-size="14" fill="#1f2328">co-work</text>
+<rect x="1418" y="552" width="115" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1427" y="571" font-size="14" fill="#1f2328">co-architect</text>
+<rect x="1541" y="552" width="90" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1550" y="571" font-size="14" fill="#1f2328">co-export</text>
+<rect x="1639" y="552" width="61" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1648" y="571" font-size="14" fill="#1f2328">co-hr</text>
+<rect x="1708" y="552" width="111" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1717" y="571" font-size="14" fill="#1f2328">co-learning</text>
+<rect x="1418" y="584" width="87" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1427" y="603" font-size="14" fill="#1f2328">co-news</text>
+<rect x="1513" y="584" width="79" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1522" y="603" font-size="14" fill="#1f2328">co-price</text>
+<rect x="1600" y="584" width="90" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<text x="1609" y="603" font-size="14" fill="#1f2328">co-safety</text>
 <rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
-<text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (13)</text>
-<text x="2088" y="468" font-size="14" fill="#424a53">base templates/VERSION 0.28.0 · co-abap-plugin 0.10.0</text>
+<text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (16)</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">base templates/VERSION 0.28.0</text>
 <rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
-<rect x="2170" y="488" width="217" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<rect x="2170" y="488" width="115" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2179" y="507" font-size="14" fill="#1f2328">co-architect</text>
-<rect x="2276" y="491" width="100" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
-<text x="2280" y="507" font-size="14" fill="#a40e26" font-weight="700">sin plantilla</text>
-<rect x="2395" y="488" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2404" y="507" font-size="14" fill="#1f2328">co-consult</text>
-<rect x="2088" y="524" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="543" font-size="14" fill="#1f2328">co-deck</text>
-<rect x="2170" y="524" width="87" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2179" y="543" font-size="14" fill="#1f2328">co-design</text>
-<rect x="2265" y="524" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2274" y="543" font-size="14" fill="#1f2328">co-develop</text>
-<rect x="2368" y="524" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2377" y="543" font-size="14" fill="#1f2328">co-export</text>
-<rect x="2088" y="560" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="579" font-size="14" fill="#1f2328">co-game</text>
-<rect x="2174" y="560" width="197" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2183" y="579" font-size="14" fill="#1f2328">co-newbiz</text>
-<rect x="2261" y="563" width="100" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
-<text x="2265" y="579" font-size="14" fill="#a40e26" font-weight="700">sin plantilla</text>
-<rect x="2380" y="560" width="79" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2389" y="579" font-size="14" fill="#1f2328">co-price</text>
-<rect x="2088" y="596" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="615" font-size="14" fill="#1f2328">co-safety</text>
-<rect x="2186" y="596" width="103" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2195" y="615" font-size="14" fill="#1f2328">co-security</text>
-<rect x="2297" y="596" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2306" y="615" font-size="14" fill="#1f2328">co-work</text>
+<rect x="2293" y="488" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2302" y="507" font-size="14" fill="#1f2328">co-consult</text>
+<rect x="2088" y="520" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="539" font-size="14" fill="#1f2328">co-deck</text>
+<rect x="2170" y="520" width="87" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2179" y="539" font-size="14" fill="#1f2328">co-design</text>
+<rect x="2265" y="520" width="95" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2274" y="539" font-size="14" fill="#1f2328">co-develop</text>
+<rect x="2368" y="520" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2377" y="539" font-size="14" fill="#1f2328">co-export</text>
+<rect x="2088" y="552" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="571" font-size="14" fill="#1f2328">co-game</text>
+<rect x="2174" y="552" width="61" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2183" y="571" font-size="14" fill="#1f2328">co-hr</text>
+<rect x="2243" y="552" width="111" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2252" y="571" font-size="14" fill="#1f2328">co-learning</text>
+<rect x="2088" y="584" width="214" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="603" font-size="14" fill="#1f2328">co-newbiz</text>
+<rect x="2191" y="587" width="100" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="2195" y="603" font-size="14" fill="#a40e26" font-weight="700">sin plantilla</text>
+<rect x="2310" y="584" width="87" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2319" y="603" font-size="14" fill="#1f2328">co-news</text>
+<rect x="2405" y="584" width="79" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2414" y="603" font-size="14" fill="#1f2328">co-price</text>
+<rect x="2088" y="616" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="635" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="2186" y="616" width="103" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2195" y="635" font-size="14" fill="#1f2328">co-security</text>
+<rect x="2297" y="616" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2306" y="635" font-size="14" fill="#1f2328">co-work</text>
 <circle cx="2526" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="2526" y="420" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
 <circle cx="1856" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>

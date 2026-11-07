@@ -246,3 +246,72 @@ the QA gate.
   belongs to the handbook sync waves (remediation rows 2–3 territory), not this change set.
 - The SVG generator still does not exist in the repository (§6); the band is hand-edited
   into the four files like the rest of the map.
+
+## 8. Amendment 2026-11-07 — L2/L3 layer-stack roster refresh
+
+Supersedes §7.5 first bullet and §7.1(b) final paragraph: the roster/count drift those
+notes deliberately left out of scope is fixed by THIS amendment (verified against the live
+tree on 2026-11-07).
+
+### 8.1 Data sources (derived with globs, not hand-copied)
+
+| Fact | Source | Verified value (2026-11-07) |
+|---|---|---|
+| L2 roster + status | `templates/co-*/variant.json` → `status` | 15 variants: stable 8 (co-abap, co-consult, co-deck, co-design, co-develop, co-game, co-security, co-work), beta 7 (co-architect, co-export, co-hr, co-learning, co-news, co-price, co-safety) |
+| L3 fleet roster | `Projects/co-*` that are template-scaffolded fleet projects | 16 fleet projects: co-abap, co-architect, co-consult, co-deck, co-design, co-develop, co-export, co-game, co-hr, co-learning, co-newbiz, co-news, co-price, co-safety, co-security, co-work |
+| L3 exclusion rule | — | `Projects/co-abap-plugin` is NOT drawn: it is a separate project (Claude Code plugin distribution, no `variant.json`, not scaffolded from an L2 variant and not upgraded through the template wave), outside the L1→L2→L3 template system the L3 box depicts |
+| L3 per-project template version | `Projects/co-*/template-version.txt` (filename per `scripts/upgrade-project.ts` header: the engine's canonical stamp) | all 16 fleet projects at 0.28.0 (verified per stamp). The L3 subtitle drops its `· co-abap-plugin 0.10.0` clause (that project is out of scope) and becomes the plain per-locale `templates/VERSION 0.28.0` basis statement |
+
+### 8.2 Badge rules
+
+| Badge | Meaning (this spec) | Where it appears after refresh |
+|---|---|---|
+| L2 `프로젝트 없음` (per-locale equivalent) | L2 variant with NO `Projects/<same-name>/` dir | NOWHERE — every L2 variant now has a matching project; all four L2 badges removed |
+| L3 `템플릿 없음` (per-locale equivalent) | L3 fleet project with NO same-named L2 variant (`templates/<project-name>/` absent) | co-newbiz only. co-architect's badge is removed (`templates/co-architect` now exists); co-abap-plugin is not drawn at all (§8.1 exclusion rule) |
+
+### 8.3 Layout rule
+
+- Both box rects stay byte-identical (L2 `x=1400 y=410 w=470 h=260`; L3 `x=2070 y=410
+  w=470 h=260`); everything outside the two blocks stays byte-identical.
+- Pills keep the existing style and 14px text: L2 stable = solid stroke `#57606a`, fill
+  `#d6e8ff`; L2 beta = dashed `#8a5a00`, fill `#fff0d1`, `stroke-dasharray="6 3"`; L3 =
+  fill `#d8f3df`, solid `#57606a`. Badges keep the existing white rect + `#cf222e` stroke
+  style (height 22, y = pill y + 3) and bold `#a40e26` text.
+- Reflow: L2 15 pills in 4 rows, L3 16 pills in 5 rows. Row y: L2 = 488/520/552/584;
+  L3 = 488/520/552/584/616 (32px pitch instead of the old 36px; 28px pill height kept;
+  last L3 pill bottom 644 < box bottom 670). Horizontal start x = box x + 18
+  (1418 / 2088), 8px gap between pills (unchanged), text at pill x + 9 (unchanged).
+- Row plan (fixed across locales; alphabetical, L2 stable block first then beta block):
+  - L2: [co-abap, co-consult, co-deck, co-design] / [co-develop, co-game, co-security,
+    co-work] / [co-architect, co-export, co-hr, co-learning] / [co-news, co-price,
+    co-safety]
+  - L3: [co-abap, co-architect, co-consult] / [co-deck, co-design, co-develop,
+    co-export] / [co-game, co-hr, co-learning] / [co-newbiz, co-news, co-price] /
+    [co-safety, co-security, co-work]
+  - Row distribution is chosen so the widest-locale variant fits: en badge (`no
+    template`, width 99) on co-newbiz is the widest case; every row ≤ 401px against
+    434px usable width (box inner width 470 − 2×18). The generator enforces this per
+    locale (no row may exceed 434).
+- Pills WITHOUT a badge keep the measured per-name widths already used by the map
+  (co-abap 74, co-consult 95, co-deck 74, co-design 87, co-develop 95, co-export 90,
+  co-game 78, co-price 79, co-safety 90, co-security 103, co-work 78, co-architect 115
+  from its old badged geometry). New/changed-width pills use a conservative estimate
+  (Noto-Sans-KR advance sum × 1.25, rounded up): co-hr 43→61, co-learning 93→111,
+  co-news 69→87, co-newbiz 85→103 base (badge kept: per-locale width = base +
+  98/110/111/108 by locale). Badge rect widths reuse the existing per-locale values
+  verbatim (ko 87, en 99, es 100, ja 97).
+- Count text swaps (all four locales): L2 title count 13 → 15; L2 subtitle beta 5 → 7;
+  L3 title count 13 → 16; L3 subtitle drops the `· co-abap-plugin 0.10.0` clause
+  (per §8.1 all 16 fleet projects are at 0.28.0, so the plain basis statement suffices).
+  `<title>`/`<desc>` and the hub band carry no roster counts (verified by grep
+  2026-11-07), so no 16-count edit is needed there.
+- No other canvas change: numbered strip, legend, hub band, `<title>`/`<desc>` stay
+  untouched (they cite no roster counts — same grep).
+
+### 8.4 Verification (extends §7.4)
+
+- `xmllint --noout` on all four SVGs.
+- Scripted geometric check (TypeScript): every pill/badge/text inside its box bounds,
+  no two pills overlap, every row ≤ usable width, per locale.
+- PNG render of the L2/L3 region per locale (rsvg-convert or qlmanage) eyeballed.
+- `bun scripts/audit.ts` green; spec entry updated via `spec-register.ts --update`.
