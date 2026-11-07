@@ -5,8 +5,8 @@ description: >
   understanding how something works, finding where code lives, tracing what calls a
   symbol or what a change breaks, or scoping an edit, get your context from trail
   before grepping or reading source files.
-version: 1.1.0
-last_reviewed: 2026-10-31
+version: 1.2.0
+last_reviewed: 2026-11-08
 status: active
 scope: common
 l2_propagate: false
@@ -196,6 +196,52 @@ When the tool's MCP server is connected, these are exposed as tools too
 `graft_find_code`, `graft_find_all`, `graft_file_api`, `graft_trace_calls` (with
 `direction` / `depth`), `graft_repo_map`, `graft_check_freshness`). Use whichever surface is
 available; the guidance is identical.
+
+## Learnings notes (`.trail/learnings/`)
+
+One file per learning someone asked their agent to save, kept next to the code
+so the next session starts from it (vendor commit-once doctrine —
+`.trail/README.md`). The session-start hook (`.trail/hook.cjs`, registered in
+`.claude/settings.json`) injects the live notes as context on every session —
+**including machines without trail installed** (the hook's fallback mode), so
+a hand-written note works identically to a tool-written one.
+
+**Naming**: `YYYY-MM-DD-<slug>-<author>.md` (e.g.
+`2026-10-31-open-bug-tracked-as-ticket-t-sunghyuk.md`). The date prefix is
+load-bearing — the hook derives a note's date from it when front matter omits
+`date`.
+
+**Front matter** (the contract the hook's `liveFiles` parser reads —
+`.trail/hook.cjs`):
+
+| Field | Contract |
+|---|---|
+| `title` | one-line summary shown in the injected list |
+| `author` | who the learning is credited to |
+| `date` | `YYYY-MM-DD` (falls back to the filename prefix) |
+| `id` | `l-` + 6–16 lowercase hex; the stable identity `replaces` chains point at |
+| `scope` | `repo` |
+| `status` | `active` (injected) \| `held` (parked) \| `replaced` \| `retired` (not injected) |
+| `touches` | repo paths the learning bears on |
+| `replaces` | optional `l-…` id of the note this one supersedes |
+
+**Body**: `## Decided` (with an inline **Why:** line) and `## Watch out`;
+short summaries, never transcripts (`.trail/README.md`); cite ticket ids,
+design paths, and memory blocks instead of restating them; end with a
+one-line attribution.
+
+**Read/credit protocol** (the hook's own injected instruction): read the ones
+that bear on the task before exploring; when one shapes the reply, credit its
+author and what it let you skip. You never edit a learning — corrections are
+a NEW note with `replaces: <old id>`; only `status: active` notes are
+injected, so retirement is a write, not an edit.
+
+**vs `memory/`** (workspace root): `memory/` is the L0 session-log audit trail
+(agent-authored, PM workflow record). Learnings are per-repo distilled
+technical knowledge for the next session (human-attributed, git-tracked,
+auto-injected at session start). Dedupe rule: a learning DISTILLS — it cites
+tickets/designs/memory and never duplicates a transcript; overlap between the
+two surfaces is complementary by design, not drift.
 
 ## Maintenance (workspace)
 This skill lives in the `skills/` SSOT (`skills/trail/SKILL.md` — renamed from

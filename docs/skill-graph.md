@@ -249,7 +249,7 @@
 | `root/team-builder` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/ticket-run` | L0 | 1.0.0 | — | — | root/sync | — | — |
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
-| `root/trail` | L0 | 1.1.0 | — | — | — | — | — |
+| `root/trail` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |

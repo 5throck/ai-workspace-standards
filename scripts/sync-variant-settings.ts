@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.4.0
+// @version 1.5.0
+// v1.5.0 (2026-11-08, design docs/designs/2026-11-08-trail-fleet-standard-design.md
+//           §5.2 — DEC-20261108-01 R2): MANAGED_SUBSTRINGS gains 'trail/hook.cjs'
+//           — the .trail session-start learnings hook (templates/common/.claude/
+//           settings.json, added by the trail fleet standard) now propagates to
+//           every variant's .claude/settings.json like the pm-role-bootstrap
+//           class. The command embeds `|| exit 0`, so pre-skeleton or
+//           hand-deleted .trail trees fail safe (hook absent → silent pass).
 // v1.4.0 (2026-11-06, T-20261106-003 — delete-guard scaffold wiring asymmetry):
 //          MANAGED_SUBSTRINGS gains 'delete-guard' — the Claude Code
 //          PreToolUse/Bash delete-guard entry (templates/common/.claude/
@@ -87,7 +94,7 @@ export const SYNC_TARGETS: ReadonlyArray<{ platform: Platform; event: string }> 
 
 /** A variant hook entry is "managed" when its command contains one of these
  * substrings — the stable identity used to pair common and variant entries. */
-export const MANAGED_SUBSTRINGS: readonly string[] = ['pm-role-bootstrap', 'pm-dispatch-gate', 'delete-guard'];
+export const MANAGED_SUBSTRINGS: readonly string[] = ['pm-role-bootstrap', 'pm-dispatch-gate', 'delete-guard', 'trail/hook.cjs'];
 
 export function isManaged(command: string): boolean {
   return MANAGED_SUBSTRINGS.some((s) => command.includes(s));

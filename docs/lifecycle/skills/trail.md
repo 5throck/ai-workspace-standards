@@ -3,12 +3,12 @@
 ## Metadata
 - **Skill**: trail
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 
 > Note: the trail CLI (ex-graft) refreshes `skills/trail/SKILL.md` on every release; when the frontmatter version moves, this record moves with it.
 - **Created**: 2026-09 (installed with the graft repo-context-graph tooling)
 - **Renamed**: 2026-10-31 — `skills/graft/` → `skills/trail/`, vendor rename 0.28 (`@trailhq/trail-code`); design 2026-10-31-graft-trail-migration, U-20261031-009. graft-era alias note carried in SKILL.md.
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-08
 
 ## Description
 Usage guide for the trail repo-context-graph MCP/CLI (`trail ask`, `trail map`,
