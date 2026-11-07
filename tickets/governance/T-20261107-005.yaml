@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261107-005
+kind: manual
+title: >-
+  External-repo dependency standard (P1 promotion): promote Projects/co-work's
+  baked external-repo pattern (external-deps.json manifest + external/ install
+  dir + scripts/lib/external-deps.ts pinned shallow-clone machinery + AS-IS
+  single-adapter coupling contract + license hygiene — ppt-master v6.8.0 MIT
+  consumed, AGPL excluded — + check-authoring private-repo gate) into the
+  templates standard. Design: 2026-11-07 external-deps standard (Row 0). Source
+  evidence: Projects/co-work/scripts/lib/external-deps.ts, external-deps.json,
+  docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md,
+  DEC-20261106-04.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-07T20:43:13.124+09:00'
+history:
+  - at: '2026-11-07T20:43:13.124+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261107-006
+kind: manual
+title: >-
+  Weekly external-deps upstream drift scan (follow-up to T-20261107-005
+  external-deps standard): scheduled root-side workflow scanning every project's
+  external-deps.json pins against upstream release tags (style:
+  .github/workflows/cli-version-drift.yml precedent — signal-only, opens an
+  issue naming old→new, never auto-bumps). Filed per user ruling 2026-11-07 with
+  the external-deps standard design approval.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-07T20:58:49.975+09:00'
+history:
+  - at: '2026-11-07T20:58:49.975+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
