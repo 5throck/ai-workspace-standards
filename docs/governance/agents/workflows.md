@@ -70,6 +70,32 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 
 > **Agent frontmatter specification**: All agent files must include YAML frontmatter as defined in [CONSTITUTION.md §5.1](../../../docs/constitution/05-multi-agent-architecture.md#51-agent-file-format-standard-frontmatter).
 
+#### Per-Session Worktree Convention
+
+> Rationale and full decision: [docs/designs/2026-11-07-session-worktree-convention-design.md](../../designs/2026-11-07-session-worktree-convention-design.md) (T-20261106-010). Enforced by procedure and report duty, not by a hook or machine gate (design §7).
+
+A dispatched session's write surface (branch pointer + working tree) is shared mutable state when sessions run concurrently. Give each write session its own branch pointer and working tree via `git worktree`.
+
+**Concurrency evidence** (ANY one hit selects isolation): shared tree dirty (`git status --porcelain` non-empty), shared checkout not on `main`, or any open PR (`gh pr list --state open` non-empty). The PM evaluates this at dispatch time and states the result in the task brief. The specialist re-checks at start, because state can change between dispatch and start, and notes the result in the task report.
+
+| Task shape | Rule |
+|------------|------|
+| Multi-file WRITE batch (code or docs) with concurrency evidence | **Worktree REQUIRED** - branch from `origin/main` |
+| Read-only tasks (research, analysis, inspection) | Worktree recommended |
+| Single-file write with concurrency evidence | Worktree recommended; staying on the shared checkout requires the verify-branch-before-mutate discipline before every mutating command |
+| PM bookkeeping (ticket moves, memory-log-only changes, CHANGELOG entries) | **Never isolate** - stays on the shared checkout; the dev-sync session entry is workspace-scoped and scoped staging already excludes foreign dirt |
+| Trivial single-file change with no concurrency evidence | Shared checkout with the existing discipline |
+
+Landing procedure: use the sync skill's Worktree Landing Variant ([skills/sync/SKILL.md](../../../skills/sync/SKILL.md)). Path convention: a sibling directory outside the repository tree (`../<repo-name>-worktrees/<slug>`), branch `pr/<YYYYMMDD>-<slug>` from `origin/main`. Run `bun scripts/dev-sync.ts` from the worktree root - the CWD guard anchors to the script's own copy's parent directory, and each worktree owns its full checkout including `scripts/dev-sync.ts`. Write the PR body to `$(git rev-parse --git-dir)/sync-pr-body.md` - inside a worktree this resolves to the worktree's private git dir, so the file never collides. Remove the worktree after the PR opens. Record the worktree path, branch, and observed concurrency evidence in the task report.
+
+**Checkout-recovery convention** - when the shared tree is flipped mid-flight by a foreign session:
+
+1. Do NOT force-restore: no `git checkout -f`, no `git reset --hard`, no repointing another session's in-flight branch, no deleting foreign untracked files.
+2. Stash foreign dirt ONLY if it blocks a required checkout - scoped and named (`git stash push -m "foreign-<session>-<date>" -- <paths>`). Leave it untouched otherwise.
+3. Leave foreign commits alone: another session's branch and its commits are not ours to rebase, reset, or delete.
+4. Re-branch from `origin/main`: `git fetch origin && git checkout -b pr/<YYYYMMDD>-<slug>-retry origin/main`, then re-apply own staged work (or move to a worktree per the rule above).
+5. Report the collision in the task report and the session memory block (who flipped, when detected, what was stashed).
+
 ---
 
 ### §4.2 Harness Engineering Workflow

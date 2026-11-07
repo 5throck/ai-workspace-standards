@@ -208,7 +208,7 @@
 | `common/k-krx` | common | 1.0.2 | — | — | common/k-dart (composes_with), common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
 | `common/k-law` | common | 1.0.2 | — | — | common/k-dart, common/k-kosis | — | — |
 | `common/k-opendata` | common | 1.2.2 | — | — | common/k-ecos (composes_with), common/k-kosis | — | — |
-| `common/sync` | common | 1.8.0 | — | — | — | — | — |
+| `common/sync` | common | 1.9.0 | — | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
 | `root/adopt-project` | L0 | 1.1.1 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
@@ -245,7 +245,7 @@
 | `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.1.0 | — | — | — | — | — |
-| `root/sync` | L0 | 1.8.0 | — | — | — | — | — |
+| `root/sync` | L0 | 1.9.0 | — | — | — | — | — |
 | `root/team-builder` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/ticket-run` | L0 | 1.0.0 | — | — | root/sync | — | — |
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
@@ -833,7 +833,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
-| `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.8.0 #cf494776; root@1.8.0 #83013972 |
+| `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.9.0 #a0e1df01; root@1.9.0 #e760363f |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
