@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.43.0
+// @version 1.44.0
+// v1.44.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §5.3/§5.4 E5, T-20261107-005): §7.9 reports entries refused by the
+//          pre-install gate (lib/external-deps.ts v1.1.0 — license policy +
+//          R3 external/<id> convention; a deny-class dependency is never
+//          cloned) as a distinct SKIPPED row; --strict-external-deps hard-fails
+//          on them like any fetch failure. The documented retry is now the
+//          project-local CLI `bun scripts/external-deps.ts install` (the root
+//          --external-deps-only path stays valid).
 // v1.43.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
 //          §6.4, DEC-20261107-01): fleet membership SSOT B3 name-collision
 //          guard — a scaffold name matching an exclusion record in
@@ -1992,9 +2000,16 @@ try {
     for (const dep of fetchResult.results) {
       if (dep.ok) {
         console.log(`  ✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? '<unknown commit>'}`);
+      } else if (dep.status === 'skipped') {
+        // v1.44.0 — E5 (external-deps standard §5.4): the pre-install gate
+        // (license policy + external/<id> convention) refused the entry; a
+        // deny-class dependency never reaches the disk. Retrying will not help.
+        console.warn(`  ⚠️  ${dep.id}: NOT cloned — ${dep.error}`);
+        console.warn('       Fix the manifest entry (license / install_dir), then: bun scripts/external-deps.ts install');
       } else {
         console.warn(`  ⚠️  ${dep.id}: external dependency NOT fetched — ${dep.error}`);
-        console.warn(`       Retry after scaffold: bun scripts/upgrade-project.ts "${projectDir}" --external-deps-only`);
+        console.warn(`       Retry after scaffold (from the project root): bun scripts/external-deps.ts install --id ${dep.id}`);
+        console.warn(`       (root alternative: bun scripts/upgrade-project.ts "${projectDir}" --external-deps-only)`);
         console.warn('       (Windows hosts: git must be on PATH — design 2026-11-07-external-deps-machinery §3)');
       }
     }

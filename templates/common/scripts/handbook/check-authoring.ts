@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §5.5, T-20261107-005): Check 11 allowlist is extended at run time
+//          with the GitHub owner/name of every external-deps.json entry that
+//          carries a recorded commit (an anonymous clone already succeeded →
+//          public). Entries without commit add nothing. Read-only; Check 11
+//          keeps its handbook link-hygiene domain.
 // scripts/handbook/check-authoring.ts
 // AUTHORING_GUIDELINES compliance checker.
 // Validates handbook HTML against the 21-section authoring guidelines + dark mode + i18n.
@@ -246,7 +252,34 @@ function checkLanguagePairs(htmlFiles: string[], baseDir: string): AuthoringIssu
 const PUBLIC_REPO_ALLOWLIST = new Set([
   "5throck/ai-workspace-standards",
 ]);
-function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
+
+/**
+ * Manifest-fed allowlist extension (external-deps standard §5.5,
+ * docs/designs/2026-11-07-external-deps-standard-design.md): every
+ * external-deps.json entry that carries a recorded `commit` names a GitHub repo
+ * that an anonymous https clone already succeeded against — evidence it is
+ * public. Entries without `commit` add nothing. Read-only and loose (a
+ * malformed manifest adds nothing; the external-deps verify gate owns its
+ * validity) — Check 11 stays a handbook link-hygiene check, not a license gate.
+ */
+function manifestPublicRepos(projectDir: string): Set<string> {
+  const repos = new Set<string>();
+  const p = join(projectDir, "external-deps.json");
+  if (!existsSync(p)) return repos;
+  try {
+    const doc = JSON.parse(readFileSync(p, "utf-8")) as { dependencies?: Array<Record<string, unknown>> };
+    for (const dep of Array.isArray(doc.dependencies) ? doc.dependencies : []) {
+      const repo = dep?.["repo"];
+      const commit = dep?.["commit"];
+      if (typeof repo !== "string" || typeof commit !== "string" || !/^[0-9a-f]{40}$/.test(commit)) continue;
+      const m = /^https:\/\/github\.com\/([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i.exec(repo);
+      if (m) repos.add(`${m[1]}/${m[2]}`);
+    }
+  } catch { /* malformed manifest — contributes nothing */ }
+  return repos;
+}
+
+function checkNoPrivateRepoRefs(html: string, file: string, extraPublic: ReadonlySet<string> = new Set()): AuthoringIssue[] {
   const issues: AuthoringIssue[] = [];
   const seen = new Set<string>();
 
@@ -254,7 +287,7 @@ function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
   let m: RegExpExecArray | null;
   while ((m = cloneRe.exec(html)) !== null) {
     const repo = `${m[1]}/${m[2]}`;
-    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !seen.has(repo)) {
+    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !extraPublic.has(repo) && !seen.has(repo)) {
       seen.add(repo);
       issues.push({
         file, rule: "private-repo-clone", section: "§4a",
@@ -267,7 +300,7 @@ function checkNoPrivateRepoRefs(html: string, file: string): AuthoringIssue[] {
   const linkRe = /github\.com\/([^\/\s"'<)]+)\/([^\/\s"'<).]+)/gi;
   while ((m = linkRe.exec(html)) !== null) {
     const repo = `${m[1]}/${m[2]}`;
-    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !seen.has(repo)) {
+    if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !extraPublic.has(repo) && !seen.has(repo)) {
       seen.add(repo);
       issues.push({
         file, rule: "private-repo-link", section: "§4a",
@@ -409,6 +442,8 @@ const htmlFiles = examplesDir
 
 const baseDir = examplesDir || docsDir;
 const allIssues: AuthoringIssue[] = [];
+// Check 11 allowlist extension — manifest repos with a recorded commit (standard §5.5).
+const manifestRepos = manifestPublicRepos(project);
 
 // Concatenate all shared stylesheets so rules defined once (not repeated per page) are visible
 const cssDir = join(docsDir, "assets", "css");
@@ -433,7 +468,7 @@ for (const file of htmlFiles) {
   allIssues.push(...checkCourseOverview(html, rel));
   allIssues.push(...checkCssVariablesOnly(html, rel));
   allIssues.push(...checkInstructorGuide(html, rel));
-  allIssues.push(...checkNoPrivateRepoRefs(html, rel));
+  allIssues.push(...checkNoPrivateRepoRefs(html, rel, manifestRepos));
   allIssues.push(...checkMetaDateGranularity(html, rel));
 }
 

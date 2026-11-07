@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-07T11:50:02.999Z
+**Generated**: 2026-11-07T13:16:08.600Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 60
-- **Scripts**: 133 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 134 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -134,6 +134,7 @@
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
 | ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
 | evidence-backport-scan.ts | 1.3.0 | scripts/evidence-backport-scan.ts | N/A |
+| external-deps.ts | 1.0.0 | scripts/external-deps.ts | N/A |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | fleet-list.ts | 1.0.0 | scripts/fleet-list.ts | N/A |
 | fleet-script-parity.ts | 1.1.0 | scripts/fleet-script-parity.ts | N/A |
@@ -161,7 +162,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | N/A |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.43.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.44.0 | scripts/new-project.ts | N/A |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
@@ -209,7 +210,7 @@
 | ticket.ts | 1.15.0 | scripts/ticket.ts | js-yaml |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.92.0 | scripts/upgrade-project.ts | N/A |
+| upgrade-project.ts | 1.94.0 | scripts/upgrade-project.ts | N/A |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | N/A |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
 | validate-doc-folder.ts | 1.3.0 | scripts/validate-doc-folder.ts | fs, path |
@@ -222,7 +223,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | N/A |
 | validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.73.0 | scripts/validate-templates.ts | js-yaml |
+| validate-templates.ts | 1.74.0 | scripts/validate-templates.ts | js-yaml |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | N/A |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | js-yaml |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
