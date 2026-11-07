@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-07, spec docs/designs/2026-11-07-handbook-archmap-drift-check-design.md):
+//          battery #10 — handbook architecture-map drift. Runs
+//          scripts/check-handbook-archmap-drift.ts as a strict validator row:
+//          exit 1 (an asset copy or inline map body in Handbooks/* differs from
+//          docs/architecture/workspace-architecture*.svg) fails the row; an
+//          absent Handbooks/ prints SKIP and exits 0, so CI and worktrees stay
+//          green. Recurrence guard for the 2026-11-07 stale-handbook-map miss.
 // v1.5.0 (2026-10-28, T-20261028-001 — spec
 //          docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //          D8): battery #9 — windowed Design-Gate coverage check. Runs
@@ -38,6 +45,7 @@
  *   7. bun scripts/validate-variant-claims.ts             # variant contract-truth (D6, T-20261005-011..014)
  *   8. nightly E2E conclusion (gh run list)               # CI surfacing (battery #8)
  *   9. bun scripts/design-gate-coverage.ts --json         # Design-Gate coverage, 24h window (battery #9, D8)
+ *  10. bun scripts/check-handbook-archmap-drift.ts        # handbook architecture-map drift (battery #10; SKIP when Handbooks/ absent)
  *
  * Exit codes: 0 = all green, 1 = one or more validators failed.
  * Known-tolerated noise (not failures): propagate --check-drift exits 1 on
@@ -68,6 +76,12 @@ const validators: Array<{
   // not see (roster/theme/status/process claims, phantom paths, boilerplate
   // drift). Runs against the default template (co-deck); exit 1 = findings.
   { name: "validate-variant-claims.ts (variant contract-truth: roster/theme/status/process claims)", cmd: ["bun", "scripts/validate-variant-claims.ts"] },
+  // Battery #10 (spec 2026-11-07-handbook-archmap-drift-check-design): the two
+  // handbook clones under Handbooks/ embed the canonical architecture map as
+  // asset files and as an inline <svg>; exit 1 = a copy drifted from
+  // docs/architecture/workspace-architecture*.svg. Handbooks/ absent → SKIP,
+  // exit 0 (gitignored clones; CI and worktrees do not have them).
+  { name: "check-handbook-archmap-drift.ts (handbook architecture-map copies vs canonical)", cmd: ["bun", "scripts/check-handbook-archmap-drift.ts"] },
 ];
 
 /** T-20261026-014 (finding #17): pure classifier for the battery #8 verdict over

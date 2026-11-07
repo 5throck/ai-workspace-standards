@@ -2,27 +2,43 @@ schemaVersion: 1
 id: T-20261107-003
 kind: manual
 title: >-
-  MAH handbook edu-sync — post-sync-cut changes (plan rows 2). Scope = plan
-  row 2 of docs/designs/2026-11-07-education-archmap-remediation-plan.md
+  MAH handbook edu-sync — post-sync-cut changes (plan rows 2). Scope = plan row
+  2 of docs/designs/2026-11-07-education-archmap-remediation-plan.md
   (docs-writer, Medium). Multi-agent-harness-handbook next edu-sync PR, after
-  the amended architecture map lands (T-20261107-002 row 1): P1 external-deps
-  — cover the EXTERNAL DEPS pass in the upgrade chapter (intro/10) and the
+  the amended architecture map lands (T-20261107-002 row 1): P1 external-deps —
+  cover the EXTERNAL DEPS pass in the upgrade chapter (intro/10) and the
   appendix/E flow legend, closing the audit finding that the upgrade chapter
-  describes upgrade-project in depth without the EXTERNAL DEPS pass; P1
-  worktree convention — add the per-session isolated worktree + checkout
-  recovery (workflows/11 + appendix/E), absent from both handbooks; P2
-  PM-row header — the "PM running on:" header requirement (intro/08), MAH
-  PM-row coverage is partial today. Each change lands with a What's-new
-  (2026-11) note. Out of scope per the plan: MAB bun.lock/package.json drift
-  (pre-existing, separate ticket if ever) and the zero-delta gate (N/A for
-  both handbooks).
+  describes upgrade-project in depth without the EXTERNAL DEPS pass; P1 worktree
+  convention — add the per-session isolated worktree + checkout recovery
+  (workflows/11 + appendix/E), absent from both handbooks; P2 PM-row header —
+  the "PM running on:" header requirement (intro/08), MAH PM-row coverage is
+  partial today. Each change lands with a What's-new (2026-11) note. Out of
+  scope per the plan: MAB bun.lock/package.json drift (pre-existing, separate
+  ticket if ever) and the zero-delta gate (N/A for both handbooks).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-07T12:01:06+09:00'
 history:
   - at: '2026-11-07T12:01:06+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-07T12:33:41.103+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-07T13:40:12.963+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-07T13:40:12.983+09:00'
+    from: review
+    to: done
+result: >-
+  MAH edu-sync 2026-11-07b landed (5throck/multi-agent-harness-handbook PR
+  #175): intro/10 External dependencies (2026-11) section (manifest convention,
+  scaffold fetch + --strict-external-deps, EXTERNAL DEPS upgrade pass +
+  --external-deps-only, vendoring guard, ppt-master v6.8.0 example); appendix/E
+  legend + worktree topology notes; workflows/11 Per-Session Worktree Convention
+  (triggers, hybrid rule table, sync v1.9.0 landing variant, 5-step recovery);
+  intro/08 PM-row header line + alias-match rule. 16 files, 4-locale symmetric,
+  bun run ci 13/13 green, validate pass.
 error: null
