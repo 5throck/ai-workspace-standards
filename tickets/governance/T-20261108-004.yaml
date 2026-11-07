@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261108-004
+kind: manual
+title: >-
+  validator-hardening (Phase I 2026-11-08 F-1, E2E nightly red — co-work
+  scaffold only): vendored external/ppt-master/skills/ppt-master/SKILL.md
+  (delivered by the scaffold-time external-deps clone per DEC-20261106-04
+  'consumed as-is') has no owner frontmatter -> skill-lifecycle-audit ERROR ->
+  scaffold pre-commit blocks the initial commit -> E2E Test 4 'no initial
+  scaffold commit'. 14/15 variants green. Minimal fix (slot C-confirmed):
+  scaffold-aware path exemption — in project mode treat external-deps
+  install_dirs (external/<id>/) as self-managed/vendored via the existing
+  isSelfManagedPath / docs/self-managed-surfaces.json mechanism, data-driven
+  from the project's external-deps.json (scripts/lib/external-deps.ts
+  extractInstallDirsLoose); do NOT deliver lifecycle stubs (upstream repos —
+  falsified provenance). Note: lifecycle-record hypothesis ruled out (LC check
+  emits WARNING, gates gate on errors only)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-08T02:02:21.353+09:00'
+history:
+  - at: '2026-11-08T02:02:21.353+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
