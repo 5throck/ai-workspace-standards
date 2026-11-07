@@ -7,12 +7,29 @@ title: >-
   user rulings (variant wave scope, skeleton delivery, TB-01 root severity,
   statusline scope)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-08T00:35:06.790+09:00'
 history:
   - at: '2026-11-08T00:35:06.790+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T01:06:48.388+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T01:06:48.412+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T01:06:48.433+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented 2026-11-08 (DEC-20261108-01 R1-R4, single wave) on PR #1903: 15
+  variant AGENTS.md trail blocks (17/17 byte-parity); templates/common/.trail
+  skeleton + SessionStart hook entry propagated to 15 variants
+  (sync-variant-settings v1.5.0); upgrade-policy v1.38.0 ADD_IF_MISSING seeds
+  for the .trail wiring trio; validate-templates v1.75.0 TB-01 arm (Error
+  variants / WARN root); skills/trail SKILL.md v1.2.0 learnings doctrine; 25
+  unit tests green; full audit + validate-templates + verify-scripts + lifecycle
+  audits pass.
 error: null
