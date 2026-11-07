@@ -8,7 +8,13 @@
 // tests (test-budget policy); real-tree greenness is pinned by the two
 // real-workspace assertions at the bottom.
 //
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-07, port from abandoned branch pr/20261102-102843 / commit
+//          df66fa8d2): entryTemplateRelPath leg, checkHubDoctrineDuplication
+//          sanction exemptions (declared consumer §7.4, common-contract stock,
+//          hub-self skip) and classifyAssetsForPromotion /
+//          formatHubClassificationReport §6.1 pipeline semantics. The
+//          unsanctioned-copy negative is NOT ported — §15.1 case 1 pins it.
 import { describe, test, expect, afterAll } from 'bun:test';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -22,11 +28,16 @@ import {
   checkUnregisteredDuplicates,
   checkVariantIdentity,
   checkHubDoctrineDuplication,
+  entryTemplateRelPath,
   checkConsumerMinimumVersions,
   loadConsumingVariants,
   loadHubTopology,
   type HubTopology,
 } from '../../scripts/helpers/hub-topology.ts';
+import {
+  classifyAssetsForPromotion,
+  formatHubClassificationReport,
+} from '../../scripts/l3-to-variant-pipeline.ts';
 import { cwd } from 'node:process';
 
 const CLEANUPS: string[] = [];
@@ -381,3 +392,137 @@ describe('real workspace registry', () => {
 function mkdtempSyncSafe(): string {
   return makeFixture();
 }
+
+// ── v1.1.0 (ported from pr/20261102-102843 / df66fa8d2): promotion/
+//    instantiation preflight legs (design §6.2). The unsanctioned-copy
+//    negative is NOT ported — §15.1 case 1 above already pins it.
+describe('entryTemplateRelPath', () => {
+  test('strips the hub template prefix; rejects foreign prefixes and traversal', () => {
+    expect(entryTemplateRelPath('templates/co-design/skills/x/SKILL.md', 'co-design')).toBe('skills/x/SKILL.md');
+    expect(entryTemplateRelPath('templates/co-design/tokens.json', 'co-design')).toBe('tokens.json');
+    expect(entryTemplateRelPath('templates/co-other/skills/x/SKILL.md', 'co-design')).toBeNull();
+    expect(entryTemplateRelPath('templates/co-design/../evil', 'co-design')).toBeNull();
+    expect(entryTemplateRelPath('templates/co-design/', 'co-design')).toBeNull();
+  });
+});
+
+describe('checkHubDoctrineDuplication (sanction exemptions — §7.4 consumer, common stock, hub self)', () => {
+  const DOCTRINE_ROW = {
+    asset: 'samm-maturity',
+    domain: 'co-security',
+    hub_variant: 'co-security',
+    category: 'hub-doctrine',
+    verticals: [] as string[],
+    origin: 'fixture hub doctrine',
+    canonical_path: 'templates/co-security/skills/samm-maturity/SKILL.md',
+    version: '1.1.0',
+  };
+
+  function templateWithDoctrineCopy(variant: string): string {
+    const root = makeFixture();
+    const templateDir = join(root, 'templates', variant);
+    mkdirSync(join(templateDir, 'skills', 'samm-maturity'), { recursive: true });
+    writeFileSync(join(templateDir, 'skills', 'samm-maturity', 'SKILL.md'), 'copy of hub doctrine\n');
+    return templateDir;
+  }
+
+  test('a declared consumer stale-read copy is sanctioned (§7.4)', () => {
+    const leg = checkHubDoctrineDuplication(
+      topologyWith({ entries: [{ ...DOCTRINE_ROW, consumers: [{ variant: 'co-game', minimum_version: '1.1.0' }] }] }),
+      { variantName: 'co-game', templateDir: templateWithDoctrineCopy('co-game') },
+    );
+    expect(leg.fails).toEqual([]);
+    expect(leg.warns).toEqual([]);
+  });
+
+  test('common-contract delivered stock is inheritance, not duplication', () => {
+    const leg = checkHubDoctrineDuplication(topologyWith({ entries: [DOCTRINE_ROW] }), {
+      variantName: 'co-any',
+      templateDir: templateWithDoctrineCopy('co-any'),
+      commonNames: new Set(['samm-maturity']),
+    });
+    expect(leg.fails).toEqual([]);
+    expect(leg.warns).toEqual([]);
+  });
+
+  test('the hub itself carrying its own doctrine copy is out of scope', () => {
+    const leg = checkHubDoctrineDuplication(topologyWith({ entries: [DOCTRINE_ROW] }), {
+      variantName: 'co-security',
+      templateDir: templateWithDoctrineCopy('co-security'),
+    });
+    expect(leg.fails).toEqual([]);
+    expect(leg.passes.length).toBe(1); // no FOREIGN rows resolved for the hub itself → vacuous pass
+  });
+});
+
+// ── v1.1.0 (ported from pr/20261102-102843 / df66fa8d2): promotion pipeline
+//    classification semantics (design §6.1) — classifyAssetsForPromotion /
+//    formatHubClassificationReport carry zero unit coverage on main.
+describe('classifyAssetsForPromotion (pipeline §6.1 semantics)', () => {
+  const entries = [
+    { asset: 'doctrine-skill', domain: 'co-develop', hub_variant: 'co-develop', category: 'hub-doctrine', canonical_path: 'templates/co-develop/skills/doctrine-skill/SKILL.md', version: '1.2.0' },
+    { asset: 'foreign-identity', domain: 'co-design', hub_variant: 'co-design', category: 'variant-identity', canonical_path: 'templates/co-design/agents/foreign-identity.md', version: '1.0.0' },
+    { asset: 'own-identity', domain: 'co-z', hub_variant: 'co-z', category: 'variant-identity', canonical_path: 'templates/co-z/agents/own-identity.md', version: '1.0.0' },
+    { asset: 'escalation-proc', domain: 'co-develop', hub_variant: 'co-develop', category: 'hub-escalation', canonical_path: 'templates/co-develop/skills/escalation-proc/SKILL.md', version: '1.0.0' },
+    { asset: 'consumer-skill', domain: 'co-develop', hub_variant: 'co-develop', category: 'hub-doctrine', canonical_path: 'templates/co-develop/skills/consumer-skill/SKILL.md', version: '2.0.0', consumers: [{ variant: 'co-z', minimum_version: '2.0.0' }] },
+  ];
+
+  test('hub-doctrine of another variant → skip carrying the consume-declaration flag (declare-first)', () => {
+    const v = classifyAssetsForPromotion({ assets: [{ name: 'doctrine-skill', kind: 'skill' }], entries, targetVariant: 'co-z' });
+    expect(v[0].action).toBe('skip');
+    if (v[0].action === 'skip') {
+      expect(v[0].domain).toBe('co-develop');
+      expect(v[0].minimumVersion).toBe('1.2.0');
+      expect(v[0].declaredConsumer).toBe(false);
+    }
+  });
+
+  test('variant-identity owned by another variant → refuse; owned by the target → copy', () => {
+    const v = classifyAssetsForPromotion({
+      assets: [{ name: 'foreign-identity', kind: 'agent' }, { name: 'own-identity', kind: 'agent' }],
+      entries,
+      targetVariant: 'co-z',
+    });
+    expect(v[0].action).toBe('refuse');
+    if (v[0].action === 'refuse') expect(v[0].hubVariant).toBe('co-design');
+    expect(v[1].action).toBe('copy');
+  });
+
+  test('unregistered → copy-unregistered; common-contract stock → plain copy; escalation category → copy', () => {
+    const v = classifyAssetsForPromotion({
+      assets: [
+        { name: 'unregistered', kind: 'skill' },
+        { name: 'common-stock', kind: 'skill' },
+        { name: 'escalation-proc', kind: 'skill' },
+      ],
+      entries,
+      targetVariant: 'co-z',
+      commonNames: new Set(['common-stock']),
+    });
+    expect(v[0].action).toBe('copy-unregistered');
+    expect(v[1].action).toBe('copy');
+    expect(v[2].action).toBe('copy');
+  });
+
+  test('a declared consumer still gets the skip verdict (the hub delivers the canonical; §6.1)', () => {
+    const v = classifyAssetsForPromotion({ assets: [{ name: 'consumer-skill', kind: 'skill' }], entries, targetVariant: 'co-z' });
+    expect(v[0].action).toBe('skip');
+    if (v[0].action === 'skip') expect(v[0].declaredConsumer).toBe(true);
+  });
+
+  test('formatHubClassificationReport emits the consumes-declaration-required line and groupings', () => {
+    const verdicts = classifyAssetsForPromotion({
+      assets: [{ name: 'doctrine-skill', kind: 'skill' }, { name: 'unregistered', kind: 'agent' }, { name: 'foreign-identity', kind: 'agent' }],
+      entries,
+      targetVariant: 'co-z',
+    });
+    const report = formatHubClassificationReport(verdicts, 'enforce');
+    expect(report.lines.some(l => l.includes('consumes declaration required') && l.includes('{domain: co-develop, minimum_version: 1.2.0}'))).toBe(true);
+    expect(report.lines.some(l => l.includes('classification report to PM agenda'))).toBe(true);
+    expect(report.requiredDeclarations).toEqual([
+      { asset: 'doctrine-skill', domain: 'co-develop', minimum_version: '1.2.0', hub_variant: 'co-develop', declared_consumer: false },
+    ]);
+    expect(report.unregistered).toEqual([{ asset: 'unregistered', kind: 'agent' }]);
+    expect(report.refused).toEqual([{ asset: 'foreign-identity', kind: 'agent', hub_variant: 'co-design' }]);
+  });
+});
