@@ -12,12 +12,18 @@ title: >-
   backfill a records-registry note anchoring the checkout-recovery PRs
   #1901/#1902 (memory-repair class, currently un-ticketed)
 priority: low
-status: backlog
+status: running
 attempts: 0
 created_at: '2026-11-08T02:02:21.385+09:00'
 history:
   - at: '2026-11-08T02:02:21.385+09:00'
     from: null
     to: backlog
+  - at: '2026-11-08T07:59:44.221+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T07:59:44.238+09:00'
+    from: waiting
+    to: running
 result: null
 error: null
