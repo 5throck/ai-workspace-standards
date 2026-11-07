@@ -6,7 +6,7 @@ description: >
   conversion chain verbatim → their delivery/OPC validation → postflight
   receipt. Use when: exporting a finished deck, interpreting the
   delivery/OPC receipts, or producing previews for visual-judge acceptance.
-version: 2.0.1
+version: 2.0.2
 last_reviewed: 2026-11-07
 status: active
 scope: co-work
@@ -115,11 +115,17 @@ user-side manual open.
    delivery-receipt JSON + package verification (xmllint every part 0
    errors, python-pptx open with expected slide/notes counts, native
    tables present as `a:tbl`, entity single-escape spot checks).
-   Optional openability leg (design 2026-11-07-external-deps-machinery D6):
+   Optional openability leg (design 2026-11-07-external-deps-machinery D6;
+   check_openability.py v1.1.0):
    `python3 scripts/deck/check_openability.py --pptx <final.pptx> --expect <json>`
    with an expectation file `{"slides": N, "notes": M|null, "tables": {"slideNum": n}|null}`
    — asserts the counts; graceful SKIP (exit 0, explicit `SKIP:` line) when
-   python-pptx is absent, so minimal CI environments stay green.
+   python-pptx is absent, so minimal CI environments stay green. Batch mode
+   (CI openability leg, 2026-11-07):
+   `python3 scripts/deck/check_openability.py --batch-expect scripts/deck/openability-expectations.json`
+   asserts every committed deck in one invocation (JSON object mapping deck
+   paths — resolved against the CWD — to per-deck expectations); exit 0 only
+   when all pass.
 6. **Previews** (visual acceptance): render from **OUR SVGs** via
    `render_previews.py` — the white-underlay method, now productionized
    (v2.0.1; resvg-py engine, bun + @resvg/resvg-js fallback):
@@ -173,5 +179,5 @@ user-side manual open.
 - Superseded (scoped): compile/export tier of `docs/designs/2026-11-03-co-work-native-pptx-deck-design.md` (authoring + gate tiers remain in force)
 - Upstream: https://github.com/hugohe3/ppt-master (MIT) — pin v6.8.0
 - Manifest: project `external-deps.json` (install_dir `external/ppt-master/`; the interim fetcher `scripts/deck/fetch-ppt-master.ts` is retired — superseded by the upstream external-deps machinery)
-- `svg-quality-gate` skill — our content SSOT gate (fingerprint; python checker `svg_check.py` 2.0.0 since Phase 2)
+- `svg-quality-gate` skill — our content SSOT gate (fingerprint; single python checker `svg_check.py` 2.1.0 since the oracle retirement)
 - `svg-slide-authoring` skill — owns the canonical language

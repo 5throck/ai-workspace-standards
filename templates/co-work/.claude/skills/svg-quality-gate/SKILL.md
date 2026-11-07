@@ -6,7 +6,7 @@ description: >
   blocks / warning passes / no auto-fix), bidirectional content-SSOT text-run
   diff, and SHA-256 fingerprint reports required for export. Use when: running
   or interpreting svg_check.py on a deck, or deciding whether a deck may export.
-version: 1.2.0
+version: 1.3.0
 last_reviewed: 2026-11-07
 status: active
 scope: co-work
@@ -93,9 +93,11 @@ corrected for delivery, it is an error.
 
 LibreOffice (and PowerPoint automation) is never installed or invoked by this pipeline. Visual acceptance renders the authored SVG via `render_previews.py` (white-underlay resvg previews; resvg-py engine, bun + @resvg/resvg-js fallback); package correctness rests on the exporter's validators plus this gate's empirical contract — checker rules thicken as real PowerPoint breakage surfaces, not by rendering packages through an Office emulator.
 
-## Checker implementation (v1.2.0, Phase 2)
+## Checker implementation (v1.3.0, oracle retirement)
 
-The gate is the python checker `svg_check.py` 2.0.0 — a faithful port of the retired bun `svg-check.ts` 1.5.x (design 2026-11-06-deck-emitter-ppt-master-rebase-design D6). Same rule IDs, same messages, same JSON shape, byte-identical fingerprints; the differential harness `scripts/deck/tests/test_svg_check_parity.py` (in the consuming project) keeps the two implementations pinned — any divergence fails it. `svg-check.ts` is retained only as that harness's parity oracle.
+The gate is the python checker `svg_check.py` — the single checker since the oracle retirement (2026-11-07): `svg_check.py` 2.0.0 was proven over the 100-page main deck, the 12-page exec cut, and the golden fixture by the differential harness of design 2026-11-06-deck-emitter-ppt-master-rebase-design D6 (byte-identical fingerprints, identical verdicts), after which the bun oracle `svg-check.ts` was DELETED and the harness became the python-only semantics suite `scripts/deck/tests/test_svg_check.py` (in the consuming project; real-deck fingerprints `aa3baf43…` / `ffa4d390…` pinned).
+
+Checker 2.1.0 adds exec-cut contract support: the reverse diff (`W-CONTENT-UNRENDERED`) is active for `## E01`–`## E12` contracts — any other markdown heading terminates a section, structured field bullets (`- focal:` / `- title:` / `- runs:` items) contribute only their content, `footnote:` / `table:` / `visual:` blocks are structural apparatus exempt from the reverse diff (the forward `E-CONTENT-DIFF` gate still enforces rendered text verbatim), and loose matching is punctuation-insensitive (word-sequence containment). `## Page <n>` contracts are unaffected.
 
 ## References
 

@@ -137,11 +137,6 @@
         "status": "active"
       },
       {
-        "name": "svg-check-ts-oracle",
-        "path": "scripts/deck/svg-check.ts",
-        "status": "parity-oracle"
-      },
-      {
         "name": "ppt-master-adapter",
         "path": "scripts/deck/ppt-master-adapter.ts",
         "status": "active"
@@ -152,8 +147,8 @@
         "status": "active"
       },
       {
-        "name": "svg-check-parity",
-        "path": "scripts/deck/tests/test_svg_check_parity.py",
+        "name": "svg-check-semantics",
+        "path": "scripts/deck/tests/test_svg_check.py",
         "status": "active"
       }
     ],
@@ -170,6 +165,6 @@
         "rationale": "run-chain.sh literal $PROJ/opc_check.py resolves only after the adapter generates the project dir — no static template-tree target can exist"
       }
     ],
-    "notes": "svg_check.py (2.0.0, python 3.10+ stdlib) is the canonical-SVG quality gate since 2026-11-07 — faithful port of svg-check.ts 1.5.x, switched only after tests/test_svg_check_parity.py proved byte-identical fingerprints and identical verdicts over the 100-page main deck, the 12-page exec cut, and the golden fixture (Phase 2 of design 2026-11-06-deck-emitter-ppt-master-rebase-design). svg-check.ts is retired from production and retained ONLY as the differential parity oracle for that harness (status parity-oracle — not invoked by the pipeline). svg-to-pptx.ts was DELETED 2026-11-07: superseded as the export engine by ppt-master-adapter.ts + the ppt-master v6.8.0 (MIT) chain consumed as-is (design D1/D6, DEC-20261106-04); its golden pins were superseded — entity/notes/ID pins live in the python parity suite, export pins are carried by ppt-master's own validators (pptx_opc_validation.py, pptx_delivery_check.py). render_previews.py (1.0.0) renders white-underlay previews (resvg-py engine, bun+@resvg/resvg-js subprocess fallback) — replaces the retired svg-to-pptx --render-png mode. Deps: python 3.10+ stdlib (gate, parity harness), resvg-py (previews), fflate + fast-xml-parser (adapter), @resvg/resvg-js (preview fallback). External dep: ppt-master pin v6.8.0 per project external-deps.json (gitignored external/ppt-master/ clone delivered by the external-deps machinery; PyMuPDF/AGPL excluded)."
+    "notes": "svg_check.py (2.1.0, python 3.10+ stdlib) is the canonical-SVG quality gate and the SINGLE checker since 2026-11-07 — 2.0.0 was the faithful port of svg-check.ts 1.5.x, switched only after tests/test_svg_check_parity.py proved byte-identical fingerprints and identical verdicts over the 100-page main deck, the 12-page exec cut, and the golden fixture (Phase 2 of design 2026-11-06-deck-emitter-ppt-master-rebase-design); 2.1.0 adds exec-cut contract support (the W-CONTENT-UNRENDERED reverse diff active for ## E01–## E12 contracts: section termination at any other markdown heading, structured-field awareness — focal/title/runs content checked, footnote/table/visual blocks structural — and punctuation-insensitive loose matching; ## Page <n> output byte-identical, main fingerprint aa3baf43… unchanged). svg-check.ts was DELETED 2026-11-07 (oracle retirement) after the differential parity run: the harness became the python-only semantics suite tests/test_svg_check.py (real-deck fingerprints aa3baf43… / ffa4d390… pinned; E-contract mutation pin proves the reverse diff). svg-to-pptx.ts was DELETED 2026-11-07: superseded as the export engine by ppt-master-adapter.ts + the ppt-master v6.8.0 (MIT) chain consumed as-is (design D1/D6, DEC-20261106-04); its golden pins were superseded — entity/notes/ID pins live in the python semantics suite, export pins are carried by ppt-master's own validators (pptx_opc_validation.py, pptx_delivery_check.py). render_previews.py (1.0.0) renders white-underlay previews (resvg-py engine, bun+@resvg/resvg-js subprocess fallback) — replaces the retired svg-to-pptx --render-png mode. Deps: python 3.10+ stdlib (gate, semantics suite), resvg-py (previews), fflate + fast-xml-parser (adapter), @resvg/resvg-js (preview fallback). External dep: ppt-master pin v6.8.0 per project external-deps.json (gitignored external/ppt-master/ clone delivered by the external-deps machinery; PyMuPDF/AGPL excluded)."
   }
 }
