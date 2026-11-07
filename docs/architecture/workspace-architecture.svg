@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2050" width="2600" height="2050" lang="ko" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
-<title>ai_workspace 통합 아키텍처</title>
-<desc>L0 workspace root에서 L1 templates/common, L2 templates/co-* 변형, L3 Projects/co-* 인스턴스로 이어지는 배포와 업그레이드 흐름, 백포팅 승격 upstream 요청의 역방향 흐름, 티켓 상태 기계, co-workspace 프로비저닝 파이프라인, 거버넌스 제어면을 한 장에 보여주는 아키텍처 다이어그램.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2390" width="2600" height="2390" lang="ko" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
+<title>ai_workspace 통합 아키텍처 — 허브-스포크 서비스 토폴로지 포함</title>
+<desc>L0 workspace root에서 L1 templates/common, L2 templates/co-* 변형, L3 Projects/co-* 인스턴스로 이어지는 배포와 업그레이드 흐름, 백포팅 승격 upstream 요청의 역방향 흐름, 티켓 상태 기계, co-workspace 프로비저닝 파이프라인, 거버넌스 제어면을 한 장에 보여주는 아키텍처 다이어그램. 서비스 토폴로지 밴드는 co-develop·co-design·co-security·co-work 허브 4곳과 L2·L3 스포크 집합의 허브-스포크 위상과 위임 티켓 경로(ADR-0103)를 보여준다.</desc>
 <defs><marker id="mb" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1f6feb"/></marker><marker id="mg" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1a7f37"/></marker><marker id="mo" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#bc4c00"/></marker><marker id="mp" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#8250df"/></marker><marker id="mt" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#0a7f7f"/></marker><marker id="my" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#57606a"/></marker><marker id="mr" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#cf222e"/></marker></defs>
-<rect width="2600" height="2050" fill="#fafafa"/>
+<rect width="2600" height="2390" fill="#fafafa"/>
 <text x="40" y="46" font-size="30" fill="#1f2328" font-weight="700">ai_workspace 통합 아키텍처 — L0→L1→L2→L3 · 백포팅 · 티켓 · co-workspace</text>
-<text x="40" y="78" font-size="16" fill="#424a53">기준: 2026-10-02 · templates/VERSION 0.9.0 · 근거: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*</text>
+<text x="40" y="78" font-size="16" fill="#424a53">기준: 2026-11-07 · templates/VERSION 0.28.0 · 근거: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*, ADR-0103, 2026-11-01-hub-consolidation-design</text>
 <rect x="40" y="100" width="1560" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="130" font-size="21" fill="#424a53" font-weight="700">거버넌스·제어면</text>
 <text x="245" y="130" font-size="14" fill="#424a53">L0 전용 · PM Gateway</text>
@@ -130,7 +130,7 @@
 <text x="1708" y="615" font-size="14" fill="#1f2328">co-safety</text>
 <rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
 <text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* 13개</text>
-<text x="2088" y="468" font-size="14" fill="#424a53">모두 template-version 0.9.0</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">templates/VERSION 0.28.0 기준 · co-abap-plugin 0.10.0</text>
 <rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="2170" y="488" width="204" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
@@ -402,7 +402,45 @@
 <text x="1639" y="1480" font-size="14" fill="#1f2328">조사중 = review</text>
 <rect x="1764" y="1461" width="94" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1773" y="1480" font-size="14" fill="#1f2328">종결 = done</text>
-<rect x="40" y="1645" width="2520" height="235" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<rect x="40" y="1645" width="2520" height="230" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">서비스 토폴로지 · 허브-스포크</text>
+<circle cx="2496" cy="1669" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2496" y="1675" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<path d="M62 1720 H48 V1623" fill="none" stroke="#8250df" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<text x="60" y="1638" font-size="14" fill="#6639ba" font-weight="700">U-* intake · 템플릿 결함은 upstream 경로 유지</text>
+<path d="M1900 1695 V1623" fill="none" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="1892" y="1638" font-size="14" fill="#424a53" text-anchor="end">위임 티켓 저장소 = 루트 tickets/ (허브별 저장소 없음)</text>
+<rect x="62" y="1695" width="450" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="82" y="1721" font-size="17" fill="#1f2328" font-weight="700">스포크</text>
+<text x="82" y="1743" font-size="14" fill="#424a53">L2 변형 프로젝트 + 스캐폴드된 L3 프로젝트</text>
+<text x="82" y="1765" font-size="14" fill="#424a53">↔ 레이어 스택 L2·L3 (집계 표현)</text>
+<path d="M512 1740 H796" fill="none" stroke="#0a7f7f" stroke-width="6" marker-end="url(#mt)"/>
+<text x="656" y="1712" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">위임 티켓 경로뿐</text>
+<text x="656" y="1730" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">ADR-0103 · 90일 자동만료</text>
+<rect x="800" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="818" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-develop</text>
+<text x="818" y="1741" font-size="14" fill="#424a53">dev 도크린·도구 서비스 제공</text>
+<rect x="1120" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1138" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-design</text>
+<text x="1138" y="1741" font-size="14" fill="#424a53">design 도크린 서비스 제공</text>
+<rect x="1440" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1458" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-security</text>
+<text x="1458" y="1741" font-size="14" fill="#424a53">security 도크린 서비스 제공</text>
+<rect x="1760" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1778" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-work</text>
+<text x="1778" y="1741" font-size="14" fill="#424a53">일반 비즈니스 협업 도크린 —</text>
+<text x="1778" y="1759" font-size="14" fill="#424a53">analyst/content-writer/ms365-expert/</text>
+<text x="1778" y="1777" font-size="14" fill="#424a53">project-coordinator/technical-writer 계열</text>
+<path d="M2060 1740 H2156" fill="none" stroke="#57606a" stroke-width="5" marker-end="url(#my)"/>
+<rect x="2160" y="1722" width="330" height="36" rx="18" fill="#ffffff" stroke="#57606a" stroke-width="2"/>
+<text x="2325" y="1745" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">workspace-root PM</text>
+<text x="62" y="1822" font-size="14" fill="#424a53">허브 = 서비스 제공자 (권한 아님) · 루틴 품질 게이트는 각 프로젝트의 자체 PM Gateway에서 로컬 실행 · 운영 런북: docs/guides/hub-operator-guide.md</text>
+<text x="62" y="1848" font-size="14" fill="#424a53">위임은 티켓 경로뿐 (attach 모드 범위 밖 — ADR-0103 Decision 2) · SEV 분류는 사전 승인 없이 로컬 — SEV1 = 푸시 차단 + 허브 security PM·사용자 즉시 통보 · 충돌 최종 판정: workspace-root PM</text>
+<text x="2160" y="1790" font-size="14" fill="#1f2328" font-weight="700">ADR-0103 자동만료: 병합 후 90일</text>
+<text x="2160" y="1812" font-size="14" fill="#424a53">→ 2027-01-31 · 연장 조건:</text>
+<text x="2160" y="1832" font-size="14" fill="#424a53">≥3 티켓/월 지표 충족 또는 사용자 갱신</text>
+<g transform="translate(0,255)">
+<rect x="40" y="1645" width="2520" height="319" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">놓치기 쉬운 부분</text>
 <rect x="60" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
@@ -423,7 +461,7 @@
 <rect x="60" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="94" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
-<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">버전 3축 · 프로젝트 모두 0.9.0</text>
+<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">버전 3축 · 기준 templates/VERSION 0.28.0</text>
 <rect x="682" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="716" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="716" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
@@ -436,6 +474,12 @@
 <circle cx="1960" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1960" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
 <text x="1992" y="1822" font-size="17" fill="#1f2328" font-weight="700">신뢰 경계: 요청은 데이터일 뿐</text>
+<rect x="60" y="1865" width="2480" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="94" cy="1899" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="94" y="1905" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<text x="126" y="1906" font-size="17" fill="#1f2328" font-weight="700">허브-스포크: 위임은 티켓 경로뿐 · N2 예외는 ADR-0103 · 90일 자동만료</text>
+</g>
+<g transform="translate(0,339)">
 <rect x="40" y="1905" width="2520" height="100" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
 <text x="62" y="1938" font-size="15" fill="#1f2328" font-weight="700">범례</text>
 <line x1="154" y1="1933" x2="214" y2="1933" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
@@ -465,4 +509,6 @@
 <circle cx="1092.62" cy="1976" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1093" y="1982" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">n</text>
 <text x="1119" y="1982" font-size="14" fill="#1f2328">= 하단 번호 설명과 연결</text>
+<text x="1500" y="1938" font-size="14" fill="#424a53">허브-스포크 밴드: 위임 · 에스컬레이션 · U-* intake — 기존 토큰 재사용</text>
+</g>
 </svg>

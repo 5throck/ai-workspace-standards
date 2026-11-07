@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2050" width="2600" height="2050" lang="es" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
-<title>Arquitectura integrada de ai_workspace</title>
-<desc>Diagrama de arquitectura en una página: el flujo de distribución y actualización desde la raíz L0 workspace hacia L1 templates/common, las variantes L2 templates/co-* y las instancias L3 Projects/co-*; los flujos inversos de backporting, promoción y solicitudes upstream; la máquina de estados de tickets; el pipeline de aprovisionamiento de co-workspace; y el plano de control de gobernanza.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2390" width="2600" height="2390" lang="es" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
+<title>Arquitectura integrada de ai_workspace — incluye topología de servicios hub-and-spoke</title>
+<desc>Diagrama de arquitectura en una página: el flujo de distribución y actualización desde la raíz L0 workspace hacia L1 templates/common, las variantes L2 templates/co-* y las instancias L3 Projects/co-*; los flujos inversos de backporting, promoción y solicitudes upstream; la máquina de estados de tickets; el pipeline de aprovisionamiento de co-workspace; y el plano de control de gobernanza. La banda de topología de servicios muestra la topología hub-and-spoke de los hubs co-develop, co-design, co-security y co-work y del grupo agregado de spokes L2/L3, con la ruta de tickets de delegación (ADR-0103).</desc>
 <defs><marker id="mb" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1f6feb"/></marker><marker id="mg" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1a7f37"/></marker><marker id="mo" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#bc4c00"/></marker><marker id="mp" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#8250df"/></marker><marker id="mt" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#0a7f7f"/></marker><marker id="my" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#57606a"/></marker><marker id="mr" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#cf222e"/></marker></defs>
-<rect width="2600" height="2050" fill="#fafafa"/>
+<rect width="2600" height="2390" fill="#fafafa"/>
 <text x="40" y="46" font-size="30" fill="#1f2328" font-weight="700">Arquitectura integrada de ai_workspace — L0→L1→L2→L3 · Backporting · Tickets · co-workspace</text>
-<text x="40" y="78" font-size="16" fill="#424a53">Base: 2026-10-02 · templates/VERSION 0.9.0 · Fuentes: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*</text>
+<text x="40" y="78" font-size="16" fill="#424a53">Base: 2026-11-07 · templates/VERSION 0.28.0 · Fuentes: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*, ADR-0103, 2026-11-01-hub-consolidation-design</text>
 <rect x="40" y="100" width="1560" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="130" font-size="21" fill="#424a53" font-weight="700">Plano de control de gobernanza</text>
 <text x="428" y="130" font-size="14" fill="#424a53">Solo L0 · PM Gateway</text>
@@ -130,7 +130,7 @@
 <text x="1709" y="615" font-size="14" fill="#1f2328">co-safety</text>
 <rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
 <text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (13)</text>
-<text x="2088" y="468" font-size="14" fill="#424a53">Todos en template-version 0.9.0</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">base templates/VERSION 0.28.0 · co-abap-plugin 0.10.0</text>
 <rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="2170" y="488" width="217" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
@@ -402,7 +402,45 @@
 <text x="1639" y="1480" font-size="14" fill="#1f2328">investigando = review</text>
 <rect x="1812" y="1461" width="122" height="28" rx="14" fill="#ffffff" stroke="#8250df" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1821" y="1480" font-size="14" fill="#1f2328">cerrado = done</text>
-<rect x="40" y="1645" width="2520" height="235" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<rect x="40" y="1645" width="2520" height="230" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
+<text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">Topología de servicios · hub-and-spoke</text>
+<circle cx="2496" cy="1669" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="2496" y="1675" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<path d="M62 1720 H48 V1623" fill="none" stroke="#8250df" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#mp)"/>
+<text x="60" y="1638" font-size="14" fill="#6639ba" font-weight="700">U-* intake · los informes de defectos de plantilla siguen la ruta upstream</text>
+<path d="M1900 1695 V1623" fill="none" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="1892" y="1638" font-size="14" fill="#424a53" text-anchor="end">Almacén de tickets de delegación = tickets/ raíz (sin almacenes por hub)</text>
+<rect x="62" y="1695" width="450" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="82" y="1721" font-size="17" fill="#1f2328" font-weight="700">Spokes</text>
+<text x="82" y="1743" font-size="14" fill="#424a53">Proyectos variante L2 + proyectos L3 andamidados</text>
+<text x="82" y="1765" font-size="14" fill="#424a53">↔ referencia a la pila de capas L2·L3 (vista agregada)</text>
+<path d="M512 1740 H796" fill="none" stroke="#0a7f7f" stroke-width="6" marker-end="url(#mt)"/>
+<text x="656" y="1712" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">Solo ruta de tickets</text>
+<text x="656" y="1730" font-size="14" fill="#0b5d5d" font-weight="700" text-anchor="middle">ADR-0103 · autoexpiración 90 días</text>
+<rect x="800" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="818" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-develop</text>
+<text x="818" y="1741" font-size="14" fill="#424a53">doctrina dev + herramientas como servicio</text>
+<rect x="1120" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1138" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-design</text>
+<text x="1138" y="1741" font-size="14" fill="#424a53">doctrina design como servicio</text>
+<rect x="1440" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1458" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-security</text>
+<text x="1458" y="1741" font-size="14" fill="#424a53">doctrina security como servicio</text>
+<rect x="1760" y="1695" width="300" height="90" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="2.5"/>
+<text x="1778" y="1719" font-size="17" fill="#1f2328" font-weight="700">co-work</text>
+<text x="1778" y="1741" font-size="14" fill="#424a53">doctrina de colaboración empresarial general —</text>
+<text x="1778" y="1759" font-size="14" fill="#424a53">analyst/content-writer/ms365-expert/</text>
+<text x="1778" y="1777" font-size="14" fill="#424a53">familia project-coordinator/technical-writer</text>
+<path d="M2060 1740 H2156" fill="none" stroke="#57606a" stroke-width="5" marker-end="url(#my)"/>
+<rect x="2160" y="1722" width="330" height="36" rx="18" fill="#ffffff" stroke="#57606a" stroke-width="2"/>
+<text x="2325" y="1745" font-size="15" fill="#1f2328" font-weight="700" text-anchor="middle">workspace-root PM</text>
+<text x="62" y="1822" font-size="14" fill="#424a53">Hub = proveedor de servicios, no una autoridad · las compuertas de calidad rutinarias se ejecutan LOCALMENTE en el PM Gateway de cada proyecto · runbook: docs/guides/hub-operator-guide.md</text>
+<text x="62" y="1848" font-size="14" fill="#424a53">La delegación es solo por ruta de tickets (modo attach fuera de alcance — ADR-0103 Decision 2) · la clasificación SEV es local sin preautorización — SEV1 = bloquear pushes + notificar al hub security PM y al usuario de inmediato · adjudicación final: workspace-root PM</text>
+<text x="2160" y="1790" font-size="14" fill="#1f2328" font-weight="700">Autoexpiración ADR-0103: 90 días tras la fusión</text>
+<text x="2160" y="1812" font-size="14" fill="#424a53">→ 2027-01-31 · se renueva si:</text>
+<text x="2160" y="1832" font-size="14" fill="#424a53">métrica ≥3 tickets/mes o renovación del usuario</text>
+<g transform="translate(0,255)">
+<rect x="40" y="1645" width="2520" height="319" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="1675" font-size="21" fill="#424a53" font-weight="700">Puntos fáciles de pasar por alto</text>
 <rect x="60" y="1697" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1731" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
@@ -423,7 +461,7 @@
 <rect x="60" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="94" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
-<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">3 ejes de versión · proyectos en 0.9.0</text>
+<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">3 ejes de versión · base templates/VERSION 0.28.0</text>
 <rect x="682" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="716" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="716" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
@@ -436,6 +474,12 @@
 <circle cx="1960" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1960" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
 <text x="1992" y="1822" font-size="17" fill="#1f2328" font-weight="700">Frontera de confianza: solo datos</text>
+<rect x="60" y="1865" width="2480" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
+<circle cx="94" cy="1899" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
+<text x="94" y="1905" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">9</text>
+<text x="126" y="1906" font-size="17" fill="#1f2328" font-weight="700">Hub-and-spoke: delegación solo por ruta de tickets · excepción N2 en ADR-0103 · autoexpiración 90 días</text>
+</g>
+<g transform="translate(0,339)">
 <rect x="40" y="1905" width="2520" height="100" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.5"/>
 <text x="62" y="1938" font-size="15" fill="#1f2328" font-weight="700">Leyenda</text>
 <line x1="154" y1="1933" x2="214" y2="1933" stroke="#1f6feb" stroke-width="5" marker-end="url(#mb)"/>
@@ -465,4 +509,6 @@
 <circle cx="1342.24" cy="1976" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1342" y="1982" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">n</text>
 <text x="1368" y="1982" font-size="14" fill="#1f2328">= enlazado a la nota numerada</text>
+<text x="1500" y="1938" font-size="14" fill="#424a53">Banda hub-and-spoke: delegación · escalación · U-* intake reutilizan tokens existentes</text>
+</g>
 </svg>
