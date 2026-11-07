@@ -3,7 +3,7 @@ id: U-20261107-004
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-07T23:20:30.014+09:00'
 history:
@@ -13,7 +13,21 @@ history:
   - at: '2026-11-07T23:54:44.483+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-08T08:02:27.828+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T08:02:27.828+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed at the repo level (PR #1908): the 5 stale graft platform mirrors
+  (.claude/.gemini/.codex/.agents/.hermes/skills/graft, graft v1.0.0
+  status:active) deleted — agents no longer see the competing graft context-tool
+  instruction next to trail. Remaining item is USER-side and outside the repo:
+  the user-level Stop hook running node ~/.claude/helpers/graft-hooks.cjs
+  (rename/remove the helper file or update the hook to the trail path — a
+  user-machine action, not a repo change). The .trail/cache/INDEX.md graft/
+  description regenerates via the tool's own trail build.
 error: null
 upstream:
   project: co-newbiz
@@ -63,3 +77,16 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-11-07T23:20:30.014+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1908
+    summary: >-
+      Fixed at the repo level (PR #1908): the 5 stale graft platform mirrors
+      (.claude/.gemini/.codex/.agents/.hermes/skills/graft, graft v1.0.0
+      status:active) deleted — agents no longer see the competing graft
+      context-tool instruction next to trail. Remaining item is USER-side and
+      outside the repo: the user-level Stop hook running node
+      ~/.claude/helpers/graft-hooks.cjs (rename/remove the helper file or update
+      the hook to the trail path — a user-machine action, not a repo change).
+      The .trail/cache/INDEX.md graft/ description regenerates via the tool's
+      own trail build.

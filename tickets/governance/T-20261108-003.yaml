@@ -15,7 +15,7 @@ title: >-
   2026-11-08 (co-work #37 reviewed, nothing to extract — openability checker
   already promoted; co-newbiz ADR-0193 kill-criteria series domain-only)
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-11-08T02:00:30.394+09:00'
 history:
@@ -28,5 +28,8 @@ history:
   - at: '2026-11-08T08:02:43.669+09:00'
     from: waiting
     to: running
+  - at: '2026-11-08T08:13:31.322+09:00'
+    from: running
+    to: review
 result: null
 error: null
