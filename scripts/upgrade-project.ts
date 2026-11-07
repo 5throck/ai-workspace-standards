@@ -1383,7 +1383,11 @@ const projectsRoot = (() => {
   }
 })();
 const relToProjects = relative(projectsRoot, projectDir);
-const targetInsideProjects = relToProjects.length > 0 && !relToProjects.startsWith('..');
+// Windows portability (CI 2026-11-07): path.relative() CANNOT relativize
+// across drives/UNC roots and returns the ABSOLUTE target path instead —
+// treat that as outside (it is), or the membership guard below would
+// misclassify an outside-drive target as inside-Projects and refuse it.
+const targetInsideProjects = relToProjects.length > 0 && !relToProjects.startsWith('..') && !isAbsolute(relToProjects);
 if (!targetInsideProjects) {
   console.warn(`WARN: Target is outside ${projectsRoot} — the canonical project layout is Projects/<name>.`);
   // H14: a warning the run continues past is invisible in scripts — that was the
