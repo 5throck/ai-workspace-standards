@@ -2,8 +2,15 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.13.0
+ * @version 1.14.0
  *
+ * v1.14.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+ *  §5.4 E3, DEC-20261107-02, T-20261107-005): check 4b — when the project-root
+ *  external-deps.json is staged, run `bun scripts/external-deps.ts verify
+ *  --manifest-only` (offline: strict parse, license policy, R3 install_dir
+ *  convention, gitignore coverage, adapter presence, excluded components); a
+ *  FAIL blocks the commit (registration refused). Zero cost when the manifest
+ *  is not staged; skipped when the CLI is absent.
  * v1.13.0 (2026-11-07, U-20261107-001 — spec
  *  docs/designs/2026-11-07-precommit-zero-delta-gate-design.md): check 6's
  *  non-merge path no longer fails unconditionally on the staged-file-set
@@ -272,6 +279,26 @@ async function main() {
       console.error("\x1b[31m[FAIL]\x1b[0m Template validation failed - commit blocked.");
       process.exit(1);
     }
+  }
+
+  // 4b. External-dependency manifest gate (E3 — external-deps standard §5.4,
+  // DEC-20261107-02). Zero cost unless the project-root external-deps.json is
+  // staged; then the offline `verify --manifest-only` leg runs (strict parse,
+  // license policy, R3 install_dir convention, gitignore coverage, adapter
+  // presence, excluded components). A FAIL blocks the commit — this is where a
+  // new entry's registration is refused.
+  if (staged.some(f => f.replace(/\\/g, '/') === 'external-deps.json') && existsSync('scripts/external-deps.ts')) {
+    console.log("\n=== External-dependency manifest (verify --manifest-only) ===");
+    const r = Bun.spawnSync(['bun', 'scripts/external-deps.ts', 'verify', '--manifest-only'], { stdout: 'pipe', stderr: 'pipe' });
+    const out = r.stdout.toString().trim();
+    if (r.exitCode !== 0) {
+      if (out) console.error(out);
+      const err = r.stderr.toString().trim();
+      if (err) console.error(err);
+      console.error("\x1b[31m[FAIL]\x1b[0m external-deps.json failed the manifest gate - commit blocked. Fix the [FAIL] rows above (bun scripts/external-deps.ts verify --manifest-only).");
+      process.exit(1);
+    }
+    console.log("\x1b[32m[PASS]\x1b[0m external-deps.json: manifest gate clean");
   }
 
   // 5. README sync check

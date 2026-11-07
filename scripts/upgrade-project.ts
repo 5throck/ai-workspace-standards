@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.93.0
+// @version 1.94.0
+// v1.94.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §5.4 E5 / §5.6, T-20261107-005): EXTERNAL DEPS pass — (a) schema
+//          v1 → v2 migration: seed ids get the v2 contract fields from the
+//          template seed with the project's pin/commit kept; project-only ids
+//          keep their entry with NO license (never invented; WARN row, verify
+//          fails until a human declares it); always written as v2; one decision
+//          row per entry. (b) E5 pre-install gate (lib/external-deps.ts v1.1.0
+//          preInstallGate — license policy + R3 install-dir convention) runs
+//          before the upstream check: a gated entry is never fetched or moved
+//          (WARN row, counted as a failure). Review-class licenses without a
+//          license_decision emit a WARN row.
 // v1.93.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
 //          §2 item 8 / §5.6 / Addendum A.3, T-20261107-005): EXTERNAL DEPS
 //          reconcile data-loss fix — the legacy/interim reconcile built its
@@ -1064,7 +1075,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated, bumpNestedLifecycleLastUpdated, scaffoldChangelogEntry } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
-import { reconcileExternalDepsManifest } from './helpers/external-deps-reconcile.ts';
+import { reconcileExternalDepsManifest, splitValidEntries } from './helpers/external-deps-reconcile.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
@@ -1124,6 +1135,9 @@ import {
   ensureGitignoreCoverage,
   isUnderAnyInstallDir,
   extractInstallDirsLoose,
+  migrateManifestV1ToV2,
+  preInstallGate,
+  evaluateLicensePolicy,
   type ExternalDepsManifest,
 } from './lib/external-deps.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
@@ -2596,6 +2610,37 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
     manifest = rec.manifest;
   }
 
+  // 2b. v1.94.0 — schema v1 → v2 migration (external-deps standard §5.6). For
+  //     an id in the template seed the v2 contract fields (license, usage,
+  //     adapter, excluded_components, license_decision) come from the seed and
+  //     the project's own fields (pin/commit included) are kept; an id NOT in
+  //     the seed keeps its entry with NO license — an attestation is never
+  //     invented, so `verify` FAILs until a human declares it. One decision row
+  //     per entry. The migrated document is always written as schema v2.
+  if (manifest && manifest.schema_version === 1) {
+    let seedForMigration: ExternalDepsManifest = { schema_version: 2, dependencies: [] };
+    if (seedPath) {
+      try { seedForMigration = parseExternalDepsManifest(readFileSync(seedPath, 'utf8'), 'template seed'); } catch { /* invalid seed — migrate without attestations */ }
+    }
+    const currentRaw = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : manifestRaw;
+    const mig = migrateManifestV1ToV2(currentRaw, seedForMigration);
+    console.log(`  MIGRATE ${MANIFEST_REL}  schema v1 → v2 (standard §5.6)${mig.migrated.length ? ` — contract fields from the seed for: ${mig.migrated.join(', ')}` : ''}${mig.unattested.length ? ` — NOT attested (no seed entry; declare license/usage/adapter by hand): ${mig.unattested.join(', ')}` : ''}`);
+    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify(mig.document, null, 2)}\n`, 'utf8');
+    if (mig.migrated.length === 0 && mig.unattested.length === 0) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', 'schema v1 → v2 (empty manifest — schema_version bump only; standard §5.6)');
+    }
+    for (const id of mig.migrated) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'UPDATE', `dep ${id}: schema v1 → v2 — license/usage/adapter/excluded_components/license_decision taken from the template seed; project pin/commit preserved (standard §5.6)`);
+    }
+    for (const id of mig.unattested) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${id}: schema v1 → v2 — no template seed entry, license NOT declared (never invented); \`bun scripts/external-deps.ts verify\` fails until a human adds license/usage/adapter (standard §5.6)`, 'WARN');
+    }
+    console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
+    changed++;
+    const split = splitValidEntries(mig.document['dependencies'] as unknown[], 2);
+    manifest = { schema_version: 2, dependencies: split.valid };
+  }
+
   // 3. install_dir .gitignore coverage (D5) — an external clone committed into
   //    the project defeats the entire distribution model.
   const gi = ensureGitignoreCoverage(projectDir, manifest!.dependencies.map((d) => d.install_dir), { dryRun });
@@ -2607,6 +2652,20 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
 
   // 4. Per-dependency upstream check → compat test → pin move / hold (D3).
   for (const dep of manifest!.dependencies) {
+    // v1.94.0 — E5 (external-deps standard §5.4): license gate + R3 install-dir
+    // convention BEFORE any fetch or pin move. A gated entry is never moved.
+    const gate = preInstallGate(dep);
+    if (!gate.ok) {
+      console.log(`  ⚠️  ${dep.id}: pre-install gate FAILED — ${gate.reasons.join('; ')}; no upstream check, no pin move`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: pre-install gate failed (license policy / install-dir convention) — ${gate.reasons.join('; ')}; pin ${dep.pin} held, nothing fetched`, 'WARN');
+      failures++;
+      continue;
+    }
+    const licVerdict = evaluateLicensePolicy(dep);
+    if (licVerdict.severity === 'warn') {
+      console.log(`  ⚠️  ${licVerdict.message}`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `dep ${dep.id}: ${licVerdict.message}`, 'WARN');
+    }
     const upstream = checkUpstreamTags(dep);
     if (!upstream.ok) {
       console.log(`  ⚠️  ${dep.id}: upstream tag check FAILED — ${upstream.error}; pin ${dep.pin} held`);

@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.73.0
+ * @version 1.74.0
+ *
+ * v1.74.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+ *          §5.4 E2 + Addendum, DEC-20261107-02, T-20261107-005): new arm
+ *          `external-dep-license` — every external-deps.json seed (common +
+ *          co-*) is strictly parsed (schema v1/v2, R3 collisions) and gated:
+ *          license deny / undeclared / GPL-without-decision FAIL,
+ *          review-without-decision WARN; a NEW entry off external/<id> FAIL
+ *          (installed → WARN); adapter not delivered by the variant/common
+ *          tree FAIL; excluded component named on a template install surface
+ *          FAIL. Verdicts come from lib/external-deps.ts v1.1.0 (single policy
+ *          constant).
  *
  * v1.73.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
  *          §5/§6.1, DEC-20261107-01): fleet membership SSOT —
@@ -557,7 +568,7 @@ import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-comp
 import { listFleetProjects } from './lib/fleet.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
-import { extractInstallDirsLoose, findVendoredInstallDirs } from './lib/external-deps.ts';
+import { extractInstallDirsLoose, findVendoredInstallDirs, parseExternalDepsManifest, evaluateLicensePolicy, evaluateInstallDirConvention, scanExcludedComponents } from './lib/external-deps.ts';
 import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
@@ -2539,6 +2550,65 @@ function checkExternalDepVendoring(): void {
   if (totalHits === 0) {
     pass(`external-dep-vendoring: no install_dir path vendored in templates/common or any co-* template (${installDirs.size} declared dir(s))`);
   }
+}
+
+// Check: external-dep-license (v1.74.0, design
+// docs/designs/2026-11-07-external-deps-standard-design.md §5.4 E2 + Addendum,
+// DEC-20261107-02) — every external-deps.json seed (templates/common + each
+// templates/co-*) is gated the moment it changes: strict parse (schema v1/v2,
+// R3 install_dir collisions) FAIL; license policy deny / undeclared /
+// GPL-without-decision FAIL, review-without-decision WARN; R3 convention — a
+// NEW entry (no recorded commit) off external/<id> FAIL, an installed one
+// WARN; the adapter must exist in the variant (or common) tree FAIL; the
+// excluded components must stay off the template's own install surfaces (V5,
+// heuristic) FAIL. All verdicts come from scripts/lib/external-deps.ts — one
+// policy constant, no copy here.
+function checkExternalDepLicense(): void {
+  if (!JSON_MODE) console.log('\n=== Check external-dep-license: seed manifests pass the license policy + coupling contract (standard §5.4 E2) ===');
+  const seeds: Array<{ variant: string; dir: string }> = [{ variant: 'common', dir: join(TEMPLATES_DIR, 'common') }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) seeds.push({ variant: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  let checked = 0;
+  let entries = 0;
+  let problems = 0;
+  for (const seed of seeds) {
+    const manifestPath = join(seed.dir, 'external-deps.json');
+    if (!existsSync(manifestPath)) continue;
+    checked++;
+    let manifest;
+    try {
+      manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf-8'), `templates/${seed.variant}/external-deps.json`);
+    } catch (err) {
+      problems++;
+      fail(seed.variant, 'external-dep-license', (err as Error).message, 'Fix the seed to schema v2 (standard §5.2) — the loader in scripts/lib/external-deps.ts is the schema SSOT');
+      continue;
+    }
+    if (manifest.schema_version === 1 && manifest.dependencies.length > 0) {
+      problems++;
+      fail(seed.variant, 'external-dep-license', `templates/${seed.variant}/external-deps.json is schema v1 with dependencies — license undeclared`, 'Bump the seed to schema_version 2 and declare license / usage / adapter per entry (standard §5.2)');
+    }
+    for (const dep of manifest.dependencies) {
+      entries++;
+      const lic = evaluateLicensePolicy(dep);
+      if (lic.severity === 'fail') { problems++; fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${lic.message}`, 'Only a reviewed change to EXTERNAL_DEP_LICENSE_POLICY (L1 release + decision record) can admit a deny-class dependency; GPL used as a separate process needs license_decision'); }
+      else if (lic.severity === 'warn') warn(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${lic.message}`);
+      const conv = evaluateInstallDirConvention(dep);
+      if (conv.severity === 'fail') { problems++; fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${conv.message}`, `Use install_dir "external/${dep.id}" (R3, DEC-20261107-02)`); }
+      else if (conv.severity === 'warn') warn(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${conv.message}`);
+      if (dep.adapter && !existsSync(join(seed.dir, dep.adapter)) && !existsSync(join(TEMPLATES_DIR, 'common', dep.adapter))) {
+        problems++;
+        fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${dep.id}: adapter ${dep.adapter} is not delivered by the variant or common tree`, 'The single coupling file named in the seed must ship with the template (standard §5.2)');
+      }
+      for (const hit of scanExcludedComponents(dep, seed.dir)) {
+        problems++;
+        fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${dep.id}: excluded component ${hit.component} is named on install surface ${hit.file} (heuristic name match)`, 'Remove the excluded component from the install surface — it must never be installed (standard §5.3 V5)');
+      }
+    }
+  }
+  if (problems === 0) pass(`external-dep-license: ${checked} seed manifest(s), ${entries} entr${entries === 1 ? 'y' : 'ies'} — license policy, R3 convention, adapter delivery, and exclusions all clean`);
 }
 
 // Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
@@ -6411,6 +6481,7 @@ function main(): number {
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
   checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
   checkExternalDepVendoring();    // v1.72.0: no manifest install_dir vendored into a template tree (design D4)
+  checkExternalDepLicense();      // v1.74.0: seed manifests pass the license policy + coupling contract (standard §5.4 E2)
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
   checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
   checkSkillRegistrySync();       // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)

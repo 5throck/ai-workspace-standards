@@ -1,7 +1,23 @@
-// @version 1.0.0
+// @version 1.1.0
 /**
  * external-deps.ts — shared helper for the generic external-dependency machinery
- * (design docs/designs/2026-11-07-external-deps-machinery-design.md, D1/D2/D3/D4/D5).
+ * (design docs/designs/2026-11-07-external-deps-machinery-design.md, D1/D2/D3/D4/D5)
+ * and the external-dependency STANDARD (design
+ * docs/designs/2026-11-07-external-deps-standard-design.md, §5 + Addendum;
+ * decision DEC-20261107-02).
+ *
+ * v1.1.0 (2026-11-07, standard design, T-20261107-005): manifest schema v2 —
+ *   required `license` / `usage` ("as-is") / `adapter`, optional
+ *   `excluded_components` / `license_decision`; v1 still parses (dual parse;
+ *   a non-empty v1 document is "license undeclared" and fails the license
+ *   gate). EXTERNAL_DEP_LICENSE_POLICY is the single source of truth for the
+ *   license classes (allow / review / review-standalone / deny — unknown ids
+ *   deny). R3: install_dir collisions are a parse error; a NEW entry (no
+ *   recorded commit) whose install_dir is not external/<id> FAILs, an
+ *   installed one is grandfathered with a WARN. Verify primitives V1-V9
+ *   (verifyProjectExternalDeps) back the project CLI scripts/external-deps.ts;
+ *   the scaffold fetch skips a gated entry (E5 — a deny-class dependency is
+ *   never cloned). All writers emit schema v2.
  *
  * One library for everything the two consumers (scripts/new-project.ts scaffold
  * fetch, scripts/upgrade-project.ts EXTERNAL DEPS pass) and the unit tests need:
@@ -31,13 +47,28 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-// ── Types (D1 schema) ──────────────────────────────────────────────────────────
+// ── Types (D1 schema; v2 per the standard design §5.2) ─────────────────────────
 
-export const EXTERNAL_DEPS_SCHEMA_VERSION = 1 as const;
+/** The schema version every WRITER emits (standard design §5.2: "All writers
+ *  … emit v2"). The loader also accepts the legacy v1 (dual parse). */
+export const EXTERNAL_DEPS_SCHEMA_VERSION = 2 as const;
+export const SUPPORTED_SCHEMA_VERSIONS = [1, 2] as const;
+export type ExternalDepsSchemaVersion = (typeof SUPPORTED_SCHEMA_VERSIONS)[number];
 
 /** `propagation` enum — "never" is the only value for now (D1). */
 export const PROPAGATION_VALUES = ['never'] as const;
 export type ExternalDepPropagation = (typeof PROPAGATION_VALUES)[number];
+
+/** `usage` enum (standard §4.3) — single value; a new class needs a design. */
+export const USAGE_VALUES = ['as-is'] as const;
+export type ExternalDepUsage = (typeof USAGE_VALUES)[number];
+
+/** A deliberately excluded part of the upstream repo (standard §5.2). */
+export interface ExcludedComponent {
+  name: string;
+  license: string;
+  reason: string;
+}
 
 export interface ExternalDepEntry {
   /** Stable identifier — unique within the manifest (merge key, D1). */
@@ -57,11 +88,28 @@ export interface ExternalDepEntry {
   /** Command run from the project root; exit 0 = pass (advisory until a pin move). */
   compatibility_test?: string;
   propagation: ExternalDepPropagation;
+  // ── v2 (standard §5.2) — absent on a parsed v1 entry ──
+  /** SPDX id or expression of the pinned repo. REQUIRED in v2. */
+  license?: string;
+  /** Allowed-use class. REQUIRED in v2; only "as-is". */
+  usage?: ExternalDepUsage;
+  /** The ONE project file that couples to the clone. REQUIRED in v2. */
+  adapter?: string;
+  /** Upstream parts we never install (values are dependency-specific facts). */
+  excluded_components?: ExcludedComponent[];
+  /** DEC-YYYYMMDD-NN or ADR-NNNN; required for review / review-standalone classes. */
+  license_decision?: string;
 }
 
 export interface ExternalDepsManifest {
-  schema_version: typeof EXTERNAL_DEPS_SCHEMA_VERSION;
+  schema_version: ExternalDepsSchemaVersion;
   dependencies: ExternalDepEntry[];
+}
+
+/** True for a v1 document that declares dependencies — license undeclared
+ *  (standard §5.2: parses with a WARN, fails the license gate in verify). */
+export function isLegacyV1WithEntries(m: ExternalDepsManifest): boolean {
+  return m.schema_version === 1 && m.dependencies.length > 0;
 }
 
 // ── Validation (D1: strict — unknown fields rejected, enum checked) ────────────
@@ -70,13 +118,24 @@ export interface ExternalDepsManifest {
  *  schema inline; JSON has no comments). Any OTHER unknown key is rejected. */
 const ALLOWED_TOP_LEVEL_DOC_KEY = '$comment';
 
-export const ENTRY_FIELDS = [
+/** v1 entry fields (machinery D1). */
+export const ENTRY_FIELDS_V1 = [
   'id', 'repo', 'pin', 'commit', 'install', 'install_dir', 'consumer',
   'compatibility_test', 'propagation',
 ] as const;
-const REQUIRED_ENTRY_FIELDS: ReadonlyArray<Exclude<typeof ENTRY_FIELDS[number], 'commit' | 'consumer' | 'compatibility_test'>> = [
+/** v2 entry fields (standard §5.2) — the v1 set plus the contract fields. */
+export const ENTRY_FIELDS_V2 = [
+  ...ENTRY_FIELDS_V1, 'license', 'usage', 'adapter', 'excluded_components', 'license_decision',
+] as const;
+/** The CURRENT (writer) schema's field set. */
+export const ENTRY_FIELDS = ENTRY_FIELDS_V2;
+/** v2 fields a v1 → v2 migration takes from the template seed (standard §5.6). */
+export const V2_CONTRACT_FIELDS = ['license', 'usage', 'adapter', 'excluded_components', 'license_decision'] as const;
+const REQUIRED_ENTRY_FIELDS: ReadonlyArray<string> = [
   'id', 'repo', 'pin', 'install', 'install_dir', 'propagation',
 ];
+const REQUIRED_ENTRY_FIELDS_V2_EXTRA: ReadonlyArray<string> = ['license', 'usage', 'adapter'];
+const LICENSE_DECISION_RE = /^(DEC-\d{8}-\d{2}|ADR-\d{4})$/;
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -203,8 +262,11 @@ export function resolveCompatTestArgv(entry: Pick<ExternalDepEntry, 'compatibili
 }
 
 /**
- * Parse + strictly validate a manifest document (D1). Throws with a precise
- * message on any schema drift — upgrade validates before running the pass.
+ * Parse + strictly validate a manifest document (D1; v2 per standard §5.2).
+ * Throws with a precise message on any schema drift — upgrade validates before
+ * running the pass. Accepts schema v1 (legacy; the v2 contract fields are
+ * rejected as unknown there) and v2 (contract fields required). R3 (standard
+ * Addendum A.2): an install_dir collision between entries is a parse error.
  */
 export function parseExternalDepsManifest(raw: string, origin = '', opts: { allowLocalRepos?: boolean } = {}): ExternalDepsManifest {
   let doc: unknown;
@@ -219,22 +281,25 @@ export function parseExternalDepsManifest(raw: string, origin = '', opts: { allo
   if (unknownTop.length > 0) {
     throw typeErr(origin, `unknown top-level field(s): ${unknownTop.join(', ')} (allowed: schema_version, dependencies${ALLOWED_TOP_LEVEL_DOC_KEY ? `, ${ALLOWED_TOP_LEVEL_DOC_KEY}` : ''})`);
   }
-  if (doc.schema_version !== EXTERNAL_DEPS_SCHEMA_VERSION) {
-    throw typeErr(origin, `schema_version must be ${EXTERNAL_DEPS_SCHEMA_VERSION} (got: ${JSON.stringify(doc.schema_version)})`);
+  if (!(SUPPORTED_SCHEMA_VERSIONS as readonly unknown[]).includes(doc.schema_version)) {
+    throw typeErr(origin, `schema_version must be one of [${SUPPORTED_SCHEMA_VERSIONS.join(', ')}] (got: ${JSON.stringify(doc.schema_version)})`);
   }
+  const schemaVersion = doc.schema_version as ExternalDepsSchemaVersion;
+  const allowedFields: readonly string[] = schemaVersion === 2 ? ENTRY_FIELDS_V2 : ENTRY_FIELDS_V1;
   if (!Array.isArray(doc.dependencies)) throw typeErr(origin, 'dependencies must be an array');
 
   const seen = new Set<string>();
   const dependencies: ExternalDepEntry[] = doc.dependencies.map((rawEntry, i) => {
     const at = `entry[${i}]`;
     if (!isPlainObject(rawEntry)) throw typeErr(origin, `${at} must be an object`);
-    const unknown = Object.keys(rawEntry).filter((k) => !(ENTRY_FIELDS as readonly string[]).includes(k));
+    const unknown = Object.keys(rawEntry).filter((k) => !allowedFields.includes(k));
     if (unknown.length > 0) {
-      throw typeErr(origin, `${at}: unknown field(s): ${unknown.join(', ')} (allowed: ${ENTRY_FIELDS.join(', ')})`);
+      throw typeErr(origin, `${at}: unknown field(s) for schema v${schemaVersion}: ${unknown.join(', ')} (allowed: ${allowedFields.join(', ')})`);
     }
-    for (const f of REQUIRED_ENTRY_FIELDS) {
+    const required = schemaVersion === 2 ? [...REQUIRED_ENTRY_FIELDS, ...REQUIRED_ENTRY_FIELDS_V2_EXTRA] : REQUIRED_ENTRY_FIELDS;
+    for (const f of required) {
       if (typeof rawEntry[f] !== 'string' || (rawEntry[f] as string).length === 0) {
-        throw typeErr(origin, `${at}: field '${f}' must be a non-empty string`);
+        throw typeErr(origin, `${at}: field '${f}' must be a non-empty string${REQUIRED_ENTRY_FIELDS_V2_EXTRA.includes(f) ? ' (required since schema v2 — standard §5.2)' : ''}`);
       }
     }
     const id = rawEntry.id as string;
@@ -269,10 +334,83 @@ export function parseExternalDepsManifest(raw: string, origin = '', opts: { allo
     if (typeof rawEntry.commit === 'string') entry.commit = rawEntry.commit;
     if (typeof rawEntry.consumer === 'string' && rawEntry.consumer.length > 0) entry.consumer = rawEntry.consumer;
     if (typeof rawEntry.compatibility_test === 'string' && rawEntry.compatibility_test.length > 0) entry.compatibility_test = rawEntry.compatibility_test;
+
+    if (schemaVersion === 2) {
+      // license: any non-empty string parses — the POLICY (evaluateLicensePolicy)
+      // classifies it, and unknown ids deny (fail closed, standard §5.4).
+      entry.license = (rawEntry.license as string).trim();
+      if (rawEntry.usage !== 'as-is') {
+        throw typeErr(origin, `${at}: usage must be one of [${USAGE_VALUES.join(', ')}] (got: ${JSON.stringify(rawEntry.usage)}) — the clone is read-only (standard §4.3)`);
+      }
+      entry.usage = 'as-is';
+      validateInstallDir(rawEntry.adapter as string, `${at} (${id}) adapter`);
+      entry.adapter = rawEntry.adapter as string;
+      if (rawEntry.excluded_components !== undefined) {
+        if (!Array.isArray(rawEntry.excluded_components)) throw typeErr(origin, `${at}: excluded_components must be an array`);
+        entry.excluded_components = rawEntry.excluded_components.map((c, j) => {
+          if (!isPlainObject(c)) throw typeErr(origin, `${at}: excluded_components[${j}] must be an object`);
+          const keys = Object.keys(c).sort();
+          if (keys.join(',') !== 'license,name,reason') {
+            throw typeErr(origin, `${at}: excluded_components[${j}] must have exactly name, license, reason (got: ${keys.join(', ')})`);
+          }
+          for (const k of ['name', 'license', 'reason']) {
+            if (typeof c[k] !== 'string' || (c[k] as string).trim().length === 0) {
+              throw typeErr(origin, `${at}: excluded_components[${j}].${k} must be a non-empty string`);
+            }
+          }
+          return { name: c.name as string, license: c.license as string, reason: c.reason as string };
+        });
+      }
+      if (rawEntry.license_decision !== undefined) {
+        if (typeof rawEntry.license_decision !== 'string' || !LICENSE_DECISION_RE.test(rawEntry.license_decision)) {
+          throw typeErr(origin, `${at}: license_decision must match DEC-YYYYMMDD-NN or ADR-NNNN (got: ${JSON.stringify(rawEntry.license_decision)})`);
+        }
+        entry.license_decision = rawEntry.license_decision;
+      }
+    }
     return entry;
   });
 
-  return { schema_version: EXTERNAL_DEPS_SCHEMA_VERSION, dependencies };
+  // Cross-entry rules: adapter outside every install_dir; R3 collisions.
+  const installDirs = dependencies.map((d) => normalizeRel(d.install_dir));
+  for (const dep of dependencies) {
+    if (dep.adapter && isUnderAnyInstallDir(normalizeRel(dep.adapter), installDirs)) {
+      throw typeErr(origin, `entry '${dep.id}': adapter '${dep.adapter}' sits under an install_dir — the adapter is OUR file and must live outside every external clone (standard §5.2)`);
+    }
+  }
+  const collision = findInstallDirCollision(dependencies);
+  if (collision) throw typeErr(origin, collision);
+
+  return { schema_version: schemaVersion, dependencies };
+}
+
+function normalizeRel(p: string): string {
+  return p.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
+}
+
+/**
+ * R3 collision rule (standard Addendum A.2) — returns a message for the FIRST
+ * collision, or null. Two entries collide when their install_dirs are equal or
+ * nested, or when one entry's install_dir sits on (or under / over) another
+ * entry's conventional path `external/<other-id>`.
+ */
+export function findInstallDirCollision(deps: ReadonlyArray<Pick<ExternalDepEntry, 'id' | 'install_dir'>>): string | null {
+  const overlaps = (a: string, b: string): boolean => a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
+  for (let i = 0; i < deps.length; i++) {
+    const a = normalizeRel(deps[i].install_dir);
+    for (let j = 0; j < deps.length; j++) {
+      if (i === j) continue;
+      const b = normalizeRel(deps[j].install_dir);
+      if (j > i && overlaps(a, b)) {
+        return `install_dir collision: '${deps[i].id}' (${a}) and '${deps[j].id}' (${b}) overlap — registration refused (R3, DEC-20261107-02)`;
+      }
+      const conventional = `external/${deps[j].id}`;
+      if (overlaps(a, conventional) && b !== conventional) {
+        return `install_dir collision: '${deps[i].id}' (${a}) occupies '${conventional}', the conventional path of entry '${deps[j].id}' — registration refused (R3, DEC-20261107-02)`;
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -281,13 +419,140 @@ export function parseExternalDepsManifest(raw: string, origin = '', opts: { allo
  * already happened upstream of this function for delivered manifests; this
  * merge exists for the seed-composition path and tests. On an id collision the
  * variant entry wins (the variant's template file is authoritative for that id).
+ * The merged schema version is the higher of the two inputs.
  */
 export function mergeExternalDepsManifests(common: ExternalDepsManifest, variant: ExternalDepsManifest | null): ExternalDepsManifest {
-  if (!variant) return { schema_version: EXTERNAL_DEPS_SCHEMA_VERSION, dependencies: [...common.dependencies] };
+  if (!variant) return { schema_version: common.schema_version, dependencies: [...common.dependencies] };
   const byId = new Map<string, ExternalDepEntry>();
   for (const dep of common.dependencies) byId.set(dep.id, dep);
   for (const dep of variant.dependencies) byId.set(dep.id, dep);
-  return { schema_version: EXTERNAL_DEPS_SCHEMA_VERSION, dependencies: [...byId.values()] };
+  const schema_version = (Math.max(common.schema_version, variant.schema_version) as ExternalDepsSchemaVersion);
+  return { schema_version, dependencies: [...byId.values()] };
+}
+
+// ── License policy (standard §5.4 + Addendum A.1 — R2, DEC-20261107-02) ───────
+
+/**
+ * THE single source of truth for the license gate. Ids are matched
+ * case-insensitively. Anything not listed is DENY (fail closed). A change here
+ * is a reviewed L1 release with a decision record — never a per-project edit.
+ */
+export const EXTERNAL_DEP_LICENSE_POLICY = {
+  allow: [
+    'MIT', 'MIT-0', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', 'ISC', '0BSD',
+    'Zlib', 'Unlicense', 'CC0-1.0', 'PSF-2.0', 'BSL-1.0',
+  ],
+  review: [
+    'MPL-2.0', 'LGPL-2.1-only', 'LGPL-2.1-or-later', 'LGPL-3.0-only',
+    'LGPL-3.0-or-later', 'EPL-2.0',
+  ],
+  /** GPL used ONLY as a separate process — admitted only with a decision record
+   *  attesting standalone use; without one it is linking GPL (deny). */
+  reviewStandalone: [
+    'GPL-2.0-only', 'GPL-2.0-or-later', 'GPL-3.0-only', 'GPL-3.0-or-later',
+  ],
+  /** Named for clarity in messages; every unlisted id is deny regardless. */
+  denyExamples: ['AGPL-3.0-only', 'AGPL-3.0-or-later', 'SSPL-1.0', 'BUSL-1.1', 'NOASSERTION'],
+} as const;
+
+export type LicenseClass = 'allow' | 'review' | 'review-standalone' | 'deny';
+const CLASS_RANK: Record<LicenseClass, number> = { allow: 0, review: 1, 'review-standalone': 2, deny: 3 };
+
+/** Classify ONE SPDX id (no operators). */
+export function classifyLicenseId(id: string): LicenseClass {
+  const k = id.trim().toLowerCase();
+  const inList = (list: readonly string[]) => list.some((x) => x.toLowerCase() === k);
+  if (inList(EXTERNAL_DEP_LICENSE_POLICY.allow)) return 'allow';
+  if (inList(EXTERNAL_DEP_LICENSE_POLICY.review)) return 'review';
+  if (inList(EXTERNAL_DEP_LICENSE_POLICY.reviewStandalone)) return 'review-standalone';
+  return 'deny';
+}
+
+/**
+ * Classify an SPDX id or expression (standard §5.4): `OR` takes the MOST
+ * permissive member; `AND` / `WITH` (or a mix) take the STRICTEST member. The
+ * token after `WITH` is an exception id, not a license, and is not classified.
+ */
+export function classifyLicenseExpression(expr: string): { class: LicenseClass; members: string[] } {
+  const tokens = expr.replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
+  const members: string[] = [];
+  const ops = new Set<string>();
+  for (let i = 0; i < tokens.length; i++) {
+    const up = tokens[i].toUpperCase();
+    if (up === 'OR' || up === 'AND' || up === 'WITH') {
+      ops.add(up);
+      if (up === 'WITH') i++; // skip the exception id
+      continue;
+    }
+    members.push(tokens[i]);
+  }
+  if (members.length === 0) return { class: 'deny', members };
+  const classes = members.map(classifyLicenseId);
+  const onlyOr = ops.size === 1 && ops.has('OR');
+  const pick = onlyOr
+    ? classes.reduce((a, b) => (CLASS_RANK[a] <= CLASS_RANK[b] ? a : b))
+    : classes.reduce((a, b) => (CLASS_RANK[a] >= CLASS_RANK[b] ? a : b));
+  return { class: pick, members };
+}
+
+export type GateSeverity = 'pass' | 'warn' | 'fail';
+
+export interface LicenseVerdict {
+  id: string;
+  license: string | null;
+  class: LicenseClass | null;
+  severity: GateSeverity;
+  message: string;
+}
+
+/** Apply the license gate to one entry (standard §5.4 / Addendum A.1). */
+export function evaluateLicensePolicy(entry: Pick<ExternalDepEntry, 'id' | 'license' | 'license_decision'>): LicenseVerdict {
+  if (!entry.license) {
+    return { id: entry.id, license: null, class: null, severity: 'fail', message: `${entry.id}: license undeclared — migrate the manifest to schema v2 and declare the SPDX license (standard §5.2)` };
+  }
+  const { class: cls } = classifyLicenseExpression(entry.license);
+  const decided = typeof entry.license_decision === 'string' && entry.license_decision.length > 0;
+  switch (cls) {
+    case 'allow':
+      return { id: entry.id, license: entry.license, class: cls, severity: 'pass', message: `${entry.id}: ${entry.license} — allow` };
+    case 'review':
+      return decided
+        ? { id: entry.id, license: entry.license, class: cls, severity: 'pass', message: `${entry.id}: ${entry.license} — review class, admitted by ${entry.license_decision}` }
+        : { id: entry.id, license: entry.license, class: cls, severity: 'warn', message: `${entry.id}: ${entry.license} — review class without license_decision (record a decision and set license_decision)` };
+    case 'review-standalone':
+      return decided
+        ? { id: entry.id, license: entry.license, class: cls, severity: 'pass', message: `${entry.id}: ${entry.license} — standalone-process GPL, admitted by ${entry.license_decision}` }
+        : { id: entry.id, license: entry.license, class: cls, severity: 'fail', message: `${entry.id}: ${entry.license} — GPL without a license_decision attesting separate-process use is treated as linking GPL (deny; R2, DEC-20261107-02)` };
+    default:
+      return { id: entry.id, license: entry.license, class: 'deny', severity: 'fail', message: `${entry.id}: ${entry.license} — deny class (AGPL / linking GPL / SSPL / BUSL / NOASSERTION / unknown id); no manifest override — only a reviewed change to EXTERNAL_DEP_LICENSE_POLICY can admit it` };
+  }
+}
+
+/**
+ * R3 install-dir convention (standard Addendum A.2): install_dir must be
+ * exactly `external/<id>`. A NEW entry (no recorded commit) that breaks it
+ * FAILs (registration refused); an installed entry is grandfathered (WARN).
+ */
+export function evaluateInstallDirConvention(entry: Pick<ExternalDepEntry, 'id' | 'install_dir' | 'commit'>): { severity: GateSeverity; message: string } {
+  const expected = `external/${entry.id}`;
+  if (normalizeRel(entry.install_dir) === expected) return { severity: 'pass', message: `${entry.id}: install_dir ${expected}` };
+  if (entry.commit) {
+    return { severity: 'warn', message: `${entry.id}: install_dir '${entry.install_dir}' is not ${expected} — grandfathered (already installed); move it on the next pin change` };
+  }
+  return { severity: 'fail', message: `${entry.id}: install_dir '${entry.install_dir}' is not ${expected} — a new entry must use the convention; registration refused (R3, DEC-20261107-02)` };
+}
+
+/**
+ * E5 pre-install gate (standard §5.4): the license gate and the R3 convention
+ * combined. `ok=false` means the entry must NOT be cloned.
+ */
+export function preInstallGate(entry: ExternalDepEntry): { ok: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  const lic = evaluateLicensePolicy(entry);
+  if (lic.severity === 'fail') reasons.push(lic.message);
+  const conv = evaluateInstallDirConvention(entry);
+  if (conv.severity === 'fail') reasons.push(conv.message);
+  return { ok: reasons.length === 0, reasons };
 }
 
 // ── Git subprocess helpers (argv-array only — no shell, ever) ──────────────────
@@ -509,7 +774,7 @@ export interface FetchProjectResult {
  * gitignore coverage (D5), and write the resolved commit back into the
  * manifest (advisory field).
  */
-export function fetchProjectExternalDeps(projectDir: string, opts: { strict?: boolean; dryRun?: boolean; allowLocalRepos?: boolean } = {}): FetchProjectResult {
+export function fetchProjectExternalDeps(projectDir: string, opts: { strict?: boolean; dryRun?: boolean; allowLocalRepos?: boolean; onlyIds?: string[] } = {}): FetchProjectResult {
   const manifestPath = join(projectDir, 'external-deps.json');
   const result: FetchProjectResult = { ok: true, manifestPresent: existsSync(manifestPath), results: [], gitignoreAppended: [] };
   if (!result.manifestPresent) return result;
@@ -524,7 +789,18 @@ export function fetchProjectExternalDeps(projectDir: string, opts: { strict?: bo
   }
 
   const outcomes: InstallOutcome[] = [];
-  for (const dep of manifest.dependencies) {
+  const selected = opts.onlyIds && opts.onlyIds.length > 0
+    ? manifest.dependencies.filter((d) => opts.onlyIds!.includes(d.id))
+    : manifest.dependencies;
+  for (const dep of selected) {
+    // E5 (standard §5.4): license gate + R3 convention BEFORE any clone — a
+    // deny-class (or license-undeclared) dependency never reaches the disk.
+    const gate = preInstallGate(dep);
+    if (!gate.ok) {
+      result.results.push({ id: dep.id, ok: false, status: 'skipped', error: `not cloned — pre-install gate: ${gate.reasons.join('; ')}` });
+      if (opts.strict) result.ok = false;
+      continue;
+    }
     const outcome = installDependency(dep, projectDir);
     outcomes.push(outcome);
     result.results.push({
@@ -551,8 +827,208 @@ export function fetchProjectExternalDeps(projectDir: string, opts: { strict?: bo
     }
   }
 
-  result.gitignoreAppended = ensureGitignoreCoverage(projectDir, manifest.dependencies.map((d) => d.install_dir), { dryRun: opts.dryRun }).appended;
+  result.gitignoreAppended = ensureGitignoreCoverage(projectDir, selected.map((d) => d.install_dir), { dryRun: opts.dryRun }).appended;
   return result;
+}
+
+// ── Verify (standard §5.3 — V1-V9; backs scripts/external-deps.ts verify) ─────
+
+export interface VerifyFinding {
+  check: 'V1' | 'V2' | 'V3' | 'V3a' | 'V4' | 'V5' | 'V6' | 'V7' | 'V8' | 'V9';
+  id: string | null;
+  severity: GateSeverity;
+  message: string;
+}
+
+/** V8 (as-is): tracked upstream files unmodified. Untracked files are ignored —
+ *  consumers may write run artifacts into the clone (standard §5.3). */
+export function checkAsIs(entry: ExternalDepEntry, projectDir: string): { checked: boolean; clean: boolean; modified: string[]; error?: string } {
+  const dest = resolve(projectDir, entry.install_dir);
+  if (!existsSync(join(dest, '.git'))) return { checked: false, clean: true, modified: [], error: 'no clone present' };
+  const st = git(['status', '--porcelain', '--untracked-files=no'], { cwd: dest });
+  if (!st.ok) return { checked: false, clean: true, modified: [], error: `git status failed: ${st.stderr}` };
+  const modified = st.stdout.split('\n').map((l) => l.trim()).filter(Boolean);
+  return { checked: true, clean: modified.length === 0, modified };
+}
+
+/** V9: upstream LICENSE* / COPYING* kept at the clone root (DEC-20261106-04 cond. 3). */
+export function checkUpstreamLicenseFile(entry: ExternalDepEntry, projectDir: string): { checked: boolean; present: boolean; files: string[] } {
+  const dest = resolve(projectDir, entry.install_dir);
+  if (!existsSync(dest)) return { checked: false, present: false, files: [] };
+  let names: string[] = [];
+  try { names = readdirSync(dest); } catch { return { checked: false, present: false, files: [] }; }
+  const files = names.filter((n) => /^(LICENSE|LICENCE|COPYING)/i.test(n));
+  return { checked: true, present: files.length > 0, files };
+}
+
+/** V7 tag half: `refs/tags/<pin>` resolves inside the clone. */
+export function checkPinTag(entry: ExternalDepEntry, projectDir: string): { checked: boolean; resolves: boolean } {
+  const dest = resolve(projectDir, entry.install_dir);
+  if (!existsSync(join(dest, '.git'))) return { checked: false, resolves: false };
+  const r = git(['rev-parse', '--verify', '--quiet', `refs/tags/${entry.pin}^{commit}`], { cwd: dest });
+  return { checked: true, resolves: r.ok };
+}
+
+function stripHashComments(text: string): string {
+  return text.split(/\r?\n/).map((l) => l.replace(/(^|\s)#.*$/, '')).join('\n');
+}
+
+function stripSlashComments(text: string): string {
+  return text.replace(/\/\*[\s\S]*?\*\//g, ' ').split(/\r?\n/).map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1')).join('\n');
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * V5 (⚠️ heuristic, name match only): excluded components must stay absent
+ * from project-owned install surfaces — root requirements*.txt, pyproject.toml,
+ * package.json dependency maps, and the adapter file. Comments are stripped
+ * first (the adapter documents its own exclusion in prose).
+ */
+export function scanExcludedComponents(entry: ExternalDepEntry, projectDir: string): Array<{ component: string; file: string }> {
+  const hits: Array<{ component: string; file: string }> = [];
+  const comps = entry.excluded_components ?? [];
+  if (comps.length === 0) return hits;
+  const surfaces: Array<{ rel: string; text: string }> = [];
+  let rootNames: string[] = [];
+  try { rootNames = readdirSync(projectDir); } catch { /* unreadable root */ }
+  for (const n of rootNames) {
+    if (/^requirements.*\.txt$/i.test(n) || n === 'pyproject.toml') {
+      try { surfaces.push({ rel: n, text: stripHashComments(readFileSync(join(projectDir, n), 'utf8')) }); } catch { /* skip */ }
+    }
+  }
+  const pkgPath = join(projectDir, 'package.json');
+  if (existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as Record<string, unknown>;
+      const keys: string[] = [];
+      for (const k of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+        const v = pkg[k];
+        if (isPlainObject(v)) keys.push(...Object.keys(v));
+      }
+      surfaces.push({ rel: 'package.json', text: keys.join('\n') });
+    } catch { /* malformed package.json — not this check's concern */ }
+  }
+  if (entry.adapter) {
+    const ap = join(projectDir, entry.adapter);
+    if (existsSync(ap)) {
+      try {
+        const raw = readFileSync(ap, 'utf8');
+        surfaces.push({ rel: entry.adapter, text: /\.(py|sh|toml|txt)$/i.test(entry.adapter) ? stripHashComments(raw) : stripSlashComments(raw) });
+      } catch { /* skip */ }
+    }
+  }
+  for (const c of comps) {
+    const re = new RegExp(`(^|[^A-Za-z0-9_-])${escapeRe(c.name)}($|[^A-Za-z0-9_-])`, 'im');
+    for (const s of surfaces) if (re.test(s.text)) hits.push({ component: c.name, file: s.rel });
+  }
+  return hits;
+}
+
+/**
+ * Run the standard §5.3 verify checks over a project. `manifestOnly` limits
+ * the run to the offline manifest checks (V1-V5 + V3a) — the commit-time and
+ * CI legs (E3/E4). Never touches the network.
+ */
+export function verifyProjectExternalDeps(projectDir: string, opts: { manifestOnly?: boolean; allowLocalRepos?: boolean } = {}): { findings: VerifyFinding[]; manifest: ExternalDepsManifest | null; manifestPresent: boolean } {
+  const findings: VerifyFinding[] = [];
+  const manifestPath = join(projectDir, 'external-deps.json');
+  if (!existsSync(manifestPath)) {
+    return { findings: [{ check: 'V1', id: null, severity: 'pass', message: 'no external-deps.json — nothing to verify' }], manifest: null, manifestPresent: false };
+  }
+  let manifest: ExternalDepsManifest;
+  try {
+    manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf8'), 'external-deps.json', { allowLocalRepos: opts.allowLocalRepos === true });
+  } catch (err) {
+    findings.push({ check: 'V1', id: null, severity: 'fail', message: (err as Error).message });
+    return { findings, manifest: null, manifestPresent: true };
+  }
+  findings.push(isLegacyV1WithEntries(manifest)
+    ? { check: 'V1', id: null, severity: 'warn', message: 'schema v1 with dependencies — license undeclared; migrate to v2 (the next upgrade visit migrates it)' }
+    : { check: 'V1', id: null, severity: 'pass', message: `manifest parses (schema v${manifest.schema_version}, ${manifest.dependencies.length} dependenc${manifest.dependencies.length === 1 ? 'y' : 'ies'})` });
+
+  const gitignore = readGitignore(projectDir);
+  for (const dep of manifest.dependencies) {
+    const lic = evaluateLicensePolicy(dep);
+    findings.push({ check: 'V2', id: dep.id, severity: lic.severity, message: lic.message });
+    findings.push(isGitignoreCovered(gitignore, dep.install_dir)
+      ? { check: 'V3', id: dep.id, severity: 'pass', message: `${dep.id}: ${dep.install_dir} covered by .gitignore` }
+      : { check: 'V3', id: dep.id, severity: 'fail', message: `${dep.id}: ${dep.install_dir} is NOT covered by .gitignore — an external clone must never be committed (D5)` });
+    const conv = evaluateInstallDirConvention(dep);
+    findings.push({ check: 'V3a', id: dep.id, severity: conv.severity, message: conv.message });
+    if (dep.adapter) {
+      findings.push(existsSync(join(projectDir, dep.adapter))
+        ? { check: 'V4', id: dep.id, severity: 'pass', message: `${dep.id}: adapter ${dep.adapter} present` }
+        : { check: 'V4', id: dep.id, severity: 'fail', message: `${dep.id}: adapter ${dep.adapter} is missing — the single coupling file must exist (standard §5.2)` });
+    }
+    const hits = scanExcludedComponents(dep, projectDir);
+    if ((dep.excluded_components ?? []).length > 0) {
+      findings.push(hits.length === 0
+        ? { check: 'V5', id: dep.id, severity: 'pass', message: `${dep.id}: excluded components absent from project install surfaces` }
+        : { check: 'V5', id: dep.id, severity: 'fail', message: `${dep.id}: excluded component(s) named on a project install surface (heuristic name match): ${hits.map((h) => `${h.component} in ${h.file}`).join(', ')}` });
+    }
+    if (opts.manifestOnly) continue;
+
+    const dest = resolve(projectDir, dep.install_dir);
+    if (!existsSync(join(dest, '.git'))) {
+      findings.push({ check: 'V6', id: dep.id, severity: 'warn', message: `${dep.id}: no clone at ${dep.install_dir} — run: bun scripts/external-deps.ts install --id ${dep.id}` });
+      continue;
+    }
+    findings.push({ check: 'V6', id: dep.id, severity: 'pass', message: `${dep.id}: clone present at ${dep.install_dir}` });
+    const drift = checkPinDrift(dep, projectDir);
+    const tag = checkPinTag(dep, projectDir);
+    if (!tag.resolves) {
+      findings.push({ check: 'V7', id: dep.id, severity: 'fail', message: `${dep.id}: refs/tags/${dep.pin} does not resolve in the clone — pin must be a release tag` });
+    } else if (drift.checked && drift.drifted) {
+      findings.push({ check: 'V7', id: dep.id, severity: 'fail', message: `${dep.id}: clone HEAD ${drift.resolved?.slice(0, 12)} != recorded commit ${dep.commit?.slice(0, 12)}` });
+    } else {
+      findings.push({ check: 'V7', id: dep.id, severity: 'pass', message: `${dep.id}: HEAD at ${dep.pin}${dep.commit ? ` (${dep.commit.slice(0, 12)})` : ''}` });
+    }
+    const asIs = checkAsIs(dep, projectDir);
+    findings.push(asIs.clean
+      ? { check: 'V8', id: dep.id, severity: 'pass', message: `${dep.id}: no tracked upstream file modified (as-is)` }
+      : { check: 'V8', id: dep.id, severity: 'fail', message: `${dep.id}: tracked upstream files modified — the clone must be consumed as-is: ${asIs.modified.slice(0, 5).join(', ')}${asIs.modified.length > 5 ? ` (+${asIs.modified.length - 5} more)` : ''}` });
+    const lf = checkUpstreamLicenseFile(dep, projectDir);
+    findings.push(lf.present
+      ? { check: 'V9', id: dep.id, severity: 'pass', message: `${dep.id}: upstream ${lf.files.join(', ')} present` }
+      : { check: 'V9', id: dep.id, severity: 'fail', message: `${dep.id}: no LICENSE*/COPYING* at the clone root — the upstream license file must be kept (DEC-20261106-04 condition 3)` });
+  }
+  return { findings, manifest, manifestPresent: true };
+}
+
+/**
+ * v1 → v2 migration of a PARSED v1 manifest (standard §5.6): for an id in the
+ * seed, take the v2 contract fields from the seed and keep everything else
+ * (the project's pin/commit are its facts); an id not in the seed keeps its
+ * entry with NO license (never invent an attestation — verify FAILs until a
+ * human adds it). Returns the raw document to write (schema_version 2).
+ */
+export function migrateManifestV1ToV2(projectRaw: string, seed: ExternalDepsManifest): { document: Record<string, unknown>; migrated: string[]; unattested: string[] } {
+  const doc = JSON.parse(projectRaw) as Record<string, unknown>;
+  const deps = Array.isArray(doc['dependencies']) ? doc['dependencies'] as Array<Record<string, unknown>> : [];
+  const seedById = new Map(seed.dependencies.map((d) => [d.id, d] as const));
+  const migrated: string[] = [];
+  const unattested: string[] = [];
+  for (const dep of deps) {
+    const id = typeof dep['id'] === 'string' ? dep['id'] : '';
+    const s = seedById.get(id);
+    if (s && s.license) {
+      for (const f of V2_CONTRACT_FIELDS) {
+        const v = (s as unknown as Record<string, unknown>)[f];
+        if (v !== undefined) dep[f] = v;
+      }
+      migrated.push(id);
+    } else {
+      unattested.push(id || '<no id>');
+    }
+  }
+  const out: Record<string, unknown> = {};
+  if (typeof doc['$comment'] === 'string') out['$comment'] = doc['$comment'];
+  out['schema_version'] = EXTERNAL_DEPS_SCHEMA_VERSION;
+  out['dependencies'] = deps;
+  return { document: out, migrated, unattested };
 }
 
 // ── Vendoring guard (D4) ───────────────────────────────────────────────────────

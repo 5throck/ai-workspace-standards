@@ -1,4 +1,11 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-07, standard design §5.6): export splitValidEntries — the
+//          v1 → v2 migration in upgrade-project.ts uses it to build the typed
+//          entry list of a migrated document whose project-only entries are
+//          not yet license-attested (kept in the file, excluded from the pass).
+//          Seeds are schema v2 now, so a project-only v1 entry without the v2
+//          contract fields lands in invalidProjectOnly (kept verbatim) — the
+//          standard's "never invent an attestation" rule.
 /**
  * external-deps-reconcile.ts — pure reconcile core for the upgrade-project.ts
  * EXTERNAL DEPS pass (design docs/designs/2026-11-07-external-deps-standard-design.md
@@ -58,6 +65,24 @@ export interface ReconcileResult {
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/**
+ * Split raw entries into the ones that validate on their own (typed) and the
+ * ones that do not (id + loader message). Order preserved; a later duplicate
+ * id is reported invalid.
+ */
+export function splitValidEntries(rawEntries: unknown[], schemaVersion: number, opts: { allowLocalRepos?: boolean } = {}): { valid: ExternalDepEntry[]; invalid: ReconcileInvalidEntry[] } {
+  const valid: ExternalDepEntry[] = [];
+  const invalid: ReconcileInvalidEntry[] = [];
+  rawEntries.forEach((raw, i) => {
+    const id = isPlainObject(raw) && typeof raw['id'] === 'string' ? raw['id'] : `entry[${i}]`;
+    const v = validateSingleEntry(raw, schemaVersion, opts.allowLocalRepos === true);
+    if (!v.entry) { invalid.push({ id, reason: v.error ?? 'invalid entry' }); return; }
+    if (valid.some((e) => e.id === v.entry!.id)) { invalid.push({ id, reason: `duplicate id '${id}'` }); return; }
+    valid.push(v.entry);
+  });
+  return { valid, invalid };
 }
 
 /**

@@ -10,10 +10,14 @@
  *
  * Pure function — no filesystem, no network.
  *
- * @version 1.0.0
+ * v1.1.0: seeds are schema v2 (license/usage/adapter required); a project-only
+ * v1 entry without the contract fields is kept verbatim but not attested;
+ * splitValidEntries cases.
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
-import { reconcileExternalDepsManifest } from '../../scripts/helpers/external-deps-reconcile.ts';
+import { reconcileExternalDepsManifest, splitValidEntries } from '../../scripts/helpers/external-deps-reconcile.ts';
 import { parseExternalDepsManifest, EXTERNAL_DEPS_SCHEMA_VERSION, type ExternalDepsManifest } from '../../scripts/lib/external-deps.ts';
 
 const SHA_A = 'a'.repeat(40);
@@ -32,6 +36,9 @@ function seedEntry(id: string, extra: Record<string, unknown> = {}): Record<stri
     install_dir: `external/${id}`,
     consumer: `seed consumer for ${id}`,
     propagation: 'never',
+    license: 'MIT',
+    usage: 'as-is',
+    adapter: `scripts/${id}-adapter.ts`,
     ...extra,
   };
 }
@@ -126,5 +133,23 @@ describe('reconcileExternalDepsManifest — schema_version and safety', () => {
     expect(r.document.dependencies).toHaveLength(2);
     expect(r.manifest.dependencies).toHaveLength(1);
     expect(r.invalidProjectOnly[0].reason).toContain('duplicate id');
+  });
+});
+
+describe('schema v2 seeds (standard §5.6)', () => {
+  test('a project-only v1-shaped entry (no license) is kept verbatim but never attested', () => {
+    const seed = seedWith([seedEntry('ppt-master')]);
+    const v1Only = { id: 'old-tool', repo: 'https://github.com/example/old-tool', pin: 'v1.0.0', install: 'git clone --depth 1 --branch {pin} {repo} {dir}', install_dir: 'external/old-tool', propagation: 'never' };
+    const r = reconcileExternalDepsManifest(JSON.stringify({ schema_version: 1, bogus: true, dependencies: [v1Only] }), seed);
+    expect(r.document.schema_version).toBe(2);
+    expect(r.document.dependencies).toContainEqual(v1Only);
+    expect(r.invalidProjectOnly.map((e) => e.id)).toEqual(['old-tool']);
+    expect(r.invalidProjectOnly[0].reason).toContain('license');
+  });
+
+  test('splitValidEntries separates valid and invalid entries and flags duplicates', () => {
+    const r = splitValidEntries([seedEntry('a'), { id: 'b' }, seedEntry('a')], 2);
+    expect(r.valid.map((e) => e.id)).toEqual(['a']);
+    expect(r.invalid.map((e) => e.id)).toEqual(['b', 'a']);
   });
 });
