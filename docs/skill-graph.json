@@ -7750,8 +7750,8 @@
       "name": "pptx-export",
       "scope": "co-work",
       "capability": "pptx-export",
-      "content_hash": "6a07c03ac4c90c61",
-      "version": "2.0.1",
+      "content_hash": "f579b355f4081d8c",
+      "version": "2.0.2",
       "mirrors": [
         "templates/co-work/skills/pptx-export/SKILL.md"
       ]
@@ -7763,8 +7763,8 @@
       "name": "svg-quality-gate",
       "scope": "co-work",
       "capability": "svg-quality-gate",
-      "content_hash": "1d22c1db3a94615b",
-      "version": "1.2.0",
+      "content_hash": "359dfd352f573c3b",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-work/skills/svg-quality-gate/SKILL.md"
       ]

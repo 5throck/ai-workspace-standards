@@ -1,12 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-@version 2.0.0
+r"""
+@version 2.1.0
 @description Deterministic quality gate for canonical SVG deck pages: whitelist
 enforcement, three-severity model, bidirectional content-SSOT text-run diff
 (SVG⊆SSOT errors + unrendered SSOT runs as W-CONTENT-UNRENDERED warnings), XML
 entity decoding in run extraction, and SHA-256 fingerprint reports required for
 PPTX export.
+
+v2.1.0 (2026-11-07): exec-cut contract support — the reverse diff
+(W-CONTENT-UNRENDERED) becomes active and meaningful for exec-cut contracts,
+which key on `## E01`–`## E12` (v2.0.0 sectioned `## Page <n>` only, so the
+reverse diff was inert there). Three coordinated generalizations, all confined
+to the contract-sectioning / reverse-diff path:
+  1. Heading pattern `## (?:Page |E)(\d+)` (E01 → page 1).
+  2. Any OTHER markdown heading terminates the current section — trailing
+     bookkeeping sections (provenance tables, References) are not slide
+     content and must not be absorbed into the last page's run list.
+  3. Structured-field awareness: exec-cut contracts are field-bulleted
+     (`- focal: …`, `- title: …`, `- runs:` items, `- footnote: …`,
+     `- table:` rows, `- visual: …`). Labeled bullets contribute only their
+     content (labels are contract metadata, never rendered); `footnote:`,
+     `table:` and `visual:` blocks are structural apparatus (provenance
+     `[Source: …]` that page design legitimately drops on title/divider
+     pages; native-table 2-D linearization covered by E-NATIVE-DATA
+     validation + the forward diff; implementation directive) and contribute
+     nothing; and the loose matching
+     used by the reverse diff strips every run of non-word/non-space chars
+     on BOTH sides (contract prose separators `=`, ` / `, `·`, em-dash are
+     rendered by 2-D slide layout as separate runs) — matching is
+     word-sequence containment. The forward E-CONTENT-DIFF gate and
+     normalize_text keep their exact 2.0.0 semantics; fingerprints are
+     unchanged (fingerprint input = page bytes, not the contract).
+Existing-contract output is byte-identical to 2.0.0 (verified: 100-page main
+deck report identical modulo generated_at; unrendered_runs stays 0 — the
+generalizations only remove false positives and add matches).
 
 Python port of templates/co-work/scripts/deck/svg-check.ts (Bun, v1.5.1) —
 Phase 2 of design 2026-11-06-deck-emitter-ppt-master-rebase-design (D6): the
@@ -43,7 +71,7 @@ from datetime import datetime, timezone
 from functools import cmp_to_key
 from typing import Any, Callable, Optional
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 
 # ---------------------------------------------------------------------------
 # Canonical contract (svg-slide-authoring skill, spec §4)
@@ -211,7 +239,13 @@ def decode_xml_entities(s: str) -> str:
 
 _WS_RE = re.compile(r"\s+")
 _NORMALIZE_PUNCT_RE = re.compile(r"[#*_`>|]+")
-_LOOSE_PUNCT_RE = re.compile(r"[.,:;!?\"'\(\)\[\]]+")
+# v2.1.0: reverse-diff loose matching is punctuation-insensitive on BOTH sides
+# — contract prose uses typographic separators (`=`, ` / `, `·`, em-dash) that
+# 2-D slide layout renders as separate runs — so strip every run of non-word,
+# non-space characters (Unicode-aware: Hangul is \w). Matching stays
+# word-sequence containment. The forward E-CONTENT-DIFF gate (normalize_text)
+# keeps its exact 2.0.0 semantics.
+_LOOSE_PUNCT_RE = re.compile(r"[^\w\s]+")
 _LEADING_MARKER_RE = re.compile(r"^[-+]\s+")
 
 
@@ -227,17 +261,45 @@ def normalize_text(s: str) -> str:
 
 
 def normalize_loose(s: str) -> str:
-    """Loose normalization for the reverse (SSOT → page) diff only (v1.5.0 R2)."""
+    """Loose normalization for the reverse (SSOT → page) diff only (v1.5.0 R2;
+    v2.1.0 strips all non-word/non-space chars — see _LOOSE_PUNCT_RE)."""
     return _WS_RE.sub(" ", _LEADING_MARKER_RE.sub(" ", _LOOSE_PUNCT_RE.sub(" ", normalize_text(s)))).strip()
 
 
-CONTRACT_HEADING_RE = re.compile(r"#{2,3}\s+Page\s+(\d+)\b", re.IGNORECASE)
+# v2.1.0: exec-cut contracts section by `## E<n>` headings (E01 → page 1).
+# `## Page <n>` behavior is unchanged — the E-alternative only ADDS matches for
+# lines the old pattern never matched (old: `Page\s+(\d+)\b`; every line that
+# matched before still matches with the same group value).
+CONTRACT_HEADING_RE = re.compile(r"#{2,3}\s+(?:Page\s+|E)(\d+)\b", re.IGNORECASE)
+
+# v2.1.0: any markdown heading that does NOT open a Page/E section terminates
+# the current section — trailing bookkeeping (provenance tables, References)
+# is not slide content and must not be absorbed into the last page's list.
+NON_SECTION_HEADING_RE = re.compile(r"#{1,6}\s+\S")
+
+# v2.1.0: structured contract fields (exec-cut format). A labeled bullet
+# contributes only its content (the label is contract metadata, never
+# rendered) — `focal:` / `title:` / `runs:` items are slide content and stay
+# in the reverse diff. Structural apparatus is exempt: `table:` rows are the
+# 2-D linearization of a native table (covered by E-NATIVE-DATA validation and
+# the forward diff), `visual:` names the implementation, and `footnote:` is
+# provenance — `[Source: …]` attribution that page design legitimately drops
+# on title/divider pages (deck convention: the parent SSOT's title section
+# carries no footnote field). The forward diff still guarantees every RENDERED
+# footnote comes verbatim from the contract.
+CONTRACT_FIELD_RE = re.compile(r"^\s*-\s*([A-Za-z][\w-]*):\s*(.*)$", re.ASCII)
+CONTRACT_STRUCTURAL_FIELDS = {"footnote", "table", "visual"}
+_BULLET_RE = re.compile(r"^\s*[-+*]\s", re.ASCII)
 
 
 def parse_contract_sections(raw: str) -> dict[int, list[str]]:
-    """Section a content contract by `## Page <n>` headings (v1.5.0 R2)."""
+    """Section a content contract by `## Page <n>` or `## E<n>` headings
+    (v1.5.0 R2; v2.1.0 adds exec-cut support: the E-heading alternative,
+    section termination at any other markdown heading, and structured-field
+    parsing). E-numbers map 1:1 to page numbers (E01 → page 1)."""
     sections: dict[int, list[str]] = {}
     current: Optional[int] = None
+    structural = False  # inside a `table:` / `visual:` block
     for line in raw.split("\n"):
         line = line.rstrip("\r")
         h = CONTRACT_HEADING_RE.match(line)
@@ -245,9 +307,28 @@ def parse_contract_sections(raw: str) -> dict[int, list[str]]:
             current = int(h.group(1), 10)
             if current not in sections:
                 sections[current] = []
+            structural = False
+            continue
+        if NON_SECTION_HEADING_RE.match(line):
+            current = None
+            structural = False
             continue
         if current is None:
             continue
+        f = CONTRACT_FIELD_RE.match(line)
+        if f:
+            label = f.group(1).lower()
+            rest = f.group(2).strip()
+            if label in CONTRACT_STRUCTURAL_FIELDS:
+                structural = True
+                continue
+            structural = False
+            if rest:
+                sections[current].append(rest)
+            continue
+        if structural and _BULLET_RE.match(line):
+            continue  # continuation of a structural (table/visual) block
+        structural = False
         t = line.strip()
         if t:
             sections[current].append(t)
