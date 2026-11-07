@@ -1,0 +1,108 @@
+schemaVersion: 1
+id: U-20261107-001
+kind: manual
+title: Upstream request from co-work
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-07T09:38:47.536+09:00'
+history:
+  - at: '2026-11-07T09:38:47.536+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-07T10:22:00.507+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-07T10:22:00.534+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-07T10:22:00.534+09:00'
+    from: review
+    to: done
+result: >-
+  Pre-commit SCRIPTS.md gate zero-delta deadlock fixed (PR #1882, design
+  2026-11-07-precommit-zero-delta-gate-design registered implemented): check 6
+  now verifies the invariant instead of the staged-set proxy — when scripts/*.ts
+  are staged, each staged script's @version is checked against SCRIPTS.md staged
+  content if staged else HEAD content (new pure evaluateStagedScriptCoverage +
+  extractFileVersionFromContent/parseScriptsMdRegistryVersions); all covered ->
+  PASS with ZERO_DELTA_GATE_NOTICE; missing row/version mismatch/no
+  @version/staged deletion still fail with per-script remedies. Registration
+  invariant preserved (whole-registry Check A iterates rows, untouched).
+  pre-commit.ts 1.12.0->1.13.0, pre-commit-script-gate.ts 1.1.0->1.2.0;
+  tests/unit/pre-commit-script-gate.test.ts v1.1.0 = 33 tests/54 assertions
+  incl. the incident regression; L1 SCRIPTS.md mirror propagation-driven, drift
+  check passed.
+error: null
+upstream:
+  project: co-work
+  variant: co-work
+  template_version: 0.28.0
+  source: project/co-work
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The pre-commit Lifecycle Compliance Check (scripts/hooks/pre-commit.ts,
+    row-comparison via scripts/helpers/pre-commit-script-gate.ts) requires
+    scripts/SCRIPTS.md to be staged whenever any scripts/*.ts is staged, using
+    `git diff --cached --name-only` as the staged-set proxy. When the SCRIPTS.md
+    registry row for the bumped script ALREADY exists in HEAD with the correct
+    target version (the row was swept into an earlier pipeline commit while the
+    script's @version bump was not yet landed), the legitimate content delta for
+    SCRIPTS.md is zero. A zero-delta file can never appear in the cached diff
+    name list, so the gate fails unconditionally and its own prescribed remedy
+    ("stage the updated scripts/SCRIPTS.md") is mathematically a no-op in this
+    state. Content invariants it is meant to protect (@version == SCRIPTS.md row
+    version) are already satisfied; the proxy just cannot observe that. Observed
+    at the workspace root while landing a coherent version-coherence batch;
+    deterministic on retry.
+  affected_paths:
+    - scripts/hooks/pre-commit.ts
+    - scripts/helpers/pre-commit-script-gate.ts
+    - templates/common/scripts/hooks/pre-commit.ts
+  identity_source: cwd
+  repro: >-
+    1. Repository state: scripts/SCRIPTS.md already contains the registry row
+    for scripts/upgrade-project.ts at version 1.91.1 (the row was swept into an
+    earlier pipeline commit), while scripts/upgrade-project.ts @version in HEAD
+    is still 1.91.0; the lifecycle record is behind. This state was CI-red but
+    locally green-ish in different gates. 2. Edit scripts/upgrade-project.ts to
+    @version 1.91.1 (matching the already-committed SCRIPTS.md row); do not
+    touch scripts/SCRIPTS.md (no legitimate content delta exists — the row
+    already matches). 3. Stage scripts/upgrade-project.ts (+ lifecycle records,
+    VERSION_MANIFEST). 4. Commit → pre-commit Lifecycle Compliance Check FAILs:
+    "[FAIL] scripts/*.ts files were modified but scripts/SCRIPTS.md was not
+    updated." 5. The gate's required action 3 says to stage scripts/SCRIPTS.md —
+    but staging an unchanged file adds nothing to `git diff --cached
+    --name-only`, so the check input cannot change and every retry fails
+    identically. Only escapes observed: a cosmetic SCRIPTS.md edit (noise
+    commit) or bypassing the hook (forbidden by workspace policy).
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/common/scripts/hooks/pre-commit.ts'
+    - info:in_last_delivery scripts/hooks/pre-commit.ts=false
+    - info:in_last_delivery scripts/helpers/pre-commit-script-gate.ts=false
+    - info:in_last_delivery templates/common/scripts/hooks/pre-commit.ts=false
+  dedupe_key: 5497b1dfb269519af9d2bac5950593972b2a57e01024a5dda181c0882c0c6606
+  duplicates:
+    - project: co-work
+      at: '2026-11-07T09:38:47.536+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1882
+    summary: >-
+      Pre-commit SCRIPTS.md gate zero-delta deadlock fixed (PR #1882, design
+      2026-11-07-precommit-zero-delta-gate-design registered implemented): check
+      6 now verifies the invariant instead of the staged-set proxy — when
+      scripts/*.ts are staged, each staged script's @version is checked against
+      SCRIPTS.md staged content if staged else HEAD content (new pure
+      evaluateStagedScriptCoverage +
+      extractFileVersionFromContent/parseScriptsMdRegistryVersions); all covered
+      -> PASS with ZERO_DELTA_GATE_NOTICE; missing row/version mismatch/no
+      @version/staged deletion still fail with per-script remedies. Registration
+      invariant preserved (whole-registry Check A iterates rows, untouched).
+      pre-commit.ts 1.12.0->1.13.0, pre-commit-script-gate.ts 1.1.0->1.2.0;
+      tests/unit/pre-commit-script-gate.test.ts v1.1.0 = 33 tests/54 assertions
+      incl. the incident regression; L1 SCRIPTS.md mirror propagation-driven,
+      drift check passed.
