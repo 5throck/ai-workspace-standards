@@ -16,12 +16,15 @@ title: >-
   project-local by design — engine-aware kordoc/rhwp split; consumption is via
   routing)
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-08T02:00:30.360+09:00'
 history:
   - at: '2026-11-08T02:00:30.360+09:00'
     from: null
     to: backlog
+  - at: '2026-11-08T08:46:57.564+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
