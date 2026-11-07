@@ -590,7 +590,7 @@ export function isUnderAnyInstallDir(relPath: string, installDirs: string[]): bo
 /**
  * Best-effort install_dir extraction from an UNVALIDATED manifest document —
  * used by the propagation-exclusion guards (D4), which must work even when the
- * manifest is a legacy/interim shape (the co-work LOCAL-PATCH instance used
+ * manifest is a legacy/interim shape (the co-work pre-machinery instance used
  * `install_path`) or otherwise schema-drifted. Strict validation is the pass's
  * job; the guard only needs the directory list.
  */

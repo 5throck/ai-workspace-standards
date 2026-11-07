@@ -8,7 +8,7 @@
 //          Check V registry). Surrounding variant-script copies already guard
 //          or require an existing project file — this was the only gap.
 // v1.91.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
-//          — implements upstream ticket U-20261106-003): new EXTERNAL DEPS pass
+//          — implements the upstream external-dependency machinery): new EXTERNAL DEPS pass
 //          AFTER the TEMPLATE TREE SYNC pass (D3) — per dependency: git
 //          ls-remote upstream tag check (semver-aware; a tag not newer than the
 //          pin short-circuits to "current") → compatibility_test from the
@@ -20,8 +20,8 @@
 //          (documented scaffold-retry path, D2; exit 1 on failures). The pass
 //          also seeds external-deps.json from the template seed when absent and
 //          reconciles a legacy/interim manifest shape into the generic schema
-//          (D1/D8 — the co-work LOCAL-PATCH instance retires on the next real
-//          run), validates install_dir .gitignore coverage with auto-append
+//          (D1/D8 — the co-work interim manifest instance was reconciled by the
+//          first real upgrade run, 2026-11-07), validates install_dir .gitignore coverage with auto-append
 //          (D5), and TEMPLATE TREE SYNC / VARIANT ASSET DIRS now hard-skip any
 //          path under a manifest install_dir (D4 — external code never flows
 //          template → project). Core in scripts/lib/external-deps.ts v1.0.0.
@@ -2425,7 +2425,7 @@ function mergeGitattributes(dest: string, src: string): void {
 
 // ── External-dependency install_dirs (v1.91.0, design D4) ─────────────────────
 // Best-effort parse (extractInstallDirsLoose — must work even on a legacy/
-// interim manifest shape like co-work's LOCAL-PATCH instance, which used
+// interim manifest shape like co-work's pre-machinery instance, which used
 // install_path); strict validation is the EXTERNAL DEPS pass's job. Consumed by
 // the TEMPLATE TREE SYNC / VARIANT ASSET DIRS hard-skips: no template file may
 // deliver into an external clone's directory (external code never flows
@@ -2437,8 +2437,8 @@ const externalInstallDirs: string[] = (() => {
 })();
 
 /**
- * EXTERNAL DEPS pass (v1.91.0, design 2026-11-07-external-deps-machinery D3,
- * upstream U-20261106-003). Runs in the main flow (after TEMPLATE TREE SYNC /
+ * EXTERNAL DEPS pass (v1.91.0, design 2026-11-07-external-deps-machinery D3).
+ * Runs in the main flow (after TEMPLATE TREE SYNC /
  * IDENTITY SEED) and standalone under --external-deps-only. Structure:
  *   1. Seed delivery — project manifest absent → copy the effective template
  *      seed (variant > common) add-if-missing.
@@ -2488,8 +2488,8 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
     changed++;
   }
 
-  // 2. Parse; reconcile a legacy/interim shape (D8 — the co-work LOCAL-PATCH
-  //    instance retires here on the next real upgrade run).
+  // 2. Parse; reconcile a legacy/interim shape (D8 — the co-work interim
+  //    instance was reconciled by the first real upgrade run, 2026-11-07).
   let manifest: ExternalDepsManifest | null = null;
   try {
     manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf8'), MANIFEST_REL);

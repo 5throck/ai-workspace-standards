@@ -1,7 +1,6 @@
 /**
  * Tests for scripts/lib/external-deps.ts — the generic external-dependency
- * machinery (design docs/designs/2026-11-07-external-deps-machinery-design.md,
- * upstream U-20261106-003):
+ * machinery (design docs/designs/2026-11-07-external-deps-machinery-design.md):
  *
  *   §4.1  manifest parsing + validation (schema drift, bad install_dir, unknown
  *         propagation value, non-https repos, placeholder resolution)

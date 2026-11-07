@@ -15,14 +15,14 @@
  * @phase: Complete pipeline orchestration
  *
  * v1.23.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
- *          D4 — implements upstream ticket U-20261106-003): PHASE 2.6 (new,
+ *          D4 — implements the upstream external-dependency machinery): PHASE 2.6 (new,
  *          after the country-scoped skill exclusion) — external-dependency
  *          install_dir exclusion. The L3 project's external-deps.json
  *          install_dirs are read from the PROJECT side and parsed loosely
  *          (scripts/lib/external-deps.ts v1.0.0 extractInstallDirsLoose), and
  *          every reconciled-manifest path under one is dropped from
  *          keepInVariant: no path under an external clone directory (e.g.
- *          presentations/ppt-master/) ever flows project → template. The
+ *          external/ppt-master/) ever flows project → template. The
  *          vendoring guard (validate-templates.ts v1.72.0 external-dep-vendoring)
  *          remains the template-side backstop; promotion inherits it in Phase 6.
  *
@@ -904,12 +904,11 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
 
   // ============================================================================
   // PHASE 2.6: EXTERNAL-DEPENDENCY INSTALL_DIR EXCLUSION (v1.23.0, design
-  // docs/designs/2026-11-07-external-deps-machinery-design.md D4, upstream
-  // U-20261106-003)
+  // docs/designs/2026-11-07-external-deps-machinery-design.md D4)
   //
   // Propagation never crosses the template boundary (D4): no path under any
   // external-deps.json manifest install_dir may flow project → template. The
-  // gitignored external clone (e.g. presentations/ppt-master/) is upstream
+  // gitignored external clone (e.g. external/ppt-master/) is upstream
   // code consumed at a pin — promoting it would vendor a fork into the
   // template tree (the vendoring guard in validate-templates.ts then FAILs).
   // The manifest is read from the PROJECT side and parsed loosely
