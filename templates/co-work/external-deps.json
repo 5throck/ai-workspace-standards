@@ -8,7 +8,7 @@
       "pin": "v6.8.0",
       "commit": "5e8856be0da8e6bc85c4aa28acc614478f7b7137",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
-      "install_dir": "presentations/ppt-master",
+      "install_dir": "external/ppt-master",
       "consumer": "deck pipeline (scripts/deck/ppt-master-adapter.ts)",
       "compatibility_test": "python3 scripts/deck/tests/test_svg_check_parity.py",
       "propagation": "never"

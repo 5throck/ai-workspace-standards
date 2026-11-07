@@ -11,7 +11,7 @@ last_reviewed: 2026-11-07
 status: active
 scope: co-work
 owner: pm
-prerequisites: Bun runtime (adapter), Python 3.10+ (gate and previews — svg_check.py stdlib-only, render_previews.py with resvg-py), external dependency ppt-master v6.8.0 (MIT) cloned per external-deps.json (presentations/ppt-master/), python venv with their install list (PyMuPDF/AGPL excluded), templates/co-work/scripts/deck/ppt-master-adapter.ts, passing final svg_check.py report
+prerequisites: Bun runtime (adapter), Python 3.10+ (gate and previews — svg_check.py stdlib-only, render_previews.py with resvg-py), external dependency ppt-master v6.8.0 (MIT) cloned per external-deps.json (external/ppt-master/), python venv with their install list (PyMuPDF/AGPL excluded), templates/co-work/scripts/deck/ppt-master-adapter.ts, passing final svg_check.py report
 metadata:
   type: capability
   triggers:
@@ -34,9 +34,11 @@ Their deterministic scripts are run verbatim and **never modified**; their
 LLM/agent authoring stages are never wired. The pinned clone keeps upstream
 LICENSE/copyright files intact. PyMuPDF/AGPL (their optional PDF converter)
 is excluded from every install list and dependency surface. Pin and install
-procedure: project `external-deps.json` + `bun scripts/deck/fetch-ppt-master.ts`
-(LOCAL-PATCH(upstream-request: U-20261106-003) — interim project-local
-mechanism until the upstream L0 manifest lands). Decks built by an MIT tool
+procedure: project `external-deps.json` (install_dir `external/ppt-master/`,
+gitignored — never a deliverable/working directory), delivered and updated by
+the upstream external-dependency machinery (design
+2026-11-07-external-deps-machinery-design.md D2/D3; the interim project-local
+fetcher `scripts/deck/fetch-ppt-master.ts` is retired). Decks built by an MIT tool
 are content, not software redistribution — no per-deck notice is required.
 
 ## Context
@@ -75,7 +77,7 @@ user-side manual open.
    ```bash
    bun scripts/deck/ppt-master-adapter.ts \
      --deck <deck-dir> \
-     --ppt-master presentations/ppt-master \
+     --ppt-master external/ppt-master \
      --out <ppt-master-project-dir> \
      [--pptx-out <final.pptx>] [--run]
    ```
@@ -113,6 +115,11 @@ user-side manual open.
    delivery-receipt JSON + package verification (xmllint every part 0
    errors, python-pptx open with expected slide/notes counts, native
    tables present as `a:tbl`, entity single-escape spot checks).
+   Optional openability leg (design 2026-11-07-external-deps-machinery D6):
+   `python3 scripts/deck/check_openability.py --pptx <final.pptx> --expect <json>`
+   with an expectation file `{"slides": N, "notes": M|null, "tables": {"slideNum": n}|null}`
+   — asserts the counts; graceful SKIP (exit 0, explicit `SKIP:` line) when
+   python-pptx is absent, so minimal CI environments stay green.
 6. **Previews** (visual acceptance): render from **OUR SVGs** via
    `render_previews.py` — the white-underlay method, now productionized
    (v2.0.1; resvg-py engine, bun + @resvg/resvg-js fallback):
@@ -165,6 +172,6 @@ user-side manual open.
 - Compatibility spike: `deliverables/drafts/2026-11-05-gtms-startup-market-research/ppt-master-spike-report_ko.md` (translation rules §5)
 - Superseded (scoped): compile/export tier of `docs/designs/2026-11-03-co-work-native-pptx-deck-design.md` (authoring + gate tiers remain in force)
 - Upstream: https://github.com/hugohe3/ppt-master (MIT) — pin v6.8.0
-- Manifest: project `external-deps.json`; fetch: `scripts/deck/fetch-ppt-master.ts` (LOCAL-PATCH U-20261106-003)
+- Manifest: project `external-deps.json` (install_dir `external/ppt-master/`; the interim fetcher `scripts/deck/fetch-ppt-master.ts` is retired — superseded by the upstream external-deps machinery)
 - `svg-quality-gate` skill — our content SSOT gate (fingerprint; python checker `svg_check.py` 2.0.0 since Phase 2)
 - `svg-slide-authoring` skill — owns the canonical language

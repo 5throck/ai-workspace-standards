@@ -1,6 +1,6 @@
 // @version 1.37.0
 // v1.37.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
-//          — implements upstream ticket U-20261106-003): resolveClaim gains the
+//          — implements the upstream external-dependency machinery): resolveClaim gains the
 //          `external-deps.json` claim — policy PROJECT_STATE, pass EXTERNAL
 //          DEPS. The manifest is template-seeded (templates/common +
 //          templates/<variant>) but project-operated (the upgrade pass rewrites
@@ -604,7 +604,7 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
 
   if (PROJECT_STATE_FILES.has(rel)) return { policy: 'PROJECT_STATE', pass: '(project state)' };
   // external-deps.json (design docs/designs/2026-11-07-external-deps-machinery-design.md
-  // D1/D3, upstream U-20261106-003): the manifest is template-SEEDED (common + variant)
+  // D1/D3): the manifest is template-SEEDED (common + variant)
   // but project-OPERATED — the pass rewrites pin/commit on a compat-gated pin move, so a
   // generic SYNC claim would escalate every rewrite to CONFLICT. The dedicated EXTERNAL
   // DEPS pass owns delivery (seed add-if-missing + interim-manifest reconcile) and all

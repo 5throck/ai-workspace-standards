@@ -4,12 +4,12 @@
  * @version 1.72.0
  *
  * v1.72.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
- *          D4 — implements upstream ticket U-20261106-003): new FAIL arm
+ *          D4 — implements the upstream external-dependency machinery): new FAIL arm
  *          `external-dep-vendoring` — if any external-deps.json manifest
  *          install_dir path exists as a real directory (or any file below one)
  *          inside templates/common or a templates/co-* tree, validation FAILS.
  *          This is the vendoring guard: the fastest way to detect a
- *          `presentations/ppt-master/` accidentally committed into a template —
+ *          `external/ppt-master/` accidentally committed into a template —
  *          external code is cloned at scaffold time into a gitignored
  *          project-local directory and never vendors into a template. Variant
  *          promotion inherits the guard (it runs through this validation).
@@ -2480,9 +2480,9 @@ function checkVariantScopedSkillLeak(): void {
 }
 
 // Check: external-dep-vendoring (v1.72.0, design
-// docs/designs/2026-11-07-external-deps-machinery-design.md D4, upstream
-// U-20261106-003) — the vendoring guard. The fastest way to detect a
-// `presentations/ppt-master/` accidentally committed into a template tree: if
+// docs/designs/2026-11-07-external-deps-machinery-design.md D4) — the vendoring
+// guard. The fastest way to detect a
+// `external/ppt-master/` accidentally committed into a template tree: if
 // ANY manifest install_dir path exists as a real directory (or any file below
 // one) inside templates/common or templates/<variant>, FAIL. External code is
 // cloned at scaffold time into a gitignored project-local directory — it never

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // @version 1.42.0
 // v1.42.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
-//          — implements upstream ticket U-20261106-003): §7.9 EXTERNAL DEPS
+//          — implements the upstream external-dependency machinery): §7.9 EXTERNAL DEPS
 //          FETCH — after project materialization (§7.8), read the scaffolded
 //          project's external-deps.json (delivered by the new template seeds,
 //          templates/common + templates/<variant>) and install each pinned
@@ -1932,7 +1932,7 @@ try {
 }
 
 // ── 7.9. External-dependency fetch (design 2026-11-07-external-deps-machinery-
-// ──────  design.md, D2/D5 — implements upstream ticket U-20261106-003) ────────
+// ──────  design.md, D2/D5) ────────
 // Project materialization is complete (seeds delivered, package installed);
 // install every pinned external git dependency the delivered external-deps.json
 // declares. Failure posture is WARN, not fail (D2): a network-dependent
