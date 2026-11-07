@@ -66,10 +66,40 @@ Window project diff ranges (co-work, co-newbiz, co-price, co-safety — the non-
 
 Carries this report + tickets T-20261108-002/-003. Design Gate: standing specs ADR-0089 + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design + 2026-11-07-fleet-membership-ssot-design.
 
-## Steps 4–5 — v0.29.0 wave
+## Steps 4–5 — v0.29.0 wave: **COMPLETE — 14/16 fleet projects delivered and merged**
 
-Appended after the wave (canary-first; tombstone guard per fleet project post-merge).
+Canary **co-safety** #231: real CI 9/9 SUCCESS → MERGED, 0.29.0 live, post-merge audit green, tombstone clean (13 deletions absent). One CONFLICT disposition recorded (scripts/dev-sync.ts project-evolved AND template changed — human port path, by-design loudness).
 
-## Step 6 — Final state
+| Project | PR | Path | Result |
+|---|---|---|---|
+| co-safety (canary) | #231 | real CI 9/9 SUCCESS | MERGED, 0.29.0 |
+| co-abap | #238 | billing-wall (windows CI flake rerun-green) | MERGED, 0.29.0 — in-wave fix: 4 sap L3 scripts wrongly pruned by the delivery (project registry declares them L3; tests import them) restored + SCRIPTS.md rows re-added; unit 0 fail |
+| co-architect | #393 | billing-wall | MERGED, 0.29.0 |
+| co-consult | #113 | real CI | MERGED, 0.29.0 |
+| co-deck | #201 | real CI | MERGED, 0.29.0 |
+| co-design | #79 | billing-wall | MERGED, 0.29.0 |
+| co-develop | #204 | billing-wall | MERGED, 0.29.0 |
+| co-export | #66 | billing-wall | MERGED, 0.29.0 |
+| co-game | #68 | billing-wall | MERGED, 0.29.0 |
+| co-hr | #23 | billing-wall | MERGED, 0.29.0 |
+| co-learning | #37 | billing-wall | MERGED, 0.29.0 |
+| co-news | #22 | billing-wall | MERGED, 0.29.0 |
+| co-security | #101 | billing-wall | MERGED, 0.29.0 |
+| co-work | — | — | **DEFERRED — external-deps.json manifest gate** (project v1 checksum field vs 0.29.0 v2 schema; conflicts: external-deps.ts/upgrade-policy.ts/validate-templates.ts/i18n-specialist.md). Human port path; T-20261108-002 is the technical unblock (bounded non-git install extension with checksum). Tree reverted clean at 0.28.0 |
+| co-newbiz | #799→#830 lineage | billing-wall | MERGED, 0.29.0 (2f candidate #824 series included) |
+| co-price | #177 | billing-wall | MERGED, 0.29.0 (ci.yml converged — no accept-ci-perm-diff needed) |
 
-Appended after the wave.
+## Step 6 — Final state (07:38 KST re-verified)
+
+| Project | branch | dirty | open PRs | template |
+|---|---|---|---|---|
+| 16 fleet projects (per SSOT) | main | 0 except live-session dirt: co-consult 95 / co-security 81 / co-newbiz 74 / co-deck 191 (11-07/11-08 sessions mid-work — mirrors/skills/settings staged; session-owned, untouched) | co-design **#77** + co-work **#32/#34** (live sessions) | **16/16 at 0.29.0** except co-work 0.28.0 (deferred, conflict-bound) |
+| co-abap-plugin (excluded) | — | — | — | — (no resync per SSOT) |
+
+- **Tombstone guard**: 0.29.0-merged 11 projects + canary — **zero reappearances** (counts: co-architect 17, co-design 12, co-develop 30, co-export 7, co-game 8, co-hr 8, co-learning 9, co-news 8, co-newbiz 28, co-consult 9, co-security 9, co-safety 13).
+- **Post-merge audits**: green on all delivered projects.
+- **Root landing**: this report + memory block + tickets T-20261108-002/-003 land via the final scoped PR — **NOTE: root /sync was verified working tonight** (the restored 10-29 block ride-along passes step 3.88 as repaired-at-head).
+
+## Verdict
+
+16/16 fleet projects verified (SSOT), 14 delivered to 0.29.0 + merged with green audits, 1 conflict-deferred with the human port path recorded (co-work external-deps v1→v2, technical unblock T-20261108-002), 1 excluded (co-abap-plugin per SSOT). 2f: 2 learning tickets. Secrets gate clean. The changelog fail-then-heal path worked in-wave (co-deck/co-newbiz legacy changelogs normalized mechanically). No gates bypassed; no force operations; live sessions untouched.
