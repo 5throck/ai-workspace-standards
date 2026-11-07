@@ -12,7 +12,7 @@ title: >-
   backfill a records-registry note anchoring the checkout-recovery PRs
   #1901/#1902 (memory-repair class, currently un-ticketed)
 priority: low
-status: running
+status: review
 attempts: 0
 created_at: '2026-11-08T02:02:21.385+09:00'
 history:
@@ -25,5 +25,8 @@ history:
   - at: '2026-11-08T07:59:44.238+09:00'
     from: waiting
     to: running
+  - at: '2026-11-08T08:02:27.784+09:00'
+    from: running
+    to: review
 result: null
 error: null

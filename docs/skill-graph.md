@@ -200,7 +200,7 @@
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
 | `common/i18n-audit` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-formatting` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
-| `common/i18n-layout` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
+| `common/i18n-layout` | common | 1.1.0 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-locale-config` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
 | `common/k-dart` | common | 2.1.2 | — | — | common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-law | — | — |
 | `common/k-ecos` | common | 1.0.0 | — | — | common/k-dart (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
