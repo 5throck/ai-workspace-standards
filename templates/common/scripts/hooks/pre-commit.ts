@@ -2,8 +2,25 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.12.0
+ * @version 1.13.0
  *
+ * v1.13.0 (2026-11-07, U-20261107-001 — spec
+ *  docs/designs/2026-11-07-precommit-zero-delta-gate-design.md): check 6's
+ *  non-merge path no longer fails unconditionally on the staged-file-set
+ *  proxy. When scripts/*.ts are staged and SCRIPTS.md is not, the commit's
+ *  SCRIPTS.md content IS HEAD's (staged blob of a zero-delta file equals
+ *  HEAD's), so each staged script's @version is verified against the HEAD
+ *  registry rows via evaluateStagedScriptCoverage
+ *  (helpers/pre-commit-script-gate.ts v1.2.0): all covered → PASS with a
+ *  one-line notice (the U-20261107-001 incident — row swept into an earlier
+ *  pipeline commit, script bump landed later, zero legitimate SCRIPTS.md
+ *  delta — could never be committed before: the old FAIL's own remedy, "stage
+ *  the updated SCRIPTS.md", is a no-op when the delta is zero); any uncovered
+ *  script (missing @version, unregistered row, version mismatch, or staged
+ *  deletion) still blocks with a per-script remedy. The registration invariant
+ *  is preserved — Check A iterates registry rows, so only this per-script
+ *  coverage check can catch a staged-but-unregistered script. Merge path and
+ *  check 6c unchanged.
  * v1.12.0 (2026-10-30, T-20261030-006 — spec
  *  docs/designs/2026-10-30-language-gate-parent-verbatim-tolerance-design.md):
  *  check 2-B gains parent-commit verbatim tolerance. The 0.24.0 co-safety canary
@@ -58,7 +75,10 @@ import { hasNonEnglish, filterParentVerbatimLines } from "../lib/language-guard.
 import { localDateISO } from "../lib/local-date.ts";
 import {
   evaluateScriptsMdGate,
+  extractFileVersionFromContent,
+  evaluateStagedScriptCoverage,
   MERGE_GATE_NOTICE,
+  ZERO_DELTA_GATE_NOTICE,
   parseCheckAErrorsDetailed,
   runScriptsMdContentGate,
 } from "../helpers/pre-commit-script-gate.ts";
@@ -290,22 +310,60 @@ async function main() {
     mergeInProgress,
   });
 
-  if (scriptsGate === 'proxy-fail') {
+  if (scriptsGate === 'verify-staged-coverage') {
+    // U-20261107-001: the old unconditional proxy FAIL ("SCRIPTS.md was not
+    // updated", remedy "stage the updated SCRIPTS.md") is a no-op trap when
+    // the SCRIPTS.md content delta is zero — a row already at the target
+    // version in HEAD (swept into an earlier pipeline commit) can never enter
+    // `git diff --cached --name-only`, so every retry failed identically.
+    // Verify the invariant the proxy stood for instead: each staged script's
+    // @version must be covered by the SCRIPTS.md registry content this commit
+    // carries. SCRIPTS.md is unstaged here, so the commit's registry content
+    // IS HEAD's (the staged blob of a zero-delta file equals HEAD's blob).
     console.log("\n=== Lifecycle Compliance Check ===");
-    console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts files were modified but scripts/SCRIPTS.md was not updated.");
-    console.error("");
-    console.error("Modified script files:");
+    const showMd = await $`git show HEAD:scripts/SCRIPTS.md`.quiet().nothrow();
+    const scriptsMdContent = showMd.exitCode === 0 ? showMd.stdout.toString() : null;
+    const scriptVersions: Record<string, string | null> = {};
+    const unreadable: string[] = []; // staged deletions (no index blob to read)
     for (const script of scriptStaged) {
-      console.error(`  - ${script}`);
+      const showScript = await $`git show :${script}`.quiet().nothrow();
+      if (showScript.exitCode === 0) {
+        scriptVersions[script] = extractFileVersionFromContent(showScript.stdout.toString());
+      } else {
+        unreadable.push(script);
+      }
     }
-    console.error("");
-    console.error("Required actions:");
-    console.error("  1. Register new scripts in scripts/SCRIPTS.md");
-    console.error("  2. Bump version for modified scripts in scripts/SCRIPTS.md");
-    console.error("  3. Stage the updated scripts/SCRIPTS.md:");
-    console.error("     git add scripts/SCRIPTS.md");
-    console.error("");
-    process.exit(1);
+    const coverage = evaluateStagedScriptCoverage({
+      stagedScripts: scriptStaged.filter((s) => !unreadable.includes(s)),
+      scriptsMdContent,
+      scriptVersions,
+    });
+
+    if (coverage.allCovered && unreadable.length === 0) {
+      console.log(`\x1b[32m[PASS]\x1b[0m ${ZERO_DELTA_GATE_NOTICE}`);
+    } else {
+      console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts staged, but not every staged script's @version is covered by scripts/SCRIPTS.md (checked against the content this commit carries).");
+      console.error("");
+      console.error("Uncovered script files:");
+      for (const entry of coverage.uncovered) {
+        console.error(`  - ${entry.script} (@version ${entry.fileVersion ?? "missing"})`);
+        if (entry.reason === 'no-version-header') {
+          console.error("    → Fix: add an @version header to the script (or revert the change) — its registry coverage cannot be verified without one");
+        } else if (entry.reason === 'no-registry-row') {
+          console.error("    → Fix: register the script in scripts/SCRIPTS.md and stage the updated file:");
+          console.error("      git add scripts/SCRIPTS.md");
+        } else {
+          console.error(`    → Fix: update the scripts/SCRIPTS.md row to ${entry.fileVersion} and stage it (git add scripts/SCRIPTS.md), or revert the @version bump to ${entry.registryVersion}`);
+        }
+      }
+      for (const script of unreadable) {
+        console.error(`  - ${script} (staged content unreadable — deletion or rename)`);
+        console.error("    → Fix: update scripts/SCRIPTS.md for the removal/rename and stage the updated file:");
+        console.error("      git add scripts/SCRIPTS.md");
+      }
+      console.error("");
+      process.exit(1);
+    }
   }
 
   if (scriptsGate === 'merge-verify') {
