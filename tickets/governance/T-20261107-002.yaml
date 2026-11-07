@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261107-002
+kind: manual
+title: >-
+  Architecture map hub-and-spoke amendment (plan
+  2026-11-07-education-archmap-remediation-plan rows 0-1). Scope = plan rows 0
+  and 1. Row 0 (architect, High): amend
+  docs/designs/2026-10-02-workspace-architecture-diagram-design.md to add the
+  hub-and-spoke plane and refresh the basis line + template VERSION basis,
+  then spec-register. Row 1 (automation-engineer, Low): apply the amendment to
+  the four locale SVGs (ko base workspace-architecture.svg + .en/.es/.ja) per
+  the amended design, plus the companion md check. Driver: the current diagram
+  set is dated 2026-10-02 with a basis line pinning template VERSION 0.9.0
+  (current templates/VERSION is 0.28.0) and carries zero hub-and-spoke
+  content, so both handbooks would cite a stale map if updated first. Plan:
+  docs/designs/2026-11-07-education-archmap-remediation-plan.md (status
+  Proposed, execution pending user go). Execution order: row 0 then row 1
+  serial; handbook rows 2-3 (T-20261107-003, T-20261107-004) start only after
+  row 1 lands.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-07T12:01:06+09:00'
+history:
+  - at: '2026-11-07T12:01:06+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
