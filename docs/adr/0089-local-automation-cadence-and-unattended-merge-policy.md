@@ -22,6 +22,7 @@ the `project-resync` skill over all `Projects/co-*` (design:
 `docs/designs/2026-09-25-daily-fleet-review-resync-design.md`; meeting transcript:
 `memory/meeting-2026-09-25-daily-review-resync-design.md`). The two runs overlap in
 time and mutation surface, and both touch shared working-tree state.
+> **Amendment (2026-11-07, DEC-20261107-01 — docs/designs/2026-11-07-fleet-membership-ssot-design.md §7):** the Phase II project set is no longer a raw `Projects/co-*` glob — it is derived via `bun scripts/fleet-list.ts --json` (the fleet SSOT: `Projects/co-*` minus the exclusions recorded in `docs/fleet-membership.json`, currently `co-abap-plugin`). Historical wording above is frozen as the as-deployed record of 2026-09-25.
 
 This run is also the workspace's **first auto-merging automation**. ADR-0082's contract
 states that neither the local runner nor a manual dispatch merges PRs — written for the

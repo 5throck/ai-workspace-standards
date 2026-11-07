@@ -1,6 +1,6 @@
 ---
 name: skill-graph-analytics
-version: 1.3.1
+version: 1.4.0
 description: >
   Weekly fleet analytics over the per-project skill-graph projections:
   consolidate root + Projects/<co-x> graphs into a dated snapshot, triage
@@ -71,6 +71,11 @@ Read-only over all inputs. Writes one machine snapshot per local calendar date:
 overwrite). First run establishes the baseline — no NEW/VANISHED diff exists yet.
 Projects without a graph projection are skipped with a note; zero graphs found
 exits 1 (fix the generator, `bun scripts/generate-skill-graph.ts`, before triage).
+**Fleet membership SSOT** (DEC-20261107-01): the report's project set comes from
+`lib/fleet.ts` — `Projects/co-*` directories minus the exclusions recorded in
+`docs/fleet-membership.json` (verify with `bun scripts/fleet-list.ts --json`).
+Never derive the set with a raw `Projects/co-*` glob; convergence denominators
+count members only.
 
 ### 2. Read the snapshot and the report
 

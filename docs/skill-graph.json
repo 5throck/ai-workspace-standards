@@ -2779,6 +2779,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261107-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -8409,8 +8414,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "9b1a1e01f57eb296",
-      "version": "1.7.0",
+      "content_hash": "29566e4228b0bf3d",
+      "version": "1.8.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",
@@ -8595,8 +8600,8 @@
       "name": "skill-graph-analytics",
       "scope": "root",
       "capability": "skill-graph-analytics",
-      "content_hash": "e3966c9cf0231dc1",
-      "version": "1.3.1",
+      "content_hash": "edc409c66634d7b6",
+      "version": "1.4.0",
       "mirrors": [
         "skills/skill-graph-analytics/SKILL.md",
         ".claude/skills/skill-graph-analytics/SKILL.md",

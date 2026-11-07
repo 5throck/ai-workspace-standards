@@ -1,4 +1,12 @@
-// @version 2.63.0
+// @version 2.64.0
+// v2.64.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §5, DEC-20261107-01): fleet membership SSOT —
+//          checkProjectDocMarkerDrift (A6) derives fleet members from
+//          lib/fleet.ts listFleetProjects() (Projects/co-* minus the
+//          docs/fleet-membership.json exclusions — co-abap-plugin carries
+//          no COMMON-CLAUDE/GEMINI/CODEX managed-block obligation); a
+//          malformed registry emits a controlled FAIL row (fail-closed)
+//          instead of guessing membership from the raw glob.
 // v2.63.0 (2026-11-06, DEC-20261106-03, docs/designs/2026-11-06-ci-warning-cleanup-design.md):
 //          (a) shell-injection source scan skips comment-line matches
 //          (helpers/security-validator.ts isSourceCommentLine); (c) workspace-root
@@ -302,6 +310,7 @@ import { findL0LeakLines } from './helpers/l0-ref-policy.ts';
 import { classifySpecHeader } from './helpers/spec-header-consistency.ts';
 import * as url from 'node:url';
 import { safeFetch } from './lib/ssrf.ts';
+import { listFleetProjects } from './lib/fleet.ts';
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from './lib/encoding-utils.ts';
 import { variantContextPlacement } from './helpers/variant-context.ts';
 import { resolveDesignLintRoots, validateDesignLintOverride, type DesignLintOverride } from './helpers/design-lint-roots.ts';
@@ -2258,10 +2267,21 @@ function checkProjectDocMarkerDrift() {
     const expectedCodex = countMarkers(path.join('templates', 'common', 'CODEX.md'), 'COMMON-CODEX');
 
     let warnCount = 0;
-    for (const entry of fs.readdirSync(projectsDir)) {
-        if (!entry.startsWith('co-')) continue;
-        const projectDir = path.join(projectsDir, entry);
-        if (!fs.statSync(projectDir).isDirectory()) continue;
+    // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+    // §5, DEC-20261107-01): fleet members come from lib/fleet.ts listFleetProjects()
+    // (Projects/co-* minus the docs/fleet-membership.json exclusions —
+    // co-abap-plugin carries no managed-block obligation, A6); no co-
+    // prefix filter here. Malformed registry → controlled FAIL (fail-closed,
+    // never guess membership from the raw glob).
+    let fleetDirs: string[];
+    try {
+        fleetDirs = listFleetProjects();
+    } catch (err) {
+        Fail(`Project CLAUDE.md/GEMINI.md marker drift check: fleet registry failed to load — ${err instanceof Error ? err.message : String(err)}`);
+        return;
+    }
+    for (const projectDir of fleetDirs) {
+        const entry = path.basename(projectDir);
 
         if (expectedClaude > 0) {
             const actual = countMarkers(path.join(projectDir, 'CLAUDE.md'), 'COMMON-CLAUDE');

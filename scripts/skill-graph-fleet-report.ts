@@ -2,6 +2,14 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.4.0 (2026-11-07, spec
+ *          docs/designs/2026-11-07-fleet-membership-ssot-design.md §5,
+ *          DEC-20261107-01): fleet membership SSOT — defaultProjects()
+ *          derives the fleet through lib/fleet.ts listFleetProjects()
+ *          (Projects/co-* minus the docs/fleet-membership.json exclusions;
+ *          co-abap-plugin out — no snapshot row, no convergence denominator
+ *          participation, A4). Transient-checkout filtering (v2.3.0) is
+ *          composed on top unchanged. Additive; report shape untouched.
  * @version 2.3.0 (2026-11-03, T-20261103-004): git-aware fleet discovery —
  *          defaultProjects() excludes transient PR working checkouts (a
  *          Projects/ checkout on a `pr/*` branch, e.g. the gitignored
@@ -97,12 +105,13 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
+import { listFleetProjects } from "./lib/fleet.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.3.0";
+const VERSION = "2.4.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -292,18 +301,16 @@ function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
 }
 
 /**
- * List Projects/co-* directories (sorted), like resync-audit.ts, minus transient
- * PR working checkouts (T-20261103-004 — see filterTransientCheckouts in
- * scripts/lib/git-aware-scan.ts).
+ * Fleet members (sorted), minus transient PR working checkouts (T-20261103-004
+ * — see filterTransientCheckouts in scripts/lib/git-aware-scan.ts).
+ * Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+ * §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
+ * exclusions, derived exclusively through lib/fleet.ts (the sole membership
+ * path — no co- prefix filter here). Transient-checkout semantics unchanged.
  */
 function defaultProjects(): string[] {
-  const out: string[] = [];
-  if (!existsSync("Projects")) return out;
-  for (const e of readdirSync("Projects", { withFileTypes: true })) {
-    if (e.isDirectory() && e.name.startsWith("co-")) out.push(join("Projects", e.name));
-  }
-  out.sort();
-  const { projects, skipped } = filterTransientCheckouts(out, checkoutBranch);
+  const candidates = listFleetProjects();
+  const { projects, skipped } = filterTransientCheckouts(candidates, checkoutBranch);
   for (const s of skipped) {
     console.warn(
       `⚠️  skill-graph-fleet-report: ${s.name} is a transient PR working checkout (branch ${s.branch}) — excluded from fleet discovery (T-20261103-004).`,

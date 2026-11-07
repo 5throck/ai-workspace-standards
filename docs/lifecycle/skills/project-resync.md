@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: project-resync
 - **Status**: active
-- **Version**: 1.7.0
+- **Version**: 1.8.0
 - **Created**: 2026-09-06
-- **Last Updated**: 2026-10-27 (Version 1.6.2 → 1.7.0: user directive 2026-10-27 — Step 2 delta source widened to non-mechanical merged-window PRs (session-landed work now gets the promote/stays-project judgment it previously bypassed); new Step 2f per-project review cadence (battery-always + scoped-on-landing + rotation safety net, shared ≤4-agent cap); Step 2e gains the skill-graph learning cross-reference (new-skill candidates, ≥3-project convergence and delivery-gap ticket rows); stale backport-diff "never implemented" note corrected (v1.0.2 shipped via T-20261009-003). Design: 2026-10-27-project-resync-coverage-design. Previous: 2026-10-26 1.6.2: Step 4 `--prune-removed` rationale corrected for ADR-0073 Amendment 4)
+- **Last Updated**: 2026-11-07 (Version 1.7.0 → 1.8.0: fleet membership SSOT (DEC-20261107-01, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md) — the project set derives ONLY via `bun scripts/fleet-list.ts --json` (`Projects/co-*` minus `docs/fleet-membership.json` exclusions; co-abap-plugin out); raw-glob fallback banned, helper/registry failure = STOP + urgent ticket. SSOT + platform mirrors hash-synced. Previous: 2026-10-27 1.7.0: Step 2 delta source widened to non-mechanical merged-window PRs; new Step 2f per-project review cadence; Step 2e learning cross-reference user directive 2026-10-27 — Step 2 delta source widened to non-mechanical merged-window PRs (session-landed work now gets the promote/stays-project judgment it previously bypassed); new Step 2f per-project review cadence (battery-always + scoped-on-landing + rotation safety net, shared ≤4-agent cap); Step 2e gains the skill-graph learning cross-reference (new-skill candidates, ≥3-project convergence and delivery-gap ticket rows); stale backport-diff "never implemented" note corrected (v1.0.2 shipped via T-20261009-003). Design: 2026-10-27-project-resync-coverage-design. Previous: 2026-10-26 1.6.2: Step 4 `--prune-removed` rationale corrected for ADR-0073 Amendment 4)
 
 ## Description
 Whole-fleet bidirectional sync cycle for Projects/co-*: provenance audit

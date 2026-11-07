@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-07-fleet-membership-ssot-design`
 - **Date**: 2026-11-07
-- **Status**: proposed
+- **Status**: implemented
 - **Author**: architect (PM-dispatched, Design Gate Row 0 — design + registration only)
 - **Related**: DEC-20261107-01 (drafted here, written by the implementer), ADR-0089 (01:30 fleet runner cadence), ADR-0061 (gate-moment decision records), `docs/designs/2026-09-25-daily-fleet-review-resync-design.md` (R19 glob rule — amended by this design), `docs/designs/2026-09-25-daily-fleet-learning-extraction-design.md`, `docs/designs/2026-11-07-handbook-archmap-drift-check-design.md` (architecture-map drift guard, context only), PR #1893 (archmap drift check, merged 2026-11-07)
 

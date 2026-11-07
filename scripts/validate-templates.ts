@@ -1,7 +1,19 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.72.0
+ * @version 1.73.0
+ *
+ * v1.73.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+ *          §5/§6.1, DEC-20261107-01): fleet membership SSOT —
+ *          checkProjectIdentityPlaceholders (A8) iterates actual fleet
+ *          members from lib/fleet.ts listFleetProjects() (Projects/co-*
+ *          minus the docs/fleet-membership.json exclusions) instead of
+ *          sweeping every Projects/* directory (co-abap-plugin was
+ *          previously swept with no co- filter at all — intended semantic
+ *          alignment per design §6.1). Malformed registry → FAIL row
+ *          (fail-closed). checkProjectCountryConfigDeclarations (A7)
+ *          unchanged — the variant.json gate already scopes out
+ *          non-member projects.
  *
  * v1.72.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
  *          D4 — implements the upstream external-dependency machinery): new FAIL arm
@@ -542,6 +554,7 @@ import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
 import { PLATFORMS } from './validate-model-registry.ts';
 import { PLATFORM_AGENT_ADAPTERS } from './sync-agent-mirrors.ts';
 import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
+import { listFleetProjects } from './lib/fleet.ts';
 import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
 import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
 import { extractInstallDirsLoose, findVendoredInstallDirs } from './lib/external-deps.ts';
@@ -6328,10 +6341,25 @@ function checkProjectIdentityPlaceholders(): void {
   const projectsDir = join(ROOT, 'Projects');
   if (!existsSync(projectsDir)) return;
   const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
-  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
-    const project = entry.name;
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5/§6.1, DEC-20261107-01): this sweep previously covered EVERY Projects/*
+  // directory (no co- filter at all — it swept co-abap-plugin and any other
+  // non-member); it now iterates actual fleet members from lib/fleet.ts
+  // listFleetProjects() (Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, A8 — the intended semantic alignment). Malformed registry →
+  // FAIL rows (fail-closed), never a fallback sweep.
+  let fleetDirs: string[];
+  try {
+    fleetDirs = listFleetProjects(ROOT);
+  } catch (err) {
+    fail('fleet-membership', 'project-identity-placeholder',
+      `docs/fleet-membership.json failed to load: ${err instanceof Error ? err.message : String(err)}`,
+      'Fix or remove the malformed registry — fleet tooling must hard-fail rather than guess membership');
+    return;
+  }
+  for (const fleetPath of fleetDirs) {
+    const project = fleetPath.split(/[\\/]/).pop() ?? fleetPath;
+    if (isTransientTestFixture(project)) continue; // E2E staging dirs (T-20260916-001)
     const projectMdPath = join(projectsDir, project, 'docs', 'project.md');
     const contextMdPath = join(projectsDir, project, 'docs', 'context.md');
     if (existsSync(projectMdPath) && placeholderRe.test(readFileSync(projectMdPath, 'utf-8'))) {

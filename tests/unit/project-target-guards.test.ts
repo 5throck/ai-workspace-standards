@@ -252,19 +252,44 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     // missing-template-version.txt optional prompt (EOF → precedent 'Aborted.'
     // exit 0) WITHOUT any outside-target warning or confirm anywhere. The
     // outside guard must stay silent for in-Projects targets.
+    // DEC-20261107-01 (fleet membership SSOT): the fixture is a NON-member
+    // (dot-prefixed name, not Projects/co-*), so the default membership
+    // refusal would fire — --allow-non-member is the sanctioned override,
+    // which emits a WARN row and proceeds into pre-flight exactly as before.
+    const before = countFiles(insideDir);
+    const result = spawnSync(
+      'bun',
+      ['scripts/upgrade-project.ts', insideDir, '--allow-non-member'],
+      { cwd: workspaceRoot, encoding: 'utf-8', timeout: 60000, input: '' }
+    );
+    expect(result.status).toBe(0);
+    const out = (result.stderr ?? '') + (result.stdout ?? '');
+    expect(out).toContain('is not a fleet member (docs/fleet-membership.json, DEC-20261107-01)');
+    expect(out).toContain('WARNING: template-version.txt not found');
+    expect(out).toContain('Aborted.');
+    expect(out).not.toContain('WARN: Target is outside');
+    expect(out).not.toContain('Proceed with upgrade into');
+    expect(out).not.toContain('Outside-Projects target refused');
+    expect(countFiles(insideDir)).toBe(before);
+  }, 30000);
+
+  test('inside-Projects NON-MEMBER target refused by default (fleet membership SSOT, DEC-20261107-01)', () => {
+    // Design docs/designs/2026-11-07-fleet-membership-ssot-design.md §6.2: an
+    // inside-Projects target that is not a fleet member is refused in every
+    // mode — the refusal names the registry + DEC and the override flag, and
+    // fires BEFORE the git-repo / template-version prompts.
     const before = countFiles(insideDir);
     const result = spawnSync(
       'bun',
       ['scripts/upgrade-project.ts', insideDir],
       { cwd: workspaceRoot, encoding: 'utf-8', timeout: 60000, input: '' }
     );
-    expect(result.status).toBe(0);
+    expect(result.status).toBe(1);
     const out = (result.stderr ?? '') + (result.stdout ?? '');
-    expect(out).toContain('WARNING: template-version.txt not found');
-    expect(out).toContain('Aborted.');
+    expect(out).toContain('is not a fleet member (docs/fleet-membership.json, DEC-20261107-01)');
+    expect(out).toContain('--allow-non-member');
+    expect(out).not.toContain('WARNING: template-version.txt not found');
     expect(out).not.toContain('WARN: Target is outside');
-    expect(out).not.toContain('Proceed with upgrade into');
-    expect(out).not.toContain('Outside-Projects target refused');
     expect(countFiles(insideDir)).toBe(before);
   }, 30000);
 

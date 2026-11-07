@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.91.1
+// @version 1.92.0
+// v1.92.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §6.2, DEC-20261107-01): fleet membership SSOT B1 guard — an
+//          inside-Projects target that is NOT a fleet member
+//          (docs/fleet-membership.json via lib/fleet.ts isFleetProjectPath)
+//          is REFUSED by default in every mode (preflight/dry-run/apply):
+//          an upgrade would re-impose the template obligations the
+//          exclusion removed. --allow-non-member is the sanctioned one-off
+//          override and emits a WARN row for the run log. Malformed
+//          registry → refusal (fail-closed).
 // v1.91.1 (2026-11-07): variant SCRIPTS sync mkdir guard — dest scripts/<variant>/
 //          may not exist in projects (co-work has no scripts/co-work/); the
 //          registry copyFileSync crashed with a raw copyfile ENOENT (Node names
@@ -1011,7 +1020,7 @@
 //         numbers on existing rows, "Unregistered script" for newly-added files) and
 //         required manual reconciliation every time.
 // upgrade-project.ts — Upgrade an existing project to the current template version
-// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--preflight] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
+// Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--preflight] [--dry-run] [--prune-removed] [--rollback] [--yes] [--allow-non-member] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff]
 // v1.9.0: Moved docs/context.md from DOCS_MERGE (managed-block merge) to VARIANT_DOCS_SYNC
 //           (version-footer sync) — the common template carries no managed-block markers,
 //           so the merge path was a silent no-op despite the file's *context.md version: X.Y*
@@ -1049,6 +1058,7 @@ import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
 import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from './lib/hook-dedupe.ts';
+import { isFleetProjectPath } from './lib/fleet.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -1156,6 +1166,12 @@ let preflight = false; // T-20261007-028: check apply-blockers (clean tree, open
 let pruneRemoved = false;
 let rollback = false;
 let yesFlag = false;
+// Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+// §6.2, DEC-20261107-01): operator agency for a sanctioned one-off upgrade
+// into a NON-member project (e.g. cleaning up co-abap-plugin's resync
+// residue). Default behavior is the refusal below; this flag emits a WARN
+// row for the run log instead.
+let allowNonMember = false;
 let skipContextCommonization = false;
 let forceContextSync = false;
 let acceptCiPermDiff = false;
@@ -1205,6 +1221,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
+  if (args[i] === '--allow-non-member') { allowNonMember = true; continue; }
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
   if (args[i] === '--accept-ci-perm-diff') { acceptCiPermDiff = true; continue; }
@@ -1365,7 +1382,13 @@ const projectsRoot = (() => {
     return lexical;
   }
 })();
-if (relative(projectsRoot, projectDir).startsWith('..')) {
+const relToProjects = relative(projectsRoot, projectDir);
+// Windows portability (CI 2026-11-07): path.relative() CANNOT relativize
+// across drives/UNC roots and returns the ABSOLUTE target path instead —
+// treat that as outside (it is), or the membership guard below would
+// misclassify an outside-drive target as inside-Projects and refuse it.
+const targetInsideProjects = relToProjects.length > 0 && !relToProjects.startsWith('..') && !isAbsolute(relToProjects);
+if (!targetInsideProjects) {
   console.warn(`WARN: Target is outside ${projectsRoot} — the canonical project layout is Projects/<name>.`);
   // H14: a warning the run continues past is invisible in scripts — that was the
   // 2026-09-12 incident class. Fail-closed confirm (design §4.2), reusing the
@@ -1379,6 +1402,33 @@ if (relative(projectsRoot, projectDir).startsWith('..')) {
       console.error('ERROR: Outside-Projects target refused — explicit confirmation required (re-run with --yes for scripted consent).');
       process.exit(1);
     }
+  }
+}
+
+// Fleet membership SSOT guard (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+// §6.2, DEC-20261107-01): a silent upgrade into a NON-member project would
+// re-impose exactly the template obligations the user removed — upgrade-project
+// is the only fleet tool that writes into a project, so the boundary is
+// visible at the moment of risk. Inside-Projects targets that are not fleet
+// members are refused by default; --allow-non-member keeps operator agency for
+// sanctioned one-offs and emits a WARN row for the run log. Fires in every
+// mode (preflight / dry-run / apply). Malformed registry → refuse
+// (fail-closed, never guess membership).
+if (targetInsideProjects) {
+  let isMember = false;
+  try {
+    isMember = isFleetProjectPath(projectDir, workspaceRoot);
+  } catch (err) {
+    console.error(`ERROR: Fleet registry failed to load — refusing to proceed (fail-closed, docs/fleet-membership.json): ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  }
+  if (!isMember) {
+    const projectName = basename(projectDir);
+    if (!allowNonMember) {
+      console.error(`ERROR: '${projectName}' is not a fleet member (docs/fleet-membership.json, DEC-20261107-01) — refusing to upgrade: an upgrade would re-impose template obligations the exclusion removed. Re-run with --allow-non-member for a sanctioned one-off.`);
+      process.exit(1);
+    }
+    console.warn(`WARN: --allow-non-member — upgrading '${projectName}' although it is not a fleet member (docs/fleet-membership.json, DEC-20261107-01). Recorded for the run log.`);
   }
 }
 

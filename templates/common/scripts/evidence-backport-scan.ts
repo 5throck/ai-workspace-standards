@@ -2,7 +2,15 @@
 /**
  * evidence-backport-scan.ts — Evidence Backporting candidate scanner
  * (project-resync skill Step 2b).
- * @version 1.2.0
+ * @version 1.3.0
+ * v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+ *           §5/§6.7, DEC-20261107-01): defaultProjects() derives the fleet
+ *           through lib/fleet.ts listFleetProjects() — Projects/co-* minus
+ *           the docs/fleet-membership.json exclusions (co-abap-plugin out,
+ *           A3; no learning rows are extracted from an excluded project).
+ *           Explicit --project naming an excluded member prints a one-line
+ *           WARN and proceeds read-only (§6.7).
+ *
  * v1.2.0 (2026-10-13, T-20261013-011): F3 plane dual-currency M1 — the plane's
  *           own evidence-ledger EV ids join the schema-basename targets, so genuine
  *           decisions citing the ledger satisfy M1 (co-safety PROMOTABLE after seeding).
@@ -50,8 +58,9 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { PLATFORM_SKILL_BASES } from "./lib/platforms.ts";
+import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
 
-const VERSION = "1.2.0";
+const VERSION = "1.3.0";
 
 type Form = "F1" | "F2" | "F3" | "F0" | "MIXED" | "none";
 
@@ -95,13 +104,11 @@ function parseArgs(): { projects: string[]; json: boolean; help: boolean } {
 }
 
 function defaultProjects(): string[] {
-  const out: string[] = [];
-  const dir = resolve("Projects");
-  if (!existsSync(dir)) return out;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && e.name.startsWith("co-")) out.push(join("Projects", e.name));
-  }
-  return out.sort();
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, derived exclusively through lib/fleet.ts (the sole membership
+  // path — no co- prefix filter here).
+  return listFleetProjects();
 }
 
 function git(projectPath: string, args: string[]): string {
@@ -790,6 +797,11 @@ Default projects: all Projects/co-*. Read-only — never modifies templates/ or 
     process.exit(0);
   }
   const targets = projects.length > 0 ? projects : defaultProjects();
+  // §6.7: an operator-named excluded member still gets full read-only results — with a one-line notice.
+  for (const p of projects) {
+    const notice = exclusionNotice(p);
+    if (notice) console.warn(`⚠️  evidence-backport-scan: ${notice}`);
+  }
   if (targets.length === 0) {
     console.error("evidence-backport-scan: no Projects/co-* directories found and no --project given.");
     process.exit(1);

@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §5, DEC-20261107-01): fleet membership SSOT — the project set is
+//          derived through lib/fleet.ts listFleetProjects() (Projects/co-*
+//          minus the docs/fleet-membership.json exclusions; co-abap-plugin
+//          out — not compared against templates/common/scripts, A5).
+//          Excluded repos cannot produce parity rows.
 // v1.0.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §8 Phase 4 verification sweep): fleet-script-parity — hashes the
 //          common script set (every file under templates/common/scripts/,
@@ -17,6 +23,7 @@
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import { listFleetProjects } from './lib/fleet.ts';
 
 const CYAN = '\x1b[36m';
 const GREEN = '\x1b[32m';
@@ -93,8 +100,13 @@ function main(): void {
   const canonicalDir = join(workspaceRoot, 'templates', 'common', 'scripts');
   const projectsDir = join(workspaceRoot, 'Projects');
 
-  const projects = readdirSync(projectsDir)
-    .filter((d) => d.startsWith('co-'))
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, derived exclusively through lib/fleet.ts (the sole membership
+  // path — no co- prefix filter here). Excluded members are not compared
+  // against templates/common/scripts (§6.1).
+  const projects = listFleetProjects(workspaceRoot)
+    .map((p) => p.split(/[\\/]/).pop() ?? p)
     .sort();
 
   const canonicalFiles = listRelativeFiles(canonicalDir);
