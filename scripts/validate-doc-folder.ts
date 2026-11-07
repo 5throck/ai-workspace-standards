@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.2.3
+ * @version 1.3.0
+ * v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md,
+ *           DEC-20261107-01): allowlist gains `fleet-membership.json` — the
+ *           L0-only fleet membership SSOT registry (never propagated,
+ *           design §11; docs/README.md §2 row is the contract).
  * v1.2.3 (2026-11-01, spec 2026-11-01-hub-consolidation-design): allowlist gains
  *           `hub-suites/` — the Phase 1 suite-manifest genre consumed by
  *           scripts/hub-promotion.ts (docs/README.md §2/§3 rows are the contract).
@@ -54,13 +58,15 @@ const ALLOWED_DIRS: ReadonlySet<string> = new Set([
 ]);
 
 /** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the
- * machine projections (generator-declared names), and the established top-level
+ * machine projections (generator-declared names), the fleet membership SSOT
+ * (L0-only registry, DEC-20261107-01), and the established top-level
  * guides indexed in docs/index.md. */
 const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   'README.md', 'index.md', 'VERSION_MANIFEST.md',
   'workspace-schema.json', 'self-managed-surfaces.json', 'skill-graph.json',
   'skill-graph.md', 'skill-graph.overrides.json', 'surface-gaps.json',
   'variant-roadmap-2026-q3-q4.md', 'variant-benchmark-backlog.md',
+  'fleet-membership.json',
 ]);
 
 interface WorkspaceFinding {

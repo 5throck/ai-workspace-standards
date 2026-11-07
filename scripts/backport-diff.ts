@@ -2,7 +2,15 @@
 /**
  * backport-diff.ts — 5-surface backport candidate differ for committed
  * Projects/co-* LOCAL-WORK (project-resync skill Step 2 support).
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-07, spec
+ *         docs/designs/2026-11-07-fleet-membership-ssot-design.md §5/§6.7,
+ *         DEC-20261107-01): defaultProjects() derives the fleet through
+ *         lib/fleet.ts listFleetProjects() — Projects/co-* minus the
+ *         docs/fleet-membership.json exclusions (co-abap-plugin out,
+ *         A2). Explicit --project naming an excluded member prints a
+ *         one-line WARN and proceeds read-only (§6.7).
  *
  * v1.0.2 (2026-09-25, ADR-0088 W2): the .hermes platform mirror joins the
  *         skills-classification regex (five-mirror parity).
@@ -97,16 +105,17 @@
  * @module backport-diff
  */
 
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
   INSTRUCTION_FILE_RELS,
   scanInstructionRegions,
   spanCarriesProjectAuthoredLines,
 } from "./lib/upgrade-policy.ts";
+import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 type Surface = "skills" | "scripts" | "helpers" | "context" | "agents" | "other";
 type Direction = "project-ahead" | "template-ahead" | "both-changed" | "in-sync" | "project-only";
@@ -196,23 +205,27 @@ function gitShow(projectPath: string, rev: string, relFile: string): string | nu
 }
 
 function defaultProjects(): string[] {
-  const out: string[] = [];
-  const dir = resolve("Projects");
-  if (!existsSync(dir)) return out;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && e.name.startsWith("co-")) out.push(join("Projects", e.name));
-  }
-  return out.sort();
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, derived exclusively through lib/fleet.ts (the sole membership
+  // path — no co- prefix filter here).
+  return listFleetProjects();
 }
 
 /** Accept both a bare co-<x> name and a path; default to the whole fleet. */
 function resolveProjects(requested: string[]): string[] {
   if (requested.length === 0) return defaultProjects();
-  return requested.map((p) => {
+  const resolved = requested.map((p) => {
     if (p.includes("/") || p.includes("\\")) return p;
     const underProjects = join("Projects", p);
     return existsSync(underProjects) ? underProjects : p;
   });
+  // §6.7: an operator-named excluded member still gets full read-only results — with a one-line notice.
+  for (const p of resolved) {
+    const notice = exclusionNotice(p);
+    if (notice) console.warn(`⚠️  backport-diff: ${notice}`);
+  }
+  return resolved;
 }
 
 /** Variant name for a project path (Projects/co-x → co-x), if that variant exists. */

@@ -4,9 +4,9 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.91.1
+- **Version**: 1.92.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-07 (variant SCRIPTS sync mkdir guard — dest scripts/<variant>/ may not exist in projects; prior: EXTERNAL DEPS pass + --external-deps-only, external-deps-machinery design D2–D5, upstream machinery)
+- **Last Updated**: 2026-11-07 (v1.92.0 fleet membership SSOT B1 — inside-Projects non-member targets refused by default in every mode; --allow-non-member sanctioned override with WARN row; DEC-20261107-01. Prior: variant SCRIPTS sync mkdir guard — dest scripts/<variant>/ may not exist in projects; prior: EXTERNAL DEPS pass + --external-deps-only, external-deps-machinery design D2–D5, upstream machinery)
 
 ## Description
 

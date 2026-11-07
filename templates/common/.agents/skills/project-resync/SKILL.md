@@ -1,8 +1,9 @@
 ---
 name: project-resync
-version: 1.7.0
+version: 1.8.0
 description: >
-  Full bidirectional sync cycle for Projects/co-* instances: provenance-audit
+  Full bidirectional sync cycle for fleet member projects (Projects/co-*
+  minus the docs/fleet-membership.json exclusions): provenance-audit
   uncommitted content, sync each project to its GitHub remote, selectively
   promote reusable work back into templates/L0, review each project (cadenced),
   run the root /sync, upgrade projects from their variant templates, and land
@@ -14,7 +15,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_updated: 2026-10-27
+last_updated: 2026-11-07
 last_reviewed: 2026-10-27
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
@@ -36,10 +37,15 @@ metadata:
 
 # project-resync
 
-Full bidirectional sync cycle for the `Projects/co-*` fleet. One run covers:
+Full bidirectional sync cycle for the template fleet. One run covers:
 provenance audit → GitHub sync → selective backport → root PR → upgrades →
 upgrade PRs. **Safety first: nothing is pushed without a dated provenance
 verdict** — stale sync-wave residue must never pollute a remote.
+**Fleet membership SSOT** (DEC-20261107-01): the project set is derived ONLY
+via `bun scripts/fleet-list.ts --json` — `Projects/co-*` directories minus
+the exclusions recorded in `docs/fleet-membership.json`. Never hardcode the
+fleet count; never fall back to a raw `Projects/co-*` glob, even when the
+helper fails (on helper/registry failure, STOP and file one urgent ticket).
 
 ## Safety Rules (non-negotiable)
 
@@ -166,7 +172,8 @@ same change (fix, improvement, or gap) echoes across the rest of the fleet:
 1. Derive a fixed query per candidate: its distinctive identifiers or strings
    (symbol names, error messages, config keys — stable tokens that only match
    the changed code).
-2. Run the query across ALL `Projects/co-*` repos, scoped to the surface the
+2. Run the query across ALL fleet repos (the membership SSOT —
+   `bun scripts/fleet-list.ts --json`), scoped to the surface the
    candidate came from (e.g.
    `grep -rn "<identifier>" Projects/*/skills/ Projects/*/scripts/`).
 3. Record a per-project verdict in the Step 2 judgment report:
@@ -245,7 +252,8 @@ nightly cycle now carries a per-project review leg (design
    like any project-review run.
 3. **ROTATION safety net**: when the scoped set is empty (or the night is
    heavy), review exactly one project per night by deterministic rotation —
-   `day-of-year mod N` over the sorted `Projects/co-*` glob — so every project
+   `day-of-year mod N` over the sorted fleet SSOT list
+   (`bun scripts/fleet-list.ts`) — so every project
    is reviewed at least once per N nights even when quiet. State the rotated
    project in the report.
 4. **Budget binding**: Step 2f reviewers share the nightly ≤4-agent cap with

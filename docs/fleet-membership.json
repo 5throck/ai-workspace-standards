@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "_comment": "Template-fleet membership exclusions. Default rule: every directory under Projects/ whose name starts with 'co-' is a fleet member, minus the ids listed in excluded[]. L0-only — never propagated to templates/ or scaffolded projects, never added to any propagation map. Consumers: scripts/lib/fleet.ts (sole code path) and scripts/fleet-list.ts. Design: docs/designs/2026-11-07-fleet-membership-ssot-design.md",
+  "excluded": [
+    {
+      "id": "co-abap-plugin",
+      "reason": "Claude Code plugin distribution project (plugin.json + commands/), not a template-derived variant project: no variant.json, no template sync obligation; last template sync (2026-10-03, template 0.10.0) is historical residue, not an open obligation. Architecture map depicts the L3 fleet as 16 projects without it.",
+      "decided": "2026-11-07",
+      "decision_ref": "DEC-20261107-01"
+    }
+  ]
+}

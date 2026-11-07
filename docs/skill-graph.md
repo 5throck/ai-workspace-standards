@@ -231,7 +231,7 @@
 | `root/new-project` | L0 | 1.0.0 | — | — | root/adopt-project, root/upgrade-project (follows) | — | — |
 | `root/platform-command-lifecycle-manager` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L0 | 1.0.2 | — | — | — | — | — |
-| `root/project-resync` | L0 | 1.7.0 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
+| `root/project-resync` | L0 | 1.8.0 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
 | `root/project-review` | L0 | 1.3.2 | — | — | — | — | — |
 | `root/project-to-variant` | L0 | 1.3.0 | — | — | root/promote-variant (composes_with) | — | — |
 | `root/promote-variant` | L0 | 1.4.0 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
@@ -241,7 +241,7 @@
 | `root/security-scan` | L0 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
-| `root/skill-graph-analytics` | L0 | 1.3.1 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
+| `root/skill-graph-analytics` | L0 | 1.4.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
 | `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.1.0 | — | — | — | — | — |
@@ -455,6 +455,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261106-02` | decision | — | — | dec:DEC-20261106-01 |
 | `dec:DEC-20261106-03` | decision | — | — | — |
 | `dec:DEC-20261106-04` | decision | — | — | — |
+| `dec:DEC-20261107-01` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -845,7 +846,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 56 | (expected until docs `references` edges are mined) |
 | agent | 23 | co-abap/i18n-specialist, co-architect/architect, co-architect/automation-engineer, co-architect/design-storyteller, co-architect/mep-engineer, co-architect/prototype-engineer, co-architect/sketchup-modeler, co-architect/structural-engineer, co-architect/typography-expert, co-architect/ux-researcher, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 23 | (expected until docs `references` edges are mined) |
+| decision | 24 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/trail |
 
 ## Skills Without `used_by` (G6)

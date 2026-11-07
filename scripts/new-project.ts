@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.42.0
+// @version 1.43.0
+// v1.43.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §6.4, DEC-20261107-01): fleet membership SSOT B3 name-collision
+//          guard — a scaffold name matching an exclusion record in
+//          docs/fleet-membership.json (via lib/fleet.ts exclusionForName)
+//          is refused (it would resurrect the membership confusion the
+//          exclusion removed). Creating new members stays friction-free.
+//          Malformed registry → refusal (fail-closed).
 // v1.42.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-machinery-design.md
 //          — implements the upstream external-dependency machinery): §7.9 EXTERNAL DEPS
 //          FETCH — after project materialization (§7.8), read the scaffolded
@@ -255,6 +262,7 @@ import { computeContentHash } from './verify-readme-sync.ts';
 import { localDateISO } from './lib/local-date.ts';
 import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
+import { exclusionForName } from './lib/fleet.ts';
 import { mergePackageJson } from './lib/package-merge.ts';
 import { resolveProvenanceVersion } from './helpers/template-version.ts';
 import {
@@ -429,6 +437,32 @@ const MANAGED_TOP_LEVEL_DIRS = new Set([
 if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/')[0])) {
   console.error(`❌ Project target '${projectName}' resolves inside the managed '${projectName.split('/')[0]}/' directory.`);
   console.error('   Scaffold into Projects/ (bare name) or tests/.temp/ instead.');
+  if (import.meta.main) {
+    process.exit(1);
+  }
+}
+
+// Fleet membership SSOT name-collision guard (design
+// docs/designs/2026-11-07-fleet-membership-ssot-design.md §6.4, DEC-20261107-01):
+// a scaffold named like a recorded exclusion (docs/fleet-membership.json)
+// would resurrect the exact membership confusion the exclusion removed.
+// Creating genuinely new members stays friction-free — every scaffold is a
+// member by the default rule; only an EXCLUDED name collides.
+const scaffoldLeafName = projectName.split('/').pop() ?? projectName;
+const scaffoldExclusion = (() => {
+  try {
+    return exclusionForName(scaffoldLeafName, workspaceRoot);
+  } catch (err) {
+    console.error(`❌ Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+    return null;
+  }
+})();
+if (scaffoldExclusion) {
+  console.error(`❌ Project name '${scaffoldLeafName}' matches an excluded fleet member (docs/fleet-membership.json, ${scaffoldExclusion.decision_ref}).`);
+  console.error('   Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).');
   if (import.meta.main) {
     process.exit(1);
   }

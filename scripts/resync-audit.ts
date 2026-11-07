@@ -2,7 +2,16 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.7.0
+ * @version 1.8.0
+ *
+ * v1.8.0 (2026-11-07, spec
+ *          docs/designs/2026-11-07-fleet-membership-ssot-design.md §5/§6.7,
+ *          DEC-20261107-01): defaultProjects() derives the fleet through
+ *          lib/fleet.ts listFleetProjects() — Projects/co-* minus the
+ *          docs/fleet-membership.json exclusions (co-abap-plugin out, A1).
+ *          Explicit --project naming an excluded member prints a one-line
+ *          WARN and proceeds read-only (§6.7), in both the default and
+ *          --final-state modes.
  *
  * v1.7.0 (2026-10-29, spec
  *          docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
@@ -132,8 +141,9 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
 
-const VERSION = "1.7.0";
+const VERSION = "1.8.0";
 
 interface FileRow {
   file: string;
@@ -278,13 +288,19 @@ function gitOk(projectPath: string, args: string[]): boolean {
 }
 
 function defaultProjects(): string[] {
-  const out: string[] = [];
-  const dir = resolve("Projects");
-  if (!existsSync(dir)) return out;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && e.name.startsWith("co-")) out.push(join("Projects", e.name));
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, derived exclusively through lib/fleet.ts (the sole membership
+  // path — no co- prefix filter here).
+  return listFleetProjects();
+}
+
+/** §6.7: an operator-named excluded member still gets full read-only results — with a one-line notice. */
+function warnIfNotFleetMember(projects: string[]): void {
+  for (const p of projects) {
+    const notice = exclusionNotice(p);
+    if (notice) console.warn(`⚠️  resync-audit: ${notice}`);
   }
-  return out.sort();
 }
 
 /** Variant name for a project path (Projects/co-x → co-x), if that variant exists. */
@@ -656,6 +672,7 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     // PRs on the current branch, delivered template version). Read-only: the
     // only subprocesses are git rev-list/status, gh pr list, and file reads.
     const targets0 = projects.length > 0 ? projects : defaultProjects();
+    if (projects.length > 0) warnIfNotFleetMember(projects);
     console.log("| project | branch | dirty | unpushed | open PR | template-version |");
     console.log("|---|---|---|---|---|---|");
     for (const project of targets0.sort()) {
@@ -683,6 +700,7 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     return;
   }
   const targets = projects.length > 0 ? projects : defaultProjects();
+  if (projects.length > 0) warnIfNotFleetMember(projects);
   if (targets.length === 0) {
     console.error("resync-audit: no Projects/co-* directories found and no --project given.");
     process.exit(1);

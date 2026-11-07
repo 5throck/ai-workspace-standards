@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §6.3, DEC-20261107-01): fleet membership SSOT B2 guard — a target
+//          name carrying an exclusion record in docs/fleet-membership.json
+//          (via lib/fleet.ts exclusionForName) is refused without explicit
+//          --yes; --yes warns and proceeds, and the sanctioned path is
+//          removing the exclusion row first (the registry row is the gate).
+//          Malformed registry → refusal (fail-closed).
 // v1.5.0 (2026-10-28, canary finding on Projects/co-newbiz — design §4.2 stub
 //          rule): §4b mirror generation passes --templates-root <workspace>/templates
 //          explicitly (generator v1.1.0 discovery covers standalone runs; the
@@ -61,6 +68,7 @@ import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/te
 import { substituteFiles } from './helpers/substitute-placeholders.ts';
 import { blankL0Refs } from './helpers/l0-ref-policy.ts';
 import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
+import { exclusionForName } from './lib/fleet.ts';
 import { setStateFile, resetStateFile, saveState, loadState, type PipelineState } from './lib/pipeline-state.ts';
 
 const GREEN = '\x1b[32m';
@@ -250,6 +258,28 @@ const projectsRoot = join(WORKSPACE_ROOT, 'Projects');
 if (!projectDir.startsWith(projectsRoot) && !YES) {
   fail(`Target is outside Projects/ (${relative(WORKSPACE_ROOT, projectDir) || projectDir}).\n`
     + `       Pass --yes to adopt a project outside the canonical Projects/ layout.`);
+}
+
+// Fleet membership SSOT guard (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+// §6.3, DEC-20261107-01): adopting a name that carries an exclusion record
+// re-admits a project the user ruled OUT of the template fleet — refused
+// without explicit --yes. --yes is the immediate escape hatch, but the
+// sanctioned path is removing the exclusion row first (the check reads the
+// registry, so the row is the gate).
+const adoptTargetName = basename(projectDir);
+const adoptExclusion = (() => {
+  try {
+    return exclusionForName(adoptTargetName, WORKSPACE_ROOT);
+  } catch (err) {
+    fail(`Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+  }
+})();
+if (adoptExclusion) {
+  if (!YES) {
+    fail(`'${adoptTargetName}' is an EXCLUDED fleet member (docs/fleet-membership.json, ${adoptExclusion.decision_ref}) — refusing to adopt: the decision record rules it out of the template fleet.\n`
+      + `       Remove the exclusion row from docs/fleet-membership.json first (the sanctioned reversal path), or pass --yes to override.`);
+  }
+  console.warn(`⚠️  adopt-project: --yes override — adopting '${adoptTargetName}' although it carries an exclusion record (docs/fleet-membership.json, ${adoptExclusion.decision_ref}).`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

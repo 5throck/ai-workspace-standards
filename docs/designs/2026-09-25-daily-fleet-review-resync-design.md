@@ -77,6 +77,7 @@ Two governance gaps motivate this registration:
 ### 4.3 Phase II — project-resync
 
 - R19. Derive the project set with the glob `Projects/co-*`. Never hardcode the fleet count.
+  > **Amendment (2026-11-07, DEC-20261107-01 — docs/designs/2026-11-07-fleet-membership-ssot-design.md §7):** R19 is SUPERSEDED for Phase II. Derive the project set by running `bun scripts/fleet-list.ts --json` — the fleet SSOT: `Projects/co-*` directories minus the exclusions recorded in `docs/fleet-membership.json`. Never hardcode the fleet count. Never fall back to a raw `Projects/co-*` glob, even as a fallback when the helper fails. If `scripts/fleet-list.ts` fails to run or the registry fails to load, STOP Phase II (project-resync) entirely, file one urgent ticket describing the failure, and continue with Phase I / Phase 1b only — do not guess membership. (R43 and Phase 1b `templates/co-*` are L2-variant enumeration, unaffected.)
 - R20. Run resync Steps 0–6 for each project whose HEAD moved in the window.
 - R21. Register the standing spec, or file a documented E-exemption, before any template-touching root sync. Never bypass the sync-time spec-check (dev-sync step 3.9).
 - R22. Run the read-only Step 2d "Domain Operating Model" diff per project. Compare project against `templates/co-<x>/` on exactly these paths:

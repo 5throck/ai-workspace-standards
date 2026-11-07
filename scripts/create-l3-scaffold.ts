@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.19.0
+// @version 1.20.0
+// v1.20.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+//          §6.4, DEC-20261107-01): fleet membership SSOT B4 name-collision
+//          guard — a scaffold variant name matching an exclusion record in
+//          docs/fleet-membership.json (via lib/fleet.ts exclusionForName)
+//          is refused (same rule as new-project B3). Creating genuinely new
+//          members stays friction-free. Malformed registry → refusal
+//          (fail-closed).
 // v1.19.0 (2026-11-01, spec docs/designs/2026-10-31-graft-trail-migration-design.md
 //          R2.5 addendum — trigger met: L0 trail init complete, PR #1783): Step 8.5
 //          index build flips graft-first/bunx-fallback → plain `trail build`
@@ -79,6 +86,7 @@ import {
   VARIANT_SCAFFOLD_MARKER_NAMES,
 } from './helpers/scaffold-markers.ts';
 import { readTemplateVersion } from './helpers/template-version.ts';
+import { exclusionForName } from './lib/fleet.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -1072,6 +1080,24 @@ function main(): void {
   // Step 1: duplicate / existence checks
   if (fs.existsSync(projectDir)) {
     fail(`Projects/${args.variant}/ already exists. Choose a different name or remove it first.`);
+  }
+  // Fleet membership SSOT name-collision guard (design
+  // docs/designs/2026-11-07-fleet-membership-ssot-design.md §6.4,
+  // DEC-20261107-01): a scaffold named like a recorded exclusion
+  // (docs/fleet-membership.json) would resurrect the exact membership
+  // confusion the exclusion removed. Malformed registry → refusal
+  // (fail-closed).
+  const nameExclusion = (() => {
+    try {
+      return exclusionForName(args.variant, WORKSPACE_ROOT);
+    } catch (err) {
+      return new Error(`Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+    }
+  })();
+  if (nameExclusion instanceof Error) fail(nameExclusion.message);
+  if (nameExclusion) {
+    fail(`Project name '${args.variant}' matches an excluded fleet member (docs/fleet-membership.json, ${nameExclusion.decision_ref}).\n`
+      + `       Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).`);
   }
   if (fs.existsSync(templateVariantDir)) {
     log(`⚠️  templates/${toVariantSlug(args.variant)}/ already exists — proceeding with L3 scaffold anyway.`);

@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: skill-graph-analytics
 - **Status**: active
-- **Version**: 1.3.1
+- **Version**: 1.4.0
 - **Created**: 2026-09-22
-- **Last Updated**: 2026-11-04 (SKILL.md 1.3.0 → 1.3.1, T-20261101-004 / DEC-20261103-04: When to Run weekly-cadence note records the decided revival home — the 01:30 fleet runner's FRIDAY FULL OVERRIDE — replacing the "pending adjudication" phrasing)
+- **Last Updated**: 2026-11-07 (SKILL.md 1.3.1 → 1.4.0, DEC-20261107-01: fleet membership SSOT — Step 1 records that the report's project set comes from lib/fleet.ts (`Projects/co-*` minus `docs/fleet-membership.json` exclusions; convergence denominators count members only; never a raw glob). Previous: 2026-11-04 SKILL.md 1.3.0 → 1.3.1, T-20261101-004 / DEC-20261103-04: When to Run weekly-cadence note records the decided revival home — the 01:30 fleet runner's FRIDAY FULL OVERRIDE — replacing the "pending adjudication" phrasing)
 
 ## Description
 Weekly fleet analytics over the per-project skill-graph projections: consolidate root + Projects/<co-x> graphs into a dated snapshot, triage skill convergence (consolidation/promotion candidates), delivery drift (root skills missing from projects), and root-graph orphans (4-way cross-check: definition+registry+mirror+reference). Triage only — tickets, no auto-modification.
