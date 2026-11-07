@@ -316,20 +316,62 @@ rendered surfaces. **Exempt from ADR-0065 accessibility review** (no UI change).
 
 ## 11. Open questions (user ruling needed before implementation)
 
+All four RESOLVED 2026-11-08 by user ruling — see the addendum below and
+docs/decisions/DEC-20261108-01.md.
+
 1. **Variant wave scope (OQ1)**: updating all 15 variant `AGENTS.md` files
    exceeds the architect's 3-template-file high-risk threshold — approve the
    full 15-file wave in the B1/B2 PR (recommended: one PR, TB-01-pinned,
    project-loss-hardening R2 precedent), or L1-only first with the wave as a
    follow-up?
+   (RESOLVED 2026-11-08: single wave now — blocks + skeleton seeds + TB-01 in
+   one PR; precedent PR #1897, same condition approved.)
 2. **D2 confirmation (OQ2)**: ship the `.trail` skeleton + SessionStart hook
    entry fleet-wide (Option A, recommended — vendor commit-once doctrine,
    learnings channel works without trail installed), or keep `trail init` as a
    per-project operator action (Option B)?
+   (RESOLVED 2026-11-08: Option A approved — skeleton + 3 ADD_IF_MISSING
+   upgrade seeds + settings propagation via sync-variant-settings to all 15
+   variants.)
 3. **TB-01 root severity (OQ3)**: root's tool-owned block checked at WARN
    (recommended — the workspace must not fight `upsertSection`), with
    templates/common + variants at Error — confirm.
+   (RESOLVED 2026-11-08: confirmed — Error on variant templates, WARN on root;
+   mirrors the destructive-file-ops pin precedent.)
 4. **Statusline out of scope (OQ4)**: `.trail/statusline.cjs` and its
    registration live in personal surfaces (`.claude/settings.local.json`,
    user-level settings — probe evidence §2); standardizing them is proposed as
    a non-goal (N3) with the dangling user-level registration recorded as an
    operator note — confirm, or pull statusline into scope as a follow-up.
+   (RESOLVED 2026-11-08: statusline confirmed OUT OF SCOPE — the dangling
+   graft-era user-level registration stays an operator note only; recorded in
+   the addendum below.)
+
+## Addendum — User Rulings (2026-11-08)
+
+Design Gate approval per ADR-0061, recorded in docs/decisions/DEC-20261108-01.md
+(user standing directive + the design's recommendations adopted; the final
+gate for the implementation PR is merge approval). Status of this design:
+approved — implementation proceeds in the kept worktree on the PR #1903
+branch, single wave per R1.
+
+- **R1 — Single wave (OQ1)**: the 15 variant AGENTS.md trail blocks + the
+  skeleton upgrade seeds + the TB-01 arm land in ONE PR (precedent: PR #1897,
+  same >3-file condition approved 2026-11-08); the 15-file high-risk threshold
+  is accepted.
+- **R2 — Skeleton delivery (OQ2)**: Option A — ship `.trail/` skeleton
+  (README.md + .gitignore + hook.cjs) via templates/common, delivered by
+  scaffold copy + 3 ADD_IF_MISSING upgrade seeds (never clobbering
+  tool-refreshed copies), with the SessionStart hook entry propagated to all
+  15 variant settings.json via sync-variant-settings.ts.
+- **R3 — TB-01 severities (OQ3)**: Error on variant templates (missing or
+  diverged block); WARN on root's tool-owned block (the workspace must not
+  fight `upsertSection` mid-vendor-update); mirrors the destructive-file-ops
+  pin precedent (project-loss-hardening design §5.4).
+- **R4 — Statusline out of scope (OQ4)**: `.trail/statusline.cjs` and its
+  registration stay OUT of the standard — they live in personal surfaces
+  (`.claude/settings.local.json`, user-level settings). Operator note (no
+  delivery, no workspace change): the user-level statusLine still points at
+  the deleted graft-era helper `.claude/helpers/graft-statusline.cjs`; an
+  operator running `trail init` (or re-registering the trail shim) resolves it
+  locally.
