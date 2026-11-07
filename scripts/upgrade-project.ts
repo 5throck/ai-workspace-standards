@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.92.0
+// @version 1.93.0
+// v1.93.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+//          §2 item 8 / §5.6 / Addendum A.3, T-20261107-005): EXTERNAL DEPS
+//          reconcile data-loss fix — the legacy/interim reconcile built its
+//          result from the template SEED entries only (a project entry whose id
+//          was not in the seed was silently dropped) and wrote a literal
+//          schema_version 1. The core moves to helpers/external-deps-reconcile.ts
+//          v1.0.0: project-only entries are PRESERVED (valid ones join the pass;
+//          invalid ones are kept verbatim with a WARN row), schema_version comes
+//          from the schema the reconciled document conforms to, and a project
+//          file that is not valid JSON is never overwritten (SKIP + WARN).
 // v1.92.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
 //          §6.2, DEC-20261107-01): fleet membership SSOT B1 guard — an
 //          inside-Projects target that is NOT a fleet member
@@ -1054,6 +1064,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated, bumpNestedLifecycleLastUpdated, scaffoldChangelogEntry } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
+import { reconcileExternalDepsManifest } from './helpers/external-deps-reconcile.ts';
 import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
@@ -1113,8 +1124,6 @@ import {
   ensureGitignoreCoverage,
   isUnderAnyInstallDir,
   extractInstallDirsLoose,
-  ENTRY_FIELDS,
-  type ExternalDepEntry,
   type ExternalDepsManifest,
 } from './lib/external-deps.ts';
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from './lib/env-sample.ts';
@@ -2541,8 +2550,11 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
   // 2. Parse; reconcile a legacy/interim shape (D8 — the co-work interim
   //    instance was reconciled by the first real upgrade run, 2026-11-07).
   let manifest: ExternalDepsManifest | null = null;
+  // Effective manifest text: under --dry-run the seed delivery above did not
+  // copy, so the would-be delivered seed stands in for the absent project file.
+  const manifestRaw = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : readFileSync(seedPath, 'utf8');
   try {
-    manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf8'), MANIFEST_REL);
+    manifest = parseExternalDepsManifest(manifestRaw, MANIFEST_REL);
   } catch (err) {
     const reason = (err as Error).message;
     let seedManifest: ExternalDepsManifest | null = null;
@@ -2555,35 +2567,33 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
       failures++;
       return { changed, failures };
     }
-    // Operative state (per-id pin/commit) survives the reconcile — the running
-    // version is the project's fact; the seed owns everything else.
-    const legacyById = new Map<string, Record<string, unknown>>();
-    const droppedLegacyKeys = new Set<string>();
-    try {
-      const legacyDoc = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dependencies?: Array<Record<string, unknown>> };
-      for (const dep of (Array.isArray(legacyDoc?.dependencies) ? legacyDoc.dependencies : [])) {
-        if (dep && typeof dep['id'] === 'string') legacyById.set(dep['id'], dep);
-      }
-    } catch { /* unreadable legacy doc — reconcile from the seed alone */ }
-    const reconciled: ExternalDepEntry[] = seedManifest.dependencies.map((entry) => {
-      const merged: ExternalDepEntry = { ...entry };
-      const legacy = legacyById.get(entry.id);
-      if (legacy) {
-        if (typeof legacy['pin'] === 'string' && legacy['pin']) merged.pin = legacy['pin'];
-        if (typeof legacy['commit'] === 'string' && /^[0-9a-f]{40}$/.test(legacy['commit'])) merged.commit = legacy['commit'];
-        for (const k of Object.keys(legacy)) {
-          if (!(ENTRY_FIELDS as readonly string[]).includes(k)) droppedLegacyKeys.add(k);
-        }
-      }
-      return merged;
-    });
-    const droppedNote = droppedLegacyKeys.size > 0 ? `; non-schema fields not promoted (dropped): ${[...droppedLegacyKeys].sort().join(', ')}` : '';
-    console.log(`  RECONCILE ${MANIFEST_REL}  (legacy/interim manifest superseded by the template seed — operative pin/commit preserved per id${droppedNote})`);
-    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify({ schema_version: 1, dependencies: reconciled }, null, 2)}\n`, 'utf8');
-    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'MERGE', `interim/legacy manifest reconciled into the generic schema (design D1/D8) — template seed authoritative, operative pin/commit preserved per id${droppedNote}`, 'WARN');
+    // v1.93.0 (external-deps standard §5.6 / Addendum A.3): the reconcile core
+    // lives in helpers/external-deps-reconcile.ts — seed entries authoritative
+    // per id with the project's operative pin/commit preserved, project-only
+    // entries PRESERVED (never silently dropped), schema_version taken from the
+    // schema the reconciled document conforms to (never a literal), and a
+    // project file that is not valid JSON is never overwritten.
+    const rec = reconcileExternalDepsManifest(manifestRaw, seedManifest);
+    if (!rec.ok) {
+      console.log(`  ⚠️  SKIP   ${MANIFEST_REL}  (${rec.error})`);
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `invalid manifest not overwritten: ${rec.error}`, 'WARN');
+      failures++;
+      return { changed, failures };
+    }
+    const droppedNote = rec.droppedLegacyKeys.length > 0 ? `; non-schema fields not promoted (dropped): ${rec.droppedLegacyKeys.join(', ')}` : '';
+    const keptNote = rec.preservedProjectOnly.length > 0 ? `; project-only entr${rec.preservedProjectOnly.length === 1 ? 'y' : 'ies'} preserved: ${rec.preservedProjectOnly.join(', ')}` : '';
+    const invalidNote = rec.invalidProjectOnly.length > 0
+      ? `; project-only entr${rec.invalidProjectOnly.length === 1 ? 'y' : 'ies'} kept VERBATIM but invalid (excluded from this pass — manual fix required): ${rec.invalidProjectOnly.map((e) => `${e.id} (${e.reason})`).join('; ')}`
+      : '';
+    console.log(`  RECONCILE ${MANIFEST_REL}  (legacy/interim manifest reconciled with the template seed — operative pin/commit preserved per id${keptNote}${invalidNote}${droppedNote})`);
+    if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify(rec.document, null, 2)}\n`, 'utf8');
+    record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'MERGE', `interim/legacy manifest reconciled into the generic schema (design D1/D8, standard §5.6) — template seed authoritative per id, operative pin/commit preserved, schema_version ${rec.document.schema_version}${keptNote}${invalidNote}${droppedNote}`, 'WARN');
+    for (const bad of rec.invalidProjectOnly) {
+      record(MANIFEST_REL, 'PROJECT_STATE', 'EXTERNAL DEPS', 'SKIP', `project-only entry ${bad.id} preserved verbatim but invalid — excluded from the pass: ${bad.reason}`, 'WARN');
+    }
     console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
     changed++;
-    manifest = { schema_version: 1, dependencies: reconciled };
+    manifest = rec.manifest;
   }
 
   // 3. install_dir .gitignore coverage (D5) — an external clone committed into
