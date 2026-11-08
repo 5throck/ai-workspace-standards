@@ -61,7 +61,11 @@ const TICKET_ID_CITATION_PATTERN = /\b([TU]-\d{8}-\d{3,4})\b/g;
  * a documented no-op (see the header note). */
 async function loadStoreResolver(): Promise<TicketLocationResolver | null> {
   try {
-    const mod = (await import('./ticket-store.ts')) as {
+    // computed specifier: tsc must not resolve this statically — ticket-store.ts is
+    // L0-only and absent from delivered trees (TS2307 broke the L1 Typecheck CI step;
+    // the runtime degrade design below is unchanged)
+    const storeSpecifier = './ticket-store.ts';
+    const mod = (await import(storeSpecifier)) as {
       resolveTicketLocation: TicketLocationResolver;
     };
     return mod.resolveTicketLocation;

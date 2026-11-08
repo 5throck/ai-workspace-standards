@@ -131,3 +131,20 @@ Then: dev-sync EXIT=0 → PR #40 → billing-wall verified (4/4 jobs 0-step + pa
 ## Verdict
 
 16/16 fleet projects verified (SSOT), **all 16 now on delivered, gated releases** — 15 at 0.29.0 (co-price completed by the 11:40 KST follow-up, PR #179) and co-work at 0.30.0 (follow-up 2, PR #40; both billing-wall exceptions verified and recorded); the 0.30.0 train (PR #1916, tag published) waves the 15 in tonight's run. co-abap-plugin excluded per SSOT. 2f: 2 learning tickets. T-20261108-006 closed not-a-gap (tombstone-row mechanism documented); T-20261108-007 filed (variant-scripts subdirectory delivery gap). Secrets gate clean. No gates bypassed; no force operations; live sessions untouched.
+
+## Follow-up 3 — 0.30.0 fleet wave: 15/16 delivered (11-08 12:35–13:20 KST)
+
+The 0.30.0 train waved fleet-wide the same day (canary **co-safety #232 real CI 5/5 → merged**; then 14 projects via the wave loop + targeted repairs). Every non-blocking branch was verified per merge: the billing-wall class was confirmed per repo (all jobs **0-step** + payment annotation) — today it hit even the previously-real-CI repos (co-consult #119, co-deck #211 merged with 0-step verified; their Actions went wall-bound this cycle).
+
+| Project | PR | Result |
+|---|---|---|
+| co-safety | #232 | real CI 5/5 → MERGED |
+| co-architect #394 · co-design #80 · co-develop #205 · co-export #67 · co-game #69 · co-hr #24 · co-learning #38 · co-news #23 · co-price #180 · co-security #102 | billing-wall 0-step verified → MERGED |
+| co-consult #119 · co-deck #211 | billing-wall 0-step verified (wall-bound this cycle) → MERGED |
+| co-abap | #241 (sap restores) → #242 (0.30.0 completion + parity-script restore + ticket-drift TS2307 fix) | real CI **4/4 green** → MERGED (its Actions work) |
+| co-work | #40 | 0.30.0 (earlier today, follow-up 2) |
+| co-newbiz | **#831 HELD OPEN** — real lint gate (see T-20261108-009) | deferred at 0.29.0 |
+
+In-wave repairs (all gate-satisfying, recorded): **T-20261108-008** — co-abap's sap L3 scripts re-lost by prune-removed (and last night's "restored" claim proven never-committed: no tracking commit after 0b40a06); restored 3 files from 0b40a06 (proxy 2.1.0 / approve 2.1.0 / integrity 1.1.0 registry-matched) + `validate-abap-platform-parity.ts` 1.1.0 (another prune victim referenced by ci.yml) + rows re-added with restoration notes. **ticket-drift TS2307 class** — the delivered helper's static import of the L0-only ticket-store breaks any project Typecheck step (only co-abap carries scripts/tsconfig.json today) and co-newbiz's typecheck-baseline baseline; fixed root + template + both projects with a computed import specifier (runtime degrade design unchanged). **memory structural class** — 6 files across co-consult/co-deck/co-security had leading-H1 blocks (same shape as co-price's 11-01); H1 removed, all CLEAN. **co-newbiz library.generated.ts** projection re-synced (its own script). **co-deck diagram-helpers** row 1.2.0→1.3.0 (top-level registry fossil).
+
+**Fleet after the wave: 15 × 0.30.0 on main + co-newbiz 0.29.0 (PR #831 open, held on the lint adjudication).** Tickets: T-20261108-007 (variant-scripts delivery gap), T-20261108-008 (recurring prune + restore-loss classes), T-20261108-009 (co-newbiz lint-policy adjudication + the 29 residual style errors). Tombstone/audit spot checks green on merged projects. No gates bypassed; the billing-wall exception was verified per merge (0-step + annotation) and recorded.
