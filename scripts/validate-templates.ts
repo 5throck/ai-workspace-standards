@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.75.0
+ * @version 1.76.0
+ *
+ * v1.76.0 (2026-11-08, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md
+ *          R2, T-20261108-010): new check `graft-mcp-surfaces` — every template MCP
+ *          surface (common + each co-* dir: .gemini/settings.json, .codex/config.toml,
+ *          opencode.json, .mcp.json, .claude/settings.json) must carry ZERO graft-era
+ *          registrations (a `graft` server key, a [mcp_servers.graft] block, a graft
+ *          command, or an @nanonets/graft argv). The 2026-11-08 flip (#1927) emptied
+ *          these; this check pins it — a template re-introducing a graft registration
+ *          fails validation instead of silently shipping to scaffolds and JSON_MERGE
+ *          deliveries. Renaming-documentation prose (CODEX.md, design docs) is not
+ *          scanned.
  *
  * v1.75.0 (2026-11-08, spec docs/designs/2026-11-08-trail-fleet-standard-design.md
  *          §5.4 — DEC-20261108-01 R1/R3): new arm `trail-block-parity` (TB-01) —
@@ -647,6 +658,42 @@ const variantArg = (() => {
 })();
 
 const issues: ValidationIssue[] = [];
+
+/** v1.76.0 (R2, graft-mcp-corrective-pass-design): every template MCP surface
+ * carries ZERO graft-era registrations — pins the 2026-11-08 mcpServers flip
+ * (PR #1927). Renaming-documentation prose is not scanned. */
+function checkGraftMcpSurfaces(): void {
+  const GRAFT_PATTERNS = [
+    /"graft"\s*:/,
+    /\[mcp_servers\.graft\]/,
+    /"command"\s*:\s*"graft"/,
+    /@nanonets\/graft/,
+  ];
+  const SURFACES = ['.gemini/settings.json', '.codex/config.toml', 'opencode.json', '.mcp.json', '.claude/settings.json'];
+  const dirs = [{ label: 'common', dir: join(TEMPLATES_DIR, 'common') }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('co-')) dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  let scanned = 0;
+  for (const { label, dir } of dirs) {
+    for (const surf of SURFACES) {
+      const abs = join(dir, surf);
+      if (!existsSync(abs)) continue;
+      scanned++;
+      const text = readFileSync(abs, 'utf-8');
+      const hit = GRAFT_PATTERNS.find((re) => re.test(text));
+      if (hit) {
+        fail(label, 'graft-mcp-surfaces',
+          `${abs} carries a graft-era MCP registration (matched ${hit}) — the mcpServers flip (PR #1927, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md) requires trail-era entries only`,
+          'Remove the graft server entry / block and ensure the trail entry (command "trail", args ["mcp"]) — see the corrective-pass design R1');
+      }
+    }
+  }
+  if (scanned === 0) pass('graft-mcp-surfaces: no template MCP surfaces found — vacuous pass');
+  else if (!JSON_MODE) pass(`graft-mcp-surfaces: ${scanned} template MCP surface(s) carry zero graft-era registrations`);
+}
 
 function pass(msg: string) {
   if (!JSON_MODE) console.log(`${colors.green}[PASS]${colors.reset} ${msg}`);
@@ -6747,6 +6794,7 @@ function checkAgentsMdDestructiveFileOpsPin(): void {
   }
 }
 
+  checkGraftMcpSurfaces();                                       // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
   checkVariantIndexCoverage(manifests);                          // WS-12
   checkMirrorHygiene();                                          // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
 
