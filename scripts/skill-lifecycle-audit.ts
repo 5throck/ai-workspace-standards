@@ -9,7 +9,17 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.10.0
+ * @version 1.11.0
+ *
+ * v1.11.0 (2026-11-08, T-20261108-004 — E2E nightly red, co-work scaffold
+ *          only, 14/15 variants green): vendored external-deps clones
+ *          (external/<id>/ via the project external-deps.json install_dirs,
+ *          self-managed-tools v1.3.0 path-set union) skip EVERY authoring
+ *          check — loop-top isSelfManagedPath skip covering frontmatter,
+ *          owner, SKILLS.md registry rows, and Check MM model literals.
+ *          Closes the scaffold pre-commit block on the vendored ppt-master
+ *          SKILL.md (no owner frontmatter; DEC-20261106-04 "consumed
+ *          as-is"). No lifecycle stubs (falsifies upstream provenance).
  * v1.10.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
  *         §3.A2, DEC-20261029-01 PR2): Check SD gains the baseline-hash-equality
  *         tolerance — a flagged last_reviewed staleness warning is suppressed to
@@ -585,6 +595,13 @@ function auditSkills(jsonMode = false): AuditResult {
 
   for (const skillFile of skillFiles) {
     const relPath = relative(ROOT, skillFile).replace(/\\/g, '/');
+    // T-20261108-004 (F-1): vendored external-deps clones (external/<id>/ per
+    // DEC-20261106-04 "consumed as-is") are tool-custody upstream content —
+    // exempt from every authoring check here (frontmatter, owner, registry,
+    // model literals): the project's external-deps.json install_dirs join the
+    // self-managed path set (self-managed-tools v1.3.0), so isSelfManagedPath
+    // is the single sanctioned skip point.
+    if (isSelfManagedPath(relPath)) continue;
     const frontmatter = parseFrontmatter(skillFile);
 
     if (!frontmatter) {
@@ -619,7 +636,13 @@ function auditSkills(jsonMode = false): AuditResult {
       });
     }
 
-    if (!isPlatformSkill && !frontmatter.owner) {
+    // T-20261108-004 (F-1): scaffold-time external-deps clones (external/<id>/
+    // per DEC-20261106-04 "consumed as-is") are vendored upstream content —
+    // no owner frontmatter by design (upstream repos; falsified provenance if
+    // stubbed). The project's external-deps.json install_dirs join the
+    // self-managed path set (self-managed-tools v1.3.0), so isSelfManagedPath
+    // exempts them here exactly like the tool-owned graft/trail skills.
+    if (!isPlatformSkill && !frontmatter.owner && !isSelfManagedPath(relPath)) {
       errors.push({
         level: 'error',
         file: relPath,
@@ -666,7 +689,10 @@ function auditSkills(jsonMode = false): AuditResult {
         fix: 'Archive to skills/_archive/ or remove from repository',
       });
     }
-    if (!isPlatformSkill && frontmatter.name && registryRows.size > 0) {
+    // T-20261108-004: vendored external-deps clones are tool-custody content —
+    // no project SKILLS.md registry row exists for upstream skills (same
+    // self-managed exemption as the owner check above).
+    if (!isPlatformSkill && !isSelfManagedPath(relPath) && frontmatter.name && registryRows.size > 0) {
       const row = registryRows.get(frontmatter.name);
       if (!row) {
         errors.push({

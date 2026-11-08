@@ -130,3 +130,25 @@ describe('self-managed-tools built-in default (U-20261009-001; trail-era 2026-10
     expect(DEFAULT_SELF_MANAGED_PATHS).not.toContain('skills/trail/');
   });
 });
+
+
+describe('project-mode external-deps vendoring (T-20261108-004 v1.3.0)', () => {
+  test('external-deps.json install_dirs join the path set; absent file stays inert', () => {
+    const root = mkdtempSync(join(tmpdir(), 'self-managed-extdeps-'));
+    try {
+      // inert without external-deps.json
+      expect(isSelfManagedPath('external/ppt-master/skills/ppt-master/SKILL.md', root)).toBe(false);
+      // with the manifest: vendored upstream content becomes self-managed
+      writeFileSync(join(root, 'external-deps.json'), JSON.stringify({
+        schemaVersion: 2,
+        dependencies: [{ id: 'ppt-master', install_dir: 'external/ppt-master' }],
+      }));
+      expect(isSelfManagedPath('external/ppt-master/skills/ppt-master/SKILL.md', root)).toBe(true);
+      expect(isSelfManagedPath('external/ppt-master/references/doc.md', root)).toBe(true);
+      expect(isSelfManagedPath('external/other/SKILL.md', root)).toBe(false);
+      expect(isSelfManagedPath('skills/normal/SKILL.md', root)).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
