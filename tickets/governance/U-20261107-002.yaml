@@ -3,14 +3,31 @@ id: U-20261107-002
 kind: manual
 title: Upstream request from co-work
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-07T21:12:57.342+09:00
+created_at: '2026-11-07T21:12:57.342+09:00'
 history:
-  - at: 2026-11-07T21:12:57.342+09:00
+  - at: '2026-11-07T21:12:57.342+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T09:35:54.349+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T09:35:54.349+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T09:35:54.349+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed: external-deps v1.2.0 (port of co-work #38's LOCAL-PATCH U-20261107-002
+  extension) admits bounded non-git install templates — NON_GIT_INSTALL_ARGV0
+  allowlist (bun/npm/curl/wget, deterministic tools only), semver-looking pin
+  requirement (NON_GIT_PIN_RE), optional checksum field (npm dist-integrity or
+  64-hex sha256), classifyInstallArgv0 single admission gate, non-git
+  placeholder rule ({pin}+{dir} required, {repo} optional), and the shell-free
+  argv executor arm in installDependency. Git path byte-compatible. The co-work
+  LOCAL-PATCH forms are now governed upstream content.
 error: null
 upstream:
   project: co-work
@@ -19,7 +36,23 @@ upstream:
   source: project/co-work
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The delivered external-dependency machinery (scripts/lib/external-deps.ts v1.0.0) accepts only git-based install templates: argv[0] must be "git", single argv, no shell metacharacters, and entries require a 40-hex commit field; unknown fields are rejected. This structurally blocks registering non-git dependencies: (1) npm-registry-pinned packages (consumer needs install "bun add --cwd {dir} <pkg>@{pin}" with bin at node_modules/.bin/, integrity anchor = npm dist.integrity sha512 hash instead of a git commit), and (2) GitHub release binary assets (install = release-asset download + SHA256 verification against SHA256SUMS; anchor = release tag + asset checksum). Reproduction: add an external-deps.json entry with install "bun add --cwd {dir} kordoc@4.24.51" or a curl release-asset template, or add an optional "checksum" field — the validator rejects each. Needed: bounded extension admitting non-git install templates, an optional checksum field, and registry/release pin checks, per the workspace external-deps machinery design §6 which deferred non-git forms ("nothing structurally blocks" the template form).'
+  symptom: >-
+    The delivered external-dependency machinery (scripts/lib/external-deps.ts
+    v1.0.0) accepts only git-based install templates: argv[0] must be "git",
+    single argv, no shell metacharacters, and entries require a 40-hex commit
+    field; unknown fields are rejected. This structurally blocks registering
+    non-git dependencies: (1) npm-registry-pinned packages (consumer needs
+    install "bun add --cwd {dir} <pkg>@{pin}" with bin at node_modules/.bin/,
+    integrity anchor = npm dist.integrity sha512 hash instead of a git commit),
+    and (2) GitHub release binary assets (install = release-asset download +
+    SHA256 verification against SHA256SUMS; anchor = release tag + asset
+    checksum). Reproduction: add an external-deps.json entry with install "bun
+    add --cwd {dir} kordoc@4.24.51" or a curl release-asset template, or add an
+    optional "checksum" field — the validator rejects each. Needed: bounded
+    extension admitting non-git install templates, an optional checksum field,
+    and registry/release pin checks, per the workspace external-deps machinery
+    design §6 which deferred non-git forms ("nothing structurally blocks" the
+    template form).
   affected_paths:
     - scripts/lib/external-deps.ts
     - external-deps.json
@@ -33,4 +66,17 @@ upstream:
   dedupe_key: f6c1bdecbccf331a179a716261c50ca8af89ce63c9cc56c29e81d386c501dce2
   duplicates:
     - project: co-work
-      at: 2026-11-07T21:12:57.342+09:00
+      at: '2026-11-07T21:12:57.342+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1911
+    summary: >-
+      Fixed: external-deps v1.2.0 (port of co-work #38's LOCAL-PATCH
+      U-20261107-002 extension) admits bounded non-git install templates —
+      NON_GIT_INSTALL_ARGV0 allowlist (bun/npm/curl/wget, deterministic tools
+      only), semver-looking pin requirement (NON_GIT_PIN_RE), optional checksum
+      field (npm dist-integrity or 64-hex sha256), classifyInstallArgv0 single
+      admission gate, non-git placeholder rule ({pin}+{dir} required, {repo}
+      optional), and the shell-free argv executor arm in installDependency. Git
+      path byte-compatible. The co-work LOCAL-PATCH forms are now governed
+      upstream content.
