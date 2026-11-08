@@ -1,12 +1,6 @@
 {
   "_comment": "Variant-specific overrides vs L1 (templates/common):MCP servers declared in settings.local.json (gitignored). PostToolUse lifecycle check hook added.",
   "mcpServers": {
-    "graft": {
-      "command": "graft",
-      "args": [
-        "mcp"
-      ]
-    },
     "trail": {
       "command": "trail",
       "args": [
