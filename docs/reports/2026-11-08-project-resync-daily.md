@@ -85,7 +85,7 @@ Canary **co-safety** #231: real CI 9/9 SUCCESS → MERGED, 0.29.0 live, post-mer
 | co-learning | #37 | billing-wall | MERGED, 0.29.0 |
 | co-news | #22 | billing-wall | MERGED, 0.29.0 |
 | co-security | #101 | billing-wall | MERGED, 0.29.0 |
-| co-work | — | — | **DEFERRED — external-deps.json manifest gate** (project v1 checksum field vs 0.29.0 v2 schema; conflicts: external-deps.ts/upgrade-policy.ts/validate-templates.ts/i18n-specialist.md). Human port path; T-20261108-002 is the technical unblock (bounded non-git install extension with checksum). Tree reverted clean at 0.28.0 |
+| co-work | — | — | **DEFERRED at 0.29.0** — superseded the same day: delivered 0.30.0 via the follow-up below (PR #40, billing-wall verified) |
 | co-newbiz | #799→#830 lineage | billing-wall | MERGED, 0.29.0 (2f candidate #824 series included) |
 | co-price | #179 | billing-wall (0-step + annotation verified) | MERGED 2026-11-08 11:40 KST (post-run follow-up, merge 7629813), 0.29.0 — **correction**: the original row here recorded `#177 MERGED 0.29.0`, which was premature (PR #177 is the 11-02 docs/skills sync; the last template delivery before tonight was #176 = 0.27.0). The actual delivery path is in the follow-up section below |
 
@@ -103,7 +103,21 @@ The wave table above originally recorded co-price as delivered via `#177`; the c
 
 Then: `dev-sync --spec-exempt=E5` **EXIT=0** (all gates green incl. unit suite, secret scan, lifecycle) → PR #179 → billing-wall verified (5/5 jobs 0-step + payment annotation) → merged per T-20261007-025 (recorded here) → post-merge `audit.ts --lifecycle-only` all-pass, worktree 0-dirty. **T-20261108-006 closed as not-a-gap** via ticket.ts (waiting→review→done): the filed "multi-merge strict-headed-block" premise never binds (single shared parent blob); the real mechanism is the tombstone-row requirement — deleted-file-arm repair needs BOTH the MEMORY.md tombstone row AND archive content satisfying `repairedAtHead`.
 
-## Step 6 — Final state (07:38 KST re-verified; co-price row superseded by the 11:40 KST follow-up above)
+## Follow-up 2 — release train 0.30.0 + co-work delivery completed (11-08 11:40–12:15 KST)
+
+The T-20261108-002 unblock landed AFTER the 0.29.0 tag (post-tag accumulation), so co-work's path ran through a fresh **release train 0.30.0** (PR #1916, merge f97e80040, tag `template-v0.30.0` published; MINOR: the governed non-git admission mechanism + scaffold-aware vendoring exemption + i18n-layout 1.1.0 + dev-sync v1.43.0 — changelog `[Unreleased]` composed from the 6 post-tag commits before releasing):
+
+| Blocker (the 0.29.0 deferral) | 0.30.0 resolution |
+|---|---|
+| external-deps v1 manifest vs v2 schema | `upgrade-project` EXTERNAL DEPS migration: ppt-master attested from the variant seed (MIT/as-is/adapter + DEC-20261106-04); kordoc + rhwp hand-attested **MIT** with evidence (kordoc: npm registry metadata + installed package.json 4.24.51 declares MIT; rhwp: LICENSE file in the clone), usage as-is, adapter `scripts/hwp/hwp-adapter.ts` — verify 0 fail |
+| 4 conflict-bound files | external-deps.ts (v1.0.0→1.2.0) and upgrade-policy.ts (1.37.0→1.38.0) and validate-templates.ts (1.72.0→1.75.0): template versions are supersets (the port absorbed the project's #38 evolution) → `--disposition adopt-template` recorded ×4 (incl. workspace-schema wholesale); behavior preservation **proven by the compat tests: 32 pass / 0 fail** (kordoc/rhwp contract) + svg_check semantics 10/10 |
+| i18n-specialist mirror | sync-agent-mirrors repair (registry projection) |
+| stale graft row in skills/SKILLS.md | removed (same self-managed class as co-price) |
+| NEW: delivery-enumeration gap | `templates/<variant>/scripts/<subdir>/` paths are delivered by NO pass — the adapter `scripts/deck/ppt-master-adapter.ts` was skipped silently until the external-deps V4 gate caught it (dev-sync gates on verify, so the landing blocked). Cleared by landing the template canonical copy + SCRIPTS.md row (compat-proven); **T-20261108-007 filed** for the enumeration fix. The seed's stale compatibility_test (deleted parity harness) also corrected, project + template seed both |
+
+Then: dev-sync EXIT=0 → PR #40 → billing-wall verified (4/4 jobs 0-step + payment annotation) → **merged (2dbeadd), 0.30.0** → post-merge audit all-pass, worktree 0-dirty. **Fleet: 15 × 0.29.0 + co-work 0.30.0 — every project now on a delivered, gated release**; tonight's run (11-09) waves the 15 to 0.30.0. U-20261107-002 (the human admission decision for non-git FORMS in the standard) remains open — the mechanism and the entries' MIT attestation do not foreclose it.
+
+## Step 6 — Final state (07:38 KST re-verified; co-price/co-work rows superseded by the follow-ups above)
 
 | Project | branch | dirty | open PRs | template |
 |---|---|---|---|---|
@@ -116,4 +130,4 @@ Then: `dev-sync --spec-exempt=E5` **EXIT=0** (all gates green incl. unit suite, 
 
 ## Verdict
 
-16/16 fleet projects verified (SSOT), **15 delivered to 0.29.0 + merged with green audits** (co-price completed by the 11:40 KST follow-up — PR #179, billing-wall exception verified and recorded), 1 conflict-deferred with the human port path recorded (co-work external-deps v1→v2, technical unblock T-20261108-002), 1 excluded (co-abap-plugin per SSOT). 2f: 2 learning tickets. T-20261108-006 closed not-a-gap (tombstone-row mechanism documented). Secrets gate clean. The changelog fail-then-heal path worked in-wave (co-deck/co-newbiz legacy changelogs normalized mechanically). No gates bypassed; no force operations; live sessions untouched.
+16/16 fleet projects verified (SSOT), **all 16 now on delivered, gated releases** — 15 at 0.29.0 (co-price completed by the 11:40 KST follow-up, PR #179) and co-work at 0.30.0 (follow-up 2, PR #40; both billing-wall exceptions verified and recorded); the 0.30.0 train (PR #1916, tag published) waves the 15 in tonight's run. co-abap-plugin excluded per SSOT. 2f: 2 learning tickets. T-20261108-006 closed not-a-gap (tombstone-row mechanism documented); T-20261108-007 filed (variant-scripts subdirectory delivery gap). Secrets gate clean. No gates bypassed; no force operations; live sessions untouched.

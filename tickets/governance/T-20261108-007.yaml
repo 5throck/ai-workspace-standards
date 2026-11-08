@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261108-007
+kind: manual
+title: >-
+  upgrade-project delivery gap: templates/<variant>/scripts/<subdir>/ paths are
+  never delivered (co-work scripts/deck/ fell between the common-scripts pass
+  and the scripts/<variant>/ pass) — the 0.30.0 co-work delivery skipped
+  templates/co-work/scripts/deck/ppt-master-adapter.ts (the declared
+  external-deps adapter, DEC-20261106-04), caught by the external-deps verify V4
+  adapter-existence gate (loud by design, dev-sync gates on it); cleared
+  in-flight by a manual template-copy landing + scripts/SCRIPTS.md row
+  (recorded). Fix: the enumeration walk must include variant scripts
+  SUBDIRECTORIES (or the variant-scripts pass must map
+  templates/<variant>/scripts/** wholesale); same class protects any future
+  variant script placed outside scripts/<variant>/.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-08T12:15:47.073+09:00'
+history:
+  - at: '2026-11-08T12:15:47.074+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
