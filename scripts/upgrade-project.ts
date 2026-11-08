@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.97.0
+// @version 1.98.0
+// v1.98.0 (2026-11-09, CI fix PR #1935): the tenant-loop registry read is LAZY
+//          and PATH-SCOPED — only a target whose real path contains a gw-<12hex>
+//          segment (tenant projectDirs always sit under .../<principal>/gw-<12hex>/
+//          project, design §3.4) consults .pipeline-state/tenant-loop-registry.json;
+//          every other outside-Projects target performs zero registry IO, so a
+//          stale/malformed registry can no longer fail an ordinary upgrade (the
+//          CI incident where a sibling suite left a malformed repo-root registry
+//          and later upgrade-project spawns inherited the fail-closed refusal).
+//          Registry path seam: CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE (absolute
+//          path to the registry FILE) replaces the repo-root path when set —
+//          resolved at the single point lib/fleet.ts tenantLoopRegistryPath, so
+//          tests keep fixture registries in mkdtemp dirs and never write the
+//          real repo's gitignored state (T-20261104-003 discipline). All
+//          refusal messages for plausible-tenant paths are byte-identical to
+//          v1.97.0.
 // v1.97.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
 //          §3.4, WP1): tenant upgrade guard. When the resolved target matches a
 //          REGISTERED tenant (lib/fleet.ts tenantForProjectPath — realpath prefix
@@ -1128,7 +1143,7 @@ import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
 import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from './lib/hook-dedupe.ts';
-import { isFleetProjectPath, isTenantWithinWindows, tenantForProjectPath, type TenantLoopTenant } from './lib/fleet.ts';
+import { isFleetProjectPath, isTenantWithinWindows, TENANT_ID_RE, tenantForProjectPath, type TenantLoopTenant } from './lib/fleet.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -1478,13 +1493,28 @@ const targetInsideProjects = relToProjects.length > 0 && !relToProjects.startsWi
 // engage for them.
 let tenantTarget: TenantLoopTenant | null = null;
 if (!targetInsideProjects) {
-  try {
-    tenantTarget = tenantForProjectPath(projectDir, workspaceRoot);
-  } catch (err) {
-    // Fail-closed (design §6): the tenant registry exists but is unusable, so a
-    // tenant target can never be verified — refuse; the message names the registry.
-    console.error(`ERROR: tenant-loop registry failed to load — refusing to proceed (fail-closed, .pipeline-state/tenant-loop-registry.json): ${err instanceof Error ? err.message : String(err)}`);
-    process.exit(1);
+  // v1.98.0 (CI 2026-11-09, PR #1935): the registry read is LAZY and
+  // PATH-SCOPED — only a tenant-SHAPED target consults the registry at all.
+  // Shape test (pure, no IO): the target's real path contains a segment
+  // matching TENANT_ID_RE (gw-<12hex>), because gateway tenant projectDirs
+  // always sit under .../<principal>/gw-<12hex>/project (design §3.4). A
+  // non-tenant-shaped outside-Projects target performs ZERO registry IO, so a
+  // stale or malformed registry file can never fail an ordinary upgrade — the
+  // exact CI failure class where a sibling suite left a malformed repo-root
+  // registry and every later upgrade-project spawn inherited the refusal.
+  // Registry path seam for tests/fixtures: CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE
+  // (absolute path to the registry FILE) replaces the repo-root path entirely
+  // (resolved at the single point lib/fleet.ts tenantLoopRegistryPath).
+  const tenantShapedTarget = projectDir.split(/[\\/]+/).some((seg) => TENANT_ID_RE.test(seg));
+  if (tenantShapedTarget) {
+    try {
+      tenantTarget = tenantForProjectPath(projectDir, workspaceRoot);
+    } catch (err) {
+      // Fail-closed (design §6): the tenant registry exists but is unusable, so a
+      // tenant target can never be verified — refuse; the message names the registry.
+      console.error(`ERROR: tenant-loop registry failed to load — refusing to proceed (fail-closed, .pipeline-state/tenant-loop-registry.json): ${err instanceof Error ? err.message : String(err)}`);
+      process.exit(1);
+    }
   }
   if (tenantTarget) {
     const guardReasons: string[] = [];

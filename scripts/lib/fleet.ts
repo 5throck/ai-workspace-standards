@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-09, CI fix PR #1935): tenantLoopRegistryPath() honors the
+//          CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE env seam (absolute path to
+//          the registry FILE) — single resolution point so tests can point
+//          fixture registries at mkdtemp dirs instead of writing the real
+//          repo's gitignored .pipeline-state (T-20261104-003 discipline; the
+//          sibling-suite pollution incident that red PR #1935). Unset → the
+//          v1.1.0 default path, behavior unchanged.
 // v1.1.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
 //          §3.1/§3.2, WP1): tenant-loop registry helpers added ALONGSIDE the fleet
 //          SSOT. Tenant ids (^gw-[0-9a-f]{12}$) are a DIFFERENT namespace from fleet
@@ -341,8 +348,19 @@ export type LoadTenantLoopRegistryResult =
 
 const TENANT_HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-/** Registry path under the workspace root. Gitignored runtime state — L0-only. */
+/**
+ * Registry path under the workspace root. Gitignored runtime state — L0-only.
+ * v1.2.0 seam: CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE (an ABSOLUTE path to the
+ * registry FILE, not a directory) replaces the repo-root path entirely when
+ * set — single resolution point for every consumer (upgrade-project guard,
+ * backport-diff, mcp-upstream-server identity). Tests use it to keep fixture
+ * registries in mkdtemp dirs and never write the real repo's gitignored state
+ * (T-20261104-003 relative-path pollution discipline). Unset → default path,
+ * byte-identical behavior to v1.1.0.
+ */
 export function tenantLoopRegistryPath(root: string = defaultRoot()): string {
+  const override = process.env.CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE;
+  if (override !== undefined && override.trim().length > 0) return resolve(override);
   return join(root, '.pipeline-state', 'tenant-loop-registry.json');
 }
 
