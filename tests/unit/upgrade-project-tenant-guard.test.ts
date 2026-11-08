@@ -28,6 +28,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync,
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { variantName } from '../../scripts/backport-diff.ts';
+import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
 const REGISTRY = join(REPO_ROOT, '.pipeline-state', 'tenant-loop-registry.json');
@@ -76,7 +77,12 @@ function makeTenantProject(opts: { git?: boolean; marker?: boolean } = {}): { di
   const base = mkdtempSync(join(tmpdir(), 'tenant-guard-'));
   const dir = join(base, 'project');
   mkdirSync(dir, { recursive: true });
-  if (opts.git !== false) execFileSync('git', ['init', '-q', dir]);
+  // gitCleanEnv: a hook context (`git push` pre-push) exports GIT_DIR aimed at this
+  // checkout's private git dir — unsanitized fixture `git init` honors it over the
+  // explicit dir arg and the fixture never gets its own .git (and the add/commit
+  // variants land commits on the PR branch; 2026-11-07 external-deps incident class,
+  // reproduced live 2026-11-09).
+  if (opts.git !== false) execFileSync('git', ['init', '-q', dir], { env: gitCleanEnv() });
   if (opts.marker !== false) {
     writeFileSync(join(dir, 'template-version.txt'), 'variant=co-consult\nversion=0.8.1\nplatform=all\n');
   }
@@ -88,7 +94,9 @@ function runUpgrade(target: string, args: string[] = []): { status: number; stdo
     cwd: REPO_ROOT,
     encoding: 'utf-8',
     timeout: 240_000,
-    env: { ...process.env, TZ: 'UTC' },
+    // Sanitized base (hook-context GIT_DIR must not steer the upgrade engine's
+    // git snapshot flows), TZ override after.
+    env: { ...gitCleanEnv(process.env), TZ: 'UTC' },
   });
   return { status: r.status ?? -1, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
 }

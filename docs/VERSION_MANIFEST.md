@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-08T22:40:45.424Z
+**Generated**: 2026-11-08T23:03:01.499Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -121,7 +121,7 @@
 | changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | N/A |
 | check-handbook-archmap-drift.ts | 1.0.0 | scripts/check-handbook-archmap-drift.ts | N/A |
 | check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
-| check-workspace-hygiene.ts | 1.0.0 | scripts/check-workspace-hygiene.ts | bun |
+| check-workspace-hygiene.ts | 1.0.1 | scripts/check-workspace-hygiene.ts | bun |
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | N/A |

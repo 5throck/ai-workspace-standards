@@ -22,6 +22,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, appendFileSync, realpath
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { classifyWorkspaceHygieneResidue, KNOWN_TOP_LEVEL_DIRS } from "../../scripts/lib/workspace-hygiene.ts";
+import { gitCleanEnv } from "../../scripts/lib/git-env.ts";
 
 const REPO_ROOT = realpathSync(join(import.meta.dir, "..", ".."));
 
@@ -103,7 +104,12 @@ describe("classifyWorkspaceHygieneResidue", () => {
 
 // ── 2. Integration — standalone script on a mkdtemp git repo fixture ─────────
 
-/** Absolute tmpdir fixture repo (T-20261104-003: mkdtempSync under realpath(tmpdir())). */
+/** Absolute tmpdir fixture repo (T-20261104-003: mkdtempSync under realpath(tmpdir())).
+ * Every git call runs with gitCleanEnv() — a hook context (`git push` pre-push)
+ * exports GIT_DIR aimed at this checkout's private git dir, and unsanitized fixture
+ * git calls honor it over cwd: init/add/commit landed in the WORKTREE repo and put
+ * a rogue `initial` commit on the PR branch (2026-11-07 external-deps incident
+ * class, reproduced live on 2026-11-09). */
 function makeFixtureRepo(): string {
   const root = mkdtempSync(join(realpathSync(tmpdir()), "ws-hygiene-fix-")); // ABSOLUTE
   const git = (args: string) =>
@@ -111,6 +117,7 @@ function makeFixtureRepo(): string {
       cwd: root,
       stdout: "pipe",
       stderr: "pipe",
+      env: gitCleanEnv(),
     });
   mkdirSync(join(root, "tests", "unit"), { recursive: true });
   writeFileSync(join(root, "tests", "unit", "tracked.test.ts"), "test();\n");
@@ -120,10 +127,17 @@ function makeFixtureRepo(): string {
   return root;
 }
 
-function runHygieneScript(root: string, extraArgs: string[] = []): { code: number; stdout: string; stderr: string } {
+function runHygieneScript(
+  root: string,
+  extraArgs: string[] = [],
+  extraEnv: Record<string, string> = {},
+): { code: number; stdout: string; stderr: string } {
   const proc = Bun.spawnSync(
     [process.execPath, join(REPO_ROOT, "scripts", "check-workspace-hygiene.ts"), "--root", root, ...extraArgs],
-    { cwd: REPO_ROOT, stdout: "pipe", stderr: "pipe" },
+    // Sanitize the inherited environment (a hook context exports GIT_DIR — see
+    // makeFixtureRepo), then layer extraEnv ON TOP: the GIT_DIR regression test
+    // deliberately re-injects pollution to prove the GATE sanitizes internally.
+    { cwd: REPO_ROOT, stdout: "pipe", stderr: "pipe", env: { ...gitCleanEnv(process.env), ...extraEnv } },
   );
   return { code: proc.exitCode ?? -1, stdout: proc.stdout.toString(), stderr: proc.stderr.toString() };
 }
@@ -172,6 +186,24 @@ describe("check-workspace-hygiene.ts (integration, mkdtemp git fixture)", () => 
       expect(res.stderr).toContain("Fail-closed");
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("REGRESSION: an inherited GIT_DIR from a hook context cannot break the fail-closed contract", () => {
+    // `git push` runs hooks with GIT_DIR pointed at this checkout's private git
+    // dir. Before scripts/lib/git-env.ts, the gate inherited it and `git status`
+    // inspected the OUTER repo — a non-git --root passed vacuously instead of
+    // failing closed (this exact scenario failed pre-fix, verified on
+    // 2026-11-09). The gate must always inspect the requested --root.
+    const decoyRepo = makeFixtureRepo(); // a DIFFERENT, real git fixture
+    const root = mkdtempSync(join(realpathSync(tmpdir()), "ws-hygiene-nogit-hook-")); // ABSOLUTE, no git init
+    try {
+      const res = runHygieneScript(root, [], { GIT_DIR: decoyRepo });
+      expect(res.code).toBe(1);
+      expect(res.stderr).toContain("Fail-closed");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      rmSync(decoyRepo, { recursive: true, force: true });
     }
   });
 });

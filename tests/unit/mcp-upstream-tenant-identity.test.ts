@@ -24,6 +24,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { dump, load, JSON_SCHEMA } from 'js-yaml';
+import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
 const SERVER = join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts');
@@ -61,13 +62,19 @@ beforeEach(() => {
     tenant(id, opts = {}) {
       const dir = join(storage, 'op@example.com', id, 'project');
       mkdirSync(dir, { recursive: true });
-      execFileSync('git', ['init', '-q', dir]);
+      // gitCleanEnv: a hook context (`git push` pre-push) exports GIT_DIR aimed at
+      // this checkout's private git dir — unsanitized fixture `git init` honors it
+      // over the explicit dir arg's cwd discovery and creates NO fixture .git, so
+      // the real server then rejects the tenant ("tenant not registered"); the
+      // add/commit variants also landed commits on the PR branch (2026-11-07
+      // external-deps incident class, reproduced live 2026-11-09).
+      execFileSync('git', ['init', '-q', dir], { env: gitCleanEnv() });
       if (opts.withMarker !== false) {
         writeFileSync(join(dir, 'template-version.txt'), 'variant=co-consult\nversion=0.8.1\nplatform=all\n');
       }
       if (opts.nestedGit) {
         mkdirSync(join(dir, 'inner'), { recursive: true });
-        execFileSync('git', ['init', '-q', join(dir, 'inner')]);
+        execFileSync('git', ['init', '-q', join(dir, 'inner')], { env: gitCleanEnv() });
       }
       return dir;
     },
@@ -126,7 +133,9 @@ class Server {
     this.proc = spawn('bun', [SERVER], {
       cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, TZ: 'UTC', UPSTREAM_WORKSPACE_ROOT: ws.root, ...env },
+      // Sanitized base (hook-context GIT_DIR must not leak into the server's own
+      // subprocesses), TZ/UPSTREAM_WORKSPACE_ROOT and per-instance overrides after.
+      env: { ...gitCleanEnv(process.env), TZ: 'UTC', UPSTREAM_WORKSPACE_ROOT: ws.root, ...env },
     });
     procs.push(this.proc);
     this.proc.stdout!.on('data', (c: Buffer) => {
@@ -252,7 +261,7 @@ describe('resolveProject tenant branch — accept matrix (design §7.4)', () => 
     const a = ws.tenant('gw-aaaaaaaaaaaa');
     const alt = a + '-alt';
     mkdirSync(alt, { recursive: true });
-    execFileSync('git', ['init', '-q', alt]);
+    execFileSync('git', ['init', '-q', alt], { env: gitCleanEnv() });
     writeFileSync(join(alt, 'template-version.txt'), 'variant=co-consult\nversion=0.8.1\nplatform=all\n');
     writeRegistry([tenantRow('gw-aaaaaaaaaaaa', a)]);
     const s = new Server(alt);
@@ -374,7 +383,7 @@ describe('identity tier precedence preserved (cwd > client_roots > self_declared
     // A decoy fleet project root + a decoy self-declared root.
     const fleet = join(ws.root, 'Projects', 'co-decoy');
     mkdirSync(fleet, { recursive: true });
-    execFileSync('git', ['init', '-q', fleet]);
+    execFileSync('git', ['init', '-q', fleet], { env: gitCleanEnv() });
     writeFileSync(join(fleet, 'template-version.txt'), 'variant=co-consult\nversion=9.9.9\nplatform=all\n');
     writeRegistry([tenantRow('gw-eeeeeeeeeeee', dir)]);
     const s = new Server(dir);

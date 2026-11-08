@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-09): run `git status` with scripts/lib/git-env.ts gitCleanEnv() — a
+//          hook context (`git push` pre-push) exports GIT_DIR pointing at this checkout's
+//          private git dir, and the status call inherited it and inspected the WRONG repo
+//          instead of --root (verified: with GIT_DIR set, a non-git --root passed vacuously
+//          instead of failing closed; a fixture commit also landed on the PR branch — the
+//          2026-11-07 external-deps incident class). The gate must always inspect the
+//          requested root regardless of the caller's git environment.
 // v1.0.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
 //          §5.1): standalone fixture-root hygiene gate. Runs `git status --porcelain`
 //          from the repo root and fails (exit 1) when any entry is an untracked WHOLE
@@ -23,6 +30,7 @@ import {
   classifyWorkspaceHygieneResidue,
   formatHygieneResidueReport,
 } from './lib/workspace-hygiene.ts';
+import { gitCleanEnv } from './lib/git-env.ts';
 
 function defaultRoot(): string {
   return new URL('..', import.meta.url).pathname;
@@ -50,7 +58,9 @@ function parseArgs(argv: string[]): { root: string; json: boolean } {
 
 const { root, json } = parseArgs(process.argv.slice(2));
 
-const status = await $`git status --porcelain`.cwd(root).quiet().nothrow();
+// gitCleanEnv() strips inherited repo-redirection vars (GIT_DIR et al. from a
+// hook/CI context) so this always inspects --root, not the caller's repo.
+const status = await $`git status --porcelain`.env(gitCleanEnv()).cwd(root).quiet().nothrow();
 if (status.exitCode !== 0) {
   const detail = status.stderr.toString().trim();
   if (json) {
