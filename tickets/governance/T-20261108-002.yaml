@@ -16,7 +16,7 @@ title: >-
   project-local by design — engine-aware kordoc/rhwp split; consumption is via
   routing)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-08T02:00:30.360+09:00'
 history:
@@ -32,5 +32,15 @@ history:
   - at: '2026-11-08T09:35:54.331+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-08T10:25:24.383+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1911 (merged): external-deps v1.2.0 — the bounded non-git
+  admission port from co-work #38 (NON_GIT_INSTALL_ARGV0 bun/npm/curl/wget,
+  classifyInstallArgv0 admission gate, semver-looking pin requirement, optional
+  checksum field, non-git placeholder rule, shell-free argv executor arm; git
+  path byte-compatible). Live-verified: a v2 manifest with a curl non-git entry
+  parses and resolves ({pin} and {dir} placeholders, argv[0]=curl); negatives
+  (non-semver pin, python3 argv0, malformed checksum) rejected.
 error: null

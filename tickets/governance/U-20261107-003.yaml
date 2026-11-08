@@ -3,7 +3,7 @@ id: U-20261107-003
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-07T22:55:29.315+09:00'
 history:
@@ -16,7 +16,18 @@ history:
   - at: '2026-11-08T10:15:13.977+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-08T10:25:33.262+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed: dev-sync v1.43.0 scoped-staging CONTENT comparison — the S0 snapshot
+  captures per-path utf-8 content and step 6.5 re-reads at S1, re-classifying
+  the S0∩S1 overlap by byte difference. A dirty-at-S0 file whose bytes changed
+  by S1 (the regenerated docs/VERSION_MANIFEST.md leftover) is pipeline output
+  and joins the commit; byte-identical overlap files stay residual. Deletions
+  keep the existing path. Landed in PR #1911; the deletion-test suite keeps
+  identical outcomes with the s0Content driver map. The first post-fix sync
+  landed the stale-manifest repair and the new classifier together.
 error: null
 upstream:
   project: co-newbiz
@@ -48,3 +59,16 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-11-07T22:55:29.315+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1911
+    summary: >-
+      Fixed: dev-sync v1.43.0 scoped-staging CONTENT comparison — the S0
+      snapshot captures per-path utf-8 content and step 6.5 re-reads at S1,
+      re-classifying the S0∩S1 overlap by byte difference. A dirty-at-S0 file
+      whose bytes changed by S1 (the regenerated docs/VERSION_MANIFEST.md
+      leftover) is pipeline output and joins the commit; byte-identical overlap
+      files stay residual. Deletions keep the existing path. Landed in PR #1911;
+      the deletion-test suite keeps identical outcomes with the s0Content driver
+      map. The first post-fix sync landed the stale-manifest repair and the new
+      classifier together.
