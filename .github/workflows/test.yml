@@ -317,7 +317,7 @@ jobs:
           # via the API (octet-stream), authenticated to stay clear of the
           # shared-runner unauthenticated rate limit. The pin itself is
           # unchanged.
-          asset_id=$(gh api "repos/gitleaks/gitleaks/releases/tags/v${GITLEAKS_VERSION}" --jq '.assets[] | select(.name == "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz") | .id')
+          asset_id=$(gh api "repos/gitleaks/gitleaks/releases/tags/v${GITLEAKS_VERSION}" --jq ".assets[] | select(.name == \"gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz\") | .id")
           test -n "$asset_id"
           gh api -H "Accept: application/octet-stream" "repos/gitleaks/gitleaks/releases/assets/${asset_id}" > /tmp/gitleaks.tgz
           sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
