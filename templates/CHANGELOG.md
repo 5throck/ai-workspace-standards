@@ -4,6 +4,15 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-08
+### Added
+- **[2026-11-08]**: external-deps machinery v1.2.0 (T-20261108-002) — bounded non-git admission ported from co-work #38: `NON_GIT_INSTALL_ARGV0` allowlist (bun/npm/curl/wget, single shell-free argv command), checksum field (npm dist-integrity `sha512-<base64>` or 64-hex sha256), `classifyInstallArgv0` single admission gate, `{pin}`+`{dir}` placeholder rule, semver-looking pin check; the git path stays byte-compatible (7 negative controls). Unblocks the co-work external-deps v1→v2 manifest migration (kordoc/rhwp `bun add` entries).
+- **[2026-11-08]**: skill-lifecycle-audit scaffold-aware external-deps vendoring exemption (T-20261108-004; self-managed-tools v1.3.0) — a project's `external-deps.json` install_dirs join the self-managed path set, so vendored upstream clones (external/ppt-master class, DEC-20261106-04 "consumed as-is") are exempt from authoring checks; clears the nightly E2E co-work scaffold red (F-1, single root cause).
+- **[2026-11-08]**: i18n-layout 1.1.0 (T-20261108-003) — HWP/HWPX work routes to the co-work hub adapter; 11 stale template copies of the removed co-consult HWP routing swept (DEC-20261106-02 follow-through).
+### Changed
+- **[2026-11-08]**: dev-sync v1.43.0 (U-20261107-003) — scoped-staging content comparison: a regenerated manifest on a dirty-at-S0 leftover now lands with the scoped PR instead of being silently dropped.
+- **[2026-11-08]**: records correction (T-20261108-005) — the five root platform mirrors have carried no `graft` since T-20261002-001 (2026-10-02); the Phase I F-2 "stale graft mirror" finding was a records artifact, now corrected in VERSION_MANIFEST/SKILLS.md rows.
+
 ## [0.29.0] - 2026-11-07
 ### Changed
 - **[2026-11-08]**: auto-release 2026-11-08: 449 delivered paths (A 95 / M 338 / D 16 / R 0)
