@@ -72,6 +72,7 @@ import {
   EXTERNAL_DEP_LICENSE_POLICY,
   type ExternalDepEntry,
   type ExternalDepsManifest,
+  classifyInstallArgv0,
 } from '../../scripts/lib/external-deps.ts';
 
 // ── fixture helpers ────────────────────────────────────────────────────────────
@@ -238,8 +239,10 @@ describe('parseExternalDepsManifest (D1 strict validation)', () => {
     expect(() => parseExternalDepsManifest(JSON.stringify(shell))).toThrow(/shell metacharacters/);
     const noPh = { schema_version: 1, dependencies: [{ ...valid.dependencies[0], install: 'git clone {repo} {dir}' }] };
     expect(() => resolveInstallArgv(parseExternalDepsManifest(JSON.stringify(noPh)).dependencies[0], '/proj')).toThrow(/placeholders/);
+    // T-20261108-002: a curl template MISSING {pin} is still rejected — now
+    // under the non-git placeholder rule (the old argv[0]='git' hard throw).
     const notGit = { schema_version: 1, dependencies: [{ ...valid.dependencies[0], install: 'curl -o {dir} {repo}' }] };
-    expect(() => resolveInstallArgv(parseExternalDepsManifest(JSON.stringify(notGit)).dependencies[0], '/proj')).toThrow(/argv\[0\]='git'/);
+    expect(() => resolveInstallArgv(parseExternalDepsManifest(JSON.stringify(notGit)).dependencies[0], '/proj')).toThrow(/non-git install template must contain \{pin\} and \{dir\}/);
   });
 });
 
@@ -818,5 +821,77 @@ describe('migrateManifestV1ToV2 (standard §5.6)', () => {
     expect(deps[0]['pin']).toBe('v6.7.0');
     expect(deps[0]['commit']).toBe('c'.repeat(40));
     expect(deps[1]['license']).toBeUndefined();
+  });
+});
+
+// ── T-20261108-002: bounded non-git admission (port of co-work #38 / LOCAL-PATCH U-20261107-002) ──
+
+describe('non-git admission (T-20261108-002, external-deps v1.2.0)', () => {
+  const nonGitEntry = (overrides: Record<string, string>) => ({
+    id: 'ppt-master',
+    repo: 'https://github.com/hugohe3/ppt-master',
+    pin: 'v0.8.7',
+    install: 'curl -L https://example.com/pkg-{pin}.tgz -o {dir}/pkg.tgz',
+    install_dir: 'external/ppt-master',
+    propagation: 'never' as const,
+    license: 'MIT',
+    usage: 'as-is',
+    adapter: 'svg-to-pptx',
+    ...overrides,
+  });
+
+  test('a v2 manifest with an allowlisted non-git install parses (checksum optional)', () => {
+    const d = parseExternalDepsManifest(JSON.stringify({
+      schema_version: 2,
+      dependencies: [nonGitEntry({})],
+    }), 't');
+    expect(d.dependencies[0].id).toBe('ppt-master');
+  });
+
+  test('a v2 manifest with an explicit valid checksum parses', () => {
+    const d = parseExternalDepsManifest(JSON.stringify({
+      schema_version: 2,
+      dependencies: [nonGitEntry({ checksum: 'sha512-abcd' })],
+    }), 't');
+    expect(d.dependencies[0].checksum).toBe('sha512-abcd');
+  });
+
+  test('negative: non-semver pin rejected for a non-git entry', () => {
+    expect(() => parseExternalDepsManifest(JSON.stringify({
+      schema_version: 2,
+      dependencies: [nonGitEntry({ pin: 'latest-build' })],
+    }), 't')).toThrow(/npm registry version or a GitHub release tag/);
+  });
+
+  test('negative: un-admitted argv[0] (python3) rejected', () => {
+    expect(() => parseExternalDepsManifest(JSON.stringify({
+      schema_version: 2,
+      dependencies: [nonGitEntry({ install: 'python3 fetch.py {pin} {dir}' })],
+    }), 't')).toThrow(/allowlisted deterministic non-git tool/);
+  });
+
+  test('negative: malformed checksum rejected', () => {
+    expect(() => parseExternalDepsManifest(JSON.stringify({
+      schema_version: 2,
+      dependencies: [nonGitEntry({ checksum: 'not-a-checksum' })],
+    }), 't')).toThrow(/npm dist-integrity/);
+  });
+
+  test('git entries keep v1 semantics byte-compatible: free-form pin, no checksum required', () => {
+    const gitEntry = {
+      id: 'git-thing', repo: 'https://github.com/x/y', pin: 'some-free-tag',
+      install: 'git clone --branch {pin} {repo} {dir}', install_dir: 'external/git-thing',
+      propagation: 'never', license: 'MIT', usage: 'as-is', adapter: 'x',
+    };
+    const d = parseExternalDepsManifest(JSON.stringify({ schema_version: 2, dependencies: [gitEntry] }), 't');
+    expect(d.dependencies[0].pin).toBe('some-free-tag');
+  });
+
+  test('classifyInstallArgv0 admits the four allowlisted tools and rejects everything else', () => {
+    for (const tool of ['bun', 'npm', 'curl', 'wget']) {
+      expect(classifyInstallArgv0(`${tool} x`, 't')).toBe('non-git');
+    }
+    expect(classifyInstallArgv0('git clone x', 't')).toBe('git');
+    expect(() => classifyInstallArgv0('python3 x', 't')).toThrow(/allowlisted/);
   });
 });
