@@ -19,7 +19,7 @@ title: >-
   is a lint-policy decision, not runner-disposable. On adjudication: finish the
   29 (or rescoped) checks, land via dev-sync, merge.
 priority: high
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-08T13:23:16.890+09:00'
 history:
@@ -29,5 +29,19 @@ history:
   - at: '2026-11-08T17:40:10.355+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-08T18:42:36.994+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T18:42:37.017+09:00'
+    from: review
+    to: done
+result: >-
+  Closed as resolved-in-flight: #831 all-green and merged (1ca7104a, 0.30.0) —
+  no lint-policy decision was ultimately required because the autofixes cleared
+  the gate. The CONFIG divergence itself remains documented for future waves:
+  root biome.json declares no linter rules while co-newbiz enables
+  linter.rules.recommended=true — next L0 content sync into co-newbiz will
+  re-trip lint on newly-changed files; if that recurs, revisit the three policy
+  options (scope L0-synced paths / L0-side conformance / rule alignment).
+  Residual risk noted, not blocking.
 error: null
