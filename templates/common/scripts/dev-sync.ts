@@ -1,4 +1,13 @@
-// @version 1.42.0
+// @version 1.43.0
+// v1.43.0 (2026-11-08, U-20261107-003): scoped-staging content comparison —
+//          a dirty-at-S0 file whose CONTENT changed by S1 (the regenerated
+//          docs/VERSION_MANIFEST.md leftover; the S0\S1 path-only diff
+//          misclassified it as residual, leaving stale bytes committed and
+//          failing main's VERSION_MANIFEST-drift gate on every push) is
+//          pipeline output. S0 snapshot gains a per-path content map
+//          (utf-8 read, absent-on-throw); step 6.5 re-reads at S1 and
+//          re-classifies the overlap by byte difference. Byte-identical
+//          overlap files stay residual; deletions keep the existing path.
 // v1.42.0 (2026-11-06, DEC-20261106-03): hoisted compound Bun-shell interpolations
 //          (git show HEAD:<rel>, gh api pulls endpoint/jq) into named consts — no behaviour change.
 // v1.41.0 (2026-11-05, T-20261105-002): step 3.88 gains the repaired-at-head
@@ -578,6 +587,17 @@ try {
     // output — today's behavior). Scoped mode must not misclassify agent files
     // as generated, so it aborts at step 6 via snapshotFailed.
     snapshotFailed = true;
+}
+
+// U-20261107-003 (v1.43.0): per-path content capture for the dirty set —
+// step 6.5's classifier needs the S0 bytes to detect that a dirty-at-S0
+// file was MUTATED by the pipeline this run (a path-only diff reads such a
+// file as residual even when step 3.85/4.7 regenerated it). utf-8 reads are
+// deterministic per content, so the S0/S1 comparison stays exact; absent
+// files (staged deletions) record undefined.
+const s0Content = new Map<string, string>();
+for (const p of s0Paths) {
+    try { s0Content.set(p, fs.readFileSync(p, 'utf-8')); } catch { /* absent at S0 */ }
 }
 
 // Pre-flight Link Validation Gate — ensures markdown documentation links resolve.
@@ -1785,7 +1805,19 @@ try {
     snapshotFailed = true;
 }
 
-const pipelineOutputs = new Set([...s1Paths].filter(p => !s0Paths.has(p)));
+// U-20261107-003 (v1.43.0): content comparison for the S0∩S1 overlap — a
+// dirty-at-S0 file whose bytes changed by S1 was mutated by THIS run's
+// pipeline (the regenerated docs/VERSION_MANIFEST.md leftover case) and is
+// pipeline output, not residual. A byte-identical overlap file is a leftover
+// the agent made before the run — kept out, per the scoped design.
+const s1Content = new Map<string, string>();
+for (const p of s1Paths) {
+    try { s1Content.set(p, fs.readFileSync(p, 'utf-8')); } catch { /* deleted at S1 */ }
+}
+const pipelineOutputs = new Set([
+    ...[...s1Paths].filter(p => !s0Paths.has(p)),
+    ...[...s1Paths].filter(p => s0Paths.has(p) && s0Content.get(p) !== s1Content.get(p)),
+]);
 const committable = new Set([...taskStaged, ...pipelineOutputs]);
 const residual = [...s1Paths].filter(p => !committable.has(p)).sort();
 

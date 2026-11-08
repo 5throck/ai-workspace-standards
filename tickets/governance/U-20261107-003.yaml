@@ -3,13 +3,19 @@ id: U-20261107-003
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: review
 attempts: 0
-created_at: 2026-11-07T22:55:29.315+09:00
+created_at: '2026-11-07T22:55:29.315+09:00'
 history:
-  - at: 2026-11-07T22:55:29.315+09:00
+  - at: '2026-11-07T22:55:29.315+09:00'
     from: null
     to: waiting
+  - at: '2026-11-08T10:03:25.267+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-08T10:15:13.977+09:00'
+    from: running
+    to: review
 result: null
 error: null
 upstream:
@@ -19,11 +25,21 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'dev-sync scoped staging omits the regenerated docs/VERSION_MANIFEST.md whenever that file is already dirty at the S0 snapshot (e.g. left over from a previous sync run). The S1\S0 diff classifies it as residual, not pipeline output, so the stale manifest stays on main and the CI ''VERSION_MANIFEST drift'' audit gate fails on every main push. Expected: the step 4.7 regenerated manifest is always committed.'
+  symptom: >-
+    dev-sync scoped staging omits the regenerated docs/VERSION_MANIFEST.md
+    whenever that file is already dirty at the S0 snapshot (e.g. left over from
+    a previous sync run). The S1\S0 diff classifies it as residual, not pipeline
+    output, so the stale manifest stays on main and the CI 'VERSION_MANIFEST
+    drift' audit gate fails on every main push. Expected: the step 4.7
+    regenerated manifest is always committed.
   affected_paths:
     - scripts/dev-sync.ts
   identity_source: client_roots
-  repro: 'Run dev-sync once and leave the regenerated docs/VERSION_MANIFEST.md uncommitted. Bump a script @version in a later task. Run dev-sync again: the manifest is listed under ''left OUT of this commit by scoped staging'', and CI audit then fails with the VERSION_MANIFEST drift error.'
+  repro: >-
+    Run dev-sync once and leave the regenerated docs/VERSION_MANIFEST.md
+    uncommitted. Bump a script @version in a later task. Run dev-sync again: the
+    manifest is listed under 'left OUT of this commit by scoped staging', and CI
+    audit then fails with the VERSION_MANIFEST drift error.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +47,4 @@ upstream:
   dedupe_key: f87b1f0977007f7a0b8d4b727ea500c2ca71a4b2e0a0c9d2bcd8a96ddbdba246
   duplicates:
     - project: co-newbiz
-      at: 2026-11-07T22:55:29.315+09:00
+      at: '2026-11-07T22:55:29.315+09:00'

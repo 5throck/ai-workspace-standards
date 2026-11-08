@@ -87,6 +87,7 @@ function buildDriver(block: string): string {
     `};`,
     // S0 snapshot — same command shape as dev-sync's pre-flight snapshot.
     `let s0Paths = new Set<string>();`,
+    `const s0Content = new Map<string, string>();`,
     `let snapshotFailed = false;`,
     `try {`,
     `  const s0Res = await bun$\`git status --porcelain=v1 -z -uall\`.quiet().nothrow();`,

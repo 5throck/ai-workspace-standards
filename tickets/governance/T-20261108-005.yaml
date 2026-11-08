@@ -12,7 +12,7 @@ title: >-
   backfill a records-registry note anchoring the checkout-recovery PRs
   #1901/#1902 (memory-repair class, currently un-ticketed)
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-08T02:02:21.385+09:00'
 history:
@@ -28,5 +28,13 @@ history:
   - at: '2026-11-08T08:02:27.784+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-08T09:12:03.928+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1908 (merged): item 1 — the 5 stale graft platform mirrors
+  (untracked tool artifacts) deleted, closing the competing-instructions class
+  at the root; item 2 — trail SKILLS.md Prior note added; item 3 — the leftover
+  remote branch verified already deleted at merge time; item 4 — recovery-PR
+  anchoring (#1901/#1902) recorded in this ticket's resolution.
 error: null
