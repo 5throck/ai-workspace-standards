@@ -1,4 +1,19 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-08, T-20261108-002 — port of co-work #38 / LOCAL-PATCH
+//          U-20261107-002): bounded NON-GIT admission — an `install` template
+//          may invoke an allowlisted deterministic non-git tool
+//          (NON_GIT_INSTALL_ARGV0: bun/npm/curl/wget) as a single shell-free
+//          argv command; non-git pins must be semver-looking
+//          (NON_GIT_PIN_RE: npm registry version or GitHub release tag); the
+//          optional `checksum` field records the integrity anchor
+//          (npm dist-integrity sha512-<base64> or 64-hex sha256).
+//          classifyInstallArgv0 is the single admission gate ('git' keeps the
+//          v1 semantics byte-identical; multi-step download→verify→extract
+//          sequences are still NOT admitted). resolveInstallArgv admits the
+//          non-git placeholder rule ({pin}+{dir} required, {repo} optional);
+//          installDependency gains the non-git executor arm (shell-free argv
+//          spawn, install_dir mkdir'd first, no commit resolution — re-run is
+//          idempotent for pinned commands). Git path byte-compatible.
 /**
  * external-deps.ts — shared helper for the generic external-dependency machinery
  * (design docs/designs/2026-11-07-external-deps-machinery-design.md, D1/D2/D3/D4/D5)
@@ -43,7 +58,7 @@
  * on PATH. No code-level workaround (documented in the consumers' WARN text).
  */
 
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -79,6 +94,9 @@ export interface ExternalDepEntry {
   pin: string;
   /** Resolved sha, advisory — drift tripwire only, written back at fetch/update. */
   commit?: string;
+  /** Integrity anchor (T-20261108-002): npm dist-integrity `sha512-<base64>`
+   *  or a 64-hex sha256 of the release asset the pinned install fetches. */
+  checksum?: string;
   /** Command template with {pin}/{repo}/{dir} placeholders. */
   install: string;
   /** Project-relative clone destination — MUST be gitignored (D5). */
@@ -120,7 +138,7 @@ const ALLOWED_TOP_LEVEL_DOC_KEY = '$comment';
 
 /** v1 entry fields (machinery D1). */
 export const ENTRY_FIELDS_V1 = [
-  'id', 'repo', 'pin', 'commit', 'install', 'install_dir', 'consumer',
+  'id', 'repo', 'pin', 'commit', 'checksum', 'install', 'install_dir', 'consumer',
   'compatibility_test', 'propagation',
 ] as const;
 /** v2 entry fields (standard §5.2) — the v1 set plus the contract fields. */
@@ -231,6 +249,37 @@ function validateCommandTemplate(cmd: string, field: string, origin: string): vo
   }
 }
 
+// T-20261108-002 (port of co-work #38 / LOCAL-PATCH U-20261107-002): bounded
+// non-git admission — deterministic package-manager/download tools only, so
+// no interpreter (`-c`-style code) injection surface opens. Multi-step
+// sequences (download → checksum-verify → extract) are NOT admitted this
+// round; the optional `checksum` field records the integrity anchor such
+// installs are verified against. Every git-based rule below is unchanged.
+const NON_GIT_INSTALL_ARGV0 = ['bun', 'npm', 'curl', 'wget'] as const;
+
+/** Semver-looking pin for non-git entries: npm registry versions (`4.24.51`)
+ *  and GitHub release tags (`v0.8.7`) share the v?MAJOR.MINOR.PATCH shape. */
+const NON_GIT_PIN_RE = /^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+
+/** npm dist-integrity form (`sha512-<base64>`) or a 64-hex sha256 (release asset). */
+const CHECKSUM_RE = /^(?:sha512-[A-Za-z0-9+/]+={0,2}|[0-9a-f]{64})$/;
+
+function validateChecksum(checksum: string, origin: string): void {
+  if (!CHECKSUM_RE.test(checksum)) {
+    throw typeErr(origin, `checksum must be an npm dist-integrity string ('sha512-<base64>') or a 64-hex sha256 (got: ${JSON.stringify(checksum)})`);
+  }
+}
+
+/** Classify an install template's argv[0]: 'git' (v1 semantics, unchanged) or
+ *  'non-git' (allowlisted deterministic tool). Anything else is rejected — this
+ *  is the extension's single admission gate (v1 rejected all non-git outright). */
+export function classifyInstallArgv0(cmd: string, origin: string): 'git' | 'non-git' {
+  const argv0 = tokenizeCommand(cmd)[0] ?? '';
+  if (argv0 === 'git') return 'git';
+  if ((NON_GIT_INSTALL_ARGV0 as readonly string[]).includes(argv0)) return 'non-git';
+  throw typeErr(origin, `install must invoke git or an allowlisted deterministic non-git tool [${NON_GIT_INSTALL_ARGV0.join(', ')}] (argv[0]='${argv0 || '<empty>'}')`);
+}
+
 /**
  * Resolve the {pin}/{repo}/{dir} placeholders of an `install` template into an
  * argv array (D1: "placeholders resolved"). `dir` becomes the ABSOLUTE install
@@ -244,11 +293,15 @@ export function resolveInstallArgv(entry: Pick<ExternalDepEntry, 'id' | 'install
     .replace(/\{pin\}/g, entry.pin)
     .replace(/\{repo\}/g, entry.repo)
     .replace(/\{dir\}/g, dirAbs));
-  if (argv.length === 0 || argv[0] !== 'git') {
-    throw typeErr(entry.id, `install must invoke git (argv[0]='git', got '${argv[0] ?? '<empty>'}') — non-git sources are out of scope (design §6)`);
+  if (argv.length === 0) {
+    throw typeErr(entry.id, `install template resolves to an empty command`);
   }
-  if (!/\{pin\}/.test(entry.install) || !/\{repo\}/.test(entry.install) || !/\{dir\}/.test(entry.install)) {
-    throw typeErr(entry.id, `install template must contain {pin}, {repo} and {dir} placeholders (got: '${entry.install}')`);
+  if (classifyInstallArgv0(entry.install, entry.id) === 'git') {
+    if (!/\{pin\}/.test(entry.install) || !/\{repo\}/.test(entry.install) || !/\{dir\}/.test(entry.install)) {
+      throw typeErr(entry.id, `install template must contain {pin}, {repo} and {dir} placeholders (got: '${entry.install}')`);
+    }
+  } else if (!/\{pin\}/.test(entry.install) || !/\{dir\}/.test(entry.install)) {
+    throw typeErr(entry.id, `non-git install template must contain {pin} and {dir} placeholders ({repo} is optional for registry pins; got: '${entry.install}')`);
   }
   return argv;
 }
@@ -314,8 +367,21 @@ export function parseExternalDepsManifest(raw: string, origin = '', opts: { allo
     validateRepoUrl(rawEntry.repo as string, `${at} (${id})`, opts.allowLocalRepos === true);
     validateInstallDir(rawEntry.install_dir as string, `${at} (${id})`);
     validateCommandTemplate(rawEntry.install as string, 'install', `${at} (${id})`);
+    // T-20261108-002 pin check: non-git pins must be semver-looking (npm
+    // registry version or GitHub release tag); git entries keep the v1
+    // free-form tag pin (their drift tripwire is the 40-hex commit below).
+    if (classifyInstallArgv0(rawEntry.install as string, `${at} (${id})`) === 'non-git'
+        && !NON_GIT_PIN_RE.test(rawEntry.pin as string)) {
+      throw typeErr(origin, `${at}: non-git pin '${rawEntry.pin}' must look like an npm registry version or a GitHub release tag (v?MAJOR.MINOR.PATCH)`);
+    }
     if (rawEntry.commit !== undefined && (typeof rawEntry.commit !== 'string' || !/^[0-9a-f]{40}$/.test(rawEntry.commit))) {
       throw typeErr(origin, `${at}: commit must be a 40-hex sha (got: ${JSON.stringify(rawEntry.commit)})`);
+    }
+    if (rawEntry.checksum !== undefined && rawEntry.checksum !== null) {
+      if (typeof rawEntry.checksum !== 'string' || rawEntry.checksum.length === 0) {
+        throw typeErr(origin, `${at}: checksum must be a non-empty string when present`);
+      }
+      validateChecksum(rawEntry.checksum, `${at} (${id})`);
     }
     if (rawEntry.compatibility_test !== undefined && rawEntry.compatibility_test !== null) {
       if (typeof rawEntry.compatibility_test !== 'string' || rawEntry.compatibility_test.length === 0) {
@@ -332,6 +398,7 @@ export function parseExternalDepsManifest(raw: string, origin = '', opts: { allo
       propagation: rawEntry.propagation as ExternalDepPropagation,
     };
     if (typeof rawEntry.commit === 'string') entry.commit = rawEntry.commit;
+    if (typeof rawEntry.checksum === 'string') entry.checksum = rawEntry.checksum;
     if (typeof rawEntry.consumer === 'string' && rawEntry.consumer.length > 0) entry.consumer = rawEntry.consumer;
     if (typeof rawEntry.compatibility_test === 'string' && rawEntry.compatibility_test.length > 0) entry.compatibility_test = rawEntry.compatibility_test;
 
@@ -593,6 +660,20 @@ export function installDependency(entry: ExternalDepEntry, projectDir: string): 
     argv = resolveInstallArgv(entry, projectDir);
   } catch (err) {
     return { status: 'failed', error: (err as Error).message };
+  }
+  // T-20261108-002 non-git executor arm (port of co-work #38): the same
+  // shell-free argv-array spawnSync as every other subprocess here; no shell
+  // is ever involved, so the v1 safety posture holds unchanged. The
+  // install_dir is created first; there is no .git refresh analogue — a
+  // re-run simply re-executes the pinned command (idempotent) and no commit
+  // is resolved.
+  if (argv[0] !== 'git') {
+    mkdirSync(resolve(projectDir, entry.install_dir), { recursive: true });
+    const run = spawnSync(argv[0], argv.slice(1), { cwd: projectDir, encoding: 'utf8', timeout: 600_000 });
+    if (run.error || run.status !== 0) {
+      return { status: 'failed', error: `install failed: ${run.stderr || (run.error ? String(run.error) : `exit ${run.status}`)}` };
+    }
+    return { status: 'installed' };
   }
   const dest = resolve(projectDir, entry.install_dir);
   const gitDir = join(dest, '.git');
