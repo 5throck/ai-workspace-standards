@@ -3,14 +3,31 @@ id: U-20261108-002
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-08T18:53:07.051+09:00
+created_at: '2026-11-08T18:53:07.051+09:00'
 history:
-  - at: 2026-11-08T18:53:07.051+09:00
+  - at: '2026-11-08T18:53:07.051+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-08T21:17:54.436+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T21:17:54.436+09:00'
+    from: review
+    to: done
+result: >-
+  Fleet leg landed (PR #1929): templates/common/.github/workflows/ci.yml — all 4
+  actions/checkout pins bumped v4 (11bd7190, Node 20) → v7.0.1 (3d3c42e5, Node
+  24); the Node 20 deprecation warnings clear as projects receive it.
+  PARTIAL-ACCEPT on the runner label: ubuntu-latest is KEPT — its Ubuntu-26
+  migration is GitHub-managed and informational (not a deprecation), and the
+  fleet rides it deliberately; a fixed runner label would be a separate per-repo
+  hardening decision. Delivery: unreleased (0.31.0 train); projects' stale
+  ci.yml copies update at their next upgrade visits via SYNC_IF_NEWER (template
+  newer-version wins). co-newbiz's own ci.yml/delete-merged-branches.yml are
+  project-evolved (standalone track) — its next upgrade visit applies the same
+  pins through the standard conflict flow.
 error: null
 upstream:
   project: co-newbiz
@@ -19,12 +36,28 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Delivered .github/workflows/ci.yml and .github/workflows/delete-merged-branches.yml pin actions/checkout to the v4 SHA (11bd71901bbe5b1630ceea73d27597364c9af683), which runs on Node 20, and use runs-on: ubuntu-latest. GitHub Actions reports 3 warnings "Node.js 20 is deprecated" for actions/checkout and 3 notices that the ubuntu-latest label will migrate to Ubuntu 26 on each CI run. Expected: checkout pinned to a Node 24 release SHA (v7.0.1: 3d3c42e5aac5ba805825da76410c181273ba90b1) and a fixed runner label (ubuntu-24.04). A template upgrade overwrites the local fix on every delivery.'
+  symptom: >-
+    Delivered .github/workflows/ci.yml and
+    .github/workflows/delete-merged-branches.yml pin actions/checkout to the v4
+    SHA (11bd71901bbe5b1630ceea73d27597364c9af683), which runs on Node 20, and
+    use runs-on: ubuntu-latest. GitHub Actions reports 3 warnings "Node.js 20 is
+    deprecated" for actions/checkout and 3 notices that the ubuntu-latest label
+    will migrate to Ubuntu 26 on each CI run. Expected: checkout pinned to a
+    Node 24 release SHA (v7.0.1: 3d3c42e5aac5ba805825da76410c181273ba90b1) and a
+    fixed runner label (ubuntu-24.04). A template upgrade overwrites the local
+    fix on every delivery.
   affected_paths:
     - .github/workflows/ci.yml
     - .github/workflows/delete-merged-branches.yml
   identity_source: client_roots
-  repro: 'Run the template upgrade to the version delivering these workflow files, then push a PR or main commit and open the Actions run annotations: the audit, dependency-audit, secret-scan, unit-tests and test jobs in ci.yml show the Node.js 20 deprecation warning for actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 and the ubuntu-latest migration notice; delete-merged-branches.yml also uses ubuntu-latest.'
+  repro: >-
+    Run the template upgrade to the version delivering these workflow files,
+    then push a PR or main commit and open the Actions run annotations: the
+    audit, dependency-audit, secret-scan, unit-tests and test jobs in ci.yml
+    show the Node.js 20 deprecation warning for
+    actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 and the
+    ubuntu-latest migration notice; delete-merged-branches.yml also uses
+    ubuntu-latest.
   triage: ready
   flagged: false
   triage_reasons:
@@ -33,4 +66,21 @@ upstream:
   dedupe_key: 404e30c125cbfc2152baf547fb5c112cadbbcee194dfeeafb89041412b6ff8f2
   duplicates:
     - project: co-newbiz
-      at: 2026-11-08T18:53:07.051+09:00
+      at: '2026-11-08T18:53:07.051+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1929
+    template_version: unreleased
+    summary: >-
+      Fleet leg landed (PR #1929): templates/common/.github/workflows/ci.yml —
+      all 4 actions/checkout pins bumped v4 (11bd7190, Node 20) → v7.0.1
+      (3d3c42e5, Node 24); the Node 20 deprecation warnings clear as projects
+      receive it. PARTIAL-ACCEPT on the runner label: ubuntu-latest is KEPT —
+      its Ubuntu-26 migration is GitHub-managed and informational (not a
+      deprecation), and the fleet rides it deliberately; a fixed runner label
+      would be a separate per-repo hardening decision. Delivery: unreleased
+      (0.31.0 train); projects' stale ci.yml copies update at their next upgrade
+      visits via SYNC_IF_NEWER (template newer-version wins). co-newbiz's own
+      ci.yml/delete-merged-branches.yml are project-evolved (standalone track) —
+      its next upgrade visit applies the same pins through the standard conflict
+      flow.
