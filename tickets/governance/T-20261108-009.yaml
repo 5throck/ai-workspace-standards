@@ -19,12 +19,15 @@ title: >-
   is a lint-policy decision, not runner-disposable. On adjudication: finish the
   29 (or rescoped) checks, land via dev-sync, merge.
 priority: high
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-08T13:23:16.890+09:00'
 history:
   - at: '2026-11-08T13:23:16.890+09:00'
     from: null
     to: backlog
+  - at: '2026-11-08T17:40:10.355+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

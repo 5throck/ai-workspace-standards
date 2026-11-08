@@ -22,12 +22,32 @@ title: >-
   list). sap-dispatch.ts remains unaccounted (no registry row, no 0b40a06 blob —
   human confirm whether it still exists anywhere).
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-08T12:47:24.558+09:00'
 history:
   - at: '2026-11-08T12:47:24.558+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T17:40:00.042+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T17:40:00.060+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T17:40:00.076+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: landed via PR #1919 (real CI green, merge b09af6862). Fixed in
+  upgrade-project v1.95.0 (PR #1919, same spec R2): PRUNE REMOVED's scripts/
+  category counts templates/<variant>/scripts as upstream — variant-overlay
+  scripts (co-abap sap-*.ts, validate-abap-platform-parity.ts) are
+  template-owned and can no longer be classified as retired deliveries. Verified
+  live: co-abap dry-run shows the sap trio as OK (no PRUNE rows, registry rows
+  intact). Item (2) of the ticket (restore-loss on wipe) traced to operator wave
+  helpers, not dev-sync — recorded as the R3 operator protocol in the design
+  (helpers snapshot pre-existing dirt before reset/clean; the 11-08 wave adopted
+  it). sap-dispatch.ts remains unaccounted (no blob at 0b40a06, no registry row)
+  — left to human confirm per the ticket.
 error: null
