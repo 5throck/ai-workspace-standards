@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.94.0
+// @version 1.95.0
+// v1.95.0 (2026-11-08, spec docs/designs/2026-11-08-variant-scripts-delivery-prune-design.md,
+//          T-20261108-007 + T-20261108-008): variant-overlay scripts become visible to
+//          delivery and prune. (R1) SYNC_IF_NEWER: scripts/ enumerates BOTH
+//          templates/<variant>/scripts and templates/common/scripts (variant-preferred
+//          precedence, resolveTemplate-consistent) — variant-template scripts, including
+//          subdirectory trees like templates/co-work/scripts/deck/, are now delivered;
+//          previously only common was walked, so templates/co-work/scripts/deck/
+//          ppt-master-adapter.ts shipped to no project and blocked co-work's 0.30.0
+//          landing on the external-deps V4 adapter gate. (R2) PRUNE REMOVED's scripts/
+//          category consults templates/<variant>/scripts as upstream (agents/ and
+//          skills/ already did) — variant-overlay scripts (co-abap's sap-*.ts,
+//          registered L0+L2 per DEC-20261106-03) were classified "retired upstream
+//          delivery" on the strength of their root-registry row alone and pruned with
+//          their registry rows dropped, twice (11-07 + 11-08 waves), silently deleting
+//          validate-abap-platform-parity.ts which co-abap's ci.yml invokes.
 // v1.94.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
 //          §5.4 E5 / §5.6, T-20261107-005): EXTERNAL DEPS pass — (a) schema
 //          v1 → v2 migration: seed ids get the v2 contract fields from the
@@ -3224,6 +3239,19 @@ const CORE_LOCKED_SCRIPTS = ['scripts/dev-sync.ts', 'scripts/audit.ts'];
 // golden-reference-loader's transitive imports shipped broken in every project
 // upgrade. Exclusions preserved: dot-dirs, node_modules, temp.
 const tplScriptsRoot = join(commonDir, 'scripts');
+// v1.95.0 (R1, T-20261108-007): the variant overlay joins the delivery walk —
+// variant-preferred precedence (same rule as resolveTemplate). Subdirectory trees
+// (templates/co-work/scripts/deck/) enumerate like any other level.
+const variantScriptsRoot = join(templatesDir, 'scripts');
+const scriptSourceRoots = existsSync(variantScriptsRoot)
+  ? [variantScriptsRoot, tplScriptsRoot]
+  : [tplScriptsRoot];
+const scriptSourceMap = new Map<string, string>();
+for (const srcRoot of scriptSourceRoots) {
+  for (const rel of collectScriptFiles(srcRoot, dryTag)) {
+    if (!scriptSourceMap.has(rel)) scriptSourceMap.set(rel, srcRoot);
+  }
+}
 
 /** Collect every template .ts file under `root` as `scripts/<relPath>` entries. */
 function collectScriptFiles(root: string, dryTag: string): string[] {
@@ -3255,9 +3283,9 @@ function collectScriptFiles(root: string, dryTag: string): string[] {
   return found.sort();
 }
 
-for (const rel of collectScriptFiles(tplScriptsRoot, dryTag)) {
+for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]) => a.localeCompare(b))) {
   const relPath = `scripts/${rel}`;
-  const tplFile = join(tplScriptsRoot, rel);
+  const tplFile = join(relSourceRoot, rel);
   const projFile = join(projectDir, relPath);
   const tplVer = extractScriptVersion(tplFile);
   if (!tplVer) { console.log(`  SKIP (no version): ${relPath}`); continue; }
@@ -5362,7 +5390,11 @@ if (pruneRemoved) {
   console.log('--- PRUNE REMOVED: files present in project but absent from template ---');
   // Check scripts/
   const pruneCategories = [
-    { projDir: join(projectDir, 'scripts'), tplDirs: [join(commonDir, 'scripts')], ext: '.ts', label: 'scripts/' },
+    // v1.95.0 (R2, T-20261108-008): the variant overlay counts as upstream — a
+    // variant-template script present in the project is template-owned, not a
+    // retired delivery, even when the root registry carries its L0+L2 row
+    // (DEC-20261106-03 co-abap registration).
+    { projDir: join(projectDir, 'scripts'), tplDirs: [join(templatesDir, 'scripts'), join(commonDir, 'scripts')].filter((d) => existsSync(d)), ext: '.ts', label: 'scripts/' },
     // v1.66.0 (T-20261006-009): consult the workspace-root agents/ SSOT too —
     // mirroring the skills/ category's v1.35.0 fix. An agent delivered from
     // the root SSOT (in agents/ but absent from variant/L1 trees) otherwise
