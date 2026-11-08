@@ -36,7 +36,7 @@ afterAll(() => {
       try { store.close(); } catch { /* best effort */ }
     }
   }
-  for (const dir of ROOTS) rmSync(dir, { recursive: true, force: true });
+  for (const dir of ROOTS) rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 function sandboxedState(name: string, env: Record<string, string> = {}): GatewayState {

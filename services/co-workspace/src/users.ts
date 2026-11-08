@@ -107,7 +107,15 @@ export class UserStore {
     // Schema evolution moved into the versioned runner (design §4.1): the PII-safe column
     // additions and the legacy email-NOT-NULL rebuild are migration step v2, and the
     // tenant-loop groups tables are step v1. Same end state as the former inline block.
-    runMigrations(this.db);
+    try {
+      runMigrations(this.db);
+    } catch (err) {
+      // A downgrade refusal (or any failed step) must not keep the handle: an object whose
+      // constructor threw is unreachable, so nothing can ever close it — on Windows the
+      // locked users.db then blocks deletion/repair until process exit (CI 2026-11-09).
+      this.db.close();
+      throw err;
+    }
   }
 
   private rowToUser(r: Record<string, unknown>): UserRecord {

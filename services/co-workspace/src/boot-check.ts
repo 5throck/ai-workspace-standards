@@ -40,16 +40,29 @@ function envTruthy(v: string | undefined): boolean {
   return v === "true" || v === "1";
 }
 
+/**
+ * Directory rendered in operator-facing prose. The refusal text is a stable, greppable
+ * string that must read identically on every OS, so a POSIX-style directory is displayed
+ * with forward slashes even where the host path uses `\` (windows-latest — CI 2026-11-09).
+ * Real paths handed to the filesystem (`scaffoldEngine`, asserted verbatim by the suite)
+ * keep their native separators.
+ */
+function displayPath(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
 export function validateBootRequirements(input: BootCheckInput): BootCheckResult {
   const exists = input.exists ?? existsSync;
   const escaped = envTruthy(input.env[ALLOW_EMPTY_CATALOG_ENV]);
   const reasons: string[] = [];
 
   if (input.variants.length === 0 && !escaped) {
+    // `templates/co-*` is a literal, never join(): the operator-facing pattern must read the
+    // same on every OS (join() rendered `templates\co-*` on windows-latest).
     reasons.push(
       `[co-workspace] resolved variant catalog is EMPTY — refusing to boot. ` +
-        `Searched workspaceDir: ${input.workspaceDir}; expected at least one ` +
-        `${join("templates", "co-*")} directory with a variant.json under it (got none). ` +
+        `Searched workspaceDir: ${displayPath(input.workspaceDir)}; expected at least one ` +
+        `templates/co-* directory with a variant.json under it (got none). ` +
         `Fix CO_WORKSPACE_WORKSPACE_DIR / CO_WORKSPACE_VARIANTS, or set ` +
         `${ALLOW_EMPTY_CATALOG_ENV}=true to boot a deliberately empty catalog.`,
     );
@@ -60,7 +73,7 @@ export function validateBootRequirements(input: BootCheckInput): BootCheckResult
     reasons.push(
       `[co-workspace] scaffold engine not found: ${scaffoldEngine} — refusing to boot. ` +
         `The gateway shells out to scripts/new-project.ts under workspaceDir ` +
-        `(${input.workspaceDir}); point CO_WORKSPACE_WORKSPACE_DIR at a checkout of this ` +
+        `(${displayPath(input.workspaceDir)}); point CO_WORKSPACE_WORKSPACE_DIR at a checkout of this ` +
         `repository, or set ${ALLOW_EMPTY_CATALOG_ENV}=true to boot without scaffolding.`,
     );
   }

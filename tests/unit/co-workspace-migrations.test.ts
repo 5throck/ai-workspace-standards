@@ -59,7 +59,7 @@ describe("runMigrations — versioned runner", () => {
       expect(joinCols).toEqual(["group_id", "principal"]);
       db.close();
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -76,7 +76,7 @@ describe("runMigrations — versioned runner", () => {
       expect(runMigrations(db)).toBe(0);
       db.close();
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -86,9 +86,16 @@ describe("runMigrations — versioned runner", () => {
       const db = new Database(join(root, "users.db"));
       db.exec(`PRAGMA user_version = ${MIGRATION_HEAD + 1}`);
       db.close();
-      expect(() => runMigrations(new Database(join(root, "users.db")))).toThrow(MigrationDowngradeError);
+      // Capture the handle: the runner throws before taking ownership, so the suite must
+      // close it or Windows keeps users.db locked and the rmSync below dies with EBUSY.
+      const probe = new Database(join(root, "users.db"));
+      try {
+        expect(() => runMigrations(probe)).toThrow(MigrationDowngradeError);
+      } finally {
+        probe.close();
+      }
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 });
@@ -120,16 +127,19 @@ describe("UserStore — migrated legacy databases", () => {
       expect(g?.scopes?.upgrade).toBe(true);
       expect(g?.windows?.start).toBe("22:00");
       // Join mirror stays in sync with designatedUsers (single input, no divergence).
-      const mirror = new Database(join(root, "tenants", "users.db"), { readonly: true })
+      // Handle captured (not chained) so it is closed — an open reader locks users.db on Windows.
+      const mirrorDb = new Database(join(root, "tenants", "users.db"), { readonly: true });
+      const mirror = mirrorDb
         .query("SELECT principal FROM user_groups WHERE group_id=? ORDER BY principal")
         .all("loop-team") as Array<{ principal: string }>;
+      mirrorDb.close();
       expect(mirror.map((r) => r.principal)).toEqual(["alice", "bob"]);
       expect(users.listGroups().map((x) => x.groupId)).toContain("loop-team");
       expect(users.deleteGroup("loop-team")).toBe(true);
       expect(users.getGroup("loop-team")).toBeUndefined();
       users.close();
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -159,7 +169,7 @@ describe("UserStore — migrated legacy databases", () => {
       db.close();
       users.close();
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -179,7 +189,7 @@ describe("UserStore — migrated legacy databases", () => {
       }
       expect(error).toBeInstanceOf(MigrationDowngradeError);
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -192,17 +202,20 @@ describe("UserStore — migrated legacy databases", () => {
       const db = new Database(dbPath);
       db.exec(`PRAGMA user_version = ${MIGRATION_HEAD + 1}`);
       db.close();
+      const doomed = new Database(dbPath);
       try {
-        runMigrations(new Database(dbPath));
+        runMigrations(doomed);
       } catch {
         /* expected */
+      } finally {
+        doomed.close(); // runner throws before taking ownership — close it or Windows EBUSYs the rm
       }
       const check = new Database(dbPath, { readonly: true });
       const v = check.query("PRAGMA user_version").get() as { user_version: number };
       expect(v.user_version).toBe(MIGRATION_HEAD + 1);
       check.close();
     } finally {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 });

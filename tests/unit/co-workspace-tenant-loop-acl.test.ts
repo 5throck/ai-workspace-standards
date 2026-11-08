@@ -46,7 +46,20 @@ function makeState(label: string): { state: GatewayState; dataDir: string; works
     CO_WORKSPACE_VARIANTS: "co-consult",
   });
   const state = createState(cfg);
-  return { state, dataDir, workspaceDir, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  return {
+    state,
+    dataDir,
+    workspaceDir,
+    // closeState FIRST: Windows keeps the SQLite handles (users/registry/audit/turns) locked
+    // until the connection is closed, so a bare rmSync over this root fails with EBUSY. The
+    // maxRetries pair additionally absorbs the short OS-level release lag after close (the
+    // mcp-upstream-tenant-identity pattern). Idempotent: per-block afterAll hooks also call
+    // closeState, and its per-store try/catch tolerates the second close.
+    cleanup: () => {
+      closeState(state);
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    },
+  };
 }
 
 function req(state: GatewayState, method: string, path: string, opts: { body?: unknown; token?: string } = {}): Promise<Response> {
