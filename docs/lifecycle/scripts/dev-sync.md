@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.42.0
+- **Version**: 1.43.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-05
+- **Last Updated**: 2026-11-08
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-08 | production | production | v1.43.0 (U-20261107-003): scoped-staging CONTENT comparison — a dirty-at-S0 file whose bytes changed by S1 (the regenerated docs/VERSION_MANIFEST.md leftover) is re-classified as pipeline output; the S0 snapshot gains a per-path content map (utf-8, absent-on-throw) and step 6.5 re-reads at S1, re-classifying the S0∩S1 overlap by byte difference. Byte-identical overlap files stay residual; deletions keep the existing path. Closes the stale-manifest class (stale bytes committed, fresh regen omitted, main CI VERSION_MANIFEST-drift failure on every push). | automation-engineer |
 | 2026-11-05 | production | production | v1.41.0 (T-20261105-002): step 3.88 gains the repaired-at-head tier — memory-union-verify v1.1.0 re-tiers a post-activation drop finding group as INFO when the working tree accounts for every parent-owed block (repairedAtHead, un-headed-block absorption tolerance); unrepaired drops stay FATAL, repaired groups print an INFO line. Completes design §5.3 "a repaired file passes" — the v1 blob-comparison made forward repairs impossible (live-blocked since c8aba5d61). | automation-engineer |
 | 2026-11-05 | production | production | v1.40.0 (T-20261104-001, spec docs/designs/2026-11-05-merge-integrity-design.md §5.1): new step 3.88 — memory session-block union-verify, BLOCKING (two-tier rollout user-approved same day): Arm A sweeps bounded recent merge commits (7 days AND 20 merges) touching flat memory logs via helpers/memory-union-verify.ts v1.0.0 (pure core, unit-pinned, byte-identical L1 mirror) requiring every parent block to survive into the merged result plus structural well-formedness; Arm B enforces the same structure on every flat memory log at HEAD (block count === separator count + 1, '## '-headed blocks, no block with >= 2 '## Session Summary' headings — the #1842/#1845 fused-separator signature). Post-activation merges and all worktree findings FATAL with repair guidance; pre-activation merge findings WARN (the design's "expected pass on first run" premise was false — the window holds real immutable-history drops, e.g. merge 3db832974 / PR #1850) and age out with the 7-day window; the five pre-existing malformed logs (2026-10-29/-30/-31, 11-02, 11-03) structurally repaired in the landing commit. Absent memory/ = documented no-op. |
 | 2026-11-04 | production | production | v1.38.0 (U-20261104-003): new step 4.87 — agent frontmatter last_updated bump: sync passes that mechanically rewrite an agent file's frontmatter (tier collapse, model-registry delivery, stub merges) left the top-level last_updated stale, so agent-lifecycle-audit emitted identical staleness warnings for every touched file on every later run (co-newbiz: 34 warnings off the single 2026-10-28 commit 0b1a406c). The pass re-stamps the top-level last_updated to the run date for sync-modified agent .md files whose HEAD-to-worktree diff is confined to the frontmatter block, via the shared bumpFrontmatterLastUpdated primitive; body edits and no-ops are never touched; pure decision core helpers/agent-mechanical-date-bump.ts v1.0.0, unit-pinned | automation-engineer |
