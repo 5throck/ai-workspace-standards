@@ -4913,24 +4913,36 @@ console.log('--- GRAFT→TRAIL MCP CORRECTIVE ---');
     const TRAIL_ENTRY = { command: 'trail', args: ['mcp'] };
 
     // JSON surfaces: .mcp.json (retired surface — corrected in place, never
-    // re-seeded), .gemini/settings.json, opencode.json
+    // re-seeded), .gemini/settings.json (mcpServers object form), opencode.json
+    // (mcp key, command ARRAY form — v1.96.0 revision after the co-price dry-run
+    // showed the object-form pass missing its graft entry entirely)
     for (const rel of ['.mcp.json', '.gemini/settings.json', 'opencode.json']) {
       const abs = join(projectDir, rel);
       if (!existsSync(abs)) continue;
-      let doc: { mcpServers?: Record<string, Record<string, unknown>> };
+      let doc: { mcpServers?: Record<string, Record<string, unknown>>; mcp?: Record<string, Record<string, unknown>> };
       try {
         doc = JSON.parse(readFileSync(abs, 'utf8'));
       } catch {
         recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'SKIP', 'unparseable JSON — left untouched (manual fix required)', undefined, 'WARN');
         continue;
       }
-      if (!doc.mcpServers || typeof doc.mcpServers !== 'object') continue;
+      const isOpencode = rel === 'opencode.json';
+      const servers = isOpencode ? doc.mcp : doc.mcpServers;
+      if (!servers || typeof servers !== 'object') continue;
+      const isGraftArray = (name: string, cfg: Record<string, unknown>): boolean => {
+        if (name === 'graft') return true;
+        const arr = (cfg.command as unknown[] | undefined) ?? [];
+        return arr.map(String).some((a) => a.includes('@nanonets/graft') || a === 'graft');
+      };
       const removed: string[] = [];
-      for (const [name, cfg] of Object.entries(doc.mcpServers)) {
-        if (isGraftEntry(name, cfg)) { delete doc.mcpServers[name]; removed.push(name); }
+      for (const [name, cfg] of Object.entries(servers)) {
+        const graft = isOpencode ? (isGraftEntry(name, cfg) || isGraftArray(name, cfg)) : isGraftEntry(name, cfg);
+        if (graft) { delete servers[name]; removed.push(name); }
       }
       let injected = false;
-      if (!doc.mcpServers.trail) { doc.mcpServers.trail = { ...TRAIL_ENTRY }; injected = true; }
+      if (isOpencode) {
+        if (!servers.trail) { servers.trail = { type: 'local', command: ['trail', 'mcp'] }; injected = true; }
+      } else if (!servers.trail) { servers.trail = { ...TRAIL_ENTRY }; injected = true; }
       if (removed.length > 0 || injected) {
         if (!dryRun) writeFileSync(abs, JSON.stringify(doc, null, 2) + '\n');
         const detail = [
