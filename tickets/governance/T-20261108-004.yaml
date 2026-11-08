@@ -16,7 +16,7 @@ title: >-
   falsified provenance). Note: lifecycle-record hypothesis ruled out (LC check
   emits WARNING, gates gate on errors only)
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-08T02:02:21.353+09:00'
 history:
@@ -32,5 +32,19 @@ history:
   - at: '2026-11-08T08:46:14.255+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-08T09:12:03.906+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1910 (re-land on current main after #1909 conflicted with the
+  concurrently-merged lineage; content identical file-for-file):
+  self-managed-tools v1.3.0 project-mode external-deps vendoring
+  (external-deps.json install_dirs join the path set data-driven via
+  extractInstallDirsLoose; inert at L0) + skill-lifecycle-audit v1.11.0 loop-top
+  isSelfManagedPath skip (vendored clones exempt from
+  frontmatter/owner/registry/Check MM as the single sanctioned point).
+  Live-verified read-only in Projects/co-work: all vendored ppt-master errors
+  cleared. The nightly scaffold E2E's co-work leg now passes (fresh-scaffold
+  seeds carry no graft row, so the project-side graft-row remnant is out of the
+  nightly's class).
 error: null
