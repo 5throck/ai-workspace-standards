@@ -66,7 +66,7 @@ Window project diff ranges (co-work, co-newbiz, co-price, co-safety — the non-
 
 Carries this report + tickets T-20261108-002/-003. Design Gate: standing specs ADR-0089 + 2026-10-07-daily-fleet-learning-extraction-design + 2026-10-28-instruction-ownership-backport-hardening-design + 2026-11-07-fleet-membership-ssot-design.
 
-## Steps 4–5 — v0.29.0 wave: **COMPLETE — 14/16 fleet projects delivered and merged**
+## Steps 4–5 — v0.29.0 wave: **COMPLETE — 15/16 fleet projects delivered and merged**
 
 Canary **co-safety** #231: real CI 9/9 SUCCESS → MERGED, 0.29.0 live, post-merge audit green, tombstone clean (13 deletions absent). One CONFLICT disposition recorded (scripts/dev-sync.ts project-evolved AND template changed — human port path, by-design loudness).
 
@@ -87,9 +87,23 @@ Canary **co-safety** #231: real CI 9/9 SUCCESS → MERGED, 0.29.0 live, post-mer
 | co-security | #101 | billing-wall | MERGED, 0.29.0 |
 | co-work | — | — | **DEFERRED — external-deps.json manifest gate** (project v1 checksum field vs 0.29.0 v2 schema; conflicts: external-deps.ts/upgrade-policy.ts/validate-templates.ts/i18n-specialist.md). Human port path; T-20261108-002 is the technical unblock (bounded non-git install extension with checksum). Tree reverted clean at 0.28.0 |
 | co-newbiz | #799→#830 lineage | billing-wall | MERGED, 0.29.0 (2f candidate #824 series included) |
-| co-price | #177 | billing-wall | MERGED, 0.29.0 (ci.yml converged — no accept-ci-perm-diff needed) |
+| co-price | #179 | billing-wall (0-step + annotation verified) | MERGED 2026-11-08 11:40 KST (post-run follow-up, merge 7629813), 0.29.0 — **correction**: the original row here recorded `#177 MERGED 0.29.0`, which was premature (PR #177 is the 11-02 docs/skills sync; the last template delivery before tonight was #176 = 0.27.0). The actual delivery path is in the follow-up section below |
 
-## Step 6 — Final state (07:38 KST re-verified)
+## Follow-up — co-price delivery completed (11-08 11:40 KST, post-closeout)
+
+The wave table above originally recorded co-price as delivered via `#177`; the closeout PR (#1913) landed that row before the delivery actually existed — co-price's committed history was still **0.27.0** (last delivery PR #176, 11-01) with the 0.29.0 tree sitting uncommitted in the worktree, blocked by the step-3.88 memory gate. The follow-up session completed the delivery with only gate-prescribed repairs (no bypasses):
+
+| Blocker | Finding | Repair (documented path) |
+|---|---|---|
+| 3.88 Arm A — 2 BLOCKING groups | merges ef98637f62 (#178) + 59ed81817e deleted `memory/2026-10-30.md`; both resolve against the same parent blob (8d10908 — theirs null on both sides) | `memory/MEMORY.md` tombstone row `\| 2026-10-30 \|` added (v1.1.1 archived-retention positive evidence) + `memory/archive/2026-10-30.md` completed to the parent superset (3 blocks appended verbatim; `droppedBlocks` → 0) |
+| 3.88 Arm B — `memory/2026-11-01.md` malformed at HEAD | first block began with an H1 (not `## `); one block carried 2 `## Session Summary` headings | leading H1 removed; `---` inserted before the fused second heading (5 blocks / 4 separators, 0 findings) |
+| Skill lifecycle audit — ERROR | `skills/SKILLS.md` graft row had no matching runtime skill (graft-era paths are self-managed per self-managed-tools v1.2.0 — the row is stale after the graft→trail migration) | graft row removed from `skills/SKILLS.md` (the audit's own fix; trail remains root-only by design) |
+| Agent-mirror parity | `.claude/agents/i18n-specialist.md` drift | `bun scripts/sync-agent-mirrors.ts` (gate-prescribed repair, 1 written) |
+| VERSION_MANIFEST drift | delivery's new scripts not in the manifest | `bun scripts/generate-version-manifest.ts` (99 scripts regenerated) |
+
+Then: `dev-sync --spec-exempt=E5` **EXIT=0** (all gates green incl. unit suite, secret scan, lifecycle) → PR #179 → billing-wall verified (5/5 jobs 0-step + payment annotation) → merged per T-20261007-025 (recorded here) → post-merge `audit.ts --lifecycle-only` all-pass, worktree 0-dirty. **T-20261108-006 closed as not-a-gap** via ticket.ts (waiting→review→done): the filed "multi-merge strict-headed-block" premise never binds (single shared parent blob); the real mechanism is the tombstone-row requirement — deleted-file-arm repair needs BOTH the MEMORY.md tombstone row AND archive content satisfying `repairedAtHead`.
+
+## Step 6 — Final state (07:38 KST re-verified; co-price row superseded by the 11:40 KST follow-up above)
 
 | Project | branch | dirty | open PRs | template |
 |---|---|---|---|---|
@@ -102,4 +116,4 @@ Canary **co-safety** #231: real CI 9/9 SUCCESS → MERGED, 0.29.0 live, post-mer
 
 ## Verdict
 
-16/16 fleet projects verified (SSOT), 14 delivered to 0.29.0 + merged with green audits, 1 conflict-deferred with the human port path recorded (co-work external-deps v1→v2, technical unblock T-20261108-002), 1 excluded (co-abap-plugin per SSOT). 2f: 2 learning tickets. Secrets gate clean. The changelog fail-then-heal path worked in-wave (co-deck/co-newbiz legacy changelogs normalized mechanically). No gates bypassed; no force operations; live sessions untouched.
+16/16 fleet projects verified (SSOT), **15 delivered to 0.29.0 + merged with green audits** (co-price completed by the 11:40 KST follow-up — PR #179, billing-wall exception verified and recorded), 1 conflict-deferred with the human port path recorded (co-work external-deps v1→v2, technical unblock T-20261108-002), 1 excluded (co-abap-plugin per SSOT). 2f: 2 learning tickets. T-20261108-006 closed not-a-gap (tombstone-row mechanism documented). Secrets gate clean. The changelog fail-then-heal path worked in-wave (co-deck/co-newbiz legacy changelogs normalized mechanically). No gates bypassed; no force operations; live sessions untouched.
