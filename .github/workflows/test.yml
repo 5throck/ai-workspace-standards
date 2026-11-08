@@ -307,9 +307,19 @@ jobs:
           bun-version: 1.4.0
 
       - name: Install gitleaks (pinned)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           GITLEAKS_VERSION=8.24.3
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          # 2026-11-08: this asset's browser_download_url redirect chain 504'd
+          # fleet-wide (3 CI runs + local probes over ~25 min) while the API
+          # asset endpoint served the identical 5,796,002-byte tarball — fetch
+          # via the API (octet-stream), authenticated to stay clear of the
+          # shared-runner unauthenticated rate limit. The pin itself is
+          # unchanged.
+          asset_id=$(gh api "repos/gitleaks/gitleaks/releases/tags/v${GITLEAKS_VERSION}" --jq '.assets[] | select(.name == "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz") | .id')
+          test -n "$asset_id"
+          gh api -H "Accept: application/octet-stream" "repos/gitleaks/gitleaks/releases/assets/${asset_id}" > /tmp/gitleaks.tgz
           sudo tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
           gitleaks version
 
