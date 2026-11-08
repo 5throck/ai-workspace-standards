@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.95.0
+// @version 1.96.0
+// v1.96.0 (2026-11-08, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md,
+//          T-20261108-010 follow-through): GRAFT→TRAIL MCP CORRECTIVE pass — gated on
+//          the migration marker (.trail/ present), it removes graft-era server entries
+//          from the four delivered MCP surfaces (.mcp.json, .gemini/settings.json,
+//          .codex/config.toml, opencode.json) and ensures a trail entry exists, while
+//          preserving every non-graft server (co-abap's abap routing, co-newbiz's
+//          project server). Needed because each surface was stuck for a different
+//          delivery reason (.codex ADD_IF_MISSING never updates; .gemini/opencode
+//          locally-modified CONFLICT-SKIP; .mcp.json retired-never-touched), so the
+//          template flip alone can never reach delivered projects. Idempotent;
+//          decision row per corrected file (INFO). R2: validate-templates gains
+//          the graft-mcp-surfaces check pinning the template flip.
 // v1.95.0 (2026-11-08, spec docs/designs/2026-11-08-variant-scripts-delivery-prune-design.md,
 //          T-20261108-007 + T-20261108-008): variant-overlay scripts become visible to
 //          delivery and prune. (R1) SYNC_IF_NEWER: scripts/ enumerates BOTH
@@ -4884,6 +4896,98 @@ console.log('--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
   if (treeChanged === 0) console.log('  (no uncovered template files — project already at parity)');
   console.log('');
 }
+
+// ── GRAFT→TRAIL MCP CORRECTIVE (migration marker: .trail/) ───────────────────
+console.log('--- GRAFT→TRAIL MCP CORRECTIVE ---');
+{
+  const trailMarker = join(projectDir, '.trail');
+  if (!existsSync(trailMarker)) {
+    console.log('  SKIP (no .trail/ migration marker — pre-migration project)');
+  } else {
+    let correctedCount = 0;
+    const isGraftEntry = (name: string, cfg: Record<string, unknown>): boolean => {
+      if (name === 'graft') return true;
+      const argv = [String(cfg.command ?? ''), ...((cfg.args as unknown[] | undefined) ?? []).map(String)].join(' ');
+      return argv.includes('@nanonets/graft');
+    };
+    const TRAIL_ENTRY = { command: 'trail', args: ['mcp'] };
+
+    // JSON surfaces: .mcp.json (retired surface — corrected in place, never
+    // re-seeded), .gemini/settings.json, opencode.json
+    for (const rel of ['.mcp.json', '.gemini/settings.json', 'opencode.json']) {
+      const abs = join(projectDir, rel);
+      if (!existsSync(abs)) continue;
+      let doc: { mcpServers?: Record<string, Record<string, unknown>> };
+      try {
+        doc = JSON.parse(readFileSync(abs, 'utf8'));
+      } catch {
+        recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'SKIP', 'unparseable JSON — left untouched (manual fix required)', undefined, 'WARN');
+        continue;
+      }
+      if (!doc.mcpServers || typeof doc.mcpServers !== 'object') continue;
+      const removed: string[] = [];
+      for (const [name, cfg] of Object.entries(doc.mcpServers)) {
+        if (isGraftEntry(name, cfg)) { delete doc.mcpServers[name]; removed.push(name); }
+      }
+      let injected = false;
+      if (!doc.mcpServers.trail) { doc.mcpServers.trail = { ...TRAIL_ENTRY }; injected = true; }
+      if (removed.length > 0 || injected) {
+        if (!dryRun) writeFileSync(abs, JSON.stringify(doc, null, 2) + '\n');
+        const detail = [
+          removed.length ? `graft-era entries removed: ${removed.join(', ')}` : '',
+          injected ? 'trail entry injected (absent)' : '',
+        ].filter(Boolean).join('; ');
+        recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'UPDATE', detail, undefined, 'INFO');
+        console.log(`  ${dryTag}CORRECTED: ${rel}  (${detail})`);
+        correctedCount++;
+      } else {
+        recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'SKIP', 'clean — no graft-era entries, trail present', undefined, 'INFO');
+      }
+    }
+
+    // TOML surface: .codex/config.toml — textual block surgery
+    {
+      const rel = '.codex/config.toml';
+      const abs = join(projectDir, rel);
+      if (existsSync(abs)) {
+        const text = readFileSync(abs, 'utf8');
+        const lines = text.split('\n');
+        const out: string[] = [];
+        let removedBlock = false;
+        let skipBlock = false;
+        let hasTrail = /^\[mcp_servers\.trail\]/m.test(text);
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (/^\[mcp_servers\.graft\]/.test(line)) { skipBlock = true; removedBlock = true; continue; }
+          if (skipBlock) {
+            if (/^\[/.test(line)) { skipBlock = false; out.push(line); }
+            continue;
+          }
+          out.push(line);
+        }
+        let injected = false;
+        if (!hasTrail) {
+          out.push('', '[mcp_servers.trail]', 'command = "trail"', 'args = ["mcp"]');
+          injected = true;
+        }
+        if (removedBlock || injected) {
+          if (!dryRun) writeFileSync(abs, out.join('\n'));
+          const detail = [
+            removedBlock ? 'graft block removed: [mcp_servers.graft]' : '',
+            injected ? 'trail block injected (absent)' : '',
+          ].filter(Boolean).join('; ');
+          recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'UPDATE', detail, undefined, 'INFO');
+          console.log(`  ${dryTag}CORRECTED: ${rel}  (${detail})`);
+          correctedCount++;
+        } else {
+          recordDecision(rel, 'CORRECTIVE', 'GRAFT_TRAIL_MCP', 'SKIP', 'clean — no graft-era entries, trail present', undefined, 'INFO');
+        }
+      }
+    }
+    if (correctedCount === 0) console.log('  OK     all MCP surfaces clean');
+  }
+}
+console.log('');
 
 // ── IDENTITY SEED: docs/project.md (add-if-missing render — spec
 //    2026-09-24-scaffold-identity-overview-design.md §13.2) ─────────────────────
