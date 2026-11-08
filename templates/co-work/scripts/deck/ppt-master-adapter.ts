@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @version 1.0.0
 /**
  * ppt-master-adapter.ts — the ONLY coupling point between co-work decks and
  * the ppt-master conversion chain (design 2026-11-06-deck-emitter-ppt-master-rebase-design,

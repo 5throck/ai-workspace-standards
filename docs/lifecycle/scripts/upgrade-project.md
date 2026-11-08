@@ -4,9 +4,9 @@
 
 - **Script**: upgrade-project
 - **Status**: active
-- **Version**: 1.94.0
+- **Version**: 1.95.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-07 (v1.93.0 EXTERNAL DEPS reconcile data-loss fix — project-only manifest entries preserved, schema_version no longer a literal, non-JSON manifest never overwritten; external-deps standard §5.6, T-20261107-005. Prior: v1.92.0 fleet membership SSOT B1 — inside-Projects non-member targets refused by default in every mode; --allow-non-member sanctioned override with WARN row; DEC-20261107-01. Prior: variant SCRIPTS sync mkdir guard — dest scripts/<variant>/ may not exist in projects; prior: EXTERNAL DEPS pass + --external-deps-only, external-deps-machinery design D2–D5, upstream machinery)
+- **Last Updated**: 2026-11-08 (v1.95.0 variant-overlay scripts visibility — SYNC_IF_NEWER: scripts/ enumerates templates/<variant>/scripts + common (variant-preferred); PRUNE REMOVED scripts/ category counts the variant overlay as upstream; spec 2026-11-08-variant-scripts-delivery-prune-design, T-20261108-007 + T-20261108-008. Prior: v1.94.0 EXTERNAL DEPS schema v1→v2 migration + E5 pre-install gate — external-deps standard §5.4 E5 / §5.6, T-20261107-005. Prior: v1.93.0 EXTERNAL DEPS reconcile data-loss fix — project-only manifest entries preserved, schema_version no longer a literal, non-JSON manifest never overwritten; external-deps standard §5.6, T-20261107-005. Prior: v1.92.0 fleet membership SSOT B1 — inside-Projects non-member targets refused by default in every mode; --allow-non-member sanctioned override with WARN row; DEC-20261107-01. Prior: variant SCRIPTS sync mkdir guard — dest scripts/<variant>/ may not exist in projects; prior: EXTERNAL DEPS pass + --external-deps-only, external-deps-machinery design D2–D5, upstream machinery)
 
 ## Description
 
