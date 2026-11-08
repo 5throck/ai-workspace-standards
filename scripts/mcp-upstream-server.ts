@@ -1,5 +1,28 @@
 #!/usr/bin/env bun
-// @version 1.14.0
+// @version 1.15.1
+// v1.15.1 (2026-11-09, QA hardening H9): workspace-root exclusion in the tenant
+//          match loop — a registry entry whose projectDir resolves to the
+//          workspace root itself never matches (fleet.ts tenantForProjectPath
+//          parity; reachable only via a hand-edited registry). Defense in depth
+//          only: a hand-edited root entry previously made EVERY cwd inside the
+//          workspace tenant-resolvable until the .git check rejected it.
+// v1.15.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §3.3, WP1): tenant identity branch in resolveProject — a cwd inside a
+//          REGISTERED tenant projectDir (realpath prefix match on the gateway's
+//          tenant-loop-registry.json export, read via lib/fleet.ts under
+//          UPSTREAM_WORKSPACE_ROOT) now resolves as that tenant (identity tier:
+//          cwd, same as Projects/co-* children), with the same nested-repo
+//          suspicion as the Projects/ rule (the tenant root itself must be a real
+//          git repo; no nested .git between cwd and the tenant root). Registry
+//          failures are fail-closed: absent/stale/schema-major behave as absent
+//          (generic REGISTRATION_RULE applies); a registry that EXISTS but is
+//          malformed rejects with the explicit tenant rule message instead of
+//          the generic one (never misresolve a tenant cwd). Rejection messages
+//          state which rule failed: the tenant rule names the registry and
+//          scopes.upstreamFile (design §3.3 verbatim). Per-project caps and the
+//          known-projects first-seen inbox gate key on the resolved name — for a
+//          tenant that is the tenant id (gw-<12hex>), so 11th-filing soft cap and
+//          first-filing → triage:inbox apply identically to co-* projects.
 // v1.14.0 (2026-11-05, T-20261105-001, spec docs/designs/2026-11-05-merge-integrity-design.md
 //          §5.4): intake-lock transient-FS tolerance — the lock acquisition was the one
 //          site the v1.9.2/v1.10.1 win32 hardening never covered: it rethrew every
@@ -149,13 +172,14 @@ import { load, dump, JSON_SCHEMA } from 'js-yaml';
 import { withTicketLock, readTicket, reprioritizeTicket, loadKanbanAliases } from './helpers/ticket-store.ts';
 import { kstDate, kstIso } from './helpers/kst-time.ts';
 import { upstreamIdentitySource, resolvePriorityInput, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
-import { ReprioritizeRefusedError } from './helpers/reprioritize.ts';
+import { ReprioritizeRefusedError, type ReprioritizeActor } from './helpers/reprioritize.ts';
+import { loadTenantLoopRegistry, tenantLoopRegistryPath, TENANT_ID_RE, type LoadTenantLoopRegistryResult, type TenantLoopTenant } from './lib/fleet.ts';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.14.0';
+export const SERVER_VERSION = '1.15.1';
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -324,13 +348,130 @@ function saveKnownProjects(m: KnownProjects): void {
 
 interface ProjectIdentity { name: string; path: string; variant: string; version: string | null }
 
-function resolveProject(cwd: string): ProjectIdentity | string {
+// v1.15.0 (design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3): the explicit
+// tenant-branch rejection. States WHICH rule failed — a tenant cwd that cannot be
+// resolved never falls back to the generic Projects/ wording (fail-closed, never
+// misresolve). Rendered from the RESOLVED cwd: raw input is never echoed verbatim.
+function tenantRuleMessage(realCwd: string): string {
+  return `tenant not registered in tenant-loop-registry (${realCwd}): filing requires the tenant to be registered and scopes.upstreamFile=true (design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3)`;
+}
+
+/**
+ * v1.15.0 tenant identity branch (design §3.3): resolve a cwd inside a
+ * REGISTERED tenant projectDir to that tenant.
+ * Returns:
+ *  - ProjectIdentity — the cwd matched an active, upstreamFile-scoped tenant;
+ *  - string          — the cwd matched tenant-shaped state that fails a rule
+ *                      (suspended / scopes.upstreamFile off / nested repo / a
+ *                      registry that exists but is malformed): the explicit
+ *                      tenant rule message;
+ *  - null            — the cwd is not tenant-resolvable (registry absent/stale/
+ *                      schema-major = zero tenants, or no registered projectDir
+ *                      prefix-matches): fall through to the Projects/ rule.
+ */
+function resolveTenantProject(cwd: string): ProjectIdentity | string | null {
+  let realCwd: string;
   try {
-    // UNC / extended-length device paths (\\server\share, \\?\UNC\, \\?\C:\) are rejected on the
-    // raw string BEFORE any filesystem call: realpathSync on a UNC path can stall on the network
-    // and leak SMB credentials (T-20261003-004; the roots/list tier already drops these in E.4 —
-    // this guards the cwd and self-declared project_root entrances too).
-    if (cwd.startsWith('\\\\')) return REGISTRATION_RULE;
+    realCwd = realpathSync(cwd);
+  } catch {
+    return null; // no such directory — the Projects/ rule message applies
+  }
+  let load: LoadTenantLoopRegistryResult;
+  try {
+    load = loadTenantLoopRegistry(WORKSPACE_ROOT);
+  } catch (err) {
+    // Defensive twin of the malformed branch below (the loader reports
+    // malformed as a result, not a throw) — keep the fail-closed contract even
+    // if a future loader revision starts throwing.
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error(`[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${detail}`);
+    return tenantRuleMessage(realCwd);
+  }
+  if (!load.ok) {
+    if (load.error === 'malformed') {
+      // The registry EXISTS but is unusable: a tenant cwd can no longer be
+      // distinguished from a non-tenant one, so fail closed on the EXPLICIT
+      // tenant rule (never the generic rule, never a guess). Detail → logs.
+      console.error(`[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${load.detail}`);
+      return tenantRuleMessage(realCwd);
+    }
+    return null; // absent-file / stale / schema-major → behave as absent (§3.1)
+  }
+
+  // Direct registry entries only — no walk-up discovery (design §3.3.2). Deepest
+  // match wins when entries nest; the +sep comparison defeats sibling-prefix
+  // overlaps (…/gw-A/project vs …/gw-AB/project). [QA H9] An entry whose projectDir
+  // IS the workspace root never matches (fleet.ts tenantForProjectPath parity,
+  // reachable only via a hand-edited registry): a tenant is never the root.
+  let baseReal: string;
+  try {
+    baseReal = realpathSync(WORKSPACE_ROOT);
+  } catch {
+    baseReal = WORKSPACE_ROOT;
+  }
+  let match: { tenant: TenantLoopTenant; realDir: string } | null = null;
+  for (const tenant of load.registry.tenants) {
+    let realDir: string;
+    try {
+      realDir = realpathSync(tenant.projectDir);
+    } catch {
+      continue; // unregistered-on-disk entries never match
+    }
+    if (realDir === baseReal) continue; // a tenant is never the workspace root itself
+    if (realCwd === realDir || realCwd.startsWith(realDir + sep)) {
+      if (match === null || realDir.length > match.realDir.length) match = { tenant, realDir };
+    }
+  }
+  if (match === null) return null;
+  const t = match.tenant;
+  // Registered but suspended, or upstream filing scoped off: the explicit rule
+  // message verbatim (design §3.3), not the generic REGISTRATION_RULE.
+  if (t.status !== 'active' || t.scopes.upstreamFile !== true) return tenantRuleMessage(realCwd);
+  // Same nested-repo suspicion as the Projects/ rule: the tenant root itself
+  // must be a real git repo (a .git FILE means worktree/submodule), and no
+  // nested .git may sit between the cwd and the tenant root.
+  try {
+    if (!lstatSync(join(t.projectDir, '.git')).isDirectory()) return tenantRuleMessage(realCwd);
+  } catch {
+    return tenantRuleMessage(realCwd);
+  }
+  let dir = realCwd;
+  while (dir !== match.realDir) {
+    if (existsSync(join(dir, '.git'))) return tenantRuleMessage(realCwd);
+    const parent = dirname(dir);
+    if (parent === dir) return tenantRuleMessage(realCwd);
+    dir = parent;
+  }
+  // template-version.txt at the tenant root WHEN PRESENT (absent → null version).
+  let version: string | null = null;
+  for (const rel of IDENTITY_PATHS) {
+    const tvFile = join(t.projectDir, rel);
+    if (existsSync(tvFile)) {
+      const verm = /^version=(\S+)\s*$/m.exec(readFileSync(tvFile, 'utf-8'));
+      version = verm ? verm[1] : null;
+      break;
+    }
+  }
+  return { name: t.id, path: t.projectDir, variant: t.variant, version };
+}
+
+function resolveProject(cwd: string): ProjectIdentity | string {
+  // UNC / extended-length device paths (\\server\share, \\?\UNC\, \\?\C:\) are rejected on the
+  // raw string BEFORE any filesystem call: realpathSync on a UNC path can stall on the network
+  // and leak SMB credentials (T-20261003-004; the roots/list tier already drops these in E.4 —
+  // this guards the cwd, the tenant branch and self-declared project_root entrances alike).
+  if (cwd.startsWith('\\\\')) return REGISTRATION_RULE;
+  const projectsResult = resolveCoProject(cwd);
+  if (typeof projectsResult !== 'string') return projectsResult;
+  // v1.15.0: tenant branch — checked ONLY when the Projects/ rule did not match
+  // (design §3.3.1); its verdict (identity / tenant rule / fall-through) decides.
+  const tenantResult = resolveTenantProject(cwd);
+  if (tenantResult !== null) return tenantResult;
+  return projectsResult;
+}
+
+function resolveCoProject(cwd: string): ProjectIdentity | string {
+  try {
     // Identity is derived from the filesystem only. git is never consulted: `git rev-parse` honors
     // the repo's own core.worktree, which the project agent controls.
     const realCwd = realpathSync(cwd);
@@ -1030,6 +1171,9 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
   try {
     return withIntakeLock(() => {
     // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
+    // v1.15.0 (design §3.3): `project` is the resolved name opaquely — for a
+    // tenant filing that is the tenant id (gw-<12hex>), so the per-project caps
+    // and every audit-bucket below key on tenant ids with no special-casing.
     const audit = readTodayAudit();
     const projectAccepted = audit.filter((e) => e.project === project && e.outcome === 'accepted').length;
     const projectMerged = audit.filter((e) => e.project === project && e.outcome === 'merged').length;
@@ -1094,6 +1238,9 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
     }
 
     const knownProjects = loadKnownProjects();
+    // v1.15.0 (design §3.3): known-projects.json also records tenants (keys
+    // gw-<hex> alongside co-* names, same shape) — a first filing from an
+    // unknown tenant is forced to triage:inbox exactly like a co-* first-seen.
     // M7 (T-20261002-010): the first-request gate is a TRUST-BUILDING gate, not a
     // permanent label — a project whose ticket the PM resolved as fixed|local-only has
     // earned trust, so its NEXT genuine defect is not auto-demoted to inbox.
@@ -1272,15 +1419,19 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   // 3-strike ledger keyed by the caller's project, and the history[] actor entry.
   // ADR-0103 records cross-project T-ticket reprioritize as a known gap; every call is
   // audit-logged with the gateway-derived identity.
+  // v1.15.0 (design §3.3): a tenant identity yields the spoke-tenant:<tenant id>
+  // actor — the tenant namespace, so the +1/24h cap and the 3-strike freeze ledger
+  // key per tenant exactly as they do per spoke project.
   let before: ReturnType<typeof readTicket>;
   try {
     before = readTicket(ticketsDir(), p.id);
   } catch {
     return { error: { code: -32602, message: 'not found' } };
   }
+  const actor: ReprioritizeActor = TENANT_ID_RE.test(project) ? `spoke-tenant:${project}` : `spoke-pm:${project}`;
 
   try {
-    const t = reprioritizeTicket(ticketsDir(), p.id, to, `spoke-pm:${project}`, {
+    const t = reprioritizeTicket(ticketsDir(), p.id, to, actor, {
       stateDir: join(WORKSPACE_ROOT, '.pipeline-state'),
       ...(DELEGATION_ID_RE.test(p.id) ? {} : { ownerProject: project }),
     });

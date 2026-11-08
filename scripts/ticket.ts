@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §3.3, WP1): the reprioritize --actor grammar accepts
+//          `spoke-tenant:gw-<12hex>` (gateway tenant agents). A tenant actor follows
+//          the identical write rules as spoke-pm — P0/urgent stays user-only,
+//          +1 level per ticket per 24h, violations feed the 3-strike counter keyed
+//          on the tenant id — so only the usage/error strings and the grammar
+//          delegation changed (policy itself lives in helpers/reprioritize.ts v1.1.0).
 // v1.15.0 (2026-11-05, spec docs/designs/2026-11-04-project-loss-hardening-design.md
 //          §5.3, T-20261104-004 item 3): two changes. (1) create gains
 //          --allow-duplicate — the ONLY surface for the store-level duplicate
@@ -419,7 +426,8 @@ try {
     }
     case 'reprioritize': {
       // v1.13.0 (hub-consolidation §5.2) — priority-only change with governance:
-      // P0/urgent is user-only (hard error for agents); spoke actors are capped at
+      // P0/urgent is user-only (hard error for agents); spoke actors (spoke-pm,
+      // and spoke-tenant since v1.16.0, design 2026-11-08 §3.3) are capped at
       // +1 level per ticket per 24h; cap violations feed the 3-strike counter
       // (.pipeline-state/hub-reprioritize-strikes.json, gitignored) and a frozen
       // project's raises are refused with a typed error pending user review.
@@ -428,10 +436,10 @@ try {
       const priorityArg = flags.priority;
       const actorArg = flags.actor;
       if (!id || priorityArg === undefined || actorArg === undefined) {
-        fail('usage: ticket.ts reprioritize <id> --priority <P0|P1|P2|P3|low|normal|high|urgent> --actor <user|hub-pm|spoke-pm:NAME>');
+        fail('usage: ticket.ts reprioritize <id> --priority <P0|P1|P2|P3|low|normal|high|urgent> --actor <user|hub-pm|spoke-pm:NAME|spoke-tenant:gw-<12hex>>');
       }
       const actor = parseActor(String(actorArg));
-      if (!actor) fail(`--actor must be user | hub-pm | spoke-pm:NAME (got: ${actorArg})`);
+      if (!actor) fail(`--actor must be user | hub-pm | spoke-pm:NAME | spoke-tenant:gw-<12hex> (got: ${actorArg})`);
       const aliases = loadKanbanAliases(workspaceRoot);
       const to = resolvePriorityInput(String(priorityArg), aliases);
       if (!to) {

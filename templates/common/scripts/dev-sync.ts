@@ -1,4 +1,18 @@
-// @version 1.43.0
+// @version 1.44.0
+// v1.44.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §5.1): new step 6.4 — fixture-root hygiene residue gate, BLOCKING, placed
+//          immediately before the 6.5 scoped-staging S1 snapshot (the design proposed
+//          "Step 5.9"; final number 6.4 assigned at edit time per the design §10
+//          note-1 delegation, so the step sits between the section-6 sensitive-file
+//          guard and the 6.5 staging snapshot). An untracked WHOLE top-level
+//          directory (`?? Projects/`, `?? tests/`, …) at the repo root can only be
+//          test-fixture residue — the relative-mkdtemp-root class behind the
+//          2026-11-04 `rm -rf Projects` incident (T-20261104-003/-004); PR #1855
+//          made the fixtures absolute and this gate makes it enforced. Untracked
+//          FILES inside tracked directories are ordinary work and remain with 6.5's
+//          residual classification. Classifier is the pure
+//          scripts/lib/workspace-hygiene.ts v1.0.0, shared with the standalone
+//          scripts/check-workspace-hygiene.ts (one derivation, two callers).
 // v1.43.0 (2026-11-08, U-20261107-003): scoped-staging content comparison —
 //          a dirty-at-S0 file whose CONTENT changed by S1 (the regenerated
 //          docs/VERSION_MANIFEST.md leftover; the S0\S1 path-only diff
@@ -390,6 +404,7 @@ import { localDateISO } from './lib/local-date.ts';
 import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
 import { driftCheck } from './helpers/ticket-drift.ts';
 import { unionScan, wellFormedScan } from './helpers/memory-union-verify.ts';
+import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from './lib/workspace-hygiene.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -1779,6 +1794,46 @@ try {
   if (import.meta.main) {
     process.exit(1);
   }
+}
+
+// 6.4 Fixture-root hygiene residue gate — BLOCKING (spec
+//     docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.1;
+//     the design's proposed "Step 5.9" numbered 6.4 at edit time per §10 note 1,
+//     immediately before the 6.5 staging snapshot). An untracked WHOLE top-level
+//     directory (`?? Projects/`, `?? tests/`, …) at the repo root can only be
+//     test-fixture residue — a suite whose mkdtemp root was relative escaped its
+//     fixture into the checkout (the 2026-11-04 `rm -rf Projects` incident class,
+//     memory/2026-11-04.md:159). Untracked FILES inside tracked directories are
+//     ordinary task work and stay with 6.5's residual classification. The pure
+//     classifier is shared with scripts/check-workspace-hygiene.ts
+//     (scripts/lib/workspace-hygiene.ts — one derivation, two callers).
+try {
+    const hygieneRes = await $`git status --porcelain`.quiet().nothrow();
+    if (hygieneRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 6.4: git status failed (exit ${hygieneRes.exitCode}) — hygiene gate fail-closed.${RESET}`);
+        const hygieneDetail = hygieneRes.stderr.toString().trim();
+        if (hygieneDetail) console.error(`   ${hygieneDetail.split('\n')[0]}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const residue = classifyWorkspaceHygieneResidue(hygieneRes.stdout.toString());
+    if (residue.length > 0) {
+        console.error(`${RED}❌ Step 6.4: workspace-hygiene residue gate FAILED — ${residue.length} untracked whole-directory entries:${RESET}`);
+        for (const r of residue) console.error(`   ?? ${r}`);
+        for (const line of formatHygieneResidueReport(residue)) console.error(`${YELLOW}   ${line}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ Step 6.4: workspace-hygiene residue gate passed${RESET}`);
+} catch (err) {
+    // Fail-closed: an error while reading the tree aborts BEFORE staging —
+    // same contract as the sensitive-file guard above.
+    console.error(`${RED}❌ Step 6.4: hygiene gate errored — refusing to proceed: ${err}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 // 6.5 Scoped staging — decide what may join this commit. taskStaged is what the

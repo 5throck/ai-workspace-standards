@@ -1,5 +1,26 @@
 #!/usr/bin/env bun
-// @version 1.96.0
+// @version 1.97.0
+// v1.97.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §3.4, WP1): tenant upgrade guard. When the resolved target matches a
+//          REGISTERED tenant (lib/fleet.ts tenantForProjectPath — realpath prefix
+//          match on the gateway's .pipeline-state/tenant-loop-registry.json export),
+//          the guard fires BEFORE any write, in every mode: registry status must be
+//          active, scopes.upgrade must be true, and isTenantWithinWindows() must be
+//          satisfied at execution time (the design's §4.3 double-enforcement — the
+//          same fleet.ts helper the gateway checks server-side). Each failed
+//          condition is printed as the refusal reason with the tenant id and the
+//          registry path (run-log rows). Tenant mode defaults to --dry-run unless
+//          the NEW --confirm flag is passed (deliberately distinct from --yes,
+//          which stays the outside-Projects prompt consent): --confirm alone
+//          executes. Because a registered tenant lives OUTSIDE Projects/ by
+//          construction, a guard-passing tenant target skips the outside-Projects
+//          --yes prompt — the registry gates + --confirm are that target's consent.
+//          A tenant registry that exists but fails to load (malformed) refuses
+//          outside-Projects targets fail-closed (a tenant target could never be
+//          verified); absent/stale/schema-major registries mean zero tenants and
+//          leave non-tenant behavior byte-identical. Inside-Projects targets stay
+//          governed by the fleet membership guard only (namespace separation,
+//          design §2).
 // v1.96.0 (2026-11-08, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md,
 //          T-20261108-010 follow-through): GRAFT→TRAIL MCP CORRECTIVE pass — gated on
 //          the migration marker (.trail/ present), it removes graft-era server entries
@@ -1107,7 +1128,7 @@ import { applySubstitutions } from './helpers/substitute-placeholders.ts';
 import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
 import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from './lib/hook-dedupe.ts';
-import { isFleetProjectPath } from './lib/fleet.ts';
+import { isFleetProjectPath, isTenantWithinWindows, tenantForProjectPath, type TenantLoopTenant } from './lib/fleet.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
@@ -1216,6 +1237,10 @@ let preflight = false; // T-20261007-028: check apply-blockers (clean tree, open
 let pruneRemoved = false;
 let rollback = false;
 let yesFlag = false;
+// v1.97.0 (tenant-loop design §3.4): explicit execute consent for a REGISTERED
+// TENANT target — deliberately distinct from --yes (the outside-Projects prompt
+// consent, untouched). Tenants default to dry-run without it.
+let confirmFlag = false;
 // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
 // §6.2, DEC-20261107-01): operator agency for a sanctioned one-off upgrade
 // into a NON-member project (e.g. cleaning up co-abap-plugin's resync
@@ -1271,6 +1296,10 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--prune-removed') { pruneRemoved = true; continue; }
   if (args[i] === '--rollback') { rollback = true; continue; }
   if (args[i] === '--yes' || args[i] === '-y') { yesFlag = true; continue; }
+  // v1.97.0 (tenant-loop design §3.4): execute consent for a registered TENANT
+  // target. Parsed on every invocation; a non-tenant run only gets a WARN that
+  // the flag is a no-op there (non-tenant behavior is otherwise unchanged).
+  if (args[i] === '--confirm') { confirmFlag = true; continue; }
   if (args[i] === '--allow-non-member') { allowNonMember = true; continue; }
   if (args[i] === '--skip-context-commonization') { skipContextCommonization = true; continue; }
   if (args[i] === '--force-context-sync') { forceContextSync = true; continue; }
@@ -1368,7 +1397,7 @@ function applyClearTombstoneArg(raw: string): void {
 }
 
 if (!projectPath) {
-  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]');
+  console.error('Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]');
   process.exit(1);
 }
 let selectedProfiles: PlatformProfile[] = [];
@@ -1438,7 +1467,56 @@ const relToProjects = relative(projectsRoot, projectDir);
 // treat that as outside (it is), or the membership guard below would
 // misclassify an outside-drive target as inside-Projects and refuse it.
 const targetInsideProjects = relToProjects.length > 0 && !relToProjects.startsWith('..') && !isAbsolute(relToProjects);
+
+// ── Tenant-loop guard (v1.97.0, design 2026-11-08-gw-tenant-loop-and-hardening-design §3.4) ──
+// A REGISTERED TENANT target (gateway storage, outside Projects/ by construction)
+// is gated BEFORE any write, in every mode (preflight / dry-run / apply):
+// registry status active + scopes.upgrade + within gateway windows, then the
+// dry-run default with --confirm as the execute consent. Every failed condition
+// is printed with the tenant id + registry path for the run log. Inside-Projects
+// targets are fleet-namespace territory (design §2) — the guard below does not
+// engage for them.
+let tenantTarget: TenantLoopTenant | null = null;
 if (!targetInsideProjects) {
+  try {
+    tenantTarget = tenantForProjectPath(projectDir, workspaceRoot);
+  } catch (err) {
+    // Fail-closed (design §6): the tenant registry exists but is unusable, so a
+    // tenant target can never be verified — refuse; the message names the registry.
+    console.error(`ERROR: tenant-loop registry failed to load — refusing to proceed (fail-closed, .pipeline-state/tenant-loop-registry.json): ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  }
+  if (tenantTarget) {
+    const guardReasons: string[] = [];
+    if (tenantTarget.status !== 'active') {
+      guardReasons.push(`status=${tenantTarget.status} (registered tenants must be active)`);
+    }
+    if (!tenantTarget.scopes.upgrade) {
+      guardReasons.push('scopes.upgrade=false');
+    }
+    if (!isTenantWithinWindows(tenantTarget, new Date())) {
+      const w = tenantTarget.windows;
+      guardReasons.push(`outside gateway windows (${w.tz} ${w.start}-${w.end} days=[${w.days.join(',')}] now=${new Date().toISOString()})`);
+    }
+    if (guardReasons.length > 0) {
+      // Design §3.4: the refusal rows record the tenant id + the reason
+      // (suspended / scope off / out-of-window) for the run log.
+      for (const r of guardReasons) console.warn(`WARN: tenant ${tenantTarget.id}: guard condition failed — ${r} (.pipeline-state/tenant-loop-registry.json) [recorded for the run log]`);
+      console.error(`ERROR: tenant ${tenantTarget.id} is not upgradeable (.pipeline-state/tenant-loop-registry.json): ${guardReasons.join('; ')}.`);
+      process.exit(1);
+    }
+    // Tenant mode defaults to dry-run; --confirm is the explicit execute consent
+    // (design §3.4) — a NEW flag, distinct from --yes (prompt suppression).
+    if (!dryRun && !confirmFlag) {
+      console.warn(`WARN: tenant ${tenantTarget.id}: upgrade defaults to dry-run — pass --confirm to execute (design 2026-11-08-gw-tenant-loop-and-hardening-design §3.4).`);
+      dryRun = true;
+    }
+  } else if (confirmFlag) {
+    console.warn('WARN: --confirm only gates a registered tenant-loop target — ignored for this target (use --yes for the outside-Projects consent).');
+  }
+}
+
+if (!targetInsideProjects && !tenantTarget) {
   console.warn(`WARN: Target is outside ${projectsRoot} — the canonical project layout is Projects/<name>.`);
   // H14: a warning the run continues past is invisible in scripts — that was the
   // 2026-09-12 incident class. Fail-closed confirm (design §4.2), reusing the
@@ -1446,6 +1524,8 @@ if (!targetInsideProjects) {
   // any non-y answer aborts; --yes is the single scripted consent token; the
   // prompt names the CANONICAL target and fires for dry-run too. Exit 1 on
   // refusal (policy refusal, deliberately not the precedent's exit 0).
+  // v1.97.0: a guard-PASSING tenant target skips this prompt — the registry
+  // gates + --confirm above are that target's consent (design §3.4).
   if (import.meta.main && !yesFlag) {
     const answer = prompt(`    Proceed with upgrade into ${projectDir}? [y/N] `);
     if (answer === null || !['y', 'Y'].includes(answer)) {

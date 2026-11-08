@@ -10,6 +10,8 @@ import { Database } from "bun:sqlite";
 import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { runMigrations } from "./migrations";
+import type { LoopGroupConfig } from "./tenant-loop";
 
 /**
  * Password hashing with a test-mode cost floor (root fix for the windows runner
@@ -102,52 +104,10 @@ export class UserStore {
       email TEXT NOT NULL,
       expires_at TEXT NOT NULL
     );`);
-    // Migration: pre-PII-safe databases carry `email NOT NULL`, which breaks signups that
-    // legitimately store a NULL email (the raw email is discarded after verification). Rebuild
-    // the table without the constraint, preserving every row and its unique indexes.
-    const cols = this.db.query("PRAGMA table_info(users)").all() as Array<{ name: string; notnull: number }>;
-    const emailCol = cols.find((c) => c.name === "email");
-    if (emailCol?.notnull) {
-      this.db.exec(`CREATE TABLE users_rebuild (
-        id TEXT PRIMARY KEY,
-        email TEXT UNIQUE,
-        name TEXT NOT NULL,
-        principal TEXT UNIQUE NOT NULL,
-        password_hash TEXT,
-        google_sub TEXT,
-        role TEXT NOT NULL DEFAULT 'user',
-        created_at TEXT NOT NULL,
-        deleted_at TEXT,
-        login_id TEXT,
-        email_hash TEXT,
-        verified_at TEXT
-      );`);
-      this.db.exec(`INSERT INTO users_rebuild
-        (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at)
-        SELECT id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at FROM users;`);
-      this.db.exec("DROP TABLE users;");
-      this.db.exec("ALTER TABLE users_rebuild RENAME TO users;");
-    }
-    // Migration-safe column additions for the PII-safe account model (login by ID; the raw
-    // email is discarded after verification and kept only as a hash for duplicate checks).
-    for (const stmt of [
-      "ALTER TABLE users ADD COLUMN login_id TEXT",
-      "ALTER TABLE users ADD COLUMN email_hash TEXT",
-      "ALTER TABLE users ADD COLUMN verified_at TEXT",
-      "ALTER TABLE users ADD COLUMN must_change_password INTEGER",
-      "ALTER TABLE users ADD COLUMN temp_password_expires TEXT",
-      "ALTER TABLE sessions ADD COLUMN last_seen_at TEXT",
-      "ALTER TABLE sessions ADD COLUMN created_at TEXT",
-      "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login_id) WHERE login_id IS NOT NULL",
-      "CREATE INDEX IF NOT EXISTS idx_users_email_hash ON users(email_hash)",
-      "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_hash_unique ON users(email_hash) WHERE email_hash IS NOT NULL",
-    ]) {
-      try {
-        this.db.exec(stmt);
-      } catch {
-        /* already applied */
-      }
-    }
+    // Schema evolution moved into the versioned runner (design §4.1): the PII-safe column
+    // additions and the legacy email-NOT-NULL rebuild are migration step v2, and the
+    // tenant-loop groups tables are step v1. Same end state as the former inline block.
+    runMigrations(this.db);
   }
 
   private rowToUser(r: Record<string, unknown>): UserRecord {
@@ -547,6 +507,68 @@ export class UserStore {
       .run(new Date().toISOString(), userId);
     this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
     return true;
+  }
+
+  /** ── Tenant-loop groups (design 2026-11-08-gw-tenant-loop-and-hardening-design §4.1,
+   * tables created by migration v1). `loop_config` JSON is the canonical payload
+   * (designatedUsers/scopes/windows); the `user_groups` join mirrors the membership for
+   * queryability — both are written from this single input, so they cannot diverge. ── */
+
+  private rowToGroup(r: { group_id: string; name: string; loop_config: string }): LoopGroupConfig {
+    let parsed: Record<string, unknown> = {};
+    try {
+      parsed = JSON.parse(r.loop_config) as Record<string, unknown>;
+    } catch {
+      /* unreadable config → empty defaults; consumers validate */
+    }
+    return {
+      groupId: r.group_id,
+      name: r.name,
+      designatedUsers: Array.isArray(parsed.designatedUsers) ? (parsed.designatedUsers as string[]) : [],
+      scopes: (parsed.scopes ?? undefined) as LoopGroupConfig["scopes"],
+      windows: (parsed.windows ?? undefined) as LoopGroupConfig["windows"],
+    };
+  }
+
+  upsertGroup(group: LoopGroupConfig): void {
+    const payload = JSON.stringify({
+      designatedUsers: group.designatedUsers,
+      ...(group.scopes ? { scopes: group.scopes } : {}),
+      ...(group.windows ? { windows: group.windows } : {}),
+    });
+    this.db
+      .query(
+        `INSERT INTO groups (group_id, name, loop_config) VALUES (?, ?, ?)
+         ON CONFLICT(group_id) DO UPDATE SET name=excluded.name, loop_config=excluded.loop_config`,
+      )
+      .run(group.groupId, group.name || group.groupId, payload);
+    // Re-sync the join mirror from the same input.
+    this.db.query("DELETE FROM user_groups WHERE group_id=?").run(group.groupId);
+    for (const principal of group.designatedUsers) {
+      this.db.query("INSERT OR IGNORE INTO user_groups (group_id, principal) VALUES (?, ?)").run(group.groupId, principal);
+    }
+  }
+
+  getGroup(groupId: string): LoopGroupConfig | undefined {
+    const r = this.db.query("SELECT group_id, name, loop_config FROM groups WHERE group_id=?").get(groupId) as
+      | { group_id: string; name: string; loop_config: string }
+      | null;
+    return r ? this.rowToGroup(r) : undefined;
+  }
+
+  listGroups(): LoopGroupConfig[] {
+    const rows = this.db.query("SELECT group_id, name, loop_config FROM groups ORDER BY group_id ASC").all() as Array<{
+      group_id: string;
+      name: string;
+      loop_config: string;
+    }>;
+    return rows.map((r) => this.rowToGroup(r));
+  }
+
+  deleteGroup(groupId: string): boolean {
+    const info = this.db.query("DELETE FROM groups WHERE group_id=?").run(groupId);
+    this.db.query("DELETE FROM user_groups WHERE group_id=?").run(groupId);
+    return Number(info.changes) > 0;
   }
 }
 

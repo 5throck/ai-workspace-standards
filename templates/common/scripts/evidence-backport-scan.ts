@@ -2,7 +2,13 @@
 /**
  * evidence-backport-scan.ts — Evidence Backporting candidate scanner
  * (project-resync skill Step 2b).
- * @version 1.3.0
+ * @version 1.4.0
+ * v1.4.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+ *           §3.2, WP1): registered tenant-loop projects join the default scan
+ *           set — gated on scopes.nightlyFleet (+ status active), enumerated
+ *           EXCLUSIVELY through lib/fleet.ts listTenantLoopProjects() (never a
+ *           readdir, never a name prefix; the §3.2 consumers rule for the
+ *           review battery).
  * v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
  *           §5/§6.7, DEC-20261107-01): defaultProjects() derives the fleet
  *           through lib/fleet.ts listFleetProjects() — Projects/co-* minus
@@ -58,9 +64,9 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { PLATFORM_SKILL_BASES } from "./lib/platforms.ts";
-import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
+import { exclusionNotice, listFleetProjects, listTenantLoopProjects } from "./lib/fleet.ts";
 
-const VERSION = "1.3.0";
+const VERSION = "1.4.0";
 
 type Form = "F1" | "F2" | "F3" | "F0" | "MIXED" | "none";
 
@@ -108,7 +114,12 @@ function defaultProjects(): string[] {
   // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
   // exclusions, derived exclusively through lib/fleet.ts (the sole membership
   // path — no co- prefix filter here).
-  return listFleetProjects();
+  const fleet = listFleetProjects();
+  // v1.4.0 (tenant-loop design §3.2): registered tenants (nightlyFleet+active,
+  // already filtered by the helper) join the review-battery default set through
+  // the ONE sanctioned enumeration path — never a readdir, never a name prefix.
+  const tenants = listTenantLoopProjects().map((t) => t.projectDir);
+  return [...fleet, ...tenants].sort();
 }
 
 function git(projectPath: string, args: string[]): string {

@@ -7,6 +7,7 @@
 import { chmodSync, chownSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join, dirname, resolve } from "node:path";
 import { genId, readJson, writeJson } from "./util";
+import type { LoopScopes, LoopWindows } from "./tenant-loop";
 
 /**
  * User-reported 2026-09-29: deleted tenants left unreferenced data on disk. Besides the
@@ -74,6 +75,19 @@ export interface TenantRecord {
   /** Session-scoped toolset (`-t`, §3.5 toolset scoping): the delegation task's toolset, not
    * the full default set. */
   attachToolsets?: string;
+  /** ── Tenant-loop participation (design 2026-11-08-gw-tenant-loop-and-hardening-design
+   * §4): set only while the tenant is loop-registered; deregister strips the fields. The
+   * override rides this versionable record (tenants.data JSON column) — no DDL (§4.1). ── */
+  /** Loop participation status; unset = not registered. */
+  loopStatus?: "active" | "suspended";
+  /** Governing group id (group defaults live in users.db `groups.loop_config`). */
+  loopGroup?: string;
+  /** Sparse per-tenant override over the group defaults; unset keys inherit the group. */
+  loopOverride?: { scopes?: Partial<LoopScopes>; windows?: LoopWindows };
+  /** "local-only" or a git URL; the export schema requires the field. */
+  loopGitRemote?: string;
+  /** Daily upgrade quota counter, UTC-day bucket (§4.4). */
+  loopState?: { upgradesDay: string; upgradesToday: number };
 }
 
 /** Gateway-owned tenant folder on disk (`storage/<P>/<N>`): `hermesHome`'s parent — identical

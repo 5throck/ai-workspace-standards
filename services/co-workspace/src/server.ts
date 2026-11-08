@@ -16,6 +16,8 @@ import { dockerProbe, dockerVolumeProbe } from "./config";
 import { credentialValid, presentedCredential, requestAuthorized } from "./auth";
 import { sessionTokenFromCookie } from "./users";
 import { csrfRequired, sweepOutbox } from "./hardening";
+import { exportTenantLoopRegistry } from "./tenant-loop";
+import { validateBootRequirements } from "./boot-check";
 import { HttpError, jsonResponse, resolveClientIp } from "./http";
 import type { GatewayState } from "./state";
 import { createState } from "./state";
@@ -149,6 +151,19 @@ if (import.meta.main) {
     console.log(`[co-workspace] turn-config overlay applied: ${state.turnOverrides.applied.join(", ")}`);
     for (const w of state.turnOverrides.warnings) console.warn(`[co-workspace] turn-config warning: ${w}`);
   }
+  // D3.2 boot validation (spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.2):
+  // a silent-empty variant catalog or a missing scaffold engine used to boot and fail
+  // later in confusing ways — refuse BEFORE listening / any boot sweep.
+  const boot = validateBootRequirements({
+    variants: state.cfg.variants,
+    workspaceDir: state.cfg.workspaceDir,
+    env: process.env,
+  });
+  if (!boot.ok) {
+    for (const reason of boot.reasons) console.error(reason);
+    process.exit(1);
+  }
+  for (const warning of boot.warnings) console.warn(warning);
   // 2026-10-03 review H3: graceful shutdown — kill running turn children, drain the chat
   // locks with a bound, checkpoint the SQLite WALs, then exit. Docker mode is rescued by
   // the reaper + `init: true`; bare-host process mode previously left orphaned children
@@ -228,6 +243,12 @@ if (import.meta.main) {
   if (sweptStorage.removed.length > 0) {
     console.log(`[co-workspace] storage sweep: removed ${sweptStorage.removed.join(", ")}`);
   }
+  // WP2 (design 2026-11-08-gw-tenant-loop-and-hardening-design §4.5): refresh the
+  // tenant-loop registry export once at boot — the workspace reader fails closed on a
+  // stale (>24h) export, so every boot must rewrite it. Loud on failure (§4.5).
+  const bootLoopExport = exportTenantLoopRegistry(state);
+  if (!bootLoopExport.ok) console.warn(`[co-workspace] tenant-loop export failed: ${bootLoopExport.error}`);
+  else if (bootLoopExport.tenants > 0) console.log(`[co-workspace] tenant-loop export: ${bootLoopExport.tenants} tenant(s) written`);
   if (state.cfg.isolation === "docker") {
     const probe = dockerProbe(state.cfg.dockerBin);
     if (!probe.ok) {

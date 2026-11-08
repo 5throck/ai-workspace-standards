@@ -179,3 +179,57 @@ describe('layer 2 — every Projects/ enumerator is registered', () => {
     }
   });
 });
+
+// ── Tenant-loop routing (design docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §3.2/§7.3) ──
+// WP1 extension of both layers: tenant enumeration is registry-only, so the
+// pinned consumer set asserts the tenant list import, and an explicit case pins
+// that the registry-reading helper triggers NO Projects-readdir classification
+// (it reads .pipeline-state/, a different namespace).
+
+describe('tenant-loop routing — registry-only enumeration (design 2026-11-08 §3.2/§7.3)', () => {
+  const TENANT_CONSUMER_FILES = [
+    'scripts/resync-audit.ts', // §3.2 resync flow (A1 twin)
+    'scripts/backport-diff.ts', // §3.5 backport differ (A2 twin)
+    'scripts/evidence-backport-scan.ts', // §3.2 review battery (A3 twin)
+  ];
+
+  test('each WP1 tenant-iteration site imports its tenant list from scripts/lib/fleet.ts', () => {
+    for (const rel of TENANT_CONSUMER_FILES) {
+      const source = readFileSync(join(REPO_ROOT, rel), 'utf-8');
+      expect(source).toMatch(/from\s+['"](\.\.?\/)+lib\/fleet\.ts['"]/);
+      expect(source).toContain('listTenantLoopProjects');
+    }
+  });
+
+  test('the tenant registry reader lives in the helper and reads .pipeline-state/, never a Projects readdir', () => {
+    const helper = readFileSync(join(REPO_ROOT, HELPER_FILE), 'utf-8');
+    // The tenant registry path helper is the ONLY tenant enumeration source:
+    expect(helper).toContain('.pipeline-state');
+    expect(helper).toContain('tenant-loop-registry.json');
+    // listTenantLoopProjects derives tenants from the parsed registry alone —
+    // no readdirSync in its body (layer-2 classification exemption pinned
+    // explicitly: a registry-reading helper is NOT a Projects enumerator).
+    const fn = /export function listTenantLoopProjects[\s\S]*?\n}/.exec(helper)?.[0] ?? '';
+    expect(fn).not.toMatch(/readdirSync/);
+    expect(fn).not.toMatch(/['"]Projects['"]/);
+  });
+
+  test('no script outside the helper enumerates the tenant registry (registry enumeration stays in fleet.ts)', () => {
+    const offenders: string[] = [];
+    for (const abs of listScriptFiles(SCRIPTS_DIR)) {
+      const rel = relScript(abs);
+      if (rel === HELPER_FILE) continue;
+      const source = readFileSync(abs, 'utf-8');
+      // Window-based like layer 2: a readdirSync within 6 lines above/below a
+      // tenant-registry literal is enumeration; a bare mention in an error
+      // message or import is not.
+      const lines = source.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].includes('tenant-loop-registry.json')) continue;
+        const window = lines.slice(Math.max(0, i - 6), i + 7).join('\n');
+        if (/readdirSync\(/.test(window)) offenders.push(`${rel}: line ${i + 1}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});

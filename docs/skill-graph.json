@@ -7280,11 +7280,7 @@
       "version": "1.5.0",
       "mirrors": [
         "templates/co-safety/skills/meeting-facilitation/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-11-01"
-      }
+      ]
     },
     {
       "id": "skill:co-safety/mid-construction-inspection",
@@ -7572,7 +7568,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-11-07"
       }
     },
@@ -8005,7 +8001,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-11-07"
       }
     },
@@ -8319,11 +8315,7 @@
         ".agents/skills/meeting-facilitation/SKILL.md",
         ".codex/skills/meeting-facilitation/SKILL.md",
         ".hermes/skills/meeting-facilitation/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-11-01"
-      }
+      ]
     },
     {
       "id": "skill:root/migrate-project",
@@ -8696,7 +8688,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
+        "sessions": 4,
         "last_used": "2026-11-07"
       }
     },
