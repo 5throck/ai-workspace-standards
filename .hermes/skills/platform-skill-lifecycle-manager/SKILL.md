@@ -8,7 +8,7 @@ description: >
   updating platform skill versions, or ensuring propagation to templates/common/.
 owner: pm
 scope: common
-last_reviewed: 2026-05-31
+last_reviewed: 2026-11-08
 metadata:
   type: process
   triggers:

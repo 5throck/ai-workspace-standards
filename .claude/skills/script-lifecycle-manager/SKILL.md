@@ -8,7 +8,7 @@ description: >
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
 owner: pm
 version: 1.2.2
-last_reviewed: 2026-05-30
+last_reviewed: 2026-11-08
 metadata:
   type: process
   triggers:

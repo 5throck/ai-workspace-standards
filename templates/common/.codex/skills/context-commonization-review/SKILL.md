@@ -11,7 +11,7 @@ scope: workspace
 l2_propagate: false
 version: "1.1.0"
 owner: architect
-last_reviewed: 2026-08-21
+last_reviewed: 2026-11-08
 relates_to:
   - skill: promote-variant
     type: follows

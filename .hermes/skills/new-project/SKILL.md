@@ -12,7 +12,7 @@ scope: common
 l2_propagate: false
 version: 1.0.0
 owner: scaffolding-expert
-last_reviewed: 2026-09-27
+last_reviewed: 2026-11-08
 relates_to:
   - skill: upgrade-project
     type: follows

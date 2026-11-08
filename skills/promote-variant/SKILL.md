@@ -8,7 +8,7 @@ scope: common
 l2_propagate: false
 version: 1.4.0
 owner: pm
-last_reviewed: 2026-08-24
+last_reviewed: 2026-11-08
 relates_to:
   - skill: create-variant
     type: follows

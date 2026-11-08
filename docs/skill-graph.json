@@ -8142,7 +8142,7 @@
       "name": "create-variant",
       "scope": "root",
       "capability": "create-variant",
-      "content_hash": "dbb38ce9c170565c",
+      "content_hash": "d165ed57a984d03c",
       "version": "1.4.3",
       "mirrors": [
         "skills/create-variant/SKILL.md",

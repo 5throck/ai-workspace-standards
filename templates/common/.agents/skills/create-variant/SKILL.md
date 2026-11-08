@@ -8,7 +8,7 @@ scope: common
 l2_propagate: false
 version: 1.4.3
 owner: pm
-last_reviewed: 2026-10-31
+last_reviewed: 2026-11-08
 relates_to:
   - skill: promote-variant
     type: enables
@@ -122,7 +122,7 @@ Copy the exact same `## <VariantName> Context` section to `GEMINI.md`.
 
 - Remove all workspace agent table entries
 - Keep the header and §PM Gateway Policy
-- Keep the tool-managed graft/trail instruction block (`graft:start`/`graft:end` markers; scaffold-appended from the L1 baseline, upgrade MERGE pass keeps it in sync — ADR-0076). Do NOT hand-edit it: it is tool-managed, and a project's `trail init` rewrites it in place to trail-era markers/paths (design 2026-10-31-graft-trail-migration)
+- Keep the tool-managed trail instruction block (`trail:start`/`trail:end` markers since the 2026-11-01 trail-era flip; pre-migration projects may still carry `graft:start`/`graft:end` spellings, rewritten in place by the project's `trail init` — design 2026-10-31-graft-trail-migration; scaffold-appended from the L1 baseline, upgrade MERGE pass keeps it in sync — ADR-0076). Do NOT hand-edit it: it is tool-managed
 - Add `## <VariantName> Agents` section with variant agent stubs
 
 Verify:
