@@ -73,12 +73,12 @@ Codex consumes slash-style workflows as **custom prompts** mirrored from the com
 
 ### 4. MCP Configurations
 
-Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0076 per-host matrix). The workspace registers the graft context-graph server:
+Codex registers MCP servers in **TOML**: project scope at `.codex/config.toml`, machine-global fallback at `~/.codex/config.toml` (ADR-0076 per-host matrix). The workspace registers the trail context-graph server (the vendor renamed graft → trail, 0.28 — design 2026-10-31-graft-trail-migration):
 
 ```toml
-[mcp_servers.graft]
+[mcp_servers.trail]
 command = "bunx"
-args = ["@nanonets/graft", "mcp"]
+args = ["@trailhq/trail-code", "mcp"]
 ```
 
 Keep command executable paths relative to the project directory for portable cross-platform runs; Codex resolves them against the project root. Per-project MCP servers (e.g. co-abap's `vsp`) live in the project's own `config.toml` and are never overwritten by template upgrades (ADD_IF_MISSING).

@@ -1,5 +1,5 @@
 {
-  "_comment": "Safety OS project settings — variant-specific overrides vs L1 (templates/common). The former '#' header comment broke strict JSON parity validation (P-01 parses both platform settings with JSON.parse).",
+  "_comment": "Safety OS project settings \u2014 variant-specific overrides vs L1 (templates/common). The former '#' header comment broke strict JSON parity validation (P-01 parses both platform settings with JSON.parse).",
   "mcpServers": {
     "kr_safety": {
       "command": "bun",
@@ -10,8 +10,8 @@
         "./mcp/kr-safety-regs/index.ts"
       ]
     },
-    "graft": {
-      "command": "graft",
+    "trail": {
+      "command": "trail",
       "args": [
         "mcp"
       ]

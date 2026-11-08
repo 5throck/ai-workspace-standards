@@ -26,12 +26,6 @@
   },
   "teammateMode": "auto",
   "mcpServers": {
-    "graft": {
-      "command": "graft",
-      "args": [
-        "mcp"
-      ]
-    },
     "trail": {
       "command": "trail",
       "args": [
