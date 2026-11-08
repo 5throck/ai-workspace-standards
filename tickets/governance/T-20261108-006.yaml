@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261108-006
+kind: manual
+title: >-
+  URGENT union-verify multi-merge deleted-file gap (extends T-20261106-007):
+  co-price 0.29.0 delivery blocked — TWO successive merges deleted
+  memory/2026-10-30.md with DIFFERENT parent contents (ef98637f62 #178
+  healthcheck, 59ed81817e #178-era), and repairedAtHead's strict headed-block
+  rule cannot clear a working-tree restore that cannot simultaneously match both
+  parents' blob unions (restoring one parent's verbatim content leaves the
+  other's blocks 'dropped'). The single-merge restore pattern (worked for
+  co-safety) does not generalize. Fix needed: (a) union gate accepts a
+  working-tree SUPERSET (heading+firstLine matched blocks from either parent
+  count as present), or (b) per-merge archive references like the memory-archive
+  location, or (c) delivery-order fix — land restores between merges. State:
+  co-price tree reverted clean at 0.28.0; 0.29.0 delivery content preserved in
+  the git stash lineage and re-appliable via upgrade-project re-run
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-08T10:59:32.502+09:00'
+history:
+  - at: '2026-11-08T10:59:32.502+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
