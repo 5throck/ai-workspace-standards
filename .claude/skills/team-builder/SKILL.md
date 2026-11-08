@@ -10,7 +10,7 @@ status: active
 scope: common
 owner: pm
 prerequisites: none
-last_reviewed: 2026-10-26
+last_reviewed: 2026-11-08
 metadata:
   type: process
   triggers:

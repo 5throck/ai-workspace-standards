@@ -5,7 +5,7 @@ description: >
   importers, schemas, and scope constraints before making changes.
   Part of the 3-layer enforcement model (Hook → Prompt → Skill).
 version: 1.0.2
-last_reviewed: 2026-08-01
+last_reviewed: 2026-11-08
 status: active
 scope: common
 l2_propagate: true

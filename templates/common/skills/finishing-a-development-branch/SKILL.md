@@ -5,7 +5,7 @@ status: active
 owner: pm
 scope: common
 version: 1.0.1
-last_reviewed: 2026-06-13
+last_reviewed: 2026-11-08
 triggers:
   - "finish branch"
   - "complete work"

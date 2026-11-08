@@ -9,7 +9,7 @@ description: >
   queue, running "/ticket-run".
 owner: automation-engineer
 version: 1.0.0
-last_reviewed: 2026-07-16
+last_reviewed: 2026-11-08
 prerequisites: []
 metadata:
   type: process

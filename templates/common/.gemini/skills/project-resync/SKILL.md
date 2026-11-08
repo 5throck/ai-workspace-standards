@@ -16,7 +16,7 @@ scope: common
 l2_propagate: false
 owner: pm
 last_updated: 2026-11-07
-last_reviewed: 2026-10-27
+last_reviewed: 2026-11-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
   - skill: sync

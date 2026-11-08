@@ -15,7 +15,7 @@ status: active
 scope: workspace
 l2_propagate: false
 owner: pm
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-08
 prerequisites: workspace-root CWD; docs/skill-graph.json + Projects/<co-x>/docs/skill-graph.json projections present
 relates_to:
   - skill: project-resync

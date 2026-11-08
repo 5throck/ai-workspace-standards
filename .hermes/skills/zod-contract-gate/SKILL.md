@@ -5,7 +5,7 @@ description: >
   and contract safety rules for multi-agent architecture, IPC channels,
   and API endpoints.
 version: 1.0.2
-last_reviewed: 2026-08-06
+last_reviewed: 2026-11-08
 status: active
 scope: common
 l2_propagate: true

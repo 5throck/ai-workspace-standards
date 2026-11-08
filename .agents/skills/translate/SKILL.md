@@ -4,7 +4,7 @@ description: Translation helper for README and documentation files with diff pre
 version: 1.0.3
 owner: pm
 status: active
-last_reviewed: 2026-08-24
+last_reviewed: 2026-11-08
 last_updated: 2026-08-24
 scope: common
 relates_to:

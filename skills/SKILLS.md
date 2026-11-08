@@ -18,47 +18,47 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.4.0 | active | pm | 2026-11-06 | — | PM-led hiring/firing workflows + skill attach/detach rules |
-| `create-variant` | 1.4.3 | active | pm | 2026-10-31 | — | Workspace operator only — not deployed to L2 |
+| `create-variant` | 1.4.3 | active | pm | 2026-11-08 | — | Workspace operator only — not deployed to L2 |
 | `decision-write-integrity` | 1.0.0 | active | pm | 2026-10-28 | — | Fleet process skill distilled from co-newbiz ADR-0186 gate-integrity: HARD BLOCK/ACK/DISPLAY taxonomy, off/shadow/enforce rollout, snapshot-hash propose-then-confirm, rationale substance, maker/checker, AI-divergence recording. L0-only (T-20261028-008) |
-| `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-06-13 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
+| `finishing-a-development-branch` | 1.0.1 | active | pm | 2026-11-08 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.4.4 | active | pm | 2026-09-26 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.2 | active | pm | 2026-10-08 | — | — |
-| `promote-variant` | 1.4.0 | active | pm | 2026-08-24 | — | Workspace operator only — not deployed to L2 |
+| `promote-variant` | 1.4.0 | active | pm | 2026-11-08 | — | Workspace operator only — not deployed to L2 |
 | `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
-| `platform-skill-lifecycle-manager` | 1.0.2 | active | pm | 2026-05-31 | — | Mirrored 2026-09-04 from .claude/skills |
-| `script-lifecycle-manager` | 1.2.2 | active | pm | 2026-05-30 | — | — |
+| `platform-skill-lifecycle-manager` | 1.0.2 | active | pm | 2026-11-08 | — | Mirrored 2026-09-04 from .claude/skills |
+| `script-lifecycle-manager` | 1.2.2 | active | pm | 2026-11-08 | — | — |
 | `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.2 | active | automation-engineer | 2026-09-21 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
 | `sync` | 1.9.0 | active | pm | 2026-11-07 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
-| `team-builder` | 1.2.0 | active | pm | 2026-10-26 | — | — |
-| `translate` | 1.0.3 | active | pm | 2026-08-24 | — | — |
-| `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-08-23 | — | Convert existing standalone project into official variant template |
+| `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
+| `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
+| `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-11-08 | — | Convert existing standalone project into official variant template |
 | `adopt-project` | 1.1.1 | active | scaffolding-expert | 2026-10-31 | — | Convert an existing external project into a workspace-standard project in place (preserves content + git history); automates variant-conversion-guide §3 Scenario B |
 | `upgrade-project` | 1.6.2 | active | pm | 2026-10-31 | — | Upgrade existing L2/L3 project to current template version |
 | `migrate-project` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | End-to-end external-project migration: GitHub baseline → adopt-project → machine-verified result (artifacts, platform twins, provenance, hooksPath, audit smoke) |
-| `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-07-31 | — | Add features (agents, skills, scripts, docs) to existing variant |
-| `new-project` | 1.0.0 | active | scaffolding-expert | 2026-09-27 | — | Scaffold a fresh project instance from `templates/<variant>` (non-interactive `new-project.ts` dispatch: variant pick, platform profile, identity flags, post-scaffold verification); L0 operator only — not deployed to L2 |
-| `ticket-run` | 1.0.0 | active | automation-engineer | 2026-07-16 | — | Pulls next waiting service ticket from Phase A queue |
+| `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-11-08 | — | Add features (agents, skills, scripts, docs) to existing variant |
+| `new-project` | 1.0.0 | active | scaffolding-expert | 2026-11-08 | — | Scaffold a fresh project instance from `templates/<variant>` (non-interactive `new-project.ts` dispatch: variant pick, platform profile, identity flags, post-scaffold verification); L0 operator only — not deployed to L2 |
+| `ticket-run` | 1.0.0 | active | automation-engineer | 2026-11-08 | — | Pulls next waiting service ticket from Phase A queue |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
 | `design-foundation` | 1.1.0 | active | architect | 2026-09-26 | — | Style-neutral design system derivation framework: principles, decision record, 3-layer token architecture ([data-theme] theming). Spec: templates/common/docs/design-foundation.md |
-| `zod-contract-gate` | 1.0.2 | active | architect | 2026-08-06 | — | Defines Zod runtime schema validation patterns and contract safety rules |
+| `zod-contract-gate` | 1.0.2 | active | architect | 2026-11-08 | — | Defines Zod runtime schema validation patterns and contract safety rules |
 | `standup-synthesizer` | 1.1.0 | active | pm | 2026-11-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
-| `api-documentation` | 1.0.2 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
-| `documentation-writing` | 1.0.3 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
-| `project-resync` | 1.8.0 | active | pm | 2026-10-27 | — | Whole-fleet bidirectional carrier cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport (LOCAL-WORK + merged-window landings) → per-project review cadence → root sync → upgrades. Operator skill; distinct from `sync`. v1.8.0 (DEC-20261107-01): the project set derives ONLY via `bun scripts/fleet-list.ts --json` — the fleet membership SSOT (`Projects/co-*` minus `docs/fleet-membership.json` exclusions); raw-glob fallback banned |
+| `api-documentation` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
+| `documentation-writing` | 1.0.3 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
+| `project-resync` | 1.8.0 | active | pm | 2026-11-08 | — | Whole-fleet bidirectional carrier cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport (LOCAL-WORK + merged-window landings) → per-project review cadence → root sync → upgrades. Operator skill; distinct from `sync`. v1.8.0 (DEC-20261107-01): the project set derives ONLY via `bun scripts/fleet-list.ts --json` — the fleet membership SSOT (`Projects/co-*` minus `docs/fleet-membership.json` exclusions); raw-glob fallback banned |
 | `release-template` | 1.0.0 | active | pm | 2026-09-09 | — | Workspace operator only — atomically bumps templates/VERSION, cuts templates/CHANGELOG.md, and creates template tag |
-| `accessibility-audit` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
+| `accessibility-audit` | 1.1.0 | active | pm | 2026-11-08 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
 | `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
 | `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | Promoted from co-design: component design, visual hierarchy, WCAG checklist; enabled by design-foundation |
 | `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | Promoted from co-design (upgrade-path propagation per PM ruling 2026-09-27): customer journeys, service blueprints, touchpoint design; ADR-0068 diversity-profile review included |
-| `research-analysis` | 1.0.2 | active | pm | 2026-07-19 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
-| `context-commonization-review` | 1.1.0 | active | architect | 2026-08-21 | — | Cross-variant docs/<variant>.context.md duplication review — promotes shared content into common docs/context.md (ADR-0050 Part 3) |
-| `gateguard` | 1.0.2 | active | pm | 2026-08-01 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
+| `research-analysis` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
+| `context-commonization-review` | 1.1.0 | active | architect | 2026-11-08 | — | Cross-variant docs/<variant>.context.md duplication review — promotes shared content into common docs/context.md (ADR-0050 Part 3) |
+| `gateguard` | 1.0.2 | active | pm | 2026-11-08 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
 | `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
-| `skill-graph-analytics` | 1.4.0 | active | pm | 2026-11-04 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification. v1.4.0 (DEC-20261107-01): the report's project set comes from lib/fleet.ts (the fleet membership SSOT — `Projects/co-*` minus `docs/fleet-membership.json` exclusions); convergence denominators count members only |
+| `skill-graph-analytics` | 1.4.0 | active | pm | 2026-11-08 | — | Weekly fleet analytics over per-project skill-graph projections (skill-graph-fleet-report.ts): presence matrix, convergence/delivery-gap triage, dated snapshots under memory/skill-graph-metrics/; triage only — tickets, no auto-modification. v1.4.0 (DEC-20261107-01): the report's project set comes from lib/fleet.ts (the fleet membership SSOT — `Projects/co-*` minus `docs/fleet-membership.json` exclusions); convergence denominators count members only |
 | `model-migration` | 1.0.0 | active | lifecycle-manager | 2026-10-11 | — | Registry model-ID migrations: edit docs/workspace-schema.json models.*, sweep sanctioned prose surfaces via sync-model-registry.ts, verify — skills carry registry pointers only (Check MM ban on literal IDs) |
 | `trail` | 1.2.0 | active | pm | 2026-11-08 | — | Renamed from `graft` (vendor rename 0.28, @trailhq/trail-code): trail-era doctrine with a graft-era alias note — design 2026-10-31-graft-trail-migration, U-20261031-009. Prior: v1.2.0 learnings doctrine traceable only via the memory addendum (memory/2026-11-05.md trail-migration records) — no separate version row exists for it (T-20261108-005 item 2) |
 | `design-token-adoption` | 1.0.0 | active | pm | 2026-10-31 | — | Staged brownfield token-retrofit playbook distilled from co-price token adoption (PRs #164-#167): Stage 0 foundation SSOT + bridge, per-layer codemods, machine-verified allowlist residue (158→131). Detection half = token-usage-lint; greenfield prerequisite = design-foundation. First fleet target: co-architect (122-entry allowlist). L0-only, l2_propagate false (T-20261030-003) |

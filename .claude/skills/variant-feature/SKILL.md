@@ -5,7 +5,7 @@ version: 1.0.0
 status: active
 scope: workspace
 owner: scaffolding-expert
-last_reviewed: 2026-07-31
+last_reviewed: 2026-11-08
 relates_to:
   - skill: upgrade-project
     type: composes_with

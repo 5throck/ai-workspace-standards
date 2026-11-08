@@ -8,7 +8,7 @@ version: 1.0.2
 scope: common
 status: active
 owner: pm
-last_reviewed: 2026-07-19
+last_reviewed: 2026-11-08
 prerequisites: none
 gemini-parity: skip
 metadata:
