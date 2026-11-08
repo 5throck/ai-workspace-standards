@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261108-010
+kind: manual
+title: >-
+  graft→trail L0/L1 surface flip (the R2.5 follow-up ticket — its designed
+  trigger has FIRED): the L0 root completed its own trail init (.trail/
+  complete) and the root surfaces were flipped today (.mcp.json recreated
+  trail-only — the migration commit ef7aef74e had deleted it outright;
+  .codex/config.toml graft→trail via bunx @trailhq/trail-code; opencode.json
+  graft entry removed). REMAINING per R2.5: (1) templates/common + variant
+  templates still ship graft-era mcpServers surfaces (.gemini mcpServers.graft
+  class, .codex graft entries) — flip them to trail-era entries so scaffolds and
+  JSON_MERGE deliveries stop (re-)introducing graft registrations into projects;
+  (2) the JSON_MERGE tolerance rule (upgrade MERGE skips template hook entries
+  whose helper path is absent post-migration) gains its mirror for mcpServers
+  entries; (3) create-variant checklist item already updated today (trail-era
+  markers). Design: docs/designs/2026-10-31-graft-trail-migration-design.md
+  §R2.5. Verification: fresh scaffold has no graft registrations; grep
+  templates/ for graft-era mcp entries returns only rename-documentation prose.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-08T19:41:24.350+09:00'
+history:
+  - at: '2026-11-08T19:41:24.350+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
