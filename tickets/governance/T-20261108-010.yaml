@@ -18,12 +18,27 @@ title: >-
   §R2.5. Verification: fresh scaffold has no graft registrations; grep
   templates/ for graft-era mcp entries returns only rename-documentation prose.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-08T19:41:24.350+09:00'
 history:
   - at: '2026-11-08T19:41:24.350+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T20:52:09.717+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T20:52:09.736+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T20:52:09.754+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: the graft→trail migration surface flip is complete end-to-end — root
+  (#1926), templates (#1927), projects (automatic at each upgrade visit via
+  JSON_MERGE template-wins). Residual machine-level graft installs
+  (~/.local/bin/graft 0.28.1, global bun packages) are outside workspace scope
+  (user's machine choice). The projects' local .gemini graft entries flip at
+  their next upgrade visits — next natural occasion is the 0.31.0 wave.
 error: null
