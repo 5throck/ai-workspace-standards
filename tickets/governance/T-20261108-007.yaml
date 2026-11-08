@@ -14,12 +14,28 @@ title: >-
   templates/<variant>/scripts/** wholesale); same class protects any future
   variant script placed outside scripts/<variant>/.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-08T12:15:47.073+09:00'
 history:
   - at: '2026-11-08T12:15:47.074+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-08T17:39:59.989+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-08T17:40:00.006+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-08T17:40:00.026+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: landed via PR #1919 (real CI green, merge b09af6862). Fixed in
+  upgrade-project v1.95.0 (PR #1919, spec
+  2026-11-08-variant-scripts-delivery-prune-design.md R1): SYNC_IF_NEWER:
+  scripts/ now enumerates templates/<variant>/scripts + templates/common/scripts
+  (variant-preferred). Verified live: co-work dry-run enumerates
+  scripts/deck/ppt-master-adapter.ts (UPDATE to 1.0.0 after the template copy
+  gained its @version header); adapter landed on co-work main earlier today.
 error: null
