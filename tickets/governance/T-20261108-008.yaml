@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: T-20261108-008
+kind: manual
+title: >-
+  co-abap sap L3 scripts: RECURRING loss class — (a) upgrade-project
+  --prune-removed re-prunes the project-owned sap-* scripts (last night's 0.29.0
+  wave pruned 4; tonight's 0.30.0 wave pruned sap-integrity+sap-approve again
+  with registry rows dropped) because the files carry stale upstream delivery
+  rows; (b) last night's in-wave restore was NOT in the landed merge (no
+  tracking commit for sap-mcp-proxy/ sap-approve/ sap-dispatch after 0b40a06) —
+  the restore lived only in the working tree and was lost to the gate-failure
+  cleanup wipe class (same class that ate co-price's memory restores), so the
+  wave table's 'restored' claim was inaccurate; the tests (dispatch-parallel 3
+  fail, Received: 0) have been failing on HEAD since. Fixed in-flight today: 3
+  files restored from 0b40a06 (versions match HEAD registry rows: proxy 2.1.0 /
+  approve 2.1.0 / integrity 1.0.0), rows re-added with restoration notes, unit
+  suite green 213/0. DURABLE FIX NEEDED: (1) prune must treat L3-registry-rowed
+  project scripts as project-owned (the 'project-owned: no upstream delivery
+  row' KEEP class that correctly protected the sap tests), or record
+  tombstone/keep grants for the permanently-project-owned set; (2) gate-failure
+  cleanup must not wipe pre-existing working-tree restores (preserve-and-replay
+  list). sap-dispatch.ts remains unaccounted (no registry row, no 0b40a06 blob —
+  human confirm whether it still exists anywhere).
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-08T12:47:24.558+09:00'
+history:
+  - at: '2026-11-08T12:47:24.558+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261108-009
+kind: manual
+title: >-
+  co-newbiz 0.30.0 deferred on a REAL lint gate (its Actions work — not the
+  billing wall): delivered L0-synced scripts fail the project's Biome profile —
+  root biome.json declares NO linter rules while co-newbiz enables
+  linter.rules.recommended=true, so L0-authored content (audit.ts x11,
+  check-authoring x5, generate-skill-graph x5, validate-templates x4,
+  upgrade-policy/self-managed-tools/security-validator/external-deps x3 each,
+  git-aware-scan, pre-push) trips 29 style errors (noAssignInExpressions 14 /
+  noControlCharactersInRegex 7 / noImplicitAnyLet 6 / useIterableCallbackReturn
+  2) after safe+unsafe autofixes cleared 26 of 55 (kept: unit suite green with
+  them). typecheck-baseline was ALSO red on the same head — root cause = the
+  ticket-drift TS2307 class (fixed same way: computed import specifier; baseline
+  now OK 74/0). PR #831 held OPEN (never merge real-red). HUMAN ADJUDICATION
+  needed: (a) scope L0-synced paths out of the project Biome profile, or (b) an
+  L0-side conformance pass under recommended rules, or (c) rule alignment — each
+  is a lint-policy decision, not runner-disposable. On adjudication: finish the
+  29 (or rescoped) checks, land via dev-sync, merge.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-08T13:23:16.890+09:00'
+history:
+  - at: '2026-11-08T13:23:16.890+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
