@@ -54,7 +54,7 @@
     },
     "meeting-facilitation": {
       "source": "skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.4",
+      "version": "1.5.0",
       "overridable": false,
       "description": "Structured multi-agent meeting facilitation"
     },
@@ -349,7 +349,7 @@
       "gemini_source": ".gemini/skills/meeting-facilitation/SKILL.md",
       "agents_source": ".agents/skills/meeting-facilitation/SKILL.md",
       "codex_source": ".codex/skills/meeting-facilitation/SKILL.md",
-      "version": "1.4.4",
+      "version": "1.5.0",
       "description": "Structured multi-agent meeting facilitation (self-contained skill; legacy /meeting command retired 2026-09-26)",
       "propagated_to_common": true
     },

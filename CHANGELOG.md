@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-10]**: docs(skills): **meeting-facilitation v1.5.0 — committee-form alignment (U-20261109-001; design `docs/designs/2026-11-09-meeting-facilitation-committee-alignment-design.md`, DEC-20261109-01 ruling 3).** Single-file skill rewrite per the design's verbatim section text: Execution Steps become a 6-step flow (agenda with round-count-as-parameter and no-silent-reduction → opening round → facilitator agenda pass distilling 2-5 named agenda issues → deliberation rounds under the four-clause response contract: ≥2 named peers with agree/rebut/ask, answer prior-round questions, explicit `changed:`/`no change:` stance line, stay on-issue → synthesis → transcript); Output Format becomes the 7-section committee minutes (attributed discussion by issue → agreements → verbatim dissent → open questions → action items → PROPOSAL-labelled recommendation), resolving the prior "decisions" wording tension against governance invariant 2. Governance Rules byte-identical. Cascade via sanctioned machinery (dot-dir mirrors, templates/common, SKILLS.md rows, lifecycle record, VERSION_MANIFEST row, skill-graph regen). Requested by co-newbiz (their ADR-0196 committee form); divergent-lineage cleanup stays with T-20261109-003.
 - **[2026-11-09]**: feat(repo-integrity): **corruption mode-1 detector — rogue-commit scan, worktree config snapshot, and fixture git identity probes (T-20261109-002; design `docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md`, DEC-20261109-01).**
   - **Rogue-commit detector** (`scripts/lib/repo-integrity.ts` v1.1.0): fixture identity email blocklist (seed `test@example.com`, author + committer, case-insensitive) matched by one `git log base..HEAD` spawn under a clean env; base resolves upstream → `origin/main` → fail-closed refusal. Wired as Arm 2 of the dev-sync step 4.88 spawned-child integrity gate and as a pre-push scan over the exact pushed range, before gitleaks. Any hit is FATAL with manual-repair remedy; no env skip path.
   - **Worktree config snapshot**: `snapshotRepoConfig` gains a probe-gated (`extensions.worktreeConfig`) worktree-scope section diffed as `wt:` rows, closing the per-worktree `config.worktree` blind spot of the mode-2 guard.
@@ -1950,8 +1951,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-11-09*
-*Last Updated: 2026-11-09*
+*Last Updated: 2026-11-10*
+*Last Updated: 2026-11-10*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

@@ -8310,8 +8310,8 @@
       "name": "meeting-facilitation",
       "scope": "root",
       "capability": "meeting-facilitation",
-      "content_hash": "4514fc0c89279ad1",
-      "version": "1.4.4",
+      "content_hash": "f4da9e5e2a11a853",
+      "version": "1.5.0",
       "mirrors": [
         "skills/meeting-facilitation/SKILL.md",
         "templates/common/skills/meeting-facilitation/SKILL.md",

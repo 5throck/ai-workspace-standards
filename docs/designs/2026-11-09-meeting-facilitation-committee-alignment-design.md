@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-09-meeting-facilitation-committee-alignment-design`
 - **Date**: 2026-11-09
-- **Status**: proposed (Design Gate — registration happens at implementation via /sync)
+- **Status**: implemented (spec registered via spec-register at implementation; Design Gate ruling DEC-20261109-01)
 - **Author**: architect (PM-dispatched)
 - **Upstream request**: U-20261109-001 (co-newbiz; their ADR-0196 committee-minutes design — the requirements quoted in the ticket are the spec)
 - **Related**: `skills/meeting-facilitation/SKILL.md` v1.4.4 (the single file this design rewrites), retirement record `docs/lifecycle/skills/meeting.md` (the `/meeting` command, retired 2026-09-26), `docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md` (format exemplar)

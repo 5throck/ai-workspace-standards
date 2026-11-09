@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-10](2026-11-10.md) | docs(skills): meeting-facilitation v1.5.0 — committee-form alignment |
 | [2026-11-09](2026-11-09.md) | fix: git-env sanitizer for hook-injected GIT_DIR in hygiene gate and tenant tests |
 | [2026-11-08](2026-11-08.md) | docs(designs): trail fleet standard — Row 0 design (T-20261108-001) |
 | [2026-11-08](2026-11-08.md) | chore(tickets): U-20261107-004 triage + T-20261108-001 intake record |
@@ -14,7 +15,7 @@
 | [2026-11-05](2026-11-05.md) | docs(governance): project-loss hardening design approval + ticket hygiene (T-20261104-004 re-filed; -002/-008/-009 closed) |
 | [2026-11-04](2026-11-04.md) | chore(templates): workspace sync (26 files) |
 | [2026-11-03](2026-11-03.md) | fix(hub-spoke): Phase 4 remediation - lock leak fix, test fixture exclusion, hook integrity lib |
-| [2026-11-02](2026-11-02.md) | feat(hub-spoke): Phase 1 batch E5 - co-architect variant template creation with consumer declaration |
+| 2026-11-02 | feat(hub-spoke): Phase 1 batch E5 - co-architect variant template creation with consumer declaration |
 | 2026-11-01 | chore(parity): drop concurrent-session changelog entry from PR surface |
 | 2026-10-31 | docs(review): daily fleet review 2026-10-31 |
 | 2026-10-31 | fix(templates): correct co-safety promotion checklist numeric claims to manifest truth (T-20261031-001) |
