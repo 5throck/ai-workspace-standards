@@ -25,18 +25,27 @@
  * Every fixture git spawn runs under gitCleanEnv() (the 2026-11-09 incident's own
  * mechanism: an inherited GIT_DIR redirects fixture writes into the outer checkout).
  *
- * @version 1.0.0
+ * v1.1.0 (2026-11-09, PR #1941 CI follow-up): canonical-containment pins — Windows
+ *          runners hand fixture roots in 8.3 short-name form (RUNNER~1) while git
+ *          resolves the long form (runneradmin); the raw prefix check refused safe
+ *          fixtures. Pins the injectable canonicalize seam with a fake native-expansion
+ *          normalizer over synthetic Windows-styled strings (no real 8.3 filesystem),
+ *          the fail-closed direction (a differently-styled leak still refuses), and the
+ *          both-sides seam wiring of both probes.
+ *
+ * @version 1.1.0
  */
 import { describe, expect, test, afterAll } from "bun:test";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { spawnSync } from "node:child_process";
 import { gitCleanEnv } from "../../scripts/lib/git-env.ts";
 import {
   assertCallerEnvSafeForGitFixtures,
   assertFixtureGitIdentity,
   deriveFixtureGitCensus,
+  isGitPathInsideFixture,
 } from "../helpers/fixture-git.ts";
 
 const REPO_ROOT = realpathSync(join(import.meta.dir, "..", ".."));
@@ -210,6 +219,61 @@ describe("assertCallerEnvSafeForGitFixtures / assertFixtureGitIdentity (FM1/FM2)
     const dir = makePlainDir("fixture-git-bogus-");
     const hostileEnv = { ...cleanEnv, GIT_DIR: join(dir, "no-such-gitdir") };
     expect(() => assertCallerEnvSafeForGitFixtures(dir, hostileEnv)).toThrow(/redirect var/i);
+  });
+});
+
+// ── 1b. Canonical containment (PR #1941 CI follow-up — Windows 8.3 aliasing) ─
+//
+// Windows runners hand mkdtemp'd fixture roots in 8.3 SHORT-NAME form
+// (`C:\Users\RUNNER~1\AppData\Local\Temp\...`) while git resolves the SAME directory
+// to the LONG form (`C:/Users/runneradmin/...`). The raw containment check refused a
+// safe fixture and failed suites like external-deps-cli on windows-latest. The fix
+// canonicalizes BOTH sides (OS-native realpath + separator normalization) through an
+// injectable seam; these pins prove the aliasing behavior with synthetic strings and a
+// fake normalizer — deterministically on every platform, no real 8.3 filesystem needed.
+describe("canonical containment (PR #1941 — Windows 8.3 short-name aliasing)", () => {
+  const cleanEnv = gitCleanEnv(process.env);
+  /** Fake fs.realpathSync.native on a Windows runner: expand the 8.3 segment, normalize separators. */
+  const fakeWindowsNative = (p: string): string => p.replace("RUNNER~1", "runneradmin").replace(/\\+/g, "/");
+
+  const SHORT_ROOT = "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\extdeps-cli-xM01Ff\\repo";
+  const LONG_GIT_DIR = "C:/Users/runneradmin/AppData/Local/Temp/extdeps-cli-xM01Ff/repo/.git";
+  const LONG_TOPLEVEL = "C:/Users/runneradmin/AppData/Local/Temp/extdeps-cli-xM01Ff/repo";
+
+  test("a RUNNER~1-styled fixture root canonicalizes EQUAL to the long-form git path (the CI shape passes)", () => {
+    expect(isGitPathInsideFixture(LONG_GIT_DIR, SHORT_ROOT, fakeWindowsNative)).toBe(true);
+    expect(isGitPathInsideFixture(LONG_TOPLEVEL, SHORT_ROOT, fakeWindowsNative)).toBe(true);
+  });
+
+  test("without canonicalization the same pair textually mismatches (the exact CI failure mode)", () => {
+    expect(isGitPathInsideFixture(LONG_GIT_DIR, SHORT_ROOT, (p) => p)).toBe(false);
+  });
+
+  test("a genuinely different directory still fails containment under the fake normalizer", () => {
+    const other = "C:/Users/runneradmin/AppData/Local/Temp/OTHER-PROJECT/repo/.git";
+    expect(isGitPathInsideFixture(other, SHORT_ROOT, fakeWindowsNative)).toBe(false);
+  });
+
+  test("the default canonicalizer accepts the injected form for plain POSIX paths", () => {
+    const root = realpathSync(mkdtempSync(join(tmpdir(), "fixture-git-canonical-")));
+    tmpRoots.push(root);
+    expect(isGitPathInsideFixture(join(root, ".git"), root)).toBe(true);
+    expect(isGitPathInsideFixture(join(root, "..", "elsewhere"), root)).toBe(false);
+  });
+
+  test("FM2 passes when the injectable canonicalizer maps BOTH sides into one namespace (seam wiring)", () => {
+    const fixture = makeFixtureRepo("fixture-git-seam-");
+    const uniform = (p: string): string => `/canonical-ns${p.split(sep).join("/")}`;
+    expect(() => assertFixtureGitIdentity(fixture, cleanEnv, { canonicalize: uniform })).not.toThrow();
+    expect(() => assertCallerEnvSafeForGitFixtures(fixture, cleanEnv, { canonicalize: uniform })).not.toThrow();
+  });
+
+  test("FM2 still refuses when the canonicalizer styles the git-dir side differently (fail-closed seam)", () => {
+    const fixture = makeFixtureRepo("fixture-git-seam2-");
+    // Both reads flow through the seam; only the .git side lands in another namespace,
+    // so the containment must refuse — canonicalization may never paper over a real leak.
+    const splitNamespace = (p: string): string => (p.endsWith(".git") ? `/git-ns${p}` : `/fs-ns${p}`);
+    expect(() => assertFixtureGitIdentity(fixture, cleanEnv, { canonicalize: splitNamespace })).toThrow(/OUTSIDE/);
   });
 });
 
