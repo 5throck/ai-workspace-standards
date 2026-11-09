@@ -1,4 +1,21 @@
-// @version 1.45.0
+// @version 1.46.0
+// v1.46.0 (2026-11-09, spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md,
+//          T-20261109-002): step 4.88 becomes the SPAWNED-CHILD INTEGRITY GATE with a
+//          second arm. Arm 1 (existing config snapshot/compare) now also covers the
+//          per-worktree config scope — `snapshotRepoConfig` captures
+//          `git config --worktree --list` when `extensions.worktreeConfig` is enabled,
+//          and its delta rows print with a `wt: ` prefix so the operator can see which
+//          scope moved. Arm 2 (new, corruption MODE 1): the rogue-commit scan —
+//          resolveRogueScanBase() picks the window base (upstream → origin/main →
+//          fail-closed refusal) and scanRogueCommits() filters one `git log base..HEAD`
+//          spawn for commits authored/committed by a known fixture identity
+//          (Test <test@example.com> class — 10 rogue commits rode the PR branch in the
+//          2026-11-09 incident). Any hit is FATAL listing SHA + identity + subject with
+//          the manual-repair guidance; there is NO environment skip path, and an
+//          unresolvable base or a failed git read also aborts (a gate that cannot
+//          establish a comparison base must not silently pass). Both arms run inside the
+//          same post-test block, before the 4.9 audit gate — a run that corrupted the
+//          repository must never reach staging/commit.
 // v1.45.0 (2026-11-09, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
 //          §11): repository-config integrity guard (the second corruption mode of the
 //          2026-11-09 incident). (a) START-OF-RUN INVARIANT immediately after the CWD
@@ -439,7 +456,11 @@ import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from './l
 import {
     assertWorkTreeHealthy,
     diffRepoConfig,
+    formatRepoConfigDeltaRows,
     isEmptyRepoConfigDelta,
+    resolveRogueScanBase,
+    rogueScanRefusalLines,
+    scanRogueCommits,
     snapshotRepoConfig,
     type RepoConfigSnapshot,
 } from './lib/repo-integrity.ts';
@@ -1731,17 +1752,28 @@ try {
     console.warn(`${YELLOW}⚠️  Step 4.87: agent frontmatter last_updated bump failed (non-blocking): ${String(err)}${RESET}`);
 }
 
-// 4.88 Repository-config integrity gate (spec docs/designs/2026-11-08-gw-tenant-loop-and-
-//      hardening-design.md §11) — the SECOND corruption mode of the 2026-11-09 incident.
-//      The steps above spawn real child processes (3.95 `bun run test`, 4.85
-//      `bun run test:unit`); a child that inherits a git hook's GIT_DIR and writes config
-//      lands on THIS repository — worktrees share the main .git/config, which is how the
-//      checkout ended up with `core.bare = true` and `.git/worktrees/` wiped. Compare the
-//      run-start snapshot against a post snapshot: any local-config delta is FATAL.
-//      BLOCKING, placed after the last test-executing step and before the 4.9 audit gate
-//      (a run that corrupted the repository must never reach staging/commit).
-//      No key is excluded — verified 2026-11-09 that no sanctioned tool writes this
-//      repository's local config during a run (scripts/lib/repo-integrity.ts records why).
+// 4.88 Spawned-child integrity gate — TWO arms (blocking, placed after the last
+//      test-executing step and before the 4.9 audit gate: a run that corrupted the
+//      repository must never reach staging/commit). The steps above spawn real child
+//      processes (3.95 `bun run test`, 4.85 `bun run test:unit`); a child that inherits
+//      a git hook's GIT_DIR can corrupt THIS repository in two independent ways:
+//      Arm 1 — repository CONFIG writes (spec docs/designs/2026-11-08-gw-tenant-loop-and-
+//      hardening-design.md §11, the SECOND incident corruption mode): worktrees share the
+//      main .git/config, which is how the checkout ended up with `core.bare = true` and
+//      `.git/worktrees/` wiped. The run-start snapshot is compared against a post
+//      snapshot; any delta — in the local OR the per-worktree scope (`wt: `-prefixed
+//      rows, v1.46.0) — is FATAL. No key is excluded — verified 2026-11-09 that no
+//      sanctioned tool writes this repository's local config during a run
+//      (scripts/lib/repo-integrity.ts records why).
+//      Arm 2 — rogue COMMITS (spec docs/designs/2026-11-09-repo-integrity-mode1-detector-
+//      design.md §3.3, the FIRST incident corruption mode, v1.46.0): the redirected
+//      upgrade-project fixtures committed 10 `Test <test@example.com>` commits onto the
+//      PR branch. One `git log <base>..HEAD` spawn is filtered for known fixture
+//      identity emails (author AND committer, case-insensitive); any hit is FATAL
+//      listing SHA + identity + subject with manual-repair guidance (no auto-repair).
+//      The base resolves upstream → origin/main; if NEITHER resolves, or the git read
+//      fails, the run aborts — a gate that cannot establish a comparison base must not
+//      silently pass. There is NO environment skip path for either arm.
 if (configSnapshotAtStart) {
     let configSnapshotAfter: RepoConfigSnapshot | null = null;
     try {
@@ -1753,15 +1785,21 @@ if (configSnapshotAtStart) {
         }
     }
     if (configSnapshotAfter) {
+        // ── Arm 1: repository-config snapshot/compare (local + worktree scopes) ──
         const configDelta = diffRepoConfig(configSnapshotAtStart.entries, configSnapshotAfter.entries);
+        const worktreeDelta = diffRepoConfig(configSnapshotAtStart.worktreeEntries, configSnapshotAfter.worktreeEntries);
         const bareChanged = configSnapshotAtStart.coreBare !== configSnapshotAfter.coreBare;
-        if (!isEmptyRepoConfigDelta(configDelta) || bareChanged) {
+        if (!isEmptyRepoConfigDelta(configDelta) || !isEmptyRepoConfigDelta(worktreeDelta) || bareChanged) {
             console.error(`${RED}❌ Step 4.88: FATAL — a spawned child mutated the REPOSITORY git config.${RESET}`);
             console.error(`${YELLOW}   Report the delta below to the failing step's owner; the change is repo-wide because${RESET}`);
             console.error(`${YELLOW}   worktrees share the main .git/config (2026-11-09 repository-config corruption incident).${RESET}`);
             for (const line of configDelta.added) console.error(`${RED}   + ${line}${RESET}`);
             for (const line of configDelta.removed) console.error(`${RED}   - ${line}${RESET}`);
             for (const line of configDelta.changed) console.error(`${RED}   ~ ${line}${RESET}`);
+            // Per-worktree scope rows (v1.46.0): the `wt: ` prefix names the scope that moved.
+            for (const line of formatRepoConfigDeltaRows(worktreeDelta, 'wt: ')) {
+                console.error(`${RED}   ${line}${RESET}`);
+            }
             if (bareChanged) {
                 console.error(`${RED}   ~ core.bare (effective): ${configSnapshotAtStart.coreBare ?? '(unset)'} → ${configSnapshotAfter.coreBare ?? '(unset)'}${RESET}`);
             }
@@ -1775,6 +1813,35 @@ if (configSnapshotAtStart) {
             }
         } else {
             console.log(`${GREEN}✓ Step 4.88: repository config unchanged across the test steps${RESET}`);
+        }
+
+        // ── Arm 2 (v1.46.0): rogue-commit scan over base..HEAD (corruption mode 1) ──
+        const baseResolution = resolveRogueScanBase(expectedRoot);
+        if (!baseResolution.ok) {
+            console.error(`${RED}❌ Step 4.88: FATAL — ${baseResolution.reason}${RESET}`);
+            if (import.meta.main) {
+                process.exit(1);
+            }
+        } else {
+            const rogueScan = scanRogueCommits(baseResolution.base, expectedRoot);
+            if (!rogueScan.ok) {
+                console.error(`${RED}❌ Step 4.88: FATAL — the rogue-commit scan could not read git history: ${rogueScan.reason}${RESET}`);
+                console.error(`${YELLOW}   A gate that cannot read the history it must guard aborts instead of passing. Spec:${RESET}`);
+                console.error(`${YELLOW}   docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.1-§3.3.${RESET}`);
+                if (import.meta.main) {
+                    process.exit(1);
+                }
+            } else if (rogueScan.commits.length > 0) {
+                console.error(`${RED}❌ Step 4.88: FATAL — a spawned test committed into THIS repository.${RESET}`);
+                for (const line of rogueScanRefusalLines(rogueScan.commits, `${baseResolution.base}..HEAD`)) {
+                    console.error(`${YELLOW}   ${line}${RESET}`);
+                }
+                if (import.meta.main) {
+                    process.exit(1);
+                }
+            } else {
+                console.log(`${GREEN}✓ Step 4.88: no rogue fixture-identity commits in ${baseResolution.base}..HEAD${RESET}`);
+            }
         }
     }
 }

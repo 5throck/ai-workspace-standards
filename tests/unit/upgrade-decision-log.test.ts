@@ -110,6 +110,7 @@ import {
 } from '../../scripts/lib/upgrade-policy.ts';
 import { composeResolvedAgentContent } from '../../scripts/helpers/resolve-pm-stub.ts';
 import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const upgradeScript = join(workspaceRoot, 'scripts', 'upgrade-project.ts');
@@ -122,11 +123,16 @@ const phaseDefsTemplate = existsSync(join(workspaceRoot, 'templates', VARIANT, P
 
 function makeTempProject(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'upgrade-decision-log-'));
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+  // §3.5): FM1 first — a hostile caller env fails LOUDLY here, before any write.
+  assertCallerEnvSafeForGitFixtures(tmp);
   // gitCleanEnv(): a hook context (`git push` pre-push, or a deliberate
   // `GIT_DIR=… bun test` regression probe) exports GIT_DIR. Without this the
   // fixture's `git init`/`add`/`commit` would be redirected into the INVOKING
   // repository — the 2026-11-09 rogue-commit incident (10 rogue commits).
   spawnSync('git', ['init', '-q'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+  // FM2 — end-to-end proof the sanitized harness resolves INSIDE the fixture root.
+  assertFixtureGitIdentity(tmp);
   spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
   spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
   mkdirSync(join(tmp, '.claude'), { recursive: true });

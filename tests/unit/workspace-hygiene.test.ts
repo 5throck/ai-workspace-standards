@@ -23,6 +23,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { classifyWorkspaceHygieneResidue, KNOWN_TOP_LEVEL_DIRS } from "../../scripts/lib/workspace-hygiene.ts";
 import { gitCleanEnv } from "../../scripts/lib/git-env.ts";
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from "../helpers/fixture-git.ts";
 
 const REPO_ROOT = realpathSync(join(import.meta.dir, "..", ".."));
 
@@ -112,6 +113,9 @@ describe("classifyWorkspaceHygieneResidue", () => {
  * class, reproduced live on 2026-11-09). */
 function makeFixtureRepo(): string {
   const root = mkdtempSync(join(realpathSync(tmpdir()), "ws-hygiene-fix-")); // ABSOLUTE
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design §3.5):
+  // FM1 first — a hostile caller env fails LOUDLY here, before any fixture git write.
+  assertCallerEnvSafeForGitFixtures(root);
   const git = (args: string) =>
     Bun.spawnSync(["git", "-c", "user.email=fix@test", "-c", "user.name=fixer", ...args], {
       cwd: root,
@@ -122,6 +126,8 @@ function makeFixtureRepo(): string {
   mkdirSync(join(root, "tests", "unit"), { recursive: true });
   writeFileSync(join(root, "tests", "unit", "tracked.test.ts"), "test();\n");
   git(["init"]);
+  // FM2 — end-to-end proof the sanitized harness resolves INSIDE the fixture root.
+  assertFixtureGitIdentity(root);
   git(["add", "tests/unit/tracked.test.ts"]);
   git(["commit", "-m", "initial"]);
   return root;

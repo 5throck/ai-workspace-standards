@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261109-003
+kind: manual
+title: >-
+  meeting-facilitation lineage hygiene (found during U-20261109-001
+  verification): 38 stale v1.4.3 command stub copies
+  (.claude/commands/meeting.md, .gemini/commands/meeting.md,
+  .codex/prompts/meeting.md across Projects/* + templates/co-architect)
+  contradict the retired root /meeting command (retired 2026-09-26, see
+  docs/lifecycle/skills/meeting.md) and still present a self-referential
+  registration stub to projects incl. co-newbiz; separately, the co-safety-only
+  lineage (SKILL.md v1.5.0 stub-style in templates/co-safety +
+  Projects/co-safety, plus a full 330-line .claude/commands/meeting.md v1.5.0)
+  diverges from root canonical v1.4.4, and the co-safety template vs project
+  SKILL.md hashes differ (bef3cf33 vs 51f0677e). Reconcile or retire per
+  skill-lifecycle-manager rules; verify cascade after the U-20261109-001 v1.5.0
+  alignment PR lands.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-09T20:35:05.651+09:00'
+history:
+  - at: '2026-11-09T20:35:05.651+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

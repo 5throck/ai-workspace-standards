@@ -32,6 +32,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 // ---------------------------------------------------------------------------
 // Temp project scaffolding
@@ -65,8 +66,16 @@ function writeScript(root: string, rel: string, body: string): string {
 }
 
 function gitInit(root: string): void {
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+  // §3.5): FM1 first (hostile caller env fails LOUDLY pre-write), FM2 right after init.
+  // NOTE: this suite's fixture identity below IS the blocklisted test@example.com class —
+  // confined to the fixture repo by gitCleanEnv-style cwd scoping; the dev-sync 4.88 /
+  // pre-push rogue-commit detectors refuse the OUTER repository ever carrying it.
+  assertCallerEnvSafeForGitFixtures(root);
   const res = spawnSync('git', ['init', '-q'], { cwd: root });
   if (res.status !== 0) throw new Error(`git init failed in ${root}`);
+  // FM2 — end-to-end proof the sanitized machinery resolves INSIDE the fixture root.
+  assertFixtureGitIdentity(root);
   // A generator output staged by runDeclaredGenerators needs a commit-able repo;
   // user identity is irrelevant for `git add` but set it for safety.
   spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd: root });

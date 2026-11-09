@@ -25,6 +25,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { dump, load, JSON_SCHEMA } from 'js-yaml';
 import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
 const SERVER = join(REPO_ROOT, 'scripts', 'mcp-upstream-server.ts');
@@ -62,6 +63,9 @@ beforeEach(() => {
     tenant(id, opts = {}) {
       const dir = join(storage, 'op@example.com', id, 'project');
       mkdirSync(dir, { recursive: true });
+      // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+      // §3.5): FM1 first — a hostile caller env fails LOUDLY here, before any write.
+      assertCallerEnvSafeForGitFixtures(dir);
       // gitCleanEnv: a hook context (`git push` pre-push) exports GIT_DIR aimed at
       // this checkout's private git dir — unsanitized fixture `git init` honors it
       // over the explicit dir arg's cwd discovery and creates NO fixture .git, so
@@ -69,6 +73,8 @@ beforeEach(() => {
       // add/commit variants also landed commits on the PR branch (2026-11-07
       // external-deps incident class, reproduced live 2026-11-09).
       execFileSync('git', ['init', '-q', dir], { env: gitCleanEnv() });
+      // FM2 — end-to-end proof the sanitized harness resolves INSIDE the fixture root.
+      assertFixtureGitIdentity(dir);
       if (opts.withMarker !== false) {
         writeFileSync(join(dir, 'template-version.txt'), 'variant=co-consult\nversion=0.8.1\nplatform=all\n');
       }

@@ -23,7 +23,7 @@ title: >-
   unreadable snapshot aborts. Design:
   docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11.
 priority: high
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-09T10:20:31.771+09:00'
 history:
@@ -36,5 +36,13 @@ history:
   - at: '2026-11-09T10:32:03.448+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-09T20:08:36.735+09:00'
+    from: review
+    to: done
+result: >-
+  Both fixes merged and verified in main: mode 1 via PR #1935 (env sanitizer
+  scripts/lib/git-env.ts, commit 6f4ea25dd), mode 2 via PR #1936
+  (repo-integrity.ts v1.0.0 + dev-sync step 4.88 config-integrity gate +
+  pre-push v1.8.1 snapshot/compare, commit d50d3274e). Residual exposures split
+  to follow-up T-20261109-002 (backlog).
 error: null

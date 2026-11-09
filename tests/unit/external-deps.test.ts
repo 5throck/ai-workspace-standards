@@ -42,6 +42,7 @@ for (const k of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIREC
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 import {
   parseExternalDepsManifest,
   mergeExternalDepsManifests,
@@ -103,7 +104,11 @@ function git(args: string[], cwd: string): void {
 /** Tiny local fixture repo: one commit tagged v6.8.0, a second tagged v6.9.0. */
 function createFixtureRepo(dir: string, opts: { secondTag?: boolean } = {}): string {
   fs.mkdirSync(dir, { recursive: true });
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+  // §3.5): FM1 first (hostile caller env fails LOUDLY pre-write), FM2 right after init.
+  assertCallerEnvSafeForGitFixtures(dir);
   git(['init', '-q'], dir);
+  assertFixtureGitIdentity(dir);
   fs.writeFileSync(path.join(dir, 'README.md'), '# fixture\n');
   git(['add', '-A'], dir);
   git(['-c', 'user.email=fixture@test', '-c', 'user.name=Fixture', 'commit', '-q', '-m', 'v6.8.0 content'], dir);

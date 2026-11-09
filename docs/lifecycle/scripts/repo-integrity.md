@@ -4,7 +4,7 @@
 
 - **Script**: repo-integrity (scripts/lib/repo-integrity.ts)
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-09
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-11-09 with the current entry; full version detail lives in the SCRIPTS.md registry row.
@@ -21,4 +21,5 @@ Repository-config integrity guard: `snapshotRepoConfig(root?)` (sorted `git conf
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-09 | production | production | v1.1.0 (spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3, T-20261109-002): corruption-MODE-1 detector + worktree-scope snapshot — ROGUE_IDENTITY_EMAIL_PATTERNS (seeded `/^test@example\.com$/i`, author AND committer, case-insensitive; extend by one commented literal + census re-run, NEVER a skip env), pure filterRogueCommits over one `git log` spawn, scanRogueCommitsInRange/scanRogueCommits (fail-closed), resolveRogueScanBase (upstream → origin/main → refuse), rogueScanRefusalLines (one derivation for both callers); snapshotRepoConfig gains worktreeEntries gated on the extensions.worktreeConfig probe (extension off → `[]`; on + no config.worktree file → empty via the exit-128 "unable to read config file" shape, verified 2026-11-09), formatRepoConfigDeltaRows for the `wt: ` rows. Unit-pinned by tests/unit/repo-integrity.test.ts v1.2.0. | automation-engineer |
 | 2026-11-09 | production | production | v1.0.0 (spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11): initial release — snapshot/diff/work-tree-health primitives shared by dev-sync.ts v1.45.0 (start-of-run invariant + blocking step 4.88 config gate) and hooks/pre-push.ts v1.8.0 (snapshot/compare around the changed-path test run). Verified mechanism: with `core.bare = true`, `git rev-parse --is-inside-work-tree` prints `false` while still exiting 0, so the guard tests stdout rather than the exit code; `git config --local --list` keeps working, which is what makes the snapshot pair a viable detector. | automation-engineer |
