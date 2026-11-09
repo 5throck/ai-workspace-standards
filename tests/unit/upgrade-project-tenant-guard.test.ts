@@ -36,6 +36,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { variantName } from '../../scripts/backport-diff.ts';
 import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..', '..');
 const UPGRADE = join(REPO_ROOT, 'scripts', 'upgrade-project.ts');
@@ -96,12 +97,19 @@ function makeTenantProject(opts: { id?: string; git?: boolean; marker?: boolean 
   const base = mkdtempSync(join(tmpdir(), 'tenant-guard-'));
   const dir = join(base, opts.id ?? 'gw-aaaaaaaaaaaa', 'project');
   mkdirSync(dir, { recursive: true });
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+  // §3.5): FM1 first — a hostile caller env fails LOUDLY here, before any write.
+  assertCallerEnvSafeForGitFixtures(dir);
   // gitCleanEnv: a hook context (`git push` pre-push) exports GIT_DIR aimed at this
   // checkout's private git dir — unsanitized fixture `git init` honors it over the
   // explicit dir arg and the fixture never gets its own .git (and the add/commit
   // variants land commits on the PR branch; 2026-11-07 external-deps incident class,
   // reproduced live 2026-11-09).
-  if (opts.git !== false) execFileSync('git', ['init', '-q', dir], { env: gitCleanEnv() });
+  if (opts.git !== false) {
+    execFileSync('git', ['init', '-q', dir], { env: gitCleanEnv() });
+    // FM2 — end-to-end proof the sanitized harness resolves INSIDE the fixture root.
+    assertFixtureGitIdentity(dir);
+  }
   if (opts.marker !== false) {
     writeFileSync(join(dir, 'template-version.txt'), 'variant=co-consult\nversion=0.8.1\nplatform=all\n');
   }

@@ -25,6 +25,7 @@ for (const k of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIREC
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const CLI = path.resolve(import.meta.dir, '../../scripts/external-deps.ts');
 let scratch = '';
@@ -60,7 +61,11 @@ function git(args: string[], cwd: string): void {
 
 function fixtureRepo(dir: string, tags: string[] = ['v1.0.0']): string {
   fs.mkdirSync(dir, { recursive: true });
+  // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+  // §3.5): FM1 first (hostile caller env fails LOUDLY pre-write), FM2 right after init.
+  assertCallerEnvSafeForGitFixtures(dir);
   git(['init', '-q'], dir);
+  assertFixtureGitIdentity(dir);
   fs.writeFileSync(path.join(dir, 'LICENSE'), 'MIT\n');
   tags.forEach((t, i) => {
     fs.writeFileSync(path.join(dir, `file-${i}.txt`), `${t}\n`);

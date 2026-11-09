@@ -26,6 +26,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { rmdirIfEmpty } from '../helpers/rmdir-if-empty';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 
@@ -140,6 +141,10 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
 
   beforeAll(() => {
     mkdirSync(outsideDir, { recursive: true });
+    // Fixture-suite self-assertion (spec 2026-11-09-repo-integrity-mode1-detector-design
+    // §3.5): FM1 first — a hostile caller env fails LOUDLY here, before the git init
+    // below could be redirected into the workspace checkout (2026-11-09 incident class).
+    assertCallerEnvSafeForGitFixtures(outsideDir);
     // T-20261104-003: parent + first child are created back-to-back so the
     // empty-parent window between them stays at zero (the git init below is
     // the slow step and must not sit inside that window).
@@ -147,6 +152,8 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     mkdirSync(insideDir, { recursive: true });
     const init = spawnSync('git', ['init', '-q', outsideDir], { encoding: 'utf-8' });
     if (init.status !== 0) throw new Error(`git init failed for guard fixture: ${init.stderr}`);
+    // FM2 — end-to-end proof the fixture repo resolves INSIDE the fixture root.
+    assertFixtureGitIdentity(outsideDir);
     try {
       symlinkSync(workspaceRoot, linkPath, 'dir');
       canSymlink = true;

@@ -1,0 +1,57 @@
+schemaVersion: 1
+id: U-20261109-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-09T18:02:30.124+09:00'
+history:
+  - at: '2026-11-09T18:02:30.124+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-09T20:08:36.784+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    ADR-0196 decision 7 (2026-11-08 owner decision, co-newbiz design doc
+    docs/designs/2026-11-08-committee-minutes-as-meeting-design.md §7 surface
+    M8): the meeting-facilitation skill (v1.4.3) runs round-robin contributions
+    and then a PM synthesis, but its agent-meeting form predates the
+    responsive-round committee design. It lacks (1) a round 2+ response contract
+    — each participant addresses at least two named peers (agree/rebut/ask),
+    answers questions addressed to them last round, states a stance-change line,
+    and stays on agenda issues; (2) a facilitator agenda pass after round 1 that
+    proposes 2-5 agenda issues from criteria/recommendation spread for the
+    remaining rounds; (3) the ADR-0196 §2.4 minutes section order as the
+    transcript template — agenda issues, discussion by issue with attributed
+    exchanges, agreements, preserved dissent VERBATIM (never summarized), open
+    questions, action items, and a proposed recommendation explicitly labelled a
+    proposal (never a PASS/approval stamp). The skill already requires a dissent
+    seat and proposal-only output, so this aligns it with the app committee form
+    rather than changing its contract. Requested change: update the skill text
+    (version bump) and the /meeting command template in the same direction;
+    co-newbiz will pick up the upgraded skill on its next upgrade delivery.
+  affected_paths:
+    - skills/meeting-facilitation/SKILL.md
+    - .claude/commands/meeting.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery skills/meeting-facilitation/SKILL.md=false
+    - info:l0_origin .claude/commands/meeting.md <- .claude/commands/meeting.md
+    - info:in_last_delivery .claude/commands/meeting.md=false
+  dedupe_key: ccef7ea19a98b5158d72fd03ed92d849824696c01d91764d70b3713485c9d6aa
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-09T18:02:30.124+09:00'

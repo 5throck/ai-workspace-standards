@@ -1,7 +1,27 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.8.1
+ * @version 1.9.0
+ * v1.9.0 (2026-11-09, spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md
+ *          §3.3, T-20261109-002): two additions, both fail-closed with no env skip path.
+ *          (a) ROGUE-COMMIT SCAN over the exact range the push would transfer, placed
+ *          immediately after the pure-deletion early-exit and BEFORE the gitleaks scan:
+ *          for every ref update with a valid (non-zero, hex-shaped — the
+ *          collectPushedChangedFiles validation) localOid, one `git log` spawn filters
+ *          the range (remoteOid..localOid for existing remote refs, localOid --not
+ *          --remotes for new branches — the same scoping collectPushedChangedFiles uses)
+ *          for commits authored/committed by a known fixture identity email
+ *          (Test <test@example.com> class: 10 rogue commits rode a PR branch in the
+ *          2026-11-09 incident). Any hit refuses the push listing SHA + identity +
+ *          subject with manual-repair guidance; an unreadable scan aborts — dev-sync's
+ *          arm catches corruption before commit, this arm is the last line before
+ *          corrupted history reaches the remote, including corruption produced outside
+ *          any pipeline (direct `bun test` + manual push).
+ *          (b) The config guard verdict now also compares the per-worktree config scope
+ *          (snapshotRepoConfig captures `git config --worktree --list` when
+ *          extensions.worktreeConfig is enabled); worktree delta rows print with a
+ *          `wt: ` prefix so the operator can see which scope moved. FATAL semantics
+ *          unchanged: any delta in either scope blocks the push.
  * v1.8.1 (2026-11-09, QA follow-up fix — design §11 fail-closed semantics): the pre-run
  *          snapshot no longer fails OPEN. An unreadable config before the changed-path
  *          test run now aborts non-zero with the same actionable shape dev-sync uses
@@ -47,7 +67,15 @@
 import { $ } from "bun";
 import { existsSync } from "node:fs";
 import { gitCleanEnvForShell } from "../lib/git-env.ts";
-import { diffRepoConfig, isEmptyRepoConfigDelta, snapshotRepoConfig, type RepoConfigSnapshot } from "../lib/repo-integrity.ts";
+import {
+  diffRepoConfig,
+  formatRepoConfigDeltaRows,
+  isEmptyRepoConfigDelta,
+  rogueScanRefusalLines,
+  scanRogueCommitsInRange,
+  snapshotRepoConfig,
+  type RepoConfigSnapshot,
+} from "../lib/repo-integrity.ts";
 
 // All-zero OID: git's "null" object id, sent as the local OID of a ref
 // deletion on both SHA-1 (40 zeros) and SHA-256 (64 zeros) repositories.
@@ -215,28 +243,51 @@ export interface RepoConfigGuardVerdict {
 
 /**
  * Pure verdict for the snapshot pair. Refuses on ANY local-config key delta (added /
- * removed / changed) AND on any change to the effective `core.bare` — the latter because
- * `core.bare` resolves local > global > system: a global flip leaves
- * `git config --local --list` byte-identical yet still makes every work-tree operation
- * fail (the incident's own failure mode). Reported even when the key diff is empty.
+ * removed / changed), on ANY per-worktree config delta (v1.9.0 — rows prefixed `wt: `
+ * so the operator can see which scope moved), AND on any change to the effective
+ * `core.bare` — the latter because `core.bare` resolves local > global > system: a
+ * global flip leaves `git config --local --list` byte-identical yet still makes every
+ * work-tree operation fail (the incident's own failure mode). Reported even when the
+ * key diff is empty.
  */
 export function repoConfigGuardVerdict(
   before: RepoConfigSnapshot,
   after: RepoConfigSnapshot,
 ): RepoConfigGuardVerdict {
   const delta = diffRepoConfig(before.entries, after.entries);
+  const worktreeDelta = diffRepoConfig(before.worktreeEntries, after.worktreeEntries);
   const bareChanged = before.coreBare !== after.coreBare;
-  if (isEmptyRepoConfigDelta(delta) && !bareChanged) return { refused: false, lines: [] };
+  if (isEmptyRepoConfigDelta(delta) && isEmptyRepoConfigDelta(worktreeDelta) && !bareChanged) {
+    return { refused: false, lines: [] };
+  }
 
   const lines = [
     ...delta.added.map((line) => `+ ${line}`),
     ...delta.removed.map((line) => `- ${line}`),
     ...delta.changed.map((line) => `~ ${line}`),
+    ...formatRepoConfigDeltaRows(worktreeDelta, "wt: "),
   ];
   if (bareChanged) {
     lines.push(`~ core.bare (effective): ${before.coreBare ?? '(unset)'} → ${after.coreBare ?? '(unset)'}`);
   }
   return { refused: true, lines };
+}
+
+/**
+ * Revision arguments for the rogue-identity scan over ONE pushed ref (v1.9.0), mirroring
+ * the collectPushedChangedFiles scoping so no new range math exists: an existing remote
+ * counterpart scans `remoteOid..localOid`; a new branch scans `localOid --not --remotes`.
+ * Returns null for deletion updates (no commits transferred) and for local/remote OIDs
+ * that fail the same hex-shape validation collectPushedChangedFiles applies before shell
+ * interpolation — those refs are skipped here exactly as they are skipped there.
+ */
+export function rogueScanRevArgs(ref: PushRefUpdate): string[] | null {
+  if (isZeroOid(ref.localOid)) return null;
+  if (!/^[0-9a-f]{40,64}$/.test(ref.localOid)) return null;
+  if (!isZeroOid(ref.remoteOid) && /^[0-9a-f]{40,64}$/.test(ref.remoteOid)) {
+    return [`${ref.remoteOid}..${ref.localOid}`];
+  }
+  return [ref.localOid, "--not", "--remotes"];
 }
 
 async function main() {
@@ -262,6 +313,35 @@ async function main() {
     console.log("ℹ️  pre-push: ref-deletion push — no commits to audit, skipping");
     return;
   }
+
+  // Rogue-identity commit scan (v1.9.0, design §3.3 of
+  // docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md): the last line
+  // before corrupted history reaches the remote — including corruption produced outside
+  // any pipeline (a direct `bun test` run whose fixture spawn lost its gitCleanEnv
+  // wrapper, then a manual push). dev-sync step 4.88 Arm 2 catches the same class
+  // before commit; this arm scans the EXACT range the push would transfer, per ref,
+  // before the gitleaks stage. Fail-closed: an unreadable scan refuses the push.
+  // No environment skip path exists for this check.
+  console.log("=== pre-push rogue-commit scan ===");
+  for (const ref of refUpdates) {
+    const revArgs = rogueScanRevArgs(ref);
+    if (!revArgs) continue; // deletion / non-commit update — nothing to scan
+    const scan = scanRogueCommitsInRange(revArgs);
+    if (!scan.ok) {
+      console.error(`\n\x1b[31m❌ pre-push: FATAL — the rogue-commit scan over ${revArgs.join(" ")} could not read git history: ${scan.reason} — push blocked.\x1b[0m`);
+      console.error("   A gate that cannot read the history it must guard refuses the push instead of passing it.");
+      console.error("   Spec: docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.3.");
+      process.exit(1);
+    }
+    if (scan.commits.length > 0) {
+      console.error(`\n\x1b[31m❌ pre-push: fixture-identity commits detected in the pushed range ${revArgs.join(" ")} — push blocked.\x1b[0m`);
+      for (const line of rogueScanRefusalLines(scan.commits, revArgs.join(" "))) {
+        console.error(`   ${line}`);
+      }
+      process.exit(1);
+    }
+  }
+  console.log("  ✅ No rogue fixture-identity commits in the pushed ranges");
 
   // Secret scan (gitleaks) — skip if not installed
   // Scoped to only the commits being pushed, not the entire working tree.
