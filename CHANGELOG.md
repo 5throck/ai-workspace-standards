@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-09]**: fix(co-workspace): **signed-out `/admin` now redirects to `/login` instead of a JSON 401.** `GET /admin` and `GET /admin.js` are added to `AUTH_EXEMPT_ROUTES` (`src/auth.ts`). The page handler still enforces the admin check itself, `admin.js` is static code with no data, and the `/admin/*` API stays key/session-gated (exact-match exemption). The regression tests are in `co-workspace-admin-page.test.ts` (5 new); the co-workspace suite has 718 passing.
 - **[2026-11-09]**: feat(co-workspace): **standalone `/admin` console with user groups, group policies, bulk user/tenant actions, CSV import/export, and security hardening (spec `docs/designs/2026-11-09-gw-admin-console-design.md`).**
   - **Admin console:** the gateway admin surface moves out of the chat SPA into its own `/admin` page (`web/admin.html` + `web/admin.js`). Non-admins and must-change sessions are redirected to `/`. The left nav has hash routes for Dashboard, Users, Groups, Tenants, Policies, Tenant Loop, Audit and System, and `index.html` drops its admin panel (1818 → 1267 lines).
   - **Migration v3:** adds `groups.kind` (existing rows become `loop`), `policy`, `description` and `created_at`; adds `users.disabled_at`; adds indexes.
