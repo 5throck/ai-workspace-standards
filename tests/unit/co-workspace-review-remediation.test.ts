@@ -486,7 +486,7 @@ describe("session hardening (2026-10-03 session-hardening design, T-20261003-027
       // handleAdmin propagates HttpError (the catch lives in handleRequest) — assert the throws
       const call = (pw?: string) => handleAdmin(
         state,
-        new Request("http://x/admin/users/x/reset-password", { method: "POST", headers: { cookie: `gw_session=${token}`, "content-type": "application/json", ...(pw ? { "x-admin-password": pw } : {}) }, body: "{}" }),
+        new Request("http://x/admin/users/x/reset-password", { method: "POST", headers: { cookie: `gw_session=${token}`, "content-type": "application/json", "x-requested-with": "co-workspace", ...(pw ? { "x-admin-password": pw } : {}) }, body: "{}" }),
         ctx,
       );
       const noHeader = await call().then((r) => r.status, (e) => ({ status: e.status, message: e.message }));

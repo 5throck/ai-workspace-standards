@@ -3,13 +3,25 @@ import { join, resolve } from "node:path";
 import { SERVICE_ROOT } from "../config";
 import { googleConfigured } from "../google-sso";
 import { HttpError, jsonResponse, htmlHeaders } from "../http";
-import { demoPage } from "../pages";
+import { adminPage, demoPage } from "../pages";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
 
 export async function handlePublic(state: GatewayState, req: Request, ctx: Ctx): Promise<Response | null> {
   const { path } = ctx;
   if (req.method === "GET" && path === "/") return demoPage();
+  if (req.method === "GET" && path === "/admin") return adminPage(state, req);
+
+  // Admin console script (design §9.2): the same no-cache posture as /app-helpers.js.
+  if (req.method === "GET" && path === "/admin.js") {
+    const adminJsPath = resolve(SERVICE_ROOT, "web", "admin.js");
+    if (existsSync(adminJsPath)) {
+      return new Response(readFileSync(adminJsPath, "utf8"), {
+        headers: { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" },
+      });
+    }
+    throw new HttpError(404, "admin script not found");
+  }
 
   if (req.method === "GET" && path === "/login") {
     const loginPath = resolve(SERVICE_ROOT, "web", "login.html");

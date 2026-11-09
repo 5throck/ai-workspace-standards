@@ -92,6 +92,33 @@ export const MIGRATION_STEPS: MigrationStep[] = [
       db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_hash_unique ON users(email_hash) WHERE email_hash IS NOT NULL");
     },
   },
+  {
+    // Admin console (design docs/designs/2026-11-09-gw-admin-console-design.md §3): general
+    // groups share the tenant-loop groups/user_groups tables, distinguished by `kind`.
+    version: 3,
+    name: "admin console: general groups (kind/policy/description) + users.disabled_at + user_groups(principal) index",
+    up(db: Database): void {
+      for (const stmt of [
+        "ALTER TABLE groups ADD COLUMN kind TEXT NOT NULL DEFAULT 'loop'",
+        "ALTER TABLE groups ADD COLUMN policy TEXT",
+        "ALTER TABLE groups ADD COLUMN description TEXT",
+        "ALTER TABLE groups ADD COLUMN created_at TEXT",
+        "ALTER TABLE users ADD COLUMN disabled_at TEXT",
+      ]) {
+        try {
+          db.exec(stmt);
+        } catch (err) {
+          // Only "already applied" is benign (2026-11-09 review L4); any other failure is a
+          // real schema problem and must stop the migration, not be swallowed.
+          if (!(err instanceof Error && err.message.includes("duplicate column name"))) throw err;
+        }
+      }
+      // Existing rows are tenant-loop groups (the DEFAULT already sets this; explicit for clarity).
+      db.exec("UPDATE groups SET kind='loop' WHERE kind IS NULL OR kind=''");
+      db.exec("CREATE INDEX IF NOT EXISTS idx_user_groups_principal ON user_groups(principal)");
+      db.exec("CREATE INDEX IF NOT EXISTS idx_groups_kind ON groups(kind)");
+    },
+  },
 ];
 
 export const MIGRATION_HEAD = MIGRATION_STEPS[MIGRATION_STEPS.length - 1].version;

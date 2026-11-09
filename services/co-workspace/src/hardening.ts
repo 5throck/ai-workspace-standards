@@ -68,10 +68,40 @@ export class AuditLog {
       .all(limit) as Array<{ at: string; actor: string; action: string; target: string | null; detail: string | null }>;
   }
 
+  /** Admin console (§8.5): exact actor match, action prefix match, paged newest-first. */
+  query(opts: { actor?: string; action?: string; page?: number; size?: number }): { entries: AuditEntry[]; total: number } {
+    const where: string[] = [];
+    const params: (string | number)[] = [];
+    if (opts.actor) {
+      where.push("actor = ?");
+      params.push(opts.actor);
+    }
+    if (opts.action) {
+      where.push("action LIKE ? ESCAPE '\\'");
+      params.push(`${opts.action.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+    }
+    const clause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+    const size = Math.min(Math.max(1, Math.floor(opts.size ?? 50)), 200);
+    const page = Math.max(1, Math.floor(opts.page ?? 1));
+    const total = Number((this.db.query(`SELECT COUNT(*) AS n FROM audit ${clause}`).get(...params) as { n: number }).n);
+    const entries = this.db
+      .query(`SELECT at, actor, action, target, detail FROM audit ${clause} ORDER BY id DESC LIMIT ? OFFSET ?`)
+      .all(...params, size, (page - 1) * size) as AuditEntry[];
+    return { entries, total };
+  }
+
   /** Graceful shutdown (2026-10-03 review H3): checkpoint WAL before process exit. */
   close(): void {
     this.db.close();
   }
+}
+
+export interface AuditEntry {
+  at: string;
+  actor: string;
+  action: string;
+  target: string | null;
+  detail: string | null;
 }
 
 /** SEC-09: CSRF guard — mutating routes must carry a custom header a cross-site form cannot

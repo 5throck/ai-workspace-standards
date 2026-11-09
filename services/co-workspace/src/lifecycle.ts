@@ -8,7 +8,8 @@ import { attachScratchDir, ATTACH_KIND } from "./attach";
 import { dirSize, moveDir } from "./util";
 import { HttpError } from "./http";
 import type { GatewayState } from "./state";
-import { callerPrincipal, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
+import { callerPrincipal, callerPolicyFor, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
+import type { EffectivePolicy } from "./policy";
 
 /** Addendum 17 Decision 2: attach provisioning — NO scaffold, NO relocate. The existing
  * checkout IS `rec.projectDir`; the gateway creates only its own artifacts (the per-session
@@ -309,11 +310,12 @@ export function getOrStartTenant(
   variant: string,
   user: string,
   ownerPrincipal?: string,
+  policy?: EffectivePolicy,
 ): { rec: TenantRecord; promise?: Promise<void> } {
   const key = tenantKeyFor(variant, user);
   const existing = state.registry.findByKey(key);
   if (existing) return { rec: existing };
-  assertTenantCap(state, ownerPrincipal ?? "anonymous");
+  assertTenantCap(state, ownerPrincipal ?? "anonymous", policy);
   const rec = state.registry.create({
     variant,
     key,
@@ -336,7 +338,7 @@ export function resolveLazyTenant(
 ): { rec: TenantRecord; promise?: Promise<void> } {
   assertProvisioningAllowed(state, req, variant);
   const principal = callerPrincipal(state, req) ?? "anonymous";
-  const found = getOrStartTenant(state, variant, principal, principal);
+  const found = getOrStartTenant(state, variant, principal, principal, callerPolicyFor(state, req));
   requireTenantAccess(state, req, found.rec);
   return found;
 }
@@ -422,6 +424,11 @@ export async function deleteTenantData(state: GatewayState, rec: TenantRecord, a
   }
   if (guardFailure) {
     throw new HttpError(500, `refusing to delete: tenant folder ${tenantFolder} escapes ${storageRoot}`);
+  }
+  // 2026-11-09 review L9: the project directory is rmSync'd below, so it must sit inside this
+  // tenant's own folder (a tampered registry row must not point the delete elsewhere).
+  if (!resolve(rec.projectDir).startsWith(tenantFolder + sep)) {
+    throw new HttpError(500, `refusing to delete: project dir ${rec.projectDir} escapes ${tenantFolder}`);
   }
   state.activeProcs.get(tenantId)?.kill();
   await boundedWait(state.provisioning.get(tenantId));

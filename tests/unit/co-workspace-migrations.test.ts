@@ -54,7 +54,7 @@ describe("runMigrations — versioned runner", () => {
       const v = db.query("PRAGMA user_version").get() as { user_version: number };
       expect(v.user_version).toBe(MIGRATION_HEAD);
       const groupsCols = (db.query("PRAGMA table_info(groups)").all() as Array<{ name: string }>).map((c) => c.name);
-      expect(groupsCols).toEqual(["group_id", "name", "loop_config"]);
+      expect(groupsCols).toEqual(["group_id", "name", "loop_config", "kind", "policy", "description", "created_at"]);
       const joinCols = (db.query("PRAGMA table_info(user_groups)").all() as Array<{ name: string }>).map((c) => c.name);
       expect(joinCols).toEqual(["group_id", "principal"]);
       db.close();

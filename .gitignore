@@ -145,6 +145,7 @@ __pycache__/
 # Team Gateway service (ADR-0092) — tracked; its runtime data dir is not.
 !services/
 services/co-workspace/data/
+services/co-workspace/data.bak-*/
 # Gateway tenant storage now lives at services/co-workspace/data/ (already ignored above).
 # Runtime-image staging for the hermes bake (build-runtime-image.sh) is local-only.
 services/co-workspace/docker/runtime-hermes/
