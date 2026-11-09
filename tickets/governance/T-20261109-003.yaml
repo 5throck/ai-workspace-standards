@@ -16,12 +16,36 @@ title: >-
   skill-lifecycle-manager rules; verify cascade after the U-20261109-001 v1.5.0
   alignment PR lands.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-09T20:35:05.651+09:00'
 history:
   - at: '2026-11-09T20:35:05.651+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T08:15:34.669+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T08:15:34.687+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T08:15:34.704+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented per docs/designs/2026-11-10-meeting-lineage-hygiene-design.md
+  (DEC-20261110-01, user-approved). Root PR #1945 (merge 16eecc4c): 3
+  templates/co-architect stubs deleted, co-safety fork adjudicated Option 2
+  (329-line command stays declared variant-local; lifecycle record updated),
+  structural pin tests/unit/meeting-command-retirement.test.ts (5/5), spec
+  registered. Project sweep (13 repos, 37 files incl. 2 stray meeting.toml
+  renderings): per-repo dev-sync commits + PRs
+  #105/#245/#395/#121/#213/#82/#207/#69/#71/#851/#183/#104/#234 — ALL MERGED;
+  zero exemptions, zero --no-verify; co-newbiz user memory files preserved
+  uncommitted; co-safety SKILL.md scope:co-safety byte-identical with template.
+  Final state: zero 893c8ca0 stubs fleet-wide; exactly 6 whitelisted co-safety
+  command files (hash 04b1ac07) remain; main-checkout pin 5/5 + audit green.
+  Recurrence prevention: template deletion closed the delivery vector + pin
+  fails any future reintroduction; PRUNE REMOVED commands/ category deferred to
+  its own design per DEC-20261110-01 ruling 3.
 error: null
