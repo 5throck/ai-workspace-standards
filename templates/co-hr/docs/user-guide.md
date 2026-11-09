@@ -79,7 +79,7 @@ Key commands (inherited from the common template):
 
 - `/sync "feat: ..."` — full pipeline: memlog → changelog → audit → commit → PR
 - `/memlog "summary"` / `/new-task "name"` — session logging and task blocks
-- `/meeting "topic"` — structured multi-agent discussion when a decision is contested
+- `meeting-facilitation` skill — structured committee-form multi-agent discussion when a decision is contested
 
 Never bypass the PM workflow with direct specialist invocation, and never run raw
 `git commit` / `git push` — the hooks will reject it.

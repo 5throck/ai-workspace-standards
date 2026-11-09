@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 659ec0a6ff91dbaf4ebc89869504016c5d3f7b6e9059d37067244b2d10475d06
+translated_from_hash: 880b027346193388d2e273f48e6c8ef12ed00e8a275bc89478253b10f3ddcef6
 lang: ko
 lang_reason: source-material
 ---
@@ -79,7 +79,7 @@ lang_reason: source-material
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `meeting-facilitation` — 구조화된 인라인 다중 에이전트 토론 진행 (스킬; 기존 `/meeting` 슬래시 명령어는 폐기됨).
 
 ### E. 산출물 위치
 

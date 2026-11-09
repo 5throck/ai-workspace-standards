@@ -77,7 +77,7 @@ Key commands (inherited from the common template):
 
 - `/sync "feat: ..."` — full pipeline: memlog → changelog → audit → commit → PR
 - `/memlog "summary"` / `/new-task "name"` — session logging and task blocks
-- `/meeting "topic"` — structured newsroom discussion when coverage decisions conflict
+- `meeting-facilitation` skill — structured committee-form newsroom discussion when coverage decisions conflict
 
 Never bypass the gates with direct specialist invocation, and never run raw
 `git commit` / `git push` — the hooks will reject it.

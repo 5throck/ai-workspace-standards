@@ -3589,6 +3589,16 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "doc:co-work/docs/user-guide_ko.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/docs/user-guide.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "doc:co-work/README.md",
       "type": "doc",
       "layer": "variant:co-work"
@@ -13261,6 +13271,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide_ko.md",
       "to": "skill:root/service-design",
       "source": "workflow-doc"
     },
@@ -13268,6 +13284,12 @@
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide.md",
       "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -13740,6 +13762,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-export/docs/user-guide.md",
       "to": "skill:co-export/customs-duty-drawback-workflow",
       "source": "workflow-doc"
@@ -13790,6 +13818,12 @@
       "type": "cites_skill",
       "from": "doc:co-export/docs/user-guide.md",
       "to": "skill:co-export/trade-documentation-checklist",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14244,6 +14278,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-hr/docs/user-guide.md",
       "to": "skill:co-hr/career-path-succession-planning",
       "source": "workflow-doc"
@@ -14312,6 +14352,12 @@
       "type": "cites_skill",
       "from": "doc:co-hr/docs/user-guide.md",
       "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14748,6 +14794,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-news/docs/user-guide.md",
       "to": "skill:co-news/ai-tell-reduction",
       "source": "workflow-doc"
@@ -14786,6 +14838,12 @@
       "type": "cites_skill",
       "from": "doc:co-news/docs/user-guide.md",
       "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -15978,8 +16036,20 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-security/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-security/docs/user-guide.md",
       "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -16016,6 +16086,12 @@
       "type": "cites_skill",
       "from": "doc:co-security/README.md",
       "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/README.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -16154,6 +16230,18 @@
       "type": "cites_skill",
       "from": "doc:co-work/docs/phase-definitions.md",
       "to": "skill:root/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/user-guide_ko.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/docs/user-guide.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 659ec0a6ff91dbaf4ebc89869504016c5d3f7b6e9059d37067244b2d10475d06
+content_hash: 880b027346193388d2e273f48e6c8ef12ed00e8a275bc89478253b10f3ddcef6
 ---
 
 # co-security
@@ -77,7 +77,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `meeting-facilitation` — Run a structured, inline multi-agent discussion (skill; the legacy `/meeting` slash command is retired).
 
 ### E. Deliverable Locations
 
@@ -96,4 +96,4 @@ This variant focuses on security review, pentesting, threat modeling, and patch 
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-10*

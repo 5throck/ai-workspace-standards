@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: d18e58aab4046f7c5b0b1ed89c1ffc207ad796e33483dd05dbce826dc21f17fc
+translated_from_hash: 69fd2d947fed7126f7b59a34fe13fe3faa65bd91a2615208968440d8382aa50f
 ---
 # Co-HR 사용자 가이드
 
@@ -82,7 +82,7 @@ translated_from_hash: d18e58aab4046f7c5b0b1ed89c1ffc207ad796e33483dd05dbce826dc2
 
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR
 - `/memlog "summary"` / `/new-task "name"` — 세션 로깅 및 태스크 블록
-- `/meeting "topic"` — 결정이 다툼일 때 구조화된 다중 에이전트 토론
+- `meeting-facilitation` 스킬 — 결정이 다툼일 때 구조화된 위원회 형식 다중 에이전트 토론
 
 PM 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원시 `git commit` /
 `git push`도 실행하지 마세요 — 훅이 거부합니다.

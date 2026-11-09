@@ -38,7 +38,7 @@ Use this table to see which agent/skill the PM will dispatch for your request.
 | "Find vulnerabilities" / build a PoC / re-test a fix | Pentester | "pentester", "security", "pentest", "vulnerability" | 3, 6 |
 | "Deploy the fix" / write an Ansible playbook / patch a CVE across Linux/macOS/Windows | Patch Engineer | "patch engineer", "patch", "remediate", "fix vulnerability" | 4, 6 |
 | "Write the report" / draft an executive summary / score with CVSS | Report Writer | "report writer", "write", "document", "draft", "security" | 5, 6 |
-| "Run a structured team discussion" on a cross-cutting decision | PM (facilitates) | `/meeting "topic"` | any |
+| "Run a structured team discussion" on a cross-cutting decision | PM (facilitates) | `meeting-facilitation` skill | any |
 
 **Rule of thumb**: if the request involves offensive activity (recon, exploitation, patching) and no authorization document exists yet, the PM will stop and ask you to complete engagement scoping first — this is not optional.
 
