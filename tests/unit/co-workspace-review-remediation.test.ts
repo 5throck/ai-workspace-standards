@@ -29,7 +29,7 @@ function scratch(name: string): string {
   return dir;
 }
 afterAll(() => {
-  for (const dir of ROOTS) rmSync(dir, { recursive: true, force: true });
+  for (const dir of ROOTS) rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 describe("quota fail-boot (2026-10-03 review M6)", () => {

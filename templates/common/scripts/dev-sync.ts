@@ -1,4 +1,33 @@
-// @version 1.43.0
+// @version 1.44.2
+// v1.44.2 (2026-11-09, P0 correctness fix): the two test spawns now run under
+//          `.env(gitCleanEnvForShell())`, not the deleted `gitEnvUnset()`. Bun Shell's
+//          `.env(obj)` REPLACES the child environment wholesale, so an
+//          `{ GIT_DIR: undefined }` map left the child with no PATH: step 4.85's
+//          `bun run test:unit` failed in 26 of 268 files with `Executable not found in
+//          $PATH: "git"`. The payload must be a full process.env copy minus the
+//          redirection keys (scripts/lib/git-env.ts v1.2.0 carries the verified proof).
+// v1.44.1 (2026-11-09, rogue-commit incident): the two test spawns (step 3.95 QA
+//          pre-check `bun run test`, step 4.85 version-bump gate `bun run test:unit`)
+//          ran under `.env(gitEnvUnset())` — RETRACTED in v1.44.2 (that payload is the
+//          child's ENTIRE env; it masked GIT_DIR but destroyed PATH). A hook context
+//          exports GIT_DIR; the
+//          upgrade-project fixtures inherited it and committed 10 rogue
+//          `Test <test@example.com>` commits into this worktree (~393 files, three L1
+//          core scripts deleted). scripts/lib/git-env.ts owns the key list.
+// v1.44.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §5.1): new step 6.4 — fixture-root hygiene residue gate, BLOCKING, placed
+//          immediately before the 6.5 scoped-staging S1 snapshot (the design proposed
+//          "Step 5.9"; final number 6.4 assigned at edit time per the design §10
+//          note-1 delegation, so the step sits between the section-6 sensitive-file
+//          guard and the 6.5 staging snapshot). An untracked WHOLE top-level
+//          directory (`?? Projects/`, `?? tests/`, …) at the repo root can only be
+//          test-fixture residue — the relative-mkdtemp-root class behind the
+//          2026-11-04 `rm -rf Projects` incident (T-20261104-003/-004); PR #1855
+//          made the fixtures absolute and this gate makes it enforced. Untracked
+//          FILES inside tracked directories are ordinary work and remain with 6.5's
+//          residual classification. Classifier is the pure
+//          scripts/lib/workspace-hygiene.ts v1.0.0, shared with the standalone
+//          scripts/check-workspace-hygiene.ts (one derivation, two callers).
 // v1.43.0 (2026-11-08, U-20261107-003): scoped-staging content comparison —
 //          a dirty-at-S0 file whose CONTENT changed by S1 (the regenerated
 //          docs/VERSION_MANIFEST.md leftover; the S0\S1 path-only diff
@@ -380,6 +409,7 @@ import * as crypto from 'node:crypto';
 import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
 import { hasNonEnglish } from './lib/language-guard.ts';
 import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts';
+import { gitCleanEnvForShell } from './lib/git-env.ts';
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from './lib/upgrade-policy.ts';
 import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
@@ -390,6 +420,7 @@ import { localDateISO } from './lib/local-date.ts';
 import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
 import { driftCheck } from './helpers/ticket-drift.ts';
 import { unionScan, wellFormedScan } from './helpers/memory-union-verify.ts';
+import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from './lib/workspace-hygiene.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -1108,7 +1139,13 @@ if (fs.existsSync('package.json')) {
             // irrelevant to this repo. `bun run test` invokes the actual package.json script
             // (`bun scripts/test-runner.ts integration`), which is already correctly scoped
             // to this repo's own tests/ directory.
-            const testResult = await $`bun run test`.nothrow();
+            // gitCleanEnvForShell(): this step may run inside a hook context (GIT_DIR
+            // exported) and the upgrade-project engine fixtures commit with plain `git`
+            // — that is the 2026-11-09 rogue-commit incident (10 rogue commits, 3 L1
+            // scripts deleted). Shell the test runner with a sanitized FULL env: Bun
+            // Shell's `.env()` replaces the child env, so a partial unset map would
+            // strip PATH (the v1.44.1 regression that broke 26 unit files at step 4.85).
+            const testResult = await $`bun run test`.env(gitCleanEnvForShell()).nothrow();
             if (testResult.exitCode !== 0) {
                 console.warn(`⚠️  Project tests failed (non-blocking, exit ${testResult.exitCode})`);
                 if (testResult.stderr) console.warn(String(testResult.stderr).trim());
@@ -1574,7 +1611,11 @@ if (fs.existsSync(genManifestTs)) {
         } else {
             console.log(`🧪 Step 4.85: ${bumps.length} staged version bump(s) — running bun run test:unit before the audit gate`);
             for (const b of bumps.slice(0, 10)) console.log(`${DIM}   ${b.kind}: ${b.file}${RESET}`);
-            const testRes = await $`bun run test:unit`.quiet().nothrow();
+            // gitCleanEnvForShell(): same reason as step 3.95 — test:unit spawns the
+            // upgrade-project engine fixtures, which must never inherit GIT_DIR
+            // (2026-11-09 rogue-commit incident). Full sanitized env, not an unset
+            // map: Bun Shell's `.env()` REPLACES the child environment.
+            const testRes = await $`bun run test:unit`.env(gitCleanEnvForShell()).quiet().nothrow();
             if (testRes.exitCode !== 0) {
                 const out = (testRes.stdout.toString() + '\n' + testRes.stderr.toString()).trim().split('\n');
                 console.error(out.slice(-60).join('\n'));
@@ -1779,6 +1820,46 @@ try {
   if (import.meta.main) {
     process.exit(1);
   }
+}
+
+// 6.4 Fixture-root hygiene residue gate — BLOCKING (spec
+//     docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.1;
+//     the design's proposed "Step 5.9" numbered 6.4 at edit time per §10 note 1,
+//     immediately before the 6.5 staging snapshot). An untracked WHOLE top-level
+//     directory (`?? Projects/`, `?? tests/`, …) at the repo root can only be
+//     test-fixture residue — a suite whose mkdtemp root was relative escaped its
+//     fixture into the checkout (the 2026-11-04 `rm -rf Projects` incident class,
+//     memory/2026-11-04.md:159). Untracked FILES inside tracked directories are
+//     ordinary task work and stay with 6.5's residual classification. The pure
+//     classifier is shared with scripts/check-workspace-hygiene.ts
+//     (scripts/lib/workspace-hygiene.ts — one derivation, two callers).
+try {
+    const hygieneRes = await $`git status --porcelain`.quiet().nothrow();
+    if (hygieneRes.exitCode !== 0) {
+        console.error(`${RED}❌ Step 6.4: git status failed (exit ${hygieneRes.exitCode}) — hygiene gate fail-closed.${RESET}`);
+        const hygieneDetail = hygieneRes.stderr.toString().trim();
+        if (hygieneDetail) console.error(`   ${hygieneDetail.split('\n')[0]}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    const residue = classifyWorkspaceHygieneResidue(hygieneRes.stdout.toString());
+    if (residue.length > 0) {
+        console.error(`${RED}❌ Step 6.4: workspace-hygiene residue gate FAILED — ${residue.length} untracked whole-directory entries:${RESET}`);
+        for (const r of residue) console.error(`   ?? ${r}`);
+        for (const line of formatHygieneResidueReport(residue)) console.error(`${YELLOW}   ${line}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+    }
+    console.log(`${GREEN}✓ Step 6.4: workspace-hygiene residue gate passed${RESET}`);
+} catch (err) {
+    // Fail-closed: an error while reading the tree aborts BEFORE staging —
+    // same contract as the sensitive-file guard above.
+    console.error(`${RED}❌ Step 6.4: hygiene gate errored — refusing to proceed: ${err}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
 }
 
 // 6.5 Scoped staging — decide what may join this commit. taskStaged is what the

@@ -282,12 +282,23 @@ const ENV_ALLOW_PREFIX = /^(HERMES_|ANTHROPIC_|OPENAI_|XDG_)/i;
 /** Defense in depth: gateway-only secrets are denied even if a future prefix/exact change would
  * match them (GOOGLE_CLIENT_* is the gateway's SSO secret and must never reach spawned agents). */
 const ENV_DENY = /^(GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|GOOGLE_REDIRECT_URI|CO_WORKSPACE_)/i;
+/**
+ * Windows enumerates OS-managed variables with the casing the OS chose (`Path`, `Temp`,
+ * `SystemRoot`), so a case-SENSITIVE equality against ENV_ALLOW_EXACT dropped PATH from every
+ * spawned turn and from the tenant upgrade plan on windows-latest (its allowlist downgraded to
+ * `["CI"]`; CI 2026-11-09). Match the upper-cased name and emit the canonical spelling the
+ * allowlist declares, so the child env has one `PATH` on every host. Windows env lookup is
+ * case-insensitive, so the canonical key reaches the same variable.
+ */
+const ENV_ALLOW_CANONICAL = new Map(Array.from(ENV_ALLOW_EXACT, (k) => [k.toUpperCase(), k]));
 
 export function allowlistedEnv(base: Record<string, string | undefined> = process.env): Record<string, string | undefined> {
   const out: Record<string, string | undefined> = {};
   for (const [k, v] of Object.entries(base)) {
     if (v === undefined || ENV_DENY.test(k)) continue;
-    if (ENV_ALLOW_EXACT.has(k) || ENV_ALLOW_PREFIX.test(k)) out[k] = v;
+    const canonical = ENV_ALLOW_CANONICAL.get(k.toUpperCase());
+    if (canonical !== undefined) out[canonical] = v;
+    else if (ENV_ALLOW_PREFIX.test(k)) out[k] = v;
   }
   return out;
 }

@@ -2,7 +2,22 @@
 /**
  * backport-diff.ts — 5-surface backport candidate differ for committed
  * Projects/co-* LOCAL-WORK (project-resync skill Step 2 support).
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (2026-11-08, spec
+ *         docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §3.5,
+ *         WP1): tenant-loop project paths join the differ. Default sets gain
+ *         registered tenants with nightlyFleet AND backportReview scopes,
+ *         enumerated exclusively through lib/fleet.ts
+ *         listTenantLoopProjects() (never a readdir, design §3.2). The real
+ *         gap the design corrects: variantName() derived the variant from the
+ *         directory basename under templates/ — a gateway tenant dir is named
+ *         'project', so the lookup yielded null and variant-keyed comparisons
+ *         silently skipped. When a path resolves to a registered tenant, the
+ *         REGISTRY entry's variant field is authoritative; the basename
+ *         heuristic remains the fallback. Explicit --project naming a tenant
+ *         with scopes.backportReview=false still gets full read-only results —
+ *         with a one-line WARN (the §6.7 twin, §3.5).
  *
  * v1.2.0 (2026-11-07, spec
  *         docs/designs/2026-11-07-fleet-membership-ssot-design.md §5/§6.7,
@@ -113,9 +128,9 @@ import {
   scanInstructionRegions,
   spanCarriesProjectAuthoredLines,
 } from "./lib/upgrade-policy.ts";
-import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
+import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath, type TenantLoopTenant } from "./lib/fleet.ts";
 
-const VERSION = "1.2.0";
+const VERSION = "1.3.0";
 
 type Surface = "skills" | "scripts" | "helpers" | "context" | "agents" | "other";
 type Direction = "project-ahead" | "template-ahead" | "both-changed" | "in-sync" | "project-only";
@@ -209,7 +224,15 @@ function defaultProjects(): string[] {
   // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
   // exclusions, derived exclusively through lib/fleet.ts (the sole membership
   // path — no co- prefix filter here).
-  return listFleetProjects();
+  const fleet = listFleetProjects();
+  // v1.3.0 (tenant-loop design §3.2/§3.5): registered tenants join the default
+  // set ONLY through lib/fleet.ts listTenantLoopProjects() (nightlyFleet+active
+  // already filtered there), narrowed to backportReview for this review-battery
+  // tool. Never a readdir, never a name prefix.
+  const tenants = listTenantLoopProjects()
+    .filter((t) => t.scopes.backportReview)
+    .map((t) => t.projectDir);
+  return [...fleet, ...tenants].sort();
 }
 
 /** Accept both a bare co-<x> name and a path; default to the whole fleet. */
@@ -225,11 +248,36 @@ function resolveProjects(requested: string[]): string[] {
     const notice = exclusionNotice(p);
     if (notice) console.warn(`⚠️  backport-diff: ${notice}`);
   }
+  // v1.3.0 (§3.5): an operator-named tenant with backportReview=false still
+  // gets full read-only results — with a one-line WARN (the §6.7 twin).
+  for (const p of resolved) {
+    const tenant = tenantOrNull(p);
+    if (tenant && !tenant.scopes.backportReview) {
+      console.warn(`⚠️  backport-diff: ${tenant.id} has scopes.backportReview=false (.pipeline-state/tenant-loop-registry.json) — proceeding read-only`);
+    }
+  }
   return resolved;
 }
 
-/** Variant name for a project path (Projects/co-x → co-x), if that variant exists. */
-function variantName(projectPath: string): string | null {
+/** Tenant row for a path (realpath prefix match), or null. A malformed
+ * tenant-loop registry THROWS from lib/fleet.ts (fail-closed, design §6) —
+ * the same contract as exclusionNotice()'s fleet registry path above. */
+function tenantOrNull(projectPath: string): TenantLoopTenant | null {
+  return tenantForProjectPath(projectPath);
+}
+
+/**
+ * Variant name for a project path, if that variant exists.
+ * v1.3.0 (tenant-loop design §3.5): a gateway tenant's project dir is named
+ * 'project', so the basename heuristic yields null and variant-keyed
+ * comparisons silently skipped. When the path resolves to a registered
+ * tenant, the REGISTRY entry's variant field is authoritative (it is the
+ * variant the tenant was scaffolded with); the basename heuristic remains the
+ * fallback for fleet/other paths. Exported for unit tests.
+ */
+export function variantName(projectPath: string): string | null {
+  const tenant = tenantOrNull(projectPath);
+  if (tenant) return tenant.variant;
   const base = projectPath.split(/[\\/]/).pop() ?? "";
   return existsSync(join("templates", base)) ? base : null;
 }

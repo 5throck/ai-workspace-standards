@@ -4,9 +4,9 @@
 
 - **Script**: generate-version-manifest
 - **Status**: active
-- **Version**: 1.11.0
+- **Version**: 1.11.2
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-09
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,5 +21,7 @@ Regenerates docs/VERSION_MANIFEST.md (the declared skill/version SSOT) from the 
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-09 | production | production | v1.11.1 → v1.11.2 (2026-11-09, P0 correctness fix): getGitTimestamp's Bun Shell probe now uses gitCleanEnvForShell() (full env minus redirection keys) instead of the deleted gitEnvUnset(); Bun Shell's `.env()` replaces the child env, so the unset map ran `git` with no PATH. spawnSync probes keep gitCleanEnv() — spawnSync merges over process.env. | automation-engineer |
+| 2026-11-09 | production | production | v1.11.0 → v1.11.1 (2026-11-09, rogue-commit incident): all four git probes (resolveRepoRoot, isShallowRepository, getTrackedFiles, getGitTimestamp) run under scripts/lib/git-env.ts (gitCleanEnv for spawns, gitEnvUnset for the Bun Shell call — replaced by gitCleanEnvForShell in v1.11.2) — an inherited GIT_DIR made resolveRepoRoot() resolve the INVOKING repository, so fixture runs generated and wrote the wrong manifest. | automation-engineer |
 | 2026-10-28 | production | production | v1.10.1 → v1.10.2 (T-20261028-012, spec docs/designs/2026-10-28-dev-sync-staged-count-design.md D6): normalizeManifestForCompare collapses any number of pre-existing `**Generated**:` header lines to one placeholder, so a conflicted merge that lands two headers (root PR #1672/#1673 class) compares clean under --check and self-heals at the next sync's regeneration. | automation-engineer |
 | 2026-10-26 | production | production | v1.10.0 → v1.10.1 (ADR-0102 / T-20261026-018, design docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7): parseAgentFrontmatter resolves the normalized scalar `tier:` form (one of high/medium/low) (legacy per-platform block still parsed during transition) so the VERSION_MANIFEST Agents table keeps real tier values after the fleet normalizes. | automation-engineer |

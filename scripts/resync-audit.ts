@@ -2,7 +2,18 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.8.0
+ * @version 1.9.0
+ *
+ * v1.9.0 (2026-11-08, spec
+ *          docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+ *          §3.2/§3.5, WP1): registered tenant-loop projects join the default
+ *          audit set — gated on scopes.nightlyFleet (+ status active), enumerated
+ *          EXCLUSIVELY through lib/fleet.ts listTenantLoopProjects() (never a
+ *          readdir, never a name prefix; design §3.2 consumers rule).
+ *          variantName() gains the §3.5 twin fix: a gateway tenant dir is named
+ *          'project', so the basename heuristic yields null — when a path
+ *          resolves to a registered tenant, the registry entry's variant field
+ *          is authoritative; the basename heuristic remains the fallback.
  *
  * v1.8.0 (2026-11-07, spec
  *          docs/designs/2026-11-07-fleet-membership-ssot-design.md §5/§6.7,
@@ -141,9 +152,9 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { exclusionNotice, listFleetProjects } from "./lib/fleet.ts";
+import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath } from "./lib/fleet.ts";
 
-const VERSION = "1.8.0";
+const VERSION = "1.9.0";
 
 interface FileRow {
   file: string;
@@ -292,7 +303,12 @@ function defaultProjects(): string[] {
   // §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
   // exclusions, derived exclusively through lib/fleet.ts (the sole membership
   // path — no co- prefix filter here).
-  return listFleetProjects();
+  const fleet = listFleetProjects();
+  // v1.9.0 (tenant-loop design §3.2): registered tenants (nightlyFleet+active,
+  // already filtered by the helper) join the resync-wave default set through
+  // the ONE sanctioned enumeration path — never a readdir, never a name prefix.
+  const tenants = listTenantLoopProjects().map((t) => t.projectDir);
+  return [...fleet, ...tenants].sort();
 }
 
 /** §6.7: an operator-named excluded member still gets full read-only results — with a one-line notice. */
@@ -303,8 +319,18 @@ function warnIfNotFleetMember(projects: string[]): void {
   }
 }
 
-/** Variant name for a project path (Projects/co-x → co-x), if that variant exists. */
+/**
+ * Variant name for a project path, if that variant exists.
+ * v1.9.0 (tenant-loop design §3.5 twin fix): a gateway tenant dir is named
+ * 'project', so the basename heuristic yields null — when the path resolves to
+ * a registered tenant, the REGISTRY entry's variant field is authoritative
+ * (the variant the tenant was scaffolded with); the basename heuristic remains
+ * the fallback. A malformed tenant-loop registry throws (fail-closed, design
+ * §6) — the same contract as exclusionNotice()'s fleet registry path.
+ */
 function variantName(projectPath: string): string | null {
+  const tenant = tenantForProjectPath(projectPath);
+  if (tenant) return tenant.variant;
   const base = projectPath.split(/[\\/]/).pop() ?? "";
   return existsSync(join("templates", base)) ? base : null;
 }

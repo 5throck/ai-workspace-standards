@@ -7,6 +7,7 @@ import { credentialValid, presentedCredential, principalFor } from "./auth";
 import { sessionTokenFromCookie, UserRecord } from "./users";
 import type { TenantRecord } from "./tenant";
 import { HttpError } from "./http";
+import { tenantLoopDisabled } from "./tenant-loop";
 
 /** Wave B3/SEC-13: bootstrap the admin account at startup (idempotent). A promotion of an
  * EXISTING user is loud (2026-10-03 review M5): logged AND audited — the sessions of the
@@ -240,4 +241,47 @@ export function openModeWarning(cfg: {
     ].join("\n");
   }
   return null;
+}
+
+/** ── Tenant-loop ACL (design 2026-11-08-gw-tenant-loop-and-hardening-design §4.2):
+ * register/suspend/deregister, loop-config change, upgrade trigger. Gate: caller is a
+ * password-set session admin (the requireAdminReady posture) OR callerPrincipal ∈
+ * designatedUsers of the governing group. Everything else: 403 default deny. Every
+ * decision — allow AND deny — is audited as `tenant.loop.<op>.allowed|denied`. ── */
+
+export type TenantLoopOp = "register" | "suspend" | "deregister" | "config" | "upgrade";
+
+/** The kill switch itself lives in tenant-loop.ts; this wrapper records the audit row so
+ * the route layer stays one-liner. Returns true (and audited) when disabled. */
+export function tenantLoopSwitchBlocked(state: GatewayState, req: Request, path: string): boolean {
+  if (!tenantLoopDisabled()) return false;
+  state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.loop.denied", path, "kill switch CO_WORKSPACE_TENANT_LOOP_DISABLED");
+  return true;
+}
+
+/** Default-deny gate for one tenant-loop operation. `governingGroup` is the group whose
+ * designatedUsers may act (the tenant's loopGroup, the body-named group, or "default").
+ * Returns the acting principal. */
+export function assertTenantLoopAllowed(state: GatewayState, req: Request, op: TenantLoopOp, governingGroup: string): string {
+  const principal = callerPrincipal(state, req);
+  const caller = principal ?? "anonymous";
+  // A nested FUNCTION DECLARATION (not a const arrow) so TS propagates `never` at the
+  // call site and the default-deny tail typechecks without an unreachable return.
+  function deny(reason: string): never {
+    state.audit.record(caller, `tenant.loop.${op}.denied`, governingGroup, reason);
+    throw new HttpError(403, `tenant-loop ${op} forbidden: ${reason}`);
+  }
+  try {
+    const admin = requireAdminReady(state, req);
+    state.audit.record(admin.principal, `tenant.loop.${op}.allowed`, governingGroup, "via=admin");
+    return admin.principal;
+  } catch {
+    /* not a password-set admin — fall through to designated membership */
+  }
+  const designated = state.users.getGroup(governingGroup)?.designatedUsers ?? [];
+  if (principal && designated.includes(principal)) {
+    state.audit.record(principal, `tenant.loop.${op}.allowed`, governingGroup, "via=designated");
+    return principal;
+  }
+  deny(principal ? `not a designated user of group "${governingGroup}"` : "unauthenticated");
 }

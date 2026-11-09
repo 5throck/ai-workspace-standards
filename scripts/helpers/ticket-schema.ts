@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.11.0
+// @version 1.12.0
+// v1.12.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §3.3, WP1): upstream.project accepts the gateway tenant namespace
+//          (^gw-[0-9a-f]{12}$) alongside ^co-[a-z0-9-]{1,40}$ — a tenant-resolved
+//          filing carries the tenant id as its project key (caps, known-projects
+//          first-seen and ownership all key on it opaquely), and without this the
+//          intake write could never pass validation. A DIFFERENT namespace: a
+//          tenant id is never a co-* project name and vice versa. duplicates[]
+//          entries already accept any non-empty project string, so merged tenant
+//          reports need no further change; the relational source check
+//          (project/<project>) follows automatically.
 // v1.11.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md
 //          §4.5, Phase 3.5): optional `hub` ticket field — the delegation target
 //          hub written by `ticket.ts create --hub <name>`. Pure metadata (the
@@ -464,7 +474,11 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     if (!/^U-\d{8}-\d{3,4}$/.test(t.id as string)) fail(`upstream ticket id must match U-YYYYMMDD-NNN: ${JSON.stringify(t.id)}`);
     const u = t.upstream as Record<string, unknown>;
     // T-20261002-007 (M2): format checks — project identity, intake version/variant types.
-    if (typeof u.project !== 'string' || !/^co-[a-z0-9-]{1,40}$/.test(u.project)) fail(`upstream.project must match ^co-[a-z0-9-]{1,40}$: ${JSON.stringify(u.project)}`);
+    // v1.12.0 (tenant-loop design §3.3): the gateway tenant namespace joins —
+    // a tenant filing carries its tenant id (gw-<12hex>) as the project key.
+    if (typeof u.project !== 'string' || !(/^co-[a-z0-9-]{1,40}$/.test(u.project) || /^gw-[0-9a-f]{12}$/.test(u.project))) {
+      fail(`upstream.project must match ^co-[a-z0-9-]{1,40}$ or ^gw-[0-9a-f]{12}$ (tenant namespace, design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3): ${JSON.stringify(u.project)}`);
+    }
     if (u.template_version !== undefined && u.template_version !== null && typeof u.template_version !== 'string') fail('upstream.template_version must be a string or null');
     if (u.variant !== undefined && u.variant !== null && typeof u.variant !== 'string') fail('upstream.variant must be a string or null');
     if (u.trust !== 'untrusted') fail('upstream.trust must be "untrusted"');

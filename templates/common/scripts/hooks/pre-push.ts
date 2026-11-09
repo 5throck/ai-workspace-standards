@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.7.1
+ * @version 1.7.3
+ * v1.7.3 (2026-11-09, P0 correctness fix): the changed-path `bun test` spawn now runs
+ *           under `.env(gitCleanEnvForShell())`, not the deleted `gitEnvUnset()`. Bun
+ *           Shell's `.env(obj)` REPLACES the child environment, so an
+ *           `{ GIT_DIR: undefined }` map gave the child no PATH and every binary
+ *           lookup failed (see scripts/lib/git-env.ts v1.2.0 for the verified proof).
+ * v1.7.2 (2026-11-09, rogue-commit incident): the changed-path `bun test` spawn ran
+ *           under `.env(gitEnvUnset())` — RETRACTED in v1.7.3 (that payload is the
+ *           child's ENTIRE env: GIT_DIR masked, PATH destroyed). This hook inherits GIT_DIR from `git
+ *           push`; the test children inherited it too and the upgrade-project fixtures
+ *           committed 10 rogue commits into this repo (see scripts/lib/git-env.ts).
+ * v1.7.1
  * v1.7.0 (2026-10-29, U-20261028-018 + U-20261028-004 rider): the gitleaks
  *           invocation passes --config .gitleaks.toml (existsSync-guarded,
  *           pre-commit.ts guard shape) so push-time scans run under the same
@@ -16,6 +27,7 @@
 
 import { $ } from "bun";
 import { existsSync } from "node:fs";
+import { gitCleanEnvForShell } from "../lib/git-env.ts";
 
 // All-zero OID: git's "null" object id, sent as the local OID of a ref
 // deletion on both SHA-1 (40 zeros) and SHA-256 (64 zeros) repositories.
@@ -262,7 +274,13 @@ async function main() {
   if (changedTestFiles.length > 0) {
     try {
       console.log(`Running ${changedTestFiles.length} changed test file(s)...`);
-      await $`bun test ${changedTestFiles}`;
+      // gitCleanEnvForShell(): this hook runs with GIT_DIR exported by git. The test
+      // children (upgrade-project engine fixtures run `git init`/`add`/`commit`)
+      // would inherit it and commit INTO this repo — the 2026-11-09 rogue-commit
+      // incident (10 rogue `Test <test@example.com>` commits, ~393 files, three
+      // L1 core scripts deleted). Never spawn a test runner here without it. The
+      // payload must be a FULL env: Bun Shell's `.env()` replaces the child env.
+      await $`bun test ${changedTestFiles}`.env(gitCleanEnvForShell());
     } catch {
       console.error("\n\x1b[31m❌ Changed-path tests failed — push blocked. Fix test failures before pushing.\x1b[0m");
       process.exit(1);

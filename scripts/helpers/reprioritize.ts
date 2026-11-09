@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §3.3, WP1): the actor grammar gains `spoke-tenant:gw-<12hex>` — a gateway
+//          tenant agent filing priority raises through its tenant identity. Tenant
+//          actors follow the SAME write rules as spoke-pm: attested identity required
+//          for writes (the MCP gateway derives it), P0/urgent stays user-only, the
+//          +1-level-per-ticket-per-24h cap applies unchanged, and the 3-strike freeze
+//          ledger keys on the tenant id (the spoke-tenant: prefix is sliced off —
+//          a different namespace from spoke-pm project names, so the two ledgers
+//          never collide). ticket-store.ts needs no logic change: it delegates to
+//          checkReprioritize/strikeKeyFor and records the actor verbatim.
 // v1.0.0 (2026-11-02, spec docs/designs/2026-11-01-hub-consolidation-design.md §5.2,
 //          Phase 3a kanban core): priority governance for the delegation kanban alias
 //          layer — actor grammar (user | hub-pm | spoke-pm:NAME), the pure cap check
@@ -20,23 +30,33 @@ import type { Priority } from './ticket-schema.ts';
 /** Who is asking for a priority change.
  * - `user` — the human operator (unrestricted, including urgent/P0).
  * - `hub-pm` — the workspace hub PM agent (unrestricted within the enum EXCEPT urgent/P0).
- * - `spoke-pm:NAME` — a spoke project's PM agent (+1 level per ticket per 24h, never urgent/P0). */
-export type ReprioritizeActor = 'user' | 'hub-pm' | `spoke-pm:${string}`;
+ * - `spoke-pm:NAME` — a spoke project's PM agent (+1 level per ticket per 24h, never urgent/P0).
+ * - `spoke-tenant:gw-<12hex>` — a gateway tenant agent (design
+ *   2026-11-08-gw-tenant-loop-and-hardening-design §3.3); same write rules as spoke-pm,
+ *   strike ledger keyed on the tenant id. */
+export type ReprioritizeActor = 'user' | 'hub-pm' | `spoke-pm:${string}` | `spoke-tenant:${string}`;
 
 const SPOKE_ACTOR_RE = /^spoke-pm:([a-z0-9-]{1,64})$/;
+// Tenant ids are a FIXED grammar (gw-<12hex>, design §3.1) — tighter than the
+// spoke-pm project-name segment, and a different namespace from it.
+const TENANT_ACTOR_RE = /^spoke-tenant:(gw-[0-9a-f]{12})$/;
 
 /** Parses the --actor grammar; null on a malformed actor token. */
 export function parseActor(raw: string): ReprioritizeActor | null {
   if (raw === 'user' || raw === 'hub-pm') return raw;
   const m = SPOKE_ACTOR_RE.exec(raw);
-  return m ? (`spoke-pm:${m[1]}` as ReprioritizeActor) : null;
+  if (m) return `spoke-pm:${m[1]}` as ReprioritizeActor;
+  const t = TENANT_ACTOR_RE.exec(raw);
+  return t ? (`spoke-tenant:${t[1]}` as ReprioritizeActor) : null;
 }
 
 /** Strike-ledger key for an actor: user actions are never counted (null);
- * spoke actors are keyed by their project name, hub-pm by the literal 'hub-pm'. */
+ * spoke-pm actors are keyed by their project name, spoke-tenant actors by their
+ * tenant id (the spoke-tenant: prefix sliced off), hub-pm by the literal 'hub-pm'. */
 export function strikeKeyFor(actor: ReprioritizeActor): string | null {
   if (actor === 'user') return null;
   if (actor === 'hub-pm') return 'hub-pm';
+  if (actor.startsWith('spoke-tenant:')) return actor.slice('spoke-tenant:'.length);
   return actor.slice('spoke-pm:'.length);
 }
 
@@ -74,11 +94,13 @@ export function checkReprioritize(
   if (to === 'urgent' && actor !== 'user') {
     return {
       allowed: false, violation: true, code: 'p0-user-only',
-      reason: 'P0/urgent is settable by actor=user only — agents (hub-pm, spoke-pm) can set P1-P3',
+      reason: 'P0/urgent is settable by actor=user only — agents (hub-pm, spoke-pm, spoke-tenant) can set P1-P3',
     };
   }
   if (actor === 'user' || actor === 'hub-pm') return { allowed: true };
-  // spoke-pm: only RAISES are capped — lowering (or any non-increase) is unrestricted.
+  // spoke-pm and spoke-tenant: only RAISES are capped — lowering (or any
+  // non-increase) is unrestricted (design 2026-11-08 §3.3 puts tenant actors
+  // under the same cap as spoke-pm).
   const raise = PRIORITY_LEVEL[to] - PRIORITY_LEVEL[from];
   if (raise <= 0) return { allowed: true };
   if (raise > 1) {

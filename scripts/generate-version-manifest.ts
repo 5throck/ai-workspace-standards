@@ -1,4 +1,16 @@
-// @version 1.11.0
+// @version 1.11.2
+// v1.11.2 (2026-11-09, P0 correctness fix): the Bun Shell git probe now uses
+//          gitCleanEnvForShell() instead of the deleted gitEnvUnset(). Bun Shell's
+//          `.env(obj)` REPLACES the child environment, so the unset map ran `git`
+//          with no PATH at all (`Executable not found in $PATH`). spawnSync sites
+//          keep gitCleanEnv() — spawnSync merges over process.env. See
+//          scripts/lib/git-env.ts v1.2.0.
+// v1.11.1 (2026-11-09, rogue-commit incident): every git probe runs under
+//          scripts/lib/git-env.ts (gitCleanEnv for spawns, gitEnvUnset for the
+//          Bun Shell call). Inherited GIT_DIR made resolveRepoRoot() point at the
+//          INVOKING repository, so a fixture run generated/wrote the wrong
+//          manifest — the same class that produced 10 rogue commits on the PR
+//          branch. See scripts/lib/git-env.ts for the incident write-up.
 // v1.11.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
 //          DEC-20261028-06 §4.4): the Agents table Model column renders the
 //          registry-resolved model — the agents/*.md SSOT no longer carries a
@@ -106,6 +118,7 @@ import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { $ } from 'bun';
 import * as yaml from 'js-yaml';
+import { gitCleanEnv, gitCleanEnvForShell } from './lib/git-env.ts';
 
 const MANIFEST_PATH = path.join('docs', 'VERSION_MANIFEST.md');
 const MANIFEST_VERSION = '1.0';
@@ -129,6 +142,7 @@ export function resolveRepoRoot(): string {
         const { status, stdout } = spawnSync('git', ['rev-parse', '--show-toplevel'], {
             encoding: 'utf-8',
             cwd: process.cwd(),
+            env: gitCleanEnv() as NodeJS.ProcessEnv,
         });
         repoRootCache = status === 0 && stdout.trim() ? stdout.trim() : process.cwd();
     } catch {
@@ -207,7 +221,7 @@ export interface CommandInfo {
 
 async function getGitTimestamp(filePath: string): Promise<string> {
     try {
-        const { stdout } = await $`git -C ${resolveRepoRoot()} log -1 --format=%ct ${filePath}`.quiet().nothrow();
+        const { stdout } = await $`git -C ${resolveRepoRoot()} log -1 --format=%ct ${filePath}`.env(gitCleanEnvForShell()).quiet().nothrow();
         if (!stdout.toString().trim()) return 'N/A';
         const timestamp = parseInt(stdout.toString().trim(), 10);
         return new Date(timestamp * 1000).toISOString().split('T')[0];
@@ -226,6 +240,7 @@ export function isShallowRepository(): boolean {
         const { status, stdout } = spawnSync('git', ['rev-parse', '--is-shallow-repository'], {
             encoding: 'utf-8',
             cwd: resolveRepoRoot(),
+            env: gitCleanEnv() as NodeJS.ProcessEnv,
         });
         return status === 0 && stdout.trim() === 'true';
     } catch {
@@ -351,7 +366,7 @@ let trackedFilesCache: Set<string> | null | undefined;
 export function getTrackedFiles(): Set<string> | null {
     if (trackedFilesCache !== undefined) return trackedFilesCache;
     try {
-        const { status, stdout } = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf-8', cwd: resolveRepoRoot() });
+        const { status, stdout } = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf-8', cwd: resolveRepoRoot(), env: gitCleanEnv() as NodeJS.ProcessEnv });
         trackedFilesCache = status === 0
             ? new Set(stdout.split('\0').filter(Boolean).map(normalizePath))
             : null;
