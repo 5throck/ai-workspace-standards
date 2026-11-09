@@ -185,3 +185,120 @@ export function formatTurnActivity(elapsedSec, lastActivity) {
   const base = secs >= 90 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
   return lastActivity ? `${base} · ${lastActivity}` : base;
 }
+
+// ── Tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI):
+// pure client-side mirrors of the gateway's write-time validation (src/tenant-loop.ts) so
+// the register form rejects malformed input before a round trip, and a dry-run → confirm
+// gate for the upgrade flow (the Confirm call must not fire without a prior plan render).
+// Unit-tested by tests/unit/co-workspace-admin-ui.test.ts. ──
+
+/** Same shape the gateway's TENANT_ID_RE enforces (src/tenant-loop.ts) — a different
+ * namespace from fleet ids (`co-*`). */
+export const TENANT_ID_RE = /^gw-[0-9a-f]{12}$/;
+
+/** Exact scope keys the gateway accepts in `scopes` (validateLoopScopes). */
+export const LOOP_SCOPE_KEYS = ["upgrade", "upstreamFile", "backportReview", "nightlyFleet"];
+
+const LOOP_GROUP_RE = /^[\w-]{1,64}$/;
+const LOOP_HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** null when `value` is a well-formed tenant id, else the error message for the form. */
+export function validateTenantId(value) {
+  return typeof value === "string" && TENANT_ID_RE.test(value)
+    ? null
+    : "tenant id must be gw- followed by 12 hex chars (e.g. gw-0123456789ab)";
+}
+
+/** Client mirror of validateLoopWindows: {tz valid IANA, days non-empty ints 0-6,
+ * start/end HH:MM, start !== end}. Returns null when valid, else the error message. */
+export function validateLoopWindowsClient(windows) {
+  if (typeof windows !== "object" || windows === null || Array.isArray(windows)) {
+    return "windows must be a JSON object {tz, days, start, end}";
+  }
+  const tz = typeof windows.tz === "string" ? windows.tz : "";
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+  } catch {
+    return `windows.tz must be a valid IANA time zone, got ${JSON.stringify(windows.tz)}`;
+  }
+  const days = windows.days;
+  if (!Array.isArray(days) || days.length === 0 || !days.every((d) => Number.isInteger(d) && d >= 0 && d <= 6)) {
+    return "windows.days must be a non-empty array of integers 0-6 (0 = Sunday)";
+  }
+  for (const [label, val] of [["start", windows.start], ["end", windows.end]]) {
+    if (typeof val !== "string" || !LOOP_HHMM_RE.test(val)) return `windows.${label} must be HH:MM (00:00-23:59)`;
+  }
+  if (windows.start === windows.end) return "windows.start and windows.end must differ";
+  return null;
+}
+
+/** Pre-flight parse+validate of the config editor's JSON (a client mirror of the PUT
+ * /admin/tenant-loop/config rules — the server stays authoritative and re-validates).
+ * Returns { ok: true, value } with the parsed body, or { ok: false, error }. */
+export function validateLoopConfigJson(text) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, error: "config must be valid JSON" };
+  }
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return { ok: false, error: "config must be a JSON object" };
+  }
+  if (raw.group !== undefined && (typeof raw.group !== "string" || !LOOP_GROUP_RE.test(raw.group))) {
+    return { ok: false, error: `group must match ${LOOP_GROUP_RE.source}` };
+  }
+  if (raw.designatedUsers !== undefined) {
+    const du = raw.designatedUsers;
+    if (!Array.isArray(du) || !du.every((u) => typeof u === "string" && u.trim().length > 0 && u.trim().length <= 128)) {
+      return { ok: false, error: "designatedUsers must be an array of principal strings" };
+    }
+  }
+  if (raw.scopes !== undefined) {
+    const sc = raw.scopes;
+    if (typeof sc !== "object" || sc === null || Array.isArray(sc)) {
+      return { ok: false, error: "scopes must be a JSON object" };
+    }
+    for (const [k, v] of Object.entries(sc)) {
+      if (!LOOP_SCOPE_KEYS.includes(k)) return { ok: false, error: `unknown scope key "${k}" (allowed: ${LOOP_SCOPE_KEYS.join(", ")})` };
+      if (typeof v !== "boolean") return { ok: false, error: `scope "${k}" must be a boolean` };
+    }
+  }
+  if (raw.windows !== undefined) {
+    const err = validateLoopWindowsClient(raw.windows);
+    if (err) return { ok: false, error: err };
+  }
+  return { ok: true, value: raw };
+}
+
+/**
+ * Dry-run → confirm upgrade gate (§4.4). The Confirm call must never fire without a
+ * prior dry-run plan RENDER for the same tenant: offerPlan only accepts a payload with
+ * `dryRun: true` (what POST …/upgrade without confirm returns), confirmAllowed is
+ * tenant-scoped, and consume clears the pending plan after a successful confirm.
+ */
+export function createUpgradeFlow() {
+  let planned = null; // { tenantId, plan } once a dry-run plan has been rendered
+  return {
+    pendingTenantId() {
+      return planned ? planned.tenantId : null;
+    },
+    /** Record a rendered dry-run plan; refuses payloads that are not a dry-run plan. */
+    offerPlan(tenantId, plan) {
+      planned = plan && plan.dryRun === true ? { tenantId, plan } : null;
+      return planned !== null;
+    },
+    /** May the Confirm call fire for this tenant right now? */
+    confirmAllowed(tenantId) {
+      return planned !== null && planned.tenantId === tenantId;
+    },
+    /** Clear the pending plan after the confirm went through (or refuse a stray one). */
+    consume(tenantId) {
+      if (planned !== null && planned.tenantId === tenantId) {
+        planned = null;
+        return true;
+      }
+      return false;
+    },
+  };
+}

@@ -167,6 +167,18 @@
   .modal .copyStatus { color: var(--muted); font-size: .74rem; }
   .gws-hidden { display: none !important; }
   .empty b { color: var(--fg); font-size: 1.05rem; display: block; margin-bottom: 6px; }
+  /* tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI) */
+  #adminView .card.wide { max-width: 980px; }
+  #adminView .card select, #adminView .card textarea { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border2); border-radius: 7px; padding: 7px 9px; font: inherit; width: 100%; }
+  .tlBanner { background: rgba(248,81,73,.08); border: 1px solid #f85149; color: #f85149; border-radius: 10px; padding: 10px 14px; font-size: .8rem; margin-bottom: 12px; max-width: 980px; }
+  .tlBadge { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: .68rem; font-weight: 600; }
+  .tlBadge.active { background: rgba(63,185,80,.15); color: #3fb950; }
+  .tlBadge.suspended { background: rgba(248,81,73,.15); color: #f85149; }
+  .tlScope { font-size: .68rem; margin-right: 6px; white-space: nowrap; }
+  .tlScope.on { color: #3fb950; }
+  .tlScope.off { color: var(--faint); }
+  .tlFresh { color: #3fb950; }
+  .tlStale { color: #f85149; }
 </style>
 </head>
 <body>
@@ -227,7 +239,7 @@
 <script type="module">
   // T-20260928-012: pure helpers (donut slice math, recency grouping) live in
   // /app-helpers.js so they can be unit-tested without a browser.
-  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, spokenSummary, speechRecognitionSupported, speechSynthesisSupported, voiceTransition, shouldAutoSend, detectVoiceLang, VOICE_LANGUAGES, formatTurnActivity } from "./app-helpers.js";
+  import { prepareDonutSlices, RECENCY_GROUP_ORDER, recencyGroupLabel, speakableText, spokenSummary, speechRecognitionSupported, speechSynthesisSupported, voiceTransition, shouldAutoSend, detectVoiceLang, VOICE_LANGUAGES, formatTurnActivity, LOOP_SCOPE_KEYS, validateTenantId, validateLoopWindowsClient, validateLoopConfigJson, createUpgradeFlow } from "./app-helpers.js";
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const modelSel = $("model"), sessionsEl = $("sessions"), log = $("log"),
@@ -1340,7 +1352,44 @@
       `<h2 style="font-size:.85rem; margin-top:14px;">Disk usage per user</h2>${barChart(stats.perUser.map((u) => [u.principal, u.diskBytes]), "B")}` +
       `<h2 style="font-size:.85rem; margin-top:14px;">Users</h2>` +
       `<div class="pager"><input id="userSearch" placeholder="Search users…" aria-label="Search users"><span id="userPager"></span></div>` +
-      `<table class="admin"><thead><tr><th>ID</th><th>Status</th><th>Tenants</th><th>Usage</th><th>Actions</th></tr></thead><tbody id="userRows"></tbody></table>`;
+      `<table class="admin"><thead><tr><th>ID</th><th>Status</th><th>Tenants</th><th>Usage</th><th>Actions</th></tr></thead><tbody id="userRows"></tbody></table>` +
+      // ── Tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI) ──
+      `<h2 style="font-size:.85rem; margin-top:18px;">Tenant loop</h2>` +
+      `<div class="tlBanner gws-hidden" id="tl-banner" role="alert">Tenant loop is disabled via CO_WORKSPACE_TENANT_LOOP_DISABLED — every tenant-loop route answers 403 and the registry export marks every tenant suspended.</div>` +
+      `<div id="tl-body" style="display:flex; flex-direction:column; gap:12px;">` +
+      `<div class="card wide" id="tl-registry"><h2 style="display:flex; align-items:center; justify-content:space-between; gap:8px;">Gateway registry export` +
+      `<button id="tl-refresh" type="button" style="background:transparent;color:var(--fg);border:1px solid var(--border2);font-size:.74rem;">↻ Refresh</button></h2>` +
+      `<div class="hint" id="tl-fresh"></div><div class="hint" id="tl-empty" style="margin-top:6px;">loading…</div>` +
+      `<div id="tl-table-wrap" class="gws-hidden" style="overflow-x:auto; margin-top:6px;">` +
+      `<table class="admin"><thead><tr><th>id</th><th>principal</th><th>variant</th><th>status</th><th>scopes</th><th>windows</th><th>git remote</th><th>actions</th></tr></thead><tbody id="tl-rows"></tbody></table></div></div>` +
+      `<div class="card" id="tl-register"><h2>Register tenant</h2>` +
+      `<div class="field"><label for="tl-reg-pick">Existing tenant (id · variant · owner)</label><select id="tl-reg-pick"><option value="">pick a tenant…</option></select></div>` +
+      `<div class="hint" id="tl-reg-meta" style="min-height:1em;"></div>` +
+      `<div class="field"><label for="tl-reg-id">Tenant id</label><input id="tl-reg-id" placeholder="gw-0123456789ab" autocomplete="off"></div>` +
+      `<div class="field"><label for="tl-reg-group">Loop group (optional — default "default")</label><input id="tl-reg-group" placeholder="default" autocomplete="off"></div>` +
+      `<div class="field">Scopes (per-tenant overrides — unset keys inherit the group defaults)` +
+      `<label class="betaPick" style="margin-top:2px;"><input type="checkbox" id="tl-reg-scope-upgrade" style="width:auto"> upgrade</label>` +
+      `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-upstreamFile" style="width:auto"> upstreamFile</label>` +
+      `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-backportReview" style="width:auto"> backportReview</label>` +
+      `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-nightlyFleet" style="width:auto"> nightlyFleet</label></div>` +
+      `<div class="field"><label for="tl-reg-tz">Window time zone (IANA)</label><input id="tl-reg-tz" value="Asia/Seoul" autocomplete="off"></div>` +
+      `<div class="field">Window days (0 = Sunday)` +
+      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, i) => `<label class="betaPick" style="display:inline-flex; margin-right:8px;"><input type="checkbox" id="tl-reg-day-${i}" checked style="width:auto"> ${d}</label>`).join("") +
+      `</div>` +
+      `<div class="field" style="flex-direction:row; gap:8px;"><span style="flex:1;"><label for="tl-reg-start">Start (HH:MM, inclusive)</label><input id="tl-reg-start" value="00:00" autocomplete="off"></span>` +
+      `<span style="flex:1;"><label for="tl-reg-end">End (HH:MM, exclusive)</label><input id="tl-reg-end" value="23:59" autocomplete="off"></span></div>` +
+      `<div class="field"><label for="tl-reg-remote">git remote (backup branch safety net)</label><select id="tl-reg-remote"><option value="local-only">local-only</option><option value="url">url</option></select></div>` +
+      `<div class="field gws-hidden" id="tl-reg-url-row"><label for="tl-reg-url">Remote URL</label><input id="tl-reg-url" placeholder="https://git.example.team/team/project.git" autocomplete="off"></div>` +
+      `<div style="display:flex; gap:8px; margin-top:8px;"><button id="tl-reg-submit" type="button">Register</button></div>` +
+      `<div class="formErr" id="tl-reg-err" role="alert"></div></div>` +
+      `<div class="card" id="tl-config"><h2>Group loop config</h2>` +
+      `<div class="field"><label for="tl-config-json">loop_config JSON — group id, designatedUsers, scope/window defaults</label>` +
+      `<textarea id="tl-config-json" rows="8" spellcheck="false"></textarea></div>` +
+      `<div style="display:flex; gap:8px; margin-top:8px;">` +
+      `<button id="tl-config-validate" type="button" style="background:transparent;color:var(--fg);border:1px solid var(--border2);">Validate</button>` +
+      `<button id="tl-config-save" type="button">Save to group</button></div>` +
+      `<div class="formErr" id="tl-config-err" role="status"></div></div>` +
+      `<div class="formErr" id="tl-status" role="status"></div></div>`;
     // R5: client-side search + pager (25/page) — server-side pagination deferred past ~150 users.
     let userPage = 0;
     let userQuery = "";
@@ -1447,6 +1496,276 @@
     }
     }
     renderUserTable();
+
+    // ── Tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI):
+    // registry export preview, register/suspend/deregister, dry-run→confirm upgrade, and
+    // the group loop-config editor. Kill switch first: ANY response carrying the typed
+    // code "tenant_loop_disabled" (403) replaces the whole section with a persistent
+    // banner — the forms cannot work while CO_WORKSPACE_TENANT_LOOP_DISABLED is set. ──
+    const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
+    const tlBanner = adminView.querySelector("#tl-banner");
+    const tlBody = adminView.querySelector("#tl-body");
+    const tlStatus = adminView.querySelector("#tl-status");
+    const tlUpgradeFlow = createUpgradeFlow();
+    const TL_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function tlDisabled(body) {
+      if (body?.code !== "tenant_loop_disabled") return false;
+      tlBanner.classList.remove("gws-hidden");
+      tlBody.classList.add("gws-hidden");
+      return true;
+    }
+
+    function tlNote(text, ok = false) {
+      tlStatus.style.color = ok ? "#3fb950" : "";
+      tlStatus.textContent = text;
+    }
+
+    // Server errors surface verbatim (message + typed code when present).
+    function tlErrText(res, body) {
+      return `⚠ ${body?.error ?? `HTTP ${res.status}`}${body?.code ? ` (${body.code})` : ""}`;
+    }
+
+    function tlScopesHtml(scopes) {
+      const short = { upgrade: "upg", upstreamFile: "file", backportReview: "backport", nightlyFleet: "fleet" };
+      return LOOP_SCOPE_KEYS.map((k) => {
+        const on = scopes?.[k] === true;
+        return `<span class="tlScope ${on ? "on" : "off"}" title="${esc(k)}: ${on ? "on" : "off"}">${short[k] ?? k} ${on ? "✓" : "✗"}</span>`;
+      }).join("");
+    }
+
+    function tlWindowsHtml(w) {
+      if (!w || typeof w !== "object") return "";
+      const days = Array.isArray(w.days) ? w.days.map((d) => TL_DAY_NAMES[d] ?? d).join(",") : "?";
+      return `${esc(String(w.tz ?? "?"))} · ${esc(days)} · ${esc(String(w.start ?? "?"))}–${esc(String(w.end ?? "?"))}`;
+    }
+
+    function tlPost(tenantId, op, bodyOut) {
+      return fetch(`/admin/tenant-loop/tenants/${encodeURIComponent(tenantId)}/${op}`, { method: "POST", headers: authHeaders, body: JSON.stringify(bodyOut ?? {}) });
+    }
+
+    async function tlLoadRegistry() {
+      const fresh = adminView.querySelector("#tl-fresh");
+      const empty = adminView.querySelector("#tl-empty");
+      const wrap = adminView.querySelector("#tl-table-wrap");
+      empty.textContent = "loading…";
+      wrap.classList.add("gws-hidden");
+      let res, body;
+      try {
+        res = await fetch("/admin/tenant-loop/registry");
+        body = await res.json().catch(() => ({}));
+      } catch (err) {
+        empty.textContent = `⚠ ${err.message}`;
+        return;
+      }
+      if (tlDisabled(body)) return;
+      if (!res.ok) { empty.textContent = tlErrText(res, body); return; }
+      const reg = body.registry ?? {};
+      const rows = Array.isArray(reg.tenants) ? reg.tenants : [];
+      const written = reg.writtenAt ? new Date(reg.writtenAt) : null;
+      const ageH = written ? (Date.now() - written.getTime()) / 3_600_000 : null;
+      // §4.5: the workspace reader fails closed on an export older than 24h — say so here.
+      const stale = ageH !== null && ageH >= 24;
+      fresh.innerHTML = `source: ${esc(String(body.source ?? "?"))} · written ${written ? esc(written.toISOString().slice(0, 16).replace("T", " ")) + " UTC" : "?"} · ` +
+        (ageH === null
+          ? `<span class="tlStale">no timestamp</span>`
+          : `<span class="${stale ? "tlStale" : "tlFresh"}">${stale ? `stale — ${Math.round(ageH)}h old (readers fail closed past 24h)` : "fresh"}</span>`);
+      if (rows.length === 0) {
+        empty.textContent = "no registry export — the gateway writes it here after config changes; readers treat absence as zero tenants";
+        return;
+      }
+      empty.textContent = "";
+      wrap.classList.remove("gws-hidden");
+      adminView.querySelector("#tl-rows").innerHTML = rows.map((t) =>
+        `<tr><td>${esc(String(t.id))}</td><td>${esc(String(t.principal))}</td><td>${esc(String(t.variant))}</td>` +
+        `<td><span class="tlBadge ${esc(String(t.status))}">${esc(String(t.status))}</span></td>` +
+        `<td>${tlScopesHtml(t.scopes)}</td><td>${tlWindowsHtml(t.windows)}</td><td>${esc(String(t.gitRemote ?? ""))}</td>` +
+        `<td style="white-space:nowrap;">` +
+        `<button class="collapsebtn" data-tl-suspend="${esc(String(t.id))}">suspend</button> ` +
+        `<button class="collapsebtn" data-tl-dereg="${esc(String(t.id))}" style="color:#f85149;">deregister</button> ` +
+        `<button class="collapsebtn" data-tl-upgrade="${esc(String(t.id))}">upgrade</button></td></tr>`).join("");
+      for (const btn of adminView.querySelectorAll("[data-tl-suspend]")) btn.addEventListener("click", () => tlSuspend(btn.getAttribute("data-tl-suspend")));
+      for (const btn of adminView.querySelectorAll("[data-tl-dereg]")) btn.addEventListener("click", () => tlDeregister(btn.getAttribute("data-tl-dereg")));
+      for (const btn of adminView.querySelectorAll("[data-tl-upgrade]")) btn.addEventListener("click", () => tlUpgrade(btn.getAttribute("data-tl-upgrade")));
+    }
+    adminView.querySelector("#tl-refresh").addEventListener("click", () => tlLoadRegistry());
+
+    function tlSuspend(tenantId) {
+      const wrap = showModal({ title: `Suspend ${tenantId}`, bodyHtml: `
+        <div class="field">The registry export marks the tenant suspended — the gateway and every workspace reader treat it as out of the loop until it is re-registered. The tenant itself and its files are untouched.</div>
+        <div class="formErr" id="tl-sus-err" role="alert"></div>
+        <div class="row"><span class="spacer"></span><button id="tl-sus-cancel" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button><button id="tl-sus-go">Suspend</button></div>` });
+      wrap.querySelector("#tl-sus-cancel").addEventListener("click", () => wrap.remove());
+      wrap.querySelector("#tl-sus-go").addEventListener("click", async () => {
+        const res = await tlPost(tenantId, "suspend");
+        const body = await res.json().catch(() => ({}));
+        if (tlDisabled(body)) { wrap.remove(); return; }
+        if (!res.ok) { wrap.querySelector("#tl-sus-err").textContent = tlErrText(res, body); return; }
+        wrap.remove();
+        tlNote(`✔ ${tenantId} suspended`, true);
+        tlLoadRegistry();
+      });
+    }
+
+    function tlDeregister(tenantId) {
+      const wrap = showModal({ title: `Deregister ${tenantId}`, bodyHtml: `
+        <div class="field">This ends the tenant's loop participation (§4.4): its loop group, scope/window overrides and git remote are cleared from the gateway registry. The tenant itself, its project files and its chat history are kept.</div>
+        <div class="formErr" id="tl-drg-err" role="alert"></div>
+        <div class="row"><span class="spacer"></span><button id="tl-drg-cancel" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button><button id="tl-drg-go" style="background:#8b1f1f;">Deregister</button></div>` });
+      wrap.querySelector("#tl-drg-cancel").addEventListener("click", () => wrap.remove());
+      wrap.querySelector("#tl-drg-go").addEventListener("click", async () => {
+        const res = await tlPost(tenantId, "deregister");
+        const body = await res.json().catch(() => ({}));
+        if (tlDisabled(body)) { wrap.remove(); return; }
+        if (!res.ok) { wrap.querySelector("#tl-drg-err").textContent = tlErrText(res, body); return; }
+        wrap.remove();
+        tlNote(`✔ ${tenantId} deregistered — the tenant itself is kept`, true);
+        tlLoadRegistry();
+      });
+    }
+
+    async function tlUpgrade(tenantId) {
+      tlNote("");
+      let res, body;
+      try {
+        // Step 1 of 2: dry-run — the gateway returns the plan (§4.4); nothing executes.
+        res = await tlPost(tenantId, "upgrade", {});
+        body = await res.json().catch(() => ({}));
+      } catch (err) {
+        tlNote(`⚠ ${err.message}`);
+        return;
+      }
+      if (tlDisabled(body)) return;
+      if (!res.ok) { tlNote(tlErrText(res, body)); return; }
+      // Step 2 gate: the Confirm call is only wired after a dry-run plan rendered for
+      // THIS tenant (createUpgradeFlow refuses non-plan payloads and cross-tenant confirms).
+      if (!tlUpgradeFlow.offerPlan(tenantId, body)) { tlNote("⚠ dry-run did not return a plan — upgrade refused"); return; }
+      const wrap = showModal({ title: `Upgrade ${tenantId} — dry-run plan`, bodyHtml: `
+        <div class="hint">Step 1 of 2 — nothing has executed yet. Confirming creates the snapshot branch and runs the upgrade engine with the allowlisted env.</div>
+        <details open style="margin-top:6px;"><summary style="cursor:pointer;">plan JSON</summary><pre class="preview" style="max-height:260px;">${esc(JSON.stringify(body, null, 2))}</pre></details>
+        <div class="formErr" id="tl-up-err" role="alert"></div>
+        <div class="row"><span class="spacer"></span><button id="tl-up-cancel" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button><button id="tl-up-confirm">Confirm upgrade</button></div>` });
+      wrap.querySelector("#tl-up-cancel").addEventListener("click", () => wrap.remove());
+      wrap.querySelector("#tl-up-confirm").addEventListener("click", async () => {
+        // Structural gate: no confirm without a prior plan render for THIS tenant.
+        if (!tlUpgradeFlow.confirmAllowed(tenantId)) return;
+        const go = wrap.querySelector("#tl-up-confirm");
+        go.disabled = true;
+        const err = wrap.querySelector("#tl-up-err");
+        err.textContent = "running…";
+        let res2, body2;
+        try {
+          res2 = await tlPost(tenantId, "upgrade", { confirm: true });
+          body2 = await res2.json().catch(() => ({}));
+        } catch (e) {
+          err.textContent = `⚠ ${e.message}`;
+          go.disabled = false;
+          return;
+        }
+        if (tlDisabled(body2)) { wrap.remove(); return; }
+        if (!res2.ok) { err.textContent = tlErrText(res2, body2); go.disabled = false; return; }
+        tlUpgradeFlow.consume(tenantId);
+        wrap.remove();
+        const ok = body2.exitCode === 0;
+        tlNote(`✔ upgrade exit ${body2.exitCode} — snapshot: ${body2.snapshot?.detail ?? "?"}` +
+          (body2.stdoutTail ? `\nstdout tail: ${body2.stdoutTail}` : "") +
+          (body2.stderrTail ? `\nstderr tail: ${body2.stderrTail}` : ""), ok);
+        tlLoadRegistry();
+      });
+    }
+
+    // Register form. Tenant picker: a password-set admin sees ALL tenants (GET /tenants) —
+    // picking one fills the id and shows variant · owner; manual entry stays possible.
+    (async () => {
+      const pick = adminView.querySelector("#tl-reg-pick");
+      const meta = adminView.querySelector("#tl-reg-meta");
+      try {
+        const res = await fetch("/tenants");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const list = ((await res.json()).tenants ?? []).slice().reverse();
+        pick.innerHTML = `<option value="">pick a tenant…</option>` +
+          list.map((t) => `<option value="${esc(String(t.tenantId))}" data-variant="${esc(String(t.variant))}" data-owner="${esc(String(t.ownerPrincipal ?? "anonymous"))}">${esc(String(t.tenantId))} · ${esc(String(t.variant))} · ${esc(String(t.ownerPrincipal ?? "anonymous"))}</option>`).join("");
+        pick.addEventListener("change", () => {
+          const opt = pick.selectedOptions[0];
+          adminView.querySelector("#tl-reg-id").value = pick.value;
+          meta.textContent = opt?.dataset.variant ? `variant: ${opt.dataset.variant} · owner: ${opt.dataset.owner}` : "";
+        });
+      } catch {
+        pick.innerHTML = `<option value="">tenant list unavailable — enter the id below</option>`;
+      }
+    })();
+
+    adminView.querySelector("#tl-reg-remote").addEventListener("change", () => {
+      adminView.querySelector("#tl-reg-url-row").classList.toggle("gws-hidden", adminView.querySelector("#tl-reg-remote").value !== "url");
+    });
+
+    adminView.querySelector("#tl-reg-submit").addEventListener("click", async () => {
+      const err = adminView.querySelector("#tl-reg-err");
+      err.textContent = "";
+      const id = adminView.querySelector("#tl-reg-id").value.trim();
+      const group = adminView.querySelector("#tl-reg-group").value.trim();
+      const scopes = Object.fromEntries(LOOP_SCOPE_KEYS.map((k) => [k, adminView.querySelector(`#tl-reg-scope-${k}`).checked]));
+      const windows = {
+        tz: adminView.querySelector("#tl-reg-tz").value.trim(),
+        days: TL_DAY_NAMES.map((_, i) => i).filter((i) => adminView.querySelector(`#tl-reg-day-${i}`).checked),
+        start: adminView.querySelector("#tl-reg-start").value.trim(),
+        end: adminView.querySelector("#tl-reg-end").value.trim(),
+      };
+      // Client-side validation mirrors the gateway's write-time rules (app-helpers.js,
+      // unit-tested); the server re-validates authoritatively and its errors surface
+      // verbatim in the form below.
+      const idErr = validateTenantId(id);
+      if (idErr) { err.textContent = `⚠ ${idErr}`; return; }
+      const winErr = validateLoopWindowsClient(windows);
+      if (winErr) { err.textContent = `⚠ ${winErr}`; return; }
+      let gitRemote = "local-only";
+      if (adminView.querySelector("#tl-reg-remote").value === "url") {
+        gitRemote = adminView.querySelector("#tl-reg-url").value.trim();
+        if (!gitRemote) { err.textContent = "⚠ a remote URL is required when git remote is 'url'"; return; }
+      }
+      err.textContent = "registering…";
+      const res = await tlPost(id, "register", { scopes, windows, gitRemote, ...(group ? { group } : {}) });
+      const body = await res.json().catch(() => ({}));
+      if (tlDisabled(body)) return;
+      if (!res.ok) { err.textContent = tlErrText(res, body); return; }
+      err.textContent = "";
+      tlNote(`✔ ${id} registered (group ${body.loopGroup ?? "?"}, export ${body.export?.ok ? `written, ${body.export.tenants} tenant(s)` : "FAILED"})`, true);
+      tlLoadRegistry();
+    });
+
+    // Config editor: JSON textarea preflight-validated client-side, saved via
+    // PUT /admin/tenant-loop/config (the server is authoritative; its validation errors
+    // surface verbatim).
+    const tlConfigTa = adminView.querySelector("#tl-config-json");
+    tlConfigTa.value = JSON.stringify({
+      group: "default",
+      designatedUsers: [],
+      scopes: { upgrade: false, upstreamFile: false, backportReview: false, nightlyFleet: false },
+      windows: { tz: "Asia/Seoul", days: [0, 1, 2, 3, 4, 5, 6], start: "00:00", end: "23:59" },
+    }, null, 2);
+    const tlConfigErr = adminView.querySelector("#tl-config-err");
+    adminView.querySelector("#tl-config-validate").addEventListener("click", () => {
+      tlConfigErr.style.color = "";
+      const parsed = validateLoopConfigJson(tlConfigTa.value);
+      tlConfigErr.textContent = parsed.ok ? "✔ JSON valid — fields check out (the server re-validates on save)" : `⚠ ${parsed.error}`;
+      if (parsed.ok) tlConfigErr.style.color = "#3fb950";
+    });
+    adminView.querySelector("#tl-config-save").addEventListener("click", async () => {
+      tlConfigErr.style.color = "";
+      tlConfigErr.textContent = "";
+      const parsed = validateLoopConfigJson(tlConfigTa.value);
+      if (!parsed.ok) { tlConfigErr.textContent = `⚠ ${parsed.error}`; return; }
+      tlConfigErr.textContent = "saving…";
+      const res = await fetch("/admin/tenant-loop/config", { method: "PUT", headers: authHeaders, body: JSON.stringify(parsed.value) });
+      const body = await res.json().catch(() => ({}));
+      if (tlDisabled(body)) return;
+      if (!res.ok) { tlConfigErr.textContent = tlErrText(res, body); return; }
+      tlConfigErr.style.color = "#3fb950";
+      tlConfigErr.textContent = `✔ group "${body.group?.groupId ?? "?"}" saved — export ${body.export?.ok ? `written (${body.export.tenants} tenant(s), ${body.export.skipped} skipped)` : `FAILED: ${body.export?.error ?? "?"}`}`;
+      tlLoadRegistry();
+    });
+
+    tlLoadRegistry();
   });
 
   // auth state on load
