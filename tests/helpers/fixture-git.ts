@@ -1,4 +1,12 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-09, PR #1941 CI follow-up round 2): export canonicalizePath() — the
+//          default canonical comparison form (OS-native realpath + separator
+//          normalization) — so tests can compute the same form the probes compare
+//          against when pinning refusal-MESSAGE content: the FM1/FM2 messages carry the
+//          git-reported paths, which on Windows 8.3 runners are the LONG forward-slash
+//          form (git resolves GIT_DIR/GIT_WORK_TREE itself), not the SHORT-form mkdtemp
+//          input. Probes and messages unchanged — this export is read-only test
+//          machinery for the pins.
 // v1.1.0 (2026-11-09, PR #1941 CI follow-up — windows-latest FM2 false positive):
 //          Windows runners hand mkdtemp'd fixture roots in 8.3 SHORT-NAME form
 //          (`C:\Users\RUNNER~1\AppData\Local\Temp\...`) while git resolves the SAME
@@ -153,6 +161,20 @@ export function isGitPathInsideFixture(
 /** Strict canonical equality (the `--show-toplevel` contract: must BE the fixture root). */
 function isSameCanonicalPath(a: string, b: string, canonicalize: (p: string) => string): boolean {
   return canonicalForm(a, canonicalize) === canonicalForm(b, canonicalize);
+}
+
+/**
+ * Canonical comparison form of one path under the DEFAULT canonicalizer (OS-native
+ * realpath — expands Windows 8.3 short names like `RUNNER~1` — plus `path.sep` → `/`
+ * normalization). Exported so tests can compute the same form the probes compare
+ * against: refusal messages carry the git-reported paths, which on Windows runners are
+ * the LONG forward-slash form (git resolves GIT_DIR/GIT_WORK_TREE itself), so message-
+ * content pins must assert against this canonical form, not the raw mkdtemp input
+ * (PR #1941 CI follow-up). Never throws — same documented fallback as the comparison
+ * path (plain separator-normalized text when the OS realpath fails).
+ */
+export function canonicalizePath(p: string): string {
+  return canonicalForm(p, OS_NATIVE_REALPATH);
 }
 
 const FIXTURE_GIT_REMEDY =

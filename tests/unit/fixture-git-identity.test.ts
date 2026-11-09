@@ -25,6 +25,15 @@
  * Every fixture git spawn runs under gitCleanEnv() (the 2026-11-09 incident's own
  * mechanism: an inherited GIT_DIR redirects fixture writes into the outer checkout).
  *
+ * v1.2.0 (2026-11-09, PR #1941 CI follow-up round 2): the two FM1 message-content pins
+ *          (GIT_DIR leak, GIT_WORK_TREE-only leak) assert against
+ *          canonicalizePath(outer) — the helper's canonical comparison form — instead
+ *          of the raw mkdtemp path: the refusal messages carry the GIT-REPORTED paths,
+ *          which on Windows 8.3 runners are the LONG forward-slash form while mkdtemp
+ *          hands out the SHORT form. Equivalent on POSIX (canonicalizer ≈ identity
+ *          there). Audit: these were the only raw-path containment assertions on
+ *          refusal messages — every other path assertion either pins the RAW fixture
+ *          input echoed by the message header (stable by construction) or no path.
  * v1.1.0 (2026-11-09, PR #1941 CI follow-up): canonical-containment pins — Windows
  *          runners hand fixture roots in 8.3 short-name form (RUNNER~1) while git
  *          resolves the long form (runneradmin); the raw prefix check refused safe
@@ -33,7 +42,7 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { describe, expect, test, afterAll } from "bun:test";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, realpathSync, writeFileSync } from "node:fs";
@@ -44,6 +53,7 @@ import { gitCleanEnv } from "../../scripts/lib/git-env.ts";
 import {
   assertCallerEnvSafeForGitFixtures,
   assertFixtureGitIdentity,
+  canonicalizePath,
   deriveFixtureGitCensus,
   isGitPathInsideFixture,
 } from "../helpers/fixture-git.ts";
@@ -169,7 +179,11 @@ describe("assertCallerEnvSafeForGitFixtures / assertFixtureGitIdentity (FM1/FM2)
       message = String((err as Error).message);
     }
     expect(message).toContain("CALLER");
-    expect(message).toContain(outer);
+    // The message carries the GIT-REPORTED path, which on Windows 8.3 runners is the
+    // LONG forward-slash form (git resolves GIT_DIR itself), not the SHORT-form mkdtemp
+    // input — so assert against the helper's canonical form of `outer` (identity-ish on
+    // POSIX, where this equals the raw path). PR #1941 CI follow-up round 2.
+    expect(message).toContain(canonicalizePath(outer));
     expect(message).toContain(fixture);
     expect(message).toContain("git-env.ts");
     expect(message).toContain("2026-11-09");
@@ -187,7 +201,9 @@ describe("assertCallerEnvSafeForGitFixtures / assertFixtureGitIdentity (FM1/FM2)
       message = String((err as Error).message);
     }
     expect(message).toContain("show-toplevel");
-    expect(message).toContain(outer);
+    // Same canonical-form assertion as the GIT_DIR pin: git reports the toplevel in the
+    // LONG forward-slash form on Windows 8.3 runners (PR #1941 CI follow-up round 2).
+    expect(message).toContain(canonicalizePath(outer));
     expect(message).not.toContain("absolute-git-dir resolves OUTSIDE");
   });
 
