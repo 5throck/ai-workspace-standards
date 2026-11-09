@@ -281,7 +281,37 @@ One implementation PR set (automation-engineer + docs-writer dispatches after ap
 
 **Open questions**: none blocking. Non-blocking notes: (1) the exact dev-sync step number for §5.1 is finalized at edit time (the 5.x/6.x boundary is crowded); (2) if tenant filings grow noisy, a per-tenant `UPSTREAM_*_CAP` override can follow later — same `readCap` pattern, out of scope here.
 
-## 11. References
+## 11. Repository-config integrity guard (2026-11-09 incident)
+
+**Addendum — implementation hardening landed after this design's first merge.** Not a change to the §3-§8 scope: it closes the second corruption mode produced by the incident this design's QA wave caused.
+
+**Context.** §5.1 hardened the pipeline against a child process inheriting a git hook's environment (`scripts/lib/git-env.ts`, PR #1935). That fix addressed *commits*. The same inheritance has a second, unguarded failure mode: **`git config` writes**.
+
+Two corruption modes, both attributed to the same inheritance path on 2026-11-09. Their evidence differs and is stated separately:
+
+1. **Rogue commits — reproduced.** `git push` exports `GIT_DIR` into the `pre-push` hook; the hook's `bun test` child inherited it, and the `upgrade-project` fixtures' `git init`/`add`/`commit` ran against the checkout instead of their tmpdir — 10 commits authored `Test <test@example.com>`, ~393 files, three L1 core scripts deleted. Reproduced on 2026-11-09 (`GIT_DIR=$(git rev-parse --git-dir) bun test <suite>` re-created it with HEAD unchanged). Fixed by `scripts/lib/git-env.ts` (`gitCleanEnv` for `spawnSync`/`Bun.spawn`, `gitCleanEnvForShell` for Bun Shell) applied at every test spawn.
+2. **Repository config corruption — directly observed, not mechanically detected.** After the mode-1 recovery the checkout was unusable and the operator/agent in that session observed it first-hand: `git status` failed with `fatal: this operation must be run in a work tree`; `git worktree list --porcelain` marked the main worktree `bare`; `.git/config` was read and contained `bare = true`; `.git/worktrees/` was absent. No gate named the cause — the day's memory log records only the mode-1 rogue commits, and the config write itself was not separately reproduced. Repair applied manually: `git config --local core.bare false`. The mechanism is the mode-1 inheritance path (reproducible) applied to `git config`: any fixture-side `git config` write made under an inherited `GIT_DIR` lands here, because **worktrees share the main `.git/config`** — one redirected write corrupts every checkout of the repository, and the damage outlives the process that caused it.
+
+**Why worktrees are the amplifier.** A linked worktree's own state lives in `.git/worktrees/<name>/`, but *config* is not per-worktree unless `extensions.worktreeConfig` is enabled — `--local` resolves to the common `.git/config`. A guard that only inspects the working tree's own directory therefore cannot see the damage; it must read the repository config the way git does.
+
+**Design.**
+
+- `scripts/lib/repo-integrity.ts` (v1.0.0) — one derivation, three primitives:
+  - `snapshotRepoConfig(root?)` → sorted `key=value` lines from `git -C <root> config --local --list` plus the *effective* `core.bare` (local > global > system; a global bare breaks the tree just as effectively);
+  - `diffRepoConfig(before, after)` → pure `{ added, removed, changed }`, order-insensitive and multi-value aware (`remote.origin.fetch` repeats); added/removed are key-level, so an existing key gaining a value reports as `changed`;
+  - `assertWorkTreeHealthy(root?)` → `{ ok: true }` or `{ ok: false, reason }`, where the reason carries the exact repair (`git config --local core.bare false`) and the incident reference.
+  Every git spawn inside the module runs under `gitCleanEnv()` — a redirected *read* would snapshot a different repository and compare clean, defeating the gate itself.
+- `scripts/dev-sync.ts` v1.45.0 — **start-of-run invariant** immediately after the CWD guard (`assertWorkTreeHealthy` → FATAL with the repair line, turning the cryptic git fatal into a one-line fix), and **config integrity gate** as step 4.88, after the last test-executing step (4.85) and before the 4.9 audit gate: the run-start snapshot is compared against a post snapshot, and any delta is FATAL listing added/removed/changed keys plus the statement that a test mutated the repository config. Blocking, because a run that corrupted the repository must never reach staging/commit.
+- `scripts/hooks/pre-push.ts` v1.8.1 — the same snapshot/compare around the changed-path test run (the origin of mode 1); four `git config` reads, no writes. v1.8.1 closes the fail-open gap: an unreadable snapshot at either phase aborts non-zero (v1.8.0 warned and skipped), and the comparison includes the effective `core.bare`, so a bare flip with an unchanged local key list is refused.
+- `tests/unit/repo-integrity.test.ts` — pure diff pins, mkdtemp fixture integration (healthy / `core.bare = true` / non-repository / a mid-run flip detected by the snapshot pair / a global-scope bare flip with an empty local key diff), the pre-push fail-closed contract (an unreadable snapshot aborts; a bare flip with an empty key diff is still refused), and structural pins that the invariant precedes the first test step, the gate sits between 4.85 and the audit gate, and the hook has no fail-open skip path.
+
+**Fail-closed semantics.** Unreadable config at run start, unreadable config after the tests, any delta, or a bare work tree all abort with a non-zero exit and a named remedy. No silent repair: the guard reports, it does not edit `.git/config`.
+
+**Sanctioned-writer exclusions: none, deliberately.** Verified 2026-11-09 that no sanctioned tool writes *this* repository's local config during a sync or push run — every `git config` write in `scripts/` targets an explicit project directory (`-C <projectDir>` or a chdir'd scaffold: `new-project.ts`, `adopt-project.ts`, `migrate-project.ts`, `upgrade-project.ts`, `create-l3-scaffold.ts`), and dev-sync installs no hooks. The gate is therefore exact rather than relaxed by a key allowlist. If a sanctioned writer is ever added, that one key is named at the call site; a blanket skip env is explicitly rejected (it would let the original incident through).
+
+**Non-goals.** Rewriting `.git/config` back to a snapshot (a config write from the pipeline is the exact hazard being guarded); detecting corruption that predates the run (that is the start-of-run invariant's job); cleaning `.git/worktrees/` residue.
+
+## 12. References
 
 - `memory/meeting-2026-11-08-coworkspace-gap-review.md`, `memory/meeting-2026-11-08-coworkspace-public-repo-design-review.md` (ratifying meetings; co-workspace-stays ruling)
 - `scripts/lib/fleet.ts:1-258` (version-header + fail-closed conventions; `FLEET_ID_RE` :58; `isFleetProjectPath` :215)
