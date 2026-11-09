@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.10.0
+- **Version**: 1.11.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-06 (v1.9.0 decision-log budget 600s → 300s on the stage-2 evidence gate, T-20261030-002)
+- **Last Updated**: 2026-11-10 (v1.11.0 `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS, T-20261110-001)
 
 ## Description
 
@@ -19,6 +19,7 @@ default suite `integration`).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-10 | production | production | v1.11.0 (T-20261110-001, spec 2026-11-10-workspace-console-ci-flake-design): `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42656818953 (PR #1942): the heavy async service suite (66 tests) hit the 120s unit-suite wall (mode a) while macOS total ~1s and healthy win32 attempts completed inside the cap. First-time row under the v1.9.0 evidence policy; single family budget (no per-platform rows exist) keeps ≥2.5x over the observed healthy win32 ceiling (<120s). Companion test containment (mode b) in the test file itself (v1.1.0). | automation-engineer |
 | 2026-11-06 | production | production | v1.10.0 (T-20261106-008): `hub-bootstrap.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42078112151: spawn-heavy bootstrap E2E at 15.1s/16.1s vs the 15000ms default per-test ceiling (the same commit passed macos 1m55s). First-time row under the v1.9.0 evidence policy. | automation-engineer |
 | 2026-10-31 | production | production | v1.9.0 (T-20261030-002 stage 2, spec 2026-10-31-test-budget-split-design): FILE_TIME_BUDGETS `upgrade-decision-log.test.ts` 600000 → 300000 on the evidence gate — PR #1770's win32 run measured the split file at 99.9s (≤ ~150s; ~2x headroom restored at 300s; extracted suite 0.34s). Row-only change; v1.8.0 guard + raise policy unchanged. | automation-engineer |
 | 2026-10-31 | production | production | v1.8.0 (T-20261030-002, spec 2026-10-31-test-budget-split-design stage 1 of 2): the re-inflation guard — BUDGET-HEADROOM WARN at 60% of a file's resolved suite budget (WARN not FAIL; burn-in visible in every CI log), budget-raise policy recorded at FILE_TIME_BUDGETS (raise requires a ticket with CI-run evidence; 2 raises/quarter → mandatory split/trim review), and an explicit row for the extracted tests/unit/upgrade-policy-decisions.test.ts pinned at the family defaults. Budget on upgrade-decision-log.test.ts HELD at 600s — stage 2 drops it to 300s only after one green win32 run ≤ ~150s. | automation-engineer |

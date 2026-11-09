@@ -1,6 +1,16 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.10.0
+ * @version 1.11.0
+ *
+ * v1.11.0 (2026-11-10, T-20261110-001 — spec
+ *          docs/designs/2026-11-10-workspace-console-ci-flake-design.md):
+ *          `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS
+ *          (suite 300s / test 45s) — windows-latest run 42656818953 (PR
+ *          #1942) killed the heavy async service suite at the 120s unit-suite
+ *          wall (mode a) on a base where healthy attempts and PR-3's CI
+ *          passed first try; macOS total ~1s (66 tests). First-time row for
+ *          a new file under the v1.9.0 ticket-evidence policy; family budget
+ *          300s keeps ≥2.5x over the observed healthy win32 ceiling (<120s).
  *
  * v1.10.0 (2026-11-06, T-20261106-008): `hub-bootstrap.test.ts` joins
  *          FILE_TIME_BUDGETS (suite 300s / test 45s) — windows-latest run
@@ -161,6 +171,20 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // headroom at 45s). First-time entry for a new file, not a raise on an
   // offender.
   "hub-bootstrap.test.ts": { suite: 300000, test: 45000 },
+  // T-20261110-001 (windows-latest, PR #1942 CI run 42656818953; spec
+  // 2026-11-10-workspace-console-ci-flake-design): the heavy async
+  // admin-console service suite (66 tests — sqlite stores, tmpdir fixtures,
+  // argon2 hashing via Bun.password.hash) hit the 120s unit-suite wall on
+  // win32 (mode a) while the same base passed macos in ~1s and healthy win32
+  // attempts completed inside the cap; the alternating failure mode (b) is
+  // the M5 simulated-hash-failure rejection, contained in the test file
+  // itself. No per-platform budget support exists (rows are basename-keyed,
+  // OS-independent), so one family budget sized for the slowest observed
+  // platform: 300s keeps ≥2.5x over the observed healthy win32 ceiling
+  // (<120s) and absorbs the FS-pressure variance band. Test ceiling 45s
+  // follows the hub-bootstrap precedent (no per-test timeout was
+  // implicated in either CI failure mode).
+  "co-workspace-admin-console.test.ts": { suite: 300000, test: 45000 },
   "mcp-upstream-server.test.ts": { suite: 300000, test: 30000 },
   "upgrade-tree-sync.test.ts": { suite: 300000, test: 60000 },
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence

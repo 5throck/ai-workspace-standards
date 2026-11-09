@@ -4,6 +4,23 @@
  * ignoring group policy, suspension, the bulk/CSV/group/tenant admin routes, audit coverage,
  * /auth/me effective budget, and the /admin page gate for a must-change admin.
  * Fixtures live under mkdtemp-style absolute tmpdir roots only.
+ *
+ * @version 1.1.0
+ *
+ * v1.1.0 (2026-11-10, T-20261110-001 — spec
+ * docs/designs/2026-11-10-workspace-console-ci-flake-design.md): review M5
+ * "failure part-way" containment — the test's simulated hash failure is
+ * consumed by the server's 500 handler (the response is awaited), but on
+ * windows-latest bun's native async hash machinery could deliver residual
+ * settle callbacks after the test body returned, surfacing as an unhandled
+ * rejection that aborted the whole bun test run (PR #1942 CI run 42656818953
+ * attempt 1). The test now drains the microtask/macrotask queue after the 500
+ * assertion so the async path fully settles inside the test; assertions on
+ * the 500 status, the async-path-not-sync-hasher contract, and the audit row
+ * are unchanged. Runtime budget: FILE_TIME_BUDGETS row in
+ * scripts/test-runner.ts v1.11.0 (suite 300s / test 45s for win32).
+ *
+ * v1.0.0 (2026-11-09): initial suite (gw-admin-console design §11 review).
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
@@ -916,6 +933,13 @@ describe("review M5: CSV import hashing, row cap, and audit", () => {
     const csv = "loginId,name,role,groups\nnewbie-a,A,user,\nalice,Alice,user,\nnewbie-b,B,user,\nnewbie-c,C,user,\n";
     const res = await send(state, "/admin/users/import", { token: adminTok, adminPassword: ADMIN_PW, raw: csv });
     expect(res.status).toBe(500);
+    // Containment (T-20261110-001): the simulated hash failure above is consumed by the
+    // server's 500 handler (the response is awaited), but on windows-latest bun's native
+    // async hash machinery can deliver residual settle callbacks after the test body
+    // returns, surfacing as an unhandled rejection that aborts the whole bun test run.
+    // Drain the queue so the async path fully settles inside this test; the assertions
+    // above and below are unchanged.
+    for (let drain = 0; drain < 3; drain += 1) await new Promise((resolve) => setTimeout(resolve, 0));
     const row = state.audit.query({ action: "user.import" }).entries[0];
     expect(row).toBeDefined();
     expect(row.detail).toContain("created=1");
