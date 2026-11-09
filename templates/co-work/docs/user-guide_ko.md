@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 2cfb18a3b8503d0a2f2a0ed829c601c38f38fb0b1b0d4d3aac261352b443034a
+translated_from_hash: f3221c1439dbac7fc367c32bb15615c10c9b0cdf7027768bb408a597d71b242d
 ---
 # Co-Work 사용자 가이드
 
@@ -39,7 +39,7 @@ translated_from_hash: 2cfb18a3b8503d0a2f2a0ed829c601c38f38fb0b1b0d4d3aac261352b4
 | "기술 문서, 사용법 가이드, 참조 자료를 작성해주세요" | **technical-writer** | documentation-writing, api-documentation |
 | "REST/GraphQL API, SDK, 개발자용 스펙을 문서화해주세요" | **technical-writer** | api-documentation |
 | "산출물 추적, 일정 조율, 상태 보고를 해주세요" | **project-coordinator** | — |
-| "여러 전문가 간 토론을 진행해주세요" | **project-coordinator** (`/meeting` 경유) | — |
+| "여러 전문가 간 토론을 진행해주세요" | **project-coordinator** (`meeting-facilitation` 경유) | — |
 | "내러티브, 변화 스토리, 프레젠테이션 구조를 만들어주세요" | **storyteller** | — |
 | "Word/Excel/PowerPoint/Teams/SharePoint/Outlook 작업을 해주세요" | **ms365-expert** | — |
 | "작업을 커밋하고 PR을 열어주세요" | PM (파이프라인 전용) | `/sync` |
@@ -75,7 +75,7 @@ QA 게이트                — PM이 `bun scripts/audit.ts` 실행; 통과해�
 - `/changelog "..."` — 전체 파이프라인 실행 없이 독립적인 `CHANGELOG.md [Unreleased]` 항목만 추가.
 - `/memlog "summary"` — CHANGELOG나 git을 건드리지 않고 `memory/YYYY-MM-DD.md`에 세션 노트만 추가.
 - `/new-task "name"` — 오늘 메모리 로그에 작업 추적 블록 생성.
-- `/meeting` — 구조화된 인라인 멀티 에이전트 토론 실행 (PM이 진행, 트랜스크립트는 `memory/meeting-YYYY-MM-DD-[slug].md`에 저장).
+- `meeting-facilitation` 스킬 — 구조화된 위원회 형식 인라인 멀티 에이전트 토론 실행 (PM이 진행, 트랜스크립트는 `memory/meeting-YYYY-MM-DD-[slug].md`에 저장).
 
 **절대** 직접 `git commit`/`git push`/`--no-verify`로 이 과정을 우회하지 마세요 — pre-commit hook이 `/sync`를 거치지 않은 커밋을 의도적으로 차단합니다.
 

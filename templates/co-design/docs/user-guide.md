@@ -24,7 +24,7 @@
 **Other everyday commands:**
 - `/changelog "..."` — add a `CHANGELOG.md [Unreleased]` entry ahead of a sync.
 - `/memlog "summary"` — log a session note without running the full pipeline.
-- `/meeting "topic" [--agents a,b] [--rounds N]` — run a structured multi-agent discussion in place, e.g. to resolve a design disagreement between `design-lead` and `storyteller`.
+- `meeting-facilitation` skill (`skills/meeting-facilitation`, or just say "meeting") — run a structured committee-form multi-agent discussion in place, e.g. to resolve a design disagreement between `design-lead` and `storyteller`.
 
 ---
 
@@ -44,7 +44,7 @@ Use this table to figure out who (or what skill) to ask the PM to bring in. You 
 | "Build an interactive prototype for testing or stakeholder demo" | `prototype-engineer` | — | 4 |
 | "Validate this design with real users / run usability tests" | `ux-researcher` | — | 4 (loop) |
 | "Prepare final handoff materials for engineering" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 4 |
-| "Facilitate a cross-team design decision" | PM via `/meeting` | — | any |
+| "Facilitate a cross-team design decision" | PM via `meeting-facilitation` | — | any |
 
 **Notes:**
 - `typography-expert` is optional — skip it if font decisions are already fixed by brand guidelines.
@@ -93,7 +93,7 @@ Phase 6 — Quality Assurance & Finalization     (PM)
 **Key commands/scripts involved:**
 - `bun scripts/audit.ts` — the QA gate; runs at pre-push (`scripts/hooks/pre-push.ts`) and inside the `/sync` pipeline (audit gate step) — it does not run automatically after Write/Edit.
 - `/sync "type(scope): message"` — the only sanctioned way to commit, push, and open a PR; direct `git commit`/`git push` calls are blocked by the pre-commit hook.
-- `/meeting` — for resolving disagreements or reviewing decisions mid-pipeline without leaving the phase.
+- `meeting-facilitation` skill — for resolving disagreements or reviewing decisions mid-pipeline without leaving the phase.
 
 ---
 

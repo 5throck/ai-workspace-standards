@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 4e53f944d6f4d3d56a591911ec86d229b50e7ebc2586be02f9e29bfa90027652
+translated_from_hash: c1f239759e81316c8eaa3e53f83b03c05de90583ba66f28d62c0885e4c7e022d
 ---
 # Co-News 사용자 가이드
 
@@ -81,7 +81,7 @@ Phase 6 — 편집 심사 게이트 (fact-checker AND style-editor)
 
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR
 - `/memlog "summary"` / `/new-task "name"` — 세션 로깅 및 태스크 블록
-- `/meeting "topic"` — 커버리지 결정이 충돌할 때 구조화된 뉴스룸 토론
+- `meeting-facilitation` 스킬 — 커버리지 결정이 충돌할 때 구조화된 위원회 형식 뉴스룸 토론
 
 게이트를 우회해 전문가에게 직접 요청하지 말고, 원시 `git commit` / `git push`도
 실행하지 마세요 — 훅이 거부합니다.

@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 9286bd940f9a65649c68464ade1e3f76099874efc53afb0bf3730c1ff03718ef
+translated_from_hash: ef35c5cf332d0eb361c578a9d10dc32e64c4712afc57c901dd7086ff850b815d
 ---
 # Co-Export 사용자 가이드
 
@@ -82,7 +82,7 @@ Phase 5-6 — 감사 게이트 ──► /sync (커밋 + PR)
 
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR
 - `/memlog "summary"` / `/new-task "name"` — 세션 로깅 및 태스크 블록
-- `/meeting "topic"` — 결과가 충돌할 때 구조화된 다중 에이전트 토론
+- `meeting-facilitation` 스킬 — 결과가 충돌할 때 구조화된 위원회 형식 다중 에이전트 토론
 
 PM 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원시 `git commit` /
 `git push`도 실행하지 마세요 — 훅이 거부합니다.

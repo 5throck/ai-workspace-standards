@@ -34,7 +34,7 @@ Use this table to guess which specialist(s) PM will bring in — useful for desc
 | "Write technical documentation, a how-to guide, or reference material" | **technical-writer** | documentation-writing, api-documentation |
 | "Document a REST/GraphQL API, SDK, or developer-facing spec" | **technical-writer** | api-documentation |
 | "Track deliverables, coordinate a schedule, run a status update" | **project-coordinator** | — |
-| "Facilitate a discussion between multiple specialists" | **project-coordinator** (via `/meeting`) | — |
+| "Facilitate a discussion between multiple specialists" | **project-coordinator** (via `meeting-facilitation`) | — |
 | "Build a narrative, change story, or presentation structure" | **storyteller** | — |
 | "Work with Word/Excel/PowerPoint/Teams/SharePoint/Outlook" | **ms365-expert** | — |
 | "Commit my work and open a PR" | PM (pipeline only) | `/sync` |
@@ -70,7 +70,7 @@ Finalization           — `/sync "type: description"` commits, pushes, and open
 - `/changelog "..."` — add a standalone `CHANGELOG.md [Unreleased]` entry without running the full pipeline.
 - `/memlog "summary"` — append a session note to `memory/YYYY-MM-DD.md` without touching CHANGELOG or git.
 - `/new-task "name"` — create a task-tracking block in today's memory log.
-- `/meeting` — run a structured, inline multi-agent discussion (PM facilitates, transcript saved to `memory/meeting-YYYY-MM-DD-[slug].md`).
+- `meeting-facilitation` skill — run a structured, inline committee-form multi-agent discussion (PM facilitates, transcript saved to `memory/meeting-YYYY-MM-DD-[slug].md`).
 
 **Never** bypass this with direct `git commit`/`git push`/`--no-verify` — the pre-commit hook blocks non-`/sync` commits by design.
 

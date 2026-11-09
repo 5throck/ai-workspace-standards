@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 56f60d6e12b8cfe1dbbf747a60e19ac47ff29a24685ca2ccdb81f43b8a736101
+translated_from_hash: ee87788f0518148a13c85211e8912bf1ad1173d7b2881ed835b0cea46d9d42c6
 ---
 # Co-Design 사용자 가이드
 
@@ -29,7 +29,7 @@ translated_from_hash: 56f60d6e12b8cfe1dbbf747a60e19ac47ff29a24685ca2ccdb81f43b8a
 **기타 일상 명령어:**
 - `/changelog "..."` — sync 실행 전에 `CHANGELOG.md [Unreleased]` 항목을 추가합니다.
 - `/memlog "summary"` — 전체 파이프라인을 실행하지 않고 세션 노트만 기록합니다.
-- `/meeting "topic" [--agents a,b] [--rounds N]` — 예를 들어 `design-lead`와 `storyteller` 간의 디자인 이견을 해결하기 위해 구조화된 멀티 에이전트 토론을 즉석에서 실행합니다.
+- `meeting-facilitation` 스킬 (`skills/meeting-facilitation`, "meeting"이라고 말해도 됩니다) — 예를 들어 `design-lead`와 `storyteller` 간의 디자인 이견을 해결하기 위해 구조화된 위원회 형식 멀티 에이전트 토론을 즉석에서 실행합니다.
 
 ---
 
@@ -49,7 +49,7 @@ translated_from_hash: 56f60d6e12b8cfe1dbbf747a60e19ac47ff29a24685ca2ccdb81f43b8a
 | "테스트나 이해관계자 데모용 인터랙티브 프로토타입을 만들어달라" | `prototype-engineer` | — | 4 |
 | "실제 사용자로 이 디자인을 검증 / 사용성 테스트를 진행해달라" | `ux-researcher` | — | 4 (루프) |
 | "엔지니어링팀에 넘길 최종 핸드오프 자료를 준비해달라" | `prototype-engineer`, `visual-designer` | `ui-ux-design-intelligence` | 4 |
-| "팀 간 디자인 의사결정을 조율해달라" | PM (via `/meeting`) | — | 모든 단계 |
+| "팀 간 디자인 의사결정을 조율해달라" | PM (via `meeting-facilitation`) | — | 모든 단계 |
 
 **참고:**
 - `typography-expert`는 선택적입니다 — 브랜드 지침에 의해 폰트 결정이 이미 고정되어 있다면 생략하세요.
@@ -98,7 +98,7 @@ Phase 6 — 품질 보증 및 최종화     (PM)
 **관련된 주요 명령어/스크립트:**
 - `bun scripts/audit.ts` — QA 게이트. Write/Edit 이후 자동으로 실행되는 것이 아니라, pre-push(`scripts/hooks/pre-push.ts`)와 `/sync` 파이프라인의 audit 게이트 단계에서 실행됩니다.
 - `/sync "type(scope): message"` — 커밋, 푸시, PR 생성을 위한 유일하게 승인된 방법입니다. 직접적인 `git commit`/`git push` 호출은 pre-commit 훅에 의해 차단됩니다.
-- `/meeting` — 파이프라인 중간에 단계를 벗어나지 않고 이견을 해결하거나 결정을 검토할 때 사용합니다.
+- `meeting-facilitation` 스킬 — 파이프라인 중간에 단계를 벗어나지 않고 이견을 해결하거나 결정을 검토할 때 사용합니다.
 
 ---
 

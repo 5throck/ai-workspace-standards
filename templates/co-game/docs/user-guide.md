@@ -52,7 +52,7 @@ Use this table to guess which agent(s) PM will dispatch — you don't need to na
 | "Clean up duplication / improve structure without changing behavior" | (specialist who owns the file) | `refactoring` | 4 |
 | "Scan for vulnerabilities / secrets before merge" | `security-monitor` | `security-scan` | 0, 5 |
 | "Set up the dev environment / unrecognized tech stack" | `stack-setup` | — | 0-1 |
-| "Facilitate a multi-agent design discussion" | (PM facilitates) | `meeting-facilitation` (`/meeting`) | any |
+| "Facilitate a multi-agent design discussion" | (PM facilitates) | `meeting-facilitation` | any |
 | "Add/update an agent or skill" | PM + affected specialist | `agent-lifecycle-manager` / `skill-lifecycle-manager` | 0 |
 | "Full project review across all agents" | all specialists (parallel, read-only) | `project-review` | any |
 

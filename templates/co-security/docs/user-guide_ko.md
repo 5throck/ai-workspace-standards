@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: bdac2f01715102024cbf0b6614b4001928904b90077846c950efea7686e52a7d
+translated_from_hash: 64afaf6b6b05a2f8b50166c1144791b9eb8d9fa7bf2925d74af00db36f5b60bc
 ---
 # co-security 사용자 가이드
 
@@ -43,7 +43,7 @@ translated_from_hash: bdac2f01715102024cbf0b6614b4001928904b90077846c950efea7686
 | "취약점을 찾아주세요" / PoC 구축 / 조치 재검증 | Pentester | "pentester", "security", "pentest", "vulnerability" | 3, 6 |
 | "패치를 배포해주세요" / Ansible 플레이북 작성 / Linux·macOS·Windows 전반 CVE 패치 | Patch Engineer | "patch engineer", "patch", "remediate", "fix vulnerability" | 4, 6 |
 | "보고서를 작성해주세요" / 요약 보고서 초안 / CVSS 점수 산정 | Report Writer | "report writer", "write", "document", "draft", "security" | 5, 6 |
-| 교차 영역 의사 결정을 위한 구조화된 팀 논의 실행 | PM (진행) | `/meeting "topic"` | 전체 |
+| 교차 영역 의사 결정을 위한 구조화된 팀 논의 실행 | PM (진행) | `meeting-facilitation` 스킬 | 전체 |
 
 **기본 원칙**: 요청이 공격적 활동(정찰, 취약점 공격, 패치)을 포함하고 아직 승인 문서가 없다면, PM은 작업을 중단하고 먼저 인게이지먼트 범위 설정을 완료하도록 요청합니다 — 이는 선택 사항이 아닙니다.
 

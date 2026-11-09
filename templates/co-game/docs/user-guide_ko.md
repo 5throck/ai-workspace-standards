@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 9fd29a75869b3cbc367e6ba96d6d0c5b34a90fc44f69379439a731b38e2b7b05
+translated_from_hash: 5263f77b8b2a0c228fbee683f57ac5417871a5b2f6caa209cacfba5386049ae1
 ---
 # co-game 사용자 가이드
 
@@ -57,7 +57,7 @@ co-game은 워크스페이스 전체의 **PM 게이트웨이** 패턴을 따릅�
 | "동작 변경 없이 중복 제거 / 구조 개선" | (파일 담당 전문 에이전트) | `refactoring` | 4 |
 | "병합 전 취약점 / 시크릿 스캔" | `security-monitor` | `security-scan` | 0, 5 |
 | "개발 환경 설정 / 인식되지 않는 기술 스택" | `stack-setup` | — | 0-1 |
-| "다중 에이전트 설계 토론 진행" | (PM이 진행) | `meeting-facilitation` (`/meeting`) | 모든 단계 |
+| "다중 에이전트 설계 토론 진행" | (PM이 진행) | `meeting-facilitation` | 모든 단계 |
 | "에이전트나 스킬 추가/수정" | PM + 대상 전문 에이전트 | `agent-lifecycle-manager` / `skill-lifecycle-manager` | 0 |
 | "모든 에이전트를 활용한 전체 프로젝트 검토" | 전 전문 에이전트 (병렬, 읽기 전용) | `project-review` | 모든 단계 |
 
