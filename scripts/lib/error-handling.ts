@@ -14,27 +14,27 @@
 // ============================================================================
 
 export enum ErrorSeverity {
-  FATAL = 'fatal',
-  WARNING = 'warning',
-  INFO = 'info',
+  FATAL = "fatal",
+  WARNING = "warning",
+  INFO = "info",
 }
 
 export enum ErrorPhase {
   // Pipeline-specific phases (legacy L3-to-variant)
-  ADR_VALIDATION = 'adr_validation',
-  L3_SCAN = 'l3_scan',
-  RECONCILIATION = 'reconciliation',
-  VARIANT_GENERATION = 'variant_generation',
-  BETA_SETUP = 'beta_setup',
-  INTEGRATION = 'integration',
-  VALIDATION = 'validation',
+  ADR_VALIDATION = "adr_validation",
+  L3_SCAN = "l3_scan",
+  RECONCILIATION = "reconciliation",
+  VARIANT_GENERATION = "variant_generation",
+  BETA_SETUP = "beta_setup",
+  INTEGRATION = "integration",
+  VALIDATION = "validation",
   // General-purpose phases (any script)
-  SCRIPT_EXECUTION = 'script_execution',
-  FILE_IO = 'file_io',
-  CLI_PARSING = 'cli_parsing',
-  AUDIT = 'audit',
-  LIFECYCLE = 'lifecycle',
-  SECURITY = 'security',
+  SCRIPT_EXECUTION = "script_execution",
+  FILE_IO = "file_io",
+  CLI_PARSING = "cli_parsing",
+  AUDIT = "audit",
+  LIFECYCLE = "lifecycle",
+  SECURITY = "security",
 }
 
 export interface PipelineError {
@@ -49,7 +49,7 @@ export interface PipelineError {
 }
 
 export interface ErrorRecoveryAction {
-  action: 'retry' | 'skip' | 'rollback' | 'abort';
+  action: "retry" | "skip" | "rollback" | "abort";
   reason: string;
   steps: string[];
 }
@@ -69,7 +69,7 @@ export function createError(
   message: string,
   details?: string,
   suggestedRemediation?: string,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): PipelineError {
   return {
     severity,
@@ -93,53 +93,25 @@ export function fatalError(
   message: string,
   details?: string,
   suggestedRemediation?: string,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): PipelineError {
-  return createError(
-    ErrorSeverity.FATAL,
-    phase,
-    code,
-    message,
-    details,
-    suggestedRemediation,
-    context
-  );
+  return createError(ErrorSeverity.FATAL, phase, code, message, details, suggestedRemediation, context);
 }
 
 /**
  * Create warning error
  * @version 1.1.0
  */
-export function warningError(
-  phase: ErrorPhase,
-  code: string,
-  message: string,
-  details?: string
-): PipelineError {
-  return createError(
-    ErrorSeverity.WARNING,
-    phase,
-    code,
-    message,
-    details
-  );
+export function warningError(phase: ErrorPhase, code: string, message: string, details?: string): PipelineError {
+  return createError(ErrorSeverity.WARNING, phase, code, message, details);
 }
 
 /**
  * Create info error
  * @version 1.1.0
  */
-export function infoError(
-  phase: ErrorPhase,
-  code: string,
-  message: string
-): PipelineError {
-  return createError(
-    ErrorSeverity.INFO,
-    phase,
-    code,
-    message
-  );
+export function infoError(phase: ErrorPhase, code: string, message: string): PipelineError {
+  return createError(ErrorSeverity.INFO, phase, code, message);
 }
 
 // ============================================================================
@@ -154,11 +126,11 @@ export function determineRecoveryAction(error: PipelineError): ErrorRecoveryActi
   switch (error.severity) {
     case ErrorSeverity.FATAL:
       return {
-        action: 'abort',
+        action: "abort",
         reason: `Fatal error in ${error.phase}: ${error.message}`,
         steps: [
-          `1. Review error details: ${error.details || 'No details available'}`,
-          `2. Check remediation: ${error.suggestedRemediation || 'No remediation available'}`,
+          `1. Review error details: ${error.details || "No details available"}`,
+          `2. Check remediation: ${error.suggestedRemediation || "No remediation available"}`,
           `3. Fix underlying issue`,
           `4. Retry pipeline execution`,
         ],
@@ -166,7 +138,7 @@ export function determineRecoveryAction(error: PipelineError): ErrorRecoveryActi
 
     case ErrorSeverity.WARNING:
       return {
-        action: 'skip',
+        action: "skip",
         reason: `Non-critical warning: ${error.message}`,
         steps: [
           `1. Acknowledge warning: ${error.details || error.message}`,
@@ -177,22 +149,16 @@ export function determineRecoveryAction(error: PipelineError): ErrorRecoveryActi
 
     case ErrorSeverity.INFO:
       return {
-        action: 'skip',
+        action: "skip",
         reason: `Informational message: ${error.message}`,
-        steps: [
-          `1. Note information: ${error.message}`,
-          `2. Continue pipeline execution`,
-        ],
+        steps: [`1. Note information: ${error.message}`, `2. Continue pipeline execution`],
       };
 
     default:
       return {
-        action: 'abort',
+        action: "abort",
         reason: `Unknown error severity: ${error.severity}`,
-        steps: [
-          `1. Review error: ${error.message}`,
-          `2. Check error handling configuration`,
-        ],
+        steps: [`1. Review error: ${error.message}`, `2. Check error handling configuration`],
       };
   }
 }
@@ -201,34 +167,32 @@ export function determineRecoveryAction(error: PipelineError): ErrorRecoveryActi
  * Execute recovery action
  * @version 1.1.0
  */
-export async function executeRecoveryAction(
-  action: ErrorRecoveryAction
-): Promise<boolean> {
+export async function executeRecoveryAction(action: ErrorRecoveryAction): Promise<boolean> {
   switch (action.action) {
-    case 'abort':
+    case "abort":
       console.error(`❌ Pipeline aborted: ${action.reason}`);
-      console.error('\nRecovery steps:');
+      console.error("\nRecovery steps:");
       for (const step of action.steps) {
         console.error(`  ${step}`);
       }
       return false;
 
-    case 'skip':
+    case "skip":
       console.warn(`⚠️  Warning: ${action.reason}`);
-      console.warn('Continuing execution...');
+      console.warn("Continuing execution...");
       return true;
 
-    case 'retry':
+    case "retry":
       console.info(`ℹ️  Retry: ${action.reason}`);
-      console.info('\nRetry steps:');
+      console.info("\nRetry steps:");
       for (const step of action.steps) {
         console.info(`  ${step}`);
       }
       return true;
 
-    case 'rollback':
+    case "rollback":
       console.error(`❌ Rollback required: ${action.reason}`);
-      console.error('\nRollback steps:');
+      console.error("\nRollback steps:");
       for (const step of action.steps) {
         console.error(`  ${step}`);
       }
@@ -265,13 +229,13 @@ export function formatErrorLog(error: PipelineError): string {
   }
 
   if (error.context && Object.keys(error.context).length > 0) {
-    lines.push('Context:');
+    lines.push("Context:");
     for (const [key, value] of Object.entries(error.context)) {
       lines.push(`  ${key}: ${JSON.stringify(value)}`);
     }
   }
 
-  return lines.join(' | ');
+  return lines.join(" | ");
 }
 
 /**
@@ -302,9 +266,9 @@ export function logError(error: PipelineError): void {
  */
 export function logErrors(errors: PipelineError[]): void {
   const grouped = {
-    fatal: errors.filter(e => e.severity === ErrorSeverity.FATAL),
-    warning: errors.filter(e => e.severity === ErrorSeverity.WARNING),
-    info: errors.filter(e => e.severity === ErrorSeverity.INFO),
+    fatal: errors.filter((e) => e.severity === ErrorSeverity.FATAL),
+    warning: errors.filter((e) => e.severity === ErrorSeverity.WARNING),
+    info: errors.filter((e) => e.severity === ErrorSeverity.INFO),
   };
 
   if (grouped.fatal.length > 0) {
@@ -359,13 +323,13 @@ export function warnAndExit(message: string, code = 0): never {
 export async function withErrorHandling<T>(
   phase: ErrorPhase,
   fn: () => Promise<T>,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): Promise<T> {
   try {
     return await fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    const error = fatalError(phase, "UNCAUGHT", message, undefined, undefined, context);
     logError(error);
     const recovery = determineRecoveryAction(error);
     await executeRecoveryAction(recovery);
@@ -376,16 +340,12 @@ export async function withErrorHandling<T>(
 /**
  * Wrap a sync function with structured error handling.
  */
-export function withSyncErrorHandling<T>(
-  phase: ErrorPhase,
-  fn: () => T,
-  context?: Record<string, unknown>
-): T {
+export function withSyncErrorHandling<T>(phase: ErrorPhase, fn: () => T, context?: Record<string, unknown>): T {
   try {
     return fn();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const error = fatalError(phase, 'UNCAUGHT', message, undefined, undefined, context);
+    const error = fatalError(phase, "UNCAUGHT", message, undefined, undefined, context);
     logError(error);
     const recovery = determineRecoveryAction(error);
     void executeRecoveryAction(recovery);

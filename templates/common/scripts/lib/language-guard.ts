@@ -31,7 +31,7 @@ export const NON_ENGLISH_RANGE = /[가-힯ᄀ-ᇿ㄰-㆏぀-ヿ一-鿿]/;
 
 /** Strip fenced/inline code blocks before checking — code samples may contain non-English values. */
 export function stripCodeBlocks(text: string): string {
-  return text.replace(/```[\s\S]*?```/g, '').replace(/`[^`]*`/g, '');
+  return text.replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, "");
 }
 
 /** True if `text` (after stripping code blocks) contains non-English (Korean/Japanese/Chinese) characters. */

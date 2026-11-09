@@ -74,7 +74,10 @@ export interface ContextSection {
 
 /** Normalize a heading line (or bare heading text) for comparison: strip leading #s, trim, lowercase. */
 export function normalizeHeading(headingLineOrText: string): string {
-  return headingLineOrText.replace(/^#{2,3}\s+/, '').trim().toLowerCase();
+  return headingLineOrText
+    .replace(/^#{2,3}\s+/, "")
+    .trim()
+    .toLowerCase();
 }
 
 /** A line that opens or closes a ``` / ~~~ fenced code block (v1.1.0). */
@@ -107,10 +110,10 @@ function computeFencedLines(lines: string[]): boolean[] {
  * count as section boundaries.
  */
 export function splitIntoSections(content: string): ContextSection[] {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const fenced = computeFencedLines(lines);
   const sections: ContextSection[] = [];
-  let currentHeadingLine = '';
+  let currentHeadingLine = "";
   let currentBody: string[] = [];
 
   const flush = () => {
@@ -118,7 +121,7 @@ export function splitIntoSections(content: string): ContextSection[] {
       sections.push({
         headingLine: currentHeadingLine,
         heading: normalizeHeading(currentHeadingLine),
-        body: currentBody.join('\n').replace(/^\n+|\n+$/g, ''),
+        body: currentBody.join("\n").replace(/^\n+|\n+$/g, ""),
       });
     }
   };
@@ -147,10 +150,10 @@ export function splitIntoSections(content: string): ContextSection[] {
  * including their ### children).
  */
 export function splitIntoTopLevelSections(content: string): ContextSection[] {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const fenced = computeFencedLines(lines);
   const sections: ContextSection[] = [];
-  let currentHeadingLine = '';
+  let currentHeadingLine = "";
   let currentBody: string[] = [];
 
   const flush = () => {
@@ -158,7 +161,7 @@ export function splitIntoTopLevelSections(content: string): ContextSection[] {
       sections.push({
         headingLine: currentHeadingLine,
         heading: normalizeHeading(currentHeadingLine),
-        body: currentBody.join('\n').replace(/^\n+|\n+$/g, ''),
+        body: currentBody.join("\n").replace(/^\n+|\n+$/g, ""),
       });
     }
   };
@@ -180,7 +183,7 @@ export function splitIntoTopLevelSections(content: string): ContextSection[] {
 /** Non-blank, whitespace-trimmed lines as a Set, for overlap comparison. */
 export function getContentLines(text: string): Set<string> {
   const lines = new Set<string>();
-  for (const line of text.split('\n')) {
+  for (const line of text.split("\n")) {
     const trimmed = line.trim();
     if (trimmed) lines.add(trimmed);
   }
@@ -242,20 +245,97 @@ export const W2_REVIEW_FLOOR = 0.3;
  * no boilerplate-detection signal and dilute the overlap ratio.
  */
 const STOP_WORDS = new Set([
-  'the', 'and', 'for', 'with', 'are', 'must', 'any', 'all', 'not', 'that', 'this',
-  'from', 'into', 'when', 'use', 'see', 'also', 'its', 'can', 'will', 'have', 'has',
-  'been', 'more', 'than', 'only', 'per', 'via', 'each', 'own', 'out', 'new', 'how',
-  'what', 'why', 'who', 'may', 'should', 'would', 'could', 'they', 'them', 'their',
-  'there', 'these', 'those', 'then', 'were', 'was', 'but', 'yet', 'nor', 'too',
-  'very', 'just', 'about', 'above', 'after', 'again', 'under', 'over', 'between',
-  'both', 'before', 'because', 'while', 'during', 'without', 'within', 'along',
-  'across', 'against', 'among', 'around', 'behind', 'below', 'beneath', 'beside',
-  'beyond', 'inside', 'outside', 'since', 'until', 'upon', 'toward', 'towards',
+  "the",
+  "and",
+  "for",
+  "with",
+  "are",
+  "must",
+  "any",
+  "all",
+  "not",
+  "that",
+  "this",
+  "from",
+  "into",
+  "when",
+  "use",
+  "see",
+  "also",
+  "its",
+  "can",
+  "will",
+  "have",
+  "has",
+  "been",
+  "more",
+  "than",
+  "only",
+  "per",
+  "via",
+  "each",
+  "own",
+  "out",
+  "new",
+  "how",
+  "what",
+  "why",
+  "who",
+  "may",
+  "should",
+  "would",
+  "could",
+  "they",
+  "them",
+  "their",
+  "there",
+  "these",
+  "those",
+  "then",
+  "were",
+  "was",
+  "but",
+  "yet",
+  "nor",
+  "too",
+  "very",
+  "just",
+  "about",
+  "above",
+  "after",
+  "again",
+  "under",
+  "over",
+  "between",
+  "both",
+  "before",
+  "because",
+  "while",
+  "during",
+  "without",
+  "within",
+  "along",
+  "across",
+  "against",
+  "among",
+  "around",
+  "behind",
+  "below",
+  "beneath",
+  "beside",
+  "beyond",
+  "inside",
+  "outside",
+  "since",
+  "until",
+  "upon",
+  "toward",
+  "towards",
 ]);
 
 /** Naive plural stem: strip a trailing 's' (not 'ss'/'us', min length 4). Deliberately language-light — no external deps. */
 function stemToken(word: string): string {
-  return word.length > 3 && word.endsWith('s') && !word.endsWith('ss') && !word.endsWith('us')
+  return word.length > 3 && word.endsWith("s") && !word.endsWith("ss") && !word.endsWith("us")
     ? word.slice(0, -1)
     : word;
 }
@@ -269,10 +349,10 @@ function contentTokens(text: string): Set<string> {
   return new Set(
     text
       .toLowerCase()
-      .replace(/[*`_>#[\]()|]/g, ' ')
+      .replace(/[*`_>#[\]()|]/g, " ")
       .split(/[^a-z0-9§.\/_-]+/)
-      .map(w => w.replace(/^[.\-_]+|[.\-_]+$/g, ''))
-      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+      .map((w) => w.replace(/^[.\-_]+|[.\-_]+$/g, ""))
+      .filter((w) => w.length > 2 && !STOP_WORDS.has(w))
       .map(stemToken),
   );
 }
@@ -333,7 +413,7 @@ const COMMON_CONTEXT_BLOCK_RE = /<!--\s*COMMON-CONTEXT:START\s*-->[\s\S]*?<!--\s
 export function stripMarkerZones(content: string): string {
   const startRe = /<!--\s*COMMON-CONTEXT\s*:\s*START\s*-->/;
   const endRe = /<!--\s*\/?\s*COMMON-CONTEXT\s*:\s*END\s*-->/;
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   // Pass 1: collect COMPLETE spans as inclusive [startIdx, endIdx] line ranges.
   const spans: Array<[number, number]> = [];
@@ -351,7 +431,7 @@ export function stripMarkerZones(content: string): string {
   // Pass 2: drop only lines inside complete spans.
   const dropped = new Set<number>();
   for (const [a, b] of spans) for (let i = a; i <= b; i++) dropped.add(i);
-  return lines.filter((_, i) => !dropped.has(i)).join('\n');
+  return lines.filter((_, i) => !dropped.has(i)).join("\n");
 }
 
 /**
@@ -392,7 +472,7 @@ export function spliceCommonContextBlock(
  */
 export function splitOffVersionFooter(content: string): { body: string; footer: string } {
   const match = content.match(VERSION_FOOTER_RE);
-  if (!match || match.index === undefined) return { body: content, footer: '' };
+  if (!match || match.index === undefined) return { body: content, footer: "" };
   return { body: content.slice(0, match.index), footer: content.slice(match.index) };
 }
 
@@ -431,7 +511,7 @@ export function splitContextFileSections(
   options?: { includeVariantInject?: boolean },
 ): ManagedZoneAwareSection[] {
   const includeVariantInject = options?.includeVariantInject ?? false;
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const fenced = computeFencedLines(lines);
 
   // Pass 1: mark lines belonging to managed zones (zone openers/closers and inner content).
@@ -467,7 +547,7 @@ export function splitContextFileSections(
 
   // Pass 2: walk heading boundaries; assemble sections with zone lines stripped.
   const result: ManagedZoneAwareSection[] = [];
-  let currentHeadingLine = '';
+  let currentHeadingLine = "";
   let currentHeadingIndex = -1;
   let currentBodyLines: string[] = [];
   let currentBodyContainedZone = false;
@@ -478,7 +558,7 @@ export function splitContextFileSections(
       section: {
         headingLine: currentHeadingLine,
         heading: normalizeHeading(currentHeadingLine),
-        body: currentBodyLines.join('\n').replace(/^\n+|\n+$/g, ''),
+        body: currentBodyLines.join("\n").replace(/^\n+|\n+$/g, ""),
       },
       headingInManagedZone: inManagedZone[currentHeadingIndex],
       bodyContainedManagedZone: currentBodyContainedZone,
@@ -513,7 +593,7 @@ export function splitContextFileSections(
 
 export interface ProjectSectionClassification {
   /** 'shared' = heading exists in common; 'superseded' = boilerplate replaced by common content; 'projectOnly' = unique project content. */
-  verdict: 'shared' | 'superseded' | 'projectOnly';
+  verdict: "shared" | "superseded" | "projectOnly";
   /** Max token-overlap similarity against any common section (0 for 'shared'). */
   maxSimilarity: number;
   /** Normalized heading of the best-matching common section (null when none). */
@@ -532,8 +612,8 @@ export function classifyProjectSection(
   options?: { supersededThreshold?: number },
 ): ProjectSectionClassification {
   const supersededThreshold = options?.supersededThreshold ?? W1_SUPERSEDED_THRESHOLD;
-  if (commonSections.some(common => common.heading === section.heading)) {
-    return { verdict: 'shared', maxSimilarity: 1, matchedCommonHeading: section.heading };
+  if (commonSections.some((common) => common.heading === section.heading)) {
+    return { verdict: "shared", maxSimilarity: 1, matchedCommonHeading: section.heading };
   }
   let maxSimilarity = 0;
   let matchedCommonHeading: string | null = null;
@@ -544,7 +624,7 @@ export function classifyProjectSection(
       matchedCommonHeading = common.heading;
     }
   }
-  const verdict = maxSimilarity >= supersededThreshold ? 'superseded' : 'projectOnly';
+  const verdict = maxSimilarity >= supersededThreshold ? "superseded" : "projectOnly";
   return { verdict, maxSimilarity, matchedCommonHeading };
 }
 
@@ -575,7 +655,7 @@ export function extractProjectOnlySections(
   const common = stripVersionFooter(commonContextMd);
 
   const projectSections = splitContextFileSections(project);
-  const commonHeadings = new Set(splitIntoSections(common).map(s => s.heading));
+  const commonHeadings = new Set(splitIntoSections(common).map((s) => s.heading));
   const commonSections = splitIntoSections(common);
 
   const projectOnly: ContextSection[] = [];
@@ -585,7 +665,7 @@ export function extractProjectOnlySections(
     if (commonHeadings.has(section.heading)) continue;
     if (!section.body.trim()) continue; // nothing to preserve
     const classification = classifyProjectSection(section, commonSections, options);
-    if (classification.verdict === 'superseded') {
+    if (classification.verdict === "superseded") {
       superseded.push(section);
     } else {
       projectOnly.push(section);
@@ -600,7 +680,7 @@ export function extractProjectOnlySections(
 
 export interface CommonizationSectionClassification {
   /** 'remove' = near-duplicate of common content; 'review' = partial overlap, manual review only; 'keep' = below report floor, untouched. */
-  verdict: 'remove' | 'review' | 'keep';
+  verdict: "remove" | "review" | "keep";
   /** Max token-overlap similarity against any common section. */
   maxSimilarity: number;
   /** Normalized heading of the best-matching common section (null when none). */
@@ -637,9 +717,9 @@ export function classifyCommonizationSection(
       matchedCommonHeading = common.heading;
     }
   }
-  if (maxSimilarity >= removeThreshold) return { verdict: 'remove', maxSimilarity, matchedCommonHeading };
-  if (maxSimilarity >= reviewFloor) return { verdict: 'review', maxSimilarity, matchedCommonHeading };
-  return { verdict: 'keep', maxSimilarity, matchedCommonHeading };
+  if (maxSimilarity >= removeThreshold) return { verdict: "remove", maxSimilarity, matchedCommonHeading };
+  if (maxSimilarity >= reviewFloor) return { verdict: "review", maxSimilarity, matchedCommonHeading };
+  return { verdict: "keep", maxSimilarity, matchedCommonHeading };
 }
 
 // ============================================================================
@@ -706,14 +786,11 @@ export interface ProjectOnlyDetection {
  * wholesale, so paraphrased-but-same-purpose content still counts — only heading
  * presence in the template proves the template carries the content.
  */
-export function findProjectOnlySections(
-  projectContent: string,
-  templateContent: string,
-): ProjectOnlyDetection {
+export function findProjectOnlySections(projectContent: string, templateContent: string): ProjectOnlyDetection {
   const { body: projectBody, footer: projectFooter } = splitOffVersionFooter(projectContent);
-  const wholeFileOwned = projectFooter === '';
+  const wholeFileOwned = projectFooter === "";
   const templateBody = stripVersionFooter(templateContent);
-  const templateHeadings = new Set(splitIntoSections(templateBody).map(s => s.heading));
+  const templateHeadings = new Set(splitIntoSections(templateBody).map((s) => s.heading));
   const projectSections = splitContextFileSections(projectBody, { includeVariantInject: true });
 
   const sections: ContextSection[] = [];
@@ -756,7 +833,7 @@ export interface HeadingSpan {
  * Returns null when no non-fenced heading matches `targetHeading` (normalized).
  */
 export function findHeadingSpan(content: string, targetHeading: string): HeadingSpan | null {
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const fenced = computeFencedLines(lines);
   const target = normalizeHeading(targetHeading);
 
@@ -787,7 +864,10 @@ export function findHeadingSpan(content: string, targetHeading: string): Heading
     headingLine: lines[startLine],
     heading: target,
     level,
-    body: lines.slice(startLine + 1, endLineExclusive).join('\n').replace(/^\n+|\n+$/g, ''),
+    body: lines
+      .slice(startLine + 1, endLineExclusive)
+      .join("\n")
+      .replace(/^\n+|\n+$/g, ""),
     startLine,
     endLineExclusive,
   };
@@ -802,14 +882,11 @@ export function findHeadingSpan(content: string, targetHeading: string): Heading
 export function removeHeadingSpan(content: string, targetHeading: string): string | null {
   const span = findHeadingSpan(content, targetHeading);
   if (!span) return null;
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const before = lines.slice(0, span.startLine);
   const after = lines.slice(span.endLineExclusive);
-  while (
-    before.length > 0 && after.length > 0 &&
-    before[before.length - 1].trim() === '' && after[0].trim() === ''
-  ) {
+  while (before.length > 0 && after.length > 0 && before[before.length - 1].trim() === "" && after[0].trim() === "") {
     before.pop();
   }
-  return [...before, ...after].join('\n');
+  return [...before, ...after].join("\n");
 }

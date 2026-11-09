@@ -34,9 +34,9 @@
  * @version 1.2.0
  */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { load as yamlLoad, dump as yamlDump } from 'js-yaml';
+import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { load as yamlLoad, dump as yamlDump } from "js-yaml";
 
 interface Stage {
   id: string;
@@ -91,7 +91,7 @@ interface ValidationIssue {
 
 function loadYaml(path: string): any {
   if (!existsSync(path)) return null;
-  const content = readFileSync(path, 'utf-8');
+  const content = readFileSync(path, "utf-8");
   try {
     return yamlLoad(content);
   } catch (err) {
@@ -102,18 +102,25 @@ function loadYaml(path: string): any {
 function discoverGovernedVariants(root: string): string[] {
   // Explicit allowlist of 9 governed-track variants per ADR-0083 §13.2 P4
   const governedVariants = [
-    'co-abap', 'co-consult', 'co-deck', 'co-design', 'co-export',
-    'co-game', 'co-hr', 'co-price', 'co-security'
+    "co-abap",
+    "co-consult",
+    "co-deck",
+    "co-design",
+    "co-export",
+    "co-game",
+    "co-hr",
+    "co-price",
+    "co-security",
   ];
 
   const variants: string[] = [];
-  const templatesDir = join(root, 'templates');
+  const templatesDir = join(root, "templates");
 
   for (const variant of governedVariants) {
     const variantDir = join(templatesDir, variant);
 
     if (existsSync(variantDir) && statSync(variantDir).isDirectory()) {
-      const stagesFile = join(variantDir, 'process', 'stages.yaml');
+      const stagesFile = join(variantDir, "process", "stages.yaml");
       if (existsSync(stagesFile)) {
         variants.push(variant);
       }
@@ -124,7 +131,7 @@ function discoverGovernedVariants(root: string): string[] {
 }
 
 function loadStages(variantDir: string): Stage[] {
-  const stagesPath = join(variantDir, 'process', 'stages.yaml');
+  const stagesPath = join(variantDir, "process", "stages.yaml");
 
   if (!existsSync(stagesPath)) {
     return [];
@@ -136,7 +143,7 @@ function loadStages(variantDir: string): Stage[] {
 
 function loadProcedures(variantDir: string, variant: string): RACIProcedure[] {
   const procedures: RACIProcedure[] = [];
-  const procDir = join(variantDir, 'procedures');
+  const procDir = join(variantDir, "procedures");
 
   if (!existsSync(procDir)) return [];
 
@@ -144,7 +151,7 @@ function loadProcedures(variantDir: string, variant: string): RACIProcedure[] {
     const procPath = join(procDir, procName);
     if (!statSync(procPath).isDirectory()) continue;
 
-    const schemaPath = join(procPath, 'schema.yaml');
+    const schemaPath = join(procPath, "schema.yaml");
     if (!existsSync(schemaPath)) continue;
 
     try {
@@ -162,7 +169,7 @@ function loadProcedures(variantDir: string, variant: string): RACIProcedure[] {
 
 /** Load human-roles registry if it exists (ADR-0084) */
 function loadHumanRoles(variantDir: string): Set<string> {
-  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  const humanRolesPath = join(variantDir, "governance", "_human-roles.yaml");
   const roles = new Set<string>();
 
   if (!existsSync(humanRolesPath)) {
@@ -171,7 +178,7 @@ function loadHumanRoles(variantDir: string): Set<string> {
 
   try {
     const data = loadYaml(humanRolesPath) as any;
-    if (data?.human_roles && typeof data.human_roles === 'object') {
+    if (data?.human_roles && typeof data.human_roles === "object") {
       for (const key of Object.keys(data.human_roles)) {
         roles.add(key);
       }
@@ -186,27 +193,23 @@ function loadHumanRoles(variantDir: string): Set<string> {
 /** Check if an agent file exists */
 function agentFileExists(agentKey: string, root: string): boolean {
   // Try all variant agent directories
-  const templatesDir = join(root, 'templates');
+  const templatesDir = join(root, "templates");
   if (existsSync(templatesDir)) {
     for (const variant of readdirSync(templatesDir)) {
-      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      const agentPath = join(templatesDir, variant, "agents", `${agentKey}.md`);
       if (existsSync(agentPath)) return true;
     }
   }
 
   // Try workspace agents
-  const workspaceAgentPath = join(root, 'agents', `${agentKey}.md`);
+  const workspaceAgentPath = join(root, "agents", `${agentKey}.md`);
   if (existsSync(workspaceAgentPath)) return true;
 
   return false;
 }
 
 /** Resolve actor type for an agent key per derivation rule (ADR-0084, §3.1) */
-function resolveActorType(
-  agentKey: string,
-  humanRoles: Set<string>,
-  root: string
-): "human" | "agent" | null {
+function resolveActorType(agentKey: string, humanRoles: Set<string>, root: string): "human" | "agent" | null {
   // 1. Check human-roles registry first (takes precedence)
   if (humanRoles.has(agentKey)) {
     return "human";
@@ -224,19 +227,17 @@ function generateMatrix(
   stages: Stage[],
   procedures: RACIProcedure[],
   humanRoles: Set<string>,
-  root: string
+  root: string,
 ): { matrix: RACIMatrix; issues: ValidationIssue[] } {
   const rows: RACIRow[] = [];
   const issues: ValidationIssue[] = [];
-  const stageMap = new Map(stages.map(s => [s.id, s]));
+  const stageMap = new Map(stages.map((s) => [s.id, s]));
 
   // Helper: construct canonical procedure node ID matching generate-skill-graph.ts
   // procedureId like "co-abap-custom-dev-delivery" → "procedure.co-abap.custom-dev-delivery"
   const getProcedureNodeId = (procedureId: string): string => {
     const prefix = `${variant}-`;
-    const procName = procedureId.startsWith(prefix)
-      ? procedureId.substring(prefix.length)
-      : procedureId;
+    const procName = procedureId.startsWith(prefix) ? procedureId.substring(prefix.length) : procedureId;
     return `procedure.${variant}.${procName}`;
   };
 
@@ -245,12 +246,12 @@ function generateMatrix(
     // owner_agent is NOT required on the procedure: when absent, the mapped
     // stage's owner_agent is the documented fallback for Accountable (v1.2.0).
     if (!proc.procedure_id || !proc.steps || !proc.stage) {
-      const procNodeId = proc.procedure_id ? getProcedureNodeId(proc.procedure_id) : 'unknown';
+      const procNodeId = proc.procedure_id ? getProcedureNodeId(proc.procedure_id) : "unknown";
       if (!proc.stage) {
         issues.push({
-          rule: 'MISSING_STAGE',
+          rule: "MISSING_STAGE",
           activity: procNodeId,
-          message: `Procedure missing stage: field (required per design §4.2)`
+          message: `Procedure missing stage: field (required per design §4.2)`,
         });
       }
       continue;
@@ -258,9 +259,9 @@ function generateMatrix(
 
     if (!stageMap.has(proc.stage)) {
       issues.push({
-        rule: 'INVALID_STAGE',
+        rule: "INVALID_STAGE",
         activity: getProcedureNodeId(proc.procedure_id),
-        message: `Stage ${proc.stage} not found in process/stages.yaml`
+        message: `Stage ${proc.stage} not found in process/stages.yaml`,
       });
       continue;
     }
@@ -276,9 +277,9 @@ function generateMatrix(
 
     if (responsibleAgents.size === 0) {
       issues.push({
-        rule: 'DEG-R-02',
+        rule: "DEG-R-02",
         activity: getProcedureNodeId(proc.procedure_id),
-        message: 'No responsible agents found in steps'
+        message: "No responsible agents found in steps",
       });
       continue;
     }
@@ -294,9 +295,9 @@ function generateMatrix(
     // DEG-R-01: exactly one accountable
     if (!accountable) {
       issues.push({
-        rule: 'DEG-R-01',
+        rule: "DEG-R-01",
         activity: getProcedureNodeId(proc.procedure_id),
-        message: `no accountable derivable — procedure ${proc.procedure_id} declares no owner_agent and stage ${proc.stage} has no owner_agent`
+        message: `no accountable derivable — procedure ${proc.procedure_id} declares no owner_agent and stage ${proc.stage} has no owner_agent`,
       });
       continue;
     }
@@ -320,9 +321,9 @@ function generateMatrix(
     // DEG-R-03: no agent both accountable and informed
     if (row.informed?.includes(accountable)) {
       issues.push({
-        rule: 'DEG-R-03',
+        rule: "DEG-R-03",
         activity: procNodeId,
-        message: `Agent "${accountable}" cannot be both accountable and informed`
+        message: `Agent "${accountable}" cannot be both accountable and informed`,
       });
     }
 
@@ -331,9 +332,9 @@ function generateMatrix(
       const actorTypes: Record<string, "human" | "agent"> = {};
       const allAgents = new Set<string>();
       allAgents.add(accountable);
-      responsible.forEach(a => allAgents.add(a));
-      row.consulted?.forEach(a => allAgents.add(a));
-      row.informed?.forEach(a => allAgents.add(a));
+      responsible.forEach((a) => allAgents.add(a));
+      row.consulted?.forEach((a) => allAgents.add(a));
+      row.informed?.forEach((a) => allAgents.add(a));
 
       for (const agent of allAgents) {
         const type = resolveActorType(agent, humanRoles, root);
@@ -351,30 +352,30 @@ function generateMatrix(
   }
 
   const matrix: RACIMatrix = {
-    schema_version: humanRoles.size > 0 ? '1.1' : '1.0',
+    schema_version: humanRoles.size > 0 ? "1.1" : "1.0",
     variant: variant,
-    generated_from: 'procedures/',
+    generated_from: "procedures/",
     rows: rows.sort((a, b) => {
       const stageCompare = a.stage.localeCompare(b.stage);
       if (stageCompare !== 0) return stageCompare;
       return a.activity.localeCompare(b.activity);
-    })
+    }),
   };
 
   return { matrix, issues };
 }
 
 function writeMatrix(variant: string, matrix: RACIMatrix, root: string): string {
-  const variantDir = join(root, 'templates', variant);
-  const govDir = join(variantDir, 'governance');
+  const variantDir = join(root, "templates", variant);
+  const govDir = join(variantDir, "governance");
   mkdirSync(govDir, { recursive: true });
 
-  const outputPath = join(govDir, 'raci.yaml');
+  const outputPath = join(govDir, "raci.yaml");
   const yamlContent = yamlDump(matrix, {
-    lineWidth: -1
+    lineWidth: -1,
   });
 
-  writeFileSync(outputPath, yamlContent, 'utf-8');
+  writeFileSync(outputPath, yamlContent, "utf-8");
   return outputPath;
 }
 
@@ -384,19 +385,19 @@ function writeMatrix(variant: string, matrix: RACIMatrix, root: string): string 
  * never affects exit codes.
  */
 function compareWithCommitted(variant: string, matrix: RACIMatrix, root: string): string[] {
-  const committedPath = join(root, 'templates', variant, 'governance', 'raci.yaml');
+  const committedPath = join(root, "templates", variant, "governance", "raci.yaml");
   if (!existsSync(committedPath)) return [];
   let committed: RACIMatrix | null = null;
   try {
     committed = loadYaml(committedPath) as RACIMatrix | null;
   } catch {
-    return [`committed ${join('governance', 'raci.yaml')} is unparseable — drift comparison skipped`];
+    return [`committed ${join("governance", "raci.yaml")} is unparseable — drift comparison skipped`];
   }
   if (!committed || !Array.isArray(committed.rows)) return [];
 
   const out: string[] = [];
-  const committedByActivity = new Map(committed.rows.map(r => [r.activity, r]));
-  const freshByActivity = new Map(matrix.rows.map(r => [r.activity, r]));
+  const committedByActivity = new Map(committed.rows.map((r) => [r.activity, r]));
+  const freshByActivity = new Map(matrix.rows.map((r) => [r.activity, r]));
 
   for (const r of matrix.rows) {
     const c = committedByActivity.get(r.activity);
@@ -404,15 +405,15 @@ function compareWithCommitted(variant: string, matrix: RACIMatrix, root: string)
       out.push(`+ ${r.activity}: new row (accountable=${r.accountable}) — absent from committed matrix`);
       continue;
     }
-    if ((c.accountable ?? '') !== (r.accountable ?? '')) {
+    if ((c.accountable ?? "") !== (r.accountable ?? "")) {
       out.push(`~ ${r.activity}: accountable committed=${c.accountable} fresh=${r.accountable}`);
     }
-    const cr = (c.responsible ?? []).slice().sort().join(',');
-    const fr = (r.responsible ?? []).slice().sort().join(',');
+    const cr = (c.responsible ?? []).slice().sort().join(",");
+    const fr = (r.responsible ?? []).slice().sort().join(",");
     if (cr !== fr) {
       out.push(`~ ${r.activity}: responsible committed=[${cr}] fresh=[${fr}]`);
     }
-    if ((c.stage ?? '') !== (r.stage ?? '')) {
+    if ((c.stage ?? "") !== (r.stage ?? "")) {
       out.push(`~ ${r.activity}: stage committed=${c.stage} fresh=${r.stage}`);
     }
   }
@@ -427,14 +428,13 @@ function compareWithCommitted(variant: string, matrix: RACIMatrix, root: string)
 export function generateAllRACIMatrices(
   root: string,
   targetVariant?: string,
-  writeFiles = false
+  writeFiles = false,
 ): Map<string, { matrix: RACIMatrix; issues: ValidationIssue[]; drift: string[]; written: boolean }> {
   const results = new Map<string, any>();
-  const variants = discoverGovernedVariants(root)
-    .filter(v => !targetVariant || v === targetVariant);
+  const variants = discoverGovernedVariants(root).filter((v) => !targetVariant || v === targetVariant);
 
   for (const variant of variants) {
-    const variantDir = join(root, 'templates', variant);
+    const variantDir = join(root, "templates", variant);
 
     const stages = loadStages(variantDir);
     const procedures = loadProcedures(variantDir, variant);
@@ -443,7 +443,7 @@ export function generateAllRACIMatrices(
     const drift = compareWithCommitted(variant, matrix, root);
 
     let written = false;
-    if (writeFiles && issues.filter(i => i.rule.startsWith('DEG-R')).length === 0) {
+    if (writeFiles && issues.filter((i) => i.rule.startsWith("DEG-R")).length === 0) {
       try {
         writeMatrix(variant, matrix, root);
         written = true;
@@ -465,14 +465,14 @@ function main(): void {
   let writeFiles = false;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--variant') targetVariant = args[++i];
-    else if (args[i] === '--root') root = args[++i];
-    else if (args[i] === '--write') writeFiles = true;
-    else if (args[i] === '--help' || args[i] === '-h') {
-      console.log('Usage: bun scripts/generate-raci.ts [--variant <name>|all] [--root <dir>] [--write]');
-      console.log('  --variant <name>  Generate for specific variant (default: all)');
-      console.log('  --root <dir>      Repository root (default: cwd)');
-      console.log('  --write           Write raci.yaml files (default: dry-run)');
+    if (args[i] === "--variant") targetVariant = args[++i];
+    else if (args[i] === "--root") root = args[++i];
+    else if (args[i] === "--write") writeFiles = true;
+    else if (args[i] === "--help" || args[i] === "-h") {
+      console.log("Usage: bun scripts/generate-raci.ts [--variant <name>|all] [--root <dir>] [--write]");
+      console.log("  --variant <name>  Generate for specific variant (default: all)");
+      console.log("  --root <dir>      Repository root (default: cwd)");
+      console.log("  --write           Write raci.yaml files (default: dry-run)");
       process.exit(0);
     }
   }
@@ -484,8 +484,8 @@ function main(): void {
   let totalDrift = 0;
 
   for (const [variant, { matrix, issues, drift, written }] of results) {
-    const critical = issues.filter(i => i.rule.startsWith('DEG-R'));
-    const warnings = issues.filter(i => !i.rule.startsWith('DEG-R'));
+    const critical = issues.filter((i) => i.rule.startsWith("DEG-R"));
+    const warnings = issues.filter((i) => !i.rule.startsWith("DEG-R"));
 
     if (critical.length > 0) {
       console.error(`\n${variant}: CRITICAL ISSUES (${critical.length})`);
@@ -503,7 +503,7 @@ function main(): void {
     }
 
     if (critical.length === 0) {
-      console.log(`\n${variant}: OK (${matrix.rows.length} rows)${written ? ' ✓ WRITTEN' : ''}`);
+      console.log(`\n${variant}: OK (${matrix.rows.length} rows)${written ? " ✓ WRITTEN" : ""}`);
     }
 
     if (drift.length > 0) {
@@ -522,7 +522,9 @@ function main(): void {
     console.warn(`\nWARN: ${totalIssues} warning(s), ${totalDrift} drift line(s) found. Review before committing.`);
     process.exit(0);
   } else {
-    console.log(`\nOK: All RACI matrices valid.${totalDrift > 0 ? ` ${totalDrift} drift line(s) vs committed matrices (informational — pass --write to converge).` : ''}`);
+    console.log(
+      `\nOK: All RACI matrices valid.${totalDrift > 0 ? ` ${totalDrift} drift line(s) vs committed matrices (informational — pass --write to converge).` : ""}`,
+    );
     process.exit(0);
   }
 }

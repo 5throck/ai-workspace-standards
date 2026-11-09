@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-09-delivered-scripts-strict-profile-design`
 - **Date**: 2026-11-09
-- **Status**: proposed (Design Gate — registration happens at implementation via /sync)
+- **Status**: implemented
 - **Author**: architect (PM-dispatched)
 - **Upstream request**: U-20261108-001 (co-newbiz), PM verification 2026-11-09
 - **Related**: `docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md` (format exemplar), `tests/unit/generate-scripts-mirror.test.ts` (183-row delivery registry, byte-identical mirror enforcement), `scripts/typecheck.ts` (baseline-0 typecheck gate), ADR-0073 Amendment 4 (IC-01 import-closure delivery policy)

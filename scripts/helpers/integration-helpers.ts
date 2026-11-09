@@ -17,11 +17,11 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, dirname } from 'path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
-import type { VariantMetadata } from './generate-variant.ts';
+import { join, dirname } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
+import { ErrorPhase, fatalError, warningError } from "../lib/error-handling.ts";
+import type { VariantMetadata } from "./generate-variant.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -50,7 +50,7 @@ export interface VersionRegistryEntry {
   /** Current version */
   version: string;
   /** Status */
-  status: 'beta' | 'stable';
+  status: "beta" | "stable";
   /** Inherits from */
   inherits: string;
   /** Created at */
@@ -62,12 +62,12 @@ export interface VersionRegistryEntry {
 // ============================================================================()
 
 const WORKSPACE_ROOT = process.cwd();
-const README_PATH = join(WORKSPACE_ROOT, 'README.md');
-const NEW_PROJECT_TS = join(WORKSPACE_ROOT, 'scripts', 'new-project.ts');
-const NEW_PROJECT_SH = join(WORKSPACE_ROOT, 'scripts', 'new-project.sh');
-const NEW_PROJECT_PS1 = join(WORKSPACE_ROOT, 'scripts', 'new-project.ps1');
-const VERSION_REGISTRY = join(WORKSPACE_ROOT, 'docs', 'templates', 'VERSION_REGISTRY.json');
-const AGENTS_MD = join(WORKSPACE_ROOT, 'AGENTS.md');
+const README_PATH = join(WORKSPACE_ROOT, "README.md");
+const NEW_PROJECT_TS = join(WORKSPACE_ROOT, "scripts", "new-project.ts");
+const NEW_PROJECT_SH = join(WORKSPACE_ROOT, "scripts", "new-project.sh");
+const NEW_PROJECT_PS1 = join(WORKSPACE_ROOT, "scripts", "new-project.ps1");
+const VERSION_REGISTRY = join(WORKSPACE_ROOT, "docs", "templates", "VERSION_REGISTRY.json");
+const AGENTS_MD = join(WORKSPACE_ROOT, "AGENTS.md");
 
 // ============================================================================
 // README.md INTEGRATION
@@ -125,8 +125,8 @@ function updateReadme(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'README_UPDATE_FAILED',
-      `Failed to update README.md: ${error instanceof Error ? error.message : String(error)}`
+      "README_UPDATE_FAILED",
+      `Failed to update README.md: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -182,8 +182,8 @@ function updateNewProjectTs(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'NEW_PROJECT_TS_UPDATE_FAILED',
-      `Failed to update new-project.ts: ${error instanceof Error ? error.message : String(error)}`
+      "NEW_PROJECT_TS_UPDATE_FAILED",
+      `Failed to update new-project.ts: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -235,8 +235,8 @@ function updateNewProjectSh(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'NEW_PROJECT_SH_UPDATE_FAILED',
-      `Failed to update new-project.sh: ${error instanceof Error ? error.message : String(error)}`
+      "NEW_PROJECT_SH_UPDATE_FAILED",
+      `Failed to update new-project.sh: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -288,8 +288,8 @@ function updateNewProjectPs1(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'NEW_PROJECT_PS1_UPDATE_FAILED',
-      `Failed to update new-project.ps1: ${error instanceof Error ? error.message : String(error)}`
+      "NEW_PROJECT_PS1_UPDATE_FAILED",
+      `Failed to update new-project.ps1: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -335,14 +335,14 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
     }
 
     // Check if variant already registered
-    const existing = registry.variants.find(v => v.name === metadata.name);
+    const existing = registry.variants.find((v) => v.name === metadata.name);
     if (existing) {
       console.log(`Variant ${metadata.name} already registered in VERSION_REGISTRY.json - updating`);
 
       // Update existing entry
       existing.variant_type = metadata.variantType;
       existing.version = metadata.version;
-      existing.status = metadata.status as VersionRegistryEntry['status'];
+      existing.status = metadata.status as VersionRegistryEntry["status"];
       existing.inherits = metadata.inherits_common;
     } else {
       // Add new entry
@@ -350,7 +350,7 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
         name: metadata.name,
         variant_type: metadata.variantType,
         version: metadata.version,
-        status: metadata.status as VersionRegistryEntry['status'],
+        status: metadata.status as VersionRegistryEntry["status"],
         inherits: metadata.inherits_common,
         created_at: new Date().toISOString(),
       };
@@ -365,8 +365,8 @@ function updateVersionRegistry(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'VERSION_REGISTRY_UPDATE_FAILED',
-      `Failed to update VERSION_REGISTRY.json: ${error instanceof Error ? error.message : String(error)}`
+      "VERSION_REGISTRY_UPDATE_FAILED",
+      `Failed to update VERSION_REGISTRY.json: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -422,8 +422,8 @@ function updateAgentsMd(metadata: VariantMetadata): boolean {
   } catch (error) {
     throw warningError(
       ErrorPhase.INTEGRATION,
-      'AGENTS_MD_UPDATE_FAILED',
-      `Failed to update AGENTS.md: ${error instanceof Error ? error.message : String(error)}`
+      "AGENTS_MD_UPDATE_FAILED",
+      `Failed to update AGENTS.md: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
@@ -437,9 +437,7 @@ function updateAgentsMd(metadata: VariantMetadata): boolean {
  * Integrate variant into workspace
  * @version 1.1.0
  */
-export async function integrateVariantToWorkspace(
-  metadata: VariantMetadata
-): Promise<IntegrationResult> {
+export async function integrateVariantToWorkspace(metadata: VariantMetadata): Promise<IntegrationResult> {
   console.log(`\n=== Integrating Variant to Workspace ===`);
   console.log(`Variant: ${metadata.name}`);
   console.log(`Type: ${metadata.variantType}\n`);
@@ -472,10 +470,10 @@ export async function integrateVariantToWorkspace(
 
   const summary =
     `Integrated variant ${metadata.name} into workspace:\n` +
-    `- README.md: ${readmeUpdated ? '✅' : '⊘'}\n` +
-    `- new-project scripts: ${newProjectUpdated ? '✅' : '⊘'}\n` +
-    `- VERSION_REGISTRY.json: ${versionRegistryUpdated ? '✅' : '⊘'}\n` +
-    `- AGENTS.md: ${agentsMdUpdated ? '✅' : '⊘'}\n` +
+    `- README.md: ${readmeUpdated ? "✅" : "⊘"}\n` +
+    `- new-project scripts: ${newProjectUpdated ? "✅" : "⊘"}\n` +
+    `- VERSION_REGISTRY.json: ${versionRegistryUpdated ? "✅" : "⊘"}\n` +
+    `- AGENTS.md: ${agentsMdUpdated ? "✅" : "⊘"}\n` +
     `\nTotal files updated: ${updatedFiles.length}`;
 
   console.log(`\n=== Integration Complete ===`);
@@ -504,24 +502,24 @@ export async function integrateVariantToWorkspace(
 
 async function main() {
   const args = process.argv.slice(2);
-  const metadataArg = args.find(arg => arg.startsWith('--metadata='));
+  const metadataArg = args.find((arg) => arg.startsWith("--metadata="));
 
   if (!metadataArg) {
-    console.error('Usage: bun scripts/helpers/integration-helpers.ts --metadata=<json-string>');
+    console.error("Usage: bun scripts/helpers/integration-helpers.ts --metadata=<json-string>");
     process.exit(1);
   }
 
   try {
     // Parse metadata
-    const metadata = JSON.parse(metadataArg.split('=')[1]) as VariantMetadata;
+    const metadata = JSON.parse(metadataArg.split("=")[1]) as VariantMetadata;
 
     // Integrate variant
     const result = await integrateVariantToWorkspace(metadata);
 
-    console.log('\n✅ Integration successful');
+    console.log("\n✅ Integration successful");
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Integration failed:');
+    console.error("\n❌ Integration failed:");
     console.error(error);
     process.exit(1);
   }

@@ -13,11 +13,11 @@
  *   4. Report unknown capabilities (not in CAPABILITY_REGISTRY) as WARNING
  */
 
-import { join, basename } from 'path';
-import { existsSync, readFileSync } from 'fs';
-import * as yaml from 'js-yaml';
-import { getValidationPolicy, isCapability, type VariantType } from '../helpers/registries/index.ts';
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
+import { join, basename } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import * as yaml from "js-yaml";
+import { getValidationPolicy, isCapability, type VariantType } from "../helpers/registries/index.ts";
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -45,7 +45,7 @@ function parseFrontmatter(content: string): Record<string, any> {
 function extractCapabilities(frontmatter: Record<string, any>): string[] {
   if (!frontmatter.capabilities) return [];
   if (!Array.isArray(frontmatter.capabilities)) return [];
-  return frontmatter.capabilities.filter((c: any) => typeof c === 'string' && c.trim() !== '');
+  return frontmatter.capabilities.filter((c: any) => typeof c === "string" && c.trim() !== "");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,9 +57,9 @@ function extractCapabilities(frontmatter: Record<string, any>): string[] {
  * Also warns about unknown capability values (possible typos).
  */
 export const capabilityValidator: ValidatorDefinition = {
-  name: 'capability',
-  description: 'Validates that required capabilities are covered across all agent files',
-  prerequisites: ['variant-json'],
+  name: "capability",
+  description: "Validates that required capabilities are covered across all agent files",
+  prerequisites: ["variant-json"],
 
   validate(ctx: ValidatorContext): ValidatorResult {
     const start = performance.now();
@@ -68,25 +68,25 @@ export const capabilityValidator: ValidatorDefinition = {
 
     // ── Collect all capabilities declared across agents ──────────────────
     const coveredCapabilities = new Set<string>();
-    const agentsDir = join(ctx.variantDir, 'agents');
+    const agentsDir = join(ctx.variantDir, "agents");
 
     for (const agentFile of ctx.agentFiles) {
       const agentPath = join(agentsDir, agentFile);
       if (!existsSync(agentPath)) continue;
 
       checks++;
-      const content = readFileSync(agentPath, 'utf-8');
+      const content = readFileSync(agentPath, "utf-8");
       const frontmatter = parseFrontmatter(content);
       const caps = extractCapabilities(frontmatter);
-      const agentName = basename(agentFile, '.md');
+      const agentName = basename(agentFile, ".md");
 
       // Check for unknown capabilities (typos)
       for (const cap of caps) {
         checks++;
         if (!isCapability(cap)) {
           issues.push({
-            severity: 'warning',
-            category: 'unknown-capability',
+            severity: "warning",
+            category: "unknown-capability",
             message: `Agent "${agentName}" declares unknown capability "${cap}" — possible typo`,
             file: agentFile,
             agentName,
@@ -101,14 +101,14 @@ export const capabilityValidator: ValidatorDefinition = {
     }
 
     // ── Check required capabilities from policy ───────────────────────────
-    if (ctx.policy && 'requiredCapabilities' in ctx.policy) {
+    if (ctx.policy && "requiredCapabilities" in ctx.policy) {
       const required = ctx.policy.requiredCapabilities as string[];
       for (const reqCap of required) {
         checks++;
         if (!coveredCapabilities.has(reqCap)) {
           issues.push({
-            severity: 'error',
-            category: 'missing-capability',
+            severity: "error",
+            category: "missing-capability",
             message: `Required capability "${reqCap}" is not covered by any agent`,
             capability: reqCap,
           });
@@ -117,7 +117,7 @@ export const capabilityValidator: ValidatorDefinition = {
     }
 
     return {
-      validator: 'capability',
+      validator: "capability",
       duration_ms: performance.now() - start,
       checks,
       issues,

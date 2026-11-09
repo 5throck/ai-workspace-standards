@@ -19,8 +19,8 @@
 //   3. a variant template carries docs/context.md (WS-07 contamination — common is the SSOT),
 //   4. a JSON_MERGE target fails JSON.parse.
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   TEMPLATE_TREE_SYNC_PASS,
   PLACEHOLDER_ALLOWLIST,
@@ -28,23 +28,23 @@ import {
   iterEffectiveTemplateFiles,
   resolveClaim,
   type UpgradeClaim,
-} from './lib/upgrade-policy.ts';
+} from "./lib/upgrade-policy.ts";
 
-const workspaceRoot = resolve(import.meta.dir, '..');
-const templatesRoot = join(workspaceRoot, 'templates');
-const commonDir = join(templatesRoot, 'common');
+const workspaceRoot = resolve(import.meta.dir, "..");
+const templatesRoot = join(workspaceRoot, "templates");
+const commonDir = join(templatesRoot, "common");
 
 // ── Args ───────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-let variantFilter = '';
+let variantFilter = "";
 let strict = false;
 let jsonOut = false;
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--variant') variantFilter = args[++i] ?? '';
-  else if (args[i] === '--strict') strict = true;
-  else if (args[i] === '--json') jsonOut = true;
-  else if (args[i] === '--help' || args[i] === '-h') {
-    console.log('Usage: bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]');
+  if (args[i] === "--variant") variantFilter = args[++i] ?? "";
+  else if (args[i] === "--strict") strict = true;
+  else if (args[i] === "--json") jsonOut = true;
+  else if (args[i] === "--help" || args[i] === "-h") {
+    console.log("Usage: bun scripts/check-upgrade-coverage.ts [--variant <name>] [--strict] [--json]");
     process.exit(0);
   }
 }
@@ -52,14 +52,14 @@ for (let i = 0; i < args.length; i++) {
 // Scaffold placeholder convention (scripts/helpers/substitute-placeholders.ts): {{UPPER_SNAKE}}.
 // Code files (.js/.ts) are excluded — template literals and template-renderer code legitimately
 // contain brace sequences (e.g. scripts/helpers/template-utils.ts documents {{KEY}} itself).
-const PLACEHOLDER_EXTENSIONS = new Set(['.md', '.json', '.yml', '.yaml', '.txt', '.html', '.css']);
+const PLACEHOLDER_EXTENSIONS = new Set([".md", ".json", ".yml", ".yaml", ".txt", ".html", ".css"]);
 const PLACEHOLDER_TOKEN = /\{\{\s*[A-Z][A-Z0-9_]+\s*\}\}/;
 
 function listVariants(): string[] {
   return readdirSync(templatesRoot, { withFileTypes: true })
-    .filter(e => e.isDirectory())
-    .map(e => e.name)
-    .filter(n => n.startsWith('co-'))
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .filter((n) => n.startsWith("co-"))
     .sort();
 }
 
@@ -70,7 +70,7 @@ const variants = variantFilter ? [variantFilter] : listVariants();
 if (!existsSync(templatesRoot)) {
   // Project (L2) context: this validator classifies the workspace template tree and both
   // scripts ship as L0+L1 — outside the workspace there is nothing to validate (skip, N/A).
-  console.log('check-upgrade-coverage: no templates/ directory — not a workspace root, skipping.');
+  console.log("check-upgrade-coverage: no templates/ directory — not a workspace root, skipping.");
   process.exit(0);
 }
 if (variants.length === 0) {
@@ -86,14 +86,22 @@ for (const variant of variants) {
   }
 
   // Check 3 — WS-07: a variant must never carry its own docs/context.md
-  if (existsSync(join(variantDir, 'docs', 'context.md'))) {
-    violations.push({ variant, rel: 'docs/context.md', check: 'WS-07', detail: 'variant template carries docs/context.md — common is the SSOT (VARIANT_OVERLAY_SKIP)' });
+  if (existsSync(join(variantDir, "docs", "context.md"))) {
+    violations.push({
+      variant,
+      rel: "docs/context.md",
+      check: "WS-07",
+      detail: "variant template carries docs/context.md — common is the SSOT (VARIANT_OVERLAY_SKIP)",
+    });
   }
 
-  for (const { rel, source, abs } of iterEffectiveTemplateFiles(commonDir, existsSync(variantDir) ? variantDir : null)) {
+  for (const { rel, source, abs } of iterEffectiveTemplateFiles(
+    commonDir,
+    existsSync(variantDir) ? variantDir : null,
+  )) {
     const claim: UpgradeClaim = resolveClaim(rel, variant);
     if (!claim || !claim.policy || !claim.pass) {
-      violations.push({ variant, rel, check: 'unresolved-claim', detail: 'resolveClaim returned no usable claim' });
+      violations.push({ variant, rel, check: "unresolved-claim", detail: "resolveClaim returned no usable claim" });
       continue;
     }
     rows.push({ variant, rel, source, policy: claim.policy, pass: claim.pass });
@@ -103,20 +111,39 @@ for (const variant of variants) {
     // matched with the mirror prefix stripped so a skill-level exemption covers all
     // four mirrors (T-20260921-009: the --all-variants mirror heal distributed
     // explain-me's runtime-template files into every variant mirror).
-    const ext = rel.slice(rel.lastIndexOf('.')).toLowerCase();
-    const allowlistRel = rel.replace(/^\.[\w-]+\/skills\//, 'skills/');
-    if (isDeliveryPolicy(claim.policy) && !PLACEHOLDER_ALLOWLIST.has(rel) && !PLACEHOLDER_ALLOWLIST.has(allowlistRel) && PLACEHOLDER_EXTENSIONS.has(ext)) {
+    const ext = rel.slice(rel.lastIndexOf(".")).toLowerCase();
+    const allowlistRel = rel.replace(/^\.[\w-]+\/skills\//, "skills/");
+    if (
+      isDeliveryPolicy(claim.policy) &&
+      !PLACEHOLDER_ALLOWLIST.has(rel) &&
+      !PLACEHOLDER_ALLOWLIST.has(allowlistRel) &&
+      PLACEHOLDER_EXTENSIONS.has(ext)
+    ) {
       try {
-        if (statSync(abs).size < 2_000_000 && PLACEHOLDER_TOKEN.test(readFileSync(abs, 'utf8'))) {
-          violations.push({ variant, rel, check: 'placeholder', detail: `delivery policy ${claim.policy} but file contains an {{UPPER_SNAKE}} placeholder token` });
+        if (statSync(abs).size < 2_000_000 && PLACEHOLDER_TOKEN.test(readFileSync(abs, "utf8"))) {
+          violations.push({
+            variant,
+            rel,
+            check: "placeholder",
+            detail: `delivery policy ${claim.policy} but file contains an {{UPPER_SNAKE}} placeholder token`,
+          });
         }
-      } catch { /* unreadable file — not a coverage concern */ }
+      } catch {
+        /* unreadable file — not a coverage concern */
+      }
     }
 
     // Check 4 — JSON_MERGE targets must be valid JSON
-    if (claim.policy === 'JSON_MERGE') {
-      try { JSON.parse(readFileSync(abs, 'utf8')); } catch (err) {
-        violations.push({ variant, rel, check: 'json-parse', detail: `JSON_MERGE target is not valid JSON: ${(err as Error).message}` });
+    if (claim.policy === "JSON_MERGE") {
+      try {
+        JSON.parse(readFileSync(abs, "utf8"));
+      } catch (err) {
+        violations.push({
+          variant,
+          rel,
+          check: "json-parse",
+          detail: `JSON_MERGE target is not valid JSON: ${(err as Error).message}`,
+        });
       }
     }
   }
@@ -128,22 +155,22 @@ if (jsonOut) {
 } else {
   const byPass = new Map<string, number>();
   for (const r of rows) byPass.set(r.pass, (byPass.get(r.pass) ?? 0) + 1);
-  console.log('Upgrade coverage matrix (effective template tree, variant overlay over common)');
-  console.log('============================================================================');
+  console.log("Upgrade coverage matrix (effective template tree, variant overlay over common)");
+  console.log("============================================================================");
   for (const [pass, count] of [...byPass.entries()].sort((a, b) => b[1] - a[1])) {
     console.log(`  ${pass.padEnd(36)} ${String(count).padStart(5)}`);
   }
-  console.log(`  ${'TOTAL'.padEnd(36)} ${String(rows.length).padStart(5)}`);
-  const tts = rows.filter(r => r.pass === TEMPLATE_TREE_SYNC_PASS);
+  console.log(`  ${"TOTAL".padEnd(36)} ${String(rows.length).padStart(5)}`);
+  const tts = rows.filter((r) => r.pass === TEMPLATE_TREE_SYNC_PASS);
   if (tts.length > 0) {
     console.log(`\n${TEMPLATE_TREE_SYNC_PASS} delivers (default policy):`);
     for (const r of tts) console.log(`  [${r.policy.padEnd(10)}] (${r.variant}) ${r.rel}`);
   }
   if (violations.length > 0) {
-    console.log('\nViolations:');
+    console.log("\nViolations:");
     for (const v of violations) console.log(`  ✗ (${v.variant}) ${v.rel} — ${v.check}: ${v.detail}`);
   } else {
-    console.log('\nNo violations.');
+    console.log("\nNo violations.");
   }
 }
 

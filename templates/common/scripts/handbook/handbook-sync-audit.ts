@@ -62,8 +62,24 @@ function htmlToText(html: string): string {
 // ─── 1. content: workspace reflection ────────────────────────────────────────
 
 const STOP = new Set([
-  "and", "the", "for", "with", "from", "into", "design", "plan", "template",
-  "update", "add", "new", "fix", "feat", "docs", "doc", "refactor", "chore",
+  "and",
+  "the",
+  "for",
+  "with",
+  "from",
+  "into",
+  "design",
+  "plan",
+  "template",
+  "update",
+  "add",
+  "new",
+  "fix",
+  "feat",
+  "docs",
+  "doc",
+  "refactor",
+  "chore",
 ]);
 
 function keywordsFromName(base: string): string[] {
@@ -140,8 +156,11 @@ interface LinkIssue {
 function extractHrefs(html: string): string[] {
   const out: string[] = [];
   const re = /<a\s+(?:[^>]*?\s)?href="([^"]*)"/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(html)) !== null) out.push(m[1]);
+  let m: RegExpExecArray | null = re.exec(html);
+  while (m !== null) {
+    out.push(m[1]);
+    m = re.exec(html);
+  }
   return out;
 }
 
@@ -198,7 +217,7 @@ export function auditStructure(handbookRoot: string) {
     }
     const name = relative(handbookRoot, repo);
     console.log(
-      `  ${name}: ${htmlFiles.length} pages, broken internal: ${brokenInternal}, broken cross-handbook: ${brokenCross}`
+      `  ${name}: ${htmlFiles.length} pages, broken internal: ${brokenInternal}, broken cross-handbook: ${brokenCross}`,
     );
   }
 
@@ -227,8 +246,16 @@ function headingIds(rawHtml: string): Map<string, string> {
   const map = new Map<string, string>();
   const re = /<h([23])[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/gi;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(html)) !== null) {
-    map.set(m[2], m[3].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim());
+  m = re.exec(html);
+  while (m !== null) {
+    map.set(
+      m[2],
+      m[3]
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    );
+    m = re.exec(html);
   }
   return map;
 }
@@ -267,9 +294,7 @@ export function auditParity(handbookDir: string) {
         continue;
       }
       const ids = headingIds(read(file));
-      const missing = [...baseIds.entries()]
-        .filter(([id]) => !ids.has(id))
-        .map(([id, title]) => ({ id, title }));
+      const missing = [...baseIds.entries()].filter(([id]) => !ids.has(id)).map(([id, title]) => ({ id, title }));
       if (missing.length > 0) {
         findings.push({ group: key, lang, missing });
       }

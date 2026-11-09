@@ -322,16 +322,21 @@ export function checkSpelling(): SpellingIssue[] {
       let m: RegExpExecArray | null;
       // Reset lastIndex since we reuse the regex across lines
       MISSPELLING_RE.lastIndex = 0;
-      while ((m = MISSPELLING_RE.exec(lines[i])) !== null) {
+      m = MISSPELLING_RE.exec(lines[i]);
+      while (m !== null) {
         const misspelling = m[1];
         const correction = MISSPELLING_MAP.get(misspelling.toLowerCase());
-        if (!correction) continue;
+        if (!correction) {
+          m = MISSPELLING_RE.exec(lines[i]);
+          continue;
+        }
         all.push({
           file: relFile,
           line: i + 1,
           misspelling,
           correction,
         });
+        m = MISSPELLING_RE.exec(lines[i]);
       }
     }
   }
@@ -354,9 +359,7 @@ if (import.meta.main) {
   console.error(`check-spell: ${issues.length} potential typo(s) found:`);
   console.error("Potential typos:");
   for (const issue of issues) {
-    console.error(
-      `  ${issue.file}: line ${issue.line}: "${issue.misspelling}" (did you mean "${issue.correction}"?)`,
-    );
+    console.error(`  ${issue.file}: line ${issue.line}: "${issue.misspelling}" (did you mean "${issue.correction}"?)`);
   }
   process.exit(1);
 }

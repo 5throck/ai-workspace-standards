@@ -53,7 +53,8 @@ export function readFile(path: string): string {
 /** Resolve a relative href from a source HTML file to an absolute disk path. */
 export function resolveHref(fromFile: string, href: string): string | null {
   // Skip external links, anchors, mailto, etc.
-  if (href.startsWith("http") || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:")) return null;
+  if (href.startsWith("http") || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:"))
+    return null;
   const dir = dirname(fromFile);
   let resolved = join(dir, href);
   // Normalize: remove query string, hash
@@ -69,7 +70,11 @@ export function extractChapterNav(html: string): {
   next?: { href: string; label: string };
   others: { href: string; label: string }[];
 } {
-  const result: { prev?: { href: string; label: string }; next?: { href: string; label: string }; others: { href: string; label: string }[] } = { others: [] };
+  const result: {
+    prev?: { href: string; label: string };
+    next?: { href: string; label: string };
+    others: { href: string; label: string }[];
+  } = { others: [] };
 
   // Extract <div class="chapter-nav">...</div> block using depth-aware parsing
   const openIdx = html.indexOf('<div class="chapter-nav"');
@@ -101,7 +106,8 @@ export function extractChapterNav(html: string): {
   const aTagRe = /<a\s+href="([^"]*)"\s*((?:class="[^"]*")?\s*(?:style="[^"]*")?\s*)>([\s\S]*?)<\/a>/g;
   let m: RegExpExecArray | null;
 
-  while ((m = aTagRe.exec(navHtml)) !== null) {
+  m = aTagRe.exec(navHtml);
+  while (m !== null) {
     const href = m[1];
     const attrs = m[2] || "";
     const inner = m[3];
@@ -116,6 +122,7 @@ export function extractChapterNav(html: string): {
     if (cls.includes("prev")) result.prev = entry;
     else if (cls.includes("next")) result.next = entry;
     else result.others.push(entry);
+    m = aTagRe.exec(navHtml);
   }
 
   return result;
@@ -126,8 +133,10 @@ export function extractAllLinks(html: string): { href: string; context: string }
   const results: { href: string; context: string }[] = [];
   const re = /<a\s+(?:[^>]*?\s)?href="([^"]*)"[^>]*>/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(html)) !== null) {
+  m = re.exec(html);
+  while (m !== null) {
     results.push({ href: m[1], context: m[0].slice(0, 120) });
+    m = re.exec(html);
   }
   return results;
 }
@@ -149,8 +158,10 @@ export function parseDocsArray(jsContent: string): { path: string; title: string
   const entries: { path: string; title: string; lang?: string }[] = [];
   const re = /\{\s*path:\s*'([^']*)'\s*,\s*title:\s*'([^']*)'\s*(?:,\s*lang:\s*'([^']*)')?\s*\}/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(jsContent)) !== null) {
+  m = re.exec(jsContent);
+  while (m !== null) {
     entries.push({ path: m[1], title: m[2], lang: m[3] || undefined });
+    m = re.exec(jsContent);
   }
   return entries;
 }

@@ -26,7 +26,7 @@ export interface EnvBlockPruneResult {
  * scaffold-time safety contract: never destroy a file when the parser is in doubt.
  */
 export function pruneCountryScopedEnvBlocks(content: string, country: string): EnvBlockPruneResult {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const output: string[] = [];
   const pruned: string[] = [];
   const warnings: string[] = [];
@@ -42,7 +42,9 @@ export function pruneCountryScopedEnvBlocks(content: string, country: string): E
 
     if (openMatch) {
       if (inBlock) {
-        warnings.push(`Unbalanced marker at line ${i + 1}: nested opening marker without closing previous block. File left unchanged.`);
+        warnings.push(
+          `Unbalanced marker at line ${i + 1}: nested opening marker without closing previous block. File left unchanged.`,
+        );
         return { output: content, pruned: [], warnings, unbalanced: true };
       }
       inBlock = true;
@@ -55,13 +57,15 @@ export function pruneCountryScopedEnvBlocks(content: string, country: string): E
         return { output: content, pruned: [], warnings, unbalanced: true };
       }
       if (closeMatch[1] !== currentBlockCode) {
-        warnings.push(`Unbalanced marker at line ${i + 1}: closing code '${closeMatch[1]}' doesn't match opening code '${currentBlockCode}'. File left unchanged.`);
+        warnings.push(
+          `Unbalanced marker at line ${i + 1}: closing code '${closeMatch[1]}' doesn't match opening code '${currentBlockCode}'. File left unchanged.`,
+        );
         return { output: content, pruned: [], warnings, unbalanced: true };
       }
 
       // Complete block — keep when the country matches, drop otherwise
       blockLines.push(line);
-      if (country !== 'none' && country !== '' && country === currentBlockCode) {
+      if (country !== "none" && country !== "" && country === currentBlockCode) {
         output.push(...blockLines);
       } else {
         pruned.push(currentBlockCode);
@@ -78,11 +82,13 @@ export function pruneCountryScopedEnvBlocks(content: string, country: string): E
   }
 
   if (inBlock) {
-    warnings.push(`Unbalanced marker: block starting at line ${blockStartLine + 1} has no closing marker. File left unchanged.`);
+    warnings.push(
+      `Unbalanced marker: block starting at line ${blockStartLine + 1} has no closing marker. File left unchanged.`,
+    );
     return { output: content, pruned: [], warnings, unbalanced: true };
   }
 
-  return { output: output.join('\n'), pruned, warnings, unbalanced: false };
+  return { output: output.join("\n"), pruned, warnings, unbalanced: false };
 }
 
 // ── Project-key-preserving merge (ENV_SAMPLE SYNC delivery) ──────────────────
@@ -90,7 +96,7 @@ export function pruneCountryScopedEnvBlocks(content: string, country: string): E
 /** Marker introducing the project-owned section appended by mergeEnvSample. Exported so
  *  re-merges can recognize (and not duplicate) their own output. ASCII-only on purpose. */
 export const PROJECT_ENV_SECTION_HEADER =
-  '# --- Project-specific variables (preserved by upgrade; not overwritten by template sync) ---';
+  "# --- Project-specific variables (preserved by upgrade; not overwritten by template sync) ---";
 
 /** `KEY=` or `KEY=value` or `KEY=value  # inline note` — LHS group is the variable name. */
 const ENV_KEY_LINE = /^([A-Za-z_][A-Za-z0-9_]*)\s*=/;
@@ -124,9 +130,9 @@ export interface EnvSampleMergeResult {
  *    the merge is idempotent (re-merging its own output is a no-op).
  */
 export function mergeEnvSample(templateContent: string, projectContent: string): EnvSampleMergeResult {
-  const templateLines = new Set(templateContent.split('\n'));
+  const templateLines = new Set(templateContent.split("\n"));
   const templateKeys = new Set<string>();
-  for (const line of templateContent.split('\n')) {
+  for (const line of templateContent.split("\n")) {
     const m = line.match(ENV_KEY_LINE);
     if (m) templateKeys.add(m[1]);
   }
@@ -135,9 +141,12 @@ export function mergeEnvSample(templateContent: string, projectContent: string):
   const preservedKeys: string[] = [];
   const overriddenKeys: string[] = [];
 
-  for (const line of projectContent.split('\n')) {
+  for (const line of projectContent.split("\n")) {
     if (line === PROJECT_ENV_SECTION_HEADER) continue; // never re-capture our own marker
-    if (line.trim() === '') { additions.push(line); continue; } // structural — collapsed below
+    if (line.trim() === "") {
+      additions.push(line);
+      continue;
+    } // structural — collapsed below
     const keyMatch = line.match(ENV_KEY_LINE);
     if (keyMatch && templateKeys.has(keyMatch[1])) {
       if (!templateLines.has(line)) overriddenKeys.push(keyMatch[1]);
@@ -151,13 +160,13 @@ export function mergeEnvSample(templateContent: string, projectContent: string):
   // Collapse blank runs to one and trim the edges (idempotence + tidy output)
   const collapsed: string[] = [];
   for (const line of additions) {
-    if (line.trim() === '' && (collapsed.length === 0 || collapsed[collapsed.length - 1].trim() === '')) continue;
+    if (line.trim() === "" && (collapsed.length === 0 || collapsed[collapsed.length - 1].trim() === "")) continue;
     collapsed.push(line);
   }
-  while (collapsed.length > 0 && collapsed[collapsed.length - 1].trim() === '') collapsed.pop();
+  while (collapsed.length > 0 && collapsed[collapsed.length - 1].trim() === "") collapsed.pop();
 
-  const base = templateContent.replace(/\n+$/, '');
-  const body = collapsed.join('\n');
+  const base = templateContent.replace(/\n+$/, "");
+  const body = collapsed.join("\n");
   const output = body ? `${base}\n\n${PROJECT_ENV_SECTION_HEADER}\n${body}\n` : `${base}\n`;
   return { output, preservedKeys, overriddenKeys };
 }

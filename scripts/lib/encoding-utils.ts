@@ -8,8 +8,8 @@
  * @Risk #3: UTF-8 Encoding (P0 - Critical)
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 // ============================================================================
 // TYPES
@@ -18,7 +18,7 @@ import { join } from 'path';
 export interface EncodingDetectionResult {
   encoding: string;
   bomPresent: boolean;
-  lineEndings: 'crlf' | 'lf' | 'mixed';
+  lineEndings: "crlf" | "lf" | "mixed";
   confident: boolean;
 }
 
@@ -31,7 +31,7 @@ export interface EncodingDetectionResult {
  * @version 1.0.0
  */
 export function stripBOM(content: string): string {
-  if (content.charCodeAt(0) === 0xFEFF) {
+  if (content.charCodeAt(0) === 0xfeff) {
     return content.slice(1);
   }
   return content;
@@ -42,7 +42,7 @@ export function stripBOM(content: string): string {
  * @version 1.0.0
  */
 export function normalizeLineEndings(content: string): string {
-  return content.replace(/\r\n/g, '\n');
+  return content.replace(/\r\n/g, "\n");
 }
 
 /**
@@ -54,42 +54,42 @@ export function detectEncoding(filePath: string): EncodingDetectionResult {
 
   // Check for BOM
   let bomPresent = false;
-  let encoding = 'utf-8';
+  let encoding = "utf-8";
 
-  if (buffer.length >= 3 && buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+  if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
     bomPresent = true;
-    encoding = 'utf-8';
-  } else if (buffer.length >= 2 && buffer[0] === 0xFF && buffer[1] === 0xFE) {
+    encoding = "utf-8";
+  } else if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xfe) {
     bomPresent = true;
-    encoding = 'utf-16le';
-  } else if (buffer.length >= 2 && buffer[0] === 0xFE && buffer[1] === 0xFF) {
+    encoding = "utf-16le";
+  } else if (buffer.length >= 2 && buffer[0] === 0xfe && buffer[1] === 0xff) {
     bomPresent = true;
-    encoding = 'utf-16be';
+    encoding = "utf-16be";
   }
 
   // Detect line endings
   let crlfCount = 0;
   let lfCount = 0;
 
-  const content = buffer.toString('utf-8');
+  const content = buffer.toString("utf-8");
   for (let i = 0; i < content.length; i++) {
-    if (content[i] === '\r') {
-      if (i + 1 < content.length && content[i + 1] === '\n') {
+    if (content[i] === "\r") {
+      if (i + 1 < content.length && content[i + 1] === "\n") {
         crlfCount++;
         i++; // Skip following \n
       }
-    } else if (content[i] === '\n') {
+    } else if (content[i] === "\n") {
       lfCount++;
     }
   }
 
-  let lineEndings: 'crlf' | 'lf' | 'mixed';
+  let lineEndings: "crlf" | "lf" | "mixed";
   if (crlfCount > 0 && lfCount === 0) {
-    lineEndings = 'crlf';
+    lineEndings = "crlf";
   } else if (lfCount > 0 && crlfCount === 0) {
-    lineEndings = 'lf';
+    lineEndings = "lf";
   } else {
-    lineEndings = 'mixed';
+    lineEndings = "mixed";
   }
 
   return {
@@ -105,7 +105,7 @@ export function detectEncoding(filePath: string): EncodingDetectionResult {
  * @version 1.0.0
  */
 export function readUTF8File(filePath: string): string {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   return stripBOM(content);
 }
 
@@ -115,7 +115,7 @@ export function readUTF8File(filePath: string): string {
  */
 export function writeUTF8File(filePath: string, content: string): void {
   const normalized = normalizeLineEndings(content);
-  writeFileSync(filePath, normalized, { encoding: 'utf-8' });
+  writeFileSync(filePath, normalized, { encoding: "utf-8" });
 }
 
 /**
@@ -135,14 +135,14 @@ export function validateUTF8Compliance(filePath: string): {
   }
 
   // Check line endings
-  if (detection.lineEndings === 'crlf') {
+  if (detection.lineEndings === "crlf") {
     issues.push(`File uses CRLF line endings, should be LF`);
-  } else if (detection.lineEndings === 'mixed') {
+  } else if (detection.lineEndings === "mixed") {
     issues.push(`File uses mixed line endings, should be LF only`);
   }
 
   // Check encoding
-  if (detection.encoding !== 'utf-8') {
+  if (detection.encoding !== "utf-8") {
     issues.push(`File encoding is ${detection.encoding}, should be UTF-8`);
   }
 
@@ -165,13 +165,11 @@ export function convertToUTF8(filePath: string): {
   const issues: string[] = [];
 
   // Already compliant
-  if (!detection.bomPresent &&
-      detection.lineEndings === 'lf' &&
-      detection.encoding === 'utf-8') {
+  if (!detection.bomPresent && detection.lineEndings === "lf" && detection.encoding === "utf-8") {
     return {
       converted: false,
       originalEncoding: detection.encoding,
-      issues: ['File already UTF-8 compliant'],
+      issues: ["File already UTF-8 compliant"],
     };
   }
 
@@ -180,12 +178,12 @@ export function convertToUTF8(filePath: string): {
   writeUTF8File(filePath, content);
 
   if (detection.bomPresent) {
-    issues.push('Removed BOM');
+    issues.push("Removed BOM");
   }
-  if (detection.lineEndings !== 'lf') {
+  if (detection.lineEndings !== "lf") {
     issues.push(`Normalized line endings from ${detection.lineEndings} to LF`);
   }
-  if (detection.encoding !== 'utf-8') {
+  if (detection.encoding !== "utf-8") {
     issues.push(`Converted encoding from ${detection.encoding} to UTF-8`);
   }
 
@@ -265,7 +263,7 @@ export interface HomoglyphMatch {
  */
 export function detectHomoglyphs(content: string): HomoglyphMatch[] {
   const matches: HomoglyphMatch[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   // Cyrillic: U+0400-U+04FF (e.g. U+0430 vs U+0061 'a', U+043E vs U+006F 'o', U+0435 vs U+0065 'e')
   // Greek: U+0370-U+03FF (e.g. U+03BF vs U+006F 'o', U+03BD vs U+0076 'v')
@@ -285,31 +283,32 @@ export function detectHomoglyphs(content: string): HomoglyphMatch[] {
 
   for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
     const line = lines[lineIdx];
-    let match: RegExpExecArray | null;
 
     // Reset lastIndex for each line
     confusablePattern.lastIndex = 0;
 
-    while ((match = confusablePattern.exec(line)) !== null) {
+    let match: RegExpExecArray | null = confusablePattern.exec(line);
+    while (match !== null) {
       const char = match[0];
       const cp = char.codePointAt(0) ?? 0;
       let range: string;
 
-      if (cp >= 0x0400 && cp <= 0x04FF) {
-        range = 'Cyrillic';
-      } else if (cp >= 0x0370 && cp <= 0x03FF) {
-        range = 'Greek';
+      if (cp >= 0x0400 && cp <= 0x04ff) {
+        range = "Cyrillic";
+      } else if (cp >= 0x0370 && cp <= 0x03ff) {
+        range = "Greek";
       } else {
-        range = 'Fullwidth';
+        range = "Fullwidth";
       }
 
       matches.push({
         char,
-        codePoint: `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`,
+        codePoint: `U+${cp.toString(16).toUpperCase().padStart(4, "0")}`,
         line: lineIdx + 1,
         column: match.index + 1,
         range,
       });
+      match = confusablePattern.exec(line);
     }
   }
 
@@ -350,44 +349,45 @@ export interface ZeroWidthMatch {
  */
 export function detectZeroWidthChars(content: string): ZeroWidthMatch[] {
   const matches: ZeroWidthMatch[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   const descriptions: Record<string, string> = {
-    '\u200B': 'Zero-width space',
-    '\u200C': 'Zero-width non-joiner',
-    '\u200D': 'Zero-width joiner',
-    '\u200E': 'Left-to-right mark',
-    '\u200F': 'Right-to-left mark',
-    '\u2028': 'Line separator',
-    '\u2029': 'Paragraph separator',
-    '\u202A': 'Left-to-right embedding',
-    '\u202B': 'Right-to-left embedding',
-    '\u202C': 'Pop directional formatting',
-    '\u202D': 'Left-to-right override',
-    '\u202E': 'Right-to-left override',
-    '\u2060': 'Word joiner',
-    '\uFEFF': 'BOM / Zero-width no-break space',
+    "\u200B": "Zero-width space",
+    "\u200C": "Zero-width non-joiner",
+    "\u200D": "Zero-width joiner",
+    "\u200E": "Left-to-right mark",
+    "\u200F": "Right-to-left mark",
+    "\u2028": "Line separator",
+    "\u2029": "Paragraph separator",
+    "\u202A": "Left-to-right embedding",
+    "\u202B": "Right-to-left embedding",
+    "\u202C": "Pop directional formatting",
+    "\u202D": "Left-to-right override",
+    "\u202E": "Right-to-left override",
+    "\u2060": "Word joiner",
+    "\uFEFF": "BOM / Zero-width no-break space",
   };
 
   const zeroWidthPattern = /[\u200B-\u200F\u2028-\u202E\u2060\uFEFF]/g;
 
   for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
     const line = lines[lineIdx];
-    let match: RegExpExecArray | null;
 
     zeroWidthPattern.lastIndex = 0;
 
-    while ((match = zeroWidthPattern.exec(line)) !== null) {
+    let match: RegExpExecArray | null = zeroWidthPattern.exec(line);
+    while (match !== null) {
       const char = match[0];
       const cp = char.codePointAt(0) ?? 0;
 
       matches.push({
         char,
-        codePoint: `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`,
+        codePoint: `U+${cp.toString(16).toUpperCase().padStart(4, "0")}`,
         description: descriptions[char] ?? `Unknown (U+${cp.toString(16)})`,
         line: lineIdx + 1,
         column: match.index + 1,
       });
+      match = zeroWidthPattern.exec(line);
     }
   }
 

@@ -111,7 +111,7 @@
  * @module design-lint
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, type Dirent } from "node:fs";
 import { join, relative } from "node:path";
 import { load as loadYaml } from "js-yaml";
 import { isThemeOverridableGroup } from "./helpers/theme-token-policy.ts";
@@ -119,7 +119,16 @@ import { isThemeOverridableGroup } from "./helpers/theme-token-policy.ts";
 const VERSION = "2.5.0";
 
 /** Sub-check execution order (canonical; --check selections are re-sorted to this). */
-const CHECK_ORDER = ["token-usage", "token-role-misuse", "components", "patterns", "icons", "fonts", "themes", "list-table"] as const;
+const CHECK_ORDER = [
+  "token-usage",
+  "token-role-misuse",
+  "components",
+  "patterns",
+  "icons",
+  "fonts",
+  "themes",
+  "list-table",
+] as const;
 type CheckName = (typeof CHECK_ORDER)[number];
 
 /** Registry paths, relative to the project root (design §4.4). POSIX-style literals: the
@@ -320,7 +329,8 @@ function loadDesignLintConfig(projectRoot: string): DesignLintConfig {
   }
   if (!raw || typeof raw !== "object") return EMPTY_CONFIG;
   const block = raw as Record<string, unknown>;
-  const strArr = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+  const strArr = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   return {
     scanRoots: strArr(block.scanRoots),
     tokenSources: strArr(block.tokenSources),
@@ -334,7 +344,11 @@ function uiSourceRoots(projectRoot: string, cfg: DesignLintConfig): string[] {
   return [...new Set(roots)].filter((r) => existsSync(r));
 }
 
-function rawFindingsToFindings(raw: RawFinding[], downgradeToInfo = false, allowlist: ReadonlySet<string> = new Set()): Finding[] {
+function rawFindingsToFindings(
+  raw: RawFinding[],
+  downgradeToInfo = false,
+  allowlist: ReadonlySet<string> = new Set(),
+): Finding[] {
   if (allowlist.size > 0) raw = raw.filter((f) => !allowlist.has(f.match));
   return raw.map((f) => ({
     file: toPosix(f.file),
@@ -382,7 +396,7 @@ function discoverTokenSourceFiles(projectRoot: string, cfg: DesignLintConfig): s
   for (const dir of TOKEN_SOURCE_DIRS) {
     const abs = join(projectRoot, dir);
     if (!existsSync(abs)) continue;
-    let entries;
+    let entries: Dirent[];
     try {
       entries = readdirSync(abs, { withFileTypes: true });
     } catch {
@@ -492,9 +506,7 @@ function extractTokenDeclarations(projectRoot: string, cfg: DesignLintConfig): T
 
 const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-type RegistryLoad =
-  | { ok: true; data: Record<string, unknown> }
-  | { ok: false; error: string };
+type RegistryLoad = { ok: true; data: Record<string, unknown> } | { ok: false; error: string };
 
 function registryError(relPath: string, message: string): Finding {
   return {
@@ -522,7 +534,10 @@ function loadRegistry(projectRoot: string, relPath: string): RegistryLoad {
     return { ok: false, error: `invalid YAML in ${relPath}${at}: ${(err as Error).message}` };
   }
   if (data === null || data === undefined || typeof data !== "object" || Array.isArray(data)) {
-    return { ok: false, error: `${relPath} parses to an empty or non-object document — expected an object with an integer \`version\` and an entry list` };
+    return {
+      ok: false,
+      error: `${relPath} parses to an empty or non-object document — expected an object with an integer \`version\` and an entry list`,
+    };
   }
   return { ok: true, data: data as Record<string, unknown> };
 }
@@ -537,13 +552,19 @@ function validateRegistrySkeleton(
   const version = data.version;
   if (typeof version !== "number" || !Number.isInteger(version) || version < 1) {
     findings.push(
-      registryError(relPath, `missing or invalid \`version\` — expected an integer >= 1 (start at 1), got ${JSON.stringify(version ?? null)}`),
+      registryError(
+        relPath,
+        `missing or invalid \`version\` — expected an integer >= 1 (start at 1), got ${JSON.stringify(version ?? null)}`,
+      ),
     );
   }
   const list = data[listKey];
   if (!Array.isArray(list)) {
     findings.push(
-      registryError(relPath, `missing or invalid \`${listKey}\` — expected a YAML list (an empty list is valid; registries are shape-only)`),
+      registryError(
+        relPath,
+        `missing or invalid \`${listKey}\` — expected a YAML list (an empty list is valid; registries are shape-only)`,
+      ),
     );
     return { findings, entries: [] };
   }
@@ -583,13 +604,25 @@ function validateComponentsRegistry(
     const label = entryLabel(raw, index);
     const id = raw.id;
     if (typeof id !== "string" || id.length === 0) {
-      findings.push(registryError(relPath, `components[${index}]: missing required field \`id\` (expected a non-empty string)`));
+      findings.push(
+        registryError(relPath, `components[${index}]: missing required field \`id\` (expected a non-empty string)`),
+      );
     } else {
       if (!KEBAB_CASE.test(id)) {
-        findings.push(registryError(relPath, `components[${index}] ${label}: \`id\` must be kebab-case (lowercase letters/digits separated by single hyphens), got '${id}'`));
+        findings.push(
+          registryError(
+            relPath,
+            `components[${index}] ${label}: \`id\` must be kebab-case (lowercase letters/digits separated by single hyphens), got '${id}'`,
+          ),
+        );
       }
       if (seen.has(id)) {
-        findings.push(registryError(relPath, `components[${index}] ${label}: duplicate \`id\` (first defined at components[${seen.get(id)}])`));
+        findings.push(
+          registryError(
+            relPath,
+            `components[${index}] ${label}: duplicate \`id\` (first defined at components[${seen.get(id)}])`,
+          ),
+        );
       } else {
         seen.set(id, index);
       }
@@ -597,21 +630,38 @@ function validateComponentsRegistry(
     const tokens = raw.tokens;
     const tokenMap: Record<string, string[]> = {};
     if (!isPlainObject(tokens)) {
-      findings.push(registryError(relPath, `components[${index}] ${label}: missing required field \`tokens\` — expected a mapping of state group -> list of custom-property names (e.g. default: [...])`));
+      findings.push(
+        registryError(
+          relPath,
+          `components[${index}] ${label}: missing required field \`tokens\` — expected a mapping of state group -> list of custom-property names (e.g. default: [...])`,
+        ),
+      );
     } else {
       for (const [state, refs] of Object.entries(tokens)) {
         if (!isStringArray(refs)) {
-          findings.push(registryError(relPath, `components[${index}] ${label}: \`tokens.${state}\` must be a list of custom-property name strings`));
+          findings.push(
+            registryError(
+              relPath,
+              `components[${index}] ${label}: \`tokens.${state}\` must be a list of custom-property name strings`,
+            ),
+          );
           continue;
         }
         tokenMap[state] = refs;
       }
     }
     if (raw.layout_primitives !== undefined && !isStringArray(raw.layout_primitives)) {
-      findings.push(registryError(relPath, `components[${index}] ${label}: \`layout_primitives\` must be a list of strings`));
+      findings.push(
+        registryError(relPath, `components[${index}] ${label}: \`layout_primitives\` must be a list of strings`),
+      );
     }
     if (raw.status !== undefined && raw.status !== "active" && raw.status !== "deprecated") {
-      findings.push(registryError(relPath, `components[${index}] ${label}: \`status\` must be 'active' or 'deprecated', got ${JSON.stringify(raw.status)}`));
+      findings.push(
+        registryError(
+          relPath,
+          `components[${index}] ${label}: \`status\` must be 'active' or 'deprecated', got ${JSON.stringify(raw.status)}`,
+        ),
+      );
     }
     components.push({
       id: typeof id === "string" ? id : "",
@@ -638,13 +688,20 @@ function validatePatternsRegistry(
     const label = entryLabel(raw, index);
     const id = raw.id;
     if (typeof id !== "string" || id.length === 0) {
-      findings.push(registryError(relPath, `patterns[${index}]: missing required field \`id\` (expected a non-empty string)`));
+      findings.push(
+        registryError(relPath, `patterns[${index}]: missing required field \`id\` (expected a non-empty string)`),
+      );
     } else {
       if (!KEBAB_CASE.test(id)) {
         findings.push(registryError(relPath, `patterns[${index}] ${label}: \`id\` must be kebab-case, got '${id}'`));
       }
       if (seen.has(id)) {
-        findings.push(registryError(relPath, `patterns[${index}] ${label}: duplicate \`id\` (first defined at patterns[${seen.get(id)}])`));
+        findings.push(
+          registryError(
+            relPath,
+            `patterns[${index}] ${label}: duplicate \`id\` (first defined at patterns[${seen.get(id)}])`,
+          ),
+        );
       } else {
         seen.set(id, index);
         ids.add(id);
@@ -660,7 +717,12 @@ function validatePatternsRegistry(
     }
     if (raw.composes_from !== undefined) {
       if (!isStringArray(raw.composes_from)) {
-        findings.push(registryError(relPath, `patterns[${index}] ${label}: \`composes_from\` must be a list of component-id strings`));
+        findings.push(
+          registryError(
+            relPath,
+            `patterns[${index}] ${label}: \`composes_from\` must be a list of component-id strings`,
+          ),
+        );
       } else {
         composesFrom.push({ id: typeof id === "string" ? id : `#${index + 1}`, refs: raw.composes_from });
       }
@@ -688,10 +750,17 @@ function validateIconsRegistry(
     const label = entryLabel(raw, index);
     const id = raw.id;
     if (typeof id !== "string" || id.length === 0) {
-      findings.push(registryError(relPath, `icons[${index}]: missing required field \`id\` (expected a non-empty string)`));
+      findings.push(
+        registryError(relPath, `icons[${index}]: missing required field \`id\` (expected a non-empty string)`),
+      );
     } else {
       if (seen.has(id)) {
-        findings.push(registryError(relPath, `icons[${index}] ${label}: duplicate \`id\` (first defined at icons[${seen.get(id)}])`));
+        findings.push(
+          registryError(
+            relPath,
+            `icons[${index}] ${label}: duplicate \`id\` (first defined at icons[${seen.get(id)}])`,
+          ),
+        );
       } else {
         seen.set(id, index);
       }
@@ -1093,10 +1162,7 @@ function runPatterns(opts: CliOptions): CheckResult {
 /** Icon reference conventions: built-ins + attributes declared in docs/design.md. */
 function iconConventions(projectRoot: string): Array<{ attr: string; tag?: string }> {
   // Built-in defaults (design §6.3 examples)
-  const conventions: Array<{ attr: string; tag?: string }> = [
-    { attr: "name", tag: "Icon" },
-    { attr: "icon" },
-  ];
+  const conventions: Array<{ attr: string; tag?: string }> = [{ attr: "name", tag: "Icon" }, { attr: "icon" }];
   const designMd = join(projectRoot, "docs", "design.md");
   if (!existsSync(designMd)) return conventions;
   let content: string;
@@ -1215,10 +1281,12 @@ function runListTable(opts: CliOptions): CheckResult {
       } catch {
         continue;
       }
-      const tableStarts = [...content.matchAll(/class(?:Name)?=["'`]([^"'`]*\bdata-table\b[^"'`]*)["'`]/g)].map((m) => ({
-        idx: m.index!,
-        cls: m[1],
-      }));
+      const tableStarts = [...content.matchAll(/class(?:Name)?=["'`]([^"'`]*\bdata-table\b[^"'`]*)["'`]/g)].map(
+        (m) => ({
+          idx: m.index!,
+          cls: m[1],
+        }),
+      );
       if (tableStarts.length === 0) continue;
       const relFile = toPosix(relative(root, file) || file);
       for (const cell of content.matchAll(/sizing-actions-cell/g)) {
@@ -1246,14 +1314,17 @@ function runListTable(opts: CliOptions): CheckResult {
             pattern: "sr-only-actions-header-missing",
             match: owner.cls.trim().slice(0, 80),
             severity: "fail",
-            note: "the actions column of a row-action table must be headed by a visually hidden (<th class=\"sr-only\">) header so screen readers announce the column — design-components.md list-table standard",
+            note: 'the actions column of a row-action table must be headed by a visually hidden (<th class="sr-only">) header so screen readers announce the column — design-components.md list-table standard',
           });
         }
       }
     }
   }
   if (tablesSeen === 0) {
-    return skipped("list-table", "no .data-table with per-row actions (sizing-actions-cell) found in the UI source roots");
+    return skipped(
+      "list-table",
+      "no .data-table with per-row actions (sizing-actions-cell) found in the UI source roots",
+    );
   }
   return result("list-table", findings);
 }
@@ -1280,7 +1351,8 @@ function runFonts(opts: CliOptions): CheckResult {
     const families = splitFamilies(decl.value);
     if (families.length >= 2 && GENERIC_FONT_FAMILIES.has(families[families.length - 1].toLowerCase())) continue;
     const reasons: string[] = [];
-    if (families.length < 2) reasons.push(`needs at least one fallback (>= 2 comma-separated families), got ${families.length}`);
+    if (families.length < 2)
+      reasons.push(`needs at least one fallback (>= 2 comma-separated families), got ${families.length}`);
     const last = families[families.length - 1];
     if (families.length > 0 && !GENERIC_FONT_FAMILIES.has(last.toLowerCase())) {
       reasons.push(`must terminate in a generic family (${[...GENERIC_FONT_FAMILIES].join(", ")}), got '${last}'`);
@@ -1326,7 +1398,12 @@ function runThemes(opts: CliOptions): CheckResult {
     }
     if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) continue;
     const themesNode = (parsed as Record<string, unknown>)["themes"];
-    if (themesNode === undefined || themesNode === null || typeof themesNode !== "object" || Array.isArray(themesNode)) {
+    if (
+      themesNode === undefined ||
+      themesNode === null ||
+      typeof themesNode !== "object" ||
+      Array.isArray(themesNode)
+    ) {
       continue;
     }
     for (const [preset, node] of Object.entries(themesNode as Record<string, unknown>)) {
@@ -1499,7 +1576,9 @@ function printHumanReport(results: CheckResult[]): void {
   const fail = results.filter((r) => r.status === "fail").length;
   const skip = results.filter((r) => r.status === "skipped").length;
   const verdict = fail > 0 ? "NEEDS REMEDIATION" : "CLEAN";
-  console.log(`design-lint v${VERSION}: ${results.length} check(s) (${pass} pass, ${fail} fail, ${skip} skipped) - ${verdict}`);
+  console.log(
+    `design-lint v${VERSION}: ${results.length} check(s) (${pass} pass, ${fail} fail, ${skip} skipped) - ${verdict}`,
+  );
 }
 
 function jsonReport(projectRoot: string, results: CheckResult[]): string {
@@ -1559,10 +1638,7 @@ export async function main(): Promise<void> {
   }
 
   const projectRoot = parsed.positionals[0] ?? process.cwd();
-  const selected =
-    parsed.checks.length > 0
-      ? CHECK_ORDER.filter((c) => parsed.checks.includes(c))
-      : [...CHECK_ORDER];
+  const selected = parsed.checks.length > 0 ? CHECK_ORDER.filter((c) => parsed.checks.includes(c)) : [...CHECK_ORDER];
   // v2.5.0 (U-20261028-014): --allow literals merge into the loaded config's
   // allowlist so callers (audit.ts checkDesignLint forwarding a variant.json
   // designLint override) can exempt literals without a workspace-schema.json.

@@ -32,10 +32,10 @@
  * @module lint-instructions
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 
-const VERSION = '1.0.0';
+const VERSION = "1.0.0";
 const WORD_LIMIT = 25;
 const REQUIREMENT_HEADING = /requirement|acceptance/i;
 const LIST_MARKER = /^\s*(?:[-*+]|\d+[.)])\s+/;
@@ -94,15 +94,15 @@ export function extractRequirementSections(text: string): Section[] {
 /** Strip list markers and inline-code backticks, collapse whitespace. */
 function normalize(text: string): string {
   return text
-    .replace(LIST_MARKER, '')
-    .replace(/`([^`]*)`/g, '$1')
+    .replace(LIST_MARKER, "")
+    .replace(/`([^`]*)`/g, "$1")
     .trim();
 }
 
 /** Count whitespace-separated words. */
 export function countWords(sentence: string): number {
   const t = normalize(sentence);
-  if (t === '') return 0;
+  if (t === "") return 0;
   return t.split(/\s+/).length;
 }
 
@@ -114,7 +114,7 @@ export function countWords(sentence: string): number {
  */
 export function splitSentences(line: string): string[] {
   const t = normalize(line);
-  if (t === '') return [];
+  if (t === "") return [];
   const parts = t.split(/(?<=[.!?])(?=\s+\S)/);
   return parts.map((p) => p.trim()).filter((p) => p.length > 0);
 }
@@ -123,9 +123,9 @@ export function splitSentences(line: string): string[] {
  * Lint one document: findings carry 1-based line numbers (as printed)
  * and the normalized sentence text, truncated by the caller.
  */
-export function lintDocument(text: string): Omit<Finding, 'file'>[] {
+export function lintDocument(text: string): Omit<Finding, "file">[] {
   const ls = lines(text);
-  const findings: Omit<Finding, 'file'>[] = [];
+  const findings: Omit<Finding, "file">[] = [];
   const sections = extractRequirementSections(text);
   for (const section of sections) {
     let inFence = false;
@@ -153,14 +153,14 @@ export function lintDocument(text: string): Omit<Finding, 'file'>[] {
 function collectMarkdown(root: string): string[] {
   const out: string[] = [];
   if (!statSync(root).isDirectory()) {
-    return root.endsWith('.md') ? [root] : [];
+    return root.endsWith(".md") ? [root] : [];
   }
   for (const entry of readdirSync(root)) {
-    if (entry.startsWith('.')) continue;
+    if (entry.startsWith(".")) continue;
     const full = join(root, entry);
     const st = statSync(full);
     if (st.isDirectory()) out.push(...collectMarkdown(full));
-    else if (entry.endsWith('.md')) out.push(full);
+    else if (entry.endsWith(".md")) out.push(full);
   }
   return out.sort();
 }
@@ -177,13 +177,13 @@ reports sentences over ${WORD_LIMIT} words as WARN lines. Exit 0 unless --strict
 
 function main(): number {
   const args = process.argv.slice(2);
-  if (args.includes('--help')) {
+  if (args.includes("--help")) {
     printHelp();
     return 0;
   }
-  const strict = args.includes('--strict');
-  const dirIdx = args.indexOf('--dir');
-  const root = dirIdx >= 0 ? args[dirIdx + 1] : 'docs/designs';
+  const strict = args.includes("--strict");
+  const dirIdx = args.indexOf("--dir");
+  const root = dirIdx >= 0 ? args[dirIdx + 1] : "docs/designs";
   if (!root || !existsSync(root)) {
     console.error(`ERROR: scan root not found: ${root}`);
     return 2;
@@ -192,7 +192,7 @@ function main(): number {
   const files = collectMarkdown(root);
   const all: Finding[] = [];
   for (const file of files) {
-    for (const f of lintDocument(readFileSync(file, 'utf-8'))) {
+    for (const f of lintDocument(readFileSync(file, "utf-8"))) {
       all.push({ file: relative(process.cwd(), file), ...f });
     }
   }
@@ -212,7 +212,7 @@ function main(): number {
   }
   console.log(
     `\n${files.length} file(s) scanned, ${all.length} over-limit sentence(s)` +
-      (all.length > 0 ? ` — advisory WARN (ADR-0079 enforcement stays advisory)` : ''),
+      (all.length > 0 ? ` — advisory WARN (ADR-0079 enforcement stays advisory)` : ""),
   );
   if (strict && all.length > 0) return 1;
   return 0;

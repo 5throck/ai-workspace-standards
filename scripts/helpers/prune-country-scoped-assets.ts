@@ -51,19 +51,19 @@
  * - Exit 0 on success, exit 1 on bad args
  */
 
-import { readFileSync, existsSync, rmSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { resolve, join, dirname } from 'node:path';
-import { basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { pruneCountryScopedEnvBlocks } from '../lib/env-sample.ts';
-import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
+import { readFileSync, existsSync, rmSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { resolve, join, dirname } from "node:path";
+import { basename } from "node:path";
+import { fileURLToPath } from "node:url";
+import { pruneCountryScopedEnvBlocks } from "../lib/env-sample.ts";
+import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // ── Argument parsing ────────────────────────────────────────────────────────
 if (process.argv.length < 4) {
-  console.error('Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none>');
+  console.error("Usage: bun scripts/helpers/prune-country-scoped-assets.ts <target-dir> <country|none>");
   process.exit(1);
 }
 
@@ -71,11 +71,13 @@ const targetDir = process.argv[2];
 const countryArg = process.argv[3];
 // Optional variant name: projects name their context doc docs/<variant>.context.md and
 // the project directory name may differ from the variant; L3 drafts use docs/context.md.
-const variantArg = process.argv[4] && process.argv[4] !== 'none' ? process.argv[4] : undefined;
+const variantArg = process.argv[4] && process.argv[4] !== "none" ? process.argv[4] : undefined;
 
 // Validate country pattern (ISO 3166-1 alpha-2 or well-known region codes)
-if (countryArg !== 'none' && countryArg !== '' && !/^[A-Z]{2,4}$/.test(countryArg)) {
-  console.error(`❌ Invalid country code: '${countryArg}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or 'none'.`);
+if (countryArg !== "none" && countryArg !== "" && !/^[A-Z]{2,4}$/.test(countryArg)) {
+  console.error(
+    `❌ Invalid country code: '${countryArg}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or 'none'.`,
+  );
   process.exit(1);
 }
 
@@ -85,19 +87,24 @@ if (!existsSync(targetDir)) {
 }
 
 // ── Load registry from workspace schema (SSOT) ──────────────────────────────
-const workspaceRoot = resolve(__dirname, '../..');
-const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
+const workspaceRoot = resolve(__dirname, "../..");
+const schemaPath = join(workspaceRoot, "docs", "workspace-schema.json");
 
-let registry: { skills: Record<string, string>; scripts: Record<string, string>; env: Record<string, string>; dirs: Record<string, string> } = {
+let registry: {
+  skills: Record<string, string>;
+  scripts: Record<string, string>;
+  env: Record<string, string>;
+  dirs: Record<string, string>;
+} = {
   skills: {},
   scripts: {},
   env: {},
-  dirs: {}
+  dirs: {},
 };
 
 if (existsSync(schemaPath)) {
   try {
-    const schemaContent = readFileSync(schemaPath, 'utf-8');
+    const schemaContent = readFileSync(schemaPath, "utf-8");
     const schema = JSON.parse(schemaContent) as Record<string, unknown>;
     const countryScoped = schema.country_scoped_assets as Record<string, unknown> | undefined;
 
@@ -144,7 +151,7 @@ function safeRemove(targetPath: string): boolean {
  */
 function pruneSkill(skillName: string, scopedCountry: string): void {
   // Prune if target country doesn't match (including region-neutral case)
-  if (countryArg !== 'none' && countryArg !== '' && countryArg === scopedCountry) {
+  if (countryArg !== "none" && countryArg !== "" && countryArg === scopedCountry) {
     return; // Keep the skill - country matches
   }
 
@@ -171,12 +178,12 @@ function pruneSkill(skillName: string, scopedCountry: string): void {
  */
 function pruneScript(scriptName: string, scopedCountry: string): void {
   // Prune if target country doesn't match
-  if (countryArg !== 'none' && countryArg !== '' && countryArg === scopedCountry) {
+  if (countryArg !== "none" && countryArg !== "" && countryArg === scopedCountry) {
     return; // Keep the script - country matches
   }
 
   // Scripts are in scripts/ directory
-  const scriptsDir = join(targetDir, 'scripts');
+  const scriptsDir = join(targetDir, "scripts");
   if (!existsSync(scriptsDir)) return;
 
   try {
@@ -203,7 +210,7 @@ function pruneScript(scriptName: string, scopedCountry: string): void {
  */
 function pruneDir(relPath: string, scopedCountry: string): void {
   // Prune if target country doesn't match (including region-neutral case)
-  if (countryArg !== 'none' && countryArg !== '' && countryArg === scopedCountry) {
+  if (countryArg !== "none" && countryArg !== "" && countryArg === scopedCountry) {
     return; // Keep the directory - country matches
   }
 
@@ -220,11 +227,11 @@ function pruneDir(relPath: string, scopedCountry: string): void {
  * share one grammar and one keep/drop decision.
  */
 function pruneEnvBlocks(): void {
-  const envSamplePath = join(targetDir, '.env.sample');
+  const envSamplePath = join(targetDir, ".env.sample");
   if (!existsSync(envSamplePath)) return;
 
   try {
-    const result = pruneCountryScopedEnvBlocks(readFileSync(envSamplePath, 'utf-8'), countryArg);
+    const result = pruneCountryScopedEnvBlocks(readFileSync(envSamplePath, "utf-8"), countryArg);
     for (const warning of result.warnings) {
       console.warn(`  ⚠️  ${warning}`);
     }
@@ -232,7 +239,7 @@ function pruneEnvBlocks(): void {
     for (const code of result.pruned) {
       console.log(`Pruned ${code}-scoped env block from .env.sample`);
     }
-    writeFileSync(envSamplePath, result.output, 'utf-8');
+    writeFileSync(envSamplePath, result.output, "utf-8");
     prunedCount += result.pruned.length;
   } catch (error) {
     console.warn(`  ⚠️  Could not process .env.sample: ${error}`);
@@ -241,7 +248,9 @@ function pruneEnvBlocks(): void {
 
 // ── Execute pruning ───────────────────────────────────────────────────────────
 
-console.log(`Pruning country-scoped assets for: ${countryArg === 'none' || countryArg === '' ? 'region-neutral' : countryArg}`);
+console.log(
+  `Pruning country-scoped assets for: ${countryArg === "none" || countryArg === "" ? "region-neutral" : countryArg}`,
+);
 
 // Prune skills
 for (const [skillName, scopedCountry] of Object.entries(registry.skills)) {
@@ -268,13 +277,12 @@ function scrubPrunedSkillReferences(): void {
   if (prunedSkillNames.length === 0) return;
   let scrubbed = 0;
 
-  const agentsPath = join(targetDir, 'AGENTS.md');
+  const agentsPath = join(targetDir, "AGENTS.md");
   if (existsSync(agentsPath)) {
-    const lines = readFileSync(agentsPath, 'utf-8').split('\n');
-    const kept = lines.filter(line =>
-      !prunedSkillNames.some(n => line.includes(`skills/${n}/SKILL.md`)));
+    const lines = readFileSync(agentsPath, "utf-8").split("\n");
+    const kept = lines.filter((line) => !prunedSkillNames.some((n) => line.includes(`skills/${n}/SKILL.md`)));
     if (kept.length !== lines.length) {
-      writeFileSync(agentsPath, kept.join('\n'), 'utf-8');
+      writeFileSync(agentsPath, kept.join("\n"), "utf-8");
       scrubbed += lines.length - kept.length;
     }
   }
@@ -283,24 +291,25 @@ function scrubPrunedSkillReferences(): void {
   // docs/context.md, scaffolded projects use docs/<variant>.context.md, and the project
   // directory name may differ from the variant. Scrub every candidate that exists.
   const ctxCandidates = [
-    join(targetDir, 'docs', 'context.md'),
-    join(targetDir, 'docs', `${basename(targetDir)}.context.md`),
-    ...(variantArg ? [join(targetDir, 'docs', `${variantArg}.context.md`)] : []),
+    join(targetDir, "docs", "context.md"),
+    join(targetDir, "docs", `${basename(targetDir)}.context.md`),
+    ...(variantArg ? [join(targetDir, "docs", `${variantArg}.context.md`)] : []),
   ];
   for (const ctxPath of ctxCandidates) {
     if (!existsSync(ctxPath)) continue;
-    const lines = readFileSync(ctxPath, 'utf-8').split('\n');
+    const lines = readFileSync(ctxPath, "utf-8").split("\n");
     // Match all three reference shapes the context docs use (spec
     // 2026-10-05-country-prune-context-scrub-design.md): an inline-code name, a
     // bold table row, or a skill-path mention. The inline-code-only filter let
     // co-consult's bold-form k-dart table row survive region-neutral scaffolds.
-    const kept = lines.filter(line =>
-      !prunedSkillNames.some(n =>
-        line.includes(`\`${n}\``) ||
-        line.includes(`**${n}**`) ||
-        line.includes(`skills/${n}/SKILL.md`)));
+    const kept = lines.filter(
+      (line) =>
+        !prunedSkillNames.some(
+          (n) => line.includes(`\`${n}\``) || line.includes(`**${n}**`) || line.includes(`skills/${n}/SKILL.md`),
+        ),
+    );
     if (kept.length !== lines.length) {
-      writeFileSync(ctxPath, kept.join('\n'), 'utf-8');
+      writeFileSync(ctxPath, kept.join("\n"), "utf-8");
       scrubbed += lines.length - kept.length;
     }
   }
@@ -313,7 +322,7 @@ function scrubPrunedSkillReferences(): void {
 scrubPrunedSkillReferences();
 
 if (prunedCount === 0) {
-  console.log('No country-scoped assets needed pruning.');
+  console.log("No country-scoped assets needed pruning.");
 } else {
   console.log(`Pruned ${prunedCount} country-scoped asset(s).`);
 }

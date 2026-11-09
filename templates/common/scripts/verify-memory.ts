@@ -20,26 +20,16 @@
  *   1 = format violations or orphaned files detected
  */
 
-import { readFileSync, readdirSync, existsSync } from "fs";
-import { join } from "path";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import { die } from "./lib/error-handling.ts";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
-const REQUIRED_SECTIONS = [
-  "## Session Summary",
-  "## Changes",
-  "## Decisions",
-  "## Open Issues",
-];
+const REQUIRED_SECTIONS = ["## Session Summary", "## Changes", "## Decisions", "## Open Issues"];
 
 // Files that are exempt from 4-section format (meetings, ADRs, index)
-const EXEMPT_PATTERNS = [
-  /^MEMORY\.md$/,
-  /^meeting-/,
-  /^adr-/,
-  /^[0-9]{4}-[0-9]{2}-[0-9]{2}-.*-meeting/,
-];
+const EXEMPT_PATTERNS = [/^MEMORY\.md$/, /^meeting-/, /^adr-/, /^[0-9]{4}-[0-9]{2}-[0-9]{2}-.*-meeting/];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -158,12 +148,8 @@ function verify(explicitFiles?: string[]): boolean {
     allFiles = readdirSync(memDir).filter((f) => f.endsWith(".md") && !f.includes("archive"));
   }
 
-  const sessionFiles = allFiles.filter(
-    (f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f)
-  );
-  const otherFiles = allFiles.filter(
-    (f) => !isExempt(f) && !/^\d{4}-\d{2}-\d{2}\.md$/.test(f)
-  );
+  const sessionFiles = allFiles.filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f));
+  const otherFiles = allFiles.filter((f) => !isExempt(f) && !/^\d{4}-\d{2}-\d{2}\.md$/.test(f));
 
   // Check 1: Format validation for session files
   // When explicit files are provided (pre-commit mode), only check the LAST entry
@@ -186,14 +172,14 @@ function verify(explicitFiles?: string[]): boolean {
       const missing = REQUIRED_SECTIONS.filter((s) => !lastBlock.includes(s));
       if (missing.length > 0) {
         errors.push(
-          `Format violation in \`${file}\` — latest entry "${heading}" missing sections: ${missing.join(", ")}`
+          `Format violation in \`${file}\` — latest entry "${heading}" missing sections: ${missing.join(", ")}`,
         );
       }
     } else {
       const violations = validateSessionFile(filepath);
       for (const v of violations) {
         errors.push(
-          `Format violation in \`${file}\` — entry "${v.heading}" missing sections: ${v.missingSections.join(", ")}`
+          `Format violation in \`${file}\` — entry "${v.heading}" missing sections: ${v.missingSections.join(", ")}`,
         );
       }
     }
@@ -205,7 +191,7 @@ function verify(explicitFiles?: string[]): boolean {
     const violations = validateSessionFile(filepath);
     for (const v of violations) {
       warnings.push(
-        `Format warning in \`${file}\` — entry "${v.heading}" missing sections: ${v.missingSections.join(", ")}`
+        `Format warning in \`${file}\` — entry "${v.heading}" missing sections: ${v.missingSections.join(", ")}`,
       );
     }
   }
@@ -217,9 +203,7 @@ function verify(explicitFiles?: string[]): boolean {
 
     for (const file of sessionFiles) {
       if (!registered.has(file)) {
-        warnings.push(
-          `Orphaned session file: \`${file}\` — not registered in MEMORY.md Sessions section`
-        );
+        warnings.push(`Orphaned session file: \`${file}\` — not registered in MEMORY.md Sessions section`);
       }
     }
 
@@ -230,7 +214,7 @@ function verify(explicitFiles?: string[]): boolean {
       if (href.includes("/")) continue; // relative refs outside the flat memory dir are out of scope
       if (!existsSync(join(memDir, href))) {
         errors.push(
-          `Dead MEMORY.md Sessions row: \`${href}\` — indexed session log no longer exists; prune the row or restore the file`
+          `Dead MEMORY.md Sessions row: \`${href}\` — indexed session log no longer exists; prune the row or restore the file`,
         );
       }
     }
@@ -253,9 +237,7 @@ function verify(explicitFiles?: string[]): boolean {
     console.log(`\n❌ ${errors.length} error(s) found — fix format violations before committing`);
     passed = false;
   } else {
-    console.log(
-      `✅ Memory format valid (${sessionFiles.length} session files, ${warnings.length} warning(s))`
-    );
+    console.log(`✅ Memory format valid (${sessionFiles.length} session files, ${warnings.length} warning(s))`);
   }
 
   return passed;
@@ -271,9 +253,7 @@ function report(): void {
   }
 
   const allFiles = readdirSync(memDir).filter((f) => f.endsWith(".md"));
-  const sessionFiles = allFiles
-    .filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
-    .sort();
+  const sessionFiles = allFiles.filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f)).sort();
   const meetingFiles = allFiles.filter((f) => f.startsWith("meeting-")).sort();
   const adrFiles = allFiles.filter((f) => f.startsWith("adr-")).sort();
 

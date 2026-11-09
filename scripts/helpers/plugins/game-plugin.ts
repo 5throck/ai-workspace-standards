@@ -13,11 +13,7 @@
  *   3. Architecture pattern mention (INFO) — collision/tile grid pattern documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'game' variant type.
@@ -39,7 +35,7 @@ import type {
  */
 export class GamePlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'game' as const;
+  readonly type = "game" as const;
 
   /**
    * Validates a game variant against game-specific requirements.
@@ -64,20 +60,13 @@ export class GamePlugin implements VariantPlugin {
     // --- Check 1: Game-specific capability coverage ---
     // Verify that agents collectively cover game-design, game-loop, asset-pipeline, debugging.
     // These are hard functional requirements — game variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'game-design',
-      'game-loop',
-      'asset-pipeline',
-      'debugging',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["game-design", "game-loop", "asset-pipeline", "debugging"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing game capability: ${cap}`,
           capability: cap,
         });
@@ -88,30 +77,22 @@ export class GamePlugin implements VariantPlugin {
     // Game variants should reference a performance budget in their documentation.
     // A 60fps target is the standard for smooth HTML5 Canvas gameplay.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('fps') &&
-      !variantContent.toLowerCase().includes('performance budget')
-    ) {
+    if (!variantContent.toLowerCase().includes("fps") && !variantContent.toLowerCase().includes("performance budget")) {
       issues.push({
-        severity: 'warning',
-        category: 'performance-budget',
-        message:
-          'Game variant should reference a performance budget (e.g., 60fps target)',
+        severity: "warning",
+        category: "performance-budget",
+        message: "Game variant should reference a performance budget (e.g., 60fps target)",
       });
     }
 
     // --- Check 3: Architecture pattern mention ---
     // Standard game architecture pattern for 2D games — tile-based collision grids.
     // This is informational; not all game types use this pattern.
-    if (
-      !variantContent.toLowerCase().includes('collision') &&
-      !variantContent.toLowerCase().includes('tile')
-    ) {
+    if (!variantContent.toLowerCase().includes("collision") && !variantContent.toLowerCase().includes("tile")) {
       issues.push({
-        severity: 'info',
-        category: 'architecture-pattern',
-        message:
-          'Consider documenting collision/tile grid architecture pattern',
+        severity: "info",
+        category: "architecture-pattern",
+        message: "Consider documenting collision/tile grid architecture pattern",
       });
     }
 

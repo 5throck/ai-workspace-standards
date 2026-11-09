@@ -23,21 +23,21 @@
  *      enforcement.
  */
 
-import { join } from 'path';
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
+import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
 
 /** The four platform trees, as [platform, mirror-root] pairs. */
 const PLATFORM_TREES: ReadonlyArray<readonly [string, string]> = [
-  ['gemini', '.gemini'],
-  ['agents', '.agents'],
-  ['codex', '.codex'],
+  ["gemini", ".gemini"],
+  ["agents", ".agents"],
+  ["codex", ".codex"],
 ];
 
 /** Frontmatter skip markers honored for the non-claude mirrors (D3.4). */
 function hasMirrorParitySkip(skillMdPath: string): boolean {
   try {
-    const content = readFileSync(skillMdPath, 'utf-8');
+    const content = readFileSync(skillMdPath, "utf-8");
     return /(^|\n)(mirror-parity|gemini-parity):\s*skip\s*(\n|$)/.test(content);
   } catch {
     return false;
@@ -82,8 +82,8 @@ function listFilenames(dirPath: string, recursive = false): string[] {
 function listSkillDirs(dirPath: string): string[] {
   if (!existsSync(dirPath)) return [];
   return readdirSync(dirPath, { withFileTypes: true })
-    .filter(e => e.isDirectory() && existsSync(join(dirPath, e.name, 'SKILL.md')))
-    .map(e => e.name);
+    .filter((e) => e.isDirectory() && existsSync(join(dirPath, e.name, "SKILL.md")))
+    .map((e) => e.name);
 }
 
 /**
@@ -100,14 +100,14 @@ function compareFileSets(
 ): void {
   const claudeSet = new Set(claudeFiles);
   const otherSet = new Set(otherFiles);
-  const soakNote = soak ? ' (soak: WARN until promotion)' : '';
+  const soakNote = soak ? " (soak: WARN until promotion)" : "";
 
   // Files in the reference (.claude/) but not in the mirror
   for (const file of claudeFiles) {
     checks.count++;
     if (!otherSet.has(file)) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         category,
         message: `File present in .claude/ but missing from ${otherPlatform}/: ${file}${soakNote}`,
       });
@@ -119,7 +119,7 @@ function compareFileSets(
     checks.count++;
     if (!claudeSet.has(file)) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         category,
         message: `File present in ${otherPlatform}/ but missing from .claude/: ${file}${soakNote}`,
       });
@@ -135,9 +135,9 @@ function compareFileSets(
  * Validates cross-platform parity across all four platform mirrors.
  */
 export const platformParityValidator: ValidatorDefinition = {
-  name: 'platform-parity',
-  description: 'Ensures the platform mirrors (.gemini/.agents/.codex) match .claude/ skills and commands',
-  prerequisites: ['variant-json', 'extends'],
+  name: "platform-parity",
+  description: "Ensures the platform mirrors (.gemini/.agents/.codex) match .claude/ skills and commands",
+  prerequisites: ["variant-json", "extends"],
 
   validate(ctx: ValidatorContext): ValidatorResult {
     const start = performance.now();
@@ -145,39 +145,31 @@ export const platformParityValidator: ValidatorDefinition = {
     const checks = { count: 0 };
 
     const variantDir = ctx.variantDir;
-    const claudeSkillsDir = join(variantDir, '.claude', 'skills');
+    const claudeSkillsDir = join(variantDir, ".claude", "skills");
     const claudeSkillEntries = listSkillDirs(claudeSkillsDir);
-    const claudeCommands = listFilenames(join(variantDir, '.claude', 'commands'), false);
+    const claudeCommands = listFilenames(join(variantDir, ".claude", "commands"), false);
 
     // ── Skills parity: each mirror vs .claude (the SSOT-side reference) ──
     for (const [platform, tree] of PLATFORM_TREES) {
-      const mirrorSkillsDir = join(variantDir, tree, 'skills');
+      const mirrorSkillsDir = join(variantDir, tree, "skills");
       const mirrorSkillEntries = listSkillDirs(mirrorSkillsDir);
-      const soak = platform !== 'gemini'; // gemini leg is pre-existing coverage
+      const soak = platform !== "gemini"; // gemini leg is pre-existing coverage
 
       // Skip-marker honor (D3.4 generalized semantics): a skill marked
       // claude-only in its .claude SKILL.md frontmatter is exempt here.
       const comparableClaude = claudeSkillEntries.filter(
-        s => !hasMirrorParitySkip(join(claudeSkillsDir, s, 'SKILL.md')),
+        (s) => !hasMirrorParitySkip(join(claudeSkillsDir, s, "SKILL.md")),
       );
 
-      compareFileSets(
-        comparableClaude,
-        mirrorSkillEntries,
-        'platform-parity-skills',
-        issues,
-        checks,
-        platform,
-        soak,
-      );
+      compareFileSets(comparableClaude, mirrorSkillEntries, "platform-parity-skills", issues, checks, platform, soak);
 
       // Also check for matching SKILL.md files inside skill directories
       for (const skillDir of comparableClaude) {
         if (!mirrorSkillEntries.includes(skillDir)) continue; // already reported above
         compareFileSets(
-          listFilenames(join(claudeSkillsDir, skillDir), false).map(f => `${skillDir}/${f}`),
-          listFilenames(join(mirrorSkillsDir, skillDir), false).map(f => `${skillDir}/${f}`),
-          'platform-parity-skill-files',
+          listFilenames(join(claudeSkillsDir, skillDir), false).map((f) => `${skillDir}/${f}`),
+          listFilenames(join(mirrorSkillsDir, skillDir), false).map((f) => `${skillDir}/${f}`),
+          "platform-parity-skill-files",
           issues,
           checks,
           platform,
@@ -191,14 +183,22 @@ export const platformParityValidator: ValidatorDefinition = {
     // lifecycle check, not here). .codex: NAME-MAPPED prompts mirror
     // (commands/<x>.md ↔ prompts/<x>.md). .agents/commands: excluded — no
     // producer, no documented consumer (design Finding D; recorded exclusion).
-    const geminiCommands = listFilenames(join(variantDir, '.gemini', 'commands'), false);
-    compareFileSets(claudeCommands, geminiCommands, 'platform-parity-commands', issues, checks, 'gemini', false);
+    const geminiCommands = listFilenames(join(variantDir, ".gemini", "commands"), false);
+    compareFileSets(claudeCommands, geminiCommands, "platform-parity-commands", issues, checks, "gemini", false);
 
-    const codexPrompts = listFilenames(join(variantDir, '.codex', 'prompts'), false);
-    compareFileSets(claudeCommands, codexPrompts, 'platform-parity-commands-codex', issues, checks, 'codex-prompts', true);
+    const codexPrompts = listFilenames(join(variantDir, ".codex", "prompts"), false);
+    compareFileSets(
+      claudeCommands,
+      codexPrompts,
+      "platform-parity-commands-codex",
+      issues,
+      checks,
+      "codex-prompts",
+      true,
+    );
 
     return {
-      validator: 'platform-parity',
+      validator: "platform-parity",
       duration_ms: performance.now() - start,
       checks: checks.count,
       issues,

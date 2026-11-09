@@ -17,14 +17,14 @@
  * motivating capture this check exists to catch.
  */
 
-import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 
 export interface MirrorHygieneFinding {
   /** Entry name inside the mirror (e.g. "SKILLS.md"). */
   entry: string;
   /** Entry class: a file, or a directory without SKILL.md. */
-  kind: 'stray-file' | 'stray-dir';
+  kind: "stray-file" | "stray-dir";
 }
 
 /**
@@ -38,12 +38,12 @@ export function scanMirrorHygiene(mirrorDir: string): MirrorHygieneFinding[] {
   const findings: MirrorHygieneFinding[] = [];
   for (const entry of readdirSync(mirrorDir, { withFileTypes: true })) {
     if (entry.isFile()) {
-      findings.push({ entry: entry.name, kind: 'stray-file' });
+      findings.push({ entry: entry.name, kind: "stray-file" });
       continue;
     }
     if (!entry.isDirectory()) continue; // symlinks and specials are not mirror entries
-    if (existsSync(join(mirrorDir, entry.name, 'SKILL.md'))) continue; // skill directory — clean
-    findings.push({ entry: entry.name, kind: 'stray-dir' });
+    if (existsSync(join(mirrorDir, entry.name, "SKILL.md"))) continue; // skill directory — clean
+    findings.push({ entry: entry.name, kind: "stray-dir" });
   }
   return findings;
 }

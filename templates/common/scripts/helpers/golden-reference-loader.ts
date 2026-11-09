@@ -17,14 +17,14 @@
  * - lib/encoding-utils.ts (UTF-8 handling)
  */
 
-import { join, basename } from 'path';
-import { existsSync, readdirSync } from 'fs';
-import { readUTF8File } from '../lib/encoding-utils.ts';
-import type { VariantType } from './registries/variant-type-registry.ts';
-import { getValidationPolicy } from './registries/validation-policy.ts';
+import { join, basename } from "node:path";
+import { existsSync, readdirSync } from "node:fs";
+import { readUTF8File } from "../lib/encoding-utils.ts";
+import type { VariantType } from "./registries/variant-type-registry.ts";
+import { getValidationPolicy } from "./registries/validation-policy.ts";
 
 // Re-export for downstream consumers
-export type { VariantType } from './registries/variant-type-registry.ts';
+export type { VariantType } from "./registries/variant-type-registry.ts";
 
 export interface GoldenStructure {
   /** Required sections present in all variants (Layer 1) */
@@ -42,13 +42,13 @@ export interface GoldenStructure {
  * (Phase 4.5's inline filter, the roster extractor, and loadDynamicLayer2Agents()).
  * See: docs/designs/l2-pipeline-governance-fixes-2026-08-09-design.md Issue A.1
  */
-export const SKIP_AGENT_FILES = new Set(['pm.md', 'README.md', 'README_ko.md']);
+export const SKIP_AGENT_FILES = new Set(["pm.md", "README.md", "README_ko.md"]);
 
 export interface StructuralGapReport {
   /** File path that was checked */
   filePath: string;
   /** File type */
-  fileType: 'agent' | 'skill';
+  fileType: "agent" | "skill";
   /** Missing Layer 1 (required) sections */
   missingSections: string[];
   /** Missing Layer 2 (optional, informational only) sections */
@@ -66,13 +66,13 @@ export interface StructuralGapReport {
  * Source: docs/designs/variant-specialist-agent-structure.md
  */
 export const AGENT_LAYER1_SECTIONS: string[] = [
-  '## Role',
-  '## ⚠️ PM-ONLY INVOCATION',
-  '## Responsibilities',
-  '## Output Format',
-  '## Constraints',
-  '## Meeting Participation',
-  '## Dispatch Protocol',
+  "## Role",
+  "## ⚠️ PM-ONLY INVOCATION",
+  "## Responsibilities",
+  "## Output Format",
+  "## Constraints",
+  "## Meeting Participation",
+  "## Dispatch Protocol",
 ];
 
 /**
@@ -80,11 +80,11 @@ export const AGENT_LAYER1_SECTIONS: string[] = [
  * Source: docs/designs/variant-specialist-skill-structure.md
  */
 export const SKILL_LAYER1_SECTIONS: string[] = [
-  '## Context',
-  '## When to Use',
-  '## Execution Steps',
-  '## Output Format',
-  '## Related Skills',
+  "## Context",
+  "## When to Use",
+  "## Execution Steps",
+  "## Output Format",
+  "## Related Skills",
 ];
 
 // ============================================================================
@@ -103,19 +103,19 @@ export const SKILL_LAYER1_SECTIONS: string[] = [
 // DYNAMIC LAYER 2 LOADING
 // ============================================================================
 
-const TEMPLATES_ROOT = join(process.cwd(), 'templates');
+const TEMPLATES_ROOT = join(process.cwd(), "templates");
 
 /**
  * Map variantType to template directory name (best effort).
  */
 const VARIANT_TYPE_TO_DIR: Partial<Record<VariantType, string>> = {
-  development: 'co-develop',
-  security: 'co-security',
-  consulting: 'co-consult',
-  lecture: 'co-deck',
-  design: 'co-design',
-  collaboration: 'co-work',
-  game: 'co-game',
+  development: "co-develop",
+  security: "co-security",
+  consulting: "co-consult",
+  lecture: "co-deck",
+  design: "co-design",
+  collaboration: "co-work",
+  game: "co-game",
 };
 
 /**
@@ -126,11 +126,10 @@ function loadDynamicLayer2Agents(variantType: VariantType): string[] {
   const dirName = VARIANT_TYPE_TO_DIR[variantType];
   if (!dirName) return [];
 
-  const agentsDir = join(TEMPLATES_ROOT, dirName, 'agents');
+  const agentsDir = join(TEMPLATES_ROOT, dirName, "agents");
   if (!existsSync(agentsDir)) return [];
 
-  const agentFiles = readdirSync(agentsDir)
-    .filter(f => f.endsWith('.md') && !SKIP_AGENT_FILES.has(f));
+  const agentFiles = readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !SKIP_AGENT_FILES.has(f));
 
   if (agentFiles.length === 0) return [];
 
@@ -160,13 +159,13 @@ function loadDynamicLayer2Skills(variantType: VariantType): string[] {
   const dirName = VARIANT_TYPE_TO_DIR[variantType];
   if (!dirName) return [];
 
-  const skillsDir = join(TEMPLATES_ROOT, dirName, 'skills');
+  const skillsDir = join(TEMPLATES_ROOT, dirName, "skills");
   if (!existsSync(skillsDir)) return [];
 
   const skillDirs = readdirSync(skillsDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => join(skillsDir, d.name, 'SKILL.md'))
-    .filter(p => existsSync(p));
+    .filter((d) => d.isDirectory())
+    .map((d) => join(skillsDir, d.name, "SKILL.md"))
+    .filter((p) => existsSync(p));
 
   if (skillDirs.length === 0) return [];
 
@@ -201,19 +200,14 @@ function loadDynamicLayer2Skills(variantType: VariantType): string[] {
  * @param variantType - Type of the variant being generated
  * @param useDynamic - Whether to load Layer 2 dynamically from existing template (default: true)
  */
-export function getAgentGoldenStructure(
-  variantType: VariantType,
-  useDynamic = true,
-): GoldenStructure {
+export function getAgentGoldenStructure(variantType: VariantType, useDynamic = true): GoldenStructure {
   const layer1 = [...AGENT_LAYER1_SECTIONS];
   const validationPolicy = getValidationPolicy(variantType);
   const hardcoded = [...(validationPolicy.optionalAgentSections ?? [])];
   const dynamic = useDynamic ? loadDynamicLayer2Agents(variantType) : [];
 
   // Merge hardcoded + dynamic, deduplicate, remove Layer 1 overlaps
-  const layer2 = [...new Set([...hardcoded, ...dynamic])].filter(
-    s => !layer1.includes(s),
-  );
+  const layer2 = [...new Set([...hardcoded, ...dynamic])].filter((s) => !layer1.includes(s));
 
   return { requiredSections: layer1, optionalSections: layer2 };
 }
@@ -221,18 +215,13 @@ export function getAgentGoldenStructure(
 /**
  * Returns the expected section structure for a variant specialist skill file.
  */
-export function getSkillGoldenStructure(
-  variantType: VariantType,
-  useDynamic = true,
-): GoldenStructure {
+export function getSkillGoldenStructure(variantType: VariantType, useDynamic = true): GoldenStructure {
   const layer1 = [...SKILL_LAYER1_SECTIONS];
   const validationPolicy = getValidationPolicy(variantType);
   const hardcoded = [...(validationPolicy.optionalSkillSections ?? [])];
   const dynamic = useDynamic ? loadDynamicLayer2Skills(variantType) : [];
 
-  const layer2 = [...new Set([...hardcoded, ...dynamic])].filter(
-    s => !layer1.includes(s),
-  );
+  const layer2 = [...new Set([...hardcoded, ...dynamic])].filter((s) => !layer1.includes(s));
 
   return { requiredSections: layer1, optionalSections: layer2 };
 }
@@ -249,10 +238,10 @@ export function checkStructuralGaps(
   filePath: string,
   content: string,
   golden: GoldenStructure,
-  fileType: 'agent' | 'skill',
+  fileType: "agent" | "skill",
 ): StructuralGapReport {
-  const missingSections = golden.requiredSections.filter(s => !content.includes(s));
-  const missingOptionalSections = golden.optionalSections.filter(s => !content.includes(s));
+  const missingSections = golden.requiredSections.filter((s) => !content.includes(s));
+  const missingOptionalSections = golden.optionalSections.filter((s) => !content.includes(s));
 
   return {
     filePath,
@@ -267,15 +256,15 @@ export function checkStructuralGaps(
  * Format a list of gap reports as a human-readable report section.
  */
 export function formatGapReport(reports: StructuralGapReport[]): string {
-  const lines: string[] = ['=== Wave 3 — Golden Reference Structural Gap Report ===', ''];
+  const lines: string[] = ["=== Wave 3 — Golden Reference Structural Gap Report ===", ""];
 
-  const failed = reports.filter(r => !r.passed);
-  const passed = reports.filter(r => r.passed);
+  const failed = reports.filter((r) => !r.passed);
+  const passed = reports.filter((r) => r.passed);
 
   lines.push(`Files checked : ${reports.length}`);
   lines.push(`Passed        : ${passed.length}`);
   lines.push(`Warnings      : ${failed.length}`);
-  lines.push('');
+  lines.push("");
 
   for (const report of failed) {
     lines.push(`[WARN] ${report.filePath} (${report.fileType})`);
@@ -284,11 +273,11 @@ export function formatGapReport(reports: StructuralGapReport[]): string {
     }
   }
 
-  for (const report of reports.filter(r => r.missingOptionalSections.length > 0)) {
+  for (const report of reports.filter((r) => r.missingOptionalSections.length > 0)) {
     for (const s of report.missingOptionalSections) {
       lines.push(`[INFO] ${report.filePath}: Missing Layer 2 section: "${s}"`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

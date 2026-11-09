@@ -38,19 +38,19 @@
  *   --verbose Show detailed diff output
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
 // Import-safe: propagate-to-templates.ts is a top-level executable whose run
 // path sits behind import.meta.main (proven by tests/unit/governance-boundary-
 // l1.test.ts, which imports the same export). No cycle: the publisher never
 // imports this checker (audit.ts runs both as separate subprocesses).
-import { applyGovernanceTransforms } from './propagate-to-templates.ts';
+import { applyGovernanceTransforms } from "./propagate-to-templates.ts";
 
 interface ParityRule {
   /** Section identifier in the file */
   section: string;
   /** Tier: 'shared' (must be identical), 'claude-only'/'gemini-only'/'variant-specific' (may differ) */
-  tier: 'shared' | 'claude-only' | 'gemini-only' | 'variant-specific';
+  tier: "shared" | "claude-only" | "gemini-only" | "variant-specific";
   /** Description of what this rule covers */
   description: string;
   /** Lines to skip when comparing (e.g., version-specific markers) */
@@ -59,10 +59,10 @@ interface ParityRule {
 
 interface ParityCheckResult {
   file: string;
-  tier: 'L0→L1' | 'L0→L2';
+  tier: "L0→L1" | "L0→L2";
   sourcePath: string;
   targetPath: string;
-  status: 'pass' | 'fail' | 'warning';
+  status: "pass" | "fail" | "warning";
   discrepancies: ParityDiscrepancy[];
 }
 
@@ -72,7 +72,7 @@ interface ParityDiscrepancy {
   expected: string;
   actual: string;
   line?: number;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
 }
 
 // ============================================================================
@@ -84,121 +84,121 @@ interface ParityDiscrepancy {
 // agents/pm.md rules below remain load-bearing for the extends/section logic.
 
 const PARITY_RULES: Record<string, ParityRule[]> = {
-  'agents/pm.md': [
+  "agents/pm.md": [
     // Shared sections - must be identical L0→L1
     {
-      section: '## Role',
-      tier: 'shared',
-      description: 'PM role definition and core responsibilities',
+      section: "## Role",
+      tier: "shared",
+      description: "PM role definition and core responsibilities",
       skipPatterns: [],
     },
     {
-      section: '## 🚨 YOU ARE THE SINGLE ENTRY POINT',
-      tier: 'shared',
-      description: 'PM as single entry point enforcement',
+      section: "## 🚨 YOU ARE THE SINGLE ENTRY POINT",
+      tier: "shared",
+      description: "PM as single entry point enforcement",
       skipPatterns: [],
     },
     {
-      section: '## Consensus-Driven Facilitation Model',
-      tier: 'shared',
-      description: 'Consensus-driven facilitation principles',
+      section: "## Consensus-Driven Facilitation Model",
+      tier: "shared",
+      description: "Consensus-driven facilitation principles",
       skipPatterns: [],
     },
     {
-      section: '## ⚠️ ROLE CLARIFICATION',
-      tier: 'shared',
-      description: 'PM role boundaries - what PM does and does not do',
+      section: "## ⚠️ ROLE CLARIFICATION",
+      tier: "shared",
+      description: "PM role boundaries - what PM does and does not do",
       skipPatterns: [],
     },
     {
-      section: '## Updated Role (Phase 0/1-2/5/6 Only)',
-      tier: 'variant-specific',
-      description: 'PM scope after restructure - specific phases only (variant-specific)',
+      section: "## Updated Role (Phase 0/1-2/5/6 Only)",
+      tier: "variant-specific",
+      description: "PM scope after restructure - specific phases only (variant-specific)",
       skipPatterns: [],
     },
     {
-      section: '## Permission Denial Protocol',
-      tier: 'shared',
-      description: 'Permission denial handling and escalation',
+      section: "## Permission Denial Protocol",
+      tier: "shared",
+      description: "Permission denial handling and escalation",
       skipPatterns: [],
     },
     {
-      section: '## PM Direct Execution Scope',
-      tier: 'shared',
-      description: 'PM direct execution tool scope and constraints',
+      section: "## PM Direct Execution Scope",
+      tier: "shared",
+      description: "PM direct execution tool scope and constraints",
       skipPatterns: [],
     },
     {
-      section: '## Denial Type Classification',
-      tier: 'shared',
-      description: 'Classification of denial types and responses',
+      section: "## Denial Type Classification",
+      tier: "shared",
+      description: "Classification of denial types and responses",
       skipPatterns: [],
     },
     {
-      section: '## Escalation Template',
-      tier: 'shared',
-      description: 'Escalation template for permission denials',
+      section: "## Escalation Template",
+      tier: "shared",
+      description: "Escalation template for permission denials",
       skipPatterns: [],
     },
     {
-      section: '## Constraints',
-      tier: 'shared',
-      description: 'PM constraints including execution plan, phase determination, tier strategy',
+      section: "## Constraints",
+      tier: "shared",
+      description: "PM constraints including execution plan, phase determination, tier strategy",
       skipPatterns: [],
     },
     {
-      section: '## Execution Plan Boilerplate Policy',
-      tier: 'shared',
-      description: 'Execution plan boilerplate mandatory and discretionary cases',
+      section: "## Execution Plan Boilerplate Policy",
+      tier: "shared",
+      description: "Execution plan boilerplate mandatory and discretionary cases",
       skipPatterns: [],
     },
     {
-      section: '## Meeting Facilitation',
-      tier: 'shared',
-      description: 'Meeting facilitation protocol and PM role',
+      section: "## Meeting Facilitation",
+      tier: "shared",
+      description: "Meeting facilitation protocol and PM role",
       skipPatterns: [],
     },
     {
-      section: '## Required Tools',
-      tier: 'shared',
-      description: 'Required tools for PM agent',
+      section: "## Required Tools",
+      tier: "shared",
+      description: "Required tools for PM agent",
       skipPatterns: [],
     },
     {
-      section: '## ⚠️ CRITICAL: PM Direct Execution Constraints',
-      tier: 'shared',
-      description: 'Critical constraints on PM direct execution',
+      section: "## ⚠️ CRITICAL: PM Direct Execution Constraints",
+      tier: "shared",
+      description: "Critical constraints on PM direct execution",
       skipPatterns: [],
     },
     {
-      section: '## Task Tracking vs Execution',
-      tier: 'shared',
-      description: 'Task tracking vs execution workflow',
+      section: "## Task Tracking vs Execution",
+      tier: "shared",
+      description: "Task tracking vs execution workflow",
       skipPatterns: [],
     },
     {
-      section: '## User Communication for Specialist Tasks',
-      tier: 'shared',
-      description: 'User communication template for specialist tasks',
+      section: "## User Communication for Specialist Tasks",
+      tier: "shared",
+      description: "User communication template for specialist tasks",
       skipPatterns: [],
     },
     // Variant-specific sections - may differ L0→L2
     {
-      section: '## Governance Workflow',
-      tier: 'variant-specific',
-      description: 'Variant-specific governance workflow - may differ by project type',
+      section: "## Governance Workflow",
+      tier: "variant-specific",
+      description: "Variant-specific governance workflow - may differ by project type",
       skipPatterns: [],
     },
     {
-      section: '## Agent Roster',
-      tier: 'variant-specific',
-      description: 'Agent roster - variant-specific specialists',
+      section: "## Agent Roster",
+      tier: "variant-specific",
+      description: "Agent roster - variant-specific specialists",
       skipPatterns: [],
     },
     {
-      section: '## Dispatch Protocol',
-      tier: 'variant-specific',
-      description: 'Dispatch protocol - variant-specific phases and auto-dispatch targets',
+      section: "## Dispatch Protocol",
+      tier: "variant-specific",
+      description: "Dispatch protocol - variant-specific phases and auto-dispatch targets",
       skipPatterns: [],
     },
   ],
@@ -209,37 +209,37 @@ const PARITY_RULES: Record<string, ParityRule[]> = {
 // ============================================================================
 
 const FILE_MAPPINGS = {
-  'CLAUDE.md': {
-    L1: 'templates/common/CLAUDE.md',
+  "CLAUDE.md": {
+    L1: "templates/common/CLAUDE.md",
     // L2 variants use L1 common files - no need to check individual L2 files
   },
-  'GEMINI.md': {
-    L1: 'templates/common/GEMINI.md',
+  "GEMINI.md": {
+    L1: "templates/common/GEMINI.md",
     // L2 variants use L1 common files - no need to check individual L2 files
   },
-  'CODEX.md': {
-    L1: 'templates/common/CODEX.md',
+  "CODEX.md": {
+    L1: "templates/common/CODEX.md",
     // L2 variants use L1 common files - no need to check individual L2 files
     // (spec 2026-09-25-verifier-platform-expansion-design site 11: the distributor
     // publishes all four root docs; the verifier half must check all four.
     // v0.5.0: verified against the publisher transform — the D3.5 deferral is closed)
   },
-  'HERMES.md': {
-    L1: 'templates/common/HERMES.md',
+  "HERMES.md": {
+    L1: "templates/common/HERMES.md",
     // L2 variants use L1 common files - no need to check individual L2 files
     // (ADR-0093: the Hermes instruction file joins the root doc set; the L2
     // copies ride the deny-list fallback claim and are checked by
     // validate-templates, not here. v0.5.0: L1 is transform-verified, closing
     // the informational-only gap)
   },
-  'agents/pm.md': {
-    L1: 'templates/common/agents/pm.md',
+  "agents/pm.md": {
+    L1: "templates/common/agents/pm.md",
     L2s: [
-      'templates/co-consult/agents/pm.md',
-      'templates/co-design/agents/pm.md',
-      'templates/co-develop/agents/pm.md',
-      'templates/co-work/agents/pm.md',
-      'templates/co-security/agents/pm.md',
+      "templates/co-consult/agents/pm.md",
+      "templates/co-design/agents/pm.md",
+      "templates/co-develop/agents/pm.md",
+      "templates/co-work/agents/pm.md",
+      "templates/co-security/agents/pm.md",
     ],
   },
 };
@@ -262,7 +262,7 @@ const FILE_MAPPINGS = {
  * the date token on BOTH sides; the annotation text after it stays verified.
  */
 export function normalizeVolatileMarkers(content: string): string {
-  return content.replace(/Last Updated: \d{4}-\d{2}-\d{2}/g, 'Last Updated: <date>');
+  return content.replace(/Last Updated: \d{4}-\d{2}-\d{2}/g, "Last Updated: <date>");
 }
 
 /**
@@ -272,15 +272,15 @@ export function normalizeVolatileMarkers(content: string): string {
  */
 function firstDivergence(
   expected: string,
-  actual: string
+  actual: string,
 ): { line: number; expectedExcerpt: string; actualExcerpt: string } | null {
-  const a = expected.split('\n');
-  const b = actual.split('\n');
+  const a = expected.split("\n");
+  const b = actual.split("\n");
   const n = Math.min(a.length, b.length);
   let i = 0;
   while (i < n && a[i] === b[i]) i++;
   if (i >= n && a.length === b.length) return null;
-  const excerpt = (s: string | undefined) => (s ?? '<end of file>').slice(0, 120);
+  const excerpt = (s: string | undefined) => (s ?? "<end of file>").slice(0, 120);
   return {
     line: i + 1,
     expectedExcerpt: excerpt(a[i]),
@@ -305,14 +305,10 @@ function firstDivergence(
  * subprocess exits 1 with the guard message on stderr — a loud, correct
  * failure; the checker intentionally does not swallow it.
  */
-export function checkTransformParity(
-  sourceFile: string,
-  targetFile: string,
-  filename: string
-): ParityCheckResult {
+export function checkTransformParity(sourceFile: string, targetFile: string, filename: string): ParityCheckResult {
   const base = {
     file: filename,
-    tier: 'L0→L1' as const,
+    tier: "L0→L1" as const,
     sourcePath: sourceFile,
     targetPath: targetFile,
   };
@@ -320,33 +316,37 @@ export function checkTransformParity(
   if (!existsSync(sourceFile)) {
     return {
       ...base,
-      status: 'fail',
-      discrepancies: [{
-        rule: 'file-exists',
-        section: 'source',
-        expected: sourceFile,
-        actual: '<file not found>',
-        severity: 'error',
-      }],
+      status: "fail",
+      discrepancies: [
+        {
+          rule: "file-exists",
+          section: "source",
+          expected: sourceFile,
+          actual: "<file not found>",
+          severity: "error",
+        },
+      ],
     };
   }
 
   if (!existsSync(targetFile)) {
     return {
       ...base,
-      status: 'fail',
-      discrepancies: [{
-        rule: 'file-exists',
-        section: 'target',
-        expected: targetFile,
-        actual: '<file not found>',
-        severity: 'error',
-      }],
+      status: "fail",
+      discrepancies: [
+        {
+          rule: "file-exists",
+          section: "target",
+          expected: targetFile,
+          actual: "<file not found>",
+          severity: "error",
+        },
+      ],
     };
   }
 
-  const sourceContent = readFileSync(sourceFile, 'utf-8');
-  const targetContent = readFileSync(targetFile, 'utf-8');
+  const sourceContent = readFileSync(sourceFile, "utf-8");
+  const targetContent = readFileSync(targetFile, "utf-8");
   // targetPath is passed through to the transform (the publisher does the
   // same) — constitution-scrub rules may key on it.
   const expected = applyGovernanceTransforms(sourceContent, filename, targetFile);
@@ -354,26 +354,28 @@ export function checkTransformParity(
   const actualNorm = normalizeVolatileMarkers(targetContent);
 
   if (expectedNorm === actualNorm) {
-    return { ...base, status: 'pass', discrepancies: [] };
+    return { ...base, status: "pass", discrepancies: [] };
   }
 
   const div = firstDivergence(expectedNorm, actualNorm) ?? {
     line: 0,
-    expectedExcerpt: '<equal prefixes, differing lengths>',
-    actualExcerpt: '<equal prefixes, differing lengths>',
+    expectedExcerpt: "<equal prefixes, differing lengths>",
+    actualExcerpt: "<equal prefixes, differing lengths>",
   };
 
   return {
     ...base,
-    status: 'fail',
-    discrepancies: [{
-      rule: 'governance-transform',
-      section: 'L0→L1 content',
-      expected: `transform(L0) [${expected.length} chars] line ${div.line}: ${div.expectedExcerpt}`,
-      actual: `L1 copy [${targetContent.length} chars] line ${div.line}: ${div.actualExcerpt}`,
-      line: div.line,
-      severity: 'error',
-    }],
+    status: "fail",
+    discrepancies: [
+      {
+        rule: "governance-transform",
+        section: "L0→L1 content",
+        expected: `transform(L0) [${expected.length} chars] line ${div.line}: ${div.expectedExcerpt}`,
+        actual: `L1 copy [${targetContent.length} chars] line ${div.line}: ${div.actualExcerpt}`,
+        line: div.line,
+        severity: "error",
+      },
+    ],
   };
 }
 
@@ -384,8 +386,8 @@ export function checkTransformParity(
  */
 function isResolvedFile(filePath: string): boolean {
   try {
-    const firstLine = readFileSync(filePath, 'utf-8').split('\n')[0];
-    return firstLine.startsWith('# @resolved-from:');
+    const firstLine = readFileSync(filePath, "utf-8").split("\n")[0];
+    return firstLine.startsWith("# @resolved-from:");
   } catch {
     return false;
   }
@@ -396,7 +398,7 @@ function isResolvedFile(filePath: string): boolean {
  */
 function usesExtends(filePath: string): { usesExtends: boolean; extendsPath?: string; removeSections?: string[] } {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
     if (!frontmatterMatch) {
@@ -410,8 +412,8 @@ function usesExtends(filePath: string): { usesExtends: boolean; extendsPath?: st
     let removeSections: string[] = [];
     if (removeSectionsMatch) {
       removeSections = removeSectionsMatch[1]
-        .split('\n')
-        .map(line => line.match(/\s*-\s*"([^"]+)"/)?.[1])
+        .split("\n")
+        .map((line) => line.match(/\s*-\s*"([^"]+)"/)?.[1])
         .filter((s): s is string => Boolean(s));
     }
 
@@ -441,13 +443,13 @@ function normalizeContent(content: string, filename: string): string {
   let normalized = content;
 
   // Remove platform-specific markers
-  normalized = normalized.replace(/<!-- CLAUDE_ONLY_START -->[\s\S]*?<!-- CLAUDE_ONLY_END -->/g, '');
-  normalized = normalized.replace(/<!-- GEMINI_ONLY_START -->[\s\S]*?<!-- GEMINI_ONLY_END -->/g, '');
-  normalized = normalized.replace(/\[!.*?\]/g, ''); // Remove adoc-style conditionals
+  normalized = normalized.replace(/<!-- CLAUDE_ONLY_START -->[\s\S]*?<!-- CLAUDE_ONLY_END -->/g, "");
+  normalized = normalized.replace(/<!-- GEMINI_ONLY_START -->[\s\S]*?<!-- GEMINI_ONLY_END -->/g, "");
+  normalized = normalized.replace(/\[!.*?\]/g, ""); // Remove adoc-style conditionals
 
   // Normalize whitespace
-  normalized = normalized.replace(/\s+$/gm, ''); // Remove trailing whitespace
-  normalized = normalized.replace(/\r\n/g, '\n'); // Normalize line endings
+  normalized = normalized.replace(/\s+$/gm, ""); // Remove trailing whitespace
+  normalized = normalized.replace(/\r\n/g, "\n"); // Normalize line endings
 
   return normalized;
 }
@@ -456,24 +458,22 @@ function normalizeContent(content: string, filename: string): string {
  * Extract section from markdown content
  */
 function extractSection(content: string, sectionHeading: string): string | null {
-  const lines = content.split('\n');
-  const startIdx = lines.findIndex(line =>
-    line.trim().startsWith('##') && line.includes(sectionHeading)
-  );
+  const lines = content.split("\n");
+  const startIdx = lines.findIndex((line) => line.trim().startsWith("##") && line.includes(sectionHeading));
 
   if (startIdx === -1) return null;
 
   // Find the end of this section (next ## or end of file)
   let endIdx = startIdx + 1;
   for (let i = startIdx + 1; i < lines.length; i++) {
-    if (lines[i].trim().startsWith('##')) {
+    if (lines[i].trim().startsWith("##")) {
       endIdx = i;
       break;
     }
     endIdx = i;
   }
 
-  return lines.slice(startIdx, endIdx + 1).join('\n');
+  return lines.slice(startIdx, endIdx + 1).join("\n");
 }
 
 /**
@@ -483,21 +483,21 @@ function compareFiles(
   sourceContent: string,
   targetContent: string,
   filename: string,
-  rules: ParityRule[]
+  rules: ParityRule[],
 ): ParityDiscrepancy[] {
   const discrepancies: ParityDiscrepancy[] = [];
   const sourceNorm = normalizeContent(sourceContent, filename);
   const targetNorm = normalizeContent(targetContent, filename);
 
   for (const rule of rules) {
-    if (rule.tier === 'gemini-only' && filename === 'CLAUDE.md') {
+    if (rule.tier === "gemini-only" && filename === "CLAUDE.md") {
       continue; // Skip gemini-only rules for CLAUDE.md
     }
 
     const sourceSection = extractSection(sourceNorm, rule.section);
     const targetSection = extractSection(targetNorm, rule.section);
 
-    if (rule.tier === 'shared') {
+    if (rule.tier === "shared") {
       // Must be identical
       if (sourceSection === null && targetSection === null) {
         continue; // Both missing - OK
@@ -506,9 +506,9 @@ function compareFiles(
         discrepancies.push({
           rule: rule.section,
           section: rule.section,
-          expected: '<missing>',
-          actual: targetSection || '<empty>',
-          severity: 'error',
+          expected: "<missing>",
+          actual: targetSection || "<empty>",
+          severity: "error",
         });
         continue;
       }
@@ -517,8 +517,8 @@ function compareFiles(
           rule: rule.section,
           section: rule.section,
           expected: sourceSection,
-          actual: '<missing>',
-          severity: 'error',
+          actual: "<missing>",
+          severity: "error",
         });
         continue;
       }
@@ -534,8 +534,8 @@ function compareFiles(
           for (const pattern of rule.skipPatterns) {
             if (sourceTrimmed.includes(pattern) || targetTrimmed.includes(pattern)) {
               // Check if the only difference is the pattern replacement
-              const sourceWithoutPattern = sourceTrimmed.replace(new RegExp(pattern, 'g'), '');
-              const targetWithoutPattern = targetTrimmed.replace(new RegExp(pattern, 'g'), '');
+              const sourceWithoutPattern = sourceTrimmed.replace(new RegExp(pattern, "g"), "");
+              const targetWithoutPattern = targetTrimmed.replace(new RegExp(pattern, "g"), "");
               if (sourceWithoutPattern.trim() === targetWithoutPattern.trim()) {
                 shouldSkip = true;
                 break;
@@ -550,19 +550,19 @@ function compareFiles(
             section: rule.section,
             expected: sourceSection,
             actual: targetSection,
-            severity: 'error',
+            severity: "error",
           });
         }
       }
-    } else if (rule.tier === 'claude-only' || rule.tier === 'gemini-only' || rule.tier === 'variant-specific') {
+    } else if (rule.tier === "claude-only" || rule.tier === "gemini-only" || rule.tier === "variant-specific") {
       // Platform-specific or variant-specific - just check existence
       if (sourceSection === null) {
         discrepancies.push({
           rule: rule.section,
           section: rule.section,
-          expected: '<should exist in source>',
-          actual: '<missing>',
-          severity: 'warning',
+          expected: "<should exist in source>",
+          actual: "<missing>",
+          severity: "warning",
         });
       }
     }
@@ -574,15 +574,11 @@ function compareFiles(
 /**
  * Run parity checks for a single file mapping
  */
-function checkParity(
-  sourceFile: string,
-  targetFile: string,
-  tier: 'L0→L1' | 'L0→L2'
-): ParityCheckResult {
+function checkParity(sourceFile: string, targetFile: string, tier: "L0→L1" | "L0→L2"): ParityCheckResult {
   // Extract filename from path (e.g., 'agents/pm.md' from '/path/to/agents/pm.md')
-  const normalizedSourceFile = sourceFile.replace(/\\/g, '/');
-  const filename = normalizedSourceFile.split('/').slice(-2).join('/');
-  const rules = PARITY_RULES[filename] || PARITY_RULES[normalizedSourceFile.split('/').pop() || ''];
+  const normalizedSourceFile = sourceFile.replace(/\\/g, "/");
+  const filename = normalizedSourceFile.split("/").slice(-2).join("/");
+  const rules = PARITY_RULES[filename] || PARITY_RULES[normalizedSourceFile.split("/").pop() || ""];
 
   if (!rules) {
     return {
@@ -590,14 +586,16 @@ function checkParity(
       tier,
       sourcePath: sourceFile,
       targetPath: targetFile,
-      status: 'warning',
-      discrepancies: [{
-        rule: 'N/A',
-        section: 'N/A',
-        expected: 'Parity rules defined',
-        actual: 'No rules found for this file',
-        severity: 'warning',
-      }],
+      status: "warning",
+      discrepancies: [
+        {
+          rule: "N/A",
+          section: "N/A",
+          expected: "Parity rules defined",
+          actual: "No rules found for this file",
+          severity: "warning",
+        },
+      ],
     };
   }
 
@@ -607,14 +605,16 @@ function checkParity(
       tier,
       sourcePath: sourceFile,
       targetPath: targetFile,
-      status: 'fail',
-      discrepancies: [{
-        rule: 'file-exists',
-        section: 'source',
-        expected: sourceFile,
-        actual: '<file not found>',
-        severity: 'error',
-      }],
+      status: "fail",
+      discrepancies: [
+        {
+          rule: "file-exists",
+          section: "source",
+          expected: sourceFile,
+          actual: "<file not found>",
+          severity: "error",
+        },
+      ],
     };
   }
 
@@ -624,19 +624,21 @@ function checkParity(
       tier,
       sourcePath: sourceFile,
       targetPath: targetFile,
-      status: 'fail',
-      discrepancies: [{
-        rule: 'file-exists',
-        section: 'target',
-        expected: targetFile,
-        actual: '<file not found>',
-        severity: 'error',
-      }],
+      status: "fail",
+      discrepancies: [
+        {
+          rule: "file-exists",
+          section: "target",
+          expected: targetFile,
+          actual: "<file not found>",
+          severity: "error",
+        },
+      ],
     };
   }
 
-  const sourceContent = readFileSync(sourceFile, 'utf-8');
-  const targetContent = readFileSync(targetFile, 'utf-8');
+  const sourceContent = readFileSync(sourceFile, "utf-8");
+  const targetContent = readFileSync(targetFile, "utf-8");
 
   const discrepancies = compareFiles(sourceContent, targetContent, sourceFile, rules);
 
@@ -645,8 +647,11 @@ function checkParity(
     tier,
     sourcePath: sourceFile,
     targetPath: targetFile,
-    status: discrepancies.some(d => d.severity === 'error') ? 'fail' :
-            discrepancies.some(d => d.severity === 'warning') ? 'warning' : 'pass',
+    status: discrepancies.some((d) => d.severity === "error")
+      ? "fail"
+      : discrepancies.some((d) => d.severity === "warning")
+        ? "warning"
+        : "pass",
     discrepancies,
   };
 }
@@ -656,14 +661,14 @@ function checkParity(
  */
 async function main() {
   const args = process.argv.slice(2);
-  const fixMode = args.includes('--fix');
-  const verbose = args.includes('--verbose');
+  const fixMode = args.includes("--fix");
+  const verbose = args.includes("--verbose");
 
-  console.log('🔍 Platform Parity Test (ADR-0033)\n');
+  console.log("🔍 Platform Parity Test (ADR-0033)\n");
 
   // Skip platform parity test if we are not in the workspace root (templates/ directory not found)
-  if (!existsSync(join(process.cwd(), 'templates'))) {
-    console.log('⚠️  Skipping platform parity test: not in workspace root (templates directory not found).');
+  if (!existsSync(join(process.cwd(), "templates"))) {
+    console.log("⚠️  Skipping platform parity test: not in workspace root (templates directory not found).");
     process.exit(0);
   }
 
@@ -688,29 +693,38 @@ async function main() {
     // gap: instead of hand-written section rules (the dead PARITY_RULES
     // approach removed in v0.5.0), there is exactly one definition of a
     // correct L1 — the function that produces it.
-    if (sourceFile === 'CLAUDE.md' || sourceFile === 'GEMINI.md' || sourceFile === 'CODEX.md' || sourceFile === 'HERMES.md') {
+    if (
+      sourceFile === "CLAUDE.md" ||
+      sourceFile === "GEMINI.md" ||
+      sourceFile === "CODEX.md" ||
+      sourceFile === "HERMES.md"
+    ) {
       const l1Result = checkTransformParity(sourcePath, l1Path, sourceFile);
       results.push(l1Result);
-      if (l1Result.status === 'fail') totalErrors += l1Result.discrepancies.filter(d => d.severity === 'error').length;
-      if (l1Result.status === 'warning') totalWarnings += l1Result.discrepancies.filter(d => d.severity === 'warning').length;
-    } else if (sourceFile === 'agents/pm.md') {
+      if (l1Result.status === "fail")
+        totalErrors += l1Result.discrepancies.filter((d) => d.severity === "error").length;
+      if (l1Result.status === "warning")
+        totalWarnings += l1Result.discrepancies.filter((d) => d.severity === "warning").length;
+    } else if (sourceFile === "agents/pm.md") {
       // For agents/pm.md, check if L1 uses extends mechanism
       const l1Extends = usesExtends(l1Path);
 
       if (!existsSync(l1Path)) {
         results.push({
           file: sourceFile,
-          tier: 'L0→L1',
+          tier: "L0→L1",
           sourcePath: sourcePath,
           targetPath: l1Path,
-          status: 'fail',
-          discrepancies: [{
-            rule: 'file-exists',
-            section: 'target',
-            expected: l1Path,
-            actual: '<file not found>',
-            severity: 'error',
-          }],
+          status: "fail",
+          discrepancies: [
+            {
+              rule: "file-exists",
+              section: "target",
+              expected: l1Path,
+              actual: "<file not found>",
+              severity: "error",
+            },
+          ],
         });
         totalErrors += 1;
       } else if (l1Extends.usesExtends) {
@@ -719,104 +733,111 @@ async function main() {
         const expectedSourcePath = join(process.cwd(), sourceFile);
 
         // Normalize paths for comparison
-        const normalizedResolved = resolvedExtendsPath.replace(/\/\//g, '/');
-        const normalizedExpected = expectedSourcePath.replace(/\/\//g, '/');
+        const normalizedResolved = resolvedExtendsPath.replace(/\/\//g, "/");
+        const normalizedExpected = expectedSourcePath.replace(/\/\//g, "/");
 
         if (normalizedResolved !== normalizedExpected) {
           results.push({
             file: sourceFile,
-            tier: 'L0→L1',
+            tier: "L0→L1",
             sourcePath: sourcePath,
             targetPath: l1Path,
-            status: 'fail',
-            discrepancies: [{
-              rule: 'extends-target',
-              section: 'extends',
-              expected: expectedSourcePath,
-              actual: resolvedExtendsPath,
-              severity: 'error',
-            }],
+            status: "fail",
+            discrepancies: [
+              {
+                rule: "extends-target",
+                section: "extends",
+                expected: expectedSourcePath,
+                actual: resolvedExtendsPath,
+                severity: "error",
+              },
+            ],
           });
           totalErrors += 1;
         } else {
           // Check that remove_sections doesn't include shared sections
-          const sharedSections = PARITY_RULES['agents/pm.md']
-            .filter(r => r.tier === 'shared')
-            .map(r => r.section.replace('## ', '').trim().toLowerCase());
+          const sharedSections = PARITY_RULES["agents/pm.md"]
+            .filter((r) => r.tier === "shared")
+            .map((r) => r.section.replace("## ", "").trim().toLowerCase());
 
-          const removedSharedSections = (l1Extends.removeSections || [])
-            .filter(rs => {
-              const removedSection = rs.replace('## ', '').trim().toLowerCase();
-              return sharedSections.some(ss => removedSection === ss);
-            });
+          const removedSharedSections = (l1Extends.removeSections || []).filter((rs) => {
+            const removedSection = rs.replace("## ", "").trim().toLowerCase();
+            return sharedSections.some((ss) => removedSection === ss);
+          });
 
           if (removedSharedSections.length > 0) {
             results.push({
               file: sourceFile,
-              tier: 'L0→L1',
+              tier: "L0→L1",
               sourcePath: sourcePath,
               targetPath: l1Path,
-              status: 'fail',
-              discrepancies: removedSharedSections.map(rs => ({
-                rule: 'remove-sections',
+              status: "fail",
+              discrepancies: removedSharedSections.map((rs) => ({
+                rule: "remove-sections",
                 section: rs,
-                expected: 'Should not remove shared sections',
+                expected: "Should not remove shared sections",
                 actual: `Removed: ${rs}`,
-                severity: 'error',
+                severity: "error",
               })),
             });
             totalErrors += removedSharedSections.length;
           } else {
             results.push({
               file: sourceFile,
-              tier: 'L0→L1',
+              tier: "L0→L1",
               sourcePath: sourcePath,
               targetPath: l1Path,
-              status: 'pass',
+              status: "pass",
               discrepancies: [],
             });
           }
         }
       } else {
         // L1 doesn't use extends - do full parity check
-        const l1Result = checkParity(sourcePath, l1Path, 'L0→L1');
+        const l1Result = checkParity(sourcePath, l1Path, "L0→L1");
         results.push(l1Result);
 
-        if (l1Result.status === 'fail') totalErrors += l1Result.discrepancies.filter(d => d.severity === 'error').length;
-        if (l1Result.status === 'warning') totalWarnings += l1Result.discrepancies.filter(d => d.severity === 'warning').length;
+        if (l1Result.status === "fail")
+          totalErrors += l1Result.discrepancies.filter((d) => d.severity === "error").length;
+        if (l1Result.status === "warning")
+          totalWarnings += l1Result.discrepancies.filter((d) => d.severity === "warning").length;
       }
     } else {
       // For other files, do full parity check
-      const l1Result = checkParity(sourcePath, l1Path, 'L0→L1');
+      const l1Result = checkParity(sourcePath, l1Path, "L0→L1");
       results.push(l1Result);
 
-      if (l1Result.status === 'fail') totalErrors += l1Result.discrepancies.filter(d => d.severity === 'error').length;
-      if (l1Result.status === 'warning') totalWarnings += l1Result.discrepancies.filter(d => d.severity === 'warning').length;
+      if (l1Result.status === "fail")
+        totalErrors += l1Result.discrepancies.filter((d) => d.severity === "error").length;
+      if (l1Result.status === "warning")
+        totalWarnings += l1Result.discrepancies.filter((d) => d.severity === "warning").length;
     }
 
     // Check each L2 (if L2s array exists)
-    if ('L2s' in mappings && mappings.L2s) {
+    if ("L2s" in mappings && mappings.L2s) {
       for (const l2Path of mappings.L2s) {
         const fullL2Path = join(process.cwd(), l2Path);
 
-        if (sourceFile === 'agents/pm.md') {
+        if (sourceFile === "agents/pm.md") {
           // For agents/pm.md, check if L2 uses extends mechanism
           const l2Extends = usesExtends(fullL2Path);
 
           if (!existsSync(fullL2Path)) {
             results.push({
               file: sourceFile,
-              tier: 'L0→L2',
+              tier: "L0→L2",
               sourcePath: sourcePath,
               targetPath: fullL2Path,
-              status: 'fail',
-              discrepancies: [{
-                rule: 'file-exists',
-                section: 'target',
-                expected: fullL2Path,
-                actual: '<file not found>',
-                severity: 'error',
-              }],
+              status: "fail",
+              discrepancies: [
+                {
+                  rule: "file-exists",
+                  section: "target",
+                  expected: fullL2Path,
+                  actual: "<file not found>",
+                  severity: "error",
+                },
+              ],
             });
             totalErrors += 1;
           } else if (l2Extends.usesExtends) {
@@ -825,40 +846,42 @@ async function main() {
             const expectedL1Path = join(process.cwd(), mappings.L1);
 
             // Normalize paths for comparison
-            const normalizedResolved = resolvedExtendsPath.replace(/\/\//g, '/');
-            const normalizedExpected = expectedL1Path.replace(/\/\//g, '/');
+            const normalizedResolved = resolvedExtendsPath.replace(/\/\//g, "/");
+            const normalizedExpected = expectedL1Path.replace(/\/\//g, "/");
 
             if (normalizedResolved !== normalizedExpected) {
               results.push({
                 file: sourceFile,
-                tier: 'L0→L2',
+                tier: "L0→L2",
                 sourcePath: sourcePath,
                 targetPath: fullL2Path,
-                status: 'warning',
-                discrepancies: [{
-                  rule: 'extends-target',
-                  section: 'extends',
-                  expected: expectedL1Path,
-                  actual: resolvedExtendsPath,
-                  severity: 'warning',
-                }],
+                status: "warning",
+                discrepancies: [
+                  {
+                    rule: "extends-target",
+                    section: "extends",
+                    expected: expectedL1Path,
+                    actual: resolvedExtendsPath,
+                    severity: "warning",
+                  },
+                ],
               });
               totalWarnings += 1;
             } else {
               // Check that remove_sections only includes variant-specific sections
-              const variantSections = PARITY_RULES['agents/pm.md']
-                .filter(r => r.tier === 'variant-specific')
-                .map(r => r.section);
+              const variantSections = PARITY_RULES["agents/pm.md"]
+                .filter((r) => r.tier === "variant-specific")
+                .map((r) => r.section);
 
               // Any removed sections should ideally be variant-specific
               const removedSections = l2Extends.removeSections || [];
               // Just verify the file exists and uses extends correctly - pass
               results.push({
                 file: sourceFile,
-                tier: 'L0→L2',
+                tier: "L0→L2",
                 sourcePath: sourcePath,
                 targetPath: fullL2Path,
-                status: 'pass',
+                status: "pass",
                 discrepancies: [],
               });
             }
@@ -867,39 +890,42 @@ async function main() {
             // Parity is satisfied by construction: the file was baked from the extends chain.
             results.push({
               file: sourceFile,
-              tier: 'L0→L2',
+              tier: "L0→L2",
               sourcePath: sourcePath,
               targetPath: fullL2Path,
-              status: 'pass',
+              status: "pass",
               discrepancies: [],
             });
           } else {
             // L2 doesn't use extends and is not pre-resolved — compare shared sections only
-            const pmRules = PARITY_RULES['agents/pm.md'];
-            const sharedRulesOnly = pmRules.filter(r => r.tier === 'shared');
+            const pmRules = PARITY_RULES["agents/pm.md"];
+            const sharedRulesOnly = pmRules.filter((r) => r.tier === "shared");
 
-            const originalRules = PARITY_RULES['agents/pm.md'];
-            PARITY_RULES['agents/pm.md'] = sharedRulesOnly;
+            const originalRules = PARITY_RULES["agents/pm.md"];
+            PARITY_RULES["agents/pm.md"] = sharedRulesOnly;
 
-            const l2Result = checkParity(sourcePath, fullL2Path, 'L0→L2');
+            const l2Result = checkParity(sourcePath, fullL2Path, "L0→L2");
 
-            PARITY_RULES['agents/pm.md'] = originalRules;
+            PARITY_RULES["agents/pm.md"] = originalRules;
 
             // Downgrade errors to warnings: unresolved L2 format is pending migration
-            if (l2Result.status === 'fail') {
-              l2Result.status = 'warning';
-              l2Result.discrepancies = l2Result.discrepancies.map(d => ({ ...d, severity: 'warning' as const }));
+            if (l2Result.status === "fail") {
+              l2Result.status = "warning";
+              l2Result.discrepancies = l2Result.discrepancies.map((d) => ({ ...d, severity: "warning" as const }));
             }
             results.push(l2Result);
-            if (l2Result.status === 'warning') totalWarnings += l2Result.discrepancies.filter(d => d.severity === 'warning').length;
+            if (l2Result.status === "warning")
+              totalWarnings += l2Result.discrepancies.filter((d) => d.severity === "warning").length;
           }
         } else {
           // For other files, do full parity check
-          const l2Result = checkParity(sourcePath, fullL2Path, 'L0→L2');
+          const l2Result = checkParity(sourcePath, fullL2Path, "L0→L2");
           results.push(l2Result);
 
-          if (l2Result.status === 'fail') totalErrors += l2Result.discrepancies.filter(d => d.severity === 'error').length;
-          if (l2Result.status === 'warning') totalWarnings += l2Result.discrepancies.filter(d => d.severity === 'warning').length;
+          if (l2Result.status === "fail")
+            totalErrors += l2Result.discrepancies.filter((d) => d.severity === "error").length;
+          if (l2Result.status === "warning")
+            totalWarnings += l2Result.discrepancies.filter((d) => d.severity === "warning").length;
         }
       }
     }
@@ -912,14 +938,14 @@ async function main() {
   console.log(`Warnings: ${totalWarnings}\n`);
 
   for (const result of results) {
-    const icon = result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : '⚠️';
+    const icon = result.status === "pass" ? "✅" : result.status === "fail" ? "❌" : "⚠️";
     console.log(`${icon} ${result.file} (${result.tier})`);
     console.log(`   Source: ${result.sourcePath}`);
     console.log(`   Target: ${result.targetPath}`);
 
     if (verbose && result.discrepancies.length > 0) {
       for (const disc of result.discrepancies) {
-        const discIcon = disc.severity === 'error' ? '❌' : '⚠️';
+        const discIcon = disc.severity === "error" ? "❌" : "⚠️";
         console.log(`   ${discIcon} ${disc.rule}: ${disc.section}`);
         if (verbose && disc.expected !== disc.actual) {
           console.log(`      Expected: ${disc.expected.slice(0, 100)}...`);
@@ -932,13 +958,13 @@ async function main() {
 
   // Exit code
   if (totalErrors > 0) {
-    console.log('❌ Platform parity test FAILED');
+    console.log("❌ Platform parity test FAILED");
     process.exit(1);
   } else if (totalWarnings > 0) {
-    console.log('⚠️ Platform parity test completed with WARNINGS');
+    console.log("⚠️ Platform parity test completed with WARNINGS");
     process.exit(2);
   } else {
-    console.log('✅ Platform parity test PASSED');
+    console.log("✅ Platform parity test PASSED");
     process.exit(0);
   }
 }
@@ -947,8 +973,8 @@ async function main() {
 // tests/unit/platform-parity-transform.test.ts) for checkTransformParity —
 // an unguarded main() would execute the whole check on import.
 if (import.meta.main) {
-  main().catch(err => {
-    console.error('Fatal error:', err);
+  main().catch((err) => {
+    console.error("Fatal error:", err);
     process.exit(1);
   });
 }

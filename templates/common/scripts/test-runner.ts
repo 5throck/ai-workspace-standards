@@ -95,10 +95,10 @@
  * helpers/scaffold-markers.ts isTransientTestFixture) — new pollution
  * fails the suite.
  */
-import { readdirSync, existsSync, rmSync, mkdirSync } from 'fs';
-import { join, basename } from 'path';
-import { availableParallelism, cpus } from 'os';
-import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
+import { readdirSync, existsSync, rmSync, mkdirSync } from "node:fs";
+import { join, basename } from "node:path";
+import { availableParallelism, cpus } from "node:os";
+import { isTransientTestFixture } from "./helpers/scaffold-markers.ts";
 
 interface TestSuite {
   name: string;
@@ -128,13 +128,13 @@ interface TestFileResult {
 }
 
 const suites: TestSuite[] = [
-  { name: 'unit', pattern: '*.test.ts', timeout: 120000, dir: 'tests/unit', ext: '.test.ts' },
-  { name: 'integration', pattern: '*.test.ts', timeout: 120000, dir: 'tests', ext: '.test.ts' },
-  { name: 'scenarios', pattern: '*', timeout: 300000, dir: 'tests/scenarios', ext: '' },
+  { name: "unit", pattern: "*.test.ts", timeout: 120000, dir: "tests/unit", ext: ".test.ts" },
+  { name: "integration", pattern: "*.test.ts", timeout: 120000, dir: "tests", ext: ".test.ts" },
+  { name: "scenarios", pattern: "*", timeout: 300000, dir: "tests/scenarios", ext: "" },
   // sequential: members stage transient fixture dirs under the real templates/
   // tree (test-l3promo-*, co-e2eguard-*, co-e2p2*) and race concurrent
   // validators when run in parallel — T-20260916-001.
-  { name: 'scripts', pattern: 'test-*.ts', timeout: 120000, dir: 'scripts', ext: '.ts', sequential: true }
+  { name: "scripts", pattern: "test-*.ts", timeout: 120000, dir: "scripts", ext: ".ts", sequential: true },
 ];
 
 /** Bun per-test ceiling passed as `bun test --timeout` (ms). bun's implicit
@@ -160,18 +160,18 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // win32 FS pressure while the same commit passed macos in 1m55s (~2.8x
   // headroom at 45s). First-time entry for a new file, not a raise on an
   // offender.
-  'hub-bootstrap.test.ts': { suite: 300000, test: 45000 },
-  'mcp-upstream-server.test.ts': { suite: 300000, test: 30000 },
-  'upgrade-tree-sync.test.ts': { suite: 300000, test: 60000 },
+  "hub-bootstrap.test.ts": { suite: 300000, test: 45000 },
+  "mcp-upstream-server.test.ts": { suite: 300000, test: 30000 },
+  "upgrade-tree-sync.test.ts": { suite: 300000, test: 60000 },
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence
   // gate — PR #1770's win32 run measured the split file at 99.9s (≤ ~150s),
   // restoring the family's ~2x headroom at 300s.
-  'upgrade-decision-log.test.ts': { suite: 300000, test: 60000 },
+  "upgrade-decision-log.test.ts": { suite: 300000, test: 60000 },
   // v1.8.0 (T-20261030-002): the pure-helper suite extracted from
   // upgrade-decision-log.test.ts, pinned AT the family defaults — the row
   // exists so any runtime drift on the extracted file is visible without a
   // registry diff.
-  'upgrade-policy-decisions.test.ts': { suite: 120000, test: 15000 },
+  "upgrade-policy-decisions.test.ts": { suite: 120000, test: 15000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {
@@ -181,14 +181,15 @@ function getTestFiles(suite: TestSuite): string[] {
     const entries = readdirSync(suite.dir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isFile()) continue;
-      const matchesExt = suite.ext === '' || entry.name.endsWith(suite.ext);
-      const matchesPattern = suite.name !== 'scripts' || (entry.name.startsWith('test-') && entry.name !== 'test-runner.ts');
+      const matchesExt = suite.ext === "" || entry.name.endsWith(suite.ext);
+      const matchesPattern =
+        suite.name !== "scripts" || (entry.name.startsWith("test-") && entry.name !== "test-runner.ts");
       if (matchesExt && matchesPattern) {
         files.push(join(suite.dir, entry.name));
       }
     }
   } catch (error: any) {
-    if (error.code !== 'ENOENT') {
+    if (error.code !== "ENOENT") {
       console.error(`Error reading directory ${suite.dir}: ${error.message}`);
     }
   }
@@ -200,10 +201,10 @@ async function executeTestFile(
   timeoutMs: number,
   bunTestTimeoutMs: number | null,
   workerId: number,
-  execMode: 'bun-test' | 'bun-script' = 'bun-test'
+  execMode: "bun-test" | "bun-script" = "bun-test",
 ): Promise<TestFileResult> {
   const startTime = Date.now();
-  const workerTempDir = join('tests', '.temp', `worker-${workerId}`);
+  const workerTempDir = join("tests", ".temp", `worker-${workerId}`);
 
   try {
     mkdirSync(workerTempDir, { recursive: true });
@@ -223,18 +224,23 @@ async function executeTestFile(
     // non-zero on failure) — running them under `bun test` fails with
     // "filters did not match any test files" because their names lack a bun
     // test naming pattern. Everything else is a bun test file.
-    const argv = execMode === 'bun-script'
-      ? [process.execPath, file]
-      : [process.execPath, 'test', '--timeout', String(bunTestTimeoutMs), file];
+    const argv =
+      execMode === "bun-script"
+        ? [process.execPath, file]
+        : [process.execPath, "test", "--timeout", String(bunTestTimeoutMs), file];
     proc = Bun.spawn(argv, {
       env,
-      stdout: 'pipe',
-      stderr: 'pipe',
+      stdout: "pipe",
+      stderr: "pipe",
     });
 
     // stdout/stderr are 'pipe', so at runtime they are ReadableStreams (never fd numbers).
-    const stdoutPromise = proc.stdout ? new Response(proc.stdout as ReadableStream<Uint8Array>).text() : Promise.resolve('');
-    const stderrPromise = proc.stderr ? new Response(proc.stderr as ReadableStream<Uint8Array>).text() : Promise.resolve('');
+    const stdoutPromise = proc.stdout
+      ? new Response(proc.stdout as ReadableStream<Uint8Array>).text()
+      : Promise.resolve("");
+    const stderrPromise = proc.stderr
+      ? new Response(proc.stderr as ReadableStream<Uint8Array>).text()
+      : Promise.resolve("");
 
     const timeoutPromise = new Promise<{ timedOut: boolean }>((resolve) => {
       timer = setTimeout(() => {
@@ -247,14 +253,12 @@ async function executeTestFile(
       }, timeoutMs);
     });
 
-    const execPromise = Promise.all([stdoutPromise, stderrPromise, proc.exited]).then(
-      ([stdout, stderr, exitCode]) => ({
-        timedOut: false,
-        stdout,
-        stderr,
-        exitCode,
-      })
-    );
+    const execPromise = Promise.all([stdoutPromise, stderrPromise, proc.exited]).then(([stdout, stderr, exitCode]) => ({
+      timedOut: false,
+      stdout,
+      stderr,
+      exitCode,
+    }));
 
     const result = await Promise.race([execPromise, timeoutPromise]);
 
@@ -297,8 +301,8 @@ async function executeTestFile(
       file,
       success: false,
       durationMs: Date.now() - startTime,
-      stdout: '',
-      stderr: '',
+      stdout: "",
+      stderr: "",
       exitCode: null,
       timedOut: false,
       error: err.message,
@@ -309,7 +313,7 @@ async function executeTestFile(
 async function runInParallel<T, R>(
   items: T[],
   concurrency: number,
-  fn: (item: T, index: number, workerId: number) => Promise<R>
+  fn: (item: T, index: number, workerId: number) => Promise<R>,
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let currentIndex = 0;
@@ -341,26 +345,30 @@ interface HygieneSnapshot {
 function takeHygieneSnapshot(): HygieneSnapshot {
   const snap: HygieneSnapshot = { gitAvailable: false, dirtyDocsTemplates: new Set(), fixtureDirs: new Set() };
   try {
-    const proc = Bun.spawnSync(['git', 'status', '--porcelain', '--', 'docs/templates'], {
-      stdout: 'pipe',
-      stderr: 'pipe',
+    const proc = Bun.spawnSync(["git", "status", "--porcelain", "--", "docs/templates"], {
+      stdout: "pipe",
+      stderr: "pipe",
     });
     if (proc.exitCode === 0) {
       snap.gitAvailable = true;
       const out = new TextDecoder().decode(proc.stdout ?? new Uint8Array());
-      for (const line of out.split('\n')) {
+      for (const line of out.split("\n")) {
         const entry = line.trim();
-        if (entry) snap.dirtyDocsTemplates.add(entry.replace(/^\S+\s+/, ''));
+        if (entry) snap.dirtyDocsTemplates.add(entry.replace(/^\S+\s+/, ""));
       }
     }
-  } catch { /* no git — hygiene check will be skipped with a note */ }
+  } catch {
+    /* no git — hygiene check will be skipped with a note */
+  }
   try {
-    if (existsSync('templates')) {
-      for (const entry of readdirSync('templates', { withFileTypes: true })) {
+    if (existsSync("templates")) {
+      for (const entry of readdirSync("templates", { withFileTypes: true })) {
         if (entry.isDirectory() && isTransientTestFixture(entry.name)) snap.fixtureDirs.add(entry.name);
       }
     }
-  } catch { /* unreadable templates/ — post-run scan reports what it can */ }
+  } catch {
+    /* unreadable templates/ — post-run scan reports what it can */
+  }
   return snap;
 }
 
@@ -370,47 +378,48 @@ function takeHygieneSnapshot(): HygieneSnapshot {
  * Returns a list of human-readable violations (empty = clean).
  */
 function verifyHygiene(snap: HygieneSnapshot): string[] {
-  if (!snap.gitAvailable && !existsSync('templates')) {
-    return ['hygiene check skipped: no git checkout and no templates/ directory'];
+  if (!snap.gitAvailable && !existsSync("templates")) {
+    return ["hygiene check skipped: no git checkout and no templates/ directory"];
   }
   const violations: string[] = [];
 
   if (snap.gitAvailable) {
-    const proc = Bun.spawnSync(['git', 'status', '--porcelain', '--', 'docs/templates'], {
-      stdout: 'pipe',
-      stderr: 'pipe',
+    const proc = Bun.spawnSync(["git", "status", "--porcelain", "--", "docs/templates"], {
+      stdout: "pipe",
+      stderr: "pipe",
     });
-    const out = proc.exitCode === 0 ? new TextDecoder().decode(proc.stdout ?? new Uint8Array()) : '';
-    for (const line of out.split('\n')) {
+    const out = proc.exitCode === 0 ? new TextDecoder().decode(proc.stdout ?? new Uint8Array()) : "";
+    for (const line of out.split("\n")) {
       const entry = line.trim();
       if (!entry) continue;
-      const path = entry.replace(/^\S+\s+/, '');
+      const path = entry.replace(/^\S+\s+/, "");
       if (!snap.dirtyDocsTemplates.has(path)) {
         violations.push(`docs/templates/ modified during suite: ${path} (${entry.split(/\s+/)[0]})`);
       }
     }
   }
 
-  if (existsSync('templates')) {
+  if (existsSync("templates")) {
     try {
-      for (const entry of readdirSync('templates', { withFileTypes: true })) {
+      for (const entry of readdirSync("templates", { withFileTypes: true })) {
         if (entry.isDirectory() && isTransientTestFixture(entry.name) && !snap.fixtureDirs.has(entry.name)) {
-          violations.push(`transient test fixture left behind: templates/${entry.name}/ (E2E cleanup failed or crashed mid-run)`);
+          violations.push(
+            `transient test fixture left behind: templates/${entry.name}/ (E2E cleanup failed or crashed mid-run)`,
+          );
         }
       }
-    } catch { /* handled above */ }
+    } catch {
+      /* handled above */
+    }
   }
 
   return violations;
 }
 
-export async function runTests(
-  suiteName: string = 'integration',
-  options: RunOptions = {}
-): Promise<boolean> {
-  const suite = suites.find(s => s.name === suiteName);
+export async function runTests(suiteName: string = "integration", options: RunOptions = {}): Promise<boolean> {
+  const suite = suites.find((s) => s.name === suiteName);
   if (!suite) {
-    console.error(`Available suites: ${suites.map(s => s.name).join(', ')}`);
+    console.error(`Available suites: ${suites.map((s) => s.name).join(", ")}`);
     throw new Error(`Suite not found: ${suiteName}`);
   }
 
@@ -421,14 +430,10 @@ export async function runTests(
     return true;
   }
 
-  const isParallel = options.parallel !== undefined
-    ? options.parallel
-    : (!suite.sequential && files.length > 1);
+  const isParallel = options.parallel !== undefined ? options.parallel : !suite.sequential && files.length > 1;
   const numCpus = availableParallelism ? availableParallelism() : cpus().length;
   const defaultConcurrency = Math.min(numCpus, 4);
-  const concurrency = isParallel
-    ? Math.max(1, options.concurrency || Math.min(files.length, defaultConcurrency))
-    : 1;
+  const concurrency = isParallel ? Math.max(1, options.concurrency || Math.min(files.length, defaultConcurrency)) : 1;
   // Explicit `--timeout` CLI wins over the per-file overrides (manual runs
   // know what they asked for); otherwise overridden files get their budgets
   // and everything else the suite default + DEFAULT_TEST_TIMEOUT_MS.
@@ -439,27 +444,41 @@ export async function runTests(
     return { suite: override?.suite ?? suite.timeout, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
   };
 
-  const modeStr = isParallel ? `parallel (concurrency: ${concurrency})` : 'sequential';
-  console.log(`Running ${suiteName} suite (${files.length} test file${files.length === 1 ? '' : 's'}, ${modeStr})...`);
+  const modeStr = isParallel ? `parallel (concurrency: ${concurrency})` : "sequential";
+  console.log(`Running ${suiteName} suite (${files.length} test file${files.length === 1 ? "" : "s"}, ${modeStr})...`);
 
   const startTime = Date.now();
   let results: TestFileResult[] = [];
-  const hygieneSnapshot = suiteName === 'scripts' ? takeHygieneSnapshot() : null;
+  const hygieneSnapshot = suiteName === "scripts" ? takeHygieneSnapshot() : null;
 
   try {
-    const execMode = suiteName === 'scripts' ? 'bun-script' as const : 'bun-test' as const;
+    const execMode = suiteName === "scripts" ? ("bun-script" as const) : ("bun-test" as const);
     if (isParallel && concurrency > 1) {
       try {
         results = await runInParallel(files, concurrency, (file, _, workerId) => {
           const budgets = resolveBudgets(file);
-          return executeTestFile(file, budgets.suite, execMode === 'bun-test' ? budgets.test : null, workerId, execMode);
+          return executeTestFile(
+            file,
+            budgets.suite,
+            execMode === "bun-test" ? budgets.test : null,
+            workerId,
+            execMode,
+          );
         });
       } catch (err: any) {
-        console.warn(`[test-runner] Warning: Parallel execution failed (${err.message}). Falling back to sequential execution...`);
+        console.warn(
+          `[test-runner] Warning: Parallel execution failed (${err.message}). Falling back to sequential execution...`,
+        );
         results = [];
         for (let i = 0; i < files.length; i++) {
           const budgets = resolveBudgets(files[i]);
-          const res = await executeTestFile(files[i], budgets.suite, execMode === 'bun-test' ? budgets.test : null, 1, execMode);
+          const res = await executeTestFile(
+            files[i],
+            budgets.suite,
+            execMode === "bun-test" ? budgets.test : null,
+            1,
+            execMode,
+          );
           results.push(res);
         }
       }
@@ -468,7 +487,13 @@ export async function runTests(
         const file = files[i];
         console.log(`  Running: ${file}`);
         const budgets = resolveBudgets(file);
-        const res = await executeTestFile(file, budgets.suite, execMode === 'bun-test' ? budgets.test : null, 1, execMode);
+        const res = await executeTestFile(
+          file,
+          budgets.suite,
+          execMode === "bun-test" ? budgets.test : null,
+          1,
+          execMode,
+        );
         results.push(res);
       }
     }
@@ -501,7 +526,9 @@ export async function runTests(
       const budgets = resolveBudgets(res.file);
       const headroomPct = Math.round((res.durationMs / budgets.suite) * 100);
       if (headroomPct >= 60) {
-        console.log(`  ⚠️  BUDGET-HEADROOM: ${basename(res.file)} took ${res.durationMs}ms (${headroomPct}% of its ${budgets.suite}ms suite budget) — a raise requires a ticket with CI-run evidence; 2 raises/quarter triggers a mandatory split/trim review`);
+        console.log(
+          `  ⚠️  BUDGET-HEADROOM: ${basename(res.file)} took ${res.durationMs}ms (${headroomPct}% of its ${budgets.suite}ms suite budget) — a raise requires a ticket with CI-run evidence; 2 raises/quarter triggers a mandatory split/trim review`,
+        );
       }
       if (res.success) {
         console.log(`  ✓ ${res.file} (${res.durationMs}ms)`);
@@ -510,7 +537,9 @@ export async function runTests(
         console.error(`\n================================================================================`);
         console.error(`FAIL: ${res.file}`);
         console.error(`--------------------------------------------------------------------------------`);
-        console.error(`Status: ${res.timedOut ? `TIMEOUT (${resolveBudgets(res.file).suite}ms)` : `FAILED (exit code ${res.exitCode})`}`);
+        console.error(
+          `Status: ${res.timedOut ? `TIMEOUT (${resolveBudgets(res.file).suite}ms)` : `FAILED (exit code ${res.exitCode})`}`,
+        );
         if (res.error) console.error(`Error: ${res.error}`);
         if (res.stdout.trim()) {
           console.error(`--- STDOUT ---`);
@@ -525,8 +554,10 @@ export async function runTests(
     }
 
     if (hasFailures) {
-      const failedCount = results.filter(r => !r.success).length;
-      console.error(`✗ ${suiteName} suite failed (${failedCount} of ${files.length} test files failed, total ${totalDuration}ms)`);
+      const failedCount = results.filter((r) => !r.success).length;
+      console.error(
+        `✗ ${suiteName} suite failed (${failedCount} of ${files.length} test files failed, total ${totalDuration}ms)`,
+      );
       return false;
     }
 
@@ -537,8 +568,8 @@ export async function runTests(
     return false;
   } finally {
     try {
-      if (existsSync('tests/.temp')) {
-        rmSync('tests/.temp', { recursive: true, force: true });
+      if (existsSync("tests/.temp")) {
+        rmSync("tests/.temp", { recursive: true, force: true });
       }
     } catch (e: any) {
       console.error(`[test-runner] Error during temp dir cleanup: ${e.message || e}`);
@@ -547,24 +578,24 @@ export async function runTests(
 }
 
 function parseArgs(args: string[]): { suiteName: string; options: RunOptions } {
-  let suiteName = 'integration';
+  let suiteName = "integration";
   let parallel: boolean | undefined = undefined;
   let concurrency: number | undefined = undefined;
   let timeout: number | undefined = undefined;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--parallel') {
+    if (arg === "--parallel") {
       parallel = true;
-    } else if (arg === '--sequential') {
+    } else if (arg === "--sequential") {
       parallel = false;
-    } else if (arg === '--concurrency' || arg === '-c') {
+    } else if (arg === "--concurrency" || arg === "-c") {
       const val = parseInt(args[++i], 10);
       if (!isNaN(val) && val > 0) concurrency = val;
-    } else if (arg === '--timeout' || arg === '-t') {
+    } else if (arg === "--timeout" || arg === "-t") {
       const val = parseInt(args[++i], 10);
       if (!isNaN(val) && val > 0) timeout = val;
-    } else if (!arg.startsWith('-')) {
+    } else if (!arg.startsWith("-")) {
       suiteName = arg;
     }
   }

@@ -19,48 +19,48 @@
  *    string path) are ignored.
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface TemplateAuditHook {
-    /** Template directory name (e.g. 'co-design'). */
-    variant: string;
-    /** Hook path exactly as declared in variant.json script_manifest.local. */
-    declaredPath: string;
-    /** Declared path resolved relative to the templates root. */
-    resolvedPath: string;
+  /** Template directory name (e.g. 'co-design'). */
+  variant: string;
+  /** Hook path exactly as declared in variant.json script_manifest.local. */
+  declaredPath: string;
+  /** Declared path resolved relative to the templates root. */
+  resolvedPath: string;
 }
 
 export interface TemplateAuditHookSweep {
-    hooks: TemplateAuditHook[];
-    /** templates/co-X/variant.json files that could not be parsed. */
-    malformed: string[];
+  hooks: TemplateAuditHook[];
+  /** templates/co-X/variant.json files that could not be parsed. */
+  malformed: string[];
 }
 
 export function collectTemplateAuditHooks(templatesDir: string): TemplateAuditHookSweep {
-    const hooks: TemplateAuditHook[] = [];
-    const malformed: string[] = [];
-    for (const entry of readdirSync(templatesDir, { withFileTypes: true })) {
-        if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
-        const variantJsonPath = join(templatesDir, entry.name, 'variant.json');
-        if (!existsSync(variantJsonPath)) continue;
-        let manifest: any;
-        try {
-            manifest = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
-        } catch {
-            malformed.push(variantJsonPath);
-            continue; // malformed variant.json is reported by the schema checks
-        }
-        const local = manifest?.script_manifest?.local;
-        if (!Array.isArray(local)) continue;
-        for (const hook of local) {
-            if (hook?.name !== 'audit-variant' || typeof hook.path !== 'string' || !hook.path) continue;
-            hooks.push({
-                variant: entry.name,
-                declaredPath: hook.path,
-                resolvedPath: join(templatesDir, entry.name, hook.path),
-            });
-        }
+  const hooks: TemplateAuditHook[] = [];
+  const malformed: string[] = [];
+  for (const entry of readdirSync(templatesDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+    const variantJsonPath = join(templatesDir, entry.name, "variant.json");
+    if (!existsSync(variantJsonPath)) continue;
+    let manifest: any;
+    try {
+      manifest = JSON.parse(readFileSync(variantJsonPath, "utf-8"));
+    } catch {
+      malformed.push(variantJsonPath);
+      continue; // malformed variant.json is reported by the schema checks
     }
-    return { hooks, malformed };
+    const local = manifest?.script_manifest?.local;
+    if (!Array.isArray(local)) continue;
+    for (const hook of local) {
+      if (hook?.name !== "audit-variant" || typeof hook.path !== "string" || !hook.path) continue;
+      hooks.push({
+        variant: entry.name,
+        declaredPath: hook.path,
+        resolvedPath: join(templatesDir, entry.name, hook.path),
+      });
+    }
+  }
+  return { hooks, malformed };
 }

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-09T13:34:58.395Z
+**Generated**: 2026-11-09T16:37:20.158Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -105,140 +105,140 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| adopt-project.ts | 1.6.0 | scripts/adopt-project.ts | N/A |
-| agent-create.ts | 1.0.1 | scripts/agent-create.ts | N/A |
-| agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | N/A |
-| agent-lifecycle-audit.ts | 1.9.0 | scripts/agent-lifecycle-audit.ts | N/A |
-| agent-list.ts | 1.1.0 | scripts/agent-list.ts | N/A |
-| agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | N/A |
+| adopt-project.ts | 1.6.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
+| agent-create.ts | 1.0.1 | scripts/agent-create.ts | fs, path |
+| agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | fs, path |
+| agent-lifecycle-audit.ts | 1.9.0 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
+| agent-list.ts | 1.1.0 | scripts/agent-list.ts | fs, path |
+| agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
-| archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | N/A |
-| audit.ts | 2.64.0 | scripts/audit.ts | bun |
-| auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | N/A |
-| automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | N/A |
-| backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | N/A |
+| archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | fs, path |
+| audit.ts | 2.65.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
+| automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
+| backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
 | bootstrap-stages.ts | 1.1.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
-| changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | N/A |
-| check-handbook-archmap-drift.ts | 1.0.0 | scripts/check-handbook-archmap-drift.ts | N/A |
-| check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | N/A |
+| changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | fs |
+| check-handbook-archmap-drift.ts | 1.0.0 | scripts/check-handbook-archmap-drift.ts | crypto, fs, path |
+| check-upgrade-coverage.ts | 1.0.0 | scripts/check-upgrade-coverage.ts | fs, path |
 | check-workspace-hygiene.ts | 1.0.1 | scripts/check-workspace-hygiene.ts | bun |
-| cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | N/A |
-| clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | N/A |
-| compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | N/A |
-| create-l3-scaffold.ts | 1.20.0 | scripts/create-l3-scaffold.ts | N/A |
-| dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | N/A |
+| cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | fs, path |
+| clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | fs |
+| compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | fs, path |
+| create-l3-scaffold.ts | 1.20.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
+| dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
-| design-lint.ts | 2.5.0 | scripts/design-lint.ts | js-yaml |
-| dev-sync.ts | 1.46.0 | scripts/dev-sync.ts | bun |
+| design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
+| dev-sync.ts | 1.46.1 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
-| dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | N/A |
-| dispatch.ts | 1.1.1 | scripts/dispatch.ts | N/A |
-| ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | N/A |
-| evidence-backport-scan.ts | 1.4.0 | scripts/evidence-backport-scan.ts | N/A |
-| external-deps.ts | 1.0.0 | scripts/external-deps.ts | N/A |
+| dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
+| dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
+| ensure-github-repo.ts | 1.0.0 | scripts/ensure-github-repo.ts | child_process, fs, path |
+| evidence-backport-scan.ts | 1.4.0 | scripts/evidence-backport-scan.ts | child_process, fs, path |
+| external-deps.ts | 1.0.0 | scripts/external-deps.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
-| fleet-list.ts | 1.0.0 | scripts/fleet-list.ts | N/A |
-| fleet-script-parity.ts | 1.1.0 | scripts/fleet-script-parity.ts | N/A |
-| gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun |
-| generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | N/A |
+| fleet-list.ts | 1.0.0 | scripts/fleet-list.ts | path |
+| fleet-script-parity.ts | 1.1.0 | scripts/fleet-script-parity.ts | crypto, fs, path |
+| gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun, fs |
+| generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | fs, path |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
-| generate-raci.ts | 1.2.0 | scripts/generate-raci.ts | js-yaml |
-| generate-scripts-mirror.ts | 1.1.0 | scripts/generate-scripts-mirror.ts | N/A |
-| generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | N/A |
-| generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | js-yaml |
-| generate-version-manifest.ts | 1.11.2 | scripts/generate-version-manifest.ts | bun, js-yaml |
-| graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | N/A |
-| hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | N/A |
-| hub-probe.ts | 1.3.0 | scripts/hub-probe.ts | N/A |
-| hub-promotion.ts | 1.0.1 | scripts/hub-promotion.ts | N/A |
-| ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | N/A |
-| ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | N/A |
-| install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | N/A |
+| generate-raci.ts | 1.2.0 | scripts/generate-raci.ts | fs, js-yaml, path |
+| generate-scripts-mirror.ts | 1.1.0 | scripts/generate-scripts-mirror.ts | fs, path, url |
+| generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
+| generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
+| generate-version-manifest.ts | 1.12.0 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
+| graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | child_process, fs, path, url |
+| hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | child_process, crypto, fs, path |
+| hub-probe.ts | 1.3.0 | scripts/hub-probe.ts | fs, path |
+| hub-promotion.ts | 1.0.1 | scripts/hub-promotion.ts | child_process, fs, os, path, url |
+| ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | fs, path |
+| ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | fs, path |
+| install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | child_process, fs, os, path, url |
 | l3-to-variant-pipeline.ts | 1.23.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
-| lifecycle-sync-audit.ts | 1.21.0 | scripts/lifecycle-sync-audit.ts | js-yaml |
-| lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | N/A |
-| list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun |
-| mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | N/A |
-| mcp-upstream-server.ts | 1.15.1 | scripts/mcp-upstream-server.ts | js-yaml |
+| lifecycle-sync-audit.ts | 1.21.0 | scripts/lifecycle-sync-audit.ts | crypto, fs, js-yaml, path, process |
+| lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
+| list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun, path |
+| mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | child_process, fs, path, readline, url |
+| mcp-upstream-server.ts | 1.15.1 | scripts/mcp-upstream-server.ts | crypto, fs, js-yaml, path, readline, url |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
-| migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | N/A |
+| migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | child_process, fs, path |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.44.0 | scripts/new-project.ts | N/A |
+| new-project.ts | 1.44.0 | scripts/new-project.ts | child_process, crypto, fs, os, path |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
-| procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | js-yaml |
-| project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | N/A |
-| promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | N/A |
-| propagate-to-templates.ts | 2.23.0 | scripts/propagate-to-templates.ts | js-yaml |
-| qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun |
-| readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | N/A |
+| procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | fs, js-yaml, path, url |
+| project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | child_process, fs, path |
+| promote-context-section.ts | 1.1.0 | scripts/promote-context-section.ts | fs, path, url |
+| propagate-to-templates.ts | 2.23.0 | scripts/propagate-to-templates.ts | child_process, crypto, fs, js-yaml, path |
+| qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun, crypto |
+| readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | fs, path, process |
 | regenerate-agents-md.ts | 1.4.0 | scripts/regenerate-agents-md.ts | fs, path |
-| release-template.ts | 1.0.0 | scripts/release-template.ts | N/A |
-| remove-project.ts | 1.0.1 | scripts/remove-project.ts | N/A |
-| render-commands.ts | 1.1.0 | scripts/render-commands.ts | N/A |
-| render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | N/A |
+| release-template.ts | 1.0.0 | scripts/release-template.ts | child_process, fs, path |
+| remove-project.ts | 1.0.1 | scripts/remove-project.ts | child_process, fs, path, readline |
+| render-commands.ts | 1.1.0 | scripts/render-commands.ts | fs, path |
+| render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | fs, path, url |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| resync-audit.ts | 1.9.0 | scripts/resync-audit.ts | N/A |
-| retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | N/A |
+| resync-audit.ts | 1.9.0 | scripts/resync-audit.ts | child_process, fs, path |
+| retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
-| route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | N/A |
-| setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun |
-| skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | N/A |
-| skill-graph-fleet-report.ts | 2.4.0 | scripts/skill-graph-fleet-report.ts | N/A |
-| skill-lifecycle-audit.ts | 1.11.0 | scripts/skill-lifecycle-audit.ts | N/A |
-| skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun |
-| spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | N/A |
-| spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | N/A |
-| spec-register.ts | 1.6.0 | scripts/spec-register.ts | N/A |
-| sync-agent-mirrors.ts | 1.3.0 | scripts/sync-agent-mirrors.ts | js-yaml |
+| route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
+| setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
+| skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
+| skill-graph-fleet-report.ts | 2.4.0 | scripts/skill-graph-fleet-report.ts | fs, path |
+| skill-lifecycle-audit.ts | 1.11.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
+| skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
+| spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
+| spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
+| spec-register.ts | 1.6.0 | scripts/spec-register.ts | fs, path |
+| sync-agent-mirrors.ts | 1.3.0 | scripts/sync-agent-mirrors.ts | fs, js-yaml, path, url |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
-| sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | N/A |
-| sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | N/A |
-| sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | N/A |
-| sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | N/A |
-| sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | N/A |
-| sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | N/A |
-| sync-variant-settings.ts | 1.5.0 | scripts/sync-variant-settings.ts | N/A |
-| tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun |
-| team-builder.ts | 1.5.0 | scripts/team-builder.ts | N/A |
-| test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | N/A |
+| sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | fs, path |
+| sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | fs, path |
+| sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | child_process, fs, path, process |
+| sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | crypto, fs, path |
+| sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | fs, path |
+| sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | fs, path |
+| sync-variant-settings.ts | 1.5.0 | scripts/sync-variant-settings.ts | fs, path, url |
+| tag-template.ts | 1.2.0 | scripts/tag-template.ts | bun, fs, path |
+| team-builder.ts | 1.5.0 | scripts/team-builder.ts | fs, path |
+| test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | child_process, fs, path |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
-| test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun |
-| test-new-project.ts | 1.11.0 | scripts/test-new-project.ts | bun, js-yaml |
+| test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
+| test-new-project.ts | 1.11.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.10.0 | scripts/test-runner.ts | fs, os, path |
-| test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | N/A |
-| test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | N/A |
-| ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml |
-| translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, fs, path |
-| typecheck.ts | 1.2.0 | scripts/typecheck.ts | N/A |
-| upgrade-project.ts | 1.98.1 | scripts/upgrade-project.ts | N/A |
-| validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | N/A |
-| validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | js-yaml |
+| test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
+| test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
+| ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
+| translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
+| typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
+| upgrade-project.ts | 1.98.1 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
+| validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.3.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | fs |
-| validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | N/A |
-| validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | N/A |
-| validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | js-yaml |
-| validate-process.ts | 1.0.0 | scripts/validate-process.ts | js-yaml |
-| validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | js-yaml |
-| validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | N/A |
-| validate-surface-registry.ts | 1.1.1 | scripts/validate-surface-registry.ts | N/A |
-| validate-templates.ts | 1.76.0 | scripts/validate-templates.ts | js-yaml |
-| validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | N/A |
-| validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | js-yaml |
-| validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | N/A |
-| variant-feature.ts | 1.1.0 | scripts/variant-feature.ts | N/A |
-| verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | N/A |
+| validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | child_process, fs, path |
+| validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
+| validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | child_process, fs, path |
+| validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | fs, js-yaml, path |
+| validate-process.ts | 1.0.0 | scripts/validate-process.ts | fs, js-yaml, path |
+| validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
+| validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
+| validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
+| validate-templates.ts | 1.76.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
+| validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
+| validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |
+| variant-feature.ts | 1.1.0 | scripts/variant-feature.ts | child_process, fs, path |
+| verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | crypto, fs, path, url |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
-| verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | N/A |
+| verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | child_process, fs, os, path, url |
 | verify-memory.ts | 1.2.0 | scripts/verify-memory.ts | fs, path |
-| verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | N/A |
-| verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | N/A |
-| verify-readme-sync.ts | 1.5.0 | scripts/verify-readme-sync.ts | bun, fs, path |
-| verify-scripts.ts | 1.14.0 | scripts/verify-scripts.ts | fs, path |
-| verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | N/A |
-| verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | N/A |
+| verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | fs |
+| verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | fs, path |
+| verify-readme-sync.ts | 1.5.0 | scripts/verify-readme-sync.ts | bun, crypto, fs, path |
+| verify-scripts.ts | 1.14.0 | scripts/verify-scripts.ts | crypto, fs, path |
+| verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | fs, path, url |
+| verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | fs, path |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
 
 ---

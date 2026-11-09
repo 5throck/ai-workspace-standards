@@ -44,8 +44,8 @@
  * @version 1.2.0
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 
 export interface SkillRegistryRow {
   skill: string;
@@ -72,11 +72,11 @@ function looksLikeVersion(cell: string): boolean {
 }
 
 function splitRow(line: string): string[] {
-  return line.split('|').map((c) => c.trim());
+  return line.split("|").map((c) => c.trim());
 }
 
 function isTableRow(line: string): boolean {
-  return line.trimStart().startsWith('|');
+  return line.trimStart().startsWith("|");
 }
 
 /**
@@ -105,7 +105,7 @@ export function parseSkillRegistryRows(content: string): {
   lastSkillRowIdx: number;
 } {
   const rows = new Map<string, SkillRegistryRow>();
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   let lastSkillRowIdx = -1;
 
   for (let i = 0; i < lines.length; i++) {
@@ -118,8 +118,8 @@ export function parseSkillRegistryRows(content: string): {
       status: stripCellQuotes(cells[3]),
       owner: stripCellQuotes(cells[4]),
       lastReviewed: stripCellQuotes(cells[5]),
-      removalDate: stripCellQuotes(cells[6] ?? '—'),
-      notes: stripCellQuotes(cells[7] ?? '—'),
+      removalDate: stripCellQuotes(cells[6] ?? "—"),
+      notes: stripCellQuotes(cells[7] ?? "—"),
       lineIdx: i,
     });
     lastSkillRowIdx = i;
@@ -142,11 +142,11 @@ export function buildSkillRegistryRow(opts: {
   removalDate?: string;
   notes?: string;
 }): string {
-  const clean = (v: string | undefined, fallback = '—') => {
-    const s = stripCellQuotes(v ?? '');
-    return s === '' ? fallback : s;
+  const clean = (v: string | undefined, fallback = "—") => {
+    const s = stripCellQuotes(v ?? "");
+    return s === "" ? fallback : s;
   };
-  return `| \`${clean(opts.skill)}\` | ${clean(opts.version, '?')} | ${clean(opts.status, 'active')} | ${clean(opts.owner)} | ${clean(opts.lastReviewed)} | ${clean(opts.removalDate)} | ${clean(opts.notes)} |`;
+  return `| \`${clean(opts.skill)}\` | ${clean(opts.version, "?")} | ${clean(opts.status, "active")} | ${clean(opts.owner)} | ${clean(opts.lastReviewed)} | ${clean(opts.removalDate)} | ${clean(opts.notes)} |`;
 }
 
 /**
@@ -170,7 +170,7 @@ export function reconcileSkillRegistry(
     lastReviewed?: string;
   }>,
 ): { content: string; updated: string[]; added: string[] } {
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const { rows, lastSkillRowIdx } = parseSkillRegistryRows(content);
   const updated: string[] = [];
   const added: string[] = [];
@@ -195,7 +195,7 @@ export function reconcileSkillRegistry(
       const newRow = buildSkillRegistryRow({
         skill: d.skill,
         version: d.version,
-        status: d.status ?? 'active',
+        status: d.status ?? "active",
         owner: d.owner,
         lastReviewed: d.lastReviewed,
       });
@@ -204,7 +204,7 @@ export function reconcileSkillRegistry(
     }
   }
 
-  return { content: lines.join('\n'), updated, added };
+  return { content: lines.join("\n"), updated, added };
 }
 
 /**
@@ -231,7 +231,7 @@ export function pruneSkillRegistryRows(
   keepNames: Iterable<string>,
 ): { content: string; pruned: string[] } {
   const keep = new Set(keepNames);
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const pruned: string[] = [];
   const kept = lines.filter((line) => {
     const cells = matchSkillRowCells(line);
@@ -241,7 +241,7 @@ export function pruneSkillRegistryRows(
     pruned.push(skill);
     return false;
   });
-  return { content: kept.join('\n'), pruned };
+  return { content: kept.join("\n"), pruned };
 }
 
 /**
@@ -271,7 +271,7 @@ export function collectDeliveredSkills(skillsDir: string): Array<{
   if (!existsSync(skillsDir)) return delivered;
 
   for (const skillName of readdirSync(skillsDir)) {
-    const skillMdPath = join(skillsDir, skillName, 'SKILL.md');
+    const skillMdPath = join(skillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue;
 
     const fm = extractFrontmatterVersionAndReviewed(skillMdPath);
@@ -300,15 +300,15 @@ export function extractFrontmatterVersionAndReviewed(filePath: string): {
   status?: string;
   owner?: string;
 } {
-  if (!existsSync(filePath)) return { version: '', last_reviewed: '' };
-  const content = readFileSync(filePath, 'utf8');
+  if (!existsSync(filePath)) return { version: "", last_reviewed: "" };
+  const content = readFileSync(filePath, "utf8");
   const versionMatch = content.match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
   const reviewedMatch = content.match(/^last_reviewed:\s*["']?(\d{4}-\d{2}-\d{2})/m);
   const statusMatch = content.match(/^status:\s*["']?([A-Za-z_-]+)/m);
   const ownerMatch = content.match(/^owner:\s*["']?([^"'\n]+)/m);
   return {
-    version: versionMatch?.[1] ?? '',
-    last_reviewed: reviewedMatch?.[1] ?? '',
+    version: versionMatch?.[1] ?? "",
+    last_reviewed: reviewedMatch?.[1] ?? "",
     status: statusMatch?.[1],
     owner: ownerMatch?.[1]?.trim(),
   };
@@ -342,7 +342,7 @@ export function foldVariantExclusiveRowsIntoWorkspaceSection(content: string): {
   content: string;
   moved: number;
 } {
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const veIdx = lines.findIndex((l) => /^###\s+Variant-Exclusive Skills\b/i.test(l));
   if (veIdx === -1) return { content, moved: 0 };
 
@@ -370,13 +370,8 @@ export function foldVariantExclusiveRowsIntoWorkspaceSection(content: string): {
     }
   }
 
-  const next = [
-    ...lines.slice(0, insertAt),
-    ...movedRows,
-    ...lines.slice(insertAt, veIdx),
-    ...lines.slice(sectionEnd),
-  ];
-  return { content: next.join('\n'), moved: movedRows.length };
+  const next = [...lines.slice(0, insertAt), ...movedRows, ...lines.slice(insertAt, veIdx), ...lines.slice(sectionEnd)];
+  return { content: next.join("\n"), moved: movedRows.length };
 }
 
 /**
@@ -406,7 +401,7 @@ export function alignSkillRegistryRowsWithFrontmatter(
     lastReviewed?: string;
   }>,
 ): { content: string; aligned: string[] } {
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const { rows } = parseSkillRegistryRows(content);
   const byName = new Map(delivered.map((d) => [d.skill, d]));
   const aligned: string[] = [];
@@ -429,7 +424,7 @@ export function alignSkillRegistryRowsWithFrontmatter(
     aligned.push(row.skill);
   }
 
-  return { content: lines.join('\n'), aligned };
+  return { content: lines.join("\n"), aligned };
 }
 
 // ── W5: registry auto-sync machinery (spec 2026-09-25-registry-policy- ───────
@@ -443,13 +438,13 @@ export interface RegistrySyncFinding {
   /** Skill the finding is about. */
   skill: string;
   kind:
-    | 'version-drift'      // row version/last_reviewed != frontmatter
-    | 'meta-drift'         // row status/owner != frontmatter
-    | 'ghost-row'          // row whose SKILL.md dir does not exist
-    | 'missing-row'        // delivered skill with no row
-    | 'unparseable'        // dir exists but SKILL.md has no parseable version
-    | 'variant-cell'       // catalog row's variant cell != owning variants
-    | 'catalog-divergent'; // multi-variant skill with divergent frontmatter
+    | "version-drift" // row version/last_reviewed != frontmatter
+    | "meta-drift" // row status/owner != frontmatter
+    | "ghost-row" // row whose SKILL.md dir does not exist
+    | "missing-row" // delivered skill with no row
+    | "unparseable" // dir exists but SKILL.md has no parseable version
+    | "variant-cell" // catalog row's variant cell != owning variants
+    | "catalog-divergent"; // multi-variant skill with divergent frontmatter
   message: string;
 }
 
@@ -457,7 +452,7 @@ export interface RegistrySyncFinding {
 export function listSkillDirs(skillsDir: string): string[] {
   if (!existsSync(skillsDir)) return [];
   return readdirSync(skillsDir)
-    .filter((e) => existsSync(join(skillsDir, e, 'SKILL.md')))
+    .filter((e) => existsSync(join(skillsDir, e, "SKILL.md")))
     .sort();
 }
 
@@ -486,25 +481,50 @@ export function collectRegistryDrift(
     const d = byName.get(row.skill);
     if (!d) {
       if (dirs && !dirs.has(row.skill)) {
-        findings.push({ surface, skill: row.skill, kind: 'ghost-row', message: `${surface}: registry row \`${row.skill}\` has no matching SKILL.md directory` });
+        findings.push({
+          surface,
+          skill: row.skill,
+          kind: "ghost-row",
+          message: `${surface}: registry row \`${row.skill}\` has no matching SKILL.md directory`,
+        });
       } else {
-        findings.push({ surface, skill: row.skill, kind: 'unparseable', message: `${surface}: \`${row.skill}\` SKILL.md has no parseable frontmatter version — row kept, values unverifiable` });
+        findings.push({
+          surface,
+          skill: row.skill,
+          kind: "unparseable",
+          message: `${surface}: \`${row.skill}\` SKILL.md has no parseable frontmatter version — row kept, values unverifiable`,
+        });
       }
       continue;
     }
     const reviewed = d.lastReviewed || row.lastReviewed;
     if (row.version !== d.version || row.lastReviewed !== reviewed) {
-      findings.push({ surface, skill: row.skill, kind: 'version-drift', message: `${surface}: \`${row.skill}\` row ${row.version}/${row.lastReviewed} != frontmatter ${d.version}/${d.lastReviewed ?? '—'}` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "version-drift",
+        message: `${surface}: \`${row.skill}\` row ${row.version}/${row.lastReviewed} != frontmatter ${d.version}/${d.lastReviewed ?? "—"}`,
+      });
     }
     const status = d.status ?? row.status;
     const owner = d.owner ?? row.owner;
     if (status !== row.status || owner !== row.owner) {
-      findings.push({ surface, skill: row.skill, kind: 'meta-drift', message: `${surface}: \`${row.skill}\` row status/owner ${row.status}/${row.owner} != frontmatter ${status}/${owner}` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "meta-drift",
+        message: `${surface}: \`${row.skill}\` row status/owner ${row.status}/${row.owner} != frontmatter ${status}/${owner}`,
+      });
     }
   }
   for (const d of delivered) {
     if (!rows.has(d.skill)) {
-      findings.push({ surface, skill: d.skill, kind: 'missing-row', message: `${surface}: delivered skill \`${d.skill}\` (${d.version}) has no registry row` });
+      findings.push({
+        surface,
+        skill: d.skill,
+        kind: "missing-row",
+        message: `${surface}: delivered skill \`${d.skill}\` (${d.version}) has no registry row`,
+      });
     }
   }
   return findings;
@@ -519,9 +539,9 @@ export function collectRegistryDrift(
  * would misread catalog rows.
  */
 export function splitRootRegistry(content: string): { workspace: string; catalog: string } {
-  const normalized = content.replace(/\r\n/g, '\n');
+  const normalized = content.replace(/\r\n/g, "\n");
   const match = normalized.match(/^###\s+Variant-Exclusive Skills\b.*(?:\n|$)/m);
-  if (!match || match.index === undefined) return { workspace: normalized, catalog: '' };
+  if (!match || match.index === undefined) return { workspace: normalized, catalog: "" };
   return { workspace: normalized.slice(0, match.index), catalog: normalized.slice(match.index) };
 }
 
@@ -538,7 +558,7 @@ export interface CatalogEntry {
 
 /** Catalog 7th-column value: `co-x only` singular, comma-joined plural. */
 export function formatCatalogVariantCell(variants: string[]): string {
-  return variants.length === 1 ? `${variants[0]} only` : variants.join(', ');
+  return variants.length === 1 ? `${variants[0]} only` : variants.join(", ");
 }
 
 /**
@@ -560,27 +580,40 @@ export function formatCatalogVariantCell(variants: string[]): string {
 export function collectCatalogEntries(
   templatesDir: string,
   exclude: Set<string>,
-): { entries: CatalogEntry[]; divergentSkills: Set<string>; skippedSkills: Set<string>; findings: RegistrySyncFinding[] } {
+): {
+  entries: CatalogEntry[];
+  divergentSkills: Set<string>;
+  skippedSkills: Set<string>;
+  findings: RegistrySyncFinding[];
+} {
   const findings: RegistrySyncFinding[] = [];
   const divergentSkills = new Set<string>();
   const skippedSkills = new Set<string>();
-  const bySkill = new Map<string, Map<string, { version: string; status?: string; owner?: string; lastReviewed?: string }>>();
+  const bySkill = new Map<
+    string,
+    Map<string, { version: string; status?: string; owner?: string; lastReviewed?: string }>
+  >();
   if (!existsSync(templatesDir)) return { entries: [], divergentSkills, skippedSkills, findings };
 
   for (const variant of readdirSync(templatesDir).sort()) {
-    if (!variant.startsWith('co-')) continue;
-    const skillsDir = join(templatesDir, variant, 'skills');
+    if (!variant.startsWith("co-")) continue;
+    const skillsDir = join(templatesDir, variant, "skills");
     for (const skill of listSkillDirs(skillsDir)) {
       if (exclude.has(skill)) continue;
-      const raw = readFileSync(join(skillsDir, skill, 'SKILL.md'), 'utf-8');
-      const fm = extractFrontmatterVersionAndReviewed(join(skillsDir, skill, 'SKILL.md'));
+      const raw = readFileSync(join(skillsDir, skill, "SKILL.md"), "utf-8");
+      const fm = extractFrontmatterVersionAndReviewed(join(skillsDir, skill, "SKILL.md"));
       if (!fm.version) continue;
       if (/^catalog-parity:\s*skip\b/m.test(raw)) {
         skippedSkills.add(skill);
         continue;
       }
       if (!bySkill.has(skill)) bySkill.set(skill, new Map());
-      bySkill.get(skill)!.set(variant, { version: fm.version, status: fm.status, owner: fm.owner, lastReviewed: fm.last_reviewed || undefined });
+      bySkill.get(skill)!.set(variant, {
+        version: fm.version,
+        status: fm.status,
+        owner: fm.owner,
+        lastReviewed: fm.last_reviewed || undefined,
+      });
     }
   }
 
@@ -596,22 +629,29 @@ export function collectCatalogEntries(
     const divergent = rest.find(
       (r) =>
         r.version !== base.version ||
-        (r.lastReviewed ?? '') !== (base.lastReviewed ?? '') ||
-        (r.status ?? '') !== (base.status ?? '') ||
-        (r.owner ?? '') !== (base.owner ?? ''),
+        (r.lastReviewed ?? "") !== (base.lastReviewed ?? "") ||
+        (r.status ?? "") !== (base.status ?? "") ||
+        (r.owner ?? "") !== (base.owner ?? ""),
     );
     if (divergent) {
-      const detail = variants.map((v) => `${v}=${byVariant.get(v)!.version}`).join(', ');
+      const detail = variants.map((v) => `${v}=${byVariant.get(v)!.version}`).join(", ");
       findings.push({
-        surface: 'skills/SKILLS.md (Variant-Exclusive)',
+        surface: "skills/SKILLS.md (Variant-Exclusive)",
         skill,
-        kind: 'catalog-divergent',
+        kind: "catalog-divergent",
         message: `skills/SKILLS.md (Variant-Exclusive): \`${skill}\` frontmatter diverges across variants (${detail}) — resolve manually before cataloging`,
       });
       divergentSkills.add(skill);
       continue;
     }
-    entries.push({ skill, variants, version: base.version, status: base.status, owner: base.owner, lastReviewed: base.lastReviewed });
+    entries.push({
+      skill,
+      variants,
+      version: base.version,
+      status: base.status,
+      owner: base.owner,
+      lastReviewed: base.lastReviewed,
+    });
   }
   entries.sort((a, b) => a.skill.localeCompare(b.skill));
   return { entries, divergentSkills, skippedSkills, findings };
@@ -643,26 +683,51 @@ export function collectCatalogDrift(
     if (skippedSkills?.has(row.skill)) continue;
     const entry = byName.get(row.skill);
     if (!entry) {
-      findings.push({ surface, skill: row.skill, kind: 'ghost-row', message: `${surface}: catalog row \`${row.skill}\` matches no variant skill directory` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "ghost-row",
+        message: `${surface}: catalog row \`${row.skill}\` matches no variant skill directory`,
+      });
       continue;
     }
     const reviewed = entry.lastReviewed || row.lastReviewed;
     if (row.version !== entry.version || row.lastReviewed !== reviewed) {
-      findings.push({ surface, skill: row.skill, kind: 'version-drift', message: `${surface}: \`${row.skill}\` row ${row.version}/${row.lastReviewed} != frontmatter ${entry.version}/${entry.lastReviewed ?? '—'}` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "version-drift",
+        message: `${surface}: \`${row.skill}\` row ${row.version}/${row.lastReviewed} != frontmatter ${entry.version}/${entry.lastReviewed ?? "—"}`,
+      });
     }
     const status = entry.status ?? row.status;
     const owner = entry.owner ?? row.owner;
     if (status !== row.status || owner !== row.owner) {
-      findings.push({ surface, skill: row.skill, kind: 'meta-drift', message: `${surface}: \`${row.skill}\` row status/owner ${row.status}/${row.owner} != frontmatter ${status}/${owner}` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "meta-drift",
+        message: `${surface}: \`${row.skill}\` row status/owner ${row.status}/${row.owner} != frontmatter ${status}/${owner}`,
+      });
     }
     const expectedCell = formatCatalogVariantCell(entry.variants);
     if (row.notes !== expectedCell) {
-      findings.push({ surface, skill: row.skill, kind: 'variant-cell', message: `${surface}: \`${row.skill}\` variant cell "${row.notes}" != owners ${expectedCell}` });
+      findings.push({
+        surface,
+        skill: row.skill,
+        kind: "variant-cell",
+        message: `${surface}: \`${row.skill}\` variant cell "${row.notes}" != owners ${expectedCell}`,
+      });
     }
   }
   for (const entry of entries) {
     if (!rows.has(entry.skill)) {
-      findings.push({ surface, skill: entry.skill, kind: 'missing-row', message: `${surface}: variant skill \`${entry.skill}\` (${entry.version}, ${entry.variants.join(', ')}) has no catalog row` });
+      findings.push({
+        surface,
+        skill: entry.skill,
+        kind: "missing-row",
+        message: `${surface}: variant skill \`${entry.skill}\` (${entry.version}, ${entry.variants.join(", ")}) has no catalog row`,
+      });
     }
   }
   return findings;
@@ -684,7 +749,7 @@ export function syncVariantExclusiveCatalog(
   keepUnmatched?: Set<string>,
   skippedSkills?: Set<string>,
 ): { content: string; updated: string[]; added: string[]; pruned: string[] } {
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const { rows } = parseSkillRegistryRows(content);
   const byName = new Map(entries.map((e) => [e.skill, e]));
   const updated: string[] = [];
@@ -734,15 +799,15 @@ export function syncVariantExclusiveCatalog(
   if (missing.length > 0) {
     // Insertion point: after the last catalog row of the pruned content (the
     // removals above may have shifted line indices, so re-parse).
-    const afterRemoval = parseSkillRegistryRows(rebuilt.join('\n'));
+    const afterRemoval = parseSkillRegistryRows(rebuilt.join("\n"));
     missing.forEach((entry, i) => {
       const row = buildSkillRegistryRow({
         skill: entry.skill,
         version: entry.version,
-        status: entry.status ?? 'active',
+        status: entry.status ?? "active",
         owner: entry.owner,
         lastReviewed: entry.lastReviewed,
-        removalDate: '—',
+        removalDate: "—",
         notes: formatCatalogVariantCell(entry.variants),
       });
       rebuilt.splice(afterRemoval.lastSkillRowIdx + 1 + i, 0, row);
@@ -750,7 +815,7 @@ export function syncVariantExclusiveCatalog(
     });
   }
 
-  return { content: rebuilt.join('\n'), updated, added, pruned };
+  return { content: rebuilt.join("\n"), updated, added, pruned };
 }
 
 /**
@@ -767,7 +832,13 @@ export function syncGenericRegistry(
   const prunedStep = pruneSkillRegistryRows(content, keep);
   const reconciledStep = reconcileSkillRegistry(prunedStep.content, delivered);
   const alignedStep = alignSkillRegistryRowsWithFrontmatter(reconciledStep.content, delivered);
-  return { after: alignedStep.content, pruned: prunedStep.pruned, updated: reconciledStep.updated, added: reconciledStep.added, aligned: alignedStep.aligned };
+  return {
+    after: alignedStep.content,
+    pruned: prunedStep.pruned,
+    updated: reconciledStep.updated,
+    added: reconciledStep.added,
+    aligned: alignedStep.aligned,
+  };
 }
 
 /**
@@ -782,35 +853,64 @@ export function collectWorkspaceRegistryFindings(root: string): RegistrySyncFind
   const findings: RegistrySyncFinding[] = [];
   const joinRoot = (...p: string[]) => join(root, ...p);
 
-  const rootSkillsDir = joinRoot('skills');
-  const rootRegistryPath = join(rootSkillsDir, 'SKILLS.md');
+  const rootSkillsDir = joinRoot("skills");
+  const rootRegistryPath = join(rootSkillsDir, "SKILLS.md");
   if (existsSync(rootRegistryPath)) {
-    const content = readFileSync(rootRegistryPath, 'utf-8');
+    const content = readFileSync(rootRegistryPath, "utf-8");
     const { workspace, catalog } = splitRootRegistry(content);
     const rootDirs = listSkillDirs(rootSkillsDir);
-    findings.push(...collectRegistryDrift('skills/SKILLS.md (Workspace Skills)', workspace, collectDeliveredSkills(rootSkillsDir), rootDirs));
+    findings.push(
+      ...collectRegistryDrift(
+        "skills/SKILLS.md (Workspace Skills)",
+        workspace,
+        collectDeliveredSkills(rootSkillsDir),
+        rootDirs,
+      ),
+    );
 
-    const catalogScan = collectCatalogEntries(joinRoot('templates'), new Set(rootDirs));
+    const catalogScan = collectCatalogEntries(joinRoot("templates"), new Set(rootDirs));
     findings.push(...catalogScan.findings);
-    findings.push(...collectCatalogDrift('skills/SKILLS.md (Variant-Exclusive)', catalog, catalogScan.entries, catalogScan.divergentSkills, catalogScan.skippedSkills));
+    findings.push(
+      ...collectCatalogDrift(
+        "skills/SKILLS.md (Variant-Exclusive)",
+        catalog,
+        catalogScan.entries,
+        catalogScan.divergentSkills,
+        catalogScan.skippedSkills,
+      ),
+    );
   }
 
-  const commonSkillsDir = joinRoot('templates', 'common', 'skills');
-  const commonRegistryPath = join(commonSkillsDir, 'SKILLS.md');
+  const commonSkillsDir = joinRoot("templates", "common", "skills");
+  const commonRegistryPath = join(commonSkillsDir, "SKILLS.md");
   if (existsSync(commonRegistryPath)) {
-    const content = readFileSync(commonRegistryPath, 'utf-8');
-    findings.push(...collectRegistryDrift('templates/common/skills/SKILLS.md', content, collectDeliveredSkills(commonSkillsDir), listSkillDirs(commonSkillsDir)));
+    const content = readFileSync(commonRegistryPath, "utf-8");
+    findings.push(
+      ...collectRegistryDrift(
+        "templates/common/skills/SKILLS.md",
+        content,
+        collectDeliveredSkills(commonSkillsDir),
+        listSkillDirs(commonSkillsDir),
+      ),
+    );
   }
 
-  const templatesDir = joinRoot('templates');
+  const templatesDir = joinRoot("templates");
   if (existsSync(templatesDir)) {
     for (const variant of readdirSync(templatesDir).sort()) {
-      if (!variant.startsWith('co-')) continue;
-      const skillsDir = join(templatesDir, variant, 'skills');
-      const registryPath = join(skillsDir, 'SKILLS.md');
+      if (!variant.startsWith("co-")) continue;
+      const skillsDir = join(templatesDir, variant, "skills");
+      const registryPath = join(skillsDir, "SKILLS.md");
       if (!existsSync(registryPath)) continue;
-      const content = readFileSync(registryPath, 'utf-8');
-      findings.push(...collectRegistryDrift(`templates/${variant}/skills/SKILLS.md`, content, collectDeliveredSkills(skillsDir), listSkillDirs(skillsDir)));
+      const content = readFileSync(registryPath, "utf-8");
+      findings.push(
+        ...collectRegistryDrift(
+          `templates/${variant}/skills/SKILLS.md`,
+          content,
+          collectDeliveredSkills(skillsDir),
+          listSkillDirs(skillsDir),
+        ),
+      );
     }
   }
 

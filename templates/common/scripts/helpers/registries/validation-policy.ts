@@ -8,9 +8,9 @@
 //         check (fatal) on every pipeline run.
 // SSOT for per-type validation policies
 
-import type { VariantType } from './variant-type-registry.ts';
-import { CAPABILITY_REGISTRY } from './capability-registry.ts';
-import type { Capability } from './capability-registry.ts';
+import type { VariantType } from "./variant-type-registry.ts";
+import { CAPABILITY_REGISTRY } from "./capability-registry.ts";
+import type { Capability } from "./capability-registry.ts";
 
 /**
  * Defines validation rules for a variant type.
@@ -58,17 +58,14 @@ export interface ValidationPolicy {
  */
 export const VALIDATION_POLICIES = {
   security: {
-    requiredCapabilities: [
-      CAPABILITY_REGISTRY.AUTHORIZATION_GATE,
-      CAPABILITY_REGISTRY.ESCALATION_PROTOCOL,
-    ],
-    requiredAgents: ['red-team-lead', 'pentester', 'threat-modeler'],
-    optionalAgentSections: ['## Authorization Gate', '## Escalation Protocol'],
-    optionalSkillSections: ['## Security Gate'],
+    requiredCapabilities: [CAPABILITY_REGISTRY.AUTHORIZATION_GATE, CAPABILITY_REGISTRY.ESCALATION_PROTOCOL],
+    requiredAgents: ["red-team-lead", "pentester", "threat-modeler"],
+    optionalAgentSections: ["## Authorization Gate", "## Escalation Protocol"],
+    optionalSkillSections: ["## Security Gate"],
   },
   development: {
     requiredCapabilities: [],
-    optionalAgentSections: ['## Phase Handoff Protocol'],
+    optionalAgentSections: ["## Phase Handoff Protocol"],
   },
   design: {
     requiredCapabilities: [],
@@ -83,8 +80,8 @@ export const VALIDATION_POLICIES = {
       CAPABILITY_REGISTRY.REPORTING,
       CAPABILITY_REGISTRY.PRESENTATION,
     ],
-    optionalAgentSections: ['## Engagement Context', '## Deliverable Standards'],
-    optionalSkillSections: ['## Prerequisites', '## Quality Criteria'],
+    optionalAgentSections: ["## Engagement Context", "## Deliverable Standards"],
+    optionalSkillSections: ["## Prerequisites", "## Quality Criteria"],
   },
   collaboration: {
     requiredCapabilities: [],
@@ -95,7 +92,7 @@ export const VALIDATION_POLICIES = {
   lecture: {
     requiredCapabilities: [],
     hasSpecialHandling: true,
-    optionalAgentSections: ['## Stage Gate Checklist'],
+    optionalAgentSections: ["## Stage Gate Checklist"],
   },
   game: {
     requiredCapabilities: [
@@ -104,12 +101,12 @@ export const VALIDATION_POLICIES = {
       CAPABILITY_REGISTRY.ASSET_PIPELINE,
       CAPABILITY_REGISTRY.DEBUGGING,
     ],
-    requiredAgents: ['game-designer', 'game-developer', 'visual-artist', 'sound-designer', 'game-debugger'],
-    optionalAgentSections: ['## Game Mechanics', '## Performance Budget'],
+    requiredAgents: ["game-designer", "game-developer", "visual-artist", "sound-designer", "game-debugger"],
+    optionalAgentSections: ["## Game Mechanics", "## Performance Budget"],
   },
-  'abap-development': {
+  "abap-development": {
     requiredCapabilities: [],
-    optionalAgentSections: ['## Phase Handoff Protocol'],
+    optionalAgentSections: ["## Phase Handoff Protocol"],
   },
   // safety: registered by d0ddc17f (co-safety variant regen) without a policy entry,
   // which tripped the registry-integrity exact-key-parity check (fatal) on every
@@ -120,7 +117,7 @@ export const VALIDATION_POLICIES = {
   // promotion is planned.
   safety: {
     requiredCapabilities: [],
-    optionalAgentSections: ['## Phase Handoff Protocol'],
+    optionalAgentSections: ["## Phase Handoff Protocol"],
   },
 } satisfies Record<VariantType, ValidationPolicy>;
 

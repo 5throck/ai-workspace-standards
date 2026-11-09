@@ -15,19 +15,19 @@
  *   bun scripts/validate-agents.ts --json
  */
 
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join, dirname, resolve } from "node:path";
 // v1.2.1: ./validators/ is L0-only; L1/L3 project copies must not crash at import time —
 // the frontmatter schema sweep degrades to a skip when the validators are absent.
-const SCHEMA_VALIDATOR_SPEC = join(import.meta.dir, 'validators', 'schema-validator.ts');
+const SCHEMA_VALIDATOR_SPEC = join(import.meta.dir, "validators", "schema-validator.ts");
 const schemaValidatorAvailable = existsSync(SCHEMA_VALIDATOR_SPEC);
 const schemaValidator = schemaValidatorAvailable ? await import(SCHEMA_VALIDATOR_SPEC) : null;
 const parseFrontmatterYaml = schemaValidator?.parseFrontmatter;
 const validateAgentFrontmatter = schemaValidator?.validateAgentFrontmatter;
-import { cwd } from 'node:process';
+import { cwd } from "node:process";
 
 interface ValidationIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   file: string;
   check: string;
   message: string;
@@ -42,23 +42,23 @@ interface ValidationResult {
 }
 
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 const ROOT = cwd();
-const AGENTS_DIR = join(ROOT, 'agents');
-const LIFECYCLE_DOCS_DIR = join(ROOT, 'docs', 'lifecycle', 'agents');
+const AGENTS_DIR = join(ROOT, "agents");
+const LIFECYCLE_DOCS_DIR = join(ROOT, "docs", "lifecycle", "agents");
 
 // Required sections in governance records (docs/lifecycle/agents/*.md)
-const GOVERNANCE_REQUIRED_SECTIONS = ['## Phase History', '## Acceptance Criteria'];
+const GOVERNANCE_REQUIRED_SECTIONS = ["## Phase History", "## Acceptance Criteria"];
 
 // Required frontmatter fields in runtime definitions (agents/*.md)
-const FRONTMATTER_REQUIRED_FIELDS = ['lifecycle.phase', 'lifecycle.governance'];
+const FRONTMATTER_REQUIRED_FIELDS = ["lifecycle.phase", "lifecycle.governance"];
 
 // Guard: must be run from workspace root
 if (!existsSync(AGENTS_DIR)) {
@@ -72,7 +72,7 @@ if (!existsSync(AGENTS_DIR)) {
 }
 
 const args = process.argv.slice(2);
-const JSON_MODE = args.includes('--json');
+const JSON_MODE = args.includes("--json");
 
 const issues: ValidationIssue[] = [];
 let totalFiles = 0;
@@ -82,7 +82,7 @@ function pass(msg: string) {
 }
 
 function fail(file: string, check: string, msg: string, fix?: string) {
-  issues.push({ level: 'error', file, check, message: msg, fix });
+  issues.push({ level: "error", file, check, message: msg, fix });
   if (!JSON_MODE) {
     console.log(`${colors.red}❌${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
@@ -90,7 +90,7 @@ function fail(file: string, check: string, msg: string, fix?: string) {
 }
 
 function warn(file: string, check: string, msg: string, fix?: string) {
-  issues.push({ level: 'warning', file, check, message: msg, fix });
+  issues.push({ level: "warning", file, check, message: msg, fix });
   if (!JSON_MODE) {
     console.log(`${colors.yellow}⚠️${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
@@ -99,7 +99,10 @@ function warn(file: string, check: string, msg: string, fix?: string) {
 
 // Normalize content: strip BOM and normalize line endings
 function normalizeContent(raw: string): string {
-  return raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return raw
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 }
 
 // Parse frontmatter fields from markdown
@@ -112,18 +115,18 @@ export function parseFrontmatter(rawContent: string): Record<string, true> {
   if (!match) return {};
 
   const fields: Record<string, true> = {};
-  for (const line of match[1].split('\n')) {
-    const colonIdx = line.indexOf(':');
+  for (const line of match[1].split("\n")) {
+    const colonIdx = line.indexOf(":");
     if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
     // Support nested keys (e.g., lifecycle.phase)
-    if (key && !key.startsWith(' ') && !key.startsWith('-')) {
+    if (key && !key.startsWith(" ") && !key.startsWith("-")) {
       fields[key] = true;
       // Also register full nested path
-      if (key.includes('.')) {
-        const parts = key.split('.');
+      if (key.includes(".")) {
+        const parts = key.split(".");
         for (let i = 1; i <= parts.length; i++) {
-          fields[parts.slice(0, i).join('.')] = true;
+          fields[parts.slice(0, i).join(".")] = true;
         }
       }
     }
@@ -140,8 +143,8 @@ export function hasNestedField(rawContent: string, fieldPath: string): boolean {
   const match = content.match(/^---\n([\s\S]*?)\n---/m);
   if (!match) return false;
 
-  const parts = fieldPath.split('.');
-  const lines = match[1].split('\n');
+  const parts = fieldPath.split(".");
+  const lines = match[1].split("\n");
 
   // For nested fields like lifecycle.phase, check both forms:
   // 1. Direct key: lifecycle.phase: production
@@ -156,7 +159,7 @@ export function hasNestedField(rawContent: string, fieldPath: string): boolean {
     }
 
     // Check nested structure form
-    const colonIdx = trimmed.indexOf(':');
+    const colonIdx = trimmed.indexOf(":");
     if (colonIdx !== -1) {
       const key = trimmed.slice(0, colonIdx).trim();
       if (key === parts[0]) {
@@ -167,13 +170,13 @@ export function hasNestedField(rawContent: string, fieldPath: string): boolean {
         const indent = line.search(/\S/);
         for (let i = lines.indexOf(line) + 1; i < lines.length; i++) {
           const nextLine = lines[i];
-          if (nextLine.trim() === '' || nextLine.startsWith('---')) break;
+          if (nextLine.trim() === "" || nextLine.startsWith("---")) break;
 
           const nextIndent = nextLine.search(/\S/);
           if (nextIndent <= indent) break; // Not a nested line
 
           const nextTrimmed = nextLine.trim();
-          const nextColonIdx = nextTrimmed.indexOf(':');
+          const nextColonIdx = nextTrimmed.indexOf(":");
           if (nextColonIdx !== -1) {
             const nextKey = nextTrimmed.slice(0, nextColonIdx).trim();
             const fullPath = `${parts[0]}.${nextKey}`;
@@ -189,7 +192,7 @@ export function hasNestedField(rawContent: string, fieldPath: string): boolean {
 
 // Filter predicate for agent files (exported for testability)
 export function isAgentFile(filename: string): boolean {
-  return filename.endsWith('.md') && !/^README(_\w+)?\.md$/.test(filename) && !filename.startsWith('_');
+  return filename.endsWith(".md") && !/^README(_\w+)?\.md$/.test(filename) && !filename.startsWith("_");
 }
 
 // Part 1: Validate runtime definitions (agents/*.md)
@@ -200,9 +203,9 @@ function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
 
   for (const file of agentFiles) {
     totalFiles++;
-    const agentName = file.replace('.md', '');
+    const agentName = file.replace(".md", "");
     const filePath = join(agentsDir, file);
-    const rawContent = readFileSync(filePath, 'utf-8');
+    const rawContent = readFileSync(filePath, "utf-8");
 
     const missingFields: string[] = [];
 
@@ -216,9 +219,9 @@ function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
     if (missingFields.length > 0) {
       fail(
         agentName,
-        'frontmatter-missing',
-        `${agentName}: Missing frontmatter fields: ${missingFields.join(', ')}`,
-        `Add missing fields to YAML frontmatter:\n     lifecycle:\n       phase: production\n       created: YYYY-MM-DD\n       last_updated: YYYY-MM-DD\n       governance: docs/lifecycle/agents/${agentName}.md`
+        "frontmatter-missing",
+        `${agentName}: Missing frontmatter fields: ${missingFields.join(", ")}`,
+        `Add missing fields to YAML frontmatter:\n     lifecycle:\n       phase: production\n       created: YYYY-MM-DD\n       last_updated: YYYY-MM-DD\n       governance: docs/lifecycle/agents/${agentName}.md`,
       );
     } else {
       pass(`${agentName}: All required frontmatter fields present`);
@@ -228,43 +231,44 @@ function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
 
 // Part 2: Validate governance records (docs/lifecycle/agents/*.md)
 function validateGovernanceRecords(): void {
-  if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 2: Governance Record Validation (docs/lifecycle/agents/*.md)${colors.reset}`);
+  if (!JSON_MODE)
+    console.log(`\n${colors.cyan}📋 Part 2: Governance Record Validation (docs/lifecycle/agents/*.md)${colors.reset}`);
 
   if (!existsSync(LIFECYCLE_DOCS_DIR)) {
     warn(
-      'docs/lifecycle/agents',
-      'directory-not-found',
-      'docs/lifecycle/agents/ directory not found',
-      'Create docs/lifecycle/agents/ directory with governance documentation'
+      "docs/lifecycle/agents",
+      "directory-not-found",
+      "docs/lifecycle/agents/ directory not found",
+      "Create docs/lifecycle/agents/ directory with governance documentation",
     );
     return;
   }
 
-  const lifecycleDocs = readdirSync(LIFECYCLE_DOCS_DIR).filter(f => f.endsWith('.md'));
+  const lifecycleDocs = readdirSync(LIFECYCLE_DOCS_DIR).filter((f) => f.endsWith(".md"));
 
   for (const file of lifecycleDocs) {
     totalFiles++;
-    const docName = file.replace('.md', '');
+    const docName = file.replace(".md", "");
     const filePath = join(LIFECYCLE_DOCS_DIR, file);
-    const content = normalizeContent(readFileSync(filePath, 'utf-8'));
+    const content = normalizeContent(readFileSync(filePath, "utf-8"));
 
     const missingSections: string[] = [];
 
     // Check for required sections
-    if (!content.includes('## Phase History')) {
-      missingSections.push('Phase History');
+    if (!content.includes("## Phase History")) {
+      missingSections.push("Phase History");
     }
 
-    if (!content.includes('## Acceptance Criteria')) {
-      missingSections.push('Acceptance Criteria');
+    if (!content.includes("## Acceptance Criteria")) {
+      missingSections.push("Acceptance Criteria");
     }
 
     if (missingSections.length > 0) {
       fail(
         `Governance doc ${docName}`,
-        'sections-missing',
-        `${docName}: Missing sections: ${missingSections.join(', ')}`,
-        `Add missing sections to docs/lifecycle/agents/${file}`
+        "sections-missing",
+        `${docName}: Missing sections: ${missingSections.join(", ")}`,
+        `Add missing sections to docs/lifecycle/agents/${file}`,
       );
     } else {
       pass(`Governance doc ${docName}: All required sections present`);
@@ -280,8 +284,8 @@ function validateSecurityHolds(): void {
   const agentsDir = AGENTS_DIR;
   if (!existsSync(agentsDir)) return;
   for (const entry of readdirSync(agentsDir)) {
-    if (!entry.endsWith('.md') || entry === 'README.md') continue;
-    const raw = readFileSync(join(agentsDir, entry), 'utf-8');
+    if (!entry.endsWith(".md") || entry === "README.md") continue;
+    const raw = readFileSync(join(agentsDir, entry), "utf-8");
     const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!fm) continue;
     const body = fm[1];
@@ -290,10 +294,24 @@ function validateSecurityHolds(): void {
     const isDeprecated = /^status:\s*deprecated\b/m.test(body);
     const hasRemovalDate = /^removal[-_]date:/m.test(body);
     if (!isDeprecated) {
-      issues.push({ level: 'error', file: entry, check: 'security-hold-active', message: entry + ': security_hold: true but status is not deprecated — quarantine immediately (constitution 05.6 Security Protocol)' });
+      issues.push({
+        level: "error",
+        file: entry,
+        check: "security-hold-active",
+        message:
+          entry +
+          ": security_hold: true but status is not deprecated — quarantine immediately (constitution 05.6 Security Protocol)",
+      });
     }
     if (!hasRemovalDate) {
-      issues.push({ level: 'error', file: entry, check: 'security-hold-no-removal-date', message: entry + ': security_hold: true without a removal-date — held agents must be scheduled for removal (≤ 30 days)' });
+      issues.push({
+        level: "error",
+        file: entry,
+        check: "security-hold-no-removal-date",
+        message:
+          entry +
+          ": security_hold: true without a removal-date — held agents must be scheduled for removal (≤ 30 days)",
+      });
     }
   }
 }
@@ -307,7 +325,7 @@ function validateAgentSchema(): void {
   for (const entry of readdirSync(AGENTS_DIR)) {
     if (!isAgentFile(entry)) continue;
     const filePath = join(AGENTS_DIR, entry);
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     if (!parseFrontmatterYaml || !validateAgentFrontmatter) continue; // validators absent in L1/L3 — workspace sweep covers schema checks
     const fm = parseFrontmatterYaml(content);
     if (Object.keys(fm).length === 0) continue; // no frontmatter — existing checks cover that
@@ -315,8 +333,8 @@ function validateAgentSchema(): void {
     if (fm.extends) continue;
     for (const issue of validateAgentFrontmatter(fm, entry)) {
       const msg = `schema-validator: ${issue.message}`;
-      if (issue.severity === 'error') fail(entry, 'schema-agent', msg);
-      else warn(entry, 'schema-agent', msg);
+      if (issue.severity === "error") fail(entry, "schema-agent", msg);
+      else warn(entry, "schema-agent", msg);
     }
   }
 }
@@ -337,13 +355,13 @@ function validatePersonaIntegrity(): void {
   for (const entry of readdirSync(AGENTS_DIR)) {
     if (!isAgentFile(entry)) continue;
     const filePath = join(AGENTS_DIR, entry);
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     // Tolerant anchor — a leading `# @resolved-from:` annotation line is legal
     // (parseFrontmatter in this same file supports it); byte-0 `---` alone
     // would silently skip those files.
     const fmStart = content.match(/^---/m)?.index;
     if (fmStart === undefined) continue; // no frontmatter — schema sweep covers
-    const fmEnd = content.indexOf('\n---', fmStart + 3);
+    const fmEnd = content.indexOf("\n---", fmStart + 3);
     if (fmEnd === -1) continue; // unterminated frontmatter — schema sweep covers
     const frontmatter = content.slice(fmStart + 3, fmEnd);
     const body = content.slice(fmEnd + 4);
@@ -359,19 +377,36 @@ function validatePersonaIntegrity(): void {
       } else if (existsSync(baseDir)) {
         // The base DIRECTORY exists but the file does not — a genuinely
         // dangling reference (the roster-artifact class this gate guards).
-        fail(entry, 'extends-dangling', `${entry}: extends '${rawTarget}' does not resolve to an existing base file — remove the field (self-contained definition) or fix the chain target`, "Delete the 'extends:' line, or point it at an existing base persona");
+        fail(
+          entry,
+          "extends-dangling",
+          `${entry}: extends '${rawTarget}' does not resolve to an existing base file — remove the field (self-contained definition) or fix the chain target`,
+          "Delete the 'extends:' line, or point it at an existing base persona",
+        );
       } else {
         // The base directory itself is absent — the reference crosses into a
         // workspace level this checkout cannot see (fresh clone / CI). Not
         // verifiable here; surface as a warning, never a silent pass in a
         // workspace-aware run.
-        warn(entry, 'extends-unverifiable', `${entry}: extends '${rawTarget}' points outside this checkout (base directory absent) — unverifiable here, re-validate inside the workspace`, 'Re-run validate-agents from the workspace root checkout');
+        warn(
+          entry,
+          "extends-unverifiable",
+          `${entry}: extends '${rawTarget}' points outside this checkout (base directory absent) — unverifiable here, re-validate inside the workspace`,
+          "Re-run validate-agents from the workspace root checkout",
+        );
       }
     }
 
-    const spillLine = body.split('\n').find(l => /^ {2}governance: docs\/lifecycle\//.test(l) || /^examples: \[\]\s*$/.test(l));
+    const spillLine = body
+      .split("\n")
+      .find((l) => /^ {2}governance: docs\/lifecycle\//.test(l) || /^examples: \[\]\s*$/.test(l));
     if (spillLine !== undefined) {
-      fail(entry, 'body-frontmatter-spill', `${entry}: frontmatter fragment leaked into the body ("${spillLine.trim()}") — the generated persona inlines it into every dispatch`, 'Delete the leaked line(s) from the markdown body');
+      fail(
+        entry,
+        "body-frontmatter-spill",
+        `${entry}: frontmatter fragment leaked into the body ("${spillLine.trim()}") — the generated persona inlines it into every dispatch`,
+        "Delete the leaked line(s) from the markdown body",
+      );
     }
 
     if (!/^description:/m.test(frontmatter)) {
@@ -379,9 +414,19 @@ function validatePersonaIntegrity(): void {
       // their base persona — warn there, fail on self-contained definitions
       // (sync-agent-personas silently skips those, freezing the persona).
       if (extendsResolves) {
-        warn(entry, 'description-missing', `${entry}: no frontmatter description: — the extends-stub is assumed to inherit it from its base persona`, "Inline the base persona's description once the stub is resolved");
+        warn(
+          entry,
+          "description-missing",
+          `${entry}: no frontmatter description: — the extends-stub is assumed to inherit it from its base persona`,
+          "Inline the base persona's description once the stub is resolved",
+        );
       } else {
-        fail(entry, 'description-missing', `${entry}: no frontmatter description: — sync-agent-personas silently skips the file, freezing the generated persona`, "Add a one-line 'description:' summarizing the agent's role");
+        fail(
+          entry,
+          "description-missing",
+          `${entry}: no frontmatter description: — sync-agent-personas silently skips the file, freezing the generated persona`,
+          "Add a one-line 'description:' summarizing the agent's role",
+        );
       }
     }
   }
@@ -397,10 +442,10 @@ export const MIN_AGENT_SECTIONS = 4;
 
 export function agentBodyCompletenessFinding(content: string): string | null {
   const parts = content.split(/^---$/m);
-  const body = parts.length >= 3 ? parts.slice(2).join('---') : content;
+  const body = parts.length >= 3 ? parts.slice(2).join("---") : content;
   // resolved stubs (hydrated at scaffold) carry the annotation persona-integrity tolerates
   if (/^#\s*@resolved-from:/m.test(body)) return null;
-  const lines = body.split(/\r?\n/).filter((l) => l.trim() !== '');
+  const lines = body.split(/\r?\n/).filter((l) => l.trim() !== "");
   const sections = body.split(/\r?\n/).filter((l) => /^##\s/.test(l));
   if (lines.length >= MIN_AGENT_BODY_LINES && sections.length >= MIN_AGENT_SECTIONS) return null;
   return `stub-quality definition: ${lines.length} non-empty body line(s), ${sections.length} '## ' section(s) (minimum ${MIN_AGENT_BODY_LINES} lines / ${MIN_AGENT_SECTIONS} sections) — a production definition carries the canonical body sections; rewrite to the section standard (co-newbiz PR #731 is the worked example)`;
@@ -410,13 +455,14 @@ function validateAgentBodyCompleteness(): void {
   if (!existsSync(AGENTS_DIR)) return;
   for (const entry of readdirSync(AGENTS_DIR)) {
     if (!isAgentFile(entry)) continue;
-    const content = readFileSync(join(AGENTS_DIR, entry), 'utf-8');
+    const content = readFileSync(join(AGENTS_DIR, entry), "utf-8");
     if (parseFrontmatterYaml) {
       const fm = parseFrontmatterYaml(content);
       if (fm.extends) continue; // extends-pattern stubs hydrate at scaffold — same skip as the schema check
     }
     const finding = agentBodyCompletenessFinding(content);
-    if (finding) fail(entry, 'agent-body-completeness', finding, 'Rewrite the definition body to the canonical section standard.');
+    if (finding)
+      fail(entry, "agent-body-completeness", finding, "Rewrite the definition body to the canonical section standard.");
   }
 }
 
@@ -433,11 +479,11 @@ function main() {
   validatePersonaIntegrity();
   validateAgentBodyCompleteness();
 
-  const errors = issues.filter(i => i.level === 'error');
-  const warnings = issues.filter(i => i.level === 'warning');
+  const errors = issues.filter((i) => i.level === "error");
+  const warnings = issues.filter((i) => i.level === "warning");
 
   if (!JSON_MODE) {
-    console.log(`\n${colors.dim}${'─'.repeat(50)}${colors.reset}`);
+    console.log(`\n${colors.dim}${"─".repeat(50)}${colors.reset}`);
     console.log(`${colors.cyan}📊 Validation Summary:${colors.reset}`);
     console.log(`   Total files checked: ${totalFiles}`);
     console.log(`   ${colors.red}Errors: ${errors.length}${colors.reset}`);
@@ -445,12 +491,18 @@ function main() {
   }
 
   if (JSON_MODE) {
-    console.log(JSON.stringify({
-      totalFilesChecked: totalFiles,
-      errors,
-      warnings,
-      summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          totalFilesChecked: totalFiles,
+          errors,
+          warnings,
+          summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
+        },
+        null,
+        2,
+      ),
+    );
   } else {
     if (errors.length > 0) {
       console.log(`\n${colors.red}❌ Validation failed with ${errors.length} error(s)${colors.reset}`);

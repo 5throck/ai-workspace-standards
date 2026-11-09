@@ -24,17 +24,17 @@ const skill = readFileSync(join(root, 'skills', 'sync', 'SKILL.md'), 'utf-8');
 
 describe('dev-sync scoped-staging default flip (T-20261001-015)', () => {
   test('T1: declaration defaults to exclusion (SYNC_SCOPED_STAGING !== 0)', () => {
-    expect(src).toMatch(/let scopedStaging = process\.env\.SYNC_SCOPED_STAGING !== '0';/);
+    expect(src).toMatch(/let scopedStaging = process\.env\.SYNC_SCOPED_STAGING !== ['"]0['"];/);
     // the old soak-default declaration must be gone
-    expect(src).not.toMatch(/let scopedStaging = process\.env\.SYNC_SCOPED_STAGING === '1';/);
+    expect(src).not.toMatch(/let scopedStaging = process\.env\.SYNC_SCOPED_STAGING === ['"]1['"];/);
   });
 
   test('T2: --warn-staging opt-out flag is parsed', () => {
-    expect(src).toMatch(/arg === '--warn-staging'/);
+    expect(src).toMatch(/arg === ['\"]--warn-staging['\"]/);
   });
 
   test('T3: legacy opt-in forms remain accepted', () => {
-    expect(src).toMatch(/arg === '--scoped-staging'/);
+    expect(src).toMatch(/arg === ['\"]--scoped-staging['\"]/);
     expect(src).toMatch(/remain accepted no-ops/);
   });
 

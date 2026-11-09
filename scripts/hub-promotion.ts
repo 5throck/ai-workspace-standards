@@ -70,24 +70,37 @@
 // @l2-propagate: false
 
 import {
-  copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmdirSync, renameSync, rmSync, statSync, writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
-import { die } from './lib/error-handling.ts';
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmdirSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+import { die } from "./lib/error-handling.ts";
 import {
-  parseSemver, semverCompare, validateHubTopologyShape,
-  type HubTopologyEntry, type HubTopology,
-} from './helpers/hub-topology.ts';
+  parseSemver,
+  semverCompare,
+  validateHubTopologyShape,
+  type HubTopologyEntry,
+  type HubTopology,
+} from "./helpers/hub-topology.ts";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
+const WORKSPACE_ROOT = resolve(SCRIPT_DIR, "..");
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type AssetKind = 'skill' | 'agent' | 'script' | 'file';
+export type AssetKind = "skill" | "agent" | "script" | "file";
 
 export interface SuiteAsset {
   source: string;
@@ -98,8 +111,8 @@ export interface SuiteAsset {
 
 export interface ContractUpdate {
   variant: string;
-  type: 'script_manifest' | 'roster';
-  list?: 'agents' | 'skills';
+  type: "script_manifest" | "roster";
+  list?: "agents" | "skills";
   entry: Record<string, unknown>;
 }
 
@@ -113,8 +126,8 @@ export interface SuiteManifest {
 }
 
 export interface StagedFile {
-  relPath: string;          // repo-relative target path
-  stagedPath: string;       // absolute path of the future bytes
+  relPath: string; // repo-relative target path
+  stagedPath: string; // absolute path of the future bytes
   backupPath: string | null; // absolute path of the original bytes (null = target is new)
 }
 
@@ -143,15 +156,17 @@ const HUB_VARIANT = /^co-[a-z]+$/;
  * drive letters, leading slashes, and any `..` segment — the same containment
  * posture as the generator-manifest loader. */
 export function isSafeRepoPath(p: string): boolean {
-  if (typeof p !== 'string' || p.length === 0) return false;
-  if (p.startsWith('/') || /^[A-Za-z]:/.test(p)) return false;
-  if (p.includes('\\')) return false;
-  const segments = p.split('/');
-  if (segments.some(s => s === '' || s === '.' || s === '..')) return false;
+  if (typeof p !== "string" || p.length === 0) return false;
+  if (p.startsWith("/") || /^[A-Za-z]:/.test(p)) return false;
+  if (p.includes("\\")) return false;
+  const segments = p.split("/");
+  if (segments.some((s) => s === "" || s === "." || s === "..")) return false;
   return true;
 }
 
-export function parseSuiteManifest(raw: string): { ok: true; manifest: SuiteManifest } | { ok: false; errors: string[] } {
+export function parseSuiteManifest(
+  raw: string,
+): { ok: true; manifest: SuiteManifest } | { ok: false; errors: string[] } {
   const errors: string[] = [];
   let obj: Record<string, unknown>;
   try {
@@ -159,66 +174,71 @@ export function parseSuiteManifest(raw: string): { ok: true; manifest: SuiteMani
   } catch (e) {
     return { ok: false, errors: [`manifest is not valid JSON: ${e instanceof Error ? e.message : String(e)}`] };
   }
-  const suite = obj['suite'];
-  const hubVariant = obj['hub_variant'];
-  if (typeof suite !== 'string' || !SUITE_ID.test(suite)) errors.push(`"suite" must match ${SUITE_ID.source}`);
-  if (typeof hubVariant !== 'string' || !HUB_VARIANT.test(hubVariant)) errors.push(`"hub_variant" must match ${HUB_VARIANT.source}`);
+  const suite = obj["suite"];
+  const hubVariant = obj["hub_variant"];
+  if (typeof suite !== "string" || !SUITE_ID.test(suite)) errors.push(`"suite" must match ${SUITE_ID.source}`);
+  if (typeof hubVariant !== "string" || !HUB_VARIANT.test(hubVariant))
+    errors.push(`"hub_variant" must match ${HUB_VARIANT.source}`);
 
-  const assetsRaw = obj['assets'];
+  const assetsRaw = obj["assets"];
   if (!Array.isArray(assetsRaw) || assetsRaw.length === 0) {
     errors.push('"assets" must be a non-empty array');
   } else {
     assetsRaw.forEach((a, i) => {
       const where = `assets[${i}]`;
-      if (!a || typeof a !== 'object' || Array.isArray(a)) {
+      if (!a || typeof a !== "object" || Array.isArray(a)) {
         errors.push(`${where} must be an object`);
         return;
       }
       const asset = a as Record<string, unknown>;
-      for (const field of ['source', 'dest', 'kind', 'name'] as const) {
-        if (typeof asset[field] !== 'string' || (asset[field] as string).length === 0) {
+      for (const field of ["source", "dest", "kind", "name"] as const) {
+        if (typeof asset[field] !== "string" || (asset[field] as string).length === 0) {
           errors.push(`${where} missing required string field "${field}"`);
         }
       }
-      if (typeof asset['kind'] === 'string' && !['skill', 'agent', 'script', 'file'].includes(asset['kind'])) {
+      if (typeof asset["kind"] === "string" && !["skill", "agent", "script", "file"].includes(asset["kind"])) {
         errors.push(`${where} kind must be skill | agent | script | file`);
       }
-      if (typeof asset['source'] === 'string' && !isSafeRepoPath(asset['source'])) {
+      if (typeof asset["source"] === "string" && !isSafeRepoPath(asset["source"])) {
         errors.push(`${where} source must be a repo-relative, traversal-free path`);
       }
-      if (typeof asset['dest'] === 'string' && !isSafeRepoPath(asset['dest'])) {
+      if (typeof asset["dest"] === "string" && !isSafeRepoPath(asset["dest"])) {
         errors.push(`${where} dest must be a repo-relative, traversal-free path`);
       }
-      if (typeof asset['dest'] === 'string' && isSafeRepoPath(asset['dest']) && !asset['dest'].startsWith('templates/')) {
+      if (
+        typeof asset["dest"] === "string" &&
+        isSafeRepoPath(asset["dest"]) &&
+        !asset["dest"].startsWith("templates/")
+      ) {
         errors.push(`${where} dest must live under templates/ (L2 delivery surface)`);
       }
     });
   }
 
-  const updates = obj['contract_updates'];
+  const updates = obj["contract_updates"];
   if (updates !== undefined) {
     if (!Array.isArray(updates)) {
       errors.push('"contract_updates" must be an array when present');
     } else {
       updates.forEach((u, i) => {
         const where = `contract_updates[${i}]`;
-        if (!u || typeof u !== 'object' || Array.isArray(u)) {
+        if (!u || typeof u !== "object" || Array.isArray(u)) {
           errors.push(`${where} must be an object`);
           return;
         }
         const update = u as Record<string, unknown>;
-        if (typeof update['variant'] !== 'string' || !HUB_VARIANT.test(String(update['variant']))) {
+        if (typeof update["variant"] !== "string" || !HUB_VARIANT.test(String(update["variant"]))) {
           errors.push(`${where} variant must match ${HUB_VARIANT.source}`);
         }
-        if (update['type'] !== 'script_manifest' && update['type'] !== 'roster') {
+        if (update["type"] !== "script_manifest" && update["type"] !== "roster") {
           errors.push(`${where} type must be "script_manifest" or "roster"`);
         }
-        if (update['type'] === 'roster' && update['list'] !== 'agents' && update['list'] !== 'skills') {
+        if (update["type"] === "roster" && update["list"] !== "agents" && update["list"] !== "skills") {
           errors.push(`${where} roster updates must declare list: "agents" | "skills"`);
         }
-        if (!update['entry'] || typeof update['entry'] !== 'object' || Array.isArray(update['entry'])) {
+        if (!update["entry"] || typeof update["entry"] !== "object" || Array.isArray(update["entry"])) {
           errors.push(`${where} entry must be an object`);
-        } else if (typeof (update['entry'] as Record<string, unknown>)['name'] !== 'string') {
+        } else if (typeof (update["entry"] as Record<string, unknown>)["name"] !== "string") {
           errors.push(`${where} entry missing required string field "name" (the upsert key)`);
         }
       });
@@ -227,7 +247,7 @@ export function parseSuiteManifest(raw: string): { ok: true; manifest: SuiteMani
 
   // Registry entries are shape-checked against the LIVE registry enums at plan
   // time (buildPlan); here only the minimal row shape is enforced.
-  const registry = obj['registry_entries'];
+  const registry = obj["registry_entries"];
   if (registry !== undefined && !Array.isArray(registry)) {
     errors.push('"registry_entries" must be an array when present');
   }
@@ -238,7 +258,7 @@ export function parseSuiteManifest(raw: string): { ok: true; manifest: SuiteMani
     manifest: {
       suite: String(suite),
       hub_variant: String(hubVariant),
-      description: typeof obj['description'] === 'string' ? obj['description'] : undefined,
+      description: typeof obj["description"] === "string" ? obj["description"] : undefined,
       assets: assetsRaw as SuiteAsset[],
       contract_updates: (updates as ContractUpdate[] | undefined) ?? [],
       registry_entries: (registry as HubTopologyEntry[] | undefined) ?? [],
@@ -258,10 +278,11 @@ export function validateSuiteAgainstRepo(manifest: SuiteManifest, rootDir: strin
     // dest must live under an EXISTING variant template root (the swap creates
     // intermediate asset directories itself; promotions legitimately add new
     // nested skill/agent directories)
-    const segments = asset.dest.split('/');
-    if (segments[0] === 'templates' && segments[1]) {
-      const variantRoot = join(rootDir, 'templates', segments[1]);
-      if (!existsSync(variantRoot)) errors.push(`assets[${i}] dest variant template does not exist: templates/${segments[1]}`);
+    const segments = asset.dest.split("/");
+    if (segments[0] === "templates" && segments[1]) {
+      const variantRoot = join(rootDir, "templates", segments[1]);
+      if (!existsSync(variantRoot))
+        errors.push(`assets[${i}] dest variant template does not exist: templates/${segments[1]}`);
     }
   }
   const loaded = loadRegistry(rootDir);
@@ -274,23 +295,33 @@ export function validateSuiteAgainstRepo(manifest: SuiteManifest, rootDir: strin
   const categories = new Set(Array.isArray(topology.categories) ? topology.categories : []);
   for (const [i, row] of (manifest.registry_entries ?? []).entries()) {
     const where = `registry_entries[${i}]`;
-    const required: Array<[string, unknown]> = [['asset', row?.asset], ['domain', row?.domain], ['hub_variant', row?.hub_variant], ['category', row?.category], ['canonical_path', row?.canonical_path], ['version', row?.version]];
+    const required: Array<[string, unknown]> = [
+      ["asset", row?.asset],
+      ["domain", row?.domain],
+      ["hub_variant", row?.hub_variant],
+      ["category", row?.category],
+      ["canonical_path", row?.canonical_path],
+      ["version", row?.version],
+    ];
     for (const [field, value] of required) {
-      if (typeof value !== 'string' || value.length === 0) errors.push(`${where} missing required string field "${field}"`);
+      if (typeof value !== "string" || value.length === 0)
+        errors.push(`${where} missing required string field "${field}"`);
     }
-    if (typeof row?.domain === 'string' && domains.size > 0 && !domains.has(row.domain)) {
+    if (typeof row?.domain === "string" && domains.size > 0 && !domains.has(row.domain)) {
       errors.push(`${where} domain "${row.domain}" is not in hub_topology.domains`);
     }
-    if (typeof row?.category === 'string' && categories.size > 0 && !categories.has(row.category)) {
+    if (typeof row?.category === "string" && categories.size > 0 && !categories.has(row.category)) {
       errors.push(`${where} category "${row.category}" is not in hub_topology.categories`);
     }
-    if (typeof row?.version === 'string' && !parseSemver(row.version)) {
+    if (typeof row?.version === "string" && !parseSemver(row.version)) {
       errors.push(`${where} version "${row.version}" is not MAJOR.MINOR.PATCH semver`);
     }
-    if (typeof row?.hub_variant === 'string' && row.hub_variant !== manifest.hub_variant) {
-      errors.push(`${where} hub_variant "${row.hub_variant}" does not match the manifest hub_variant "${manifest.hub_variant}"`);
+    if (typeof row?.hub_variant === "string" && row.hub_variant !== manifest.hub_variant) {
+      errors.push(
+        `${where} hub_variant "${row.hub_variant}" does not match the manifest hub_variant "${manifest.hub_variant}"`,
+      );
     }
-    if (typeof row?.canonical_path === 'string' && !isSafeRepoPath(row.canonical_path)) {
+    if (typeof row?.canonical_path === "string" && !isSafeRepoPath(row.canonical_path)) {
       errors.push(`${where} canonical_path must be a repo-relative, traversal-free path`);
     }
   }
@@ -298,12 +329,12 @@ export function validateSuiteAgainstRepo(manifest: SuiteManifest, rootDir: strin
 }
 
 function loadRegistry(rootDir: string): { ok: boolean; topology?: HubTopology; error?: string } {
-  const schemaPath = join(rootDir, 'docs', 'workspace-schema.json');
-  if (!existsSync(schemaPath)) return { ok: false, error: 'docs/workspace-schema.json not found' };
+  const schemaPath = join(rootDir, "docs", "workspace-schema.json");
+  if (!existsSync(schemaPath)) return { ok: false, error: "docs/workspace-schema.json not found" };
   try {
-    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
-    const topology = schema['hub_topology'] as HubTopology | undefined;
-    if (!topology || typeof topology !== 'object') return { ok: false, error: 'hub_topology section absent' };
+    const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+    const topology = schema["hub_topology"] as HubTopology | undefined;
+    if (!topology || typeof topology !== "object") return { ok: false, error: "hub_topology section absent" };
     return { ok: true, topology };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
@@ -317,7 +348,10 @@ function renderEntryRow(row: HubTopologyEntry): string {
   // hub_topology.entries at the file's top-level indentation (entries items
   // sit at 6 spaces: "entries": [ ... "      {" ...).
   const rendered = JSON.stringify(row, null, 2);
-  return rendered.split('\n').map((l, i) => (i === 0 ? l : '    ' + l)).join('\n');
+  return rendered
+    .split("\n")
+    .map((l, i) => (i === 0 ? l : "    " + l))
+    .join("\n");
 }
 
 /** Upsert rows into a workspace-schema.json FILE's hub_topology.entries array
@@ -328,40 +362,48 @@ export function upsertRegistryEntriesInText(fileText: string, rows: HubTopologyE
   if (rows.length === 0) return fileText;
   const marker = '"hub_topology": {';
   const start = fileText.indexOf(marker);
-  if (start === -1) throw new Error('hub_topology section not found in schema file');
-  const trimmed = fileText.replace(/\s+$/, '');
+  if (start === -1) throw new Error("hub_topology section not found in schema file");
+  const trimmed = fileText.replace(/\s+$/, "");
   // Locate the section's MATCHING closing brace (string-aware bracket count) —
   // never assume the section runs to end-of-file: splicing past its real end
   // would silently destroy any member that follows it.
-  const open = fileText.indexOf('{', start);
-  let depth = 0, inStr = false, esc = false, end = -1;
+  const open = fileText.indexOf("{", start);
+  let depth = 0,
+    inStr = false,
+    esc = false,
+    end = -1;
   for (let i = open; i < trimmed.length; i++) {
     const ch = trimmed[i];
     if (inStr) {
       if (esc) esc = false;
-      else if (ch === '\\') esc = true;
+      else if (ch === "\\") esc = true;
       else if (ch === '"') inStr = false;
       continue;
     }
     if (ch === '"') inStr = true;
-    else if (ch === '{') depth++;
-    else if (ch === '}') {
+    else if (ch === "{") depth++;
+    else if (ch === "}") {
       depth--;
-      if (depth === 0) { end = i; break; }
+      if (depth === 0) {
+        end = i;
+        break;
+      }
     }
   }
-  if (end === -1) throw new Error('hub_topology section is not properly closed');
+  if (end === -1) throw new Error("hub_topology section is not properly closed");
   // The section is the LAST member of the file by landing convention — the
   // only thing allowed after it is the root object's closing brace.
-  const tail = trimmed.slice(end + 1).replace(/\s+/g, '');
-  if (tail !== '}') {
-    throw new Error('hub_topology must be the last member of the schema file (landing convention) — refusing to splice; reconcile the file layout first');
+  const tail = trimmed.slice(end + 1).replace(/\s+/g, "");
+  if (tail !== "}") {
+    throw new Error(
+      "hub_topology must be the last member of the schema file (landing convention) — refusing to splice; reconcile the file layout first",
+    );
   }
-  const parsed = JSON.parse('{' + trimmed.slice(start, end + 1) + '}') as { hub_topology: HubTopology };
+  const parsed = JSON.parse("{" + trimmed.slice(start, end + 1) + "}") as { hub_topology: HubTopology };
   const topology = parsed.hub_topology;
   const entries = Array.isArray(topology.entries) ? (topology.entries as HubTopologyEntry[]) : [];
   for (const row of rows) {
-    const idx = entries.findIndex(e => e && e.asset === row.asset && e.domain === row.domain);
+    const idx = entries.findIndex((e) => e && e.asset === row.asset && e.domain === row.domain);
     if (idx >= 0) entries[idx] = row;
     else entries.push(row);
   }
@@ -372,8 +414,11 @@ export function upsertRegistryEntriesInText(fileText: string, rows: HubTopologyE
   const renderedSection = JSON.stringify({ hub_topology: topology }, null, 2)
     .slice(1, -1) // drop the wrapper braces
     .trim();
-  const indented = renderedSection.split('\n').map((l, i) => (i === 0 ? l : '  ' + l)).join('\n');
-  return trimmed.slice(0, start) + indented + '\n}\n';
+  const indented = renderedSection
+    .split("\n")
+    .map((l, i) => (i === 0 ? l : "  " + l))
+    .join("\n");
+  return trimmed.slice(0, start) + indented + "\n}\n";
 }
 
 // ── Contract updates (variant.json upserts) ───────────────────────────────
@@ -381,20 +426,20 @@ export function upsertRegistryEntriesInText(fileText: string, rows: HubTopologyE
 /** Upsert a contract entry into a parsed variant.json object. Returns an
  * error string on shape problems, else null. Mutates the object. */
 export function upsertContractEntry(variantJson: Record<string, unknown>, update: ContractUpdate): string | null {
-  if (update.type === 'script_manifest') {
-    const sm = (variantJson['script_manifest'] as Record<string, unknown> | undefined) ?? {};
-    const local = Array.isArray(sm['local']) ? (sm['local'] as Array<Record<string, unknown>>) : [];
-    const idx = local.findIndex(e => e && e['name'] === update.entry['name']);
+  if (update.type === "script_manifest") {
+    const sm = (variantJson["script_manifest"] as Record<string, unknown> | undefined) ?? {};
+    const local = Array.isArray(sm["local"]) ? (sm["local"] as Array<Record<string, unknown>>) : [];
+    const idx = local.findIndex((e) => e && e["name"] === update.entry["name"]);
     if (idx >= 0) local[idx] = update.entry;
     else local.push(update.entry);
-    sm['local'] = local;
-    variantJson['script_manifest'] = sm;
+    sm["local"] = local;
+    variantJson["script_manifest"] = sm;
     return null;
   }
   // roster
-  const listKey = update.list === 'agents' ? 'agents' : 'skills';
+  const listKey = update.list === "agents" ? "agents" : "skills";
   const list = Array.isArray(variantJson[listKey]) ? (variantJson[listKey] as Array<Record<string, unknown>>) : [];
-  const idx = list.findIndex(e => e && e['name'] === update.entry['name']);
+  const idx = list.findIndex((e) => e && e["name"] === update.entry["name"]);
   if (idx >= 0) list[idx] = update.entry;
   else list.push(update.entry);
   variantJson[listKey] = list;
@@ -404,16 +449,18 @@ export function upsertContractEntry(variantJson: Record<string, unknown>, update
 /** Is this contract update already present (idempotency check)? */
 export function contractEntryPresent(variantJson: Record<string, unknown>, update: ContractUpdate): boolean {
   let list: Array<Record<string, unknown>>;
-  if (update.type === 'script_manifest') {
-    const sm = variantJson['script_manifest'] as Record<string, unknown> | undefined;
-    if (!sm || !Array.isArray(sm['local'])) return false;
-    list = sm['local'] as Array<Record<string, unknown>>;
+  if (update.type === "script_manifest") {
+    const sm = variantJson["script_manifest"] as Record<string, unknown> | undefined;
+    if (!sm || !Array.isArray(sm["local"])) return false;
+    list = sm["local"] as Array<Record<string, unknown>>;
   } else {
-    const listKey = update.list === 'agents' ? 'agents' : 'skills';
+    const listKey = update.list === "agents" ? "agents" : "skills";
     if (!Array.isArray(variantJson[listKey])) return false;
     list = variantJson[listKey] as Array<Record<string, unknown>>;
   }
-  return list.some(e => e && e['name'] === update.entry['name'] && JSON.stringify(e) === JSON.stringify(update.entry));
+  return list.some(
+    (e) => e && e["name"] === update.entry["name"] && JSON.stringify(e) === JSON.stringify(update.entry),
+  );
 }
 
 // ── Plan building ─────────────────────────────────────────────────────────
@@ -422,7 +469,7 @@ export function contractEntryPresent(variantJson: Record<string, unknown>, updat
  * variant.json family, 2 for the schema pair). */
 function detectIndent(text: string): string {
   const m = /\n(\s+)\S/.exec(text);
-  return m ? m[1] : '  ';
+  return m ? m[1] : "  ";
 }
 
 export function buildPlan(manifest: SuiteManifest, rootDir: string): PromotionPlan {
@@ -447,17 +494,18 @@ export function buildPlan(manifest: SuiteManifest, rootDir: string): PromotionPl
 
   // Contract updates
   for (const update of manifest.contract_updates ?? []) {
-    const vjPath = join(rootDir, 'templates', update.variant, 'variant.json');
+    const vjPath = join(rootDir, "templates", update.variant, "variant.json");
     if (!existsSync(vjPath)) {
       notes.push(`variant.json missing for ${update.variant} — update will create the contract block`);
       alreadyPromoted = false;
       continue;
     }
-    const vj = JSON.parse(readFileSync(vjPath, 'utf-8')) as Record<string, unknown>;
-    if (contractEntryPresent(vj, update)) notes.push(`contract entry already present: ${update.variant}/${update.type}/${String(update.entry['name'])}`);
+    const vj = JSON.parse(readFileSync(vjPath, "utf-8")) as Record<string, unknown>;
+    if (contractEntryPresent(vj, update))
+      notes.push(`contract entry already present: ${update.variant}/${update.type}/${String(update.entry["name"])}`);
     else {
       alreadyPromoted = false;
-      notes.push(`contract update: ${update.variant}/${update.type}/${String(update.entry['name'])}`);
+      notes.push(`contract update: ${update.variant}/${update.type}/${String(update.entry["name"])}`);
     }
   }
 
@@ -467,9 +515,10 @@ export function buildPlan(manifest: SuiteManifest, rootDir: string): PromotionPl
     let present = false;
     if (loaded.ok) {
       const entries = Array.isArray(loaded.topology!.entries) ? (loaded.topology!.entries as HubTopologyEntry[]) : [];
-      const existing = entries.find(e => e && e.asset === row.asset && e.domain === row.domain);
+      const existing = entries.find((e) => e && e.asset === row.asset && e.domain === row.domain);
       if (existing && JSON.stringify(existing) === JSON.stringify(row)) present = true;
-      else if (existing) notes.push(`registry row version update: ${row.asset} (${String(existing.version)} → ${row.version})`);
+      else if (existing)
+        notes.push(`registry row version update: ${row.asset} (${String(existing.version)} → ${row.version})`);
     }
     if (present) notes.push(`registry row already present: ${row.asset}`);
     else alreadyPromoted = false;
@@ -488,18 +537,22 @@ interface Staging {
 
 function makeStaging(rootDir: string, apply: boolean, suite: string): Staging {
   if (apply) {
-    const base = join(rootDir, '.pipeline-state', 'hub-promotion');
+    const base = join(rootDir, ".pipeline-state", "hub-promotion");
     mkdirSync(base, { recursive: true });
     const root = join(base, `${suite}.${process.pid}.${Date.now()}`);
     mkdirSync(root, { recursive: true });
-    return { root, payloadDir: join(root, 'payload'), backupDir: join(root, 'backups') };
+    return { root, payloadDir: join(root, "payload"), backupDir: join(root, "backups") };
   }
   // dry-run: stage outside the repo — a dry run writes NOTHING into the workspace
-  const root = mkdtempSync(join(tmpdir(), 'hub-promotion-dryrun-'));
-  return { root, payloadDir: join(root, 'payload'), backupDir: join(root, 'backups') };
+  const root = mkdtempSync(join(tmpdir(), "hub-promotion-dryrun-"));
+  return { root, payloadDir: join(root, "payload"), backupDir: join(root, "backups") };
 }
 
-function stageAll(manifest: SuiteManifest, rootDir: string, staging: Staging): { staged: StagedFile[]; errors: string[] } {
+function stageAll(
+  manifest: SuiteManifest,
+  rootDir: string,
+  staging: Staging,
+): { staged: StagedFile[]; errors: string[] } {
   const staged: StagedFile[] = [];
   const errors: string[] = [];
   // relPath is a LOGICAL repo-relative locator (marker swappedPaths, rollback
@@ -507,7 +560,7 @@ function stageAll(manifest: SuiteManifest, rootDir: string, staging: Staging): {
   // OS, matching the isSafeRepoPath convention. win32 path.join accepts
   // forward-slash segments, so filesystem ops below are unaffected.
   const stage = (rawRelPath: string, content: Buffer | string) => {
-    const relPath = rawRelPath.replace(/\\/g, '/');
+    const relPath = rawRelPath.replace(/\\/g, "/");
     const targetAbs = join(staging.payloadDir, relPath);
     mkdirSync(dirname(targetAbs), { recursive: true });
     writeFileSync(targetAbs, content);
@@ -533,14 +586,14 @@ function stageAll(manifest: SuiteManifest, rootDir: string, staging: Staging): {
 
   // 2. contract updates (re-rendered variant.json)
   for (const update of manifest.contract_updates ?? []) {
-    const relPath = join('templates', update.variant, 'variant.json');
+    const relPath = join("templates", update.variant, "variant.json");
     try {
       const abs = join(rootDir, relPath);
-      const raw = existsSync(abs) ? readFileSync(abs, 'utf-8') : '{\n}';
+      const raw = existsSync(abs) ? readFileSync(abs, "utf-8") : "{\n}";
       const obj = JSON.parse(raw) as Record<string, unknown>;
       const err = upsertContractEntry(obj, update);
       if (err) errors.push(`${update.variant} variant.json: ${err}`);
-      else stage(relPath, JSON.stringify(obj, null, detectIndent(raw)) + '\n');
+      else stage(relPath, JSON.stringify(obj, null, detectIndent(raw)) + "\n");
     } catch (e) {
       errors.push(`failed to stage contract update ${relPath}: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -548,14 +601,14 @@ function stageAll(manifest: SuiteManifest, rootDir: string, staging: Staging): {
 
   // 3. registry entries (root + L1 pair, byte-identical section)
   if ((manifest.registry_entries ?? []).length > 0) {
-    for (const relPath of ['docs/workspace-schema.json', 'templates/common/docs/workspace-schema.json']) {
+    for (const relPath of ["docs/workspace-schema.json", "templates/common/docs/workspace-schema.json"]) {
       try {
         const abs = join(rootDir, relPath);
         if (!existsSync(abs)) {
           errors.push(`schema copy missing: ${relPath}`);
           continue;
         }
-        const raw = readFileSync(abs, 'utf-8');
+        const raw = readFileSync(abs, "utf-8");
         stage(relPath, upsertRegistryEntriesInText(raw, manifest.registry_entries ?? []));
       } catch (e) {
         errors.push(`failed to stage registry update ${relPath}: ${e instanceof Error ? e.message : String(e)}`);
@@ -575,12 +628,12 @@ function verifyStaged(staged: StagedFile[]): string[] {
   let rootCanon: string | null = null;
   let l1Canon: string | null = null;
   for (const file of staged) {
-    if (!file.relPath.endsWith('.json')) continue;
+    if (!file.relPath.endsWith(".json")) continue;
     try {
-      const parsed = JSON.parse(readFileSync(file.stagedPath, 'utf-8')) as Record<string, unknown>;
-      if (file.relPath === 'docs/workspace-schema.json') rootCanon = canonicalWsSchema(parsed, 'root');
-      if (file.relPath === 'templates/common/docs/workspace-schema.json') l1Canon = canonicalWsSchema(parsed, 'l1');
-      const topology = parsed['hub_topology'] as HubTopology | undefined;
+      const parsed = JSON.parse(readFileSync(file.stagedPath, "utf-8")) as Record<string, unknown>;
+      if (file.relPath === "docs/workspace-schema.json") rootCanon = canonicalWsSchema(parsed, "root");
+      if (file.relPath === "templates/common/docs/workspace-schema.json") l1Canon = canonicalWsSchema(parsed, "l1");
+      const topology = parsed["hub_topology"] as HubTopology | undefined;
       if (topology) {
         for (const e of validateHubTopologyShape(topology)) errors.push(`staged ${file.relPath}: ${e}`);
       }
@@ -589,20 +642,22 @@ function verifyStaged(staged: StagedFile[]): string[] {
     }
   }
   if (rootCanon !== null && l1Canon !== null && rootCanon !== l1Canon) {
-    errors.push('staged schema pair diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist + _notes.root_allowlist_divergence) — registry writes must keep the pair identical');
+    errors.push(
+      "staged schema pair diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist + _notes.root_allowlist_divergence) — registry writes must keep the pair identical",
+    );
   }
   return errors;
 }
 
-function canonicalWsSchema(obj: Record<string, unknown>, level: 'root' | 'l1'): string {
+function canonicalWsSchema(obj: Record<string, unknown>, level: "root" | "l1"): string {
   const clone = JSON.parse(JSON.stringify(obj)) as {
     rootAllowlist?: { files?: string[] };
     _notes?: Record<string, unknown>;
   };
-  if (level === 'root') {
+  if (level === "root") {
     const files = clone.rootAllowlist?.files;
     if (Array.isArray(files)) {
-      const idx = files.indexOf('CONSTITUTION.md');
+      const idx = files.indexOf("CONSTITUTION.md");
       if (idx !== -1) files.splice(idx, 1);
     }
   } else {
@@ -610,11 +665,13 @@ function canonicalWsSchema(obj: Record<string, unknown>, level: 'root' | 'l1'): 
   }
   const canon = (v: unknown): unknown => {
     if (Array.isArray(v)) return v.map(canon);
-    if (v && typeof v === 'object') {
-      return Object.keys(v as Record<string, unknown>).sort().reduce<Record<string, unknown>>((acc, k) => {
-        acc[k] = canon((v as Record<string, unknown>)[k]);
-        return acc;
-      }, {});
+    if (v && typeof v === "object") {
+      return Object.keys(v as Record<string, unknown>)
+        .sort()
+        .reduce<Record<string, unknown>>((acc, k) => {
+          acc[k] = canon((v as Record<string, unknown>)[k]);
+          return acc;
+        }, {});
     }
     return v;
   };
@@ -627,23 +684,41 @@ function canonicalWsSchema(obj: Record<string, unknown>, level: 'root' | 'l1'): 
 export type ValidatorRunner = (rootDir: string) => { ok: boolean; output: string };
 
 const DEFAULT_VALIDATOR: ValidatorRunner = (rootDir) => {
-  const res = spawnSync('bun', ['scripts/validate-templates.ts'], { cwd: rootDir, encoding: 'utf-8', timeout: 300_000 });
-  return { ok: res.status === 0, output: (res.stdout ?? '') + (res.stderr ?? '') };
+  const res = spawnSync("bun", ["scripts/validate-templates.ts"], {
+    cwd: rootDir,
+    encoding: "utf-8",
+    timeout: 300_000,
+  });
+  return { ok: res.status === 0, output: (res.stdout ?? "") + (res.stderr ?? "") };
 };
 
-function writeFailureMarker(rootDir: string, suite: string, phase: string, errors: string[], swapped: string[]): string {
-  const dir = join(rootDir, '.pipeline-state', 'hub-promotion');
+function writeFailureMarker(
+  rootDir: string,
+  suite: string,
+  phase: string,
+  errors: string[],
+  swapped: string[],
+): string {
+  const dir = join(rootDir, ".pipeline-state", "hub-promotion");
   mkdirSync(dir, { recursive: true });
   const markerPath = join(dir, `${suite}.failed.json`);
-  writeFileSync(markerPath, JSON.stringify({
-    suite,
-    phase,
-    timestamp: new Date().toISOString(),
-    pid: process.pid,
-    errors,
-    swappedPaths: swapped,
-    remedy: 'Diagnose the errors above, fix the suite manifest or the target state, remove this marker, and re-run. Backups (when the phase is post-swap) are named inside swappedPaths under .pipeline-state/hub-promotion/.',
-  }, null, 2) + '\n');
+  writeFileSync(
+    markerPath,
+    JSON.stringify(
+      {
+        suite,
+        phase,
+        timestamp: new Date().toISOString(),
+        pid: process.pid,
+        errors,
+        swappedPaths: swapped,
+        remedy:
+          "Diagnose the errors above, fix the suite manifest or the target state, remove this marker, and re-run. Backups (when the phase is post-swap) are named inside swappedPaths under .pipeline-state/hub-promotion/.",
+      },
+      null,
+      2,
+    ) + "\n",
+  );
   return markerPath;
 }
 
@@ -699,7 +774,7 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
   const actions: string[] = [];
   const errors: string[] = [];
 
-  const raw = readFileSync(join(rootDir, manifestPath), 'utf-8');
+  const raw = readFileSync(join(rootDir, manifestPath), "utf-8");
   const parsed = parseSuiteManifest(raw);
   if (!parsed.ok) {
     return { ok: false, alreadyPromoted: false, dryRun: !apply, actions, errors: parsed.errors };
@@ -707,11 +782,16 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
   const manifest = parsed.manifest;
 
   // A previous failed run blocks re-execution until diagnosed.
-  const markerPath = join(rootDir, '.pipeline-state', 'hub-promotion', `${manifest.suite}.failed.json`);
+  const markerPath = join(rootDir, ".pipeline-state", "hub-promotion", `${manifest.suite}.failed.json`);
   if (existsSync(markerPath)) {
     return {
-      ok: false, alreadyPromoted: false, dryRun: !apply, actions,
-      errors: [`a failure marker exists for suite "${manifest.suite}": ${markerPath} — diagnose it, resolve, remove the marker, then re-run`],
+      ok: false,
+      alreadyPromoted: false,
+      dryRun: !apply,
+      actions,
+      errors: [
+        `a failure marker exists for suite "${manifest.suite}": ${markerPath} — diagnose it, resolve, remove the marker, then re-run`,
+      ],
     };
   }
 
@@ -722,7 +802,9 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
 
   const plan = buildPlan(manifest, rootDir);
   if (plan.alreadyPromoted) {
-    actions.push(`suite "${manifest.suite}" is already promoted (all asset copies byte-equal, registry rows and contract entries present) — no-op`);
+    actions.push(
+      `suite "${manifest.suite}" is already promoted (all asset copies byte-equal, registry rows and contract entries present) — no-op`,
+    );
     return { ok: true, alreadyPromoted: true, dryRun: !apply, actions, errors };
   }
 
@@ -731,7 +813,7 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
     const { staged, errors: stageErrors } = stageAll(manifest, rootDir, staging);
     if (stageErrors.length > 0) {
       if (apply) {
-        const mp = writeFailureMarker(rootDir, manifest.suite, 'stage', stageErrors, []);
+        const mp = writeFailureMarker(rootDir, manifest.suite, "stage", stageErrors, []);
         return { ok: false, alreadyPromoted: false, dryRun: false, actions, errors: stageErrors, markerPath: mp };
       }
       return { ok: false, alreadyPromoted: false, dryRun: true, actions, errors: stageErrors };
@@ -740,7 +822,7 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
     const verifyErrors = verifyStaged(staged);
     if (verifyErrors.length > 0) {
       if (apply) {
-        const mp = writeFailureMarker(rootDir, manifest.suite, 'verify-staged', verifyErrors, []);
+        const mp = writeFailureMarker(rootDir, manifest.suite, "verify-staged", verifyErrors, []);
         return { ok: false, alreadyPromoted: false, dryRun: false, actions, errors: verifyErrors, markerPath: mp };
       }
       return { ok: false, alreadyPromoted: false, dryRun: true, actions, errors: verifyErrors };
@@ -748,12 +830,14 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
 
     for (const note of plan.notes) actions.push(note);
     actions.push(`staged ${staged.length} file(s) under ${staging.payloadDir}`);
-    if (staged.some(s => s.relPath.endsWith('workspace-schema.json'))) {
-      actions.push('registry writes keep the root + L1 schema pair byte-identical for the hub_topology section');
+    if (staged.some((s) => s.relPath.endsWith("workspace-schema.json"))) {
+      actions.push("registry writes keep the root + L1 schema pair byte-identical for the hub_topology section");
     }
 
     if (!apply) {
-      actions.push('DRY-RUN — no files written (pass --apply to execute). Full validate-templates.ts verification runs after the swap in --apply mode.');
+      actions.push(
+        "DRY-RUN — no files written (pass --apply to execute). Full validate-templates.ts verification runs after the swap in --apply mode.",
+      );
       return { ok: true, alreadyPromoted: false, dryRun: true, actions, errors };
     }
 
@@ -764,7 +848,7 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
     } catch (e) {
       const restored = rollback(staged, rootDir);
       const msg = `swap failed: ${e instanceof Error ? e.message : String(e)}; rolled back ${restored.length} file(s)`;
-      const mp = writeFailureMarker(rootDir, manifest.suite, 'swap', [msg, ...errors], swapped);
+      const mp = writeFailureMarker(rootDir, manifest.suite, "swap", [msg, ...errors], swapped);
       return { ok: false, alreadyPromoted: false, dryRun: false, actions, errors: [msg], markerPath: mp };
     }
 
@@ -772,9 +856,12 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
     const verdict = runValidator(rootDir);
     if (!verdict.ok) {
       const restored = rollback(staged, rootDir);
-      const firstFails = verdict.output.split('\n').filter(l => l.includes('[FAIL]')).slice(0, 10);
-      const msg = `post-swap validate-templates.ts failed — rolled back ${restored.length} file(s); validator FAIL lines: ${firstFails.length > 0 ? firstFails.join(' | ') : '(see output below)'}`;
-      const mp = writeFailureMarker(rootDir, manifest.suite, 'verify-post-swap', [msg, ...firstFails], swapped);
+      const firstFails = verdict.output
+        .split("\n")
+        .filter((l) => l.includes("[FAIL]"))
+        .slice(0, 10);
+      const msg = `post-swap validate-templates.ts failed — rolled back ${restored.length} file(s); validator FAIL lines: ${firstFails.length > 0 ? firstFails.join(" | ") : "(see output below)"}`;
+      const mp = writeFailureMarker(rootDir, manifest.suite, "verify-post-swap", [msg, ...firstFails], swapped);
       return { ok: false, alreadyPromoted: false, dryRun: false, actions, errors: [msg], markerPath: mp };
     }
 
@@ -782,8 +869,14 @@ export function promoteSuite(opts: PromoteOptions): PromoteResult {
     // success — staging no longer needed; the parent base directory is removed
     // only when empty (rmdirSync fails silently on markers of failed runs)
     rmSync(staging.root, { recursive: true, force: true });
-    try { rmdirSync(join(rootDir, '.pipeline-state', 'hub-promotion')); } catch { /* non-empty — failed-run markers live there */ }
-    actions.push('Next: review the diff, then land via the per-suite promotion PR frame (2026-10-27 design); SCRIPTS.md/CHANGELOG rows are docs-writer-owned.');
+    try {
+      rmdirSync(join(rootDir, ".pipeline-state", "hub-promotion"));
+    } catch {
+      /* non-empty — failed-run markers live there */
+    }
+    actions.push(
+      "Next: review the diff, then land via the per-suite promotion PR frame (2026-10-27 design); SCRIPTS.md/CHANGELOG rows are docs-writer-owned.",
+    );
     return { ok: true, alreadyPromoted: false, dryRun: false, actions, errors };
   } finally {
     if (!apply) rmSync(staging.root, { recursive: true, force: true });
@@ -817,14 +910,14 @@ Examples:
 
 function main(): number {
   const argv = process.argv.slice(2);
-  if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) {
+  if (argv.includes("--help") || argv.includes("-h") || argv.length === 0) {
     console.log(USAGE);
-    return argv.length === 0 && !argv.includes('--help') ? 2 : 0;
+    return argv.length === 0 && !argv.includes("--help") ? 2 : 0;
   }
-  const apply = argv.includes('--apply');
-  const positional = argv.filter(a => !a.startsWith('--'));
+  const apply = argv.includes("--apply");
+  const positional = argv.filter((a) => !a.startsWith("--"));
   if (positional.length !== 1) {
-    console.error('Usage: bun scripts/hub-promotion.ts <suite-manifest.json> [--apply]  (see --help)');
+    console.error("Usage: bun scripts/hub-promotion.ts <suite-manifest.json> [--apply]  (see --help)");
     return 2;
   }
   const manifestPath = positional[0]!;
@@ -833,9 +926,9 @@ function main(): number {
   }
   const result = promoteSuite({ rootDir: WORKSPACE_ROOT, manifestPath, apply });
 
-  console.log(`\nhub-promotion: suite manifest ${manifestPath} (${apply ? 'APPLY' : 'DRY-RUN'})`);
+  console.log(`\nhub-promotion: suite manifest ${manifestPath} (${apply ? "APPLY" : "DRY-RUN"})`);
   for (const action of result.actions) console.log(`  • ${action}`);
-  if (result.alreadyPromoted) console.log('  ✓ already promoted — no-op');
+  if (result.alreadyPromoted) console.log("  ✓ already promoted — no-op");
   if (result.errors.length > 0) {
     for (const e of result.errors) console.error(`  ✗ ${e}`);
     if (result.markerPath) console.error(`  ✗ failure marker: ${result.markerPath}`);

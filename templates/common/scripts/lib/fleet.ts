@@ -50,12 +50,12 @@
 // every fleet-iteration tool hard-fails rather than guessing (fail-closed,
 // mirroring helpers/hub-topology.ts).
 
-import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 /** Repo root when a caller omits one: scripts/lib/ → the checkout root. */
 function defaultRoot(): string {
-  return resolve(import.meta.dir, '..', '..');
+  return resolve(import.meta.dir, "..", "..");
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -79,9 +79,9 @@ export interface FleetRegistry {
 export type LoadFleetRegistryResult =
   | { ok: true; registry: FleetRegistry }
   /** File absent → zero exclusions, historical glob behavior (design §4). */
-  | { ok: false; error: 'absent-file' }
+  | { ok: false; error: "absent-file" }
   /** File malformed → callers hard-fail, never guess (fail-closed). */
-  | { ok: false; error: 'malformed'; detail: string };
+  | { ok: false; error: "malformed"; detail: string };
 
 // ── Validation ─────────────────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ const DECISION_REF_RE = /^DEC-\d{8}-\d{2,4}$/;
 /** Real-calendar check behind the YYYY-MM-DD shape (rejects 2026-02-31). */
 function isValidCalendarDate(s: string): boolean {
   if (!DATE_RE.test(s)) return false;
-  const [y, m, d] = s.split('-').map(Number);
+  const [y, m, d] = s.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
 }
@@ -102,9 +102,11 @@ function isValidCalendarDate(s: string): boolean {
  * rules). Returns the cleaned registry, or a fail-closed detail string.
  * Unknown keys are ignored forward-compatibly.
  */
-export function validateFleetRegistryPayload(payload: unknown): { ok: true; registry: FleetRegistry } | { ok: false; detail: string } {
-  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
-    return { ok: false, detail: 'top-level payload must be a JSON object' };
+export function validateFleetRegistryPayload(
+  payload: unknown,
+): { ok: true; registry: FleetRegistry } | { ok: false; detail: string } {
+  if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+    return { ok: false, detail: "top-level payload must be a JSON object" };
   }
   const raw = payload as Record<string, unknown>;
   if (raw.version !== 1) {
@@ -117,26 +119,26 @@ export function validateFleetRegistryPayload(payload: unknown): { ok: true; regi
   const excluded: FleetExclusion[] = [];
   for (let i = 0; i < raw.excluded.length; i++) {
     const row = raw.excluded[i] as Record<string, unknown>;
-    if (typeof row !== 'object' || row === null || Array.isArray(row)) {
+    if (typeof row !== "object" || row === null || Array.isArray(row)) {
       return { ok: false, detail: `excluded[${i}] must be an object` };
     }
     const id = row.id;
-    if (typeof id !== 'string' || !FLEET_ID_RE.test(id)) {
+    if (typeof id !== "string" || !FLEET_ID_RE.test(id)) {
       return {
         ok: false,
         detail: `excluded[${i}].id must match ^co-[a-z0-9-]{1,40}$, got ${JSON.stringify(id)}`,
       };
     }
-    if (typeof row.reason !== 'string' || row.reason.trim().length === 0) {
+    if (typeof row.reason !== "string" || row.reason.trim().length === 0) {
       return { ok: false, detail: `excluded[${i}] (${id}).reason must be a non-empty string` };
     }
-    if (typeof row.decided !== 'string' || !isValidCalendarDate(row.decided)) {
+    if (typeof row.decided !== "string" || !isValidCalendarDate(row.decided)) {
       return {
         ok: false,
         detail: `excluded[${i}] (${id}).decided must be a valid YYYY-MM-DD date, got ${JSON.stringify(row.decided)}`,
       };
     }
-    if (typeof row.decision_ref !== 'string' || !DECISION_REF_RE.test(row.decision_ref)) {
+    if (typeof row.decision_ref !== "string" || !DECISION_REF_RE.test(row.decision_ref)) {
       return {
         ok: false,
         detail: `excluded[${i}] (${id}).decision_ref must match DEC-YYYYMMDD-NN, got ${JSON.stringify(row.decision_ref)}`,
@@ -155,7 +157,7 @@ export function validateFleetRegistryPayload(payload: unknown): { ok: true; regi
 
 /** Registry path relative to the workspace root. L0-only — never propagated. */
 export function fleetRegistryPath(root: string = defaultRoot()): string {
-  return join(root, 'docs', 'fleet-membership.json');
+  return join(root, "docs", "fleet-membership.json");
 }
 
 /**
@@ -167,19 +169,19 @@ export function fleetRegistryPath(root: string = defaultRoot()): string {
  */
 export function loadFleetRegistry(root: string = defaultRoot()): LoadFleetRegistryResult {
   const path = fleetRegistryPath(root);
-  if (!existsSync(path)) return { ok: false, error: 'absent-file' };
+  if (!existsSync(path)) return { ok: false, error: "absent-file" };
   let payload: unknown;
   try {
-    payload = JSON.parse(readFileSync(path, 'utf-8'));
+    payload = JSON.parse(readFileSync(path, "utf-8"));
   } catch (err) {
     return {
       ok: false,
-      error: 'malformed',
+      error: "malformed",
       detail: `${path} is not valid JSON (${err instanceof Error ? err.message : String(err)})`,
     };
   }
   const validated = validateFleetRegistryPayload(payload);
-  if (!validated.ok) return { ok: false, error: 'malformed', detail: validated.detail };
+  if (!validated.ok) return { ok: false, error: "malformed", detail: validated.detail };
   return { ok: true, registry: validated.registry };
 }
 
@@ -191,7 +193,7 @@ export function loadFleetRegistry(root: string = defaultRoot()): LoadFleetRegist
 export function fleetExclusions(root: string = defaultRoot()): FleetExclusion[] {
   const result = loadFleetRegistry(root);
   if (result.ok) return result.registry.excluded;
-  if (result.error === 'absent-file') return [];
+  if (result.error === "absent-file") return [];
   throw new Error(`Malformed fleet registry (docs/fleet-membership.json): ${result.detail}`);
 }
 
@@ -208,7 +210,7 @@ export function excludedFleetIds(root: string = defaultRoot()): Set<string> {
  * loaded registry; callers iterating in a hot loop may pass their own set.
  */
 export function isFleetMember(name: string, exclusions: ReadonlySet<string> = excludedFleetIds()): boolean {
-  return name.startsWith('co-') && !exclusions.has(name);
+  return name.startsWith("co-") && !exclusions.has(name);
 }
 
 /**
@@ -221,7 +223,7 @@ export function isFleetMember(name: string, exclusions: ReadonlySet<string> = ex
  */
 export function listFleetProjects(root: string = defaultRoot()): string[] {
   const exclusions = excludedFleetIds(root);
-  const dir = join(root, 'Projects');
+  const dir = join(root, "Projects");
   if (!existsSync(dir)) return [];
   const out: string[] = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -229,7 +231,7 @@ export function listFleetProjects(root: string = defaultRoot()): string[] {
       // Forward-slash normalized (design §5 "Projects/<name>"): every node fs
       // API accepts '/' on Windows, and platform-independent output keeps the
       // CLI/JSON contracts and consumer string handling deterministic.
-      out.push(join('Projects', e.name).replace(/\\/g, '/'));
+      out.push(join("Projects", e.name).replace(/\\/g, "/"));
     }
   }
   return out.sort();
@@ -246,9 +248,9 @@ export function isFleetProjectPath(path: string, root: string = defaultRoot()): 
   const base = resolve(root);
   const target = resolve(base, path);
   const rel = relative(base, target);
-  if (rel.length === 0 || rel.startsWith('..') || isAbsolute(rel)) return false;
+  if (rel.length === 0 || rel.startsWith("..") || isAbsolute(rel)) return false;
   const parts = rel.split(/[\\/]/);
-  if (parts.length !== 2 || parts[0] !== 'Projects') return false;
+  if (parts.length !== 2 || parts[0] !== "Projects") return false;
   return isFleetMember(parts[1], excludedFleetIds(root));
 }
 
@@ -264,11 +266,11 @@ export function exclusionNotice(projectPath: string, root: string = defaultRoot(
   const base = resolve(root);
   const target = resolve(base, projectPath);
   const rel = relative(base, target);
-  if (rel.length === 0 || rel.startsWith('..') || isAbsolute(rel)) return null;
+  if (rel.length === 0 || rel.startsWith("..") || isAbsolute(rel)) return null;
   const parts = rel.split(/[\\/]/);
-  if (parts.length !== 2 || parts[0] !== 'Projects') return null;
+  if (parts.length !== 2 || parts[0] !== "Projects") return null;
   const name = parts[1];
-  if (!name.startsWith('co-')) return null;
+  if (!name.startsWith("co-")) return null;
   const exclusions = fleetExclusions(root);
   const row = exclusions.find((e) => e.id === name);
   if (!row) return null;
@@ -321,7 +323,7 @@ export interface TenantLoopTenant {
   variant: string;
   /** Absolute path of the tenant's project root in gateway storage. */
   projectDir: string;
-  status: 'active' | 'suspended';
+  status: "active" | "suspended";
   scopes: TenantLoopScopes;
   windows: TenantLoopWindows;
   /** 'local-only' or an URL (design §3.1 field rules). */
@@ -337,14 +339,14 @@ export interface TenantLoopRegistry {
 export type LoadTenantLoopRegistryResult =
   | { ok: true; registry: TenantLoopRegistry }
   /** File absent → zero tenants (no historical behavior to fall back to, §3.1). */
-  | { ok: false; error: 'absent-file' }
+  | { ok: false; error: "absent-file" }
   /** writtenAt older than 24h → zero tenants; a WARN row is emitted for the log. */
-  | { ok: false; error: 'stale'; detail: string }
+  | { ok: false; error: "stale"; detail: string }
   /** schemaVersion >= 2 → treat the ENTIRE file as absent (never misread a newer
    * format with v1 code); a WARN row is emitted for the log. */
-  | { ok: false; error: 'schema-major'; detail: string }
+  | { ok: false; error: "schema-major"; detail: string }
   /** Malformed JSON / invalid row → callers hard-fail, never guess (fail-closed). */
-  | { ok: false; error: 'malformed'; detail: string };
+  | { ok: false; error: "malformed"; detail: string };
 
 const TENANT_HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -361,11 +363,11 @@ const TENANT_HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 export function tenantLoopRegistryPath(root: string = defaultRoot()): string {
   const override = process.env.CO_WORKSPACE_TENANT_LOOP_REGISTRY_FILE;
   if (override !== undefined && override.trim().length > 0) return resolve(override);
-  return join(root, '.pipeline-state', 'tenant-loop-registry.json');
+  return join(root, ".pipeline-state", "tenant-loop-registry.json");
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /**
@@ -378,89 +380,139 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 export function validateTenantLoopRegistryPayload(
   payload: unknown,
   nowMs: number = Date.now(),
-): { ok: true; registry: TenantLoopRegistry } | { ok: false; kind: 'malformed' | 'schema-major' | 'stale'; detail: string } {
+):
+  | { ok: true; registry: TenantLoopRegistry }
+  | { ok: false; kind: "malformed" | "schema-major" | "stale"; detail: string } {
   if (!isPlainObject(payload)) {
-    return { ok: false, kind: 'malformed', detail: 'top-level payload must be a JSON object' };
+    return { ok: false, kind: "malformed", detail: "top-level payload must be a JSON object" };
   }
   const raw = payload;
   const sv = raw.schemaVersion;
-  if (typeof sv !== 'number' || !Number.isInteger(sv)) {
-    return { ok: false, kind: 'malformed', detail: `schemaVersion must be an integer, got ${JSON.stringify(sv)}` };
+  if (typeof sv !== "number" || !Number.isInteger(sv)) {
+    return { ok: false, kind: "malformed", detail: `schemaVersion must be an integer, got ${JSON.stringify(sv)}` };
   }
   if (sv >= 2) {
-    return { ok: false, kind: 'schema-major', detail: `schemaVersion ${sv} is a major bump over 1 — treat the file as absent and rebuild on the gateway side` };
+    return {
+      ok: false,
+      kind: "schema-major",
+      detail: `schemaVersion ${sv} is a major bump over 1 — treat the file as absent and rebuild on the gateway side`,
+    };
   }
   if (sv !== 1) {
-    return { ok: false, kind: 'malformed', detail: `schemaVersion must be 1, got ${sv}` };
+    return { ok: false, kind: "malformed", detail: `schemaVersion must be 1, got ${sv}` };
   }
-  if (typeof raw.writtenAt !== 'string' || Number.isNaN(Date.parse(raw.writtenAt))) {
-    return { ok: false, kind: 'malformed', detail: `writtenAt must be an ISO-8601 timestamp, got ${JSON.stringify(raw.writtenAt)}` };
+  if (typeof raw.writtenAt !== "string" || Number.isNaN(Date.parse(raw.writtenAt))) {
+    return {
+      ok: false,
+      kind: "malformed",
+      detail: `writtenAt must be an ISO-8601 timestamp, got ${JSON.stringify(raw.writtenAt)}`,
+    };
   }
   const ageMs = nowMs - Date.parse(raw.writtenAt);
   if (ageMs > TENANT_LOOP_STALE_MS) {
-    return { ok: false, kind: 'stale', detail: `writtenAt ${raw.writtenAt} is older than 24h — restart or touch the gateway export` };
+    return {
+      ok: false,
+      kind: "stale",
+      detail: `writtenAt ${raw.writtenAt} is older than 24h — restart or touch the gateway export`,
+    };
   }
   if (!Array.isArray(raw.tenants)) {
-    return { ok: false, kind: 'malformed', detail: `'tenants' must be an array, got ${typeof raw.tenants}` };
+    return { ok: false, kind: "malformed", detail: `'tenants' must be an array, got ${typeof raw.tenants}` };
   }
   const seen = new Set<string>();
   const tenants: TenantLoopTenant[] = [];
   for (let i = 0; i < raw.tenants.length; i++) {
     const row = raw.tenants[i];
     const at = `tenants[${i}]`;
-    if (!isPlainObject(row)) return { ok: false, kind: 'malformed', detail: `${at} must be an object` };
+    if (!isPlainObject(row)) return { ok: false, kind: "malformed", detail: `${at} must be an object` };
     const { id, principal, variant, projectDir, status, scopes, windows, gitRemote } = row;
-    if (typeof id !== 'string' || !TENANT_ID_RE.test(id)) {
-      return { ok: false, kind: 'malformed', detail: `${at}.id must match ^gw-[0-9a-f]{12}$, got ${JSON.stringify(id)}` };
-    }
-    if (typeof principal !== 'string' || principal.trim().length === 0) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).principal must be a non-empty string` };
-    }
-    if (typeof variant !== 'string' || !FLEET_ID_RE.test(variant)) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).variant must match ^co-[a-z0-9-]{1,40}$, got ${JSON.stringify(variant)}` };
-    }
-    if (typeof projectDir !== 'string' || projectDir.length === 0 || !isAbsolute(projectDir)) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).projectDir must be an absolute path, got ${JSON.stringify(projectDir)}` };
-    }
-    if (status !== 'active' && status !== 'suspended') {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).status must be 'active' or 'suspended', got ${JSON.stringify(status)}` };
-    }
-    if (!isPlainObject(scopes)) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).scopes must be an object` };
-    }
-    const scopeKeys = Object.keys(scopes).sort();
-    const expectedKeys = ['backportReview', 'nightlyFleet', 'upgrade', 'upstreamFile'];
-    if (scopeKeys.length !== expectedKeys.length || scopeKeys.some((k, j) => k !== expectedKeys[j])) {
+    if (typeof id !== "string" || !TENANT_ID_RE.test(id)) {
       return {
-        ok: false, kind: 'malformed',
-        detail: `${at} (${id}).scopes must carry exactly the keys ${expectedKeys.join(', ')} (design §3.1), got [${Object.keys(scopes).join(', ')}]`,
+        ok: false,
+        kind: "malformed",
+        detail: `${at}.id must match ^gw-[0-9a-f]{12}$, got ${JSON.stringify(id)}`,
       };
     }
-    if (expectedKeys.some((k) => typeof scopes[k] !== 'boolean')) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).scopes values must all be booleans` };
+    if (typeof principal !== "string" || principal.trim().length === 0) {
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).principal must be a non-empty string` };
+    }
+    if (typeof variant !== "string" || !FLEET_ID_RE.test(variant)) {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).variant must match ^co-[a-z0-9-]{1,40}$, got ${JSON.stringify(variant)}`,
+      };
+    }
+    if (typeof projectDir !== "string" || projectDir.length === 0 || !isAbsolute(projectDir)) {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).projectDir must be an absolute path, got ${JSON.stringify(projectDir)}`,
+      };
+    }
+    if (status !== "active" && status !== "suspended") {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).status must be 'active' or 'suspended', got ${JSON.stringify(status)}`,
+      };
+    }
+    if (!isPlainObject(scopes)) {
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).scopes must be an object` };
+    }
+    const scopeKeys = Object.keys(scopes).sort();
+    const expectedKeys = ["backportReview", "nightlyFleet", "upgrade", "upstreamFile"];
+    if (scopeKeys.length !== expectedKeys.length || scopeKeys.some((k, j) => k !== expectedKeys[j])) {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).scopes must carry exactly the keys ${expectedKeys.join(", ")} (design §3.1), got [${Object.keys(scopes).join(", ")}]`,
+      };
+    }
+    if (expectedKeys.some((k) => typeof scopes[k] !== "boolean")) {
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).scopes values must all be booleans` };
     }
     if (!isPlainObject(windows)) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).windows must be an object` };
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).windows must be an object` };
     }
     const { tz, days, start, end } = windows;
-    if (typeof tz !== 'string' || tz.trim().length === 0) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).windows.tz must be a non-empty IANA tz name` };
+    if (typeof tz !== "string" || tz.trim().length === 0) {
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).windows.tz must be a non-empty IANA tz name` };
     }
-    if (!Array.isArray(days) || days.length === 0 || days.some((d) => typeof d !== 'number' || !Number.isInteger(d) || d < 0 || d > 6)) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).windows.days must be a non-empty array of integers 0-6 (0 = Sunday), got ${JSON.stringify(days)}` };
+    if (
+      !Array.isArray(days) ||
+      days.length === 0 ||
+      days.some((d) => typeof d !== "number" || !Number.isInteger(d) || d < 0 || d > 6)
+    ) {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).windows.days must be a non-empty array of integers 0-6 (0 = Sunday), got ${JSON.stringify(days)}`,
+      };
     }
-    for (const [label, val] of [['start', start], ['end', end]] as const) {
-      if (typeof val !== 'string' || !TENANT_HHMM_RE.test(val)) {
-        return { ok: false, kind: 'malformed', detail: `${at} (${id}).windows.${label} must be a valid HH:MM (00:00-23:59), got ${JSON.stringify(val)}` };
+    for (const [label, val] of [
+      ["start", start],
+      ["end", end],
+    ] as const) {
+      if (typeof val !== "string" || !TENANT_HHMM_RE.test(val)) {
+        return {
+          ok: false,
+          kind: "malformed",
+          detail: `${at} (${id}).windows.${label} must be a valid HH:MM (00:00-23:59), got ${JSON.stringify(val)}`,
+        };
       }
     }
-    if (typeof start !== 'string' || typeof end !== 'string') {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).windows.start/end must be valid HH:MM strings` };
+    if (typeof start !== "string" || typeof end !== "string") {
+      return { ok: false, kind: "malformed", detail: `${at} (${id}).windows.start/end must be valid HH:MM strings` };
     }
-    if (typeof gitRemote !== 'string' || gitRemote.trim().length === 0) {
-      return { ok: false, kind: 'malformed', detail: `${at} (${id}).gitRemote must be a non-empty string ('local-only' or an URL)` };
+    if (typeof gitRemote !== "string" || gitRemote.trim().length === 0) {
+      return {
+        ok: false,
+        kind: "malformed",
+        detail: `${at} (${id}).gitRemote must be a non-empty string ('local-only' or an URL)`,
+      };
     }
-    if (seen.has(id)) return { ok: false, kind: 'malformed', detail: `duplicate tenant id '${id}'` };
+    if (seen.has(id)) return { ok: false, kind: "malformed", detail: `duplicate tenant id '${id}'` };
     seen.add(id);
     tenants.push({
       id,
@@ -468,7 +520,12 @@ export function validateTenantLoopRegistryPayload(
       variant,
       projectDir,
       status,
-      scopes: { upgrade: scopes.upgrade as boolean, upstreamFile: scopes.upstreamFile as boolean, backportReview: scopes.backportReview as boolean, nightlyFleet: scopes.nightlyFleet as boolean },
+      scopes: {
+        upgrade: scopes.upgrade as boolean,
+        upstreamFile: scopes.upstreamFile as boolean,
+        backportReview: scopes.backportReview as boolean,
+        nightlyFleet: scopes.nightlyFleet as boolean,
+      },
       windows: { tz, days: [...days], start, end },
       gitRemote,
     });
@@ -491,28 +548,28 @@ export function validateTenantLoopRegistryPayload(
  */
 export function loadTenantLoopRegistry(root: string = defaultRoot()): LoadTenantLoopRegistryResult {
   const path = tenantLoopRegistryPath(root);
-  if (!existsSync(path)) return { ok: false, error: 'absent-file' };
+  if (!existsSync(path)) return { ok: false, error: "absent-file" };
   let payload: unknown;
   try {
-    payload = JSON.parse(readFileSync(path, 'utf-8'));
+    payload = JSON.parse(readFileSync(path, "utf-8"));
   } catch (err) {
     return {
       ok: false,
-      error: 'malformed',
+      error: "malformed",
       detail: `${path} is not valid JSON (${err instanceof Error ? err.message : String(err)})`,
     };
   }
   const validated = validateTenantLoopRegistryPayload(payload, Date.now());
   if (validated.ok) return { ok: true, registry: validated.registry };
-  if (validated.kind === 'schema-major') {
+  if (validated.kind === "schema-major") {
     console.error(`[fleet] WARN: tenant-loop registry (${path}) ${validated.detail} — proceeding with zero tenants`);
-    return { ok: false, error: 'schema-major', detail: validated.detail };
+    return { ok: false, error: "schema-major", detail: validated.detail };
   }
-  if (validated.kind === 'stale') {
+  if (validated.kind === "stale") {
     console.error(`[fleet] WARN: tenant-loop registry (${path}) ${validated.detail} — proceeding with zero tenants`);
-    return { ok: false, error: 'stale', detail: validated.detail };
+    return { ok: false, error: "stale", detail: validated.detail };
   }
-  return { ok: false, error: 'malformed', detail: validated.detail };
+  return { ok: false, error: "malformed", detail: validated.detail };
 }
 
 /**
@@ -528,10 +585,10 @@ export function listTenantLoopProjects(root: string = defaultRoot()): TenantLoop
   const result = loadTenantLoopRegistry(root);
   if (result.ok) {
     return result.registry.tenants
-      .filter((t) => t.status === 'active' && t.scopes.nightlyFleet)
+      .filter((t) => t.status === "active" && t.scopes.nightlyFleet)
       .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   }
-  if (result.error === 'malformed') {
+  if (result.error === "malformed") {
     throw new Error(`Malformed tenant-loop registry (${tenantLoopRegistryPath(root)}): ${result.detail}`);
   }
   return []; // absent-file / stale / schema-major — the loader already WARNed where useful
@@ -539,7 +596,7 @@ export function listTenantLoopProjects(root: string = defaultRoot()): TenantLoop
 
 /** Minutes since midnight for a validated HH:MM string. */
 function tenantWindowMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
+  const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
 }
 
@@ -549,14 +606,18 @@ const TENANT_WEEKDAY_INDEX: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, W
  * null when the tz is unknown/unrepresentable (fail-closed deny, design §6). */
 function tenantTzParts(tz: string, at: Date): { day: number; minutes: number } | null {
   try {
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
     });
     const parts = dtf.formatToParts(at);
-    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
-    const day = TENANT_WEEKDAY_INDEX[get('weekday')];
-    const h = Number(get('hour'));
-    const m = Number(get('minute'));
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+    const day = TENANT_WEEKDAY_INDEX[get("weekday")];
+    const h = Number(get("hour"));
+    const m = Number(get("minute"));
     if (day === undefined || !Number.isInteger(h) || !Number.isInteger(m)) return null;
     return { day, minutes: (h % 24) * 60 + m };
   } catch {
@@ -576,9 +637,15 @@ export function isTenantWithinWindows(tenant: TenantLoopTenant, now: Date = new 
   const windows = tenant?.windows;
   if (!windows) return false;
   const { tz, days, start, end } = windows;
-  if (typeof tz !== 'string' || tz.trim().length === 0) return false;
-  if (!Array.isArray(days) || days.length === 0 || days.some((d) => typeof d !== 'number' || !Number.isInteger(d) || d < 0 || d > 6)) return false;
-  if (typeof start !== 'string' || typeof end !== 'string' || !TENANT_HHMM_RE.test(start) || !TENANT_HHMM_RE.test(end)) return false;
+  if (typeof tz !== "string" || tz.trim().length === 0) return false;
+  if (
+    !Array.isArray(days) ||
+    days.length === 0 ||
+    days.some((d) => typeof d !== "number" || !Number.isInteger(d) || d < 0 || d > 6)
+  )
+    return false;
+  if (typeof start !== "string" || typeof end !== "string" || !TENANT_HHMM_RE.test(start) || !TENANT_HHMM_RE.test(end))
+    return false;
   const parts = tenantTzParts(tz, now);
   if (!parts) return false;
   const { day, minutes } = parts;
@@ -612,7 +679,7 @@ export function tenantForProjectPath(path: string, root: string = defaultRoot())
   if (realTarget === null) return null;
   const load = loadTenantLoopRegistry(root);
   if (!load.ok) {
-    if (load.error === 'malformed') {
+    if (load.error === "malformed") {
       throw new Error(`Malformed tenant-loop registry (${tenantLoopRegistryPath(root)}): ${load.detail}`);
     }
     return null;
@@ -634,7 +701,7 @@ export function tenantForProjectPath(path: string, root: string = defaultRoot())
  * remainder; null only when no ancestor resolves (drive-root gone / race). */
 function realTargetWithLexicalTail(p: string): string | null {
   let cur = resolve(p);
-  let tail = '';
+  let tail = "";
   for (;;) {
     try {
       return realpathSync(cur) + tail;

@@ -9,7 +9,7 @@
  * Import-safety: pure functions only; safe to import from tests and from dev-sync.ts.
  */
 
-export type VersionBumpKind = 'skill' | 'script';
+export type VersionBumpKind = "skill" | "script";
 
 export interface VersionBump {
   file: string;
@@ -21,9 +21,9 @@ const HEADER_LINE_LIMIT = 80;
 
 /** Classify a repo-relative path as a versioned skill/script file, or null. */
 export function classifyVersionedPath(file: string): VersionBumpKind | null {
-  const norm = file.replace(/\\/g, '/');
-  if (norm.endsWith('/SKILL.md') || norm === 'SKILL.md') return 'skill';
-  if (norm.endsWith('.ts') && /(^|\/)scripts\//.test(norm)) return 'script';
+  const norm = file.replace(/\\/g, "/");
+  if (norm.endsWith("/SKILL.md") || norm === "SKILL.md") return "skill";
+  if (norm.endsWith(".ts") && /(^|\/)scripts\//.test(norm)) return "script";
   return null;
 }
 
@@ -32,24 +32,24 @@ export function classifyVersionedPath(file: string): VersionBumpKind | null {
  * skill: frontmatter `version:`; script: `// @version` / ` * @version` header comment.
  */
 export function diffChangesVersion(kind: VersionBumpKind, unifiedDiff: string): boolean {
-  const linePattern = kind === 'skill' ? /^[+-]version\s*:/ : /^[+-]\s*(?:\/\/|\*)\s*@version\b/;
+  const linePattern = kind === "skill" ? /^[+-]version\s*:/ : /^[+-]\s*(?:\/\/|\*)\s*@version\b/;
   let oldLine = 0;
   let newLine = 0;
-  for (const line of unifiedDiff.split('\n')) {
+  for (const line of unifiedDiff.split("\n")) {
     const hunk = line.match(/^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
     if (hunk) {
       oldLine = Number(hunk[1]);
       newLine = Number(hunk[2]);
       continue;
     }
-    if (line.startsWith('+++') || line.startsWith('---')) continue;
-    if (line.startsWith('+')) {
+    if (line.startsWith("+++") || line.startsWith("---")) continue;
+    if (line.startsWith("+")) {
       if (linePattern.test(line) && newLine <= HEADER_LINE_LIMIT) return true;
       newLine++;
-    } else if (line.startsWith('-')) {
+    } else if (line.startsWith("-")) {
       if (linePattern.test(line) && oldLine <= HEADER_LINE_LIMIT) return true;
       oldLine++;
-    } else if (line.startsWith(' ')) {
+    } else if (line.startsWith(" ")) {
       oldLine++;
       newLine++;
     }
@@ -77,7 +77,7 @@ export function hasTestUnitScript(packageJsonText: string | null): boolean {
   if (!packageJsonText) return false;
   try {
     const scripts = JSON.parse(packageJsonText)?.scripts;
-    return !!scripts && typeof scripts['test:unit'] === 'string' && scripts['test:unit'].length > 0;
+    return !!scripts && typeof scripts["test:unit"] === "string" && scripts["test:unit"].length > 0;
   } catch {
     return false;
   }

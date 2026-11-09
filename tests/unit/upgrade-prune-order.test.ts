@@ -23,7 +23,7 @@ const SOURCE = readFileSync(
 describe('upgrade-project prune pass ordering (T-20261006-010)', () => {
   test('VARIANT-SCOPE SKILL PRUNE runs before the PRUNE REMOVED preservation walk', () => {
     const variantScopeIdx = SOURCE.indexOf('── VARIANT-SCOPE SKILL PRUNE');
-    const pruneRemovedIdx = SOURCE.indexOf("'--- PRUNE REMOVED: files present in project but absent from template ---'");
+    const pruneRemovedIdx = SOURCE.indexOf('"--- PRUNE REMOVED: files present in project but absent from template ---"');
     expect(variantScopeIdx).toBeGreaterThan(-1);
     expect(pruneRemovedIdx).toBeGreaterThan(-1);
     expect(variantScopeIdx).toBeLessThan(pruneRemovedIdx);

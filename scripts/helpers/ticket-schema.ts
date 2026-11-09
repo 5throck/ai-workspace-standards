@@ -71,31 +71,39 @@
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
-export type Status = 'backlog' | 'waiting' | 'running' | 'review' | 'done' | 'failed';
-export type Kind = 'service' | 'manual';
-export type Priority = 'low' | 'normal' | 'high' | 'urgent';
+export type Status = "backlog" | "waiting" | "running" | "review" | "done" | "failed";
+export type Kind = "service" | "manual";
+export type Priority = "low" | "normal" | "high" | "urgent";
 /** Canonical priority enum (T-20261026-015): single source for schema validation
  * AND ticket.ts create input validation, so the CLI can never mint a priority
  * the schema would reject at read time. */
-export const PRIORITIES: readonly Priority[] = ['low', 'normal', 'high', 'urgent'];
+export const PRIORITIES: readonly Priority[] = ["low", "normal", "high", "urgent"];
 /** Incident severity (hub-consolidation design §5.1): a standalone ticket field, NOT a
  * priority alias. SEV1 tickets additionally bypass triage (auto-ready with a history[]
  * marker); sevDefaultPriority in the alias JSON is an initial-suggestion mapping only. */
-export type Sev = 'SEV1' | 'SEV2' | 'SEV3';
-export const SEVS: readonly Sev[] = ['SEV1', 'SEV2', 'SEV3'];
-export type RunType = 'skill' | 'script';
-export type UpstreamLayer = 'L1' | 'L2' | 'unsure';
-export type UpstreamTriage = 'inbox' | 'ready';
-export type UpstreamIdentitySource = 'cwd' | 'client_roots' | 'self_declared';
-export const UPSTREAM_IDENTITY_SOURCES: readonly UpstreamIdentitySource[] = ['cwd', 'client_roots', 'self_declared'];
+export type Sev = "SEV1" | "SEV2" | "SEV3";
+export const SEVS: readonly Sev[] = ["SEV1", "SEV2", "SEV3"];
+export type RunType = "skill" | "script";
+export type UpstreamLayer = "L1" | "L2" | "unsure";
+export type UpstreamTriage = "inbox" | "ready";
+export type UpstreamIdentitySource = "cwd" | "client_roots" | "self_declared";
+export const UPSTREAM_IDENTITY_SOURCES: readonly UpstreamIdentitySource[] = ["cwd", "client_roots", "self_declared"];
 
 /** Design Appendix E.5.3: a legacy ticket without the field reads as self_declared when its
  * triage_reasons carry identity:self_declared, otherwise as cwd. */
-export function upstreamIdentitySource(u: { identity_source?: unknown; triage_reasons?: unknown }): UpstreamIdentitySource {
-  if (typeof u.identity_source === 'string' && (UPSTREAM_IDENTITY_SOURCES as readonly string[]).includes(u.identity_source)) {
+export function upstreamIdentitySource(u: {
+  identity_source?: unknown;
+  triage_reasons?: unknown;
+}): UpstreamIdentitySource {
+  if (
+    typeof u.identity_source === "string" &&
+    (UPSTREAM_IDENTITY_SOURCES as readonly string[]).includes(u.identity_source)
+  ) {
     return u.identity_source as UpstreamIdentitySource;
   }
-  return Array.isArray(u.triage_reasons) && u.triage_reasons.includes('identity:self_declared') ? 'self_declared' : 'cwd';
+  return Array.isArray(u.triage_reasons) && u.triage_reasons.includes("identity:self_declared")
+    ? "self_declared"
+    : "cwd";
 }
 
 export interface RunDef {
@@ -145,15 +153,15 @@ export interface ActionHistoryEntry {
 export type HistoryRecord = HistoryEntry | ActionHistoryEntry;
 
 export function isActionEntry(e: HistoryRecord): e is ActionHistoryEntry {
-  return typeof (e as ActionHistoryEntry).action === 'string';
+  return typeof (e as ActionHistoryEntry).action === "string";
 }
 
 export interface UpstreamBlock {
-  project: string;                           // e.g. "co-work" — server-derived
-  variant: string | null;                   // from project's template-version.txt (root; legacy .claude/ accepted)
-  template_version: string | null;          // at intake time
-  source: string;                           // "project/<name>" — server-set
-  trust: 'untrusted';                       // constant
+  project: string; // e.g. "co-work" — server-derived
+  variant: string | null; // from project's template-version.txt (root; legacy .claude/ accepted)
+  template_version: string | null; // at intake time
+  source: string; // "project/<name>" — server-set
+  trust: "untrusted"; // constant
   suspected_layer: UpstreamLayer;
   symptom: string;
   affected_paths: string[];
@@ -162,14 +170,14 @@ export interface UpstreamBlock {
   identity_source?: UpstreamIdentitySource; // who attested the project identity (absent on legacy tickets)
   triage: UpstreamTriage;
   flagged: boolean;
-  triage_reasons: string[];                 // failed auto-ready conditions
-  dedupe_key: string;                       // sha256 hash, hex
-  duplicates: Array<{ project: string; at: string }>;  // merged reports
+  triage_reasons: string[]; // failed auto-ready conditions
+  dedupe_key: string; // sha256 hash, hex
+  duplicates: Array<{ project: string; at: string }>; // merged reports
   resolution?: {
-    outcome: 'fixed' | 'rejected' | 'local-only' | 'duplicate';
+    outcome: "fixed" | "rejected" | "local-only" | "duplicate";
     pr_url?: string;
-    template_version?: string;               // template release containing the fix
-    summary?: string;                        // PM-written, trusted
+    template_version?: string; // template release containing the fix
+    summary?: string; // PM-written, trusted
   };
 }
 
@@ -203,17 +211,17 @@ export interface Ticket {
   history: HistoryRecord[];
   result: string | null;
   error: string | null;
-  upstream?: UpstreamBlock;  // optional, allowed only on kind: manual
+  upstream?: UpstreamBlock; // optional, allowed only on kind: manual
 }
 
 /** Adjacency-only state machine. `--force` in the CLI bypasses this; every other
  * caller (schema validation, `next`, `ticket-run`) must go through canTransition. */
 export const TRANSITIONS: Record<Status, Status[]> = {
-  backlog: ['waiting'],
-  waiting: ['running', 'review'], // running: pulled by `next` (service). review: manual ticket picked up directly by a human.
-  running: ['review', 'failed'],
-  review: ['done'],
-  failed: ['waiting'],
+  backlog: ["waiting"],
+  waiting: ["running", "review"], // running: pulled by `next` (service). review: manual ticket picked up directly by a human.
+  running: ["review", "failed"],
+  review: ["done"],
+  failed: ["waiting"],
   done: [],
 };
 
@@ -233,28 +241,32 @@ function fail(msg: string): never {
 }
 
 export function validateCatalog(obj: unknown): asserts obj is Catalog {
-  if (typeof obj !== 'object' || obj === null) fail('catalog must be an object');
+  if (typeof obj !== "object" || obj === null) fail("catalog must be an object");
   const c = obj as Record<string, unknown>;
   if (c.schemaVersion !== CURRENT_SCHEMA_VERSION) {
     fail(`catalog schemaVersion must be ${CURRENT_SCHEMA_VERSION} (got: ${JSON.stringify(c.schemaVersion)})`);
   }
-  if (!Array.isArray(c.services)) fail('catalog.services must be an array');
+  if (!Array.isArray(c.services)) fail("catalog.services must be an array");
   const seenIds = new Set<string>();
   for (const [i, svc] of (c.services as unknown[]).entries()) {
-    if (typeof svc !== 'object' || svc === null) fail(`services[${i}] must be an object`);
+    if (typeof svc !== "object" || svc === null) fail(`services[${i}] must be an object`);
     const s = svc as Record<string, unknown>;
-    if (typeof s.id !== 'string' || !ID_PATTERN.test(s.id)) fail(`services[${i}].id invalid: ${JSON.stringify(s.id)}`);
+    if (typeof s.id !== "string" || !ID_PATTERN.test(s.id)) fail(`services[${i}].id invalid: ${JSON.stringify(s.id)}`);
     if (seenIds.has(s.id as string)) fail(`duplicate service id: ${s.id}`);
     seenIds.add(s.id as string);
-    if (typeof s.name !== 'string' || s.name.length === 0) fail(`services[${i}].name must be a non-empty string`);
-    if (typeof s.run !== 'object' || s.run === null) fail(`services[${i}].run must be an object`);
+    if (typeof s.name !== "string" || s.name.length === 0) fail(`services[${i}].name must be a non-empty string`);
+    if (typeof s.run !== "object" || s.run === null) fail(`services[${i}].run must be an object`);
     const run = s.run as Record<string, unknown>;
-    if (run.type !== 'skill' && run.type !== 'script') fail(`services[${i}].run.type must be 'skill' or 'script'`);
-    if (typeof run.ref !== 'string') fail(`services[${i}].run.ref must be a string`);
-    const refPattern = run.type === 'script' ? SCRIPT_REF_PATTERN : SKILL_REF_PATTERN;
-    if (!refPattern.test(run.ref as string)) fail(`services[${i}].run.ref fails allowlist for type '${run.type}': ${JSON.stringify(run.ref)}`);
+    if (run.type !== "skill" && run.type !== "script") fail(`services[${i}].run.type must be 'skill' or 'script'`);
+    if (typeof run.ref !== "string") fail(`services[${i}].run.ref must be a string`);
+    const refPattern = run.type === "script" ? SCRIPT_REF_PATTERN : SKILL_REF_PATTERN;
+    if (!refPattern.test(run.ref as string))
+      fail(`services[${i}].run.ref fails allowlist for type '${run.type}': ${JSON.stringify(run.ref)}`);
     if (s.inputs !== undefined) {
-      if (!Array.isArray(s.inputs) || !(s.inputs as unknown[]).every(x => typeof x === 'string' && INPUT_NAME_PATTERN.test(x))) {
+      if (
+        !Array.isArray(s.inputs) ||
+        !(s.inputs as unknown[]).every((x) => typeof x === "string" && INPUT_NAME_PATTERN.test(x))
+      ) {
         fail(`services[${i}].inputs must be an array of ^[a-z0-9_-]+$ strings`);
       }
     }
@@ -272,7 +284,7 @@ export const SHELL_FRAGMENT_PAREN_RUN = 5;
  * would brick ticket.ts on records already carrying the corruption.
  */
 export function corruptedProseFinding(text: unknown): string | null {
-  if (typeof text !== 'string' || text.length === 0) return null;
+  if (typeof text !== "string" || text.length === 0) return null;
   const parenRun = text.match(new RegExp(String.raw`\({${SHELL_FRAGMENT_PAREN_RUN},}`));
   if (parenRun) {
     return `parenthesis run of ${parenRun[0].length} — shell interpolation debris (T-20261029-001 writer-class corruption)`;
@@ -280,7 +292,7 @@ export function corruptedProseFinding(text: unknown): string | null {
   const bracketCmp = /\[\s*\S+\s*[=!<>]=?\s*\S+\s*\]/.test(text);
   const conditionalEcho = /\]\s*&&\s*(echo|printf)\b/.test(text);
   if (bracketCmp && conditionalEcho) {
-    return 'shell conditional fragment ([ x = y ] && echo) inside prose — interpolation debris (T-20261029-001 writer-class corruption)';
+    return "shell conditional fragment ([ x = y ] && echo) inside prose — interpolation debris (T-20261029-001 writer-class corruption)";
   }
   return null;
 }
@@ -295,59 +307,70 @@ export interface KanbanAliases {
   sevDefaultPriority: Record<string, string>;
 }
 
-export const KANBAN_PRIORITY_ALIAS_KEYS = ['P0', 'P1', 'P2', 'P3'] as const;
-export const KANBAN_STATUS_ALIAS_KEYS = ['queued', 'in-progress', 'accepted', 'blocked'] as const;
+export const KANBAN_PRIORITY_ALIAS_KEYS = ["P0", "P1", "P2", "P3"] as const;
+export const KANBAN_STATUS_ALIAS_KEYS = ["queued", "in-progress", "accepted", "blocked"] as const;
 
 /** Built-in shape used when docs/templates/hub-kanban-aliases.json is absent (unit-test
  * temp workspaces). Production always reads the real file; the loader validates it
  * against the same rules, so drift between the shipped file and this default fails loudly. */
 export const DEFAULT_KANBAN_ALIASES: KanbanAliases = {
   version: 1,
-  priorityAliases: { P0: 'urgent', P1: 'high', P2: 'normal', P3: 'low' },
-  statusAliases: { queued: 'waiting', 'in-progress': 'running', accepted: 'review', blocked: 'waiting' },
-  blockedSubstate: { alias: 'blocked', canonicalStatus: 'waiting', reasonField: 'blocked_reason' },
-  sevDefaultPriority: { SEV1: 'P0', SEV2: 'P1', SEV3: 'P2' },
+  priorityAliases: { P0: "urgent", P1: "high", P2: "normal", P3: "low" },
+  statusAliases: { queued: "waiting", "in-progress": "running", accepted: "review", blocked: "waiting" },
+  blockedSubstate: { alias: "blocked", canonicalStatus: "waiting", reasonField: "blocked_reason" },
+  sevDefaultPriority: { SEV1: "P0", SEV2: "P1", SEV3: "P2" },
 };
 
 /** v1.10.0: shape validation for docs/templates/hub-kanban-aliases.json. Strict on the
  * keys the governance rules depend on (exact P0-P3 / lane / SEV sets, distinct priority
  * targets, blocked -> waiting); tolerant on free-text note fields. */
 export function validateKanbanAliases(obj: unknown): asserts obj is KanbanAliases {
-  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) fail('kanban aliases must be an object');
+  if (typeof obj !== "object" || obj === null || Array.isArray(obj)) fail("kanban aliases must be an object");
   const a = obj as Record<string, unknown>;
   if (a.version !== 1) fail(`kanban aliases version must be 1 (got: ${JSON.stringify(a.version)})`);
-  if (typeof a.priorityAliases !== 'object' || a.priorityAliases === null) fail('kanban aliases.priorityAliases must be an object');
+  if (typeof a.priorityAliases !== "object" || a.priorityAliases === null)
+    fail("kanban aliases.priorityAliases must be an object");
   const pa = a.priorityAliases as Record<string, unknown>;
-  const expectedPriorityKeys = [...KANBAN_PRIORITY_ALIAS_KEYS].sort().join(',');
-  if (Object.keys(pa).sort().join(',') !== expectedPriorityKeys) {
+  const expectedPriorityKeys = [...KANBAN_PRIORITY_ALIAS_KEYS].sort().join(",");
+  if (Object.keys(pa).sort().join(",") !== expectedPriorityKeys) {
     fail(`kanban aliases.priorityAliases must map exactly ${expectedPriorityKeys}`);
   }
   const targets = new Set<string>();
   for (const k of KANBAN_PRIORITY_ALIAS_KEYS) {
     const v = pa[k];
-    if (!(PRIORITIES as readonly string[]).includes(v as string)) fail(`kanban aliases.priorityAliases[${k}] invalid: ${JSON.stringify(v)}`);
+    if (!(PRIORITIES as readonly string[]).includes(v as string))
+      fail(`kanban aliases.priorityAliases[${k}] invalid: ${JSON.stringify(v)}`);
     targets.add(v as string);
   }
-  if (targets.size !== KANBAN_PRIORITY_ALIAS_KEYS.length) fail('kanban aliases.priorityAliases targets must be distinct');
-  if (typeof a.statusAliases !== 'object' || a.statusAliases === null) fail('kanban aliases.statusAliases must be an object');
+  if (targets.size !== KANBAN_PRIORITY_ALIAS_KEYS.length)
+    fail("kanban aliases.priorityAliases targets must be distinct");
+  if (typeof a.statusAliases !== "object" || a.statusAliases === null)
+    fail("kanban aliases.statusAliases must be an object");
   const sa = a.statusAliases as Record<string, unknown>;
-  const expectedStatusKeys = [...KANBAN_STATUS_ALIAS_KEYS].sort().join(',');
-  if (Object.keys(sa).sort().join(',') !== expectedStatusKeys) {
+  const expectedStatusKeys = [...KANBAN_STATUS_ALIAS_KEYS].sort().join(",");
+  if (Object.keys(sa).sort().join(",") !== expectedStatusKeys) {
     fail(`kanban aliases.statusAliases must map exactly ${expectedStatusKeys}`);
   }
-  const STATUSES: readonly string[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
+  const STATUSES: readonly string[] = ["backlog", "waiting", "running", "review", "done", "failed"];
   for (const k of KANBAN_STATUS_ALIAS_KEYS) {
-    if (!STATUSES.includes(sa[k] as string)) fail(`kanban aliases.statusAliases[${k}] invalid: ${JSON.stringify(sa[k])}`);
+    if (!STATUSES.includes(sa[k] as string))
+      fail(`kanban aliases.statusAliases[${k}] invalid: ${JSON.stringify(sa[k])}`);
   }
-  if (sa.blocked !== 'waiting') fail('kanban aliases.statusAliases.blocked must map to waiting (blocked is a waiting-substate, not a status)');
-  if (typeof a.blockedSubstate !== 'object' || a.blockedSubstate === null) fail('kanban aliases.blockedSubstate must be an object');
+  if (sa.blocked !== "waiting")
+    fail("kanban aliases.statusAliases.blocked must map to waiting (blocked is a waiting-substate, not a status)");
+  if (typeof a.blockedSubstate !== "object" || a.blockedSubstate === null)
+    fail("kanban aliases.blockedSubstate must be an object");
   const bs = a.blockedSubstate as Record<string, unknown>;
-  if (bs.alias !== 'blocked' || bs.canonicalStatus !== 'waiting') fail('kanban aliases.blockedSubstate must be { alias: "blocked", canonicalStatus: "waiting", ... }');
-  if (typeof bs.reasonField !== 'string' || bs.reasonField.length === 0) fail('kanban aliases.blockedSubstate.reasonField must be a non-empty string');
-  if (typeof a.sevDefaultPriority !== 'object' || a.sevDefaultPriority === null) fail('kanban aliases.sevDefaultPriority must be an object');
+  if (bs.alias !== "blocked" || bs.canonicalStatus !== "waiting")
+    fail('kanban aliases.blockedSubstate must be { alias: "blocked", canonicalStatus: "waiting", ... }');
+  if (typeof bs.reasonField !== "string" || bs.reasonField.length === 0)
+    fail("kanban aliases.blockedSubstate.reasonField must be a non-empty string");
+  if (typeof a.sevDefaultPriority !== "object" || a.sevDefaultPriority === null)
+    fail("kanban aliases.sevDefaultPriority must be an object");
   const sp = a.sevDefaultPriority as Record<string, unknown>;
-  const expectedSevKeys = [...SEVS].sort().join(',');
-  if (Object.keys(sp).sort().join(',') !== expectedSevKeys) fail(`kanban aliases.sevDefaultPriority must map exactly ${expectedSevKeys}`);
+  const expectedSevKeys = [...SEVS].sort().join(",");
+  if (Object.keys(sp).sort().join(",") !== expectedSevKeys)
+    fail(`kanban aliases.sevDefaultPriority must map exactly ${expectedSevKeys}`);
   for (const k of SEVS) {
     if (!(KANBAN_PRIORITY_ALIAS_KEYS as readonly string[]).includes(sp[k] as string)) {
       fail(`kanban aliases.sevDefaultPriority[${k}] must be a P0-P3 alias (got: ${JSON.stringify(sp[k])})`);
@@ -364,39 +387,42 @@ export function resolvePriorityInput(value: string, aliases: KanbanAliases): Pri
 }
 
 export function validateTicket(obj: unknown): asserts obj is Ticket {
-  if (typeof obj !== 'object' || obj === null) fail('ticket must be an object');
+  if (typeof obj !== "object" || obj === null) fail("ticket must be an object");
   const t = obj as Record<string, unknown>;
   if (t.schemaVersion !== CURRENT_SCHEMA_VERSION) {
     fail(`ticket schemaVersion must be ${CURRENT_SCHEMA_VERSION} (got: ${JSON.stringify(t.schemaVersion)})`);
   }
-  if (typeof t.id !== 'string' || t.id.length === 0) fail('ticket.id must be a non-empty string');
-  if (t.kind !== 'service' && t.kind !== 'manual') fail(`ticket.kind must be 'service' or 'manual'`);
-  if (t.kind === 'manual' && t.service !== undefined) {
-    fail('manual tickets must not carry a service field — a manual ticket is never executable');
+  if (typeof t.id !== "string" || t.id.length === 0) fail("ticket.id must be a non-empty string");
+  if (t.kind !== "service" && t.kind !== "manual") fail(`ticket.kind must be 'service' or 'manual'`);
+  if (t.kind === "manual" && t.service !== undefined) {
+    fail("manual tickets must not carry a service field — a manual ticket is never executable");
   }
-  if (t.kind === 'service' && (typeof t.service !== 'string' || t.service.length === 0)) {
-    fail('service tickets must declare a non-empty service field referencing the catalog');
+  if (t.kind === "service" && (typeof t.service !== "string" || t.service.length === 0)) {
+    fail("service tickets must declare a non-empty service field referencing the catalog");
   }
   if (!PRIORITIES.includes(t.priority as Priority)) fail(`ticket.priority invalid: ${JSON.stringify(t.priority)}`);
-  const validStatuses: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
+  const validStatuses: Status[] = ["backlog", "waiting", "running", "review", "done", "failed"];
   if (!validStatuses.includes(t.status as Status)) fail(`ticket.status invalid: ${JSON.stringify(t.status)}`);
   // v1.10.0 (hub-consolidation §5.1): optional sev / blocked_reason — absent on every
   // pre-existing ticket, so the schema stays tolerance-compatible (no migration).
   if (t.sev !== undefined && !(SEVS as readonly unknown[]).includes(t.sev)) {
-    fail(`ticket.sev must be one of: ${SEVS.join(', ')} (got: ${JSON.stringify(t.sev)})`);
+    fail(`ticket.sev must be one of: ${SEVS.join(", ")} (got: ${JSON.stringify(t.sev)})`);
   }
-  if (t.blocked_reason !== undefined && (typeof t.blocked_reason !== 'string' || t.blocked_reason.trim() === '' || t.blocked_reason.length > 500)) {
-    fail('ticket.blocked_reason must be a non-empty string of at most 500 chars');
+  if (
+    t.blocked_reason !== undefined &&
+    (typeof t.blocked_reason !== "string" || t.blocked_reason.trim() === "" || t.blocked_reason.length > 500)
+  ) {
+    fail("ticket.blocked_reason must be a non-empty string of at most 500 chars");
   }
   // v1.11.0 (hub-consolidation §4.5): optional delegation-target hub metadata.
-  if (t.hub !== undefined && (typeof t.hub !== 'string' || !/^co-[a-z0-9-]{1,40}$/.test(t.hub))) {
+  if (t.hub !== undefined && (typeof t.hub !== "string" || !/^co-[a-z0-9-]{1,40}$/.test(t.hub))) {
     fail(`ticket.hub must match co-<slug>: ${JSON.stringify(t.hub)}`);
   }
-  if (typeof t.attempts !== 'number' || t.attempts < 0) fail('ticket.attempts must be a non-negative number');
-  if (t.not_before !== undefined && (typeof t.not_before !== 'string' || !ISO_DATE_PATTERN.test(t.not_before))) {
+  if (typeof t.attempts !== "number" || t.attempts < 0) fail("ticket.attempts must be a non-negative number");
+  if (t.not_before !== undefined && (typeof t.not_before !== "string" || !ISO_DATE_PATTERN.test(t.not_before))) {
     fail(`ticket.not_before must be an ISO YYYY-MM-DD string: ${JSON.stringify(t.not_before)}`);
   }
-  if (!Array.isArray(t.history)) fail('ticket.history must be an array');
+  if (!Array.isArray(t.history)) fail("ticket.history must be an array");
   // T-20261007-004: history shape — entries are chronologically non-decreasing,
   // the first entry is the creation (from: null), consecutive entries chain
   // (each `from` equals the previous `to`), and created_at does not postdate
@@ -409,44 +435,51 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     let prevTo: Status | null = null;
     for (let i = 0; i < hist.length; i++) {
       const e = hist[i];
-      if (typeof e.at !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(e.at)) {
+      if (typeof e.at !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(e.at)) {
         fail(`history[${i}].at must be an ISO timestamp: ${JSON.stringify(e.at)}`);
       }
       if (prevAt !== null && e.at < prevAt) {
-        fail(`history[${i}].at (${e.at}) predates the previous entry (${prevAt}) — non-monotonic history (repair with: ticket.ts repair-history)`);
+        fail(
+          `history[${i}].at (${e.at}) predates the previous entry (${prevAt}) — non-monotonic history (repair with: ticket.ts repair-history)`,
+        );
       }
       // v1.10.0 (hub-consolidation §5): ACTION entries (reprioritize audits, the SEV1
       // bypass-triage marker) are transparent to the chain — they never start a
       // history, must carry a non-empty actor, and the next status entry still
       // chains from the last status entry's `to`.
       if (isActionEntry(e as HistoryRecord)) {
-        if (i === 0) fail('history[0] must be the creation transition — action entries follow the status chain');
+        if (i === 0) fail("history[0] must be the creation transition — action entries follow the status chain");
         const act = e as unknown as Record<string, unknown>;
-        if (typeof act.actor !== 'string' || act.actor.trim() === '') {
+        if (typeof act.actor !== "string" || act.actor.trim() === "") {
           fail(`history[${i}].actor must be a non-empty string on an action entry`);
         }
-        if (typeof act.from !== 'string' || typeof act.to !== 'string') {
+        if (typeof act.from !== "string" || typeof act.to !== "string") {
           fail(`history[${i}] action entry must carry string from/to (got: ${JSON.stringify(e)})`);
         }
         prevAt = e.at as string;
         continue;
       }
-      if (i === 0 && t.status !== 'done') {
+      if (i === 0 && t.status !== "done") {
         // A done ticket may carry a TRIMMED history (archived/legacy shapes
         // keep only the closing review→done edge) — the creation rules bind
         // only to tickets still in flight.
-        if (e.from !== null) fail('history[0].from must be null (the creation transition)');
-        if (e.to !== 'backlog' && e.to !== 'waiting') fail('history[0].to must be backlog (or waiting for a directly-triaged import)');
+        if (e.from !== null) fail("history[0].from must be null (the creation transition)");
+        if (e.to !== "backlog" && e.to !== "waiting")
+          fail("history[0].to must be backlog (or waiting for a directly-triaged import)");
       } else if (i > 0 && prevTo !== null && e.from !== prevTo) {
-        fail(`history[${i}].from (${JSON.stringify(e.from)}) does not chain from history[${i - 1}].to (${JSON.stringify(prevTo)}) — duplicated or divergent edge (repair with: ticket.ts repair-history)`);
+        fail(
+          `history[${i}].from (${JSON.stringify(e.from)}) does not chain from history[${i - 1}].to (${JSON.stringify(prevTo)}) — duplicated or divergent edge (repair with: ticket.ts repair-history)`,
+        );
       }
       prevAt = e.at as string;
       prevTo = e.to as Status;
     }
-    if (hist.length > 0 && typeof t.created_at === 'string' && (hist[0].at as string) >= t.created_at) {
+    if (hist.length > 0 && typeof t.created_at === "string" && (hist[0].at as string) >= t.created_at) {
       const minAt = hist.reduce((m: string, e) => ((e.at as string) < m ? (e.at as string) : m), hist[0].at as string);
       if (minAt < t.created_at) {
-        fail(`ticket.created_at (${t.created_at}) postdates the earliest history entry (${minAt}) — reconcile with: ticket.ts repair-history`);
+        fail(
+          `ticket.created_at (${t.created_at}) postdates the earliest history entry (${minAt}) — reconcile with: ticket.ts repair-history`,
+        );
       }
     }
   }
@@ -455,54 +488,73 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
   // Action entries (v1.10.0) never count: their from/to are priorities or triage
   // values, not status hops.
   const expectedAttempts = (t.history as HistoryRecord[]).filter(
-    (h) => !isActionEntry(h) && h.from === 'failed' && h.to === 'waiting',
+    (h) => !isActionEntry(h) && h.from === "failed" && h.to === "waiting",
   ).length;
   if (t.attempts !== expectedAttempts) {
-    fail(`ticket.attempts (${t.attempts}) must equal the number of failed → waiting history transitions (${expectedAttempts})`);
+    fail(
+      `ticket.attempts (${t.attempts}) must equal the number of failed → waiting history transitions (${expectedAttempts})`,
+    );
   }
   if (t.inputs !== undefined) {
-    if (typeof t.inputs !== 'object' || t.inputs === null) fail('ticket.inputs must be an object');
+    if (typeof t.inputs !== "object" || t.inputs === null) fail("ticket.inputs must be an object");
     for (const key of Object.keys(t.inputs as Record<string, unknown>)) {
       if (!INPUT_NAME_PATTERN.test(key)) fail(`ticket.inputs key fails allowlist: ${JSON.stringify(key)}`);
     }
   }
   // Upstream block validation (design 2026-10-01-upstream-request-mcp-design.md §5)
   if (t.upstream !== undefined) {
-    if (t.kind !== 'manual') fail('upstream block is allowed only on kind: manual');
-    if (t.service !== undefined) fail('upstream tickets must not carry a service field');
-    if (t.inputs !== undefined) fail('upstream tickets must not carry inputs');
-    if (!/^U-\d{8}-\d{3,4}$/.test(t.id as string)) fail(`upstream ticket id must match U-YYYYMMDD-NNN: ${JSON.stringify(t.id)}`);
+    if (t.kind !== "manual") fail("upstream block is allowed only on kind: manual");
+    if (t.service !== undefined) fail("upstream tickets must not carry a service field");
+    if (t.inputs !== undefined) fail("upstream tickets must not carry inputs");
+    if (!/^U-\d{8}-\d{3,4}$/.test(t.id as string))
+      fail(`upstream ticket id must match U-YYYYMMDD-NNN: ${JSON.stringify(t.id)}`);
     const u = t.upstream as Record<string, unknown>;
     // T-20261002-007 (M2): format checks — project identity, intake version/variant types.
     // v1.12.0 (tenant-loop design §3.3): the gateway tenant namespace joins —
     // a tenant filing carries its tenant id (gw-<12hex>) as the project key.
-    if (typeof u.project !== 'string' || !(/^co-[a-z0-9-]{1,40}$/.test(u.project) || /^gw-[0-9a-f]{12}$/.test(u.project))) {
-      fail(`upstream.project must match ^co-[a-z0-9-]{1,40}$ or ^gw-[0-9a-f]{12}$ (tenant namespace, design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3): ${JSON.stringify(u.project)}`);
+    if (
+      typeof u.project !== "string" ||
+      !(/^co-[a-z0-9-]{1,40}$/.test(u.project) || /^gw-[0-9a-f]{12}$/.test(u.project))
+    ) {
+      fail(
+        `upstream.project must match ^co-[a-z0-9-]{1,40}$ or ^gw-[0-9a-f]{12}$ (tenant namespace, design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3): ${JSON.stringify(u.project)}`,
+      );
     }
-    if (u.template_version !== undefined && u.template_version !== null && typeof u.template_version !== 'string') fail('upstream.template_version must be a string or null');
-    if (u.variant !== undefined && u.variant !== null && typeof u.variant !== 'string') fail('upstream.variant must be a string or null');
-    if (u.trust !== 'untrusted') fail('upstream.trust must be "untrusted"');
-    if (typeof u.source !== 'string' || !/^project\/[a-z0-9-]+$/.test(u.source)) fail(`upstream.source must match ^project/[a-z0-9-]+$: ${JSON.stringify(u.source)}`);
-    if (u.source !== `project/${u.project}`) fail(`upstream.source must equal "project/${u.project}", got "${u.source}"`);
-    if (u.suspected_layer !== 'L1' && u.suspected_layer !== 'L2' && u.suspected_layer !== 'unsure') fail(`upstream.suspected_layer must be L1 | L2 | unsure`);
-    if (typeof u.symptom !== 'string' || u.symptom.length < 20 || u.symptom.length > 2000) fail('upstream.symptom must be 20-2000 chars');
-    if (!Array.isArray(u.affected_paths)) fail('upstream.affected_paths must be an array');
-    if (u.affected_paths.length === 0 || u.affected_paths.length > 10) fail('upstream.affected_paths must have 1-10 items');
+    if (u.template_version !== undefined && u.template_version !== null && typeof u.template_version !== "string")
+      fail("upstream.template_version must be a string or null");
+    if (u.variant !== undefined && u.variant !== null && typeof u.variant !== "string")
+      fail("upstream.variant must be a string or null");
+    if (u.trust !== "untrusted") fail('upstream.trust must be "untrusted"');
+    if (typeof u.source !== "string" || !/^project\/[a-z0-9-]+$/.test(u.source))
+      fail(`upstream.source must match ^project/[a-z0-9-]+$: ${JSON.stringify(u.source)}`);
+    if (u.source !== `project/${u.project}`)
+      fail(`upstream.source must equal "project/${u.project}", got "${u.source}"`);
+    if (u.suspected_layer !== "L1" && u.suspected_layer !== "L2" && u.suspected_layer !== "unsure")
+      fail(`upstream.suspected_layer must be L1 | L2 | unsure`);
+    if (typeof u.symptom !== "string" || u.symptom.length < 20 || u.symptom.length > 2000)
+      fail("upstream.symptom must be 20-2000 chars");
+    if (!Array.isArray(u.affected_paths)) fail("upstream.affected_paths must be an array");
+    if (u.affected_paths.length === 0 || u.affected_paths.length > 10)
+      fail("upstream.affected_paths must have 1-10 items");
     for (const p of u.affected_paths as unknown[]) {
-      if (typeof p !== 'string' || p.length > 200 || !/^(?!\/)(?!.*\.\.)[A-Za-z0-9._\-\/]+$/.test(p)) {
+      if (typeof p !== "string" || p.length > 200 || !/^(?!\/)(?!.*\.\.)[A-Za-z0-9._\-\/]+$/.test(p)) {
         fail(`upstream.affected_paths entry fails pattern: ${JSON.stringify(p)}`);
       }
     }
     if (u.local_workaround_diff !== undefined) {
-      if (typeof u.local_workaround_diff !== 'string' || u.local_workaround_diff.length > 8000) fail('upstream.local_workaround_diff must be ≤8000 chars');
+      if (typeof u.local_workaround_diff !== "string" || u.local_workaround_diff.length > 8000)
+        fail("upstream.local_workaround_diff must be ≤8000 chars");
     }
     if (u.repro !== undefined) {
-      if (typeof u.repro !== 'string' || u.repro.length > 2000) fail('upstream.repro must be ≤2000 chars');
+      if (typeof u.repro !== "string" || u.repro.length > 2000) fail("upstream.repro must be ≤2000 chars");
     }
-    if (u.identity_source !== undefined && !(UPSTREAM_IDENTITY_SOURCES as readonly unknown[]).includes(u.identity_source)) {
-      fail(`upstream.identity_source must be one of: ${UPSTREAM_IDENTITY_SOURCES.join(', ')}`);
+    if (
+      u.identity_source !== undefined &&
+      !(UPSTREAM_IDENTITY_SOURCES as readonly unknown[]).includes(u.identity_source)
+    ) {
+      fail(`upstream.identity_source must be one of: ${UPSTREAM_IDENTITY_SOURCES.join(", ")}`);
     }
-    if (u.triage !== 'inbox' && u.triage !== 'ready') fail('upstream.triage must be inbox | ready');
+    if (u.triage !== "inbox" && u.triage !== "ready") fail("upstream.triage must be inbox | ready");
     // T-20261002-007 (M2): triage↔status consistency — the store writes them in
     // step, so a file where they disagree is hand-editing or a crashed write.
     // v1.6.0 (U-20261006 runner batch): `running` joins the ready branch — a
@@ -510,35 +562,46 @@ export function validateTicket(obj: unknown): asserts obj is Ticket {
     // is a legitimate tool-mediated state (the store wrote it), not a
     // hand-edit; the old rule made every claim of an upstream ticket wedge the
     // file into a state no ticket.ts command could touch.
-    const triageStatusConsistent = u.triage === 'inbox'
-      ? (t.status === 'backlog' || t.status === 'done')
-      : (t.status === 'waiting' || t.status === 'running' || t.status === 'review' || t.status === 'done');
+    const triageStatusConsistent =
+      u.triage === "inbox"
+        ? t.status === "backlog" || t.status === "done"
+        : t.status === "waiting" || t.status === "running" || t.status === "review" || t.status === "done";
     if (!triageStatusConsistent) {
-      fail(`upstream.triage ${JSON.stringify(u.triage)} is inconsistent with status ${JSON.stringify(t.status)} (inbox ⇒ backlog|done; ready ⇒ waiting|running|review|done)`);
+      fail(
+        `upstream.triage ${JSON.stringify(u.triage)} is inconsistent with status ${JSON.stringify(t.status)} (inbox ⇒ backlog|done; ready ⇒ waiting|running|review|done)`,
+      );
     }
-    if (typeof u.flagged !== 'boolean') fail('upstream.flagged must be a boolean');
-    if (!Array.isArray(u.triage_reasons)) fail('upstream.triage_reasons must be an array');
-    if (typeof u.dedupe_key !== 'string' || u.dedupe_key.length === 0) fail('upstream.dedupe_key must be a non-empty string');
-    if (!Array.isArray(u.duplicates)) fail('upstream.duplicates must be an array');
+    if (typeof u.flagged !== "boolean") fail("upstream.flagged must be a boolean");
+    if (!Array.isArray(u.triage_reasons)) fail("upstream.triage_reasons must be an array");
+    if (typeof u.dedupe_key !== "string" || u.dedupe_key.length === 0)
+      fail("upstream.dedupe_key must be a non-empty string");
+    if (!Array.isArray(u.duplicates)) fail("upstream.duplicates must be an array");
     for (const dup of u.duplicates as unknown[]) {
-      if (typeof dup !== 'object' || dup === null) fail('upstream.duplicates entry must be an object');
+      if (typeof dup !== "object" || dup === null) fail("upstream.duplicates entry must be an object");
       const d = dup as Record<string, unknown>;
-      if (typeof d.project !== 'string' || d.project.length === 0) fail('upstream.duplicates[].project must be a non-empty string');
-      if (typeof d.at !== 'string' || d.at.length === 0) fail('upstream.duplicates[].at must be a non-empty string');
+      if (typeof d.project !== "string" || d.project.length === 0)
+        fail("upstream.duplicates[].project must be a non-empty string");
+      if (typeof d.at !== "string" || d.at.length === 0) fail("upstream.duplicates[].at must be a non-empty string");
     }
-    if (t.status === 'done' && u.resolution === undefined) fail('upstream ticket at status done requires upstream.resolution (T-20261002-007)');
+    if (t.status === "done" && u.resolution === undefined)
+      fail("upstream ticket at status done requires upstream.resolution (T-20261002-007)");
     if (u.resolution !== undefined) {
-      if (typeof u.resolution !== 'object' || u.resolution === null) fail('upstream.resolution must be an object');
+      if (typeof u.resolution !== "object" || u.resolution === null) fail("upstream.resolution must be an object");
       const res = u.resolution as Record<string, unknown>;
-      const validOutcomes = ['fixed', 'rejected', 'local-only', 'duplicate'];
-      if (!validOutcomes.includes(res.outcome as string)) fail(`upstream.resolution.outcome must be one of: ${validOutcomes.join(', ')}`);
+      const validOutcomes = ["fixed", "rejected", "local-only", "duplicate"];
+      if (!validOutcomes.includes(res.outcome as string))
+        fail(`upstream.resolution.outcome must be one of: ${validOutcomes.join(", ")}`);
       // T-20261002-007 (M2): resolution shape — summary required, https pr_url, string template_version.
-      if (typeof res.summary !== 'string' || (res.summary as string).trim() === '') fail('upstream.resolution.summary must be a non-empty string');
-      if (res.pr_url !== undefined && (typeof res.pr_url !== 'string' || !/^https:\/\/\S+$/.test(res.pr_url))) {
-        fail('upstream.resolution.pr_url must be an https URL');
+      if (typeof res.summary !== "string" || (res.summary as string).trim() === "")
+        fail("upstream.resolution.summary must be a non-empty string");
+      if (res.pr_url !== undefined && (typeof res.pr_url !== "string" || !/^https:\/\/\S+$/.test(res.pr_url))) {
+        fail("upstream.resolution.pr_url must be an https URL");
       }
-      if (res.template_version !== undefined && (typeof res.template_version !== 'string' || (res.template_version as string).trim() === '')) {
-        fail('upstream.resolution.template_version must be a non-empty string');
+      if (
+        res.template_version !== undefined &&
+        (typeof res.template_version !== "string" || (res.template_version as string).trim() === "")
+      ) {
+        fail("upstream.resolution.template_version must be a non-empty string");
       }
     }
   }

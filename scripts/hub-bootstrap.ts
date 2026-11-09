@@ -145,26 +145,32 @@
 //                                       and journal (tests only).
 // @l2-propagate: false
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, renameSync, statSync, writeFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { join, resolve } from 'node:path';
-import { acquireLock, releaseLock } from './automation-lock.ts';
-import { latestProbeReportFile, probeReportVerdict } from './hub-probe.ts';
-import { hookDirViolations } from './lib/hook-integrity.ts';
-import { loadHubTopology } from './helpers/hub-topology.ts';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { join, resolve } from "node:path";
+import { acquireLock, releaseLock } from "./automation-lock.ts";
+import { latestProbeReportFile, probeReportVerdict } from "./hub-probe.ts";
+import { hookDirViolations } from "./lib/hook-integrity.ts";
+import { loadHubTopology } from "./helpers/hub-topology.ts";
 import {
-  applyTransition, initStateFile, isLeaseValid, loadRegistryEnums, readState,
-  stateFilePath, validateChain, validateDegradedCapabilities,
+  applyTransition,
+  initStateFile,
+  isLeaseValid,
+  loadRegistryEnums,
+  readState,
+  stateFilePath,
+  validateChain,
+  validateDegradedCapabilities,
   HubStateError,
   OPERATIONAL_STATES,
   type HubStateFile,
-} from './helpers/hub-state.ts';
+} from "./helpers/hub-state.ts";
 
 // ── Seams + constants ────────────────────────────────────────────────────────
 
-const ROOT = process.env.HUB_BOOTSTRAP_ROOT ? resolve(process.env.HUB_BOOTSTRAP_ROOT) : resolve(import.meta.dir, '..');
-const PROJECTS_DIR = join(ROOT, 'Projects');
+const ROOT = process.env.HUB_BOOTSTRAP_ROOT ? resolve(process.env.HUB_BOOTSTRAP_ROOT) : resolve(import.meta.dir, "..");
+const PROJECTS_DIR = join(ROOT, "Projects");
 const HUB_NAME_RE = /^co-[a-z0-9-]{1,40}$/;
 const SWEEP_MAX_AGE_MS = 24 * 3_600_000; // recovery sweep: age > 24h (design §4.3)
 
@@ -181,9 +187,12 @@ function nowIso(): string {
  * CLI frame prints the ❌ verdict and converts it to the exit code once.
  * Exported so library consumers (and tests) can catch it explicitly. */
 export class ExitSignal extends Error {
-  constructor(readonly exitCode: number, message: string) {
+  constructor(
+    readonly exitCode: number,
+    message: string,
+  ) {
     super(message);
-    this.name = 'ExitSignal';
+    this.name = "ExitSignal";
   }
 }
 
@@ -192,12 +201,12 @@ function fail(msg: string, exitCode = 1): never {
 }
 
 function run(cmd: string[], opts: { cwd?: string } = {}): { code: number; out: string } {
-  const proc = spawnSync(cmd[0], cmd.slice(1), { cwd: opts.cwd, encoding: 'utf-8', windowsHide: true });
+  const proc = spawnSync(cmd[0], cmd.slice(1), { cwd: opts.cwd, encoding: "utf-8", windowsHide: true });
   // status null = the child never ran (spawn error, e.g. ENOENT for a missing
   // binary — v1.3.0): surface the reason in the output instead of returning a
   // silent empty string that callers would report as an opaque tool failure.
-  const spawnNote = proc.status === null && proc.error ? ` [spawn failed: ${proc.error.message}]` : '';
-  return { code: proc.status ?? 1, out: `${proc.stdout ?? ''}${proc.stderr ?? ''}${spawnNote}` };
+  const spawnNote = proc.status === null && proc.error ? ` [spawn failed: ${proc.error.message}]` : "";
+  return { code: proc.status ?? 1, out: `${proc.stdout ?? ""}${proc.stderr ?? ""}${spawnNote}` };
 }
 
 /** The bun binary running THIS process (v1.3.0): the VALIDATED gate's bun
@@ -241,10 +250,12 @@ interface HubRemoteResolution {
 function resolveHubRemote(hub: string): HubRemoteResolution {
   const loaded = loadHubTopology(ROOT);
   if (!loaded.ok) {
-    if (loaded.error === 'absent-file' || loaded.error === 'absent-section') {
-      return fail(`remote-missing: the hub_topology registry is not available (${loaded.error}) — cannot resolve hub_remote for '${hub}'. ` +
-        `This is the REMOTE-MISSING case (design §4.1): it routes to a USER decision — run scripts/ensure-github-repo.ts / the scaffold flow manually. ` +
-        `hub-bootstrap NEVER creates a remote from this path.`);
+    if (loaded.error === "absent-file" || loaded.error === "absent-section") {
+      return fail(
+        `remote-missing: the hub_topology registry is not available (${loaded.error}) — cannot resolve hub_remote for '${hub}'. ` +
+          `This is the REMOTE-MISSING case (design §4.1): it routes to a USER decision — run scripts/ensure-github-repo.ts / the scaffold flow manually. ` +
+          `hub-bootstrap NEVER creates a remote from this path.`,
+      );
     }
     return fail(`hub_topology registry is malformed: ${loaded.error}`);
   }
@@ -253,33 +264,37 @@ function resolveHubRemote(hub: string): HubRemoteResolution {
     return fail(`hub_topology registry resolved empty — cannot resolve hub_remote for '${hub}'`);
   }
   const hubRow = (Array.isArray(t.hubs) ? t.hubs : []).find(
-    h => h && typeof h === 'object' && (h as Record<string, unknown>)['name'] === hub,
+    (h) => h && typeof h === "object" && (h as Record<string, unknown>)["name"] === hub,
   ) as Record<string, unknown> | undefined;
-  if (hubRow && typeof hubRow['hub_remote'] === 'string' && hubRow['hub_remote'].length > 0) {
-    return { remote: hubRow['hub_remote'], source: 'hub_topology.hubs[]' };
+  if (hubRow && typeof hubRow["hub_remote"] === "string" && hubRow["hub_remote"].length > 0) {
+    return { remote: hubRow["hub_remote"], source: "hub_topology.hubs[]" };
   }
   const entryRemotes = new Set<string>();
   for (const row of Array.isArray(t.entries) ? t.entries : []) {
-    if (!row || typeof row !== 'object') continue;
+    if (!row || typeof row !== "object") continue;
     const e = row as Record<string, unknown>;
-    if (e['hub_variant'] === hub && typeof e['hub_remote'] === 'string' && e['hub_remote'].length > 0) {
-      entryRemotes.add(e['hub_remote']);
+    if (e["hub_variant"] === hub && typeof e["hub_remote"] === "string" && e["hub_remote"].length > 0) {
+      entryRemotes.add(e["hub_remote"]);
     }
   }
-  if (entryRemotes.size === 1) return { remote: [...entryRemotes][0], source: 'hub_topology.entries[]' };
+  if (entryRemotes.size === 1) return { remote: [...entryRemotes][0], source: "hub_topology.entries[]" };
   if (entryRemotes.size > 1) {
-    return fail(`registry ambiguity: entries[] rows for '${hub}' carry ${entryRemotes.size} distinct hub_remote values — fix the registry before bootstrapping`);
+    return fail(
+      `registry ambiguity: entries[] rows for '${hub}' carry ${entryRemotes.size} distinct hub_remote values — fix the registry before bootstrapping`,
+    );
   }
-  return fail(`remote-missing: no hub_remote for '${hub}' in the hub_topology registry (hubs[] and entries[]). ` +
-    `This is the REMOTE-MISSING case (design §4.1): it routes to a USER decision — run scripts/ensure-github-repo.ts / the scaffold flow manually. ` +
-    `hub-bootstrap NEVER creates a remote from this path.`);
+  return fail(
+    `remote-missing: no hub_remote for '${hub}' in the hub_topology registry (hubs[] and entries[]). ` +
+      `This is the REMOTE-MISSING case (design §4.1): it routes to a USER decision — run scripts/ensure-github-repo.ts / the scaffold flow manually. ` +
+      `hub-bootstrap NEVER creates a remote from this path.`,
+  );
 }
 
 /** Pinned SHA (design §4.2): ls-remote main, falling back to HEAD. */
 function resolvePinnedSha(remote: string): string | null {
-  for (const ref of ['main', 'HEAD']) {
-    const r = run(['git', 'ls-remote', remote, ref]);
-    const line = r.out.split(/\r?\n/).find(l => l.includes(ref));
+  for (const ref of ["main", "HEAD"]) {
+    const r = run(["git", "ls-remote", remote, ref]);
+    const line = r.out.split(/\r?\n/).find((l) => l.includes(ref));
     if (r.code === 0 && line) return line.split(/\s+/)[0];
   }
   return null;
@@ -296,15 +311,17 @@ interface TargetCheck {
 function checkTarget(hubDir: string): TargetCheck {
   if (!existsSync(hubDir)) return { present: false, valid: false, problems: [] };
   const problems: string[] = [];
-  if (!existsSync(join(hubDir, '.git'))) problems.push('.git missing — not a git working clone');
-  const vj = join(hubDir, 'variant.json');
-  if (!existsSync(vj)) problems.push('variant.json missing');
+  if (!existsSync(join(hubDir, ".git"))) problems.push(".git missing — not a git working clone");
+  const vj = join(hubDir, "variant.json");
+  if (!existsSync(vj)) problems.push("variant.json missing");
   else {
-    try { JSON.parse(readFileSync(vj, 'utf-8')); } catch (e) {
+    try {
+      JSON.parse(readFileSync(vj, "utf-8"));
+    } catch (e) {
       problems.push(`variant.json does not parse (${e instanceof Error ? e.message : String(e)})`);
     }
   }
-  if (!existsSync(join(hubDir, 'template-version.txt'))) problems.push('template-version.txt missing');
+  if (!existsSync(join(hubDir, "template-version.txt"))) problems.push("template-version.txt missing");
   return { present: true, valid: problems.length === 0, problems };
 }
 
@@ -312,7 +329,9 @@ function printStatus(hub: string, stateDirOverride?: string): void {
   const dir = stateDirOverride ?? join(PROJECTS_DIR, hub);
   const target = checkTarget(dir);
   console.log(`Hub: ${hub}`);
-  console.log(`Local clone: ${dir} ${target.present ? (target.valid ? '(present, valid)' : `(present, INVALID: ${target.problems.join('; ')})`) : '(absent — run: bun scripts/hub-bootstrap.ts ' + hub + ' --apply)'}`);
+  console.log(
+    `Local clone: ${dir} ${target.present ? (target.valid ? "(present, valid)" : `(present, INVALID: ${target.problems.join("; ")})`) : "(absent — run: bun scripts/hub-bootstrap.ts " + hub + " --apply)"}`,
+  );
   let state: HubStateFile | null = null;
   try {
     state = readState(dir, hub);
@@ -321,18 +340,27 @@ function printStatus(hub: string, stateDirOverride?: string): void {
     return;
   }
   if (!state) {
-    console.log('State file: absent (never bootstrapped through the Phase 3.5 flow)');
+    console.log("State file: absent (never bootstrapped through the Phase 3.5 flow)");
     return;
   }
   const chain = validateChain(state);
-  console.log(`Bootstrap state: ${state.bootstrap_state ?? '<init never run>'}`);
-  console.log(`Operational state: ${state.operational_state ?? 'null (not yet in service — first declaration is the hub PM\'s)'}`);
+  console.log(`Bootstrap state: ${state.bootstrap_state ?? "<init never run>"}`);
+  console.log(
+    `Operational state: ${state.operational_state ?? "null (not yet in service — first declaration is the hub PM's)"}`,
+  );
   if (state.operational_state) {
-    console.log(`TTL lease: ${isLeaseValid(state) ? `valid until ${state.ttl_lease!.expires_at}` : `EXPIRED (was until ${state.ttl_lease?.expires_at ?? '?'}) — consumers read UNAVAILABLE`}`);
-    if (state.operational_state === 'DEGRADED') console.log(`Degraded capabilities: [${state.degraded_capabilities.join(', ')}]`);
+    console.log(
+      `TTL lease: ${isLeaseValid(state) ? `valid until ${state.ttl_lease!.expires_at}` : `EXPIRED (was until ${state.ttl_lease?.expires_at ?? "?"}) — consumers read UNAVAILABLE`}`,
+    );
+    if (state.operational_state === "DEGRADED")
+      console.log(`Degraded capabilities: [${state.degraded_capabilities.join(", ")}]`);
   }
-  console.log(`Approval: ${state.approval ? `${state.approval.actor} @ ${state.approval.sha.slice(0, 12)} (${state.approval.remote}, ${state.approval.at})` : 'none recorded'}`);
-  console.log(`Journal: ${state.state_history.length} entr(ies), head ${state.head_hash?.slice(0, 12) ?? 'null'}, chain ${chain.ok ? 'VALID' : `BROKEN at ${chain.at}: ${(chain as { error: string }).error}`}`);
+  console.log(
+    `Approval: ${state.approval ? `${state.approval.actor} @ ${state.approval.sha.slice(0, 12)} (${state.approval.remote}, ${state.approval.at})` : "none recorded"}`,
+  );
+  console.log(
+    `Journal: ${state.state_history.length} entr(ies), head ${state.head_hash?.slice(0, 12) ?? "null"}, chain ${chain.ok ? "VALID" : `BROKEN at ${chain.at}: ${(chain as { error: string }).error}`}`,
+  );
 }
 
 // ── VALIDATED gate (design §4.4) ─────────────────────────────────────────────
@@ -350,7 +378,7 @@ function printStatus(hub: string, stateDirOverride?: string): void {
  * disagree about what divergence is. Returns violation strings (empty =
  * clean). */
 function hookIntegrityDiff(cloneDir: string): string[] {
-  return hookDirViolations(join(ROOT, 'scripts', 'hooks'), join(cloneDir, 'scripts', 'hooks'));
+  return hookDirViolations(join(ROOT, "scripts", "hooks"), join(cloneDir, "scripts", "hooks"));
 }
 
 interface ValidationReport {
@@ -361,59 +389,95 @@ interface ValidationReport {
 
 function runValidatedGate(cloneDir: string): ValidationReport {
   const reasons: string[] = [];
-  const skippedExternal = process.env.HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS === '1';
+  const skippedExternal = process.env.HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS === "1";
 
   // Check 2 — hook-integrity diff (always real: pure byte compare, no deps).
   const hookViolations = hookIntegrityDiff(cloneDir);
   if (hookViolations.length > 0) {
-    return { ok: false, reasons: hookViolations.map(v => `hook-integrity: ${v}`), skippedExternal };
+    return { ok: false, reasons: hookViolations.map((v) => `hook-integrity: ${v}`), skippedExternal };
   }
-  reasons.push('hook-integrity: clone scripts/hooks/ byte-identical to canonical scripts/hooks/');
+  reasons.push("hook-integrity: clone scripts/hooks/ byte-identical to canonical scripts/hooks/");
 
   if (skippedExternal) {
-    reasons.push('external checks (gitleaks / bun install+audit / root audit.ts) SKIPPED via HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS=1 — recorded here so a skipped validation is never silent');
+    reasons.push(
+      "external checks (gitleaks / bun install+audit / root audit.ts) SKIPPED via HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS=1 — recorded here so a skipped validation is never silent",
+    );
     return { ok: true, reasons, skippedExternal };
   }
 
   // Check 1 — gitleaks with explicit workspace-owned --config (working tree).
-  const cfg = join(ROOT, '.gitleaks.toml');
-  if (!existsSync(cfg)) return { ok: false, reasons: ['gitleaks: workspace .gitleaks.toml missing — refusing to validate without the owned rules'], skippedExternal };
+  const cfg = join(ROOT, ".gitleaks.toml");
+  if (!existsSync(cfg))
+    return {
+      ok: false,
+      reasons: ["gitleaks: workspace .gitleaks.toml missing — refusing to validate without the owned rules"],
+      skippedExternal,
+    };
   // Existence-gated (v1.3.0): a missing gitleaks binary spawns as ENOENT and
   // reads exit 1 — indistinguishable from a FINDING. Gate it explicitly and
   // fail closed with the typed route out (install, or the documented seam).
-  const glPath = Bun.which('gitleaks');
+  const glPath = Bun.which("gitleaks");
   if (!glPath) {
-    return { ok: false, reasons: ['gitleaks: not found on PATH — install gitleaks (https://gitleaks.io) or set HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS=1 to skip the external checks explicitly (a missing scanner is never read as a clean scan)'], skippedExternal };
+    return {
+      ok: false,
+      reasons: [
+        "gitleaks: not found on PATH — install gitleaks (https://gitleaks.io) or set HUB_BOOTSTRAP_SKIP_EXTERNAL_CHECKS=1 to skip the external checks explicitly (a missing scanner is never read as a clean scan)",
+      ],
+      skippedExternal,
+    };
   }
-  const gl = run([glPath, 'detect', '--source', cloneDir, '--config', cfg, '--no-git', '--redact']);
+  const gl = run([glPath, "detect", "--source", cloneDir, "--config", cfg, "--no-git", "--redact"]);
   if (gl.code === 1) {
-    return { ok: false, reasons: [`gitleaks: findings in the clone working tree (exit 1) — review before bootstrapping`], skippedExternal };
+    return {
+      ok: false,
+      reasons: [`gitleaks: findings in the clone working tree (exit 1) — review before bootstrapping`],
+      skippedExternal,
+    };
   }
   if (gl.code !== 0) {
-    return { ok: false, reasons: [`gitleaks: tool failure (exit ${gl.code}) ${gl.out.slice(0, 400)}`], skippedExternal };
+    return {
+      ok: false,
+      reasons: [`gitleaks: tool failure (exit ${gl.code}) ${gl.out.slice(0, 400)}`],
+      skippedExternal,
+    };
   }
-  reasons.push('gitleaks: working-tree scan clean (explicit --config .gitleaks.toml)');
+  reasons.push("gitleaks: working-tree scan clean (explicit --config .gitleaks.toml)");
 
   // Check 3 — bun install && bun audit, no advisories (design floor: no
   // high/critical; the gate refuses ANY advisory — fail-closed beyond it).
-  if (existsSync(join(cloneDir, 'package.json'))) {
-    const install = run([BUN_BIN, 'install'], { cwd: cloneDir });
-    if (install.code !== 0) return { ok: false, reasons: [`bun install failed in the clone (exit ${install.code}) ${install.out.slice(0, 400)}`], skippedExternal };
-    const audit = run([BUN_BIN, 'audit'], { cwd: cloneDir });
+  if (existsSync(join(cloneDir, "package.json"))) {
+    const install = run([BUN_BIN, "install"], { cwd: cloneDir });
+    if (install.code !== 0)
+      return {
+        ok: false,
+        reasons: [`bun install failed in the clone (exit ${install.code}) ${install.out.slice(0, 400)}`],
+        skippedExternal,
+      };
+    const audit = run([BUN_BIN, "audit"], { cwd: cloneDir });
     if (audit.code !== 0) {
-      return { ok: false, reasons: [`bun audit reported advisories (exit ${audit.code}) — no high/critical allowed ${audit.out.slice(0, 400)}`], skippedExternal };
+      return {
+        ok: false,
+        reasons: [
+          `bun audit reported advisories (exit ${audit.code}) — no high/critical allowed ${audit.out.slice(0, 400)}`,
+        ],
+        skippedExternal,
+      };
     }
-    reasons.push('bun install + bun audit: no advisories');
+    reasons.push("bun install + bun audit: no advisories");
   } else {
-    reasons.push('bun install + bun audit: skipped (clone carries no package.json)');
+    reasons.push("bun install + bun audit: skipped (clone carries no package.json)");
   }
 
   // Check 4 — root audit.ts green.
-  const audit = run([BUN_BIN, 'scripts/audit.ts'], { cwd: ROOT });
+  const audit = run([BUN_BIN, "scripts/audit.ts"], { cwd: ROOT });
   if (audit.code !== 0) {
-    return { ok: false, reasons: [`root audit.ts not green (exit ${audit.code}) ${audit.out.slice(-400)}`], skippedExternal };
+    return {
+      ok: false,
+      reasons: [`root audit.ts not green (exit ${audit.code}) ${audit.out.slice(-400)}`],
+      skippedExternal,
+    };
   }
-  reasons.push('root audit.ts: green');
+  reasons.push("root audit.ts: green");
 
   return { ok: true, reasons, skippedExternal };
 }
@@ -439,12 +503,18 @@ export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
   // with a note instead of false-failing the atomic rename (v1.3.0 platform
   // guard; shell probes like `stat -f` stay forbidden here).
   const tempDev = statSync(tempDir).dev;
-  const targetParentDev = statSync(join(targetDir, '..')).dev;
+  const targetParentDev = statSync(join(targetDir, "..")).dev;
   const decidable = Number.isFinite(tempDev) && Number.isFinite(targetParentDev);
   if (decidable && tempDev !== targetParentDev) {
-    failWithCleanup(`same-volume check failed: temp dir (dev ${tempDev}) and target parent (dev ${targetParentDev}) are on different devices — an atomic rename is impossible; free the cross-volume mount and retry`, tempDir);
+    failWithCleanup(
+      `same-volume check failed: temp dir (dev ${tempDev}) and target parent (dev ${targetParentDev}) are on different devices — an atomic rename is impossible; free the cross-volume mount and retry`,
+      tempDir,
+    );
   }
-  if (!decidable) console.log('   note: same-volume check skipped (fs dev numbers unavailable on this platform) — the rename stays within Projects/ and atomic');
+  if (!decidable)
+    console.log(
+      "   note: same-volume check skipped (fs dev numbers unavailable on this platform) — the rename stays within Projects/ and atomic",
+    );
   try {
     renameSync(tempDir, targetDir);
     return { moved: true, concurrentClaim: false };
@@ -458,7 +528,7 @@ export function moveIntoPlace(tempDir: string, targetDir: string): MoveOutcome {
     // shape never produces EPERM there, so the branch is unreachable on
     // POSIX and no legitimate failure is masked. Cleanup + typed notice are
     // identical for all three codes.
-    if (code === 'ENOTEMPTY' || code === 'EEXIST' || code === 'EPERM') {
+    if (code === "ENOTEMPTY" || code === "EEXIST" || code === "EPERM") {
       // Five-guarantee #3 concurrency clause (§4.3.4): a concurrent claim
       // won — clean OUR temp and report, this is not an error. Cleanup is
       // best-effort (v1.2.0): a Windows EBUSY here must not turn the
@@ -484,9 +554,11 @@ function buildPlan(hub: string): BootstrapPlan {
   const tempDir = join(PROJECTS_DIR, `.bootstrap-${hub}-${process.pid}-${Date.now()}`);
   console.log(`\n📋 Bootstrap plan for '${hub}' (dry-run — add --apply to execute):`);
   console.log(`   hub_remote: ${remote} (source: ${source})`);
-  console.log(`   pinned SHA: ${sha ?? '<unresolved — offline? (apply requires a resolvable SHA)>'}`);
+  console.log(`   pinned SHA: ${sha ?? "<unresolved — offline? (apply requires a resolvable SHA)>"}`);
   console.log(`   temp dir:   ${tempDir} (never gw- — that namespace is swept by co-workspace)`);
-  console.log(`   gate:       gitleaks(--config .gitleaks.toml) + hook-integrity diff + bun install/audit + root audit.ts`);
+  console.log(
+    `   gate:       gitleaks(--config .gitleaks.toml) + hook-integrity diff + bun install/audit + root audit.ts`,
+  );
   console.log(`   move:       same-volume rename into ${join(PROJECTS_DIR, hub)} after the gate passes`);
   return { hub, hubDir: join(PROJECTS_DIR, hub), remote, sha, tempDir };
 }
@@ -500,10 +572,14 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     // VALIDATED gate (§4.4) run by the bootstrap that created the clone —
     // never stamped onto a directory that appeared by other means.
     if (!target.valid) {
-      fail(`'${join(PROJECTS_DIR, hub)}' exists but is NOT a valid hub clone: ${target.problems.join('; ')} — repair or remove it manually; hub-bootstrap never deletes or overwrites a target`);
+      fail(
+        `'${join(PROJECTS_DIR, hub)}' exists but is NOT a valid hub clone: ${target.problems.join("; ")} — repair or remove it manually; hub-bootstrap never deletes or overwrites a target`,
+      );
     }
     console.log(`✅ ${hub} is already present at ${join(PROJECTS_DIR, hub)} — nothing to do (idempotent no-op).`);
-    console.log(`   Note: READY is only ever reached via the VALIDATED gate (§4.4) run by the bootstrap that created the clone.`);
+    console.log(
+      `   Note: READY is only ever reached via the VALIDATED gate (§4.4) run by the bootstrap that created the clone.`,
+    );
     printStatus(hub);
     return;
   }
@@ -514,11 +590,13 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
   // PM asks the user in-session and re-runs with --yes. The FLAG is the
   // recorded approval; it lands in the state file's approval journal record.
   if (!apply) {
-    console.log('\nDry run — nothing was written. Re-run with --apply (and --yes to record user approval) to execute.');
+    console.log("\nDry run — nothing was written. Re-run with --apply (and --yes to record user approval) to execute.");
     return;
   }
   if (!yes) {
-    fail(`approval gate: re-run with --yes after the user approves the plan above (hub + pinned SHA must be shown to the user; the flag IS the recorded approval)`);
+    fail(
+      `approval gate: re-run with --yes after the user approves the plan above (hub + pinned SHA must be shown to the user; the flag IS the recorded approval)`,
+    );
   }
   if (!plan.sha) {
     fail(`cannot pin a commit: git ls-remote resolved no SHA for ${plan.remote} — check the remote and retry`);
@@ -527,7 +605,7 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
 
   // Five-guarantee #2 — lock: automation-lock.ts verbatim, key bootstrap-<hub>.
   const lockName = `bootstrap-${hub}`;
-  const lock = acquireLock(lockName, { stateDir: join(ROOT, '.pipeline-state') });
+  const lock = acquireLock(lockName, { stateDir: join(ROOT, ".pipeline-state") });
   if (!lock.ok) fail(`lock refused: ${lock.message}`);
   try {
     // Five-guarantee #4 — boot-time sweep (§4.3.5): a crashed bootstrap leaves
@@ -540,7 +618,9 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
         rmSync(s.dir, { recursive: true, force: true });
         console.log(`   🧹 boot-time sweep removed ${s.dir} — ${s.cause}`);
       } catch (e) {
-        console.log(`   ⚠ boot-time sweep could not remove ${s.dir} (${e instanceof Error ? e.message : e}) — left for the next sweep`);
+        console.log(
+          `   ⚠ boot-time sweep could not remove ${s.dir} (${e instanceof Error ? e.message : e}) — left for the next sweep`,
+        );
       }
     }
     // Five-guarantee #3 — temp dir + atomic move (§4.3): clone into
@@ -553,76 +633,127 @@ function bootstrap(hub: string, apply: boolean, yes: boolean): void {
     // -c core.autocrlf=false (v1.2.0): pin a faithful checkout so the hook-
     // integrity byte compare is deterministic on Windows too (no-op on POSIX,
     // where autocrlf already defaults to false).
-    const clone = run(['git', '-c', 'core.autocrlf=false', 'clone', '--quiet', plan.remote, plan.tempDir]);
+    const clone = run(["git", "-c", "core.autocrlf=false", "clone", "--quiet", plan.remote, plan.tempDir]);
     if (clone.code !== 0) {
-      failWithCleanup(`git clone failed (exit ${clone.code}) ${clone.out.slice(0, 400)} — temp dir cleaned`, plan.tempDir);
+      failWithCleanup(
+        `git clone failed (exit ${clone.code}) ${clone.out.slice(0, 400)} — temp dir cleaned`,
+        plan.tempDir,
+      );
     }
     // Five-guarantee #4 — recovery marker (§4.3.5), written after the clone
     // (git clone refuses a non-empty target); a crash DURING the clone leaves
     // a markerless dir that the --recover sweep removes via its age fallback.
-    writeFileSync(join(plan.tempDir, 'bootstrap-state.json'), JSON.stringify({
-      pid: process.pid, url: plan.remote, sha: plan.sha, started_at: nowIso(),
-    }, null, 2) + '\n', 'utf-8');
-    const head = run(['git', '-C', plan.tempDir, 'rev-parse', 'HEAD']);
-    const clonedSha = head.out.trim().split('\n')[0];
+    writeFileSync(
+      join(plan.tempDir, "bootstrap-state.json"),
+      JSON.stringify(
+        {
+          pid: process.pid,
+          url: plan.remote,
+          sha: plan.sha,
+          started_at: nowIso(),
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf-8",
+    );
+    const head = run(["git", "-C", plan.tempDir, "rev-parse", "HEAD"]);
+    const clonedSha = head.out.trim().split("\n")[0];
     if (head.code !== 0 || clonedSha !== plan.sha) {
-      failWithCleanup(`SHA pin mismatch: approved ${plan.sha} but the clone resolved ${clonedSha || '<none>'} — the remote moved between approval and clone; re-approve the new SHA and retry (temp dir cleaned)`, plan.tempDir);
+      failWithCleanup(
+        `SHA pin mismatch: approved ${plan.sha} but the clone resolved ${clonedSha || "<none>"} — the remote moved between approval and clone; re-approve the new SHA and retry (temp dir cleaned)`,
+        plan.tempDir,
+      );
     }
     // Verify inside temp BEFORE any gate: identity files parse, it is a work tree.
     try {
-      JSON.parse(readFileSync(join(plan.tempDir, 'variant.json'), 'utf-8'));
+      JSON.parse(readFileSync(join(plan.tempDir, "variant.json"), "utf-8"));
     } catch (e) {
-      failWithCleanup(`clone verification failed: variant.json does not parse (${e instanceof Error ? e.message : String(e)}) — temp dir cleaned`, plan.tempDir);
+      failWithCleanup(
+        `clone verification failed: variant.json does not parse (${e instanceof Error ? e.message : String(e)}) — temp dir cleaned`,
+        plan.tempDir,
+      );
     }
-    const inside = run(['git', '-C', plan.tempDir, 'rev-parse', '--is-inside-work-tree']);
-    if (inside.code !== 0 || !inside.out.includes('true')) {
-      failWithCleanup('clone verification failed: not a git work tree — temp dir cleaned', plan.tempDir);
+    const inside = run(["git", "-C", plan.tempDir, "rev-parse", "--is-inside-work-tree"]);
+    if (inside.code !== 0 || !inside.out.includes("true")) {
+      failWithCleanup("clone verification failed: not a git work tree — temp dir cleaned", plan.tempDir);
     }
     console.log(`   clone verified at ${clonedSha.slice(0, 12)}; variant.json parses; git work tree ok`);
 
     // Hooks stay INACTIVE until VALIDATED (§4.3.6): pre-VALIDATED the clone
     // sits in the temp dir — no hook is armed because the gate runs first and
     // the move happens only after every check passes.
-    console.log(' VALIDATED gate: gitleaks → hook-integrity → bun audit → root audit.ts …');
+    console.log(" VALIDATED gate: gitleaks → hook-integrity → bun audit → root audit.ts …");
     const gate = runValidatedGate(plan.tempDir);
     for (const r of gate.reasons) console.log(`   · ${r}`);
     if (!gate.ok) {
-      failWithCleanup(`VALIDATED gate FAILED — temp dir cleaned, nothing moved:\n   ${gate.reasons.join('\n   ')}`, plan.tempDir);
+      failWithCleanup(
+        `VALIDATED gate FAILED — temp dir cleaned, nothing moved:\n   ${gate.reasons.join("\n   ")}`,
+        plan.tempDir,
+      );
     }
 
     // State file: init + BOOTSTRAPPED->VALIDATED->READY journal (§3.1), written
     // INSIDE the temp clone so the single atomic move carries state + journal.
-    initStateFile(plan.tempDir, hub, { actor: 'user', remote: plan.remote, sha: plan.sha, at: nowIso() });
+    initStateFile(plan.tempDir, hub, { actor: "user", remote: plan.remote, sha: plan.sha, at: nowIso() });
     const bootstrapEnums = loadRegistryEnums(ROOT, hub);
-    const skipNote = gate.skippedExternal ? ' (external checks skipped via test seam — see reason)' : '';
-    applyTransition(plan.tempDir, hub, {
-      kind: 'bootstrap', to: 'BOOTSTRAPPED', actor: 'hub-bootstrap',
-      reason: `cloned ${plan.remote} @ ${plan.sha} with user approval (--yes recorded in approval)${skipNote}`,
-      at: nowIso(),
-    }, { enums: bootstrapEnums });
-    applyTransition(plan.tempDir, hub, {
-      kind: 'bootstrap', to: 'VALIDATED', actor: 'hub-bootstrap',
-      reason: gate.reasons.join('; '),
-      at: nowIso(),
-    }, { enums: bootstrapEnums });
-    applyTransition(plan.tempDir, hub, {
-      kind: 'bootstrap', to: 'READY', actor: 'hub-bootstrap',
-      reason: 'infra verified end-to-end (READY says nothing about service capacity — the hub PM declares operational state at session start)',
-      at: nowIso(),
-    }, { enums: bootstrapEnums });
+    const skipNote = gate.skippedExternal ? " (external checks skipped via test seam — see reason)" : "";
+    applyTransition(
+      plan.tempDir,
+      hub,
+      {
+        kind: "bootstrap",
+        to: "BOOTSTRAPPED",
+        actor: "hub-bootstrap",
+        reason: `cloned ${plan.remote} @ ${plan.sha} with user approval (--yes recorded in approval)${skipNote}`,
+        at: nowIso(),
+      },
+      { enums: bootstrapEnums },
+    );
+    applyTransition(
+      plan.tempDir,
+      hub,
+      {
+        kind: "bootstrap",
+        to: "VALIDATED",
+        actor: "hub-bootstrap",
+        reason: gate.reasons.join("; "),
+        at: nowIso(),
+      },
+      { enums: bootstrapEnums },
+    );
+    applyTransition(
+      plan.tempDir,
+      hub,
+      {
+        kind: "bootstrap",
+        to: "READY",
+        actor: "hub-bootstrap",
+        reason:
+          "infra verified end-to-end (READY says nothing about service capacity — the hub PM declares operational state at session start)",
+        at: nowIso(),
+      },
+      { enums: bootstrapEnums },
+    );
 
     // Same-volume check (§4.3.3) then the atomic move.
     const move = moveIntoPlace(plan.tempDir, plan.hubDir);
     if (!move.moved && move.concurrentClaim) {
-      console.log(`✅ ${hub} was claimed concurrently while this bootstrap ran — our temp dir is cleaned, the winner's clone stands at ${plan.hubDir}.`);
+      console.log(
+        `✅ ${hub} was claimed concurrently while this bootstrap ran — our temp dir is cleaned, the winner's clone stands at ${plan.hubDir}.`,
+      );
       printStatus(hub);
       return;
     }
-    console.log(`\n✅ ${hub} bootstrapped: BOOTSTRAPPED → VALIDATED → READY (journal hash-chained in ${stateFilePath(plan.hubDir, hub)}).`);
-    console.log('   operational_state is intentionally null — the hub PM declares AVAILABLE/DEGRADED at session start (see the hub operator guide §Bootstrap & lifecycle).');
+    console.log(
+      `\n✅ ${hub} bootstrapped: BOOTSTRAPPED → VALIDATED → READY (journal hash-chained in ${stateFilePath(plan.hubDir, hub)}).`,
+    );
+    console.log(
+      "   operational_state is intentionally null — the hub PM declares AVAILABLE/DEGRADED at session start (see the hub operator guide §Bootstrap & lifecycle).",
+    );
     printStatus(hub);
   } finally {
-    releaseLock(lockName, { stateDir: join(ROOT, '.pipeline-state') });
+    releaseLock(lockName, { stateDir: join(ROOT, ".pipeline-state") });
   }
 }
 
@@ -640,23 +771,28 @@ interface StaleTemp {
 function sweepStaleTempDirs(nowMs: number = Date.now()): StaleTemp[] {
   let names: string[] = [];
   try {
-    names = readdirSync(PROJECTS_DIR).filter(n => n.startsWith('.bootstrap-'));
-  } catch { /* no Projects dir — nothing to sweep */ }
+    names = readdirSync(PROJECTS_DIR).filter((n) => n.startsWith(".bootstrap-"));
+  } catch {
+    /* no Projects dir — nothing to sweep */
+  }
   const stale: StaleTemp[] = [];
   for (const name of names) {
     const dir = join(PROJECTS_DIR, name);
-    const markerPath = join(dir, 'bootstrap-state.json');
+    const markerPath = join(dir, "bootstrap-state.json");
     let cause: string | null = null;
     try {
-      const marker = JSON.parse(readFileSync(markerPath, 'utf-8')) as { pid?: number; started_at?: string };
+      const marker = JSON.parse(readFileSync(markerPath, "utf-8")) as { pid?: number; started_at?: string };
       const started = marker.started_at ? Date.parse(marker.started_at) : NaN;
-      const ageOk = Number.isNaN(started) ? (Date.now() - statSync(dir).mtimeMs > SWEEP_MAX_AGE_MS) : (nowMs - started > SWEEP_MAX_AGE_MS);
-      const pidDead = typeof marker.pid === 'number' ? !pidAlive(marker.pid) : true;
-      if (pidDead) cause = `pid ${marker.pid ?? '?'} is dead`;
-      else if (ageOk) cause = `age > 24h (started_at ${marker.started_at ?? '?'})`;
+      const ageOk = Number.isNaN(started)
+        ? Date.now() - statSync(dir).mtimeMs > SWEEP_MAX_AGE_MS
+        : nowMs - started > SWEEP_MAX_AGE_MS;
+      const pidDead = typeof marker.pid === "number" ? !pidAlive(marker.pid) : true;
+      if (pidDead) cause = `pid ${marker.pid ?? "?"} is dead`;
+      else if (ageOk) cause = `age > 24h (started_at ${marker.started_at ?? "?"})`;
     } catch {
       // No/unreadable marker: fall back to directory age only.
-      if (Date.now() - statSync(dir).mtimeMs > SWEEP_MAX_AGE_MS) cause = 'no readable bootstrap-state.json and dir age > 24h';
+      if (Date.now() - statSync(dir).mtimeMs > SWEEP_MAX_AGE_MS)
+        cause = "no readable bootstrap-state.json and dir age > 24h";
     }
     if (cause) stale.push({ dir, cause });
   }
@@ -667,10 +803,10 @@ function recover(apply: boolean): void {
   const nowMs = Date.parse(process.env.HUB_BOOTSTRAP_NOW ?? new Date().toISOString());
   const stale = sweepStaleTempDirs(nowMs);
   if (stale.length === 0) {
-    console.log('✅ no stale bootstrap temp dirs under Projects/');
+    console.log("✅ no stale bootstrap temp dirs under Projects/");
     return;
   }
-  for (const s of stale) console.log(`${apply ? '🧹' : '[dry-run]'}  ${s.dir} — ${s.cause}`);
+  for (const s of stale) console.log(`${apply ? "🧹" : "[dry-run]"}  ${s.dir} — ${s.cause}`);
   if (!apply) {
     console.log(`\n${stale.length} stale temp dir(s). Re-run with --apply to remove.`);
     return;
@@ -694,7 +830,7 @@ function pidAlive(pid: number): boolean {
     process.kill(pid, 0);
     return true;
   } catch (err) {
-    return (err as NodeJS.ErrnoException).code === 'EPERM';
+    return (err as NodeJS.ErrnoException).code === "EPERM";
   }
 }
 
@@ -713,7 +849,7 @@ function probeDivergenceForce(reportsDir: string, hub: string, lastJournalAt: st
     file = latestProbeReportFile(reportsDir, hub);
     if (!file) return null;
     const full = join(reportsDir, file);
-    if (probeReportVerdict(readFileSync(full, 'utf-8')) !== 'DIVERGENT') return null;
+    if (probeReportVerdict(readFileSync(full, "utf-8")) !== "DIVERGENT") return null;
     if (lastJournalAt !== null && Date.parse(lastJournalAt) >= statSync(full).mtimeMs) return null;
   } catch {
     return null; // unreadable/absent reports dir is not a declaration blocker
@@ -723,15 +859,19 @@ function probeDivergenceForce(reportsDir: string, hub: string, lastJournalAt: st
 
 function declare(hub: string, to: string, flags: Record<string, string | boolean>): void {
   if (!(OPERATIONAL_STATES as readonly string[]).includes(to)) {
-    fail(`declare targets an operational_state only (${OPERATIONAL_STATES.join('|')}) — bootstrap states are machine-declared by hub-bootstrap (design §3.1)`);
+    fail(
+      `declare targets an operational_state only (${OPERATIONAL_STATES.join("|")}) — bootstrap states are machine-declared by hub-bootstrap (design §3.1)`,
+    );
   }
-  const actor = String(flags.actor ?? '');
-  if (actor !== 'user' && actor !== 'hub-pm') {
-    fail(`--actor must be user | hub-pm (operational declarations are the hub PM's duty; got: ${actor || '<missing>'})`);
+  const actor = String(flags.actor ?? "");
+  if (actor !== "user" && actor !== "hub-pm") {
+    fail(
+      `--actor must be user | hub-pm (operational declarations are the hub PM's duty; got: ${actor || "<missing>"})`,
+    );
   }
-  const reason = String(flags.reason ?? '');
-  if (!reason.trim()) fail('--reason is required — every transition is audited with its cause');
-  const stateDir = flags['state-dir'] ? resolve(String(flags['state-dir'])) : join(PROJECTS_DIR, hub);
+  const reason = String(flags.reason ?? "");
+  if (!reason.trim()) fail("--reason is required — every transition is audited with its cause");
+  const stateDir = flags["state-dir"] ? resolve(String(flags["state-dir"])) : join(PROJECTS_DIR, hub);
   let current: HubStateFile | null = null;
   try {
     current = readState(stateDir, hub);
@@ -742,41 +882,61 @@ function declare(hub: string, to: string, flags: Record<string, string | boolean
   // Divergence force (§3.5): a standing DIVERGENT probe report coerces the
   // next AVAILABLE declaration to DEGRADED. More-constrained declarations
   // (DEGRADED / UNAVAILABLE / RECOVERY) pass through untouched.
-  const forcedBy = probeDivergenceForce(join(ROOT, 'docs', 'reports'), hub, current?.state_history.at(-1)?.timestamp ?? null);
+  const forcedBy = probeDivergenceForce(
+    join(ROOT, "docs", "reports"),
+    hub,
+    current?.state_history.at(-1)?.timestamp ?? null,
+  );
   let target = to as (typeof OPERATIONAL_STATES)[number];
-  let forcedNote = '';
-  if (forcedBy !== null && target === 'AVAILABLE') {
-    target = 'DEGRADED';
+  let forcedNote = "";
+  if (forcedBy !== null && target === "AVAILABLE") {
+    target = "DEGRADED";
     forcedNote = ` [auto-forced to DEGRADED by probe divergence: ${forcedBy} — design §3.5; a MATCH probe re-opens AVAILABLE]`;
   }
   // §3.4 capability matrix: entering DEGRADED with no existing degraded set
   // names its reduced capability set (operator guide §5.3; the reuse path —
   // re-attesting an existing DEGRADED — and the machine-coerced force are exempt).
-  if (target === 'DEGRADED' && flags.capabilities === undefined && forcedNote === ''
-    && (current?.degraded_capabilities?.length ?? 0) === 0) {
-    fail('--capabilities is required when declaring DEGRADED with no existing degraded set (design §3.4: a DEGRADED declaration names its reduced capability set)');
+  if (
+    target === "DEGRADED" &&
+    flags.capabilities === undefined &&
+    forcedNote === "" &&
+    (current?.degraded_capabilities?.length ?? 0) === 0
+  ) {
+    fail(
+      "--capabilities is required when declaring DEGRADED with no existing degraded set (design §3.4: a DEGRADED declaration names its reduced capability set)",
+    );
   }
   const enums = loadRegistryEnums(ROOT, hub);
   let capabilities: string[] | undefined;
   if (flags.capabilities !== undefined) {
-    capabilities = String(flags.capabilities).split(',').map(s => s.trim()).filter(Boolean);
+    capabilities = String(flags.capabilities)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     for (const v of validateDegradedCapabilities(capabilities, enums)) fail(`refused: ${v}`);
   }
-  const leaseHours = flags['lease-hours'] !== undefined ? Number(flags['lease-hours']) : undefined;
+  const leaseHours = flags["lease-hours"] !== undefined ? Number(flags["lease-hours"]) : undefined;
   if (leaseHours !== undefined && (!Number.isFinite(leaseHours) || leaseHours <= 0 || leaseHours > 24 * 7)) {
-    fail(`--lease-hours must be a positive number (<= 168), got: ${flags['lease-hours']}`);
+    fail(`--lease-hours must be a positive number (<= 168), got: ${flags["lease-hours"]}`);
   }
   try {
-    const state = applyTransition(stateDir, hub, {
-      kind: 'operational',
-      to: target,
-      actor,
-      reason: reason + forcedNote,
-      leaseMs: leaseHours !== undefined ? leaseHours * 3_600_000 : undefined,
-      degradedCapabilities: capabilities,
-      replaceCapabilities: flags.capabilities !== undefined || target !== 'DEGRADED',
-    }, { enums });
-    console.log(`✅ ${hub}: operational_state=${state.operational_state}${state.degraded_capabilities.length ? ` (degraded: ${state.degraded_capabilities.join(', ')})` : ''}, lease until ${state.ttl_lease?.expires_at}${forcedNote}`);
+    const state = applyTransition(
+      stateDir,
+      hub,
+      {
+        kind: "operational",
+        to: target,
+        actor,
+        reason: reason + forcedNote,
+        leaseMs: leaseHours !== undefined ? leaseHours * 3_600_000 : undefined,
+        degradedCapabilities: capabilities,
+        replaceCapabilities: flags.capabilities !== undefined || target !== "DEGRADED",
+      },
+      { enums },
+    );
+    console.log(
+      `✅ ${hub}: operational_state=${state.operational_state}${state.degraded_capabilities.length ? ` (degraded: ${state.degraded_capabilities.join(", ")})` : ""}, lease until ${state.ttl_lease?.expires_at}${forcedNote}`,
+    );
   } catch (err) {
     if (err instanceof HubStateError) fail(err.message);
     throw err;
@@ -789,11 +949,13 @@ function parseFlags(args: string[]): { positional: string[]; flags: Record<strin
   const positional: string[] = [];
   const flags: Record<string, string | boolean> = {};
   for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith('--')) {
+    if (args[i].startsWith("--")) {
       const key = args[i].slice(2);
       const next = args[i + 1];
-      if (next !== undefined && !next.startsWith('--') && key !== 'apply' && key !== 'yes' && key !== 'recover') { flags[key] = next; i++; }
-      else flags[key] = true;
+      if (next !== undefined && !next.startsWith("--") && key !== "apply" && key !== "yes" && key !== "recover") {
+        flags[key] = next;
+        i++;
+      } else flags[key] = true;
     } else positional.push(args[i]);
   }
   return { positional, flags };
@@ -809,18 +971,18 @@ if (import.meta.main) {
   let exitCode = 0;
   try {
     const args = process.argv.slice(2);
-    if (args.includes('--recover')) {
-      recover(args.includes('--apply'));
+    if (args.includes("--recover")) {
+      recover(args.includes("--apply"));
     } else {
       const { positional, flags } = parseFlags(args);
       const [sub, second] = positional;
-      if (sub === 'status') {
+      if (sub === "status") {
         if (!second) fail(USAGE);
-        printStatus(second, flags['state-dir'] ? resolve(String(flags['state-dir'])) : undefined);
-      } else if (sub === 'declare') {
+        printStatus(second, flags["state-dir"] ? resolve(String(flags["state-dir"])) : undefined);
+      } else if (sub === "declare") {
         if (!second || !positional[2]) fail(USAGE);
         declare(second, positional[2], flags);
-      } else if (sub && !sub.startsWith('--')) {
+      } else if (sub && !sub.startsWith("--")) {
         bootstrap(sub, flags.apply === true, flags.yes === true);
       } else {
         console.log(USAGE);

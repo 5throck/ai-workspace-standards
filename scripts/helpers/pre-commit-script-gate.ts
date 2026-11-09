@@ -59,24 +59,23 @@
  *                               the content invariant the proxy stands for
  *                               instead via the full Check A comparison.
  */
-export type ScriptsMdGateAction = 'pass' | 'verify-staged-coverage' | 'merge-verify';
+export type ScriptsMdGateAction = "pass" | "verify-staged-coverage" | "merge-verify";
 
 export function evaluateScriptsMdGate(input: {
   scriptsStagedCount: number;
   scriptsMdStaged: boolean;
   mergeInProgress: boolean;
 }): ScriptsMdGateAction {
-  if (input.scriptsStagedCount === 0) return 'pass';
-  if (input.scriptsMdStaged) return 'pass';
-  return input.mergeInProgress ? 'merge-verify' : 'verify-staged-coverage';
+  if (input.scriptsStagedCount === 0) return "pass";
+  if (input.scriptsMdStaged) return "pass";
+  return input.mergeInProgress ? "merge-verify" : "verify-staged-coverage";
 }
 
 /**
  * Observable one-line notice emitted when check 6 takes the merge path, so the
  * exemption is visible in hook output (T-20261027-009 requirement 2).
  */
-export const MERGE_GATE_NOTICE =
-  'check 6: merge in progress — verified via lifecycle Check A content comparison';
+export const MERGE_GATE_NOTICE = "check 6: merge in progress — verified via lifecycle Check A content comparison";
 
 /**
  * Observable one-line notice emitted when check 6's zero-delta coverage
@@ -85,7 +84,7 @@ export const MERGE_GATE_NOTICE =
  * registry rows the commit carries.
  */
 export const ZERO_DELTA_GATE_NOTICE =
-  'check 6: SCRIPTS.md zero delta — staged script @versions verified against HEAD registry rows';
+  "check 6: SCRIPTS.md zero delta — staged script @versions verified against HEAD registry rows";
 
 /**
  * Extract `@version X.Y.Z` from script CONTENT (U-20261107-001).
@@ -114,37 +113,37 @@ export function parseScriptsMdRegistryVersions(content: string): Map<string, str
   const result = new Map<string, string>();
   const registryMatch = content.match(/## Registry\r?\n([\s\S]*?)(?:\r?\n## |\s*$)/);
   if (!registryMatch) return result;
-  const lines = registryMatch[1].split('\n');
+  const lines = registryMatch[1].split("\n");
 
   let versionColIdx = 3;
   for (const line of lines) {
-    if (!line.startsWith('|')) continue;
-    const cols = line.split('|').map((c) => c.trim());
-    if (cols[1] === 'script') {
+    if (!line.startsWith("|")) continue;
+    const cols = line.split("|").map((c) => c.trim());
+    if (cols[1] === "script") {
       for (let i = 1; i < cols.length; i++) {
-        if (cols[i].toLowerCase() === 'version') versionColIdx = i;
+        if (cols[i].toLowerCase() === "version") versionColIdx = i;
       }
       break;
     }
   }
 
   for (const line of lines) {
-    if (!line.startsWith('|')) continue;
-    const cols = line.split('|').map((c) => c.trim());
+    if (!line.startsWith("|")) continue;
+    const cols = line.split("|").map((c) => c.trim());
     if (cols.length < 5) continue;
     const rawName = cols[1];
-    if (rawName === 'script' || rawName.startsWith('-')) continue;
-    if (!rawName.startsWith('`')) continue;
-    const filename = rawName.replace(/`/g, '').trim();
+    if (rawName === "script" || rawName.startsWith("-")) continue;
+    if (!rawName.startsWith("`")) continue;
+    const filename = rawName.replace(/`/g, "").trim();
     if (!filename) continue;
-    const version = cols[versionColIdx] ?? '';
+    const version = cols[versionColIdx] ?? "";
     result.set(filename, version);
   }
   return result;
 }
 
 /** Why one staged script failed the coverage check (U-20261107-001). */
-export type CoverageFailureReason = 'no-version-header' | 'no-registry-row' | 'version-mismatch';
+export type CoverageFailureReason = "no-version-header" | "no-registry-row" | "version-mismatch";
 
 /** Per-script coverage outcome for one staged script. */
 export interface StagedScriptCoverageEntry {
@@ -176,21 +175,24 @@ export function evaluateStagedScriptCoverage(input: {
   scriptsMdContent: string | null;
   scriptVersions: Record<string, string | null>;
 }): { allCovered: boolean; covered: string[]; uncovered: StagedScriptCoverageEntry[] } {
-  const rows = input.scriptsMdContent !== null ? parseScriptsMdRegistryVersions(input.scriptsMdContent) : new Map<string, string>();
+  const rows =
+    input.scriptsMdContent !== null
+      ? parseScriptsMdRegistryVersions(input.scriptsMdContent)
+      : new Map<string, string>();
   const covered: string[] = [];
   const uncovered: StagedScriptCoverageEntry[] = [];
 
   for (const script of input.stagedScripts) {
     // SCRIPTS.md keys are repo-relative-within-scripts/ (e.g. `hooks/pre-commit.ts`).
-    const registryKey = script.replace(/\\/g, '/').replace(/^scripts\//, '');
+    const registryKey = script.replace(/\\/g, "/").replace(/^scripts\//, "");
     const fileVersion = input.scriptVersions[script] ?? null;
     if (fileVersion === null) {
-      uncovered.push({ script, fileVersion: null, covered: false, reason: 'no-version-header' });
+      uncovered.push({ script, fileVersion: null, covered: false, reason: "no-version-header" });
       continue;
     }
     const registryVersion = rows.get(registryKey);
     if (registryVersion === undefined) {
-      uncovered.push({ script, fileVersion, covered: false, reason: 'no-registry-row' });
+      uncovered.push({ script, fileVersion, covered: false, reason: "no-registry-row" });
       continue;
     }
     if (registryVersion !== fileVersion) {
@@ -199,7 +201,7 @@ export function evaluateStagedScriptCoverage(input: {
         fileVersion,
         registryVersion,
         covered: false,
-        reason: 'version-mismatch',
+        reason: "version-mismatch",
       });
       continue;
     }
@@ -231,13 +233,9 @@ export interface CheckAIssue {
 }
 
 function toFixData(raw: unknown): CheckAFixData | undefined {
-  if (raw === null || typeof raw !== 'object') return undefined;
+  if (raw === null || typeof raw !== "object") return undefined;
   const r = raw as Record<string, unknown>;
-  if (
-    typeof r.scriptName === 'string' &&
-    typeof r.fileVersion === 'string' &&
-    typeof r.registryVersion === 'string'
-  ) {
+  if (typeof r.scriptName === "string" && typeof r.fileVersion === "string" && typeof r.registryVersion === "string") {
     return { scriptName: r.scriptName, fileVersion: r.fileVersion, registryVersion: r.registryVersion };
   }
   return undefined;
@@ -261,10 +259,10 @@ export function parseCheckAErrorsDetailed(jsonRaw: string): CheckAIssue[] {
   return errors
     .filter(
       (e): e is RawAuditIssue & { message: string } =>
-        e?.level === 'error' && typeof e.message === 'string' && e.message.includes('Check A:'),
+        e?.level === "error" && typeof e.message === "string" && e.message.includes("Check A:"),
     )
     .map((e) => ({
-      file: typeof e.file === 'string' ? e.file : '',
+      file: typeof e.file === "string" ? e.file : "",
       message: e.message,
       fixData: toFixData(e.fixData),
     }));

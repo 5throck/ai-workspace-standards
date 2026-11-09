@@ -19,12 +19,12 @@ interface ParallelAgentTask {
   task: string;
   context?: string[];
   outputFormat?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: "high" | "medium" | "low";
 }
 
 interface DispatchResult {
   task: ParallelAgentTask;
-  status: 'dispatched' | 'completed' | 'failed';
+  status: "dispatched" | "completed" | "failed";
   output?: string;
   error?: string;
   timestamp: Date;
@@ -46,22 +46,18 @@ const defaultTasks: ParallelAgentTask[] = [
     context: [
       "Look for architectural patterns",
       "Identify dependencies between components",
-      "Check for code quality issues"
+      "Check for code quality issues",
     ],
     outputFormat: "markdown",
-    priority: "high"
+    priority: "high",
   },
   {
     description: "Documentation audit",
     role: "docs-writer",
     task: "Audit all documentation files for consistency and completeness",
-    context: [
-      "Check CLAUDE.md files",
-      "Verify README.md completeness",
-      "Check AGENTS.md accuracy"
-    ],
+    context: ["Check CLAUDE.md files", "Verify README.md completeness", "Check AGENTS.md accuracy"],
     outputFormat: "json",
-    priority: "medium"
+    priority: "medium",
   },
   {
     description: "Security review",
@@ -70,23 +66,19 @@ const defaultTasks: ParallelAgentTask[] = [
     context: [
       "Scan for secrets or unsafe patterns",
       "Check dependency vulnerabilities",
-      "Validate permission configurations"
+      "Validate permission configurations",
     ],
     outputFormat: "markdown",
-    priority: "high"
+    priority: "high",
   },
   {
     description: "Quality gate audit",
     role: "auditor",
     task: "Run bun scripts/audit.ts and report all findings",
-    context: [
-      "Run full workspace audit",
-      "Check lifecycle sync",
-      "Verify skill definitions"
-    ],
+    context: ["Run full workspace audit", "Check lifecycle sync", "Verify skill definitions"],
     outputFormat: "markdown",
-    priority: "low"
-  }
+    priority: "low",
+  },
 ];
 
 /**
@@ -97,9 +89,9 @@ async function dispatchAgent(task: ParallelAgentTask, options: DispatchOptions =
   const startTime = Date.now();
 
   try {
-    console.log(`   [${task.priority || 'medium'}] ${task.description}`);
+    console.log(`   [${task.priority || "medium"}] ${task.description}`);
     console.log(`   Role: ${task.role}`);
-    console.log(`   Task: ${task.task.substring(0, 60)}${task.task.length > 60 ? '...' : ''}`);
+    console.log(`   Task: ${task.task.substring(0, 60)}${task.task.length > 60 ? "..." : ""}`);
 
     const elapsed = Date.now() - startTime;
 
@@ -107,26 +99,27 @@ async function dispatchAgent(task: ParallelAgentTask, options: DispatchOptions =
       console.log(`   ✅ Dry run accepted (${elapsed}ms)\n`);
       return {
         task,
-        status: 'completed',
-        output: 'dry-run',
-        timestamp: new Date()
+        status: "completed",
+        output: "dry-run",
+        timestamp: new Date(),
       };
     }
 
-    const errMsg = 'CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.';
+    const errMsg =
+      "CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.";
     console.log(`   ❌ Failed: ${errMsg} (${elapsed}ms)\n`);
-      return {
-        task,
-        status: 'failed',
-        error: errMsg,
-        timestamp: new Date()
-      };
+    return {
+      task,
+      status: "failed",
+      error: errMsg,
+      timestamp: new Date(),
+    };
   } catch (error) {
     return {
       task,
-      status: 'failed',
+      status: "failed",
       error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -134,28 +127,29 @@ async function dispatchAgent(task: ParallelAgentTask, options: DispatchOptions =
 /**
  * Dispatch multiple agents in parallel and await all results
  */
-export async function dispatchParallel(tasks: ParallelAgentTask[], options: DispatchOptions = {}): Promise<DispatchResult[]> {
+export async function dispatchParallel(
+  tasks: ParallelAgentTask[],
+  options: DispatchOptions = {},
+): Promise<DispatchResult[]> {
   console.log(`\n🚀 Parallel Agent Dispatcher`);
   console.log(`📊 Dispatching ${tasks.length} agents simultaneously\n`);
-  console.log(`━${'━'.repeat(60)}`);
+  console.log(`━${"━".repeat(60)}`);
 
   const startTime = Date.now();
 
   // Sort by priority and dispatch in parallel
   const prioritizedTasks = [...tasks].sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
-    return (priorityOrder[a.priority || 'medium'] ?? 1) - (priorityOrder[b.priority || 'medium'] ?? 1);
+    return (priorityOrder[a.priority || "medium"] ?? 1) - (priorityOrder[b.priority || "medium"] ?? 1);
   });
 
-  const results = await Promise.all(
-    prioritizedTasks.map(task => dispatchAgent(task, options))
-  );
+  const results = await Promise.all(prioritizedTasks.map((task) => dispatchAgent(task, options)));
 
   const elapsed = Date.now() - startTime;
-  const completed = results.filter(r => r.status === 'completed').length;
-  const failed = results.filter(r => r.status === 'failed').length;
+  const completed = results.filter((r) => r.status === "completed").length;
+  const failed = results.filter((r) => r.status === "failed").length;
 
-  console.log(`━${'━'.repeat(60)}`);
+  console.log(`━${"━".repeat(60)}`);
   console.log(`\n📊 Results:`);
   console.log(`   ✅ Completed: ${completed}/${tasks.length}`);
   console.log(`   ❌ Failed: ${failed}/${tasks.length}`);
@@ -172,22 +166,22 @@ export async function dispatchParallel(tasks: ParallelAgentTask[], options: Disp
  */
 export async function runCli(
   args: string[] = process.argv.slice(2),
-  defaults: ParallelAgentTask[] = defaultTasks
+  defaults: ParallelAgentTask[] = defaultTasks,
 ): Promise<void> {
   const customTasks: ParallelAgentTask[] = [];
 
-  const dryRun = args.includes('--dry-run');
+  const dryRun = args.includes("--dry-run");
 
   // Parse custom tasks from command line
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--task' && args[i + 1]) {
-      const parts = args[i + 1].split(':');
+    if (args[i] === "--task" && args[i + 1]) {
+      const parts = args[i + 1].split(":");
       if (parts.length >= 3) {
         customTasks.push({
           description: parts[0],
           role: parts[1],
           task: parts[2],
-          priority: (parts[3] as any) || 'medium'
+          priority: (parts[3] as any) || "medium",
         });
       }
       i++;
@@ -198,9 +192,9 @@ export async function runCli(
 
   try {
     const results = await dispatchParallel(tasksToRun, { dryRun });
-    process.exit(results.some(result => result.status === 'failed') ? 1 : 0);
+    process.exit(results.some((result) => result.status === "failed") ? 1 : 0);
   } catch (error) {
-    console.error('❌ Dispatch failed:', error);
+    console.error("❌ Dispatch failed:", error);
     process.exit(1);
   }
 }
@@ -215,7 +209,10 @@ async function main() {
 /**
  * Export for direct module use - handles empty task array by using defaults
  */
-export async function runDispatcher(tasks?: ParallelAgentTask[], options: DispatchOptions = {}): Promise<DispatchResult[]> {
+export async function runDispatcher(
+  tasks?: ParallelAgentTask[],
+  options: DispatchOptions = {},
+): Promise<DispatchResult[]> {
   return dispatchParallel(tasks && tasks.length > 0 ? tasks : defaultTasks, options);
 }
 
@@ -225,4 +222,3 @@ if (import.meta.main) {
 }
 
 export { dispatchParallel as default, ParallelAgentTask, DispatchResult, DispatchOptions };
-

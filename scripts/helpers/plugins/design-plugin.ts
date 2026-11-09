@@ -13,11 +13,7 @@
  *   3. Design token system mention (INFO) — design token system documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'design' variant type.
@@ -39,7 +35,7 @@ import type {
  */
 export class DesignPlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'design' as const;
+  readonly type = "design" as const;
 
   /**
    * Validates a design variant against design-specific requirements.
@@ -66,20 +62,13 @@ export class DesignPlugin implements VariantPlugin {
     // Verify that agents collectively cover visual-design, user-research,
     // prototyping, and design-system.
     // These are hard functional requirements — design variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'visual-design',
-      'user-research',
-      'prototyping',
-      'design-system',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["visual-design", "user-research", "prototyping", "design-system"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing design capability: ${cap}`,
           capability: cap,
         });
@@ -90,28 +79,22 @@ export class DesignPlugin implements VariantPlugin {
     // Design variants should reference accessibility compliance in their documentation.
     // Accessibility is a critical quality attribute for inclusive design workflows.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('accessibility')
-    ) {
+    if (!variantContent.toLowerCase().includes("accessibility")) {
       issues.push({
-        severity: 'warning',
-        category: 'accessibility-compliance',
-        message:
-          'Design variant should reference accessibility compliance standards',
+        severity: "warning",
+        category: "accessibility-compliance",
+        message: "Design variant should reference accessibility compliance standards",
       });
     }
 
     // --- Check 3: Design token system mention ---
     // Standard design token system documentation for design contexts.
     // This is informational; not all design contexts require explicit design token system docs.
-    if (
-      !variantContent.toLowerCase().includes('design token')
-    ) {
+    if (!variantContent.toLowerCase().includes("design token")) {
       issues.push({
-        severity: 'info',
-        category: 'design-token-system',
-        message:
-          'Consider documenting design token system standards',
+        severity: "info",
+        category: "design-token-system",
+        message: "Consider documenting design token system standards",
       });
     }
 

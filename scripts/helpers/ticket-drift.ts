@@ -22,8 +22,8 @@
 // variant sync — the step is an L0 surface per the design scope table (§6),
 // the L1 mirror carries the code only because its importer is L0+L1.
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 /** One citation pattern match that does not resolve in any store or archive. */
 export interface DriftFinding {
@@ -44,11 +44,7 @@ export interface DriftReport {
 
 /** resolveTicketLocation's shape, structurally typed so this helper never
  * statically depends on the L0-only store module. */
-type TicketLocationResolver = (
-  serviceDir: string,
-  governanceDir: string,
-  id: string,
-) => unknown;
+type TicketLocationResolver = (serviceDir: string, governanceDir: string, id: string) => unknown;
 
 /** Ticket-id citation shape (same grammar the store enforces at its boundary:
  * T-YYYYMMDD-NNN service/governance tickets and U-YYYYMMDD-NNN upstream
@@ -64,7 +60,7 @@ async function loadStoreResolver(): Promise<TicketLocationResolver | null> {
     // computed specifier: tsc must not resolve this statically — ticket-store.ts is
     // L0-only and absent from delivered trees (TS2307 broke the L1 Typecheck CI step;
     // the runtime degrade design below is unchanged)
-    const storeSpecifier = './ticket-store.ts';
+    const storeSpecifier = "./ticket-store.ts";
     const mod = (await import(storeSpecifier)) as {
       resolveTicketLocation: TicketLocationResolver;
     };
@@ -90,9 +86,9 @@ export async function driftCheck(opts: {
   const cited = new Map<string, { file: string; line: number }>();
   if (existsSync(memoryDir)) {
     for (const entry of readdirSync(memoryDir, { withFileTypes: true })) {
-      if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+      if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
       const filePath = join(memoryDir, entry.name);
-      const lines = readFileSync(filePath, 'utf-8').split('\n');
+      const lines = readFileSync(filePath, "utf-8").split("\n");
       for (let i = 0; i < lines.length; i++) {
         for (const m of lines[i].matchAll(TICKET_ID_CITATION_PATTERN)) {
           const id = m[1];

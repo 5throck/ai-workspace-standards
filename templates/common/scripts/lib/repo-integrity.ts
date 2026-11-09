@@ -68,25 +68,25 @@
 //          at. Ambiguity would defeat the gate itself — a redirected read snapshots a
 //          different repository and compares clean.
 
-import { spawnSync } from 'node:child_process';
-import { gitCleanEnv } from './git-env.ts';
+import { spawnSync } from "node:child_process";
+import { gitCleanEnv } from "./git-env.ts";
 
 /**
  * One-line incident reference carried by every refusal message, so an operator who
  * meets the guard for the first time can find the mechanism without git archaeology.
  */
 export const REPO_INTEGRITY_INCIDENT_REF =
-  '2026-11-09 repository-config corruption incident (design §11 of 2026-11-08-gw-tenant-loop-and-hardening-design)';
+  "2026-11-09 repository-config corruption incident (design §11 of 2026-11-08-gw-tenant-loop-and-hardening-design)";
 
 /** The exact command that clears the `core.bare = true` half of the incident. */
-export const CORE_BARE_REPAIR_COMMAND = 'git config --local core.bare false';
+export const CORE_BARE_REPAIR_COMMAND = "git config --local core.bare false";
 
 /**
  * Design reference for the corruption-mode-1 detector (rogue commits), cited by the
  * base-resolution refusal and the Arm-2 wiring.
  */
 export const ROGUE_COMMIT_DESIGN_REF =
-  'docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md (rogue-commit detector, §3.1-§3.3)';
+  "docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md (rogue-commit detector, §3.1-§3.3)";
 
 /**
  * Blocklist of KNOWN fixture identity emails. A commit authored or committed by one of
@@ -116,12 +116,12 @@ export const ROGUE_IDENTITY_EMAIL_PATTERNS: RegExp[] = [
 ];
 
 /** Field separator for the single-spawn `git log` record format (%x1f). */
-const FIELD_SEPARATOR = '\x1f';
+const FIELD_SEPARATOR = "\x1f";
 
 /** One blocklisted commit, with WHICH identity field matched so the operator can see the shape. */
 export interface RogueCommitRecord {
   sha: string;
-  field: 'author' | 'committer';
+  field: "author" | "committer";
   /** Reconstructed `Name <email>` of the matched field. */
   identity: string;
   subject: string;
@@ -149,24 +149,24 @@ export function filterRogueCommits(
   patterns: RegExp[] = ROGUE_IDENTITY_EMAIL_PATTERNS,
 ): RogueCommitRecord[] {
   const hits: RogueCommitRecord[] = [];
-  for (const line of logOutput.split('\n')) {
+  for (const line of logOutput.split("\n")) {
     if (line.length === 0) continue;
     const fields = line.split(FIELD_SEPARATOR);
     if (fields.length < 6) continue; // not a scan record — ignore rather than misreport
     const [sha, authorName, authorEmail, committerName, committerEmail] = fields;
     const subject = fields.slice(5).join(FIELD_SEPARATOR);
     if (patterns.some((p) => p.test(authorEmail))) {
-      hits.push({ sha, field: 'author', identity: `${authorName} <${authorEmail}>`, subject });
+      hits.push({ sha, field: "author", identity: `${authorName} <${authorEmail}>`, subject });
     }
     if (patterns.some((p) => p.test(committerEmail))) {
-      hits.push({ sha, field: 'committer', identity: `${committerName} <${committerEmail}>`, subject });
+      hits.push({ sha, field: "committer", identity: `${committerName} <${committerEmail}>`, subject });
     }
   }
   return hits;
 }
 
 /** The exact `git log` record format: SHA + both identities + subject, one line each. */
-const ROGUE_SCAN_FORMAT = '%H%x1f%an%x1f%ae%x1f%cn%x1f%ce%x1f%s';
+const ROGUE_SCAN_FORMAT = "%H%x1f%an%x1f%ae%x1f%cn%x1f%ce%x1f%s";
 
 /**
  * Spawn + filter over an explicit rev range (pre-push scans the EXACT pushed range:
@@ -178,13 +178,16 @@ const ROGUE_SCAN_FORMAT = '%H%x1f%an%x1f%ae%x1f%cn%x1f%ce%x1f%s';
  */
 export function scanRogueCommitsInRange(revArgs: string[], root: string = process.cwd()): RogueScanResult {
   if (revArgs.length === 0) {
-    return { ok: false, reason: 'rogue-commit scan received an empty revision range — refusing to scan unbounded history' };
+    return {
+      ok: false,
+      reason: "rogue-commit scan received an empty revision range — refusing to scan unbounded history",
+    };
   }
-  const res = runGit(['log', ...revArgs, `--format=${ROGUE_SCAN_FORMAT}`], root);
+  const res = runGit(["log", ...revArgs, `--format=${ROGUE_SCAN_FORMAT}`], root);
   if (res.status !== 0) {
     return {
       ok: false,
-      reason: `git log ${revArgs.join(' ')} failed (exit ${res.status}): ${res.stderr.trim() || 'no stderr'}`,
+      reason: `git log ${revArgs.join(" ")} failed (exit ${res.status}): ${res.stderr.trim() || "no stderr"}`,
     };
   }
   return { ok: true, commits: filterRogueCommits(res.stdout) };
@@ -214,21 +217,21 @@ export function scanRogueCommits(base: string, root: string = process.cwd()): Ro
 export function resolveRogueScanBase(
   root: string = process.cwd(),
 ): { ok: true; base: string } | { ok: false; reason: string } {
-  const upstream = runGit(['rev-parse', '--abbrev-ref', 'HEAD@{upstream}'], root);
-  if (upstream.status === 0 && upstream.stdout.trim() !== '') {
+  const upstream = runGit(["rev-parse", "--abbrev-ref", "HEAD@{upstream}"], root);
+  if (upstream.status === 0 && upstream.stdout.trim() !== "") {
     return { ok: true, base: upstream.stdout.trim() };
   }
-  const originMain = runGit(['rev-parse', '--verify', 'origin/main'], root);
-  if (originMain.status === 0 && originMain.stdout.trim() !== '') {
-    return { ok: true, base: 'origin/main' };
+  const originMain = runGit(["rev-parse", "--verify", "origin/main"], root);
+  if (originMain.status === 0 && originMain.stdout.trim() !== "") {
+    return { ok: true, base: "origin/main" };
   }
   return {
     ok: false,
     reason:
-      `cannot resolve a rogue-commit scan base in ${root}: neither HEAD@{upstream} `
-      + `(exit ${upstream.status}: ${upstream.stderr.trim() || 'no stderr'}) nor origin/main `
-      + `(exit ${originMain.status}: ${originMain.stderr.trim() || 'no stderr'}) resolves. `
-      + `An integrity gate that cannot establish a comparison base must not silently pass. Ref: ${ROGUE_COMMIT_DESIGN_REF} §3.2.`,
+      `cannot resolve a rogue-commit scan base in ${root}: neither HEAD@{upstream} ` +
+      `(exit ${upstream.status}: ${upstream.stderr.trim() || "no stderr"}) nor origin/main ` +
+      `(exit ${originMain.status}: ${originMain.stderr.trim() || "no stderr"}) resolves. ` +
+      `An integrity gate that cannot establish a comparison base must not silently pass. Ref: ${ROGUE_COMMIT_DESIGN_REF} §3.2.`,
   };
 }
 
@@ -246,11 +249,11 @@ export function rogueScanRefusalLines(commits: RogueCommitRecord[], windowLabel:
     lines.push(`${c.sha} [${c.field}] ${c.identity} — ${c.subject}`);
   }
   lines.push(
-    'These commits were produced by a spawned test that inherited a hook\'s git environment (2026-11-09 incident class).',
-    'Repair is MANUAL history surgery — no auto-repair: drop the commits with `git rebase` (or `git reset` while unpushed)',
-    'after confirming no legitimate work is discarded, then re-run /sync.',
-    'Fix the spawning test to run under scripts/lib/git-env.ts (gitCleanEnvForShell for Bun Shell, gitCleanEnv for spawnSync);',
-    'fixture suites must self-assert via tests/helpers/fixture-git.ts.',
+    "These commits were produced by a spawned test that inherited a hook's git environment (2026-11-09 incident class).",
+    "Repair is MANUAL history surgery — no auto-repair: drop the commits with `git rebase` (or `git reset` while unpushed)",
+    "after confirming no legitimate work is discarded, then re-run /sync.",
+    "Fix the spawning test to run under scripts/lib/git-env.ts (gitCleanEnvForShell for Bun Shell, gitCleanEnv for spawnSync);",
+    "fixture suites must self-assert via tests/helpers/fixture-git.ts.",
     `Spec: ${ROGUE_COMMIT_DESIGN_REF} §3.3.`,
   );
   return lines;
@@ -293,24 +296,24 @@ interface GitResult {
 }
 
 function runGit(args: string[], root: string): GitResult {
-  const res = spawnSync('git', ['-C', root, ...args], {
-    encoding: 'utf8',
+  const res = spawnSync("git", ["-C", root, ...args], {
+    encoding: "utf8",
     // gitCleanEnv(): never let a hook-inherited GIT_DIR/GIT_CONFIG redirect these
     // reads onto another repository (that would silently defeat the gate).
     env: gitCleanEnv(),
   });
   return {
     status: res.status ?? 1,
-    stdout: res.stdout ?? '',
-    stderr: res.stderr ?? res.error?.message ?? '',
+    stdout: res.stdout ?? "",
+    stderr: res.stderr ?? res.error?.message ?? "",
   };
 }
 
 /** Split `git config --list` output into sorted, CR-trimmed, non-empty lines. */
 function normalizeConfigList(stdout: string): string[] {
   return stdout
-    .split('\n')
-    .map((line) => line.replace(/\r$/, ''))
+    .split("\n")
+    .map((line) => line.replace(/\r$/, ""))
     .filter((line) => line.length > 0)
     .sort();
 }
@@ -327,7 +330,7 @@ function normalizeConfigList(stdout: string): string[] {
  * non-repository probe.
  */
 export function snapshotRepoConfig(root: string = process.cwd()): RepoConfigSnapshot {
-  const list = runGit(['config', '--local', '--list'], root);
+  const list = runGit(["config", "--local", "--list"], root);
   if (list.status !== 0) {
     throw new Error(
       `repo-integrity: cannot read local git config at ${root} (exit ${list.status}): ${list.stderr.trim()}`,
@@ -337,8 +340,8 @@ export function snapshotRepoConfig(root: string = process.cwd()): RepoConfigSnap
 
   // Effective value, not just the local one: a global `core.bare` would break the
   // work tree just as effectively. Exit 1 with empty stdout = key unset.
-  const bare = runGit(['config', '--bool', '--get', 'core.bare'], root);
-  const coreBare = bare.status === 0 && bare.stdout.trim() !== '' ? bare.stdout.trim() : null;
+  const bare = runGit(["config", "--bool", "--get", "core.bare"], root);
+  const coreBare = bare.status === 0 && bare.stdout.trim() !== "" ? bare.stdout.trim() : null;
 
   // Worktree scope (v1.1.0): gated on the extension probe — with the extension OFF,
   // `git config --worktree --list` silently falls back to the LOCAL config (verified
@@ -347,9 +350,9 @@ export function snapshotRepoConfig(root: string = process.cwd()): RepoConfigSnap
   // exits 128 with "unable to read config file … config.worktree" — that is git
   // reporting an EMPTY worktree scope, not a failure (verified 2026-11-09).
   let worktreeEntries: string[] = [];
-  const wtProbe = runGit(['config', '--type=bool', '--get', 'extensions.worktreeConfig'], root);
-  if (wtProbe.status === 0 && wtProbe.stdout.trim() === 'true') {
-    const wt = runGit(['config', '--worktree', '--list'], root);
+  const wtProbe = runGit(["config", "--type=bool", "--get", "extensions.worktreeConfig"], root);
+  if (wtProbe.status === 0 && wtProbe.stdout.trim() === "true") {
+    const wt = runGit(["config", "--worktree", "--list"], root);
     if (wt.status === 0) {
       worktreeEntries = normalizeConfigList(wt.stdout);
     } else if (/unable to read config file .*config\.worktree/i.test(wt.stderr)) {
@@ -376,9 +379,9 @@ function parseEntries(entries: string[]): ParsedConfig {
   const values = new Map<string, string[]>();
   const lines = new Map<string, string[]>();
   for (const entry of entries) {
-    const eq = entry.indexOf('=');
+    const eq = entry.indexOf("=");
     const key = eq === -1 ? entry : entry.slice(0, eq);
-    const value = eq === -1 ? '' : entry.slice(eq + 1);
+    const value = eq === -1 ? "" : entry.slice(eq + 1);
     const bucket = values.get(key) ?? [];
     bucket.push(value);
     values.set(key, bucket);
@@ -416,8 +419,8 @@ export function diffRepoConfig(before: string[], after: string[]): RepoConfigDel
     if (!a.values.has(key)) continue;
     const beforeValues = b.values.get(key)!;
     const afterValues = a.values.get(key)!;
-    if (beforeValues.join('\u0000') === afterValues.join('\u0000')) continue;
-    changed.push(`${key}: ${beforeValues.join(', ')} → ${afterValues.join(', ')}`);
+    if (beforeValues.join("\u0000") === afterValues.join("\u0000")) continue;
+    changed.push(`${key}: ${beforeValues.join(", ")} → ${afterValues.join(", ")}`);
   }
 
   return { added: added.sort(), removed: removed.sort(), changed: changed.sort() };
@@ -434,7 +437,7 @@ export function isEmptyRepoConfigDelta(delta: RepoConfigDelta): boolean {
  * printed with `'wt: '` so a `config.worktree` delta is distinguishable from a local
  * one at a glance (v1.1.0).
  */
-export function formatRepoConfigDeltaRows(delta: RepoConfigDelta, scopePrefix = ''): string[] {
+export function formatRepoConfigDeltaRows(delta: RepoConfigDelta, scopePrefix = ""): string[] {
   return [
     ...delta.added.map((line) => `${scopePrefix}+ ${line}`),
     ...delta.removed.map((line) => `${scopePrefix}- ${line}`),
@@ -452,23 +455,24 @@ export function formatRepoConfigDeltaRows(delta: RepoConfigDelta, scopePrefix = 
  *   - the effective `core.bare` value is `true`.
  */
 export function assertWorkTreeHealthy(root: string = process.cwd()): WorkTreeHealth {
-  const probe = runGit(['rev-parse', '--is-inside-work-tree'], root);
-  const insideWorkTree = probe.status === 0 && probe.stdout.trim() === 'true';
+  const probe = runGit(["rev-parse", "--is-inside-work-tree"], root);
+  const insideWorkTree = probe.status === 0 && probe.stdout.trim() === "true";
 
-  const bare = runGit(['config', '--bool', '--get', 'core.bare'], root);
-  const coreBare = bare.status === 0 && bare.stdout.trim() !== '' ? bare.stdout.trim() : null;
+  const bare = runGit(["config", "--bool", "--get", "core.bare"], root);
+  const coreBare = bare.status === 0 && bare.stdout.trim() !== "" ? bare.stdout.trim() : null;
 
-  if (insideWorkTree && coreBare !== 'true') return { ok: true };
+  if (insideWorkTree && coreBare !== "true") return { ok: true };
 
-  const detail = coreBare === 'true'
-    ? `core.bare is true in ${root}/.git/config`
-    : `git rev-parse --is-inside-work-tree did not return true at ${root} (exit ${probe.status}: ${probe.stderr.trim() || 'not inside a git work tree'})`;
+  const detail =
+    coreBare === "true"
+      ? `core.bare is true in ${root}/.git/config`
+      : `git rev-parse --is-inside-work-tree did not return true at ${root} (exit ${probe.status}: ${probe.stderr.trim() || "not inside a git work tree"})`;
 
   return {
     ok: false,
     reason:
-      `unusable git work tree — ${detail}. `
-      + `Repair: ${CORE_BARE_REPAIR_COMMAND}  (worktrees share the main .git/config, so one redirected write breaks every checkout). `
-      + `Ref: ${REPO_INTEGRITY_INCIDENT_REF}.`,
+      `unusable git work tree — ${detail}. ` +
+      `Repair: ${CORE_BARE_REPAIR_COMMAND}  (worktrees share the main .git/config, so one redirected write breaks every checkout). ` +
+      `Ref: ${REPO_INTEGRITY_INCIDENT_REF}.`,
   };
 }

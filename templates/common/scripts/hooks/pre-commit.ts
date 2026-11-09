@@ -92,16 +92,20 @@ import {
 
 async function main() {
   const stagedOutput = await $`git diff --cached --name-only`.text();
-  const staged = stagedOutput.split('\n').filter(Boolean);
+  const staged = stagedOutput.split("\n").filter(Boolean);
   if (staged.length === 0) process.exit(0);
 
-  const memoryOnly = staged.every(f => f.startsWith('memory/'));
+  const memoryOnly = staged.every((f) => f.startsWith("memory/"));
 
   console.log("=== TS Pre-commit Hook ===");
 
   if (process.env.SYNC_ACTIVE !== "1") {
-    console.error("\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.");
-    console.error("\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.");
+    console.error(
+      "\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.",
+    );
+    console.error(
+      "\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.",
+    );
     process.exit(1);
   }
 
@@ -110,53 +114,64 @@ async function main() {
   // shared fixed filename and validate one run's commit against another's token.
   const expectedContext = process.env.DEV_SYNC_CONTEXT;
   const contextFile = process.env.DEV_SYNC_CONTEXT_FILE;
-  if (!expectedContext || !contextFile || !existsSync(contextFile) || readFileSync(contextFile, 'utf-8') !== expectedContext) {
-    console.error("\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.");
+  if (
+    !expectedContext ||
+    !contextFile ||
+    !existsSync(contextFile) ||
+    readFileSync(contextFile, "utf-8") !== expectedContext
+  ) {
+    console.error(
+      "\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.",
+    );
     console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
     process.exit(1);
   }
 
   // 1. Auto-update Markdown "Last Updated" dates
-  const mdStaged = staged.filter(f => f.toLowerCase().endsWith('.md'));
+  const mdStaged = staged.filter((f) => f.toLowerCase().endsWith(".md"));
   if (mdStaged.length > 0) {
     // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
     const today = localDateISO();
     for (const file of mdStaged) {
       try {
-        let content = readFileSync(file, 'utf-8');
-        if (content.includes('Last Updated:')) {
+        let content = readFileSync(file, "utf-8");
+        if (content.includes("Last Updated:")) {
           content = content.replace(/Last Updated: \d{4}-\d{2}-\d{2}/g, `Last Updated: ${today}`);
-          writeFileSync(file, content, 'utf-8');
+          writeFileSync(file, content, "utf-8");
           await $`git add ${file}`;
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        /* ignore */
+      }
     }
   }
 
   // 1-A. Auto-date CHANGELOG.md [Unreleased]
-  if (staged.includes('CHANGELOG.md')) {
+  if (staged.includes("CHANGELOG.md")) {
     // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
     const today = localDateISO();
-    let content = readFileSync('CHANGELOG.md', 'utf-8');
-    let lines = content.split('\n');
+    let content = readFileSync("CHANGELOG.md", "utf-8");
+    let lines = content.split("\n");
     let inUnreleased = false;
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('## [Unreleased]')) inUnreleased = true;
-      else if (lines[i].startsWith('## [') && !lines[i].startsWith('## [Unreleased]')) inUnreleased = false;
-      
+      if (lines[i].startsWith("## [Unreleased]")) inUnreleased = true;
+      else if (lines[i].startsWith("## [") && !lines[i].startsWith("## [Unreleased]")) inUnreleased = false;
+
       if (inUnreleased && /^\s*-\s+/.test(lines[i]) && !lines[i].match(/\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: /)) {
         lines[i] = lines[i].replace(/^(\s*-\s+)/, `$1**[${today}]**: `);
       }
     }
-    const rewritten = lines.join('\n');
+    const rewritten = lines.join("\n");
     if (rewritten !== content) {
-      writeFileSync('CHANGELOG.md', rewritten, 'utf-8');
+      writeFileSync("CHANGELOG.md", rewritten, "utf-8");
       await $`git add CHANGELOG.md`;
     }
   }
 
   // 2. Block .env files (".env.example" / ".env.sample" templates are allowed)
-  const envStaged = staged.filter(f => /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f));
+  const envStaged = staged.filter((f) =>
+    /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f),
+  );
   if (envStaged.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");
     process.exit(1);
@@ -167,22 +182,24 @@ async function main() {
   // gitleaks' git-mode scans skip it via the .gitleaks.toml path allowlist, so
   // nothing else would ever flag it. Block every commit until it is untracked.
   const trackedEnv = (await $`git ls-files -- '*.env' '**/.env'`.nothrow().text())
-    .split('\n')
+    .split("\n")
     .map((l: string) => l.trim())
     .filter((l: string) => /(^|\/)\.env$/.test(l));
   if (trackedEnv.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Tracked .env file detected — commit blocked:");
     for (const f of trackedEnv) console.error(`  - ${f}`);
-    console.error("\x1b[33m[INFO]\x1b[0m Untrack it with 'git rm --cached <file>' (keep the file on disk), then commit the removal.");
+    console.error(
+      "\x1b[33m[INFO]\x1b[0m Untrack it with 'git rm --cached <file>' (keep the file on disk), then commit the removal.",
+    );
     process.exit(1);
   }
 
   // 2-A. Block merge conflict markers
-  const textStaged = staged.filter(f => !f.match(/\.(png|jpg|jpeg|gif|ico|pdf|zip|tar|gz|mp4|webm|bin|exe|dll)$/i));
+  const textStaged = staged.filter((f) => !f.match(/\.(png|jpg|jpeg|gif|ico|pdf|zip|tar|gz|mp4|webm|bin|exe|dll)$/i));
   for (const file of textStaged) {
     if (!existsSync(file)) continue;
     try {
-      const content = readFileSync(file, 'utf-8');
+      const content = readFileSync(file, "utf-8");
       // `=======` alone is a legal markdown setext underline — only the opening
       // and closing markers block (the former bare-`=======` test here was dead
       // code: the inner exit path never fired for it).
@@ -190,7 +207,9 @@ async function main() {
         console.error(`\x1b[31m[FAIL]\x1b[0m Merge conflict marker detected in ${file}`);
         process.exit(1);
       }
-    } catch { /* ignore binary read errors */ }
+    } catch {
+      /* ignore binary read errors */
+    }
   }
 
   // 2-B. Enforce English Only in PR Artifacts (CHANGELOG only)
@@ -211,26 +230,33 @@ async function main() {
   // file new in HEAD) leaves the parent set empty — every added line stays genuinely
   // new and the fail behavior is preserved. Genuinely new non-English lines still
   // block: the tolerance self-expires the moment the content is truly new.
-  const docsToCheck = staged.filter(f => /^CHANGELOG\.md$/.test(f.replace(/\\/g, '/')) && !/_ko\.md$/.test(f.replace(/\\/g, '/')));
+  const docsToCheck = staged.filter(
+    (f) => /^CHANGELOG\.md$/.test(f.replace(/\\/g, "/")) && !/_ko\.md$/.test(f.replace(/\\/g, "/")),
+  );
   for (const file of docsToCheck) {
     if (!existsSync(file)) continue;
     const diff = await $`git diff --cached -U0 -- ${file}`.text();
-    const addedLines = diff.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).map(l => l.slice(1));
-    if (!hasNonEnglish(addedLines.join('\n'))) continue;
+    const addedLines = diff
+      .split("\n")
+      .filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+      .map((l) => l.slice(1));
+    if (!hasNonEnglish(addedLines.join("\n"))) continue;
     let parentLines: string[] = [];
     try {
-      const show = Bun.spawnSync(['git', 'show', `HEAD:${file}`], { stdout: 'pipe', stderr: 'pipe' });
-      if (show.exitCode === 0) parentLines = show.stdout.toString().split('\n');
-    } catch { /* parent unavailable — treat as no parent content */ }
+      const show = Bun.spawnSync(["git", "show", `HEAD:${file}`], { stdout: "pipe", stderr: "pipe" });
+      if (show.exitCode === 0) parentLines = show.stdout.toString().split("\n");
+    } catch {
+      /* parent unavailable — treat as no parent content */
+    }
     const genuinelyNew = filterParentVerbatimLines(addedLines, parentLines);
-    if (hasNonEnglish(genuinelyNew.join('\n'))) {
+    if (hasNonEnglish(genuinelyNew.join("\n"))) {
       console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters detected in newly added lines of ${file}`);
       process.exit(1);
     }
   }
 
   // 3. Memory Cleanup & Validation
-  const memoryStaged = staged.filter(f => /^memory\//.test(f.replace(/\\/g, '/')));
+  const memoryStaged = staged.filter((f) => /^memory\//.test(f.replace(/\\/g, "/")));
   if (memoryStaged.length > 0) {
     console.log("\n=== Memory Format Validation ===");
     try {
@@ -269,8 +295,8 @@ async function main() {
     console.log("\n=== Workspace Audit === [skipped — already ran in dev-sync pipeline]");
   }
 
-  const templateStaged = staged.filter(f => /^templates\//.test(f.replace(/\\/g, '/')));
-  if (templateStaged.length > 0 && existsSync('scripts/validate-templates.ts')) {
+  const templateStaged = staged.filter((f) => /^templates\//.test(f.replace(/\\/g, "/")));
+  if (templateStaged.length > 0 && existsSync("scripts/validate-templates.ts")) {
     console.log("\n=== Template Lifecycle Validation ===");
     try {
       await $`bun scripts/validate-templates.ts`;
@@ -287,22 +313,27 @@ async function main() {
   // license policy, R3 install_dir convention, gitignore coverage, adapter
   // presence, excluded components). A FAIL blocks the commit — this is where a
   // new entry's registration is refused.
-  if (staged.some(f => f.replace(/\\/g, '/') === 'external-deps.json') && existsSync('scripts/external-deps.ts')) {
+  if (staged.some((f) => f.replace(/\\/g, "/") === "external-deps.json") && existsSync("scripts/external-deps.ts")) {
     console.log("\n=== External-dependency manifest (verify --manifest-only) ===");
-    const r = Bun.spawnSync(['bun', 'scripts/external-deps.ts', 'verify', '--manifest-only'], { stdout: 'pipe', stderr: 'pipe' });
+    const r = Bun.spawnSync(["bun", "scripts/external-deps.ts", "verify", "--manifest-only"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
     const out = r.stdout.toString().trim();
     if (r.exitCode !== 0) {
       if (out) console.error(out);
       const err = r.stderr.toString().trim();
       if (err) console.error(err);
-      console.error("\x1b[31m[FAIL]\x1b[0m external-deps.json failed the manifest gate - commit blocked. Fix the [FAIL] rows above (bun scripts/external-deps.ts verify --manifest-only).");
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m external-deps.json failed the manifest gate - commit blocked. Fix the [FAIL] rows above (bun scripts/external-deps.ts verify --manifest-only).",
+      );
       process.exit(1);
     }
     console.log("\x1b[32m[PASS]\x1b[0m external-deps.json: manifest gate clean");
   }
 
   // 5. README sync check
-  const readmeStaged = staged.some(f => /README(\_ko)?\.md$/.test(f));
+  const readmeStaged = staged.some((f) => /README(\_ko)?\.md$/.test(f));
   if (readmeStaged) {
     console.log("\n=== README Synchronization ===");
     try {
@@ -315,8 +346,8 @@ async function main() {
   }
 
   // 6. Lifecycle compliance check (Tier 1 Gatekeeper)
-  const scriptStaged = staged.filter(f => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, '/')));
-  const scriptsMdStaged = staged.includes('scripts/SCRIPTS.md');
+  const scriptStaged = staged.filter((f) => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, "/")));
+  const scriptsMdStaged = staged.includes("scripts/SCRIPTS.md");
 
   // T-20261027-009: merge-in-progress detection — resolved via --git-path so
   // linked worktrees (MERGE_HEAD under .git/worktrees/<name>/) are covered.
@@ -337,7 +368,7 @@ async function main() {
     mergeInProgress,
   });
 
-  if (scriptsGate === 'verify-staged-coverage') {
+  if (scriptsGate === "verify-staged-coverage") {
     // U-20261107-001: the old unconditional proxy FAIL ("SCRIPTS.md was not
     // updated", remedy "stage the updated SCRIPTS.md") is a no-op trap when
     // the SCRIPTS.md content delta is zero — a row already at the target
@@ -369,18 +400,24 @@ async function main() {
     if (coverage.allCovered && unreadable.length === 0) {
       console.log(`\x1b[32m[PASS]\x1b[0m ${ZERO_DELTA_GATE_NOTICE}`);
     } else {
-      console.error("\x1b[31m[FAIL]\x1b[0m scripts/*.ts staged, but not every staged script's @version is covered by scripts/SCRIPTS.md (checked against the content this commit carries).");
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m scripts/*.ts staged, but not every staged script's @version is covered by scripts/SCRIPTS.md (checked against the content this commit carries).",
+      );
       console.error("");
       console.error("Uncovered script files:");
       for (const entry of coverage.uncovered) {
         console.error(`  - ${entry.script} (@version ${entry.fileVersion ?? "missing"})`);
-        if (entry.reason === 'no-version-header') {
-          console.error("    → Fix: add an @version header to the script (or revert the change) — its registry coverage cannot be verified without one");
-        } else if (entry.reason === 'no-registry-row') {
+        if (entry.reason === "no-version-header") {
+          console.error(
+            "    → Fix: add an @version header to the script (or revert the change) — its registry coverage cannot be verified without one",
+          );
+        } else if (entry.reason === "no-registry-row") {
           console.error("    → Fix: register the script in scripts/SCRIPTS.md and stage the updated file:");
           console.error("      git add scripts/SCRIPTS.md");
         } else {
-          console.error(`    → Fix: update the scripts/SCRIPTS.md row to ${entry.fileVersion} and stage it (git add scripts/SCRIPTS.md), or revert the @version bump to ${entry.registryVersion}`);
+          console.error(
+            `    → Fix: update the scripts/SCRIPTS.md row to ${entry.fileVersion} and stage it (git add scripts/SCRIPTS.md), or revert the @version bump to ${entry.registryVersion}`,
+          );
         }
       }
       for (const script of unreadable) {
@@ -393,7 +430,7 @@ async function main() {
     }
   }
 
-  if (scriptsGate === 'merge-verify') {
+  if (scriptsGate === "merge-verify") {
     // T-20261027-009: the merged-in side may carry script changes whose
     // SCRIPTS.md rows pre-exist on this branch (zero delta), so the
     // staged-file-set proxy does not apply. Verify the content invariant the
@@ -405,12 +442,16 @@ async function main() {
       return { exitCode: result.exitCode, stdout: result.stdout.toString() };
     });
     if (!pass) {
-      console.error("\x1b[31m[FAIL]\x1b[0m Merge commit fails the SCRIPTS.md content check (lifecycle-sync-audit Check A):");
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m Merge commit fails the SCRIPTS.md content check (lifecycle-sync-audit Check A):",
+      );
       for (const err of checkAErrors) {
         console.error(`  - ${err.file}: ${err.message}`);
       }
       if (checkAErrors.length === 0) {
-        console.error("  (lifecycle-sync-audit.ts exited non-zero without parseable Check A detail — run 'bun scripts/lifecycle-sync-audit.ts' to see the failure)");
+        console.error(
+          "  (lifecycle-sync-audit.ts exited non-zero without parseable Check A detail — run 'bun scripts/lifecycle-sync-audit.ts' to see the failure)",
+        );
       }
       console.error("");
       process.exit(1);
@@ -421,9 +462,9 @@ async function main() {
   // (T-20261027-010: this gate was dead until v1.11.0 — it read `parsed.results`,
   // a key that never exists on the AuditResult wire shape, so Check A mismatches
   // never blocked. Extraction now goes through the shared, tested helper.)
-  const scriptOrMdStaged = staged.some(f => {
-    const normalized = f.replace(/\\/g, '/');
-    return /^scripts\/.*\.ts$/.test(normalized) || normalized === 'scripts/SCRIPTS.md';
+  const scriptOrMdStaged = staged.some((f) => {
+    const normalized = f.replace(/\\/g, "/");
+    return /^scripts\/.*\.ts$/.test(normalized) || normalized === "scripts/SCRIPTS.md";
   });
 
   if (scriptOrMdStaged) {
@@ -436,7 +477,9 @@ async function main() {
         // errors live in `errors` (level === 'error', message includes 'Check A:').
         checkAErrors = parseCheckAErrorsDetailed(auditResult.stdout.toString().trim());
       } catch {
-        console.error("\x1b[33m[WARN]\x1b[0m lifecycle-sync-audit.ts returned non-JSON output — skipping Check A version block");
+        console.error(
+          "\x1b[33m[WARN]\x1b[0m lifecycle-sync-audit.ts returned non-JSON output — skipping Check A version block",
+        );
       }
       if (checkAErrors.length > 0) {
         console.error("\x1b[31m[FAIL]\x1b[0m Script @version / SCRIPTS.md mismatch detected:");
@@ -444,8 +487,12 @@ async function main() {
         for (const err of checkAErrors) {
           const fd = err.fixData;
           if (fd) {
-            console.error(`[FAIL] ${err.file}: @version ${fd.fileVersion} does not match SCRIPTS.md entry ${fd.registryVersion}`);
-            console.error(`  → Fix: ${existsSync('scripts/fix-script-versions.ts') ? `bun scripts/fix-script-versions.ts --script ${fd.scriptName}` : `update the @version header in ${fd.scriptName} to match SCRIPTS.md`}`);
+            console.error(
+              `[FAIL] ${err.file}: @version ${fd.fileVersion} does not match SCRIPTS.md entry ${fd.registryVersion}`,
+            );
+            console.error(
+              `  → Fix: ${existsSync("scripts/fix-script-versions.ts") ? `bun scripts/fix-script-versions.ts --script ${fd.scriptName}` : `update the @version header in ${fd.scriptName} to match SCRIPTS.md`}`,
+            );
           } else {
             console.error(`[FAIL] ${err.file}: ${err.message}`);
           }
@@ -469,29 +516,35 @@ async function main() {
   // consumed by the Antigravity CLI at the workspace root (spec
   // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
   // T-20260925-003; recorded exclusion, not a silent skip).
-  const skillStaged = staged.filter(f => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, '/')));
-  const claudeCommandStaged = staged.filter(f => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
-  const geminiCommandStaged = staged.filter(f => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
-  const codexPromptStaged = staged.filter(f => /^\.codex\/prompts\/[^/]+\.md$/.test(f.replace(/\\/g, '/')));
+  const skillStaged = staged.filter((f) =>
+    /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, "/")),
+  );
+  const claudeCommandStaged = staged.filter((f) => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
+  const geminiCommandStaged = staged.filter((f) => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
+  const codexPromptStaged = staged.filter((f) => /^\.codex\/prompts\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
 
   // The command counterpart check is L0-only (recorded exclusion, D8 style like the
   // .agents/commands exclusion below): L2/L3 projects and scaffold commits have no
   // templates/common tree to map to, so every staged command warned there — observed
   // 21x on the gw-76f6b4c9c6ff scaffold's initial commit (2026-10-01).
-  const commandCheckL0 = existsSync('templates/common');
+  const commandCheckL0 = existsSync("templates/common");
 
   for (const f of skillStaged) {
     try {
-      const content = readFileSync(f, 'utf-8');
+      const content = readFileSync(f, "utf-8");
       if (!/^version:\s*\d+\.\d+\.\d+/m.test(content)) {
-        console.error(`\x1b[33m[WARN]\x1b[0m ${f}: missing 'version:' in frontmatter — add version: 1.0.0 for new skills`);
+        console.error(
+          `\x1b[33m[WARN]\x1b[0m ${f}: missing 'version:' in frontmatter — add version: 1.0.0 for new skills`,
+        );
       }
-    } catch { /* file may be deleted */ }
+    } catch {
+      /* file may be deleted */
+    }
   }
 
   if (commandCheckL0) {
     for (const f of claudeCommandStaged) {
-      const commonPath = f.replace(/^\.claude\//, 'templates/common/.claude/').replace(/\\/g, '/');
+      const commonPath = f.replace(/^\.claude\//, "templates/common/.claude/").replace(/\\/g, "/");
       if (!existsSync(commonPath)) {
         console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
         console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
@@ -499,7 +552,7 @@ async function main() {
     }
 
     for (const f of geminiCommandStaged) {
-      const commonPath = f.replace(/^\.gemini\//, 'templates/common/.gemini/').replace(/\\/g, '/');
+      const commonPath = f.replace(/^\.gemini\//, "templates/common/.gemini/").replace(/\\/g, "/");
       if (!existsSync(commonPath)) {
         console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
         console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
@@ -507,7 +560,7 @@ async function main() {
     }
 
     for (const f of codexPromptStaged) {
-      const commonPath = f.replace(/^\.codex\//, 'templates/common/.codex/').replace(/\\/g, '/');
+      const commonPath = f.replace(/^\.codex\//, "templates/common/.codex/").replace(/\\/g, "/");
       if (!existsSync(commonPath)) {
         console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
         console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
@@ -527,15 +580,18 @@ async function main() {
       /AKIA[0-9A-Z]{16}/,
       /ghp_[0-9a-zA-Z]{36}/,
       /sk-[0-9a-zA-Z]{48}/,
-      /sk-ant-[a-zA-Z0-9\-_]{95,}/,    // H-07: Anthropic API keys (sk-ant-api03-...)
-      /sk-proj-[a-zA-Z0-9\-_]{48,}/,   // H-07: Anthropic project keys
-      /gho_[A-Za-z0-9]{30,}/,          // GitHub OAuth tokens (shorter than ghp_)
-      /github_pat_[A-Za-z0-9_]{20,}/,  // GitHub fine-grained PATs
-      /xox[baprs]-[A-Za-z0-9-]{10,}/,  // Slack tokens
+      /sk-ant-[a-zA-Z0-9\-_]{95,}/, // H-07: Anthropic API keys (sk-ant-api03-...)
+      /sk-proj-[a-zA-Z0-9\-_]{48,}/, // H-07: Anthropic project keys
+      /gho_[A-Za-z0-9]{30,}/, // GitHub OAuth tokens (shorter than ghp_)
+      /github_pat_[A-Za-z0-9_]{20,}/, // GitHub fine-grained PATs
+      /xox[baprs]-[A-Za-z0-9-]{10,}/, // Slack tokens
     ];
     return async () => {
       const diffText = await diff.text();
-      const added = diffText.split('\n').filter(l => l.startsWith('+') && !l.startsWith('+++')).join('\n');
+      const added = diffText
+        .split("\n")
+        .filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+        .join("\n");
       for (const p of patterns) {
         if (p.test(added)) {
           return false;
@@ -552,9 +608,9 @@ async function main() {
       // Build the argv array conditionally — interpolating empty-string
       // fallback args into the Bun shell passed literal '' arguments to
       // gitleaks when no .gitleaks.toml exists, weakening the gate.
-      const gitleaksArgs = existsSync('.gitleaks.toml')
-        ? ['protect', '--staged', '--no-banner', '--log-level', 'error', '--config', '.gitleaks.toml']
-        : ['protect', '--staged', '--no-banner', '--log-level', 'error'];
+      const gitleaksArgs = existsSync(".gitleaks.toml")
+        ? ["protect", "--staged", "--no-banner", "--log-level", "error", "--config", ".gitleaks.toml"]
+        : ["protect", "--staged", "--no-banner", "--log-level", "error"];
       const gitleaksResult = await $`gitleaks ${gitleaksArgs}`.nothrow().quiet();
       if (gitleaksResult.exitCode !== 0) {
         console.error("\x1b[31m[FAIL]\x1b[0m Secrets detected by gitleaks! Commit blocked.");
@@ -562,10 +618,10 @@ async function main() {
       }
       console.log("\x1b[32m[PASS]\x1b[0m gitleaks: no secrets detected");
     } catch (err) {
-      console.warn('\x1b[33m[WARN]\x1b[0m gitleaks execution error -- using regex fallback');
+      console.warn("\x1b[33m[WARN]\x1b[0m gitleaks execution error -- using regex fallback");
     }
   } else {
-    console.warn('\x1b[33m[WARN]\x1b[0m gitleaks not installed -- using regex fallback');
+    console.warn("\x1b[33m[WARN]\x1b[0m gitleaks not installed -- using regex fallback");
   }
 
   // Regex fallback runs regardless for defense-in-depth
@@ -576,7 +632,7 @@ async function main() {
   console.log("\x1b[32m[PASS]\x1b[0m Regex secret scan: nothing detected");
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("Hook error:", err);
   process.exit(1);
 });

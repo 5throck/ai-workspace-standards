@@ -109,7 +109,7 @@ describe('variant agent sections: resolve-and-check (registry completeness R2.2)
 
   test('audit.ts checks AGENT_LAYER1_SECTIONS by reference — inline duplicate is gone', () => {
     const auditSource = readFileSync(join(workspaceRoot, 'scripts', 'audit.ts'), 'utf-8');
-    expect(auditSource).toContain('import { AGENT_LAYER1_SECTIONS } from \'./helpers/golden-reference-loader.ts\'');
+    expect(auditSource).toContain('import { AGENT_LAYER1_SECTIONS } from "./helpers/golden-reference-loader.ts"');
     expect(auditSource).toContain('const REQUIRED_SECTIONS = AGENT_LAYER1_SECTIONS');
     // The inline 7-element Layer-1 list literal must not survive anywhere in audit.ts
     // (other checks' REQUIRED_SECTIONS lists are different sections and stay).

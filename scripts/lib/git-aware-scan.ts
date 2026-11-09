@@ -18,8 +18,8 @@
 //          checkouts inside the fleet projection
 //          (skill-graph-fleet-report.ts defaultProjects).
 
-import { spawnSync } from 'node:child_process';
-import { gitCleanEnv } from './git-env.ts';
+import { spawnSync } from "node:child_process";
+import { gitCleanEnv } from "./git-env.ts";
 
 /**
  * One `git ls-files -z -- <dir>` query rooted at `root`, NUL-split and
@@ -34,11 +34,14 @@ import { gitCleanEnv } from './git-env.ts';
  * decisions silently keyed off the wrong repository).
  */
 export function trackedFilesUnder(root: string, dir: string): Set<string> | null {
-  const res = spawnSync('git', ['-C', root, 'ls-files', '-z', '--', dir], { encoding: 'buffer', env: gitCleanEnv() as NodeJS.ProcessEnv });
+  const res = spawnSync("git", ["-C", root, "ls-files", "-z", "--", dir], {
+    encoding: "buffer",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+  });
   if (res.status !== 0 || !res.stdout) return null;
   const out = new Set<string>();
-  for (const entry of res.stdout.toString('utf8').split('\0')) {
-    if (entry) out.add(entry.replace(/\\/g, '/'));
+  for (const entry of res.stdout.toString("utf8").split("\0")) {
+    if (entry) out.add(entry.replace(/\\/g, "/"));
   }
   return out;
 }
@@ -50,7 +53,7 @@ export function trackedFilesUnder(root: string, dir: string): Set<string> | null
  */
 export function isTrackedRel(tracked: Set<string> | null, relPath: string): boolean {
   if (tracked === null) return true;
-  return tracked.has(relPath.replace(/\\/g, '/'));
+  return tracked.has(relPath.replace(/\\/g, "/"));
 }
 
 /**
@@ -61,15 +64,18 @@ export function isTrackedRel(tracked: Set<string> | null, relPath: string): bool
 export function checkoutBranch(dir: string): string | null {
   // gitCleanEnv(): same reason as trackedFilesUnder — never let an inherited
   // GIT_DIR answer "which branch is this checkout on" for another repo.
-  const res = spawnSync('git', ['-C', dir, 'branch', '--show-current'], { encoding: 'utf8', env: gitCleanEnv() as NodeJS.ProcessEnv });
+  const res = spawnSync("git", ["-C", dir, "branch", "--show-current"], {
+    encoding: "utf8",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+  });
   if (res.status !== 0) return null;
-  const branch = (res.stdout || '').trim();
+  const branch = (res.stdout || "").trim();
   return branch || null; // detached HEAD prints empty
 }
 
 /** `pr/*` = a transient PR working checkout per the landing convention. */
 export function isTransientCheckoutBranch(branch: string): boolean {
-  return branch.startsWith('pr/');
+  return branch.startsWith("pr/");
 }
 
 /**

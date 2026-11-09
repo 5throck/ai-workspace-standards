@@ -32,7 +32,7 @@ import { checkSymmetry } from "./check-symmetry.ts";
 import { checkLabels } from "./check-labels.ts";
 import { checkSearchIndex } from "./check-search.ts";
 import { checkA11y, type A11yIssue } from "./check-a11y.ts";
-import { checkSpelling } from "./check-spell.ts";
+import { checkSpelling, type SpellingIssue } from "./check-spell.ts";
 import { checkLint, type LintIssue } from "./check-lint.ts";
 
 interface Issue {
@@ -55,9 +55,13 @@ function getArg(name: string, fallback: string): string {
 
 const docsDir = resolve(getArg("--docs-dir", "docs"));
 const checksArg = getArg("--checks", "structure,nav,tables");
-const checks = checksArg === "all"
-  ? ["structure", "nav", "tables", "a11y", "spell", "lint", "authoring", "doctor"]
-  : checksArg.split(",").map((s) => s.trim()).filter(Boolean);
+const checks =
+  checksArg === "all"
+    ? ["structure", "nav", "tables", "a11y", "spell", "lint", "authoring", "doctor"]
+    : checksArg
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
 // Point every check at the target docs dir (nav-utils resolves lazily).
 configureDocsDir(docsDir);
@@ -81,7 +85,8 @@ if (checks.includes("nav")) {
   const navIssues: Issue[] = [];
   for (const e of checkBrokenLinks()) navIssues.push({ file: e.file, detail: `${e.href} -> missing` });
   for (const e of checkSymmetry()) navIssues.push({ file: e.fileA, detail: e.detail });
-  for (const e of checkLabels()) navIssues.push({ file: e.file, detail: `${e.href} label "${e.label}" vs target "${e.targetTitle}"` });
+  for (const e of checkLabels())
+    navIssues.push({ file: e.file, detail: `${e.href} label "${e.label}" vs target "${e.targetTitle}"` });
   for (const e of checkSearchIndex()) navIssues.push({ file: e.path, detail: e.detail });
   addReport("② Navigation", navIssues);
 }
@@ -110,7 +115,10 @@ function runSubprocess(scriptName: string, label: string): void {
   const output = `${r.stdout || ""}${r.stderr || ""}`.trim();
   if (r.status !== 0) {
     const lines = output.split("\n").filter((l) => l.trim().length > 0);
-    addReport(label, lines.length > 0 ? lines.map((l) => ({ detail: l.trim() })) : [{ detail: `${scriptName} exited ${r.status}` }]);
+    addReport(
+      label,
+      lines.length > 0 ? lines.map((l) => ({ detail: l.trim() })) : [{ detail: `${scriptName} exited ${r.status}` }],
+    );
   } else {
     addReport(label, []);
   }
@@ -129,7 +137,14 @@ if (checks.includes("a11y")) {
 
 // ⑤ Spell check (in-process)
 if (checks.includes("spell")) {
-  addReport("⑤ Spell check", checkSpelling());
+  addReport(
+    "⑤ Spell check",
+    checkSpelling().map((e: SpellingIssue) => ({
+      file: e.file,
+      line: e.line,
+      detail: `"${e.misspelling}" -> ${e.correction}`,
+    })),
+  );
 }
 
 // ⑥ HTML lint (in-process)

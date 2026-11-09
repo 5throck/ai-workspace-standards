@@ -107,14 +107,14 @@
  *   30. Project skill-lifecycle-audit reports 0 errors (T-20260924-008 gate)
  */
 
-import { existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
-import { join, basename } from 'node:path';
-import { platform } from 'node:process';
-import { $ } from 'bun';
-import { load as yamlLoad } from 'js-yaml';
-import { verifyActualTreeMatchesDerivation } from './helpers/scaffold-markers.ts';
-import { parseSkillRegistryRows } from './helpers/skills-registry.ts';
-import { applySubstitutions } from './helpers/substitute-placeholders.ts';
+import { existsSync, readFileSync, readdirSync, statSync, rmSync } from "node:fs";
+import { join, basename } from "node:path";
+import { platform } from "node:process";
+import { $ } from "bun";
+import { load as yamlLoad } from "js-yaml";
+import { verifyActualTreeMatchesDerivation } from "./helpers/scaffold-markers.ts";
+import { parseSkillRegistryRows } from "./helpers/skills-registry.ts";
+import { applySubstitutions } from "./helpers/substitute-placeholders.ts";
 
 // ── Args ─────────────────────────────────────────────────────────────────────
 
@@ -122,40 +122,48 @@ const args = process.argv.slice(2);
 // Default name keeps the harness runnable bare (test-runner scripts suite runs
 // every scripts/test-*.ts with no arguments); path-like names land in
 // tests/.temp/ per the v1.16.0 canonicalization rules.
-const projectName = args.find(a => !a.startsWith('--')) ?? `auto-${Date.now()}`;
-const variantArg  = (() => { const i = args.indexOf('--variant');  return i !== -1 ? args[i + 1] : 'co-develop'; })();
-const platformArg = (() => { const i = args.indexOf('--platform'); return i !== -1 ? args[i + 1] : 'all'; })();
+const projectName = args.find((a) => !a.startsWith("--")) ?? `auto-${Date.now()}`;
+const variantArg = (() => {
+  const i = args.indexOf("--variant");
+  return i !== -1 ? args[i + 1] : "co-develop";
+})();
+const platformArg = (() => {
+  const i = args.indexOf("--platform");
+  return i !== -1 ? args[i + 1] : "all";
+})();
 // --all-variants: loop the single-variant harness across every templates/co-* variant
 // (T-20260912-004 — the pm.md extends-stub resolution differs per variant stub shape:
 // 8 empty-body stubs, 5 prose-body stubs; every variant must scaffold a full PM agent).
-const allVariants = args.includes('--all-variants');
+const allVariants = args.includes("--all-variants");
 
 if (allVariants && import.meta.main) {
-  const tplDir = join(process.cwd(), 'templates');
+  const tplDir = join(process.cwd(), "templates");
   const variants = readdirSync(tplDir, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
-    .map(e => e.name)
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+    .map((e) => e.name)
     .sort();
-  console.log(`\n🧪 All-variants mode: ${variants.length} variants (${variants.join(', ')})`);
+  console.log(`\n🧪 All-variants mode: ${variants.length} variants (${variants.join(", ")})`);
   const failedVariants: string[] = [];
   for (const v of variants) {
-    console.log(`\n${'═'.repeat(60)}\n🧪 Variant run: ${v}\n${'═'.repeat(60)}`);
+    console.log(`\n${"═".repeat(60)}\n🧪 Variant run: ${v}\n${"═".repeat(60)}`);
     const proc = Bun.spawnSync(
-      ['bun', 'scripts/test-new-project.ts', `PmStub-${v}`, '--variant', v, '--platform', platformArg, '--yes'],
-      { stdout: 'inherit', stderr: 'inherit', cwd: process.cwd() },
+      ["bun", "scripts/test-new-project.ts", `PmStub-${v}`, "--variant", v, "--platform", platformArg, "--yes"],
+      { stdout: "inherit", stderr: "inherit", cwd: process.cwd() },
     );
     if (proc.exitCode !== 0) failedVariants.push(v);
   }
-  console.log(`\n${'═'.repeat(60)}`);
+  console.log(`\n${"═".repeat(60)}`);
   console.log(`📊 All-variants summary: ${variants.length - failedVariants.length}/${variants.length} variants passed`);
   if (failedVariants.length > 0) {
-    console.log(`   FAILED: ${failedVariants.join(', ')}`);
+    console.log(`   FAILED: ${failedVariants.join(", ")}`);
   }
   process.exit(failedVariants.length > 0 ? 1 : 0);
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex|hermes] [--all-variants]');
+  console.error(
+    "Usage: bun scripts/test-new-project.ts <TestProjectName> [--variant co-develop] [--platform all|claude|antigravity|codex|hermes] [--all-variants]",
+  );
   if (import.meta.main) {
     process.exit(1);
   }
@@ -164,35 +172,47 @@ if (!projectName) {
 // Due to new-project path traversal protection, the project name must be strictly alphanumeric.
 // We can no longer nest tests inside .sandbox/ - we must create them in the workspace root.
 // EXCEPT we now use tests/.temp/ to avoid cluttering root. We'll bypass or fix the check.
-const testDir  = `tests/.temp/Test-${projectName}`;
-const isWin    = platform === 'win32';
-const today    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
+const testDir = `tests/.temp/Test-${projectName}`;
+const isWin = platform === "win32";
+const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-let testsRun = 0, testsPassed = 0;
+let testsRun = 0,
+  testsPassed = 0;
 let allPassed = true;
 // Fail-soft (§15.3, T-20261103-003-1): when the scaffold itself fails, the
 // post-scaffold tests cannot execute — each records an explicit FAILED row
 // ("not executed") via requireScaffold instead of the run aborting.
 let scaffoldMissing = false;
 
-function pass(label: string)                    { console.log(`  ✅ ${label}`); testsPassed++; testsRun++; }
-function fail(label: string, reason: string)   { console.error(`  ❌ ${label}: ${reason}`); allPassed = false; testsRun++; }
-function skip(label: string, reason: string)   { console.log(`  ⚠️  ${label} SKIPPED: ${reason}`); testsPassed++; testsRun++; }
+function pass(label: string) {
+  console.log(`  ✅ ${label}`);
+  testsPassed++;
+  testsRun++;
+}
+function fail(label: string, reason: string) {
+  console.error(`  ❌ ${label}: ${reason}`);
+  allPassed = false;
+  testsRun++;
+}
+function skip(label: string, reason: string) {
+  console.log(`  ⚠️  ${label} SKIPPED: ${reason}`);
+  testsPassed++;
+  testsRun++;
+}
 
 /** Guard for every post-scaffold test body: when the scaffold failed, record
  * the test as an explicit not-executed FAILED row (a not-executed assertion
  * is a failure, NOT a skip) and let the run continue to the summary. */
 function requireScaffold(label: string): boolean {
   if (!scaffoldMissing) return true;
-  fail(label, 'not executed — scaffold missing (Test 1 failed)');
+  fail(label, "not executed — scaffold missing (Test 1 failed)");
   return false;
 }
 
 function readText(rel: string): string {
-  return readFileSync(join(testDir, rel), 'utf-8');
+  return readFileSync(join(testDir, rel), "utf-8");
 }
 function fileExists(rel: string): boolean {
   return existsSync(join(testDir, rel));
@@ -211,7 +231,9 @@ function cleanup() {
     console.log(`\n🧹 Cleaning up ${testDir}...`);
     try {
       rmSync(testDir, { recursive: true, force: true });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -220,65 +242,78 @@ function cleanup() {
 console.log(`\n🧪 E2E Test — new-project (variant: ${variantArg}, platform: ${platformArg})`);
 console.log(`   Project name : ${projectName}`);
 console.log(`   Test dir     : ${testDir}`);
-console.log(`   OS           : ${isWin ? 'Windows' : 'Unix'}\n`);
+console.log(`   OS           : ${isWin ? "Windows" : "Unix"}\n`);
 
 cleanup();
 
 try {
   // ── Test 0: Script Syntax Validation ─────────────────────────────────────────
   // Runs BEFORE project creation — catches bracket/syntax errors early.
-  console.log('Test 0: Script Syntax Validation');
+  console.log("Test 0: Script Syntax Validation");
   let syntaxOk = true;
 
   // 0a: Help validation for bun scripts/new-project.ts
   try {
     const res = await $`bun scripts/new-project.ts`.nothrow();
     const output = (res.stdout.toString() + res.stderr.toString()).trim();
-    if (output.includes('Usage: bun scripts/new-project.ts')) {
-      pass('Test 0a PASSED: bun scripts/new-project.ts help validation OK');
+    if (output.includes("Usage: bun scripts/new-project.ts")) {
+      pass("Test 0a PASSED: bun scripts/new-project.ts help validation OK");
     } else {
-      fail('Test 0a', `bun scripts/new-project.ts help output unexpected:\n${output}`);
+      fail("Test 0a", `bun scripts/new-project.ts help output unexpected:\n${output}`);
       syntaxOk = false;
     }
-  } catch (e) { fail('Test 0a', String(e)); syntaxOk = false; }
+  } catch (e) {
+    fail("Test 0a", String(e));
+    syntaxOk = false;
+  }
 
   // 0b: Argument validation for bun scripts/new-project.ts
   try {
     const res = await $`bun scripts/new-project.ts --platform invalid_platform`.nothrow();
     const output = (res.stdout.toString() + res.stderr.toString()).trim();
-    if (res.exitCode !== 0 && output.includes('platform')) {
-      pass('Test 0b PASSED: bun scripts/new-project.ts argument validation OK');
+    if (res.exitCode !== 0 && output.includes("platform")) {
+      pass("Test 0b PASSED: bun scripts/new-project.ts argument validation OK");
     } else {
-      fail('Test 0b', `bun scripts/new-project.ts argument validation failed:\n${output}`);
+      fail("Test 0b", `bun scripts/new-project.ts argument validation failed:\n${output}`);
       syntaxOk = false;
     }
-  } catch (e) { fail('Test 0b', String(e)); syntaxOk = false; }
+  } catch (e) {
+    fail("Test 0b", String(e));
+    syntaxOk = false;
+  }
 
   // 0c: Unknown-flag hard error (R6/AC4, 2026-09-24-scaffold-hygiene-bundle-design)
   // — a `--` token matching no known flag must exit non-zero BEFORE any write:
   // the output names the offending token and lists the valid flags, and the
   // target directory is never created.
   try {
-    const typoDir = 'tests/.temp/Test-flag-typo-unknown';
+    const typoDir = "tests/.temp/Test-flag-typo-unknown";
     rmSync(typoDir, { recursive: true, force: true });
     const res = await $`bun scripts/new-project.ts ${typoDir} --variant ${variantArg} --varaint x`.nothrow();
     const output = (res.stdout.toString() + res.stderr.toString()).trim();
-    if (res.exitCode !== 0 && output.includes('--varaint') && output.includes('--variant') && !existsSync(typoDir)) {
-      pass('Test 0c PASSED: unknown flag `--varaint` hard error — token named, valid flags listed, no directory created');
+    if (res.exitCode !== 0 && output.includes("--varaint") && output.includes("--variant") && !existsSync(typoDir)) {
+      pass(
+        "Test 0c PASSED: unknown flag `--varaint` hard error — token named, valid flags listed, no directory created",
+      );
     } else {
-      fail('Test 0c', `unknown flag not rejected (exit ${res.exitCode}, dir created: ${existsSync(typoDir)}):\n${output.slice(0, 300)}`);
+      fail(
+        "Test 0c",
+        `unknown flag not rejected (exit ${res.exitCode}, dir created: ${existsSync(typoDir)}):\n${output.slice(0, 300)}`,
+      );
       syntaxOk = false;
     }
-  } catch (e) { fail('Test 0c', String(e)); syntaxOk = false; }
-
+  } catch (e) {
+    fail("Test 0c", String(e));
+    syntaxOk = false;
+  }
 
   // 0e: Verify new-project.sh template validation logic checks common/ and variant/ separately.
   // Guards against the same bug as Test 0d — ensures sh version validates correctly.
   try {
-    const commonPath = join(process.cwd(), 'templates', 'common');
-    const variantPath = join(process.cwd(), 'templates', variantArg);
-    const commonRequired = ['.gitignore', '.githooks/pre-commit'];
-    const variantRequired = ['agents/pm.md', 'variant.json'];
+    const commonPath = join(process.cwd(), "templates", "common");
+    const variantPath = join(process.cwd(), "templates", variantArg);
+    const commonRequired = [".gitignore", ".githooks/pre-commit"];
+    const variantRequired = ["agents/pm.md", "variant.json"];
 
     let missing: string[] = [];
     for (const file of commonRequired) {
@@ -289,564 +324,696 @@ try {
     }
 
     if (missing.length > 0) {
-      fail('Test 0e', `Missing required template files: ${missing.join(', ')}`);
+      fail("Test 0e", `Missing required template files: ${missing.join(", ")}`);
     } else {
-      pass('Test 0e PASSED: template validation checks passed');
+      pass("Test 0e PASSED: template validation checks passed");
     }
   } catch (e) {
-    skip('Test 0e', `Template validation check failed (${e})`);
+    skip("Test 0e", `Template validation check failed (${e})`);
   }
 
   if (!syntaxOk) {
     // Fail-soft (§15.3): keep the banner but drop the process.exit — Tests
     // 0a-0c already recorded their failures and Test 1 below records the
     // scaffold outcome; the run continues so the summary stays honest.
-    console.error('\n❌ Syntax errors found — remaining tests skipped.');
+    console.error("\n❌ Syntax errors found — remaining tests skipped.");
   }
 
   // ── Test 1: Project Creation [maps to: step 1 + step 2] ─────────────────────
-  console.log('Test 1: Project Creation');
+  console.log("Test 1: Project Creation");
   try {
-    const result = await $`bun scripts/new-project.ts ${testDir} --variant ${variantArg} --platform ${platformArg} --yes`.nothrow();
+    const result =
+      await $`bun scripts/new-project.ts ${testDir} --variant ${variantArg} --platform ${platformArg} --yes`.nothrow();
     if (result.exitCode !== 0 || !existsSync(testDir)) {
-      fail('Test 1', `exit code ${result.exitCode} / directory not found`);
+      fail("Test 1", `exit code ${result.exitCode} / directory not found`);
     } else {
-      pass('Test 1 PASSED: Project created');
+      pass("Test 1 PASSED: Project created");
     }
-  } catch (e) { fail('Test 1', String(e)); }
+  } catch (e) {
+    fail("Test 1", String(e));
+  }
 
   if (!existsSync(testDir)) {
     // Fail-soft (§15.3): reword the banner, set the fail-soft flag and drop
     // the process.exit — every post-scaffold test body now records an
     // explicit not-executed FAILED row via requireScaffold and the run
     // continues to the summary (per-test counts stay honest, exit code 1).
-    console.error('\n❌ Project directory not found — recording remaining tests as not-executed failures (run continues).');
+    console.error(
+      "\n❌ Project directory not found — recording remaining tests as not-executed failures (run continues).",
+    );
     scaffoldMissing = true;
   }
 
   // 0e (post-scaffold): Verify generated project outputs in testDir contain CLAUDE.md and GEMINI.md
-  if (requireScaffold('Test 0e (scaffolded output)')) {
-  try {
-    const missingScaffolded: string[] = [];
-    if (platformArg !== 'antigravity' && platformArg !== 'hermes' && !fileExists('CLAUDE.md')) missingScaffolded.push('CLAUDE.md');
-    if (platformArg !== 'claude' && platformArg !== 'hermes' && !fileExists('GEMINI.md')) missingScaffolded.push('GEMINI.md');
-    if (missingScaffolded.length > 0) {
-      fail('Test 0e (scaffolded output)', `Generated project in ${testDir} missing: ${missingScaffolded.join(', ')}`);
-    } else {
-      pass('Test 0e (scaffolded output) PASSED: Generated project in testDir contains CLAUDE.md and GEMINI.md as expected');
+  if (requireScaffold("Test 0e (scaffolded output)")) {
+    try {
+      const missingScaffolded: string[] = [];
+      if (platformArg !== "antigravity" && platformArg !== "hermes" && !fileExists("CLAUDE.md"))
+        missingScaffolded.push("CLAUDE.md");
+      if (platformArg !== "claude" && platformArg !== "hermes" && !fileExists("GEMINI.md"))
+        missingScaffolded.push("GEMINI.md");
+      if (missingScaffolded.length > 0) {
+        fail("Test 0e (scaffolded output)", `Generated project in ${testDir} missing: ${missingScaffolded.join(", ")}`);
+      } else {
+        pass(
+          "Test 0e (scaffolded output) PASSED: Generated project in testDir contains CLAUDE.md and GEMINI.md as expected",
+        );
+      }
+    } catch (e) {
+      fail("Test 0e (scaffolded output)", String(e));
     }
-  } catch (e) { fail('Test 0e (scaffolded output)', String(e)); } }
+  }
 
   // ── Test 2: UTF-8 Integrity [maps to: step 5 (encoding)] ───────────────────
-  console.log('\nTest 2: UTF-8 Integrity');
-  if (requireScaffold('Test 2')) {
-  try {
-    const content = readText('README.md');
-    if (content.includes('�')) {  // encoding-check-ignore
-      fail('Test 2', 'UTF-8 replacement char (U+FFFD) found — encoding corruption');
-    } else {
-      pass('Test 2 PASSED: No encoding corruption in README.md');
+  console.log("\nTest 2: UTF-8 Integrity");
+  if (requireScaffold("Test 2")) {
+    try {
+      const content = readText("README.md");
+      if (content.includes("\uFFFD")) {
+        // encoding-check-ignore
+        fail("Test 2", "UTF-8 replacement char (U+FFFD) found — encoding corruption");
+      } else {
+        pass("Test 2 PASSED: No encoding corruption in README.md");
+      }
+    } catch (e) {
+      fail("Test 2", String(e));
     }
-  } catch (e) { fail('Test 2', String(e)); } }
+  }
 
   // ── Test 3: Placeholder Substitution [maps to: step 5] ──────────────────────
-  console.log('\nTest 3: Placeholder Substitution');
-  if (requireScaffold('Test 3')) {
-  try {
-    const readme = readText('README.md');
-    const hasOldPlaceholder = readme.includes('[Project Name]') ||
-                              readme.includes('{{PROJECT_NAME}}');
-    const expectedName = basename(testDir);
-    if (hasOldPlaceholder) {
-      fail('Test 3', 'Placeholder not replaced in README.md');
-    } else if (!readme.includes(String(projectName)) && !readme.includes(expectedName) && !readme.includes(String(variantArg))) {
-      fail('Test 3', `Project name "${expectedName}" / variant "${variantArg}" not found in README.md`);
-    } else {
-      pass('Test 3 PASSED: Placeholders substituted correctly');
+  console.log("\nTest 3: Placeholder Substitution");
+  if (requireScaffold("Test 3")) {
+    try {
+      const readme = readText("README.md");
+      const hasOldPlaceholder = readme.includes("[Project Name]") || readme.includes("{{PROJECT_NAME}}");
+      const expectedName = basename(testDir);
+      if (hasOldPlaceholder) {
+        fail("Test 3", "Placeholder not replaced in README.md");
+      } else if (
+        !readme.includes(String(projectName)) &&
+        !readme.includes(expectedName) &&
+        !readme.includes(String(variantArg))
+      ) {
+        fail("Test 3", `Project name "${expectedName}" / variant "${variantArg}" not found in README.md`);
+      } else {
+        pass("Test 3 PASSED: Placeholders substituted correctly");
+      }
+    } catch (e) {
+      fail("Test 3", String(e));
     }
-  } catch (e) { fail('Test 3', String(e)); } }
+  }
 
   // ── Test 4: Git Initialisation [maps to: step 7] ──────────────────────────
-  console.log('\nTest 4: Git Initialisation');
-  if (requireScaffold('Test 4')) {
-  try {
-    if (!fileExists('.git')) {
-      fail('Test 4', '.git directory not found');
-    } else {
-      const r = await $`git -C ${testDir} config core.hooksPath`.nothrow();
-      const hooksPath = r.stdout.toString().trim();
-      if (!hooksPath.includes('.githooks')) {
-        fail('Test 4', `core.hooksPath = "${hooksPath}" (expected .githooks)`);
+  console.log("\nTest 4: Git Initialisation");
+  if (requireScaffold("Test 4")) {
+    try {
+      if (!fileExists(".git")) {
+        fail("Test 4", ".git directory not found");
       } else {
-        // T-20260929-002: the scaffold seeds an initial commit — zero-commit
-        // scaffolds abort upgrade-project (T-20260921-001 class).
-        const head = await $`git -C ${testDir} rev-parse --verify HEAD`.nothrow();
-        if (head.exitCode !== 0) {
-          fail('Test 4', 'no initial scaffold commit (HEAD missing)');
+        const r = await $`git -C ${testDir} config core.hooksPath`.nothrow();
+        const hooksPath = r.stdout.toString().trim();
+        if (!hooksPath.includes(".githooks")) {
+          fail("Test 4", `core.hooksPath = "${hooksPath}" (expected .githooks)`);
         } else {
-          pass('Test 4 PASSED: git init + core.hooksPath configured + initial commit present');
+          // T-20260929-002: the scaffold seeds an initial commit — zero-commit
+          // scaffolds abort upgrade-project (T-20260921-001 class).
+          const head = await $`git -C ${testDir} rev-parse --verify HEAD`.nothrow();
+          if (head.exitCode !== 0) {
+            fail("Test 4", "no initial scaffold commit (HEAD missing)");
+          } else {
+            pass("Test 4 PASSED: git init + core.hooksPath configured + initial commit present");
+          }
         }
       }
+    } catch (e) {
+      fail("Test 4", String(e));
     }
-  } catch (e) { fail('Test 4', String(e)); } }
+  }
 
   // ── Test 5: Git Hooks Installed [maps to: step 6 + step 7] ────────────────
-  console.log('\nTest 5: Git Hooks Installed');
-  if (requireScaffold('Test 5')) {
-  try {
-    const required = ['pre-commit', 'pre-push'];
-    const missing  = required.filter(h => !fileExists(`.githooks/${h}`));
-    if (missing.length > 0) {
-      fail('Test 5', `Missing hooks: ${missing.join(', ')}`);
-    } else {
-      pass('Test 5 PASSED: Required hooks present');
+  console.log("\nTest 5: Git Hooks Installed");
+  if (requireScaffold("Test 5")) {
+    try {
+      const required = ["pre-commit", "pre-push"];
+      const missing = required.filter((h) => !fileExists(`.githooks/${h}`));
+      if (missing.length > 0) {
+        fail("Test 5", `Missing hooks: ${missing.join(", ")}`);
+      } else {
+        pass("Test 5 PASSED: Required hooks present");
+      }
+    } catch (e) {
+      fail("Test 5", String(e));
     }
-  } catch (e) { fail('Test 5', String(e)); } }
+  }
 
   // ── Test 6: Security Bootstrap [maps to: step 6.5] ────────────────────────
-  console.log('\nTest 6: Security Bootstrap');
-  if (requireScaffold('Test 6')) {
-  const secChecks: [string, () => boolean][] = [
-    ['.gitleaks.toml present',          () => fileExists('.gitleaks.toml')],
-    ['.gitattributes has eol=lf',       () => fileExists('.gitattributes') && readText('.gitattributes').includes('eol=lf')],
-    ['.gitignore excludes .env',        () => fileExists('.gitignore') && readText('.gitignore').includes('.env')],
-    ['.githooks/pre-commit exists',     () => fileExists('.githooks/pre-commit')],
-  ];
-  let secOk = true;
-  for (const [label, check] of secChecks) {
-    try {
-      if (check()) { pass(label); }
-      else         { fail('Test 6', label); secOk = false; }
-    } catch (e)    { fail('Test 6', `${label}: ${e}`); secOk = false; }
-  } }
+  console.log("\nTest 6: Security Bootstrap");
+  if (requireScaffold("Test 6")) {
+    const secChecks: [string, () => boolean][] = [
+      [".gitleaks.toml present", () => fileExists(".gitleaks.toml")],
+      [
+        ".gitattributes has eol=lf",
+        () => fileExists(".gitattributes") && readText(".gitattributes").includes("eol=lf"),
+      ],
+      [".gitignore excludes .env", () => fileExists(".gitignore") && readText(".gitignore").includes(".env")],
+      [".githooks/pre-commit exists", () => fileExists(".githooks/pre-commit")],
+    ];
+    let secOk = true;
+    for (const [label, check] of secChecks) {
+      try {
+        if (check()) {
+          pass(label);
+        } else {
+          fail("Test 6", label);
+          secOk = false;
+        }
+      } catch (e) {
+        fail("Test 6", `${label}: ${e}`);
+        secOk = false;
+      }
+    }
+  }
 
   // ── Test 7: Required Template Files [maps to: step 1 + step 2] ───────────
-  console.log('\nTest 7: Required Template Files');
-  if (requireScaffold('Test 7')) {
-  try {
-    const required = ['AGENTS.md', 'agents/pm.md', '.gitignore', '.githooks/pre-commit'];
-    // CLAUDE.md/GEMINI.md depend on --platform (the hermes profile drops the
-    // legacy instruction twins — it delivers HERMES.md instead, asserted in Test 8)
-    if (platformArg !== 'antigravity' && platformArg !== 'hermes') required.push('CLAUDE.md');
-    if (platformArg !== 'claude' && platformArg !== 'hermes')      required.push('GEMINI.md');
-    const missing = required.filter(f => !fileExists(f));
-    if (missing.length > 0) {
-      fail('Test 7', `Missing: ${missing.join(', ')}`);
-    } else {
-      pass('Test 7 PASSED: All required files present');
+  console.log("\nTest 7: Required Template Files");
+  if (requireScaffold("Test 7")) {
+    try {
+      const required = ["AGENTS.md", "agents/pm.md", ".gitignore", ".githooks/pre-commit"];
+      // CLAUDE.md/GEMINI.md depend on --platform (the hermes profile drops the
+      // legacy instruction twins — it delivers HERMES.md instead, asserted in Test 8)
+      if (platformArg !== "antigravity" && platformArg !== "hermes") required.push("CLAUDE.md");
+      if (platformArg !== "claude" && platformArg !== "hermes") required.push("GEMINI.md");
+      const missing = required.filter((f) => !fileExists(f));
+      if (missing.length > 0) {
+        fail("Test 7", `Missing: ${missing.join(", ")}`);
+      } else {
+        pass("Test 7 PASSED: All required files present");
+      }
+    } catch (e) {
+      fail("Test 7", String(e));
     }
-  } catch (e) { fail('Test 7', String(e)); } }
+  }
 
   // ── Test 8: Platform Profile [maps to: step 2.5] ────────────────────────
-  console.log('\nTest 8: Platform Profile');
-  if (requireScaffold('Test 8')) {
-  try {
-    if (platformArg === 'claude') {
-      if (fileExists('GEMINI.md'))  fail('Test 8', 'GEMINI.md should be removed for --platform claude');
-      else                          pass('Test 8 PASSED: GEMINI.md removed for claude platform');
-    } else if (platformArg === 'antigravity') {
-      if (fileExists('CLAUDE.md'))  fail('Test 8', 'CLAUDE.md should be removed for --platform antigravity');
-      else                          pass('Test 8 PASSED: CLAUDE.md removed for antigravity platform');
-    } else if (platformArg === 'codex') {
-      const hasCodexMd  = fileExists('CODEX.md');
-      const hasCodexDir = fileExists('.codex');
-      if (!hasCodexMd || !hasCodexDir) fail('Test 8', `codex files expected: CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
-      else                             pass('Test 8 PASSED: CODEX.md and .codex/ present for codex platform');
-    } else if (platformArg === 'hermes') {
-      const hasHermesDir = fileExists('.hermes');
-      const hasHermesMd  = fileExists('HERMES.md');
-      const hasClaudeMd  = fileExists('CLAUDE.md');
-      const hasGeminiMd  = fileExists('GEMINI.md');
-      if (!hasHermesDir || !hasHermesMd || hasClaudeMd || hasGeminiMd) {
-        fail('Test 8', `hermes files expected: .hermes/=${hasHermesDir} HERMES.md=${hasHermesMd} CLAUDE.md absent=${!hasClaudeMd} GEMINI.md absent=${!hasGeminiMd}`);
+  console.log("\nTest 8: Platform Profile");
+  if (requireScaffold("Test 8")) {
+    try {
+      if (platformArg === "claude") {
+        if (fileExists("GEMINI.md")) fail("Test 8", "GEMINI.md should be removed for --platform claude");
+        else pass("Test 8 PASSED: GEMINI.md removed for claude platform");
+      } else if (platformArg === "antigravity") {
+        if (fileExists("CLAUDE.md")) fail("Test 8", "CLAUDE.md should be removed for --platform antigravity");
+        else pass("Test 8 PASSED: CLAUDE.md removed for antigravity platform");
+      } else if (platformArg === "codex") {
+        const hasCodexMd = fileExists("CODEX.md");
+        const hasCodexDir = fileExists(".codex");
+        if (!hasCodexMd || !hasCodexDir)
+          fail("Test 8", `codex files expected: CODEX.md=${hasCodexMd} .codex/=${hasCodexDir}`);
+        else pass("Test 8 PASSED: CODEX.md and .codex/ present for codex platform");
+      } else if (platformArg === "hermes") {
+        const hasHermesDir = fileExists(".hermes");
+        const hasHermesMd = fileExists("HERMES.md");
+        const hasClaudeMd = fileExists("CLAUDE.md");
+        const hasGeminiMd = fileExists("GEMINI.md");
+        if (!hasHermesDir || !hasHermesMd || hasClaudeMd || hasGeminiMd) {
+          fail(
+            "Test 8",
+            `hermes files expected: .hermes/=${hasHermesDir} HERMES.md=${hasHermesMd} CLAUDE.md absent=${!hasClaudeMd} GEMINI.md absent=${!hasGeminiMd}`,
+          );
+        } else {
+          pass("Test 8 PASSED: .hermes/ and HERMES.md present, legacy twins removed for hermes platform");
+        }
       } else {
-        pass('Test 8 PASSED: .hermes/ and HERMES.md present, legacy twins removed for hermes platform');
+        const hasClaude = fileExists("CLAUDE.md");
+        const hasGemini = fileExists("GEMINI.md");
+        const hasCodexMd = fileExists("CODEX.md");
+        const hasCodexDir = fileExists(".codex");
+        const hasHermesDir = fileExists(".hermes");
+        const hasHermesMd = fileExists("HERMES.md");
+        if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir || !hasHermesDir || !hasHermesMd) {
+          fail(
+            "Test 8",
+            `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir} .hermes/=${hasHermesDir} HERMES.md=${hasHermesMd}`,
+          );
+        } else {
+          pass(
+            "Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, .hermes/, and HERMES.md all present for platform=all",
+          );
+        }
       }
-    } else {
-      const hasClaude   = fileExists('CLAUDE.md');
-      const hasGemini   = fileExists('GEMINI.md');
-      const hasCodexMd  = fileExists('CODEX.md');
-      const hasCodexDir = fileExists('.codex');
-      const hasHermesDir = fileExists('.hermes');
-      const hasHermesMd  = fileExists('HERMES.md');
-      if (!hasClaude || !hasGemini || !hasCodexMd || !hasCodexDir || !hasHermesDir || !hasHermesMd) {
-        fail('Test 8', `All files expected: CLAUDE.md=${hasClaude} GEMINI.md=${hasGemini} CODEX.md=${hasCodexMd} .codex/=${hasCodexDir} .hermes/=${hasHermesDir} HERMES.md=${hasHermesMd}`);
-      } else {
-        pass('Test 8 PASSED: CLAUDE.md, GEMINI.md, CODEX.md, .codex/, .hermes/, and HERMES.md all present for platform=all');
-      }
+    } catch (e) {
+      fail("Test 8", String(e));
     }
-  } catch (e) { fail('Test 8', String(e)); } }
+  }
 
   // ── Test 9: variant.json lifecycle.statusSince [maps to: step 5.5b] ───────
-  console.log('\nTest 9: variant.json lifecycle.statusSince');
-  if (requireScaffold('Test 9')) {
-  try {
-    if (!fileExists('variant.json')) {
-      skip('Test 9', 'variant.json not found');
-    } else {
-      const vj = JSON.parse(readText('variant.json'));
-      if (vj?.lifecycle?.statusSince === today) {
-        pass(`Test 9 PASSED: lifecycle.statusSince = ${today}`);
+  console.log("\nTest 9: variant.json lifecycle.statusSince");
+  if (requireScaffold("Test 9")) {
+    try {
+      if (!fileExists("variant.json")) {
+        skip("Test 9", "variant.json not found");
       } else {
-        fail('Test 9', `lifecycle.statusSince = "${vj?.lifecycle?.statusSince}", expected "${today}"`);
+        const vj = JSON.parse(readText("variant.json"));
+        if (vj?.lifecycle?.statusSince === today) {
+          pass(`Test 9 PASSED: lifecycle.statusSince = ${today}`);
+        } else {
+          fail("Test 9", `lifecycle.statusSince = "${vj?.lifecycle?.statusSince}", expected "${today}"`);
+        }
       }
+    } catch (e) {
+      fail("Test 9", String(e));
     }
-  } catch (e) { fail('Test 9', String(e)); } }
+  }
 
   // ── Test 10: scripts-snapshot.json [maps to: step 5.5c] ──────────────────
-  console.log('\nTest 10: scripts-snapshot.json');
-  if (requireScaffold('Test 10')) {
-  try {
-    if (!fileExists('scripts-snapshot.json')) {
-      fail('Test 10', 'scripts-snapshot.json not found');
-    } else {
-      const snap = JSON.parse(readText('scripts-snapshot.json'));
-      if (!snap.created || !snap.variant || !snap.scripts) {
-        fail('Test 10', `Missing required fields: created=${!!snap.created} variant=${!!snap.variant} scripts=${!!snap.scripts}`);
+  console.log("\nTest 10: scripts-snapshot.json");
+  if (requireScaffold("Test 10")) {
+    try {
+      if (!fileExists("scripts-snapshot.json")) {
+        fail("Test 10", "scripts-snapshot.json not found");
       } else {
-        pass(`Test 10 PASSED: scripts-snapshot.json present (${Object.keys(snap.scripts).length} scripts)`);
+        const snap = JSON.parse(readText("scripts-snapshot.json"));
+        if (!snap.created || !snap.variant || !snap.scripts) {
+          fail(
+            "Test 10",
+            `Missing required fields: created=${!!snap.created} variant=${!!snap.variant} scripts=${!!snap.scripts}`,
+          );
+        } else {
+          pass(`Test 10 PASSED: scripts-snapshot.json present (${Object.keys(snap.scripts).length} scripts)`);
+        }
       }
+    } catch (e) {
+      fail("Test 10", String(e));
     }
-  } catch (e) { fail('Test 10', String(e)); } }
+  }
 
   // ── Test 11: package.json Tier 2 scripts [maps to: step 5.5d] ──────────────
-  console.log('\nTest 11: package.json Tier 2 scripts');
-  if (requireScaffold('Test 11')) {
-  try {
-    if (!fileExists('package.json')) {
-      skip('Test 11', 'package.json not found');
-    } else {
-      const pkg = JSON.parse(readText('package.json'));
-      const required = ['audit', 'dev-sync', 'sync-md'];
-      const missing  = required.filter(k => !pkg?.scripts?.[k]);
-      if (missing.length > 0) {
-        fail('Test 11', `Missing package.json scripts: ${missing.join(', ')}`);
+  console.log("\nTest 11: package.json Tier 2 scripts");
+  if (requireScaffold("Test 11")) {
+    try {
+      if (!fileExists("package.json")) {
+        skip("Test 11", "package.json not found");
       } else {
-        pass('Test 11 PASSED: Tier 2 scripts in package.json');
+        const pkg = JSON.parse(readText("package.json"));
+        const required = ["audit", "dev-sync", "sync-md"];
+        const missing = required.filter((k) => !pkg?.scripts?.[k]);
+        if (missing.length > 0) {
+          fail("Test 11", `Missing package.json scripts: ${missing.join(", ")}`);
+        } else {
+          pass("Test 11 PASSED: Tier 2 scripts in package.json");
+        }
       }
+    } catch (e) {
+      fail("Test 11", String(e));
     }
-  } catch (e) { fail('Test 11', String(e)); } }
+  }
 
   // ── Test 12: template-version.txt at project root [maps to: step 5.6] ──────
-  console.log('\nTest 12: template-version.txt (project root)');
-  if (requireScaffold('Test 12')) {
-  try {
-    const tvPath = 'template-version.txt';
-    if (!fileExists(tvPath)) {
-      fail('Test 12', 'template-version.txt not found at project root');
-    } else {
-      const content = readText(tvPath);
-      const hasVariant  = content.includes('variant=');
-      const hasVersion  = content.includes('version=');
-      const hasPlatform = content.includes('platform=');
-      const hasCreated  = content.includes('created=');
-      if (!hasVariant || !hasVersion || !hasPlatform || !hasCreated) {
-        fail('Test 12', `Missing fields: variant=${hasVariant} version=${hasVersion} platform=${hasPlatform} created=${hasCreated}`);
+  console.log("\nTest 12: template-version.txt (project root)");
+  if (requireScaffold("Test 12")) {
+    try {
+      const tvPath = "template-version.txt";
+      if (!fileExists(tvPath)) {
+        fail("Test 12", "template-version.txt not found at project root");
       } else {
-        pass('Test 12 PASSED: template-version.txt has all required fields');
+        const content = readText(tvPath);
+        const hasVariant = content.includes("variant=");
+        const hasVersion = content.includes("version=");
+        const hasPlatform = content.includes("platform=");
+        const hasCreated = content.includes("created=");
+        if (!hasVariant || !hasVersion || !hasPlatform || !hasCreated) {
+          fail(
+            "Test 12",
+            `Missing fields: variant=${hasVariant} version=${hasVersion} platform=${hasPlatform} created=${hasCreated}`,
+          );
+        } else {
+          pass("Test 12 PASSED: template-version.txt has all required fields");
+        }
       }
+    } catch (e) {
+      fail("Test 12", String(e));
     }
-  } catch (e) { fail('Test 12', String(e)); } }
+  }
 
   // ── Test 13: .gitattributes merge=ours [maps to: step 5.7] ────────────────
-  console.log('\nTest 13: .gitattributes merge=ours for context.md');
-  if (requireScaffold('Test 13')) {
-  try {
-    if (!fileExists('.gitattributes')) {
-      fail('Test 13', '.gitattributes not found');
-    } else {
-      const content = readText('.gitattributes');
-      if (!content.includes('merge=ours')) {
-        fail('Test 13', 'merge=ours not set in .gitattributes');
+  console.log("\nTest 13: .gitattributes merge=ours for context.md");
+  if (requireScaffold("Test 13")) {
+    try {
+      if (!fileExists(".gitattributes")) {
+        fail("Test 13", ".gitattributes not found");
       } else {
-        pass('Test 13 PASSED: .gitattributes has merge=ours');
+        const content = readText(".gitattributes");
+        if (!content.includes("merge=ours")) {
+          fail("Test 13", "merge=ours not set in .gitattributes");
+        } else {
+          pass("Test 13 PASSED: .gitattributes has merge=ours");
+        }
       }
+    } catch (e) {
+      fail("Test 13", String(e));
     }
-  } catch (e) { fail('Test 13', String(e)); } }
+  }
 
   // ── Test 14: docs/_examples removed [maps to: step 3] ────────────────────
-  console.log('\nTest 14: docs/_examples removed');
-  if (requireScaffold('Test 14')) {
-  try {
-    if (fileExists('docs/_examples')) {
-      fail('Test 14', 'docs/_examples directory should have been removed');
-    } else {
-      pass('Test 14 PASSED: docs/_examples not present');
+  console.log("\nTest 14: docs/_examples removed");
+  if (requireScaffold("Test 14")) {
+    try {
+      if (fileExists("docs/_examples")) {
+        fail("Test 14", "docs/_examples directory should have been removed");
+      } else {
+        pass("Test 14 PASSED: docs/_examples not present");
+      }
+    } catch (e) {
+      fail("Test 14", String(e));
     }
-  } catch (e) { fail('Test 14', String(e)); } }
+  }
 
   // ── Test 15: No .gitkeep files [maps to: step 4] ────────────────────────
-  console.log('\nTest 15: No .gitkeep files remain');
-  if (requireScaffold('Test 15')) {
-  try {
-    const gitkeeps = findFiles(testDir, '.gitkeep');
-    if (gitkeeps.length > 0) {
-      fail('Test 15', `.gitkeep files found: ${gitkeeps.join(', ')}`);
-    } else {
-      pass('Test 15 PASSED: No .gitkeep files');
+  console.log("\nTest 15: No .gitkeep files remain");
+  if (requireScaffold("Test 15")) {
+    try {
+      const gitkeeps = findFiles(testDir, ".gitkeep");
+      if (gitkeeps.length > 0) {
+        fail("Test 15", `.gitkeep files found: ${gitkeeps.join(", ")}`);
+      } else {
+        pass("Test 15 PASSED: No .gitkeep files");
+      }
+    } catch (e) {
+      fail("Test 15", String(e));
     }
-  } catch (e) { fail('Test 15', String(e)); } }
+  }
 
   // ── Test 16: File permissions (Unix only) [maps to: step 6] ───────────────
-  console.log('\nTest 16: Hook file permissions');
-  if (requireScaffold('Test 16')) {
-  if (isWin) {
-    skip('Test 16', 'file permission check not applicable on Windows (git index chmod used instead)');
-  } else {
-    try {
-      const hooksDir = join(testDir, '.githooks');
-      if (!existsSync(hooksDir)) {
-        skip('Test 16', '.githooks/ not found');
-      } else {
-        const hooks = readdirSync(hooksDir).filter(f => !f.endsWith('.ps1'));
-        const notExec = hooks.filter(h => !(statSync(join(hooksDir, h)).mode & 0o111));
-        if (notExec.length > 0) {
-          fail('Test 16', `Not executable: ${notExec.join(', ')}`);
+  console.log("\nTest 16: Hook file permissions");
+  if (requireScaffold("Test 16")) {
+    if (isWin) {
+      skip("Test 16", "file permission check not applicable on Windows (git index chmod used instead)");
+    } else {
+      try {
+        const hooksDir = join(testDir, ".githooks");
+        if (!existsSync(hooksDir)) {
+          skip("Test 16", ".githooks/ not found");
         } else {
-          pass(`Test 16 PASSED: All ${hooks.length} hooks are executable`);
+          const hooks = readdirSync(hooksDir).filter((f) => !f.endsWith(".ps1"));
+          const notExec = hooks.filter((h) => !(statSync(join(hooksDir, h)).mode & 0o111));
+          if (notExec.length > 0) {
+            fail("Test 16", `Not executable: ${notExec.join(", ")}`);
+          } else {
+            pass(`Test 16 PASSED: All ${hooks.length} hooks are executable`);
+          }
         }
+      } catch (e) {
+        fail("Test 16", String(e));
       }
-    } catch (e) { fail('Test 16', String(e)); }
-  } }
+    }
+  }
 
   // ── Test 17: No .cmd files [maps to: step 2.6] ────────────────────────────
-  console.log('\nTest 17: No .cmd files');
-  if (requireScaffold('Test 17')) {
-  try {
-    function findCmdFiles(dir: string): string[] {
-      const results: string[] = [];
-      if (!existsSync(dir)) return results;
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        const fullPath = join(dir, entry.name);
-        if (entry.isDirectory()) results.push(...findCmdFiles(fullPath));
-        else if (entry.name.endsWith('.cmd')) results.push(fullPath);
+  console.log("\nTest 17: No .cmd files");
+  if (requireScaffold("Test 17")) {
+    try {
+      function findCmdFiles(dir: string): string[] {
+        const results: string[] = [];
+        if (!existsSync(dir)) return results;
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          const fullPath = join(dir, entry.name);
+          if (entry.isDirectory()) results.push(...findCmdFiles(fullPath));
+          else if (entry.name.endsWith(".cmd")) results.push(fullPath);
+        }
+        return results;
       }
-      return results;
+      const cmdFiles = findCmdFiles(testDir);
+      if (cmdFiles.length > 0) {
+        fail("Test 17", `.cmd files found: ${cmdFiles.join(", ")}`);
+      } else {
+        pass("Test 17 PASSED: No .cmd files present");
+      }
+    } catch (e) {
+      fail("Test 17", String(e));
     }
-    const cmdFiles = findCmdFiles(testDir);
-    if (cmdFiles.length > 0) {
-      fail('Test 17', `.cmd files found: ${cmdFiles.join(', ')}`);
-    } else {
-      pass('Test 17 PASSED: No .cmd files present');
-    }
-  } catch (e) { fail('Test 17', String(e)); } }
+  }
 
   // ── Test 18: Script pair validation in project scripts/ [maps to: step 3.5]
-  console.log('\nTest 18: Script pair validation in project scripts/');
-  if (requireScaffold('Test 18')) {
-  try {
-    const projScripts = join(testDir, 'scripts');
-    if (!existsSync(projScripts)) {
-      skip('Test 18', 'scripts/ directory not found in project');
-    } else {
-      const files = readdirSync(projScripts);
-      const shBases  = new Set(files.filter(f => f.endsWith('.sh')  && !f.startsWith('test-')).map(f => f.replace('.sh', '')));
-      const ps1Bases = new Set(files.filter(f => f.endsWith('.ps1') && !f.startsWith('test-')).map(f => f.replace('.ps1', '')));
-      const missingPs1 = [...shBases].filter(b => !ps1Bases.has(b));
-      const missingSh  = [...ps1Bases].filter(b => !shBases.has(b));
-      if (missingPs1.length > 0 || missingSh.length > 0) {
-        const msg = [
-          ...missingPs1.map(b => `${b}.sh missing .ps1`),
-          ...missingSh.map(b => `${b}.ps1 missing .sh`),
-        ].join(', ');
-        fail('Test 18', msg);
+  console.log("\nTest 18: Script pair validation in project scripts/");
+  if (requireScaffold("Test 18")) {
+    try {
+      const projScripts = join(testDir, "scripts");
+      if (!existsSync(projScripts)) {
+        skip("Test 18", "scripts/ directory not found in project");
       } else {
-        pass(`Test 18 PASSED: All script pairs present (${shBases.size} pairs)`);
-      }
-    }
-  } catch (e) { fail('Test 18', String(e)); } }
-
-  // ── Test 19: AGENTS.md Skills injected into context.md [maps to: step 5.6b]
-  console.log('\nTest 19: AGENTS.md Skills injected into context.md');
-  if (requireScaffold('Test 19')) {
-  try {
-    const contextPath = join(testDir, 'docs', `${variantArg}.context.md`);
-    const agentsPath  = join(testDir, 'AGENTS.md');
-    if (!existsSync(contextPath)) {
-      skip('Test 19', `docs/${variantArg}.context.md not found`);
-    } else if (!existsSync(agentsPath)) {
-      skip('Test 19', 'AGENTS.md not found');
-    } else {
-      const context = readFileSync(contextPath, 'utf-8');
-      const agents  = readFileSync(agentsPath, 'utf-8');
-      // Only test injection if context.md has the marker AND AGENTS.md has Skills section
-      const hasMarker   = context.includes('<!-- DYNAMIC_SKILLS_START -->');
-      const hasSkills   = /^## Skills/m.test(agents);
-      if (!hasMarker) {
-        skip('Test 19', 'context.md has no DYNAMIC_SKILLS_START marker — injection not applicable');
-      } else if (!hasSkills) {
-        skip('Test 19', 'AGENTS.md has no Skills section');
-      } else {
-        // Check that the content between markers is not empty
-        const injected = context.match(/<!-- DYNAMIC_SKILLS_START -->([\s\S]*?)<!-- DYNAMIC_SKILLS_END -->/);
-        if (!injected || injected[1].trim().length === 0) {
-          fail('Test 19', 'Skills table not injected between markers');
+        const files = readdirSync(projScripts);
+        const shBases = new Set(
+          files.filter((f) => f.endsWith(".sh") && !f.startsWith("test-")).map((f) => f.replace(".sh", "")),
+        );
+        const ps1Bases = new Set(
+          files.filter((f) => f.endsWith(".ps1") && !f.startsWith("test-")).map((f) => f.replace(".ps1", "")),
+        );
+        const missingPs1 = [...shBases].filter((b) => !ps1Bases.has(b));
+        const missingSh = [...ps1Bases].filter((b) => !shBases.has(b));
+        if (missingPs1.length > 0 || missingSh.length > 0) {
+          const msg = [
+            ...missingPs1.map((b) => `${b}.sh missing .ps1`),
+            ...missingSh.map((b) => `${b}.ps1 missing .sh`),
+          ].join(", ");
+          fail("Test 18", msg);
         } else {
-          pass('Test 19 PASSED: AGENTS.md Skills injected into context.md');
+          pass(`Test 18 PASSED: All script pairs present (${shBases.size} pairs)`);
         }
       }
+    } catch (e) {
+      fail("Test 18", String(e));
     }
-  } catch (e) { fail('Test 19', String(e)); } }
+  }
+
+  // ── Test 19: AGENTS.md Skills injected into context.md [maps to: step 5.6b]
+  console.log("\nTest 19: AGENTS.md Skills injected into context.md");
+  if (requireScaffold("Test 19")) {
+    try {
+      const contextPath = join(testDir, "docs", `${variantArg}.context.md`);
+      const agentsPath = join(testDir, "AGENTS.md");
+      if (!existsSync(contextPath)) {
+        skip("Test 19", `docs/${variantArg}.context.md not found`);
+      } else if (!existsSync(agentsPath)) {
+        skip("Test 19", "AGENTS.md not found");
+      } else {
+        const context = readFileSync(contextPath, "utf-8");
+        const agents = readFileSync(agentsPath, "utf-8");
+        // Only test injection if context.md has the marker AND AGENTS.md has Skills section
+        const hasMarker = context.includes("<!-- DYNAMIC_SKILLS_START -->");
+        const hasSkills = /^## Skills/m.test(agents);
+        if (!hasMarker) {
+          skip("Test 19", "context.md has no DYNAMIC_SKILLS_START marker — injection not applicable");
+        } else if (!hasSkills) {
+          skip("Test 19", "AGENTS.md has no Skills section");
+        } else {
+          // Check that the content between markers is not empty
+          const injected = context.match(/<!-- DYNAMIC_SKILLS_START -->([\s\S]*?)<!-- DYNAMIC_SKILLS_END -->/);
+          if (!injected || injected[1].trim().length === 0) {
+            fail("Test 19", "Skills table not injected between markers");
+          } else {
+            pass("Test 19 PASSED: AGENTS.md Skills injected into context.md");
+          }
+        }
+      }
+    } catch (e) {
+      fail("Test 19", String(e));
+    }
+  }
 
   // ── Test 20: No VARIANT-SECTION markers in pm.md [maps to: AC-03] ─────────
-  console.log('\nTest 20: No VARIANT-SECTION markers in pm.md');
-  if (requireScaffold('Test 20')) {
-  try {
-    const pmPath = join(testDir, 'agents', 'pm.md');
-    if (!existsSync(pmPath)) {
-      fail('Test 20', 'agents/pm.md not found');
-    } else {
-      const pmContent = readFileSync(pmPath, 'utf-8');
-      if (pmContent.includes('<!-- VARIANT-SECTION')) {
-        fail('Test 20', 'pm.md contains VARIANT-SECTION markers');
+  console.log("\nTest 20: No VARIANT-SECTION markers in pm.md");
+  if (requireScaffold("Test 20")) {
+    try {
+      const pmPath = join(testDir, "agents", "pm.md");
+      if (!existsSync(pmPath)) {
+        fail("Test 20", "agents/pm.md not found");
       } else {
-        pass('Test 20 PASSED: pm.md has no VARIANT-SECTION markers');
+        const pmContent = readFileSync(pmPath, "utf-8");
+        if (pmContent.includes("<!-- VARIANT-SECTION")) {
+          fail("Test 20", "pm.md contains VARIANT-SECTION markers");
+        } else {
+          pass("Test 20 PASSED: pm.md has no VARIANT-SECTION markers");
+        }
       }
+    } catch (e) {
+      fail("Test 20", String(e));
     }
-  } catch (e) { fail('Test 20', String(e)); } }
+  }
 
   // ── Test 21: Exactly one YAML frontmatter block in pm.md [maps to: AC-04] ─
-  console.log('\nTest 21: Exactly one YAML frontmatter block in pm.md');
-  if (requireScaffold('Test 21')) {
-  try {
-    const pmPath = join(testDir, 'agents', 'pm.md');
-    if (!existsSync(pmPath)) {
-      fail('Test 21', 'agents/pm.md not found');
-    } else {
-      const pmContent = readFileSync(pmPath, 'utf-8');
-      const matches = pmContent.match(/^---$/gm);
-      if (!matches || matches.length !== 2) {
-        fail('Test 21', `Expected exactly 2 '---' markers for 1 frontmatter block, found ${matches ? matches.length : 0}`);
+  console.log("\nTest 21: Exactly one YAML frontmatter block in pm.md");
+  if (requireScaffold("Test 21")) {
+    try {
+      const pmPath = join(testDir, "agents", "pm.md");
+      if (!existsSync(pmPath)) {
+        fail("Test 21", "agents/pm.md not found");
       } else {
-        pass('Test 21 PASSED: pm.md has exactly one frontmatter block');
+        const pmContent = readFileSync(pmPath, "utf-8");
+        const matches = pmContent.match(/^---$/gm);
+        if (!matches || matches.length !== 2) {
+          fail(
+            "Test 21",
+            `Expected exactly 2 '---' markers for 1 frontmatter block, found ${matches ? matches.length : 0}`,
+          );
+        } else {
+          pass("Test 21 PASSED: pm.md has exactly one frontmatter block");
+        }
       }
+    } catch (e) {
+      fail("Test 21", String(e));
     }
-  } catch (e) { fail('Test 21', String(e)); } }
+  }
 
   // ── Test 22: pm.md contains all 7 invariant sections [maps to: AC-05] ─────
   // T-20260912-004: the previous `extends:` escape hatch (pass when the scaffolded
   // pm.md still said `extends:`) masked unresolved stubs — the scaffold must inline
   // the common body, so the invariants are required unconditionally.
-  console.log('\nTest 22: pm.md contains all 7 invariant sections');
-  if (requireScaffold('Test 22')) {
-  try {
-    const pmPath = join(testDir, 'agents', 'pm.md');
-    if (!existsSync(pmPath)) {
-      fail('Test 22', 'agents/pm.md not found');
-    } else {
-      const pmContent = readFileSync(pmPath, 'utf-8');
-      const invariants = [
-        '## Role',
-        '## ⚠️ ROLE CLARIFICATION',
-        '## YOU ARE THE SINGLE ENTRY POINT',
-        '## Consensus-Driven Facilitation Model',
-        '## Governance Workflow',
-        '## Agent Ecosystem',
-        '## Permission Denial Protocol'
-      ];
-      const missing = invariants.filter(s => !pmContent.includes(s));
-      if (missing.length > 0) {
-        fail('Test 22', `Missing invariant sections: ${missing.join(', ')}`);
+  console.log("\nTest 22: pm.md contains all 7 invariant sections");
+  if (requireScaffold("Test 22")) {
+    try {
+      const pmPath = join(testDir, "agents", "pm.md");
+      if (!existsSync(pmPath)) {
+        fail("Test 22", "agents/pm.md not found");
       } else {
-        pass('Test 22 PASSED: pm.md contains all 7 invariant sections');
+        const pmContent = readFileSync(pmPath, "utf-8");
+        const invariants = [
+          "## Role",
+          "## ⚠️ ROLE CLARIFICATION",
+          "## YOU ARE THE SINGLE ENTRY POINT",
+          "## Consensus-Driven Facilitation Model",
+          "## Governance Workflow",
+          "## Agent Ecosystem",
+          "## Permission Denial Protocol",
+        ];
+        const missing = invariants.filter((s) => !pmContent.includes(s));
+        if (missing.length > 0) {
+          fail("Test 22", `Missing invariant sections: ${missing.join(", ")}`);
+        } else {
+          pass("Test 22 PASSED: pm.md contains all 7 invariant sections");
+        }
       }
+    } catch (e) {
+      fail("Test 22", String(e));
     }
-  } catch (e) { fail('Test 22', String(e)); } }
+  }
 
   // ── Test 23: Smoke test — dev-sync.ts and sync-md.ts present ─────────────
-  console.log('\nTest 23: Smoke test — dev-sync.ts and sync-md.ts present');
-  if (requireScaffold('Test 23')) {
-  try {
-    const devSyncPath = join(testDir, 'scripts', 'dev-sync.ts');
-    const syncMdPath  = join(testDir, 'scripts', 'sync-md.ts');
-    if (!existsSync(devSyncPath)) {
-      fail('Test 23', 'Smoke test: scripts/dev-sync.ts missing from scaffolded project');
-    } else {
-      pass('Smoke test: scripts/dev-sync.ts present');
+  console.log("\nTest 23: Smoke test — dev-sync.ts and sync-md.ts present");
+  if (requireScaffold("Test 23")) {
+    try {
+      const devSyncPath = join(testDir, "scripts", "dev-sync.ts");
+      const syncMdPath = join(testDir, "scripts", "sync-md.ts");
+      if (!existsSync(devSyncPath)) {
+        fail("Test 23", "Smoke test: scripts/dev-sync.ts missing from scaffolded project");
+      } else {
+        pass("Smoke test: scripts/dev-sync.ts present");
+      }
+      if (!existsSync(syncMdPath)) {
+        fail("Test 23", "Smoke test: scripts/sync-md.ts missing from scaffolded project (required by dev-sync.ts)");
+      } else {
+        pass("Smoke test: scripts/sync-md.ts present");
+      }
+    } catch (e) {
+      fail("Test 23", String(e));
     }
-    if (!existsSync(syncMdPath)) {
-      fail('Test 23', 'Smoke test: scripts/sync-md.ts missing from scaffolded project (required by dev-sync.ts)');
-    } else {
-      pass('Smoke test: scripts/sync-md.ts present');
-    }
-  } catch (e) { fail('Test 23', String(e)); } }
+  }
 
   // ── Test 24: Smoke test — verify-readme-sync.ts present ──────────────────
-  console.log('\nTest 24: Smoke test — verify-readme-sync.ts present');
-  if (requireScaffold('Test 24')) {
-  try {
-    const verifyReadmeSyncPath = join(testDir, 'scripts', 'verify-readme-sync.ts');
-    if (!existsSync(verifyReadmeSyncPath)) {
-      fail('Test 24', 'Smoke test: scripts/verify-readme-sync.ts missing from scaffolded project');
-    } else {
-      pass('Smoke test: scripts/verify-readme-sync.ts present');
+  console.log("\nTest 24: Smoke test — verify-readme-sync.ts present");
+  if (requireScaffold("Test 24")) {
+    try {
+      const verifyReadmeSyncPath = join(testDir, "scripts", "verify-readme-sync.ts");
+      if (!existsSync(verifyReadmeSyncPath)) {
+        fail("Test 24", "Smoke test: scripts/verify-readme-sync.ts missing from scaffolded project");
+      } else {
+        pass("Smoke test: scripts/verify-readme-sync.ts present");
+      }
+    } catch (e) {
+      fail("Test 24", String(e));
     }
-  } catch (e) { fail('Test 24', String(e)); } }
+  }
 
   // ── Test 25: pm.md extends-stub fully resolved [T-20260912-004] ──────────
   // The scaffolded agents/pm.md must be self-contained: no dangling `extends:`,
   // no raw `variant_overrides:` YAML (rendered into the body instead), and a
   // substantive body (the L1 PM body, not a stub).
-  console.log('\nTest 25: pm.md extends-stub resolution (no extends / no variant_overrides / substantive body)');
-  if (requireScaffold('Test 25')) {
-  try {
-    const pmPath = join(testDir, 'agents', 'pm.md');
-    if (!existsSync(pmPath)) {
-      fail('Test 25', 'agents/pm.md not found');
-    } else {
-      const pmContent = readFileSync(pmPath, 'utf-8');
-      const problems: string[] = [];
-      if (pmContent.includes('extends:')) {
-        problems.push('scaffolded pm.md still contains a dangling `extends:` pointer (templates/ does not exist in the project)');
-      }
-      if (pmContent.includes('variant_overrides:')) {
-        problems.push('scaffolded pm.md still contains raw `variant_overrides:` YAML (must be rendered into body sections)');
-      }
-      const fmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
-      const body = fmMatch ? pmContent.slice(fmMatch[0].length) : pmContent;
-      if (!/Permission Denial|PM Gateway|Dispatch Protocol/i.test(body)) {
-        problems.push('body lacks substantive PM content (no Permission Denial / PM Gateway / Dispatch Protocol match)');
-      }
-      if (body.trim().length < 2000) {
-        problems.push(`body too short (${body.trim().length} chars) — the L1 PM body was not attached`);
-      }
-      // If the variant template ships variant_overrides, its governance text must be
-      // rendered into the scaffolded body (ADR-0039/ADR-0034 scaffold-time contract).
-      const tmplPmPath = join(process.cwd(), 'templates', variantArg, 'agents', 'pm.md');
-      if (existsSync(tmplPmPath)) {
-        const tmplMatch = readFileSync(tmplPmPath, 'utf-8').match(/^---\n([\s\S]*?)\n---\n?/);
-        if (tmplMatch) {
-          const fm = (yamlLoad(tmplMatch[1]) ?? {}) as Record<string, unknown>;
-          const overrides = (fm['variant_overrides'] ?? {}) as Record<string, unknown>;
-          const gw = typeof overrides['governance_workflow'] === 'string' ? (overrides['governance_workflow'] as string) : '';
-          let contentLine = gw.split('\n').map(l => l.trim()).find(l => l !== '' && !l.startsWith('#'));
-          // The scaffold's substitution pass (scripts/helpers/substitute-placeholders.ts)
-          // rewrites backtick `<variant>` paths (and the rest of the placeholder map) in
-          // the rendered body. Normalize the raw-template expectation through the same
-          // exported map — with the params this harness's scaffold run uses — so the
-          // assertion tests the ADR-0039/ADR-0034 contract (override rendered into the
-          // body), not placeholder spelling (T-20261106-004 class B).
-          if (contentLine) {
-            contentLine = applySubstitutions(contentLine, {
-              projectName: `Test-${projectName}`,
-              description: 'A new project',
-              characteristics: '',
-              variantName: variantArg,
-              countryDisplayName: '',
-            });
-          }
-          if (contentLine && !pmContent.includes(contentLine)) {
-            problems.push(`variant_overrides.governance_workflow not rendered into body (missing line: "${contentLine.slice(0, 60)}…")`);
+  console.log("\nTest 25: pm.md extends-stub resolution (no extends / no variant_overrides / substantive body)");
+  if (requireScaffold("Test 25")) {
+    try {
+      const pmPath = join(testDir, "agents", "pm.md");
+      if (!existsSync(pmPath)) {
+        fail("Test 25", "agents/pm.md not found");
+      } else {
+        const pmContent = readFileSync(pmPath, "utf-8");
+        const problems: string[] = [];
+        if (pmContent.includes("extends:")) {
+          problems.push(
+            "scaffolded pm.md still contains a dangling `extends:` pointer (templates/ does not exist in the project)",
+          );
+        }
+        if (pmContent.includes("variant_overrides:")) {
+          problems.push(
+            "scaffolded pm.md still contains raw `variant_overrides:` YAML (must be rendered into body sections)",
+          );
+        }
+        const fmMatch = pmContent.match(/^---\n([\s\S]*?)\n---\n?/);
+        const body = fmMatch ? pmContent.slice(fmMatch[0].length) : pmContent;
+        if (!/Permission Denial|PM Gateway|Dispatch Protocol/i.test(body)) {
+          problems.push(
+            "body lacks substantive PM content (no Permission Denial / PM Gateway / Dispatch Protocol match)",
+          );
+        }
+        if (body.trim().length < 2000) {
+          problems.push(`body too short (${body.trim().length} chars) — the L1 PM body was not attached`);
+        }
+        // If the variant template ships variant_overrides, its governance text must be
+        // rendered into the scaffolded body (ADR-0039/ADR-0034 scaffold-time contract).
+        const tmplPmPath = join(process.cwd(), "templates", variantArg, "agents", "pm.md");
+        if (existsSync(tmplPmPath)) {
+          const tmplMatch = readFileSync(tmplPmPath, "utf-8").match(/^---\n([\s\S]*?)\n---\n?/);
+          if (tmplMatch) {
+            const fm = (yamlLoad(tmplMatch[1]) ?? {}) as Record<string, unknown>;
+            const overrides = (fm["variant_overrides"] ?? {}) as Record<string, unknown>;
+            const gw =
+              typeof overrides["governance_workflow"] === "string" ? (overrides["governance_workflow"] as string) : "";
+            let contentLine = gw
+              .split("\n")
+              .map((l) => l.trim())
+              .find((l) => l !== "" && !l.startsWith("#"));
+            // The scaffold's substitution pass (scripts/helpers/substitute-placeholders.ts)
+            // rewrites backtick `<variant>` paths (and the rest of the placeholder map) in
+            // the rendered body. Normalize the raw-template expectation through the same
+            // exported map — with the params this harness's scaffold run uses — so the
+            // assertion tests the ADR-0039/ADR-0034 contract (override rendered into the
+            // body), not placeholder spelling (T-20261106-004 class B).
+            if (contentLine) {
+              contentLine = applySubstitutions(contentLine, {
+                projectName: `Test-${projectName}`,
+                description: "A new project",
+                characteristics: "",
+                variantName: variantArg,
+                countryDisplayName: "",
+              });
+            }
+            if (contentLine && !pmContent.includes(contentLine)) {
+              problems.push(
+                `variant_overrides.governance_workflow not rendered into body (missing line: "${contentLine.slice(0, 60)}…")`,
+              );
+            }
           }
         }
+        if (problems.length > 0) {
+          fail("Test 25", problems.join("; "));
+        } else {
+          pass(
+            `Test 25 PASSED: pm.md fully resolved (body: ${body.trim().length} chars, no extends, no variant_overrides)`,
+          );
+        }
       }
-      if (problems.length > 0) {
-        fail('Test 25', problems.join('; '));
-      } else {
-        pass(`Test 25 PASSED: pm.md fully resolved (body: ${body.trim().length} chars, no extends, no variant_overrides)`);
-      }
+    } catch (e) {
+      fail("Test 25", String(e));
     }
-  } catch (e) { fail('Test 25', String(e)); } }
+  }
 
   // ── Test 26: common-template delivery parity (derived vs actual) [T-20260915-003] ──
   // The static derivation of what new-project delivers FROM templates/common/
@@ -857,25 +1024,31 @@ try {
   // script's actual behavior fails here first. Post-delivery artifacts
   // (bun install lockfiles, node_modules, .git, graft/) are excluded by the
   // helper; comparison is restricted to the common-template universe.
-  console.log('\nTest 26: common-template delivery parity (derived vs actual)');
-  if (requireScaffold('Test 26')) {
-  try {
-    const verdict = verifyActualTreeMatchesDerivation({
-      which: 'new-project',
-      actualRoot: testDir,
-      commonDir: join(process.cwd(), 'templates', 'common'),
-      platform: platformArg as 'claude' | 'antigravity' | 'all' | 'codex' | 'hermes',
-    });
-    if (!verdict.ok) {
-      const detail = [
-        ...verdict.missing.map((p) => `derived but absent from scaffold: ${p}`),
-        ...verdict.extra.map((p) => `scaffolded but not derived: ${p}`),
-      ];
-      fail('Test 26', `delivery derivation drifted from actual scaffold (${detail.length} path(s)): ${detail.slice(0, 10).join('; ')}${detail.length > 10 ? '…' : ''}`);
-    } else {
-      pass('Test 26 PASSED: actual scaffold matches deriveNewProjectDelivery exactly');
+  console.log("\nTest 26: common-template delivery parity (derived vs actual)");
+  if (requireScaffold("Test 26")) {
+    try {
+      const verdict = verifyActualTreeMatchesDerivation({
+        which: "new-project",
+        actualRoot: testDir,
+        commonDir: join(process.cwd(), "templates", "common"),
+        platform: platformArg as "claude" | "antigravity" | "all" | "codex" | "hermes",
+      });
+      if (!verdict.ok) {
+        const detail = [
+          ...verdict.missing.map((p) => `derived but absent from scaffold: ${p}`),
+          ...verdict.extra.map((p) => `scaffolded but not derived: ${p}`),
+        ];
+        fail(
+          "Test 26",
+          `delivery derivation drifted from actual scaffold (${detail.length} path(s)): ${detail.slice(0, 10).join("; ")}${detail.length > 10 ? "…" : ""}`,
+        );
+      } else {
+        pass("Test 26 PASSED: actual scaffold matches deriveNewProjectDelivery exactly");
+      }
+    } catch (e) {
+      fail("Test 26", String(e));
     }
-  } catch (e) { fail('Test 26', String(e)); } }
+  }
 
   // ── Test 27: Identity seed — default scaffold [AC2 + AC3, spec 2026-09-24-scaffold-identity-overview-design] ──
   // The main harness scaffold carries NO --description/--type, so docs/project.md
@@ -883,89 +1056,104 @@ try {
   // placeholder regex family), docs/context.md must carry the byte-stable pointer
   // section (heading kept, literal placeholders gone, footer 2.14), and the raw
   // project.template.md copy must be absent from the delivered tree.
-  console.log('\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy');
-  if (requireScaffold('Test 27')) {
-  {
-    const auditPlaceholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
-    try {
-      if (!fileExists('docs/project.md')) {
-        fail('Test 27', 'docs/project.md not found (identity seed was not rendered)');
-      } else {
-        const projectMd = readText('docs/project.md');
-        const problems: string[] = [];
-        if (!projectMd.includes('TODO(project-overview)')) {
-          problems.push('docs/project.md lost the TODO(project-overview) fallback line');
-        }
-        if (!auditPlaceholderRe.test(projectMd)) {
-          problems.push('docs/project.md does not match the audit.ts placeholder regex (fallback invisible to audit)');
-        }
-        if (problems.length > 0) fail('Test 27 (AC2 fallback)', problems.join('; '));
-        else pass('Test 27 PASSED (AC2): docs/project.md keeps TODO(project-overview), audit-regex visible');
-      }
-
+  console.log("\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy");
+  if (requireScaffold("Test 27")) {
+    {
+      const auditPlaceholderRe =
+        /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
       try {
-        const ctx = readText('docs/context.md');
-        const ctxProblems: string[] = [];
-        if (!ctx.includes('## Project Overview')) ctxProblems.push('missing "## Project Overview" heading');
-        if (!ctx.includes('docs/project.md')) ctxProblems.push('missing pointer to docs/project.md');
-        if (ctx.includes('[One-sentence description')) ctxProblems.push('literal description placeholder still present');
-        if (ctx.includes('web | cli | api | mcp')) ctxProblems.push('literal Type placeholder still present');
-        if (!/\*context\.md version: 2\.14\b/.test(ctx)) ctxProblems.push('version footer is not 2.14');
-        if (ctxProblems.length > 0) fail('Test 27 (AC3 pointer)', ctxProblems.join('; '));
-        else pass('Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.14');
-      } catch (e) { fail('Test 27 (AC3 pointer)', String(e)); }
+        if (!fileExists("docs/project.md")) {
+          fail("Test 27", "docs/project.md not found (identity seed was not rendered)");
+        } else {
+          const projectMd = readText("docs/project.md");
+          const problems: string[] = [];
+          if (!projectMd.includes("TODO(project-overview)")) {
+            problems.push("docs/project.md lost the TODO(project-overview) fallback line");
+          }
+          if (!auditPlaceholderRe.test(projectMd)) {
+            problems.push(
+              "docs/project.md does not match the audit.ts placeholder regex (fallback invisible to audit)",
+            );
+          }
+          if (problems.length > 0) fail("Test 27 (AC2 fallback)", problems.join("; "));
+          else pass("Test 27 PASSED (AC2): docs/project.md keeps TODO(project-overview), audit-regex visible");
+        }
 
-      const templateCopies = findFiles(testDir, 'project.template.md');
-      if (templateCopies.length > 0) {
-        fail('Test 27 (raw template)', `project.template.md delivered into the tree: ${templateCopies.join(', ')}`);
-      } else {
-        pass('Test 27 PASSED (template removal): no project.template.md in the delivered tree');
+        try {
+          const ctx = readText("docs/context.md");
+          const ctxProblems: string[] = [];
+          if (!ctx.includes("## Project Overview")) ctxProblems.push('missing "## Project Overview" heading');
+          if (!ctx.includes("docs/project.md")) ctxProblems.push("missing pointer to docs/project.md");
+          if (ctx.includes("[One-sentence description"))
+            ctxProblems.push("literal description placeholder still present");
+          if (ctx.includes("web | cli | api | mcp")) ctxProblems.push("literal Type placeholder still present");
+          if (!/\*context\.md version: 2\.14\b/.test(ctx)) ctxProblems.push("version footer is not 2.14");
+          if (ctxProblems.length > 0) fail("Test 27 (AC3 pointer)", ctxProblems.join("; "));
+          else
+            pass("Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.14");
+        } catch (e) {
+          fail("Test 27 (AC3 pointer)", String(e));
+        }
+
+        const templateCopies = findFiles(testDir, "project.template.md");
+        if (templateCopies.length > 0) {
+          fail("Test 27 (raw template)", `project.template.md delivered into the tree: ${templateCopies.join(", ")}`);
+        } else {
+          pass("Test 27 PASSED (template removal): no project.template.md in the delivered tree");
+        }
+      } catch (e) {
+        fail("Test 27", String(e));
       }
-    } catch (e) { fail('Test 27', String(e)); }
-  } }
+    }
+  }
 
   // ── Test 28: Identity seed — flags render docs/project.md [AC1, spec 2026-09-24-scaffold-identity-overview-design] ──
   // A second scaffold WITH --description/--type must render the identity fields
   // into docs/project.md (fallback gone) and leave no raw template copy.
-  console.log('\nTest 28: Identity seed — --description/--type rendered into docs/project.md');
-  if (requireScaffold('Test 28')) {
-  {
-    const flaggedDir = `tests/.temp/Test-${projectName}-identity`;
-    const flagTestRel = (rel: string) => readFileSync(join(flaggedDir, rel), 'utf-8');
-    try {
-      const result = await $`bun scripts/new-project.ts ${flaggedDir} --variant ${variantArg} --platform ${platformArg} --yes --description "Test identity seed one-sentence description." --type cli`.nothrow();
-      if (result.exitCode !== 0 || !existsSync(flaggedDir)) {
-        fail('Test 28', `flagged scaffold failed (exit ${result.exitCode})`);
-      } else if (!existsSync(join(flaggedDir, 'docs', 'project.md'))) {
-        fail('Test 28', 'docs/project.md not rendered in the flagged scaffold');
-      } else {
-        const projectMd = flagTestRel('docs/project.md');
-        const problems: string[] = [];
-        if (!projectMd.includes('Test identity seed one-sentence description.')) {
-          problems.push('--description not rendered into docs/project.md');
-        }
-        if (!/- \*\*Type\*\*: cli\b/m.test(projectMd)) {
-          problems.push('--type cli not rendered into docs/project.md');
-        }
-        if (projectMd.includes('TODO(project-overview)')) {
-          problems.push('TODO(project-overview) fallback survived a flagged scaffold');
-        }
-        if (findFiles(flaggedDir, 'project.template.md').length > 0) {
-          problems.push('project.template.md delivered into the flagged scaffold');
-        }
-        if (problems.length > 0) {
-          fail('Test 28', problems.join('; '));
+  console.log("\nTest 28: Identity seed — --description/--type rendered into docs/project.md");
+  if (requireScaffold("Test 28")) {
+    {
+      const flaggedDir = `tests/.temp/Test-${projectName}-identity`;
+      const flagTestRel = (rel: string) => readFileSync(join(flaggedDir, rel), "utf-8");
+      try {
+        const result =
+          await $`bun scripts/new-project.ts ${flaggedDir} --variant ${variantArg} --platform ${platformArg} --yes --description "Test identity seed one-sentence description." --type cli`.nothrow();
+        if (result.exitCode !== 0 || !existsSync(flaggedDir)) {
+          fail("Test 28", `flagged scaffold failed (exit ${result.exitCode})`);
+        } else if (!existsSync(join(flaggedDir, "docs", "project.md"))) {
+          fail("Test 28", "docs/project.md not rendered in the flagged scaffold");
         } else {
-          pass('Test 28 PASSED (AC1): --description/--type rendered, fallback gone, no raw template copy');
+          const projectMd = flagTestRel("docs/project.md");
+          const problems: string[] = [];
+          if (!projectMd.includes("Test identity seed one-sentence description.")) {
+            problems.push("--description not rendered into docs/project.md");
+          }
+          if (!/- \*\*Type\*\*: cli\b/m.test(projectMd)) {
+            problems.push("--type cli not rendered into docs/project.md");
+          }
+          if (projectMd.includes("TODO(project-overview)")) {
+            problems.push("TODO(project-overview) fallback survived a flagged scaffold");
+          }
+          if (findFiles(flaggedDir, "project.template.md").length > 0) {
+            problems.push("project.template.md delivered into the flagged scaffold");
+          }
+          if (problems.length > 0) {
+            fail("Test 28", problems.join("; "));
+          } else {
+            pass("Test 28 PASSED (AC1): --description/--type rendered, fallback gone, no raw template copy");
+          }
+        }
+      } catch (e) {
+        fail("Test 28", String(e));
+      } finally {
+        try {
+          if (existsSync(flaggedDir)) rmSync(flaggedDir, { recursive: true, force: true });
+        } catch {
+          /* ignore */
         }
       }
-    } catch (e) { fail('Test 28', String(e)); }
-    finally {
-      try {
-        if (existsSync(flaggedDir)) rmSync(flaggedDir, { recursive: true, force: true });
-      } catch { /* ignore */ }
     }
-  } }
+  }
 
   // ── Test 29: skills registry ↔ delivered tree bijection [T-20260924-008] ──
   // The delivered skills/SKILLS.md (seeded from templates/common, overlay
@@ -976,115 +1164,140 @@ try {
   // carries a stale accessibility-audit row (last_reviewed 2026-09-12) that
   // must never reach delivery; the delivered frontmatter (2026-09-06 lineage)
   // wins. Also pins the variant-exclusive append (service-design).
-  console.log('\nTest 29: skills registry ↔ delivered tree bijection');
-  if (requireScaffold('Test 29')) {
-  {
-    try {
-      if (!fileExists('skills/SKILLS.md')) {
-        fail('Test 29', 'skills/SKILLS.md not delivered (seed registry missing)');
-      } else {
-        const { rows } = parseSkillRegistryRows(readText('skills/SKILLS.md'));
-        const skillsDir = join(testDir, 'skills');
-        const deliveredNames = new Set<string>();
-        const fmBySkill = new Map<string, { version?: string; last_reviewed?: string }>();
-        for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
-          if (!entry.isDirectory()) continue;
-          const skillMd = join(skillsDir, entry.name, 'SKILL.md');
-          if (!existsSync(skillMd)) continue;
-          deliveredNames.add(entry.name);
-          const fmMatch = readFileSync(skillMd, 'utf-8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
-          if (fmMatch) {
-            fmBySkill.set(entry.name, ((yamlLoad(fmMatch[1]) ?? {}) as Record<string, unknown>) as { version?: string; last_reviewed?: string });
-          }
-        }
-
-        const problems: string[] = [];
-        const missingRows = [...deliveredNames].filter((n) => !rows.has(n));
-        if (missingRows.length > 0) {
-          problems.push(`delivered skills without a registry row: ${missingRows.sort().join(', ')}`);
-        }
-        const orphanRows = [...rows.keys()].filter((n) => !deliveredNames.has(n));
-        if (orphanRows.length > 0) {
-          problems.push(`registry rows with no delivered skill (undelivered seeds survived): ${orphanRows.sort().join(', ')}`);
-        }
-
-        // Frontmatter-value assertions (the reconcile's update rule): whenever
-        // the delivered SKILL.md declares version/last_reviewed, the row must
-        // match — subsumes the shadow case for every overlaid skill.
-        for (const [name, fm] of fmBySkill) {
-          const row = rows.get(name);
-          if (!row) continue;
-          if (fm.version && row.version !== String(fm.version)) {
-            problems.push(`${name}: row version ${row.version} != delivered SKILL.md ${fm.version}`);
-          }
-          if (fm.last_reviewed && row.lastReviewed !== String(fm.last_reviewed)) {
-            problems.push(`${name}: row last_reviewed ${row.lastReviewed} != delivered SKILL.md ${fm.last_reviewed}`);
-          }
-        }
-
-        // Explicit shadow pin: the co-design overlay's stale 2026-09-12 must
-        // never appear on a delivered row when the frontmatter disagrees.
-        const accFm = fmBySkill.get('accessibility-audit');
-        const accRow = rows.get('accessibility-audit');
-        if (accFm && accRow && accFm.last_reviewed && accRow.lastReviewed !== String(accFm.last_reviewed)) {
-          problems.push(`shadow unresolved: accessibility-audit row carries ${accRow.lastReviewed}, delivered SKILL.md says ${accFm.last_reviewed}`);
-        }
-
-        // Variant-exclusive append pin (co-design ships service-design; the
-        // common seed has no row for it — the reconcile must have added one).
-        if (deliveredNames.has('service-design') && !rows.has('service-design')) {
-          problems.push('service-design delivered but has no registry row (append missing)');
-        }
-
-        if (problems.length > 0) {
-          fail('Test 29', `${problems.length} problem(s): ${problems.slice(0, 8).join('; ')}${problems.length > 8 ? '…' : ''}`);
+  console.log("\nTest 29: skills registry ↔ delivered tree bijection");
+  if (requireScaffold("Test 29")) {
+    {
+      try {
+        if (!fileExists("skills/SKILLS.md")) {
+          fail("Test 29", "skills/SKILLS.md not delivered (seed registry missing)");
         } else {
-          pass(`Test 29 PASSED: registry rows (${rows.size}) == delivered skill dirs (${deliveredNames.size}), frontmatter values win`);
+          const { rows } = parseSkillRegistryRows(readText("skills/SKILLS.md"));
+          const skillsDir = join(testDir, "skills");
+          const deliveredNames = new Set<string>();
+          const fmBySkill = new Map<string, { version?: string; last_reviewed?: string }>();
+          for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
+            if (!entry.isDirectory()) continue;
+            const skillMd = join(skillsDir, entry.name, "SKILL.md");
+            if (!existsSync(skillMd)) continue;
+            deliveredNames.add(entry.name);
+            const fmMatch = readFileSync(skillMd, "utf-8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+            if (fmMatch) {
+              fmBySkill.set(
+                entry.name,
+                (yamlLoad(fmMatch[1]) ?? {}) as Record<string, unknown> as { version?: string; last_reviewed?: string },
+              );
+            }
+          }
+
+          const problems: string[] = [];
+          const missingRows = [...deliveredNames].filter((n) => !rows.has(n));
+          if (missingRows.length > 0) {
+            problems.push(`delivered skills without a registry row: ${missingRows.sort().join(", ")}`);
+          }
+          const orphanRows = [...rows.keys()].filter((n) => !deliveredNames.has(n));
+          if (orphanRows.length > 0) {
+            problems.push(
+              `registry rows with no delivered skill (undelivered seeds survived): ${orphanRows.sort().join(", ")}`,
+            );
+          }
+
+          // Frontmatter-value assertions (the reconcile's update rule): whenever
+          // the delivered SKILL.md declares version/last_reviewed, the row must
+          // match — subsumes the shadow case for every overlaid skill.
+          for (const [name, fm] of fmBySkill) {
+            const row = rows.get(name);
+            if (!row) continue;
+            if (fm.version && row.version !== String(fm.version)) {
+              problems.push(`${name}: row version ${row.version} != delivered SKILL.md ${fm.version}`);
+            }
+            if (fm.last_reviewed && row.lastReviewed !== String(fm.last_reviewed)) {
+              problems.push(`${name}: row last_reviewed ${row.lastReviewed} != delivered SKILL.md ${fm.last_reviewed}`);
+            }
+          }
+
+          // Explicit shadow pin: the co-design overlay's stale 2026-09-12 must
+          // never appear on a delivered row when the frontmatter disagrees.
+          const accFm = fmBySkill.get("accessibility-audit");
+          const accRow = rows.get("accessibility-audit");
+          if (accFm && accRow && accFm.last_reviewed && accRow.lastReviewed !== String(accFm.last_reviewed)) {
+            problems.push(
+              `shadow unresolved: accessibility-audit row carries ${accRow.lastReviewed}, delivered SKILL.md says ${accFm.last_reviewed}`,
+            );
+          }
+
+          // Variant-exclusive append pin (co-design ships service-design; the
+          // common seed has no row for it — the reconcile must have added one).
+          if (deliveredNames.has("service-design") && !rows.has("service-design")) {
+            problems.push("service-design delivered but has no registry row (append missing)");
+          }
+
+          if (problems.length > 0) {
+            fail(
+              "Test 29",
+              `${problems.length} problem(s): ${problems.slice(0, 8).join("; ")}${problems.length > 8 ? "…" : ""}`,
+            );
+          } else {
+            pass(
+              `Test 29 PASSED: registry rows (${rows.size}) == delivered skill dirs (${deliveredNames.size}), frontmatter values win`,
+            );
+          }
         }
+      } catch (e) {
+        fail("Test 29", String(e));
       }
-    } catch (e) { fail('Test 29', String(e)); }
-  } }
+    }
+  }
 
   // ── Test 30: project skill-lifecycle-audit reports 0 errors [T-20260924-008] ──
   // The project's own audit is the permanent post-scaffold gate and the
   // instrument that caught the defect (baseline: 35 scanned, 32 errors — 31
   // missing rows + 1 last_reviewed drift — on every fresh co-design scaffold).
   // Runs it with --json from the scaffold root and asserts a clean error count.
-  console.log('\nTest 30: project skill-lifecycle-audit — 0 errors');
-  if (requireScaffold('Test 30')) {
-  {
-    try {
-      const proc = Bun.spawnSync(['bun', 'scripts/skill-lifecycle-audit.ts', '--json'], {
-        cwd: testDir,
-        stdout: 'pipe',
-        stderr: 'pipe',
-      });
-      const out = proc.stdout.toString();
-      const jsonStart = out.indexOf('{');
-      if (jsonStart === -1) {
-        fail('Test 30', `no JSON output from skill-lifecycle-audit (exit ${proc.exitCode}): ${out.slice(0, 200)}`);
-      } else {
-        const audit = JSON.parse(out.slice(jsonStart)) as {
-          skillsScanned: number;
-          errors: Array<{ message: string; file: string }>;
-        };
-        if (audit.errors.length > 0) {
-          const detail = audit.errors.slice(0, 5).map((e) => `${e.file}: ${e.message}`).join('; ');
-          fail('Test 30', `${audit.errors.length} error(s) (${audit.skillsScanned} skills scanned): ${detail}${audit.errors.length > 5 ? '…' : ''}`);
+  console.log("\nTest 30: project skill-lifecycle-audit — 0 errors");
+  if (requireScaffold("Test 30")) {
+    {
+      try {
+        const proc = Bun.spawnSync(["bun", "scripts/skill-lifecycle-audit.ts", "--json"], {
+          cwd: testDir,
+          stdout: "pipe",
+          stderr: "pipe",
+        });
+        const out = proc.stdout.toString();
+        const jsonStart = out.indexOf("{");
+        if (jsonStart === -1) {
+          fail("Test 30", `no JSON output from skill-lifecycle-audit (exit ${proc.exitCode}): ${out.slice(0, 200)}`);
         } else {
-          pass(`Test 30 PASSED: project skill-lifecycle-audit clean — 0 errors (${audit.skillsScanned} skills scanned)`);
+          const audit = JSON.parse(out.slice(jsonStart)) as {
+            skillsScanned: number;
+            errors: Array<{ message: string; file: string }>;
+          };
+          if (audit.errors.length > 0) {
+            const detail = audit.errors
+              .slice(0, 5)
+              .map((e) => `${e.file}: ${e.message}`)
+              .join("; ");
+            fail(
+              "Test 30",
+              `${audit.errors.length} error(s) (${audit.skillsScanned} skills scanned): ${detail}${audit.errors.length > 5 ? "…" : ""}`,
+            );
+          } else {
+            pass(
+              `Test 30 PASSED: project skill-lifecycle-audit clean — 0 errors (${audit.skillsScanned} skills scanned)`,
+            );
+          }
         }
+      } catch (e) {
+        fail("Test 30", String(e));
       }
-    } catch (e) { fail('Test 30', String(e)); }
-  } }
+    }
+  }
 
   // ── Summary ───────────────────────────────────────────────────────────────
-  console.log('\n' + '─'.repeat(50));
-  console.log('📊 Test Summary');
+  console.log("\n" + "─".repeat(50));
+  console.log("📊 Test Summary");
   console.log(`   Tests run:    ${testsRun}`);
   console.log(`   Tests passed: ${testsPassed}`);
-  console.log(`   Result: ${allPassed ? '✅ ALL PASSED' : '❌ FAILED'}`);
-
+  console.log(`   Result: ${allPassed ? "✅ ALL PASSED" : "❌ FAILED"}`);
 } finally {
   cleanup();
 }

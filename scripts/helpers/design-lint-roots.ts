@@ -18,21 +18,19 @@
 // set exists, the caller still Skips — but with an explicit reason naming both.
 
 /** Conventional UI-source roots — mirrors design-lint.ts's uiSourceRoots default. */
-export const CONVENTIONAL_DESIGN_LINT_ROOTS: readonly string[] = ['./playground/src', './src'];
+export const CONVENTIONAL_DESIGN_LINT_ROOTS: readonly string[] = ["./playground/src", "./src"];
 
 /** Shape of a variant.json `designLint` override block (U-20261028-014). */
 export interface DesignLintOverride {
-    enabled: boolean;
-    scanRoots?: string[];
-    allowlist?: string[];
+  enabled: boolean;
+  scanRoots?: string[];
+  allowlist?: string[];
 }
 
-export type DesignLintOverrideResult =
-    | { ok: true; config: DesignLintOverride }
-    | { ok: false; error: string };
+export type DesignLintOverrideResult = { ok: true; config: DesignLintOverride } | { ok: false; error: string };
 
 function isStringArray(v: unknown): v is string[] {
-    return Array.isArray(v) && v.every((x) => typeof x === 'string');
+  return Array.isArray(v) && v.every((x) => typeof x === "string");
 }
 
 /**
@@ -43,38 +41,47 @@ function isStringArray(v: unknown): v is string[] {
  * tolerated (forward-compatible), wrong-typed known keys are named errors.
  */
 export function validateDesignLintOverride(raw: unknown): DesignLintOverrideResult {
-    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-        return { ok: false, error: `variant.json designLint must be an object with a required boolean "enabled" (got ${Array.isArray(raw) ? 'array' : raw === null ? 'null' : typeof raw})` };
-    }
-    const block = raw as Record<string, unknown>;
-    if (typeof block.enabled !== 'boolean') {
-        return { ok: false, error: `variant.json designLint.enabled must be a boolean (got ${JSON.stringify(block.enabled ?? null)})` };
-    }
-    // Validate into typed locals — narrowing through the Record index does not
-    // persist, and the conditional spread below needs the array types.
-    let scanRoots: string[] | undefined;
-    let allowlist: string[] | undefined;
-    for (const key of ['scanRoots', 'allowlist'] as const) {
-        if (block[key] === undefined) continue;
-        if (!isStringArray(block[key])) {
-            return { ok: false, error: `variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(block[key])})` };
-        }
-        if (key === 'scanRoots') scanRoots = block[key];
-        else allowlist = block[key];
-    }
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return {
-        ok: true,
-        config: {
-            enabled: block.enabled,
-            ...(scanRoots !== undefined ? { scanRoots } : {}),
-            ...(allowlist !== undefined ? { allowlist } : {}),
-        },
+      ok: false,
+      error: `variant.json designLint must be an object with a required boolean "enabled" (got ${Array.isArray(raw) ? "array" : raw === null ? "null" : typeof raw})`,
     };
+  }
+  const block = raw as Record<string, unknown>;
+  if (typeof block.enabled !== "boolean") {
+    return {
+      ok: false,
+      error: `variant.json designLint.enabled must be a boolean (got ${JSON.stringify(block.enabled ?? null)})`,
+    };
+  }
+  // Validate into typed locals — narrowing through the Record index does not
+  // persist, and the conditional spread below needs the array types.
+  let scanRoots: string[] | undefined;
+  let allowlist: string[] | undefined;
+  for (const key of ["scanRoots", "allowlist"] as const) {
+    if (block[key] === undefined) continue;
+    if (!isStringArray(block[key])) {
+      return {
+        ok: false,
+        error: `variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(block[key])})`,
+      };
+    }
+    if (key === "scanRoots") scanRoots = block[key];
+    else allowlist = block[key];
+  }
+  return {
+    ok: true,
+    config: {
+      enabled: block.enabled,
+      ...(scanRoots !== undefined ? { scanRoots } : {}),
+      ...(allowlist !== undefined ? { allowlist } : {}),
+    },
+  };
 }
 
 export type DesignLintRootsResult =
-  | { status: 'scan'; roots: string[]; source: 'configured' | 'conventional-fallback' }
-  | { status: 'skip'; message: string };
+  | { status: "scan"; roots: string[]; source: "configured" | "conventional-fallback" }
+  | { status: "skip"; message: string };
 
 /**
  * Resolve the effective design-lint scan roots for audit.ts's gate.
@@ -93,18 +100,16 @@ export function resolveDesignLintRoots(
   configuredScanRoots: string[],
   exists: (p: string) => boolean,
 ): DesignLintRootsResult {
-  const configured = (configuredScanRoots ?? []).filter(
-    (r) => typeof r === 'string' && r.length > 0 && exists(r),
-  );
+  const configured = (configuredScanRoots ?? []).filter((r) => typeof r === "string" && r.length > 0 && exists(r));
   if (configured.length > 0) {
-    return { status: 'scan', roots: configured, source: 'configured' };
+    return { status: "scan", roots: configured, source: "configured" };
   }
   const conventional = CONVENTIONAL_DESIGN_LINT_ROOTS.filter((r) => exists(r));
   if (conventional.length > 0) {
-    return { status: 'scan', roots: conventional, source: 'conventional-fallback' };
+    return { status: "scan", roots: conventional, source: "conventional-fallback" };
   }
   return {
-    status: 'skip',
-    message: `no configured scan roots present (${JSON.stringify(configuredScanRoots ?? [])}) and no conventional roots (${CONVENTIONAL_DESIGN_LINT_ROOTS.join(', ')}) exist — skipped`,
+    status: "skip",
+    message: `no configured scan roots present (${JSON.stringify(configuredScanRoots ?? [])}) and no conventional roots (${CONVENTIONAL_DESIGN_LINT_ROOTS.join(", ")}) exist — skipped`,
   };
 }

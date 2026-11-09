@@ -373,7 +373,7 @@ describe("dev-sync repository-config guard placement (design §11 structural pin
 
   test("dev-sync imports the shared guard primitives (one derivation, two callers)", async () => {
     const src = await devSync;
-    expect(src).toContain("from './lib/repo-integrity.ts'");
+    expect(src).toContain('from "./lib/repo-integrity.ts"');
     expect(src).toContain("assertWorkTreeHealthy");
     expect(src).toContain("diffRepoConfig");
     expect(src).toContain("snapshotRepoConfig");
@@ -427,8 +427,8 @@ describe("pre-push repository-config guard placement (design §11 structural pin
   test("the hook snapshots the config around its changed-path test run", async () => {
     const src = await hook;
     const spawnIdx = src.indexOf("await $`bun test ${changedTestFiles}`");
-    const beforeIdx = src.indexOf("snapshotRepoConfigOrAbort(\n      'before'");
-    const afterIdx = src.indexOf("snapshotRepoConfigOrAbort(\n      'after'");
+    const beforeIdx = src.indexOf('snapshotRepoConfigOrAbort(\n      "before"');
+    const afterIdx = src.indexOf('snapshotRepoConfigOrAbort(\n      "after"');
     expect(spawnIdx).toBeGreaterThan(-1);
     expect(beforeIdx).toBeGreaterThan(-1);
     expect(afterIdx).toBeGreaterThan(beforeIdx);

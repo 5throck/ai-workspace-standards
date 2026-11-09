@@ -27,8 +27,8 @@
  * so tests can import parseScriptRegistry.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 
 export interface ScriptSnapshotEntry {
   version: string;
@@ -43,11 +43,14 @@ export interface ScriptSnapshotEntry {
  */
 export function parseScriptRegistry(content: string): Record<string, ScriptSnapshotEntry> {
   const scripts: Record<string, ScriptSnapshotEntry> = {};
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     if (!/^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(line)) continue;
-    const parts = line.split('|').map(p => p.trim()).filter(p => p);
+    const parts = line
+      .split("|")
+      .map((p) => p.trim())
+      .filter((p) => p);
     if (parts.length < 4) continue;
-    const name = parts[0].replace(/`/g, '');
+    const name = parts[0].replace(/`/g, "");
     const version = parts[2];
     const status = parts[3];
     if (!/^\d+\.\d+\.\d+$/.test(version)) continue;
@@ -64,26 +67,24 @@ function main(): void {
   const l1Source = args[3];
 
   if (!projectDir || !date || !variant || !l1Source) {
-    console.error('Usage: bun write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>');
+    console.error("Usage: bun write-scripts-snapshot.ts <project-dir> <date> <variant> <l1-source>");
     process.exit(1);
   }
 
   // resolve (not join): l1Source may be absolute (adopt/upgrade pass absolute
   // common/scripts paths); join would prefix cwd and silently fall back to L0.
-  const l1RegistryPath = resolve(process.cwd(), l1Source, 'SCRIPTS.md');
+  const l1RegistryPath = resolve(process.cwd(), l1Source, "SCRIPTS.md");
   // Snapshot files are TRACKED: store the workspace-root-relative form, never
   // the machine-local absolute input (audit-variant D1 machine-local path ban).
   const l1SourceRel = relative(process.cwd(), resolve(process.cwd(), l1Source));
-  const registryPath = existsSync(l1RegistryPath)
-    ? l1RegistryPath
-    : join(process.cwd(), 'scripts', 'SCRIPTS.md');
-  const scripts = parseScriptRegistry(readFileSync(registryPath, 'utf-8'));
+  const registryPath = existsSync(l1RegistryPath) ? l1RegistryPath : join(process.cwd(), "scripts", "SCRIPTS.md");
+  const scripts = parseScriptRegistry(readFileSync(registryPath, "utf-8"));
 
   // Variant overlay scripts (delivered to scripts/<variant>/ in the project)
   // carry their own registry alongside the overlay sources.
-  const variantRegistryPath = join(process.cwd(), 'templates', variant, 'scripts', variant, 'SCRIPTS.md');
+  const variantRegistryPath = join(process.cwd(), "templates", variant, "scripts", variant, "SCRIPTS.md");
   if (existsSync(variantRegistryPath)) {
-    Object.assign(scripts, parseScriptRegistry(readFileSync(variantRegistryPath, 'utf-8')));
+    Object.assign(scripts, parseScriptRegistry(readFileSync(variantRegistryPath, "utf-8")));
   }
 
   const snapshot = {
@@ -93,7 +94,7 @@ function main(): void {
     scripts,
   };
 
-  writeFileSync(join(projectDir, 'scripts-snapshot.json'), JSON.stringify(snapshot, null, 2) + '\n', 'utf-8');
+  writeFileSync(join(projectDir, "scripts-snapshot.json"), JSON.stringify(snapshot, null, 2) + "\n", "utf-8");
   console.log(`  ✅ scripts-snapshot.json written (${Object.keys(scripts).length} scripts) from ${registryPath}`);
 }
 

@@ -30,41 +30,36 @@
  *   Module import: import { SecurityValidator } from './helpers/security-validator.js'
  */
 
-import { resolve, dirname, normalize, join, sep } from 'path';
-import { existsSync, realpathSync } from 'fs';
+import { resolve, dirname, normalize, join, sep } from "node:path";
+import { existsSync, realpathSync } from "node:fs";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Allowed root directories for extends references
-const ALLOWED_ROOT_DIRS = [
-  'templates',
-  'agents',
-  'skills',
-  '.claude'
-];
+const ALLOWED_ROOT_DIRS = ["templates", "agents", "skills", ".claude"];
 
 // Whitelisted sections that can be overridden
 const OVERRIDE_WHITELIST = [
-  '## Role',
-  '## Agent Roster',
-  '## Governance Workflow',
-  '## Phase Determination Checklist',
-  '## Mandatory Execution Plan Display',
-  '## Execution Plan Boilerplate',
-  '## Specialist Agent List'
+  "## Role",
+  "## Agent Roster",
+  "## Governance Workflow",
+  "## Phase Determination Checklist",
+  "## Mandatory Execution Plan Display",
+  "## Execution Plan Boilerplate",
+  "## Specialist Agent List",
 ];
 
 // Security violation types
 export enum SecurityViolationType {
-  PATH_TRAVERSAL = 'path_traversal',
-  ABSOLUTE_PATH = 'absolute_path',
-  OUTSIDE_WORKSPACE = 'outside_workspace',
-  INVALID_OVERRIDE_SECTION = 'invalid_override_section',
-  MALICIOUS_CONTENT = 'malicious_content',
-  EXTERNAL_URL = 'external_url',
-  SHELL_COMMAND = 'shell_command'
+  PATH_TRAVERSAL = "path_traversal",
+  ABSOLUTE_PATH = "absolute_path",
+  OUTSIDE_WORKSPACE = "outside_workspace",
+  INVALID_OVERRIDE_SECTION = "invalid_override_section",
+  MALICIOUS_CONTENT = "malicious_content",
+  EXTERNAL_URL = "external_url",
+  SHELL_COMMAND = "shell_command",
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -108,16 +103,19 @@ function extractCodeBlockContent(content: string): string {
   const codeRegions: string[] = [];
   // Match fenced code blocks: opening ``` with optional lang, then body, then closing ```
   const fencedBlockRegex = /```[a-zA-Z]*\n([\s\S]*?)```/g;
-  let match: RegExpExecArray | null;
-  while ((match = fencedBlockRegex.exec(content)) !== null) {
+  let match: RegExpExecArray | null = fencedBlockRegex.exec(content);
+  while (match !== null) {
     codeRegions.push(match[1]);
+    match = fencedBlockRegex.exec(content);
   }
   // Match inline code: `...` (not inside fenced blocks — simplified single-pass)
   const inlineCodeRegex = /`([^`\n]+)`/g;
-  while ((match = inlineCodeRegex.exec(content)) !== null) {
+  match = inlineCodeRegex.exec(content);
+  while (match !== null) {
     codeRegions.push(match[1]);
+    match = inlineCodeRegex.exec(content);
   }
-  return codeRegions.join('\n');
+  return codeRegions.join("\n");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -133,10 +131,7 @@ function extractCodeBlockContent(content: string): string {
  * templates/ directory for their own deliverables but never templates/common).
  * Verified against every live Projects/co-* checkout when chosen (U-20261104-002).
  */
-const WORKSPACE_ROOT_MARKERS: string[] = [
-  'CONSTITUTION.md',
-  join('templates', 'common'),
-];
+const WORKSPACE_ROOT_MARKERS: string[] = ["CONSTITUTION.md", join("templates", "common")];
 
 /**
  * Detect the ai_workspace workspace root by walking upward from `startDir`
@@ -207,13 +202,13 @@ export class SecurityValidator {
    */
   validateExtendsPath(extendsPath: string, currentFileDir: string): SecurityValidationResult {
     // Check 1: Absolute path detection
-    if (extendsPath.startsWith('/') || /^[A-Za-z]:/.test(extendsPath)) {
+    if (extendsPath.startsWith("/") || /^[A-Za-z]:/.test(extendsPath)) {
       return {
         valid: false,
         violation_type: SecurityViolationType.ABSOLUTE_PATH,
-        message: 'Absolute paths are not allowed in extends field',
+        message: "Absolute paths are not allowed in extends field",
         malicious_input: extendsPath,
-        remediation: 'Use relative paths from current file location (e.g., "../common/agents/pm.md")'
+        remediation: 'Use relative paths from current file location (e.g., "../common/agents/pm.md")',
       };
     }
 
@@ -232,29 +227,31 @@ export class SecurityValidator {
       return {
         valid: false,
         violation_type: SecurityViolationType.PATH_TRAVERSAL,
-        message: 'Path traversal attempt detected - attempting to escape workspace boundaries',
+        message: "Path traversal attempt detected - attempting to escape workspace boundaries",
         malicious_input: extendsPath,
-        remediation: 'Ensure extends path stays within workspace directory'
+        remediation: "Ensure extends path stays within workspace directory",
       };
     }
 
     // Check 3: Verify resolved path is within allowed directories
     const pathRelativeToWorkspace = resolvedPath.substring(this.workspaceRoot.length);
-    const isInAllowedDir = this.allowedRootDirs.some(dir => {
-      const normalizedDir = dir.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+    const isInAllowedDir = this.allowedRootDirs.some((dir) => {
+      const normalizedDir = dir.replace(/^\/+|\/+$/g, ""); // Remove leading/trailing slashes
       // Check if path starts with /dir or \dir (for cross-platform compatibility)
-      return pathRelativeToWorkspace.startsWith(`/${normalizedDir}`) ||
-             pathRelativeToWorkspace.startsWith(`\\${normalizedDir}`) ||
-             pathRelativeToWorkspace.startsWith(`${normalizedDir}`);
+      return (
+        pathRelativeToWorkspace.startsWith(`/${normalizedDir}`) ||
+        pathRelativeToWorkspace.startsWith(`\\${normalizedDir}`) ||
+        pathRelativeToWorkspace.startsWith(`${normalizedDir}`)
+      );
     });
 
     if (!isInAllowedDir && this.strictMode) {
       return {
         valid: false,
         violation_type: SecurityViolationType.OUTSIDE_WORKSPACE,
-        message: 'Extends path must reference allowed directories (templates/, agents/, skills/, .claude/)',
+        message: "Extends path must reference allowed directories (templates/, agents/, skills/, .claude/)",
         malicious_input: extendsPath,
-        remediation: `Move referenced file to one of: ${this.allowedRootDirs.join(', ')}`
+        remediation: `Move referenced file to one of: ${this.allowedRootDirs.join(", ")}`,
       };
     }
 
@@ -263,16 +260,16 @@ export class SecurityValidator {
       return {
         valid: false,
         violation_type: SecurityViolationType.PATH_TRAVERSAL,
-        message: 'Referenced file does not exist - possible path traversal attempt',
+        message: "Referenced file does not exist - possible path traversal attempt",
         malicious_input: extendsPath,
-        remediation: 'Verify the extends path is correct and file exists'
+        remediation: "Verify the extends path is correct and file exists",
       };
     }
 
     return {
       valid: true,
       sanitized_path: resolvedPath,
-      allowed_sections: this.overrideWhitelist
+      allowed_sections: this.overrideWhitelist,
     };
   }
 
@@ -283,7 +280,7 @@ export class SecurityValidator {
   validateOverrideContent(sectionName: string, content: string): SecurityValidationResult {
     // Check 1: Section whitelist enforcement
     const normalizedSectionName = this.normalizeSectionName(sectionName);
-    const isWhitelisted = this.overrideWhitelist.some(whitelisted => {
+    const isWhitelisted = this.overrideWhitelist.some((whitelisted) => {
       const normalizedWhitelist = this.normalizeSectionName(whitelisted);
       // Check for exact match only - no variants allowed
       return normalizedSectionName === normalizedWhitelist;
@@ -295,7 +292,7 @@ export class SecurityValidator {
         violation_type: SecurityViolationType.INVALID_OVERRIDE_SECTION,
         message: `Override section '${sectionName}' is not in the whitelist`,
         malicious_input: sectionName,
-        remediation: `Only these sections can be overridden: ${this.overrideWhitelist.join(', ')}`
+        remediation: `Only these sections can be overridden: ${this.overrideWhitelist.join(", ")}`,
       };
     }
 
@@ -306,9 +303,9 @@ export class SecurityValidator {
       /\bsystem\s*\(/i,
       /\bspawn\s*\(/i,
       /\bchild_process/i,
-      /`\$\{.*\}`/,  // Template literals with code
-      /<\?.*\?>/,     // PHP tags
-      /<%.*%>/        // ASP tags
+      /`\$\{.*\}`/, // Template literals with code
+      /<\?.*\?>/, // PHP tags
+      /<%.*%>/, // ASP tags
     ];
 
     for (const pattern of shellCommandPatterns) {
@@ -316,9 +313,9 @@ export class SecurityValidator {
         return {
           valid: false,
           violation_type: SecurityViolationType.SHELL_COMMAND,
-          message: 'Shell command or code execution detected in override content',
-          malicious_input: content.substring(0, 100) + '...',
-          remediation: 'Remove executable code and use markdown documentation only'
+          message: "Shell command or code execution detected in override content",
+          malicious_input: content.substring(0, 100) + "...",
+          remediation: "Remove executable code and use markdown documentation only",
         };
       }
     }
@@ -326,11 +323,7 @@ export class SecurityValidator {
     // Check 3: External URL detection — only flag URLs inside code blocks
     // (fenced ``` blocks) or inline code (`backtick` wrapped). URLs in
     // regular prose/documentation are legitimate references and allowed.
-    const urlPatterns = [
-      /https?:\/\/[^\s]+/i,
-      /ftp:\/\/[^\s]+/i,
-      /file:\/\/\/[^\s]+/i
-    ];
+    const urlPatterns = [/https?:\/\/[^\s]+/i, /ftp:\/\/[^\s]+/i, /file:\/\/\/[^\s]+/i];
 
     // Extract text that is inside code blocks (``` ... ```) or inline code (`...`)
     // by stripping non-code regions, then check only the code regions for URLs.
@@ -340,9 +333,9 @@ export class SecurityValidator {
         return {
           valid: false,
           violation_type: SecurityViolationType.EXTERNAL_URL,
-          message: 'External URL detected inside code block in override content',
-          malicious_input: content.substring(0, 100) + '...',
-          remediation: 'Remove external references from code blocks — use relative paths'
+          message: "External URL detected inside code block in override content",
+          malicious_input: content.substring(0, 100) + "...",
+          remediation: "Remove external references from code blocks — use relative paths",
         };
       }
     }
@@ -352,7 +345,7 @@ export class SecurityValidator {
       /password\s*[:=]\s*['"]\S+['"]/i,
       /api[_-]?key\s*[:=]\s*['"]\S+['"]/i,
       /secret\s*[:=]\s*['"]\S+['"]/i,
-      /token\s*[:=]\s*['"]\S+['"]/i
+      /token\s*[:=]\s*['"]\S+['"]/i,
     ];
 
     for (const pattern of sensitivePatterns) {
@@ -360,17 +353,17 @@ export class SecurityValidator {
         return {
           valid: false,
           violation_type: SecurityViolationType.MALICIOUS_CONTENT,
-          message: 'Possible sensitive data exposure detected',
-          malicious_input: content.substring(0, 100) + '...',
-          remediation: 'Remove sensitive data from documentation'
+          message: "Possible sensitive data exposure detected",
+          malicious_input: content.substring(0, 100) + "...",
+          remediation: "Remove sensitive data from documentation",
         };
       }
     }
 
     return {
       valid: true,
-      sanitized_path: '',
-      allowed_sections: this.overrideWhitelist
+      sanitized_path: "",
+      allowed_sections: this.overrideWhitelist,
     };
   }
 
@@ -380,8 +373,8 @@ export class SecurityValidator {
   private normalizeSectionName(sectionName: string): string {
     return sectionName
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special chars except hyphen
-      .replace(/\s+/g, ' ')      // Normalize spaces
+      .replace(/[^\w\s-]/g, "") // Remove special chars except hyphen
+      .replace(/\s+/g, " ") // Normalize spaces
       .trim();
   }
 
@@ -401,7 +394,7 @@ export class SecurityValidator {
     return {
       valid: true,
       sanitized_path: pathValidation.sanitized_path,
-      allowed_sections: this.overrideWhitelist
+      allowed_sections: this.overrideWhitelist,
     };
   }
 
@@ -415,7 +408,7 @@ export class SecurityValidator {
       violation_type: violation.violation_type,
       message: violation.message,
       malicious_input: violation.malicious_input,
-      remediation: violation.remediation
+      remediation: violation.remediation,
     };
 
     console.error(`🚨 Security Violation Detected [${timestamp}]`);
@@ -442,7 +435,7 @@ export const defaultSecurityValidator = new SecurityValidator();
 export function validateExtendsSecurity(
   extendsPath: string,
   currentFileDir: string,
-  options?: SecurityValidatorOptions
+  options?: SecurityValidatorOptions,
 ): SecurityValidationResult {
   const validator = options ? new SecurityValidator(options) : defaultSecurityValidator;
   return validator.validateExtendsChain(extendsPath, currentFileDir);
@@ -454,7 +447,7 @@ export function validateExtendsSecurity(
 export function validateOverrideSecurity(
   sectionName: string,
   content: string,
-  options?: SecurityValidatorOptions
+  options?: SecurityValidatorOptions,
 ): SecurityValidationResult {
   const validator = options ? new SecurityValidator(options) : defaultSecurityValidator;
   return validator.validateOverrideContent(sectionName, content);
@@ -509,7 +502,7 @@ export interface SourceShellInjectionPattern {
 // Matches Node's child_process spawning family plus locally-defined wrapper
 // functions whose name contains one of these fragments (see calibration
 // notes above).
-const SUBPROCESS_SINK_NAME_FRAGMENT = ['run', 'exec', 'spawn', 'shell'].join('|');
+const SUBPROCESS_SINK_NAME_FRAGMENT = ["run", "exec", "spawn", "shell"].join("|");
 
 /**
  * True when the line containing `matchIndex` in `content` is a comment line
@@ -517,43 +510,47 @@ const SUBPROCESS_SINK_NAME_FRAGMENT = ['run', 'exec', 'spawn', 'shell'].join('|'
  * heuristic to avoid flagging examples quoted in comments.
  */
 export function isSourceCommentLine(content: string, matchIndex: number): boolean {
-  const lineStart = content.lastIndexOf('\n', matchIndex - 1) + 1;
-  const nl = content.indexOf('\n', matchIndex);
+  const lineStart = content.lastIndexOf("\n", matchIndex - 1) + 1;
+  const nl = content.indexOf("\n", matchIndex);
   const line = content.slice(lineStart, nl === -1 ? content.length : nl).trimStart();
-  return line.startsWith('//') || line.startsWith('*') || line.startsWith('/*');
+  return line.startsWith("//") || line.startsWith("*") || line.startsWith("/*");
 }
 
 export const sourceShellInjectionPatterns: SourceShellInjectionPattern[] = [
   {
-    name: 'bun-shell-compound-interpolation',
+    name: "bun-shell-compound-interpolation",
     // Tagged-template shell invocation containing an interpolation whose
     // expression is built via string concatenation, `.join(`, or a nested
     // template literal, and is not visibly wrapped in a
     // shellEscape*/shellQuote*/escapeShellArg* call.
     pattern: new RegExp(
-      '\\$`[^`]*\\$\\{(?![^}]*\\b(?:shellEscape|shellQuote|escapeShellArg)\\w*\\s*\\()' +
-      // `.join(` counts as a compound-build signal EXCEPT the common, safe
-      // `path.join(...)` idiom (calibration: path.join(...) accounted for
-      // 100% of this sub-pattern's false positives on the current repo).
-      '[^}]*(?:\\+|(?<!path)\\.join\\s*\\(|`[^`]*\\$\\{)[^}]*\\}[^`]*`',
-      'g'
+      "\\$`[^`]*\\$\\{(?![^}]*\\b(?:shellEscape|shellQuote|escapeShellArg)\\w*\\s*\\()" +
+        // `.join(` counts as a compound-build signal EXCEPT the common, safe
+        // `path.join(...)` idiom (calibration: path.join(...) accounted for
+        // 100% of this sub-pattern's false positives on the current repo).
+        "[^}]*(?:\\+|(?<!path)\\.join\\s*\\(|`[^`]*\\$\\{)[^}]*\\}[^`]*`",
+      "g",
     ),
-    remediation: 'Validate/allowlist the input before interpolating a manually-assembled string into a shell-invocation template, or wrap it in a shellEscape*/shellQuote* helper before interpolation.'
+    remediation:
+      "Validate/allowlist the input before interpolating a manually-assembled string into a shell-invocation template, or wrap it in a shellEscape*/shellQuote* helper before interpolation.",
   },
   {
-    name: 'subprocess-spawn-string-build',
+    name: "subprocess-spawn-string-build",
     // Calls to a subprocess-spawning function (Node's child_process family,
     // or a locally-defined wrapper -- see SUBPROCESS_SINK_NAME_FRAGMENT)
     // where the command argument is built via string concatenation or a
     // template literal with interpolation, rather than the safer argv-array
     // calling form.
     pattern: new RegExp(
-      '\\b\\w*(?:' + SUBPROCESS_SINK_NAME_FRAGMENT + ')\\w*\\s*\\(\\s*' +
-      '(?:[^,()]*\\+[^,()]*|`[^`]*\\$\\{[^}]*\\}[^`]*`)',
-      'gi'
+      "\\b\\w*(?:" +
+        SUBPROCESS_SINK_NAME_FRAGMENT +
+        ")\\w*\\s*\\(\\s*" +
+        "(?:[^,()]*\\+[^,()]*|`[^`]*\\$\\{[^}]*\\}[^`]*`)",
+      "gi",
     ),
-    remediation: 'Prefer the argv-array calling form over shell-string interpolation, or validate/allowlist the input before building the command string.'
-  }
+    remediation:
+      "Prefer the argv-array calling form over shell-string interpolation, or validate/allowlist the input before building the command string.",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -564,9 +561,9 @@ if (import.meta.main) {
   const args = process.argv.slice(2);
 
   if (args.length < 2) {
-    console.error('Usage: bun scripts/helpers/security-validator.ts <extends-path> <current-file-dir>');
-    console.error('  extends-path: Path value from extends field');
-    console.error('  current-file-dir: Directory containing the current file');
+    console.error("Usage: bun scripts/helpers/security-validator.ts <extends-path> <current-file-dir>");
+    console.error("  extends-path: Path value from extends field");
+    console.error("  current-file-dir: Directory containing the current file");
     process.exit(1);
   }
 
@@ -579,7 +576,7 @@ if (import.meta.main) {
   if (result.valid) {
     console.log(`✅ Security validation passed`);
     console.log(`   Sanitized path: ${result.sanitized_path}`);
-    console.log(`   Allowed sections: ${result.allowed_sections.join(', ')}`);
+    console.log(`   Allowed sections: ${result.allowed_sections.join(", ")}`);
   } else {
     defaultSecurityValidator.logSecurityViolation(result);
     process.exit(1);

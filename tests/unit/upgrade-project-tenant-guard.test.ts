@@ -216,7 +216,7 @@ describe('tenant mode defaults to dry-run; --confirm is the execute consent (des
     const src = readFileSync(UPGRADE, 'utf-8');
     expect(src).toContain('if (!dryRun && !confirmFlag)');
     expect(src).toContain('if (!targetInsideProjects && !tenantTarget)');
-    expect(src).toContain("args[i] === '--confirm'");
+    expect(src).toContain('args[i] === "--confirm"');
   });
 });
 

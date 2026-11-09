@@ -725,13 +725,13 @@ describe('out-of-root CHECK degrade, per-agent (U-20261029-001 — T-20261029-00
 describe('canonical-literal pin (identifier-rot protection)', () => {
   const src = fs.readFileSync(GENERATOR_SRC, 'utf8');
   test('the generator names the design-canonical files and keys byte-exactly', () => {
-    expect(src).toContain("const SCRIPT_NAME = 'sync-agent-mirrors.ts';");
-    expect(src).toContain("const MIRROR_MANIFEST_NAME = '.sync-agent-mirrors-managed.json';");
-    expect(src).toContain("const LOCK_NAME = '.sync-agent-mirrors.lock';");
-    expect(src).toContain("const REGISTRY_BLOCK = 'platform_surfaces';");
-    expect(src).toContain("from './helpers/resolve-pm-stub.ts'");
+    expect(src).toContain('const SCRIPT_NAME = "sync-agent-mirrors.ts";');
+    expect(src).toContain('const MIRROR_MANIFEST_NAME = ".sync-agent-mirrors-managed.json";');
+    expect(src).toContain('const LOCK_NAME = ".sync-agent-mirrors.lock";');
+    expect(src).toContain('const REGISTRY_BLOCK = "platform_surfaces";');
+    expect(src).toContain('from "./helpers/resolve-pm-stub.ts"');
     expect(src).toContain('composeResolvedAgentContent');
-    expect(src).toContain("'--check'");
-    expect(src).toContain("'--dir'");
+    expect(src).toContain('"--check"');
+    expect(src).toContain('"--dir"');
   });
 });

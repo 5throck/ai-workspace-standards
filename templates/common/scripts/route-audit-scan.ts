@@ -185,14 +185,20 @@ export function loadRouteAuditConfig(root: string): RouteAuditConfig {
       if (typeof v !== "string" || v.trim() === "") problems.push(`auditTokenPatterns[${i}] is not a non-empty string`);
     });
   }
-  if (block.allowlist !== undefined && (typeof block.allowlist !== "object" || block.allowlist === null || Array.isArray(block.allowlist))) {
+  if (
+    block.allowlist !== undefined &&
+    (typeof block.allowlist !== "object" || block.allowlist === null || Array.isArray(block.allowlist))
+  ) {
     problems.push('"allowlist" must be an object of { "<route path>": "<reason>" }');
   } else if (block.allowlist !== undefined) {
     for (const [k, v] of Object.entries(block.allowlist as Record<string, unknown>)) {
       if (typeof v !== "string") problems.push(`allowlist["${k}"] reason is not a string`);
     }
   }
-  if (block.sharedInfra !== undefined && (!Array.isArray(block.sharedInfra) || block.sharedInfra.some((v) => typeof v !== "string"))) {
+  if (
+    block.sharedInfra !== undefined &&
+    (!Array.isArray(block.sharedInfra) || block.sharedInfra.some((v) => typeof v !== "string"))
+  ) {
     problems.push('"sharedInfra" must be an array of file basenames');
   }
   if (problems.length > 0) {
@@ -218,7 +224,9 @@ export function compileAuditTokenPatterns(patterns: readonly string[]): RegExp[]
     try {
       return new RegExp(src, "g");
     } catch (err) {
-      throw new RouteAuditConfigError(`auditTokenPatterns entry is not a valid regex: "${src}" (${(err as Error).message})`);
+      throw new RouteAuditConfigError(
+        `auditTokenPatterns entry is not a valid regex: "${src}" (${(err as Error).message})`,
+      );
     }
   });
 }
@@ -284,7 +292,12 @@ export function importBasename(p: string): string {
 function resolveLocal(from: string, spec: string, sharedInfra: ReadonlySet<string>): string | null {
   const base = resolve(dirname(from), spec);
   for (const cand of [base, `${base}.ts`, `${base}.tsx`, join(base, "index.ts")]) {
-    if (existsSync(cand) && statSync(cand).isFile() && /\.(ts|tsx)$/.test(cand) && !sharedInfra.has(importBasename(cand))) {
+    if (
+      existsSync(cand) &&
+      statSync(cand).isFile() &&
+      /\.(ts|tsx)$/.test(cand) &&
+      !sharedInfra.has(importBasename(cand))
+    ) {
       return cand;
     }
   }
@@ -292,7 +305,13 @@ function resolveLocal(from: string, spec: string, sharedInfra: ReadonlySet<strin
 }
 
 /** True when the file, or a local module reachable within `depth` import hops, carries an audit token. Cycle-safe. */
-export function reachesAudit(file: string, tokens: readonly RegExp[], depth = MAX_DEPTH, sharedInfra: ReadonlySet<string> = new Set(), seen: Set<string> = new Set()): boolean {
+export function reachesAudit(
+  file: string,
+  tokens: readonly RegExp[],
+  depth = MAX_DEPTH,
+  sharedInfra: ReadonlySet<string> = new Set(),
+  seen: Set<string> = new Set(),
+): boolean {
   if (seen.has(file) || !existsSync(file)) return false;
   seen.add(file);
   const src = readFileSync(file, "utf8");
@@ -394,7 +413,8 @@ export function scanRouteAudit(root: string, config: RouteAuditConfig): RouteAud
   const allowlistErrors: string[] = [];
   for (const [route, reason] of Object.entries(config.allowlist)) {
     if (route.includes("*")) allowlistErrors.push(`wildcard allowlist entry not allowed: ${route}`);
-    if (!reason || reason.trim().length < MIN_REASON_LENGTH) allowlistErrors.push(`allowlist entry needs a reason (>= ${MIN_REASON_LENGTH} chars): ${route}`);
+    if (!reason || reason.trim().length < MIN_REASON_LENGTH)
+      allowlistErrors.push(`allowlist entry needs a reason (>= ${MIN_REASON_LENGTH} chars): ${route}`);
     if (!writeRel.has(route)) allowlistErrors.push(`allowlist entry is not a write route (stale?): ${route}`);
   }
 
@@ -403,7 +423,12 @@ export function scanRouteAudit(root: string, config: RouteAuditConfig): RouteAud
     const rel = posix(r.file);
     if (config.allowlist[rel] !== undefined) continue;
     if (!reachesAudit(r.file, tokens, MAX_DEPTH, sharedInfra)) {
-      unaudited.push({ route: rel, file: r.file, line: r.line, methods: ["POST", "PUT", "PATCH", "DELETE"].filter((m) => r.methods.includes(m)) });
+      unaudited.push({
+        route: rel,
+        file: r.file,
+        line: r.line,
+        methods: ["POST", "PUT", "PATCH", "DELETE"].filter((m) => r.methods.includes(m)),
+      });
     }
   }
 
@@ -432,7 +457,9 @@ function printReport(r: RouteAuditReport, json: boolean): number {
     return 0;
   }
   for (const u of r.unaudited) {
-    console.log(`route-audit  ${u.route}:${u.line}  state-changing handler (${u.methods.join("/")}) with no audit token in its local import graph (depth-${MAX_DEPTH})`);
+    console.log(
+      `route-audit  ${u.route}:${u.line}  state-changing handler (${u.methods.join("/")}) with no audit token in its local import graph (depth-${MAX_DEPTH})`,
+    );
   }
   for (const e of r.allowlistErrors) console.log(`route-audit  ${e}`);
   const verdict = r.ok ? "PASS" : "FAIL";
@@ -447,8 +474,12 @@ if (import.meta.main) {
   if (args.includes("--help")) {
     console.log(`Usage: bun scripts/${SCRIPT_NAME} [--dir <project-root>] [--json]`);
     console.log("");
-    console.log("Write-route audit tripwire: every route.ts exporting POST/PUT/PATCH/DELETE must reach an auditTokenPatterns match within its local import graph (depth-3), or be listed with a >= 10-char reason in the routeAudit.allowlist block.");
-    console.log(`Config: <project-root>/${SCHEMA_REL} routeAudit block (auditTokenPatterns + optional allowlist/sharedInfra); missing block falls back to the documented co-newbiz defaults.`);
+    console.log(
+      "Write-route audit tripwire: every route.ts exporting POST/PUT/PATCH/DELETE must reach an auditTokenPatterns match within its local import graph (depth-3), or be listed with a >= 10-char reason in the routeAudit.allowlist block.",
+    );
+    console.log(
+      `Config: <project-root>/${SCHEMA_REL} routeAudit block (auditTokenPatterns + optional allowlist/sharedInfra); missing block falls back to the documented co-newbiz defaults.`,
+    );
     process.exit(0);
   }
   let dir: string | null = null;
@@ -457,7 +488,10 @@ if (import.meta.main) {
     if (arg === "--json") continue;
     if (arg === "--dir") {
       const value = args[i + 1];
-      if (value === undefined || value.startsWith("--")) die(`--dir requires a path argument (got ${value ?? "nothing"}) — usage: bun scripts/${SCRIPT_NAME} [--dir <path>] [--json]`);
+      if (value === undefined || value.startsWith("--"))
+        die(
+          `--dir requires a path argument (got ${value ?? "nothing"}) — usage: bun scripts/${SCRIPT_NAME} [--dir <path>] [--json]`,
+        );
       dir = value;
       i += 1;
       continue;

@@ -22,23 +22,23 @@
  * @version 1.0.0
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { load as yamlLoad } from 'js-yaml';
-import { createTicket, listTickets } from './helpers/ticket-store.ts';
-import { parseFrontmatter } from './generate-skill-graph.ts';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { load as yamlLoad } from "js-yaml";
+import { createTicket, listTickets } from "./helpers/ticket-store.ts";
+import { parseFrontmatter } from "./generate-skill-graph.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, '..');
+const ROOT = resolve(__dirname, "..");
 
 const L0_LIFECYCLE_PROCEDURES = [
-  'create-variant',
-  'promote-variant',
-  'project-to-variant',
-  'upgrade-project',
-  'de-commonization-review',
+  "create-variant",
+  "promote-variant",
+  "project-to-variant",
+  "upgrade-project",
+  "de-commonization-review",
 ];
 
 interface Gap {
@@ -64,16 +64,16 @@ interface VariantCoverage {
 function listProcedureFiles(dir: string): Array<{ name: string; path: string }> {
   if (!existsSync(dir)) return [];
   return readdirSync(dir, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !e.name.startsWith('_'))
-    .map((e) => ({ name: e.name, path: join(dir, e.name, 'schema.yaml') }))
+    .filter((e) => e.isDirectory() && !e.name.startsWith("_"))
+    .map((e) => ({ name: e.name, path: join(dir, e.name, "schema.yaml") }))
     .filter((f) => existsSync(f.path))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function loadProcedure(path: string): any | null {
   try {
-    const data = yamlLoad(readFileSync(path, 'utf-8'));
-    return data && typeof data === 'object' ? data : null;
+    const data = yamlLoad(readFileSync(path, "utf-8"));
+    return data && typeof data === "object" ? data : null;
   } catch {
     return null;
   }
@@ -81,15 +81,15 @@ function loadProcedure(path: string): any | null {
 
 /** Variant Coverage for one co-* variant. */
 function coverageForVariant(root: string, variant: string): VariantCoverage {
-  const agentsDir = join(root, 'templates', variant, 'agents');
+  const agentsDir = join(root, "templates", variant, "agents");
   const required: Array<{ agentKey: string; phase: number }> = [];
   if (existsSync(agentsDir)) {
     for (const f of readdirSync(agentsDir).sort()) {
-      if (!f.endsWith('.md') || f === 'handoff-spec.md' || f.startsWith('_')) continue;
-      const fm = parseFrontmatter(readFileSync(join(agentsDir, f), 'utf-8'));
+      if (!f.endsWith(".md") || f === "handoff-spec.md" || f.startsWith("_")) continue;
+      const fm = parseFrontmatter(readFileSync(join(agentsDir, f), "utf-8"));
       const phases = fm?.phases;
       if (!Array.isArray(phases)) continue;
-      const agentKey = f.replace(/\.md$/, '');
+      const agentKey = f.replace(/\.md$/, "");
       for (const p of phases) {
         if (Number.isInteger(p) && p >= 0 && p <= 6) {
           required.push({ agentKey, phase: p });
@@ -100,14 +100,14 @@ function coverageForVariant(root: string, variant: string): VariantCoverage {
 
   // Covered pairs: (step.agent_key, procedure.phase), ≥1 step suffices.
   const covered = new Map<string, Set<string>>(); // pair key -> procedure names
-  const procDir = join(root, 'templates', variant, 'procedures');
+  const procDir = join(root, "templates", variant, "procedures");
   for (const { name, path } of listProcedureFiles(procDir)) {
     const data = loadProcedure(path);
     if (!data || !Array.isArray(data.steps)) continue;
     const phase = Number(data.phase);
     if (!Number.isInteger(phase)) continue;
     for (const step of data.steps) {
-      if (!step || typeof step !== 'object' || typeof step.agent_key !== 'string') continue;
+      if (!step || typeof step !== "object" || typeof step.agent_key !== "string") continue;
       const key = `${step.agent_key}|${phase}`;
       if (!covered.has(key)) covered.set(key, new Set());
       covered.get(key)!.add(name);
@@ -117,13 +117,13 @@ function coverageForVariant(root: string, variant: string): VariantCoverage {
   const rows: CoverageRow[] = [];
   const gaps: Gap[] = [];
   const seen = new Set<string>();
-  for (const { agentKey, phase } of required.sort((a, b) =>
-    a.agentKey.localeCompare(b.agentKey) || a.phase - b.phase,
+  for (const { agentKey, phase } of required.sort(
+    (a, b) => a.agentKey.localeCompare(b.agentKey) || a.phase - b.phase,
   )) {
     const key = `${agentKey}|${phase}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const pmExempt = agentKey === 'pm';
+    const pmExempt = agentKey === "pm";
     const covering = [...(covered.get(key) ?? new Set<string>())].sort();
     rows.push({ agentKey, phase, covering, pmExempt });
     if (covering.length === 0 && !pmExempt) {
@@ -141,26 +141,31 @@ function coverageForVariant(root: string, variant: string): VariantCoverage {
 
 /** L0 Lifecycle Coverage: the five lifecycle procedures + relation chain. */
 function l0Coverage(root: string): { rows: CoverageRow[]; gaps: Gap[]; relationIssues: string[] } {
-  const procDir = join(root, 'procedures');
+  const procDir = join(root, "procedures");
   const rows: CoverageRow[] = [];
   const gaps: Gap[] = [];
   const existing = new Set<string>();
   const statuses = new Map<string, string>();
 
   for (const name of L0_LIFECYCLE_PROCEDURES) {
-    const path = join(procDir, name, 'schema.yaml');
+    const path = join(procDir, name, "schema.yaml");
     if (!existsSync(path)) {
-      gaps.push({ coverageKey: `l0:l0-${name}`, variant: 'l0', agentKey: `(procedure) l0-${name}`, phase: -1 });
+      gaps.push({ coverageKey: `l0:l0-${name}`, variant: "l0", agentKey: `(procedure) l0-${name}`, phase: -1 });
       rows.push({ agentKey: `l0-${name}`, phase: -1, covering: [], pmExempt: false });
       continue;
     }
     const data = loadProcedure(path);
-    const status = typeof data?.status === 'string' ? data.status : 'unknown';
+    const status = typeof data?.status === "string" ? data.status : "unknown";
     statuses.set(name, status);
     existing.add(name);
-    rows.push({ agentKey: `l0-${name}`, phase: -1, covering: [status === 'active' ? '✓ active' : `⚠ ${status}`], pmExempt: false });
-    if (status !== 'active') {
-      gaps.push({ coverageKey: `l0:l0-${name}`, variant: 'l0', agentKey: `(procedure) l0-${name}`, phase: -1 });
+    rows.push({
+      agentKey: `l0-${name}`,
+      phase: -1,
+      covering: [status === "active" ? "✓ active" : `⚠ ${status}`],
+      pmExempt: false,
+    });
+    if (status !== "active") {
+      gaps.push({ coverageKey: `l0:l0-${name}`, variant: "l0", agentKey: `(procedure) l0-${name}`, phase: -1 });
     }
   }
 
@@ -169,10 +174,10 @@ function l0Coverage(root: string): { rows: CoverageRow[]; gaps: Gap[]; relationI
     const data = loadProcedure(path);
     if (!data || !Array.isArray(data.relations)) continue;
     for (const rel of data.relations) {
-      const m = rel && typeof rel === 'object' ? /^procedure\.l0\.([a-z0-9-]+)$/.exec(String(rel.target)) : null;
+      const m = rel && typeof rel === "object" ? /^procedure\.l0\.([a-z0-9-]+)$/.exec(String(rel.target)) : null;
       if (!m) continue;
       const targetName = m[1];
-      if (!existing.has(targetName) || statuses.get(targetName) !== 'active') {
+      if (!existing.has(targetName) || statuses.get(targetName) !== "active") {
         relationIssues.push(`l0-${name} --${rel.type}--> l0-${targetName}: target missing or not active`);
       }
     }
@@ -182,10 +187,17 @@ function l0Coverage(root: string): { rows: CoverageRow[]; gaps: Gap[]; relationI
 }
 
 function createGapTickets(root: string, gaps: Gap[]): { created: string[]; skipped: number } {
-  const governanceDir = join(root, 'tickets', 'governance');
-  const existingTickets = [...listTickets(governanceDir, { kind: 'manual' }), ...listTickets(join(root, 'tickets'), { kind: 'manual' })];
+  const governanceDir = join(root, "tickets", "governance");
+  const existingTickets = [
+    ...listTickets(governanceDir, { kind: "manual" }),
+    ...listTickets(join(root, "tickets"), { kind: "manual" }),
+  ];
   const existingKeys = new Set(
-    existingTickets.map((t) => (t.inputs && typeof t.inputs === 'object' ? (t.inputs as Record<string, string>).coverage_key : undefined)).filter(Boolean),
+    existingTickets
+      .map((t) =>
+        t.inputs && typeof t.inputs === "object" ? (t.inputs as Record<string, string>).coverage_key : undefined,
+      )
+      .filter(Boolean),
   );
 
   const created: string[] = [];
@@ -195,20 +207,21 @@ function createGapTickets(root: string, gaps: Gap[]): { created: string[]; skipp
       skipped++;
       continue;
     }
-    const isL0 = gap.variant === 'l0';
+    const isL0 = gap.variant === "l0";
     const ticket = createTicket(governanceDir, {
-      kind: 'manual',
+      kind: "manual",
       title: isL0
         ? `Coverage gap: ${gap.agentKey} (procedure missing or inactive)`
         : `Coverage gap: ${gap.variant} / ${gap.agentKey} @ phase ${gap.phase}`,
-      priority: 'normal',
+      priority: "normal",
       inputs: {
-        source: 'procedure-coverage',
+        source: "procedure-coverage",
         coverage_key: gap.coverageKey,
         variant: gap.variant,
         agent_key: gap.agentKey,
         phase: String(gap.phase),
-        resolution: 'PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)',
+        resolution:
+          "PROCEDURE_REQUIRED or N/A_JUSTIFIED (human judgment — see docs/designs/2026-08-29-procedure-coverage-and-l0-design.md §2)",
       },
     });
     created.push(ticket.id);
@@ -222,11 +235,11 @@ function main(): void {
   let tickets = false;
   let json = false;
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--variant') onlyVariant = args[++i];
-    else if (args[i] === '--tickets') tickets = true;
-    else if (args[i] === '--json') json = true;
-    else if (args[i] === '--help' || args[i] === '-h') {
-      console.log('Usage: bun scripts/procedure-coverage.ts [--variant <name>] [--tickets] [--json]');
+    if (args[i] === "--variant") onlyVariant = args[++i];
+    else if (args[i] === "--tickets") tickets = true;
+    else if (args[i] === "--json") json = true;
+    else if (args[i] === "--help" || args[i] === "-h") {
+      console.log("Usage: bun scripts/procedure-coverage.ts [--variant <name>] [--tickets] [--json]");
       process.exit(0);
     } else {
       console.error(`Unknown argument: ${args[i]}`);
@@ -234,14 +247,14 @@ function main(): void {
     }
   }
 
-  const variants = readdirSync(join(ROOT, 'templates'), { withFileTypes: true })
-    .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
+  const variants = readdirSync(join(ROOT, "templates"), { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
     .map((e) => e.name)
     .sort();
-  const scoped = onlyVariant && onlyVariant !== 'l0' ? variants.filter((v) => v === onlyVariant) : variants;
+  const scoped = onlyVariant && onlyVariant !== "l0" ? variants.filter((v) => v === onlyVariant) : variants;
 
   const results: VariantCoverage[] = scoped.map((v) => coverageForVariant(ROOT, v));
-  const l0 = onlyVariant && onlyVariant !== 'l0' ? null : l0Coverage(ROOT);
+  const l0 = onlyVariant && onlyVariant !== "l0" ? null : l0Coverage(ROOT);
   const allGaps: Gap[] = [...results.flatMap((r) => r.gaps), ...(l0?.gaps ?? [])];
 
   if (json) {
@@ -249,18 +262,18 @@ function main(): void {
   } else {
     for (const r of results) {
       console.log(`\n## ${r.variant}`);
-      console.log('Agent | Phase | Covering procedure(s) | Covered');
-      console.log('------|-------|----------------------|--------');
+      console.log("Agent | Phase | Covering procedure(s) | Covered");
+      console.log("------|-------|----------------------|--------");
       for (const row of r.rows) {
-        const coveredMark = row.covering.length > 0 ? '✓' : row.pmExempt ? '– (pm exempt)' : '✗';
-        console.log(`${row.agentKey} | ${row.phase} | ${row.covering.join(', ') || '—'} | ${coveredMark}`);
+        const coveredMark = row.covering.length > 0 ? "✓" : row.pmExempt ? "– (pm exempt)" : "✗";
+        console.log(`${row.agentKey} | ${row.phase} | ${row.covering.join(", ") || "—"} | ${coveredMark}`);
       }
       console.log(`  gaps: ${r.gaps.length}`);
     }
     if (l0) {
-      console.log('\n## L0 Lifecycle Coverage');
+      console.log("\n## L0 Lifecycle Coverage");
       for (const row of l0.rows) {
-        console.log(`  ${row.agentKey}: ${row.covering.join(', ') || 'MISSING'}`);
+        console.log(`  ${row.agentKey}: ${row.covering.join(", ") || "MISSING"}`);
       }
       for (const issue of l0.relationIssues) {
         console.log(`  relation issue: ${issue}`);
@@ -277,9 +290,9 @@ function main(): void {
     }
   } else if (allGaps.length > 0 && !json) {
     console.log(`\n${allGaps.length} coverage gap(s). Each is a HUMAN judgment target:`);
-    console.log('  PROCEDURE_REQUIRED → author a workflow-shaped procedure, or');
-    console.log('  N/A_JUSTIFIED      → record rationale in a governance ticket.');
-    console.log('Run with --tickets to register them (idempotent by coverage_key).');
+    console.log("  PROCEDURE_REQUIRED → author a workflow-shaped procedure, or");
+    console.log("  N/A_JUSTIFIED      → record rationale in a governance ticket.");
+    console.log("Run with --tickets to register them (idempotent by coverage_key).");
   }
 
   process.exit(0);

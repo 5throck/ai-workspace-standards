@@ -28,10 +28,10 @@
  */
 
 /** Release level for the pending template diff. `major` is unreachable by design (R7). */
-export type ReleaseLevel = 'no-op' | 'patch' | 'minor' | 'manual-review';
+export type ReleaseLevel = "no-op" | "patch" | "minor" | "manual-review";
 
 /** git name-status row families the classifier understands. */
-export type RowFamily = 'A' | 'M' | 'D' | 'R' | 'other';
+export type RowFamily = "A" | "M" | "D" | "R" | "other";
 
 export interface ClassifyCounts {
   /** Scoped rows per git status family. */
@@ -71,10 +71,10 @@ export interface ClassifyResult {
 
 /** Release-metadata paths excluded from classification (design R2). */
 export const RELEASE_METADATA_PATHS: ReadonlySet<string> = new Set([
-  'templates/VERSION',
-  'templates/CHANGELOG.md',
-  'templates/README.md',
-  'templates/README_ko.md',
+  "templates/VERSION",
+  "templates/CHANGELOG.md",
+  "templates/README.md",
+  "templates/README_ko.md",
 ]);
 
 /** A delivered (upgrade-shipped) template path: common or any co-* variant. */
@@ -94,9 +94,9 @@ export function isSemver(v: string): boolean {
 }
 
 /** Bump a semver string. `minor` resets patch, `patch` increments patch. `major` is out of scope here (R7). */
-export function bumpVersion(current: string, level: 'patch' | 'minor'): string {
-  const [major, minor, patch] = current.trim().split('.').map(Number);
-  if (level === 'minor') return `${major}.${minor + 1}.0`;
+export function bumpVersion(current: string, level: "patch" | "minor"): string {
+  const [major, minor, patch] = current.trim().split(".").map(Number);
+  if (level === "minor") return `${major}.${minor + 1}.0`;
   return `${major}.${minor}.${patch + 1}`;
 }
 
@@ -109,20 +109,20 @@ interface ParsedRow {
 }
 
 function parseRow(line: string): ParsedRow {
-  const fields = line.split('\t');
-  const status = fields[0] ?? '';
+  const fields = line.split("\t");
+  const status = fields[0] ?? "";
   if (/^R\d{0,3}$/.test(status) || /^C\d{0,3}$/.test(status)) {
     if (fields.length >= 3) {
-      const family: RowFamily = status[0] === 'R' ? 'R' : 'other';
+      const family: RowFamily = status[0] === "R" ? "R" : "other";
       return { family, rawStatus: status, paths: [fields[1], fields[2]], malformed: false };
     }
-    return { family: 'other', rawStatus: status, paths: [], malformed: true };
+    return { family: "other", rawStatus: status, paths: [], malformed: true };
   }
   if (fields.length >= 2) {
-    const known: RowFamily = status === 'A' ? 'A' : status === 'M' ? 'M' : status === 'D' ? 'D' : 'other';
+    const known: RowFamily = status === "A" ? "A" : status === "M" ? "M" : status === "D" ? "D" : "other";
     return { family: known, rawStatus: status, paths: [fields[1]], malformed: false };
   }
-  return { family: 'other', rawStatus: status, paths: [], malformed: true };
+  return { family: "other", rawStatus: status, paths: [], malformed: true };
 }
 
 /** True when any path on the row is a delivered path (a rename into/out of the delivered surface counts). */
@@ -140,10 +140,17 @@ function rowInScope(row: ParsedRow): boolean {
  */
 export function classifyTemplateChanges(rows: string[], opts: ClassifyOptions): ClassifyResult {
   const counts: ClassifyCounts = {
-    added: 0, modified: 0, deleted: 0, renamed: 0, other: 0, scopedTotal: 0, deliveredPaths: 0, byDir: {},
+    added: 0,
+    modified: 0,
+    deleted: 0,
+    renamed: 0,
+    other: 0,
+    scopedTotal: 0,
+    deliveredPaths: 0,
+    byDir: {},
   };
   const reasons: string[] = [];
-  const samples: ClassifyResult['samples'] = { added: [], deleted: [], renamed: [], modified: [] };
+  const samples: ClassifyResult["samples"] = { added: [], deleted: [], renamed: [], modified: [] };
   const SAMPLE_LIMIT = 5;
 
   const currentVersion = opts.currentVersion.trim();
@@ -152,14 +159,14 @@ export function classifyTemplateChanges(rows: string[], opts: ClassifyOptions): 
   const scopedRows: ParsedRow[] = [];
 
   for (const raw of rows) {
-    const line = raw.replace(/\r$/, '');
+    const line = raw.replace(/\r$/, "");
     if (!line.trim()) continue;
     const row = parseRow(line);
 
     // R6d: an uncommitted/unlanded VERSION bump signature anywhere in the
     // pending diff forces manual review, even though VERSION is excluded
     // from the classified counts (R2).
-    if (row.paths.some((p) => RELEASE_METADATA_PATHS.has(p) && p === 'templates/VERSION')) {
+    if (row.paths.some((p) => RELEASE_METADATA_PATHS.has(p) && p === "templates/VERSION")) {
       reasons.push(`templates/VERSION appears in the pending diff (uncommitted bump signature) — reconcile by hand`);
     }
 
@@ -168,19 +175,19 @@ export function classifyTemplateChanges(rows: string[], opts: ClassifyOptions): 
     counts.scopedTotal += 1;
 
     switch (row.family) {
-      case 'A':
+      case "A":
         counts.added += 1;
         if (samples.added.length < SAMPLE_LIMIT) samples.added.push(row.paths[0]);
         break;
-      case 'M':
+      case "M":
         counts.modified += 1;
         if (samples.modified.length < SAMPLE_LIMIT) samples.modified.push(row.paths[0]);
         break;
-      case 'D':
+      case "D":
         counts.deleted += 1;
         if (samples.deleted.length < SAMPLE_LIMIT) samples.deleted.push(row.paths[0]);
         break;
-      case 'R':
+      case "R":
         counts.renamed += 1;
         if (samples.renamed.length < SAMPLE_LIMIT) samples.renamed.push(`${row.paths[0]} -> ${row.paths[1]}`);
         break;
@@ -188,8 +195,10 @@ export function classifyTemplateChanges(rows: string[], opts: ClassifyOptions): 
         counts.other += 1;
         break;
     }
-    if (row.family === 'other') {
-      reasons.push(`unknown status code '${row.rawStatus}' on scoped row: ${row.malformed ? line : row.paths.join(' -> ')}`);
+    if (row.family === "other") {
+      reasons.push(
+        `unknown status code '${row.rawStatus}' on scoped row: ${row.malformed ? line : row.paths.join(" -> ")}`,
+      );
     }
 
     for (const p of row.paths) {
@@ -208,18 +217,19 @@ export function classifyTemplateChanges(rows: string[], opts: ClassifyOptions): 
   // template tags exist. Absent tag with no older tags is a first release,
   // not an inconsistency.
   if (opts.tagExists === false && opts.otherTemplateTagsExist === true) {
-    reasons.push(`tag template-v${currentVersion} does not exist while older template-v* tags do — previous release incomplete, reconcile by hand`);
+    reasons.push(
+      `tag template-v${currentVersion} does not exist while older template-v* tags do — previous release incomplete, reconcile by hand`,
+    );
   }
 
   // R5 precedence: manual-review beats minor; minor beats patch (R7: major unreachable).
   let level: ReleaseLevel;
-  if (reasons.length > 0) level = 'manual-review';
-  else if (counts.deleted > 0 || counts.renamed > 0 || counts.added > 0) level = 'minor';
-  else if (counts.modified > 0) level = 'patch';
-  else level = 'no-op';
+  if (reasons.length > 0) level = "manual-review";
+  else if (counts.deleted > 0 || counts.renamed > 0 || counts.added > 0) level = "minor";
+  else if (counts.modified > 0) level = "patch";
+  else level = "no-op";
 
-  const nextVersion =
-    level === 'patch' || level === 'minor' ? bumpVersion(currentVersion, level) : null;
+  const nextVersion = level === "patch" || level === "minor" ? bumpVersion(currentVersion, level) : null;
 
   return { level, nextVersion, counts, reasons, samples };
 }

@@ -41,8 +41,20 @@ interface TagToken {
 }
 
 const VOID_TAGS = new Set([
-  "area", "base", "br", "col", "embed", "hr", "img",
-  "input", "link", "meta", "param", "source", "track", "wbr",
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
 ]);
 
 // Closing tag immediately followed by a stray ASCII letter — a generation
@@ -50,12 +62,7 @@ const VOID_TAGS = new Set([
 // Closing tags only: "<div>Text" is a normal opening tag, not corruption.
 const STRAY_AFTER_CLOSE_RE = /<\/(?:div|table|thead|tbody|article|main|ul|ol)[^>]*>[a-zA-Z]/g;
 
-const KNOWN_SCRIPTS = [
-  "dark-mode-toggle.js",
-  "lang-switcher.js",
-  "inpage-search.js",
-  "site-search.js",
-];
+const KNOWN_SCRIPTS = ["dark-mode-toggle.js", "lang-switcher.js", "inpage-search.js", "site-search.js"];
 
 function countNewlines(s: string): number {
   let n = 0;
@@ -154,7 +161,10 @@ export function checkNesting(html: string): { line: number; detail: string }[] {
     }
     const idx = findLastIndex(stack, (s) => s.tag === t.tag);
     if (idx !== -1) {
-      const unclosed = stack.slice(idx + 1).map((s) => `<${s.tag}>`).join(", ");
+      const unclosed = stack
+        .slice(idx + 1)
+        .map((s) => `<${s.tag}>`)
+        .join(", ");
       errors.push({
         line: t.line,
         detail: `</${t.tag}> closes an outer tag while these are still open: ${unclosed}`,
@@ -216,7 +226,11 @@ function checkFile(relPath: string, content: string, requiredScripts: string[]):
   // <pre> count — but it must never fall below it.
   const copyBtns = (content.match(/class="copy-btn"/g) || []).length;
   if (copyBtns < preOpen) {
-    issues.push({ file: relPath, line: 0, detail: `copy-btn count ${copyBtns} btn vs ${preOpen} pre — every <pre> needs a copy button` });
+    issues.push({
+      file: relPath,
+      line: 0,
+      detail: `copy-btn count ${copyBtns} btn vs ${preOpen} pre — every <pre> needs a copy button`,
+    });
   }
 
   if (content.includes("<img")) {

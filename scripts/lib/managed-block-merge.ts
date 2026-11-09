@@ -124,15 +124,15 @@ export interface ManagedPattern {
 }
 
 export const MANAGED_PATTERNS: ManagedPattern[] = [
-  { open: /<!-- WORKSPACE-MANAGED(?::[^>]*?)? -->/, close: '<!-- /WORKSPACE-MANAGED -->', label: 'WORKSPACE-MANAGED' },
-  { open: /<!-- COMMON-CLAUDE:START -->/, close: '<!-- COMMON-CLAUDE:END -->', label: 'COMMON-CLAUDE' },
-  { open: /<!-- COMMON-GEMINI:START -->/, close: '<!-- COMMON-GEMINI:END -->', label: 'COMMON-GEMINI' },
-  { open: /<!-- COMMON-CODEX:START -->/, close: '<!-- COMMON-CODEX:END -->', label: 'COMMON-CODEX' },
-  { open: /<!-- COMMON-HERMES:START -->/, close: '<!-- COMMON-HERMES:END -->', label: 'COMMON-HERMES' },
-  { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: '<!-- END VARIANT-INJECT -->', label: 'VARIANT-INJECT' },
-  { open: /<!-- COMMON-AGENTS:START -->/, close: '<!-- COMMON-AGENTS:END -->', label: 'COMMON-AGENTS' },
-  { open: /<!-- COMMON-CONTEXT:START -->/, close: '<!-- COMMON-CONTEXT:END -->', label: 'COMMON-CONTEXT' },
-  { open: /<!-- DYNAMIC_SKILLS_START -->/, close: '<!-- DYNAMIC_SKILLS_END -->', label: 'DYNAMIC_SKILLS' },
+  { open: /<!-- WORKSPACE-MANAGED(?::[^>]*?)? -->/, close: "<!-- /WORKSPACE-MANAGED -->", label: "WORKSPACE-MANAGED" },
+  { open: /<!-- COMMON-CLAUDE:START -->/, close: "<!-- COMMON-CLAUDE:END -->", label: "COMMON-CLAUDE" },
+  { open: /<!-- COMMON-GEMINI:START -->/, close: "<!-- COMMON-GEMINI:END -->", label: "COMMON-GEMINI" },
+  { open: /<!-- COMMON-CODEX:START -->/, close: "<!-- COMMON-CODEX:END -->", label: "COMMON-CODEX" },
+  { open: /<!-- COMMON-HERMES:START -->/, close: "<!-- COMMON-HERMES:END -->", label: "COMMON-HERMES" },
+  { open: /<!-- VARIANT-INJECT(?::[^\-]*?)? -->/, close: "<!-- END VARIANT-INJECT -->", label: "VARIANT-INJECT" },
+  { open: /<!-- COMMON-AGENTS:START -->/, close: "<!-- COMMON-AGENTS:END -->", label: "COMMON-AGENTS" },
+  { open: /<!-- COMMON-CONTEXT:START -->/, close: "<!-- COMMON-CONTEXT:END -->", label: "COMMON-CONTEXT" },
+  { open: /<!-- DYNAMIC_SKILLS_START -->/, close: "<!-- DYNAMIC_SKILLS_END -->", label: "DYNAMIC_SKILLS" },
 ];
 
 /** ManagedBlock with extracted key from `: description` suffix. */
@@ -140,20 +140,20 @@ export interface ManagedBlock {
   start: number;
   end: number;
   matched: string;
-  key: string;  // extracted `: description` suffix, or '' for unlabeled blocks
+  key: string; // extracted `: description` suffix, or '' for unlabeled blocks
 }
 
 function escapeClose(close: string): string {
-  return close.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return close.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** v1.6.0: line count of a marker-inclusive block text. */
 function lineCount(blockText: string): number {
-  return blockText.split('\n').length;
+  return blockText.split("\n").length;
 }
 
 function patternRegex(pattern: ManagedPattern): RegExp {
-  return new RegExp(pattern.open.source + '[\\s\\S]*?' + escapeClose(pattern.close), 'g');
+  return new RegExp(pattern.open.source + "[\\s\\S]*?" + escapeClose(pattern.close), "g");
 }
 
 /** Scan `content` for every match of one pattern, extracting block keys from
@@ -163,8 +163,8 @@ function scanPatternBlocks(content: string, pattern: ManagedPattern): ManagedBlo
   const blocks: ManagedBlock[] = [];
   for (const occ of content.matchAll(patternRegex(pattern))) {
     const matched = occ[0]!;
-    let key = '';
-    if (pattern.label === 'WORKSPACE-MANAGED' || pattern.label === 'VARIANT-INJECT') {
+    let key = "";
+    if (pattern.label === "WORKSPACE-MANAGED" || pattern.label === "VARIANT-INJECT") {
       const keyMatch = matched.match(/:\s*([^\s].*?)\s*-->/);
       if (keyMatch) key = keyMatch[1].trim();
     }
@@ -191,8 +191,13 @@ export function findManagedBlocks(content: string): Array<{ pattern: ManagedPatt
 /**
  * Build a map-of-maps for efficient key-based block lookup.
  */
-export function buildBlockKeyMap(managed: Array<{ pattern: ManagedPattern; blocks: ManagedBlock[] }>): Map<string, { pattern: ManagedPattern; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }> {
-  const map = new Map<string, { pattern: ManagedPattern; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }>();
+export function buildBlockKeyMap(
+  managed: Array<{ pattern: ManagedPattern; blocks: ManagedBlock[] }>,
+): Map<string, { pattern: ManagedPattern; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }> {
+  const map = new Map<
+    string,
+    { pattern: ManagedPattern; blocksByKey: Map<string, ManagedBlock>; blocksByIndex: ManagedBlock[] }
+  >();
   for (const { pattern, blocks } of managed) {
     const blocksByKey = new Map<string, ManagedBlock>();
     const blocksByIndex: ManagedBlock[] = [];
@@ -257,8 +262,8 @@ export function findInsertionPosition(content: string, rel: string, key: string,
   // Escape the key: block keys come from arbitrary `: description` suffixes and
   // may contain RegExp metacharacters — unescaped interpolation would throw
   // mid-upgrade or silently mis-anchor the insertion (T-20260917-review).
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const headingRegex = new RegExp(`^#+\\s+.*${escapedKey}.*$`, 'm');
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const headingRegex = new RegExp(`^#+\\s+.*${escapedKey}.*$`, "m");
   const headingMatch = content.match(headingRegex);
   if (headingMatch) {
     const headingEnd = headingMatch.index! + headingMatch[0].length;
@@ -268,9 +273,10 @@ export function findInsertionPosition(content: string, rel: string, key: string,
   // Fallback: find the last block of the same label and insert after it
   const regex = patternRegex(pattern);
   let lastMatch: RegExpExecArray | null = null;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
+  let match: RegExpExecArray | null = regex.exec(content);
+  while (match !== null) {
     lastMatch = match;
+    match = regex.exec(content);
   }
   if (lastMatch) {
     return lastMatch.index! + lastMatch[0].length;
@@ -355,7 +361,7 @@ export function mergeManagedBlocks(
   dryRun: boolean,
   censusGate?: ManagedBlockCensusGate,
 ): ManagedBlockMergeResult {
-  const dryTag = dryRun ? '[DRY RUN] ' : '';
+  const dryTag = dryRun ? "[DRY RUN] " : "";
   const log: string[] = [];
   const snapshots: { rel: string; content: string }[] = [];
   const escalated: { rel: string; content: string }[] = [];
@@ -381,8 +387,8 @@ export function mergeManagedBlocks(
     const projUnlabeledCount = projBlocksAll.filter((b) => !b.key).length;
 
     // Separate keyed from unlabeled blocks
-    const keyedTplBlocks = tplBlocks.filter(b => b.key);
-    const unlabeledTplBlocks = tplBlocks.filter(b => !b.key);
+    const keyedTplBlocks = tplBlocks.filter((b) => b.key);
+    const unlabeledTplBlocks = tplBlocks.filter((b) => !b.key);
 
     // Process keyed blocks: match by key, insert if not found. A key may
     // repeat (AGENTS.md carries two `tier-model-mapping` blocks), so the Nth
@@ -396,7 +402,12 @@ export function mergeManagedBlocks(
       if (projBlock) {
         // Found by key — replace it
         if (projBlock.matched !== tplBlock.matched) {
-          restamps.push({ label: pattern.label, key: tplBlock.key, linesBefore: lineCount(projBlock.matched), linesAfter: lineCount(tplBlock.matched) });
+          restamps.push({
+            label: pattern.label,
+            key: tplBlock.key,
+            linesBefore: lineCount(projBlock.matched),
+            linesAfter: lineCount(tplBlock.matched),
+          });
         }
         updated = updated.slice(0, projBlock.start) + tplBlock.matched + updated.slice(projBlock.end);
         merged = true;
@@ -404,11 +415,10 @@ export function mergeManagedBlocks(
       } else {
         // Not found by key — insert with insertion anchor logic
         // A repeated key's later occurrence goes right after its predecessor.
-        const prevSameKey = nth > 0
-          ? scanPatternBlocks(updated, pattern).filter((b) => b.key === tplBlock.key)[nth - 1]
-          : undefined;
+        const prevSameKey =
+          nth > 0 ? scanPatternBlocks(updated, pattern).filter((b) => b.key === tplBlock.key)[nth - 1] : undefined;
         const insertionPos = prevSameKey ? prevSameKey.end : findInsertionPosition(updated, rel, tplBlock.key, pattern);
-        updated = updated.slice(0, insertionPos) + '\n\n' + tplBlock.matched + '\n' + updated.slice(insertionPos);
+        updated = updated.slice(0, insertionPos) + "\n\n" + tplBlock.matched + "\n" + updated.slice(insertionPos);
         merged = true;
         log.push(`    ${dryTag}INSERTED ${pattern.label}:${tplBlock.key} in: ${rel}`);
       }
@@ -418,7 +428,7 @@ export function mergeManagedBlocks(
     if (projUnlabeledCount === 0) {
       // No matching block in project — append all unlabeled template blocks
       for (const tplBlock of unlabeledTplBlocks) {
-        updated = updated + '\n\n' + tplBlock.matched + '\n';
+        updated = updated + "\n\n" + tplBlock.matched + "\n";
         merged = true;
         log.push(`    ${dryTag}APPENDED ${pattern.label} block to: ${rel}`);
       }
@@ -439,20 +449,31 @@ export function mergeManagedBlocks(
         // and no --disposition adopt-template grant covers the path.
         const adapted = Boolean(censusGate && censusGate.divergent && censusGate.isSpanAdapted(spanContent));
         if (adapted && censusGate && !censusGate.dispositionGranted) {
-          log.push(`    ${dryTag}RECONCILE BLOCKED (adapted out-of-zone span): ${rel} — the instruction-region census found project-authored content in the replaced span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`);
-          log.push('      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump');
+          log.push(
+            `    ${dryTag}RECONCILE BLOCKED (adapted out-of-zone span): ${rel} — the instruction-region census found project-authored content in the replaced span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`,
+          );
+          log.push(
+            "      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump",
+          );
           escalated.push({ rel, content: spanContent });
           continue;
         }
-        log.push(`    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projUnlabeledCount}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`);
+        log.push(
+          `    WARNING: ${pattern.label} unlabeled block count mismatch in ${rel} (project has ${projUnlabeledCount}, template has ${unlabeledTplBlocks.length}) — replacing all project blocks with the template sequence (this may cause prose loss if prose exists between project blocks)`,
+        );
         // T-20260917-010: capture the exact replaced span so the caller can
         // persist a recovery snapshot before applying this destructive
         // replace. Pure data here — the fs write lives in upgrade-project.
         snapshots.push({ rel, content: spanContent });
         if (adapted) adaptedReplaces++;
-        updated = updated.slice(0, first.start) + unlabeledTplBlocks.map((b) => b.matched).join('\n\n') + updated.slice(last.end);
+        updated =
+          updated.slice(0, first.start) +
+          unlabeledTplBlocks.map((b) => b.matched).join("\n\n") +
+          updated.slice(last.end);
         merged = true;
-        log.push(`    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}${adapted ? ' (adapted span — delivered via --disposition adopt-template)' : ''}`);
+        log.push(
+          `    ${dryTag}RECONCILED ${pattern.label} blocks in: ${rel}${adapted ? " (adapted span — delivered via --disposition adopt-template)" : ""}`,
+        );
       }
     } else {
       // Counts match — replace positionally, back-to-front so earlier offsets stay valid.
@@ -463,7 +484,12 @@ export function mergeManagedBlocks(
         if (!occ) continue;
         const tplBlock = unlabeledTplBlocks[i];
         if (occ.matched !== tplBlock.matched) {
-          restamps.push({ label: pattern.label, key: '', linesBefore: lineCount(occ.matched), linesAfter: lineCount(tplBlock.matched) });
+          restamps.push({
+            label: pattern.label,
+            key: "",
+            linesBefore: lineCount(occ.matched),
+            linesAfter: lineCount(tplBlock.matched),
+          });
         }
         updated = updated.slice(0, occ.start) + tplBlock.matched + updated.slice(occ.end);
         merged = true;
@@ -474,7 +500,7 @@ export function mergeManagedBlocks(
 
   if (findManagedBlocks(projectContent).length === 0 && !merged) {
     log.push(`    WARNING: ${rel} has no managed markers in project.`);
-    log.push('             Appending template managed blocks at end of file.');
+    log.push("             Appending template managed blocks at end of file.");
     merged = true;
     log.push(`    ${dryTag}APPENDED managed blocks to: ${rel}`);
   }

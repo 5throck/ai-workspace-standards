@@ -50,13 +50,13 @@ interface SkillMetadata {
  * Returns a WARN SkillCheck if the column is found, null otherwise.
  */
 async function checkSkillsMdSchema(): Promise<SkillCheck | null> {
-  const skillsMdPath = path.join(projectRoot, 'skills', 'SKILLS.md');
-  const { existsSync } = await import('node:fs');
+  const skillsMdPath = path.join(projectRoot, "skills", "SKILLS.md");
+  const { existsSync } = await import("node:fs");
   if (!existsSync(skillsMdPath)) return null;
 
   try {
     const content = await Bun.file(skillsMdPath).text();
-    const registryIndex = content.indexOf('## Registry');
+    const registryIndex = content.indexOf("## Registry");
     if (registryIndex === -1) return null;
 
     // Find the first table header line after ## Registry
@@ -65,14 +65,14 @@ async function checkSkillsMdSchema(): Promise<SkillCheck | null> {
     if (!headerMatch) return null;
 
     const headerLine = headerMatch[0].toLowerCase();
-    if (headerLine.includes('| layer ') || headerLine.includes('| layer|') || headerLine.match(/\|\s*layer\s*\|/)) {
+    if (headerLine.includes("| layer ") || headerLine.includes("| layer|") || headerLine.match(/\|\s*layer\s*\|/)) {
       return {
-        name: 'SKILLS.md schema',
+        name: "SKILLS.md schema",
         path: skillsMdPath,
-        status: 'WARN',
+        status: "WARN",
         issues: [
-          "SKILLS.md has a stale 'layer' column — this column no longer controls propagation (SKILL.md frontmatter is the SSOT). Run 'bun scripts/upgrade-project.ts <project-path>' to migrate."
-        ]
+          "SKILLS.md has a stale 'layer' column — this column no longer controls propagation (SKILL.md frontmatter is the SSOT). Run 'bun scripts/upgrade-project.ts <project-path>' to migrate.",
+        ],
       };
     }
     return null;
@@ -86,36 +86,40 @@ async function checkSkillsMdSchema(): Promise<SkillCheck | null> {
 // Workspace-root only: scaffolded projects carry variant-overlay skills that the
 // root catalog intentionally does not list.
 async function checkSkillsCatalogSync(): Promise<SkillCheck | null> {
-  const { existsSync, readdirSync } = await import('node:fs');
-  if (!existsSync(path.join(projectRoot, 'templates', 'common'))) return null;
-  const skillsMdPath = path.join(projectRoot, 'skills', 'SKILLS.md');
+  const { existsSync, readdirSync } = await import("node:fs");
+  if (!existsSync(path.join(projectRoot, "templates", "common"))) return null;
+  const skillsMdPath = path.join(projectRoot, "skills", "SKILLS.md");
   if (!existsSync(skillsMdPath)) return null;
 
   const content = await Bun.file(skillsMdPath).text();
   const rows: Record<string, string> = {};
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     const m = line.match(/^\|\s*`([a-z0-9-]+)`\s*\|\s*"?([0-9][0-9.]*)"?\s*\|/);
     if (m) rows[m[1]] = m[2];
   }
 
   const issues: string[] = [];
-  for (const dir of readdirSync(path.join(projectRoot, 'skills'))) {
-    const skillMd = path.join(projectRoot, 'skills', dir, 'SKILL.md');
+  for (const dir of readdirSync(path.join(projectRoot, "skills"))) {
+    const skillMd = path.join(projectRoot, "skills", dir, "SKILL.md");
     if (!existsSync(skillMd)) continue;
-    const fm = (await Bun.file(skillMd).text()).split('---')[1] ?? '';
+    const fm = (await Bun.file(skillMd).text()).split("---")[1] ?? "";
     const version = fm.match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
     if (!version) continue; // frontmatter completeness is validate-skills' domain
     if (!(dir in rows)) {
-      issues.push(`skills/SKILLS.md has no row for '${dir}' (frontmatter version ${version}) — add it to the Workspace Skills table`);
+      issues.push(
+        `skills/SKILLS.md has no row for '${dir}' (frontmatter version ${version}) — add it to the Workspace Skills table`,
+      );
     } else if (rows[dir] !== version) {
-      issues.push(`skills/SKILLS.md version drift for '${dir}': catalog=${rows[dir]}, SKILL.md=${version} — update the catalog row`);
+      issues.push(
+        `skills/SKILLS.md version drift for '${dir}': catalog=${rows[dir]}, SKILL.md=${version} — update the catalog row`,
+      );
     }
   }
   if (issues.length === 0) return null;
   return {
-    name: 'SKILLS.md catalog sync',
+    name: "SKILLS.md catalog sync",
     path: skillsMdPath,
-    status: 'FAIL',
+    status: "FAIL",
     issues,
   };
 }
@@ -132,8 +136,8 @@ async function checkSkillsCatalogSync(): Promise<SkillCheck | null> {
  * have no L1 counterpart by DEC-20260829-02 and are skipped naturally.
  */
 async function checkRegistryL0L1Parity(): Promise<SkillCheck | null> {
-  const l0Path = path.join(projectRoot, 'skills', 'SKILLS.md');
-  const l1Path = path.join(projectRoot, 'templates', 'common', 'skills', 'SKILLS.md');
+  const l0Path = path.join(projectRoot, "skills", "SKILLS.md");
+  const l1Path = path.join(projectRoot, "templates", "common", "skills", "SKILLS.md");
   if (!existsSync(l0Path) || !existsSync(l1Path)) return null;
 
   const parseRows = async (p: string): Promise<Map<string, { version: string; notes: string }>> => {
@@ -144,12 +148,12 @@ async function checkRegistryL0L1Parity(): Promise<SkillCheck | null> {
     // compared against a same-named L1 common row. Workspace/common tables only.
     const catalogStart = content.match(/^###\s+Variant-Exclusive Skills\b.*(?:\n|$)/m);
     if (catalogStart && catalogStart.index !== undefined) content = content.slice(0, catalogStart.index);
-    for (const line of content.split('\n')) {
+    for (const line of content.split("\n")) {
       if (!/^\|\s*`[a-z0-9-]+`\s*\|/.test(line)) continue; // data rows only (skips header/separator)
-      const cells = line.split('|').map((c) => c.trim());
+      const cells = line.split("|").map((c) => c.trim());
       // leading + trailing splits give 9 cells for a 7-column row
       if (cells.length < 9) continue;
-      const name = cells[1].replace(/`/g, '');
+      const name = cells[1].replace(/`/g, "");
       rows.set(name, { version: cells[2], notes: cells[7] });
     }
     return rows;
@@ -161,17 +165,21 @@ async function checkRegistryL0L1Parity(): Promise<SkillCheck | null> {
     const row1 = l1.get(name);
     if (!row1) continue; // workspace-only or variant-exclusive — no L1 counterpart by design
     if (row0.version !== row1.version) {
-      issues.push(`registry version drift for '${name}': root=${row0.version}, common=${row1.version} — align the two SKILLS.md rows`);
+      issues.push(
+        `registry version drift for '${name}': root=${row0.version}, common=${row1.version} — align the two SKILLS.md rows`,
+      );
     }
     if (row0.notes !== row1.notes) {
-      issues.push(`registry description drift for '${name}': root="${row0.notes}", common="${row1.notes}" — align the two SKILLS.md rows`);
+      issues.push(
+        `registry description drift for '${name}': root="${row0.notes}", common="${row1.notes}" — align the two SKILLS.md rows`,
+      );
     }
   }
   if (issues.length === 0) return null;
   return {
-    name: 'SKILLS.md L0↔L1 parity',
+    name: "SKILLS.md L0↔L1 parity",
     path: l0Path,
-    status: 'FAIL',
+    status: "FAIL",
     issues,
   };
 }
@@ -201,8 +209,8 @@ async function main(): Promise<void> {
     }
   }
 
-  const failed = checks.filter(c => c.status === "FAIL").length;
-  const warned = checks.filter(c => c.status === "WARN").length;
+  const failed = checks.filter((c) => c.status === "FAIL").length;
+  const warned = checks.filter((c) => c.status === "WARN").length;
 
   console.log(`\n${checks.length} skills checked`);
   if (failed > 0) {
@@ -261,7 +269,9 @@ async function main(): Promise<void> {
           break;
         }
       }
-      console.error("   The file is curated (first line is not the exact generated stub) — verify-skills never rewrites it.");
+      console.error(
+        "   The file is curated (first line is not the exact generated stub) — verify-skills never rewrites it.",
+      );
       console.error("   Align the curated index manually, then re-run with --check.");
       process.exit(1);
     }
@@ -288,7 +298,10 @@ function isExactGeneratedStub(content: string): boolean {
  * (T-20261007-003) so the --check comparison is stable across runs.
  */
 export function normalizeGeneratedLine(content: string): string {
-  return content.split("\n").filter((l) => !/^Generated: /.test(l)).join("\n");
+  return content
+    .split("\n")
+    .filter((l) => !/^Generated: /.test(l))
+    .join("\n");
 }
 
 async function scanSkills(): Promise<SkillCheck[]> {
@@ -302,9 +315,7 @@ async function scanSkills(): Promise<SkillCheck[]> {
     // Bun.glob is unavailable in some Bun versions — plain recursive readdir (fixed 2026-08-29)
     // (no encoding option given, so entries are strings — the cast only pins the overload)
     const entries = readdirSync(skillsPath, { recursive: true }) as string[];
-    return entries
-      .filter((entry) => entry.endsWith("SKILL.md"))
-      .map((entry) => path.join(skillsPath, entry));
+    return entries.filter((entry) => entry.endsWith("SKILL.md")).map((entry) => path.join(skillsPath, entry));
   }
 
   const skillFiles = await scanDirectory("skills");
@@ -329,8 +340,8 @@ async function scanSkills(): Promise<SkillCheck[]> {
       const l2PropagateMatch = frontmatter.match(/^l2_propagate:\s*(true|false)\b/m);
       const scopeMatch = frontmatter.match(/^scope:\s*(\S+)/m);
 
-      const noPropagate = l2PropagateMatch && l2PropagateMatch[1] === 'false';
-      const isWorkspaceScope = scopeMatch && scopeMatch[1].toLowerCase() === 'workspace';
+      const noPropagate = l2PropagateMatch && l2PropagateMatch[1] === "false";
+      const isWorkspaceScope = scopeMatch && scopeMatch[1].toLowerCase() === "workspace";
 
       if (noPropagate || isWorkspaceScope) {
         // Extract skill name from path like .../skills/audit-workspace/SKILL.md
@@ -338,16 +349,16 @@ async function scanSkills(): Promise<SkillCheck[]> {
         const skillName = skillNameMatch ? skillNameMatch[1] : null;
         if (!skillName) continue;
 
-        const l1Path = path.join(projectRoot, 'templates', 'common', 'skills', skillName);
-        const { existsSync } = await import('node:fs');
+        const l1Path = path.join(projectRoot, "templates", "common", "skills", skillName);
+        const { existsSync } = await import("node:fs");
         if (existsSync(l1Path)) {
           checks.push({
             name: skillName,
             path: l0File,
-            status: 'FAIL',
+            status: "FAIL",
             issues: [
-              `L1 orphan detected: skill has l2_propagate: false or scope: workspace in SKILL.md but exists in templates/common/skills/ — delete templates/common/skills/${skillName}/`
-            ]
+              `L1 orphan detected: skill has l2_propagate: false or scope: workspace in SKILL.md but exists in templates/common/skills/ — delete templates/common/skills/${skillName}/`,
+            ],
           });
         }
       }
@@ -368,7 +379,7 @@ function extractSkillMetadata(content: string, skillPath: string): SkillMetadata
     name: "",
     description: "",
     type: "unknown",
-    triggers: []
+    triggers: [],
   };
 
   // Extract frontmatter
@@ -391,9 +402,10 @@ function extractSkillMetadata(content: string, skillPath: string): SkillMetadata
   // Extract triggers from content
   const triggerMatch = content.match(/(?:## Trigger|When to Use):\s*\n([^#]+)/);
   if (triggerMatch) {
-    const triggers = triggerMatch[1].split('\n')
-      .map(line => line.trim().replace(/^[-*]\s*/, ''))
-      .filter(line => line.length > 0);
+    const triggers = triggerMatch[1]
+      .split("\n")
+      .map((line) => line.trim().replace(/^[-*]\s*/, ""))
+      .filter((line) => line.length > 0);
     metadata.triggers = triggers;
   }
 
@@ -483,15 +495,17 @@ async function verifySkill(skillFile: string): Promise<SkillCheck> {
         }
 
         // Check l2_propagate field for skills in templates/common/skills/
-        if (skillFile.includes('templates/common/skills') || skillFile.includes('templates\\common\\skills')) {
-          if (!frontmatter.includes('l2_propagate:')) {
-            issues.push('Missing l2_propagate field — add l2_propagate: true or l2_propagate: false to clarify L2 propagation intent');
-            if (status !== 'FAIL') status = 'WARN';
+        if (skillFile.includes("templates/common/skills") || skillFile.includes("templates\\common\\skills")) {
+          if (!frontmatter.includes("l2_propagate:")) {
+            issues.push(
+              "Missing l2_propagate field — add l2_propagate: true or l2_propagate: false to clarify L2 propagation intent",
+            );
+            if (status !== "FAIL") status = "WARN";
           } else {
             const l2Match = frontmatter.match(/^l2_propagate:\s*(true|false)\b/m);
             if (!l2Match) {
-              issues.push('Invalid l2_propagate value — must be true or false (boolean, not quoted)');
-              if (status !== 'FAIL') status = 'WARN';
+              issues.push("Invalid l2_propagate value — must be true or false (boolean, not quoted)");
+              if (status !== "FAIL") status = "WARN";
             }
           }
         }
@@ -517,14 +531,14 @@ async function verifySkill(skillFile: string): Promise<SkillCheck> {
       name: skillName,
       path: skillFile,
       status,
-      issues
+      issues,
     };
   } catch (error) {
     return {
       name: skillFile,
       path: skillFile,
       status: "FAIL",
-      issues: [`Failed to read: ${error}`]
+      issues: [`Failed to read: ${error}`],
     };
   }
 }

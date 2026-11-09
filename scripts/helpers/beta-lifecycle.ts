@@ -13,12 +13,12 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join } from 'path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
-import type { VariantType } from './registries/variant-type-registry.ts';
-import { getPromotionPolicy } from './registries/promotion-policy.ts';
-import { checkPromotionEligibility } from './variant-governance-rules.ts';
+import { join } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { ErrorPhase, fatalError, warningError } from "../lib/error-handling.ts";
+import type { VariantType } from "./registries/variant-type-registry.ts";
+import { getPromotionPolicy } from "./registries/promotion-policy.ts";
+import { checkPromotionEligibility } from "./variant-governance-rules.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -30,7 +30,7 @@ export interface BetaLifecycleState {
   /** Variant type */
   variantType: string;
   /** Current status */
-  status: 'beta' | 'stable';
+  status: "beta" | "stable";
   /** Status transition timestamp */
   statusSince: string;
   /** Beta creation timestamp */
@@ -59,7 +59,7 @@ export interface Engagement {
   /** Client identifier (obfuscated) */
   clientId: string;
   /** Engagement outcome */
-  outcome: 'success' | 'failure' | 'ongoing';
+  outcome: "success" | "failure" | "ongoing";
   /** Notes */
   notes?: string;
 }
@@ -68,9 +68,9 @@ export interface Bug {
   /** Bug report timestamp */
   timestamp: string;
   /** Bug severity */
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   /** Bug status */
-  status: 'open' | 'in_progress' | 'resolved' | 'wontfix';
+  status: "open" | "in_progress" | "resolved" | "wontfix";
   /** Bug description */
   description: string;
 }
@@ -96,7 +96,7 @@ export interface PromotionEligibilityResult {
 // ============================================================================
 
 const WORKSPACE_ROOT = process.cwd();
-const LIFECYCLE_DIR = join(WORKSPACE_ROOT, '.pipeline-state', 'beta-lifecycle');
+const LIFECYCLE_DIR = join(WORKSPACE_ROOT, ".pipeline-state", "beta-lifecycle");
 
 // ============================================================================
 // LIFECYCLE STATE MANAGEMENT
@@ -122,15 +122,15 @@ export function loadLifecycleState(variantName: string): BetaLifecycleState | nu
   }
 
   try {
-    const content = readFileSync(statePath, 'utf-8');
+    const content = readFileSync(statePath, "utf-8");
     return JSON.parse(content) as BetaLifecycleState;
   } catch (error) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_LOAD_FAILED',
+      "LIFECYCLE_STATE_LOAD_FAILED",
       `Failed to load lifecycle state for variant: ${variantName}`,
       error instanceof Error ? error.message : String(error),
-      'Check lifecycle state file format and permissions'
+      "Check lifecycle state file format and permissions",
     );
   }
 }
@@ -148,14 +148,14 @@ function saveLifecycleState(state: BetaLifecycleState): void {
   }
 
   try {
-    writeFileSync(statePath, JSON.stringify(state, null, 2), 'utf-8');
+    writeFileSync(statePath, JSON.stringify(state, null, 2), "utf-8");
   } catch (error) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_SAVE_FAILED',
+      "LIFECYCLE_STATE_SAVE_FAILED",
       `Failed to save lifecycle state for variant: ${state.variantName}`,
       error instanceof Error ? error.message : String(error),
-      'Check directory permissions and disk space'
+      "Check directory permissions and disk space",
     );
   }
 
@@ -174,14 +174,14 @@ function saveLifecycleState(state: BetaLifecycleState): void {
  * variant.json (e.g. in a unit test fixture) only logs a warning.
  */
 export function syncSummaryToVariantJson(state: BetaLifecycleState, workspaceRoot: string = WORKSPACE_ROOT): void {
-  const variantJsonPath = join(workspaceRoot, 'templates', state.variantName, 'variant.json');
+  const variantJsonPath = join(workspaceRoot, "templates", state.variantName, "variant.json");
   if (!existsSync(variantJsonPath)) {
     console.warn(`⚠️  Skipping betaLifecycleSummary sync — not found: ${variantJsonPath}`);
     return;
   }
 
   try {
-    const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+    const variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8"));
     variantJson.betaLifecycleSummary = {
       betaEngagements: state.betaEngagements,
       betaBugs: state.betaBugs,
@@ -190,9 +190,11 @@ export function syncSummaryToVariantJson(state: BetaLifecycleState, workspaceRoo
       missingCriteria: state.missingCriteria,
       lastSynced: new Date().toISOString(),
     };
-    writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + '\n', 'utf-8');
+    writeFileSync(variantJsonPath, JSON.stringify(variantJson, null, 2) + "\n", "utf-8");
   } catch (error) {
-    console.warn(`⚠️  Failed to sync betaLifecycleSummary to ${variantJsonPath}: ${error instanceof Error ? error.message : String(error)}`);
+    console.warn(
+      `⚠️  Failed to sync betaLifecycleSummary to ${variantJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -200,10 +202,7 @@ export function syncSummaryToVariantJson(state: BetaLifecycleState, workspaceRoo
  * Initialize lifecycle state for new beta variant
  * @version 1.1.0
  */
-export function initializeBetaLifecycle(
-  variantName: string,
-  variantType: VariantType
-): BetaLifecycleState {
+export function initializeBetaLifecycle(variantName: string, variantType: VariantType): BetaLifecycleState {
   console.log(`\n=== Initializing Beta Lifecycle ===`);
   console.log(`Variant: ${variantName}`);
   console.log(`Type: ${variantType}\n`);
@@ -213,7 +212,7 @@ export function initializeBetaLifecycle(
   const state: BetaLifecycleState = {
     variantName,
     variantType,
-    status: 'beta',
+    status: "beta",
     statusSince: now,
     betaCreatedAt: now,
     betaEngagements: 0,
@@ -254,8 +253,8 @@ function calculateBetaAge(betaCreatedAt: string): number {
 export function recordEngagement(
   variantName: string,
   clientId: string,
-  outcome: 'success' | 'failure' | 'ongoing',
-  notes?: string
+  outcome: "success" | "failure" | "ongoing",
+  notes?: string,
 ): BetaLifecycleState {
   console.log(`\n=== Recording Engagement ===`);
   console.log(`Variant: ${variantName}`);
@@ -267,10 +266,10 @@ export function recordEngagement(
   if (!state) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_NOT_FOUND',
+      "LIFECYCLE_STATE_NOT_FOUND",
       `Lifecycle state not found for variant: ${variantName}`,
       undefined,
-      'Initialize lifecycle state first using initializeBetaLifecycle'
+      "Initialize lifecycle state first using initializeBetaLifecycle",
     );
   }
 
@@ -290,7 +289,7 @@ export function recordEngagement(
     state.variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
-    state.completedChecks
+    state.completedChecks,
   );
 
   state.promotionEligible = eligibility.eligible;
@@ -300,7 +299,7 @@ export function recordEngagement(
 
   console.log(`✅ Engagement recorded`);
   console.log(`Total engagements: ${state.betaEngagements}`);
-  console.log(`Promotion eligible: ${state.promotionEligible ? 'Yes' : 'No'}`);
+  console.log(`Promotion eligible: ${state.promotionEligible ? "Yes" : "No"}`);
 
   return state;
 }
@@ -311,8 +310,8 @@ export function recordEngagement(
  */
 export function recordBug(
   variantName: string,
-  severity: 'critical' | 'high' | 'medium' | 'low',
-  description: string
+  severity: "critical" | "high" | "medium" | "low",
+  description: string,
 ): BetaLifecycleState {
   console.log(`\n=== Recording Bug ===`);
   console.log(`Variant: ${variantName}`);
@@ -323,17 +322,17 @@ export function recordBug(
   if (!state) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_NOT_FOUND',
+      "LIFECYCLE_STATE_NOT_FOUND",
       `Lifecycle state not found for variant: ${variantName}`,
       undefined,
-      'Initialize lifecycle state first using initializeBetaLifecycle'
+      "Initialize lifecycle state first using initializeBetaLifecycle",
     );
   }
 
   const bug: Bug = {
     timestamp: new Date().toISOString(),
     severity,
-    status: 'open',
+    status: "open",
     description,
   };
 
@@ -355,23 +354,23 @@ export function recordBug(
 export function updateBugStatus(
   variantName: string,
   bugIndex: number,
-  newStatus: 'open' | 'in_progress' | 'resolved' | 'wontfix'
+  newStatus: "open" | "in_progress" | "resolved" | "wontfix",
 ): BetaLifecycleState {
   const state = loadLifecycleState(variantName);
 
   if (!state) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_NOT_FOUND',
-      `Lifecycle state not found for variant: ${variantName}`
+      "LIFECYCLE_STATE_NOT_FOUND",
+      `Lifecycle state not found for variant: ${variantName}`,
     );
   }
 
   if (bugIndex < 0 || bugIndex >= state.bugLog.length) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'INVALID_BUG_INDEX',
-      `Invalid bug index: ${bugIndex} (total bugs: ${state.bugLog.length})`
+      "INVALID_BUG_INDEX",
+      `Invalid bug index: ${bugIndex} (total bugs: ${state.bugLog.length})`,
     );
   }
 
@@ -387,10 +386,7 @@ export function updateBugStatus(
  * Record completed validation check
  * @version 1.1.0
  */
-export function recordCompletedCheck(
-  variantName: string,
-  checkName: string
-): BetaLifecycleState {
+export function recordCompletedCheck(variantName: string, checkName: string): BetaLifecycleState {
   console.log(`\n=== Recording Completed Check ===`);
   console.log(`Variant: ${variantName}`);
   console.log(`Check: ${checkName}\n`);
@@ -400,8 +396,8 @@ export function recordCompletedCheck(
   if (!state) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_NOT_FOUND',
-      `Lifecycle state not found for variant: ${variantName}`
+      "LIFECYCLE_STATE_NOT_FOUND",
+      `Lifecycle state not found for variant: ${variantName}`,
     );
   }
 
@@ -415,7 +411,7 @@ export function recordCompletedCheck(
     state.variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
-    state.completedChecks
+    state.completedChecks,
   );
 
   state.promotionEligible = eligibility.eligible;
@@ -425,7 +421,7 @@ export function recordCompletedCheck(
 
   console.log(`✅ Check recorded`);
   console.log(`Completed checks: ${state.completedChecks.length}`);
-  console.log(`Promotion eligible: ${state.promotionEligible ? 'Yes' : 'No'}`);
+  console.log(`Promotion eligible: ${state.promotionEligible ? "Yes" : "No"}`);
 
   return state;
 }
@@ -434,10 +430,7 @@ export function recordCompletedCheck(
  * Check promotion eligibility with full details
  * @version 1.1.0
  */
-export function checkPromotionEligibilityDetails(
-  variantName: string,
-  variantType: string
-): PromotionEligibilityResult {
+export function checkPromotionEligibilityDetails(variantName: string, variantType: string): PromotionEligibilityResult {
   console.log(`\n=== Checking Promotion Eligibility ===`);
   console.log(`Variant: ${variantName}`);
   console.log(`Type: ${variantType}\n`);
@@ -458,7 +451,7 @@ export function checkPromotionEligibilityDetails(
     variantType as VariantType,
     state.betaEngagements,
     new Date(state.betaCreatedAt),
-    state.completedChecks
+    state.completedChecks,
   );
 
   state.promotionEligible = eligibility.eligible;
@@ -472,8 +465,8 @@ export function checkPromotionEligibilityDetails(
     const policy = getPromotionPolicy(variantType as VariantType);
     const needed = policy.minEngagements - state.betaEngagements;
     recommendations.push(
-      `Record ${needed} more client engagement${needed > 1 ? 's' : ''} ` +
-      `(currently ${state.betaEngagements}/${policy.minEngagements})`
+      `Record ${needed} more client engagement${needed > 1 ? "s" : ""} ` +
+        `(currently ${state.betaEngagements}/${policy.minEngagements})`,
     );
   }
 
@@ -481,25 +474,25 @@ export function checkPromotionEligibilityDetails(
     const policy = getPromotionPolicy(variantType as VariantType);
     const monthsNeeded = (policy.minBetaMonths - state.betaAgeInMonths).toFixed(1);
     recommendations.push(
-      `Wait ${monthsNeeded} more month${parseFloat(monthsNeeded) > 1 ? 's' : ''} ` +
-      `(currently ${state.betaAgeInMonths}/${policy.minBetaMonths} months)`
+      `Wait ${monthsNeeded} more month${parseFloat(monthsNeeded) > 1 ? "s" : ""} ` +
+        `(currently ${state.betaAgeInMonths}/${policy.minBetaMonths} months)`,
     );
   }
 
   if (eligibility.additionalChecksFailed.length > 0) {
-    recommendations.push(
-      `Complete ${eligibility.additionalChecksFailed.length} additional validation check(s):`
-    );
+    recommendations.push(`Complete ${eligibility.additionalChecksFailed.length} additional validation check(s):`);
     for (const check of eligibility.additionalChecksFailed) {
       recommendations.push(`  - ${check}`);
     }
   }
 
   console.log(`\n=== Eligibility Result ===`);
-  console.log(`Eligible: ${eligibility.eligible ? 'Yes ✅' : 'No ❌'}`);
-  console.log(`\nEngagements: ${state.betaEngagements} (met: ${eligibility.engagementsMet ? 'Yes' : 'No'})`);
-  console.log(`Beta age: ${state.betaAgeInMonths} months (met: ${eligibility.betaDurationMet ? 'Yes' : 'No'})`);
-  console.log(`Additional checks: ${eligibility.additionalChecksPassed.length}/${eligibility.additionalChecksPassed.length + eligibility.additionalChecksFailed.length} passed`);
+  console.log(`Eligible: ${eligibility.eligible ? "Yes ✅" : "No ❌"}`);
+  console.log(`\nEngagements: ${state.betaEngagements} (met: ${eligibility.engagementsMet ? "Yes" : "No"})`);
+  console.log(`Beta age: ${state.betaAgeInMonths} months (met: ${eligibility.betaDurationMet ? "Yes" : "No"})`);
+  console.log(
+    `Additional checks: ${eligibility.additionalChecksPassed.length}/${eligibility.additionalChecksPassed.length + eligibility.additionalChecksFailed.length} passed`,
+  );
 
   if (recommendations.length > 0) {
     console.log(`\nRecommendations:`);
@@ -534,23 +527,23 @@ export function promoteToStable(variantName: string): BetaLifecycleState {
   if (!state) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'LIFECYCLE_STATE_NOT_FOUND',
-      `Lifecycle state not found for variant: ${variantName}`
+      "LIFECYCLE_STATE_NOT_FOUND",
+      `Lifecycle state not found for variant: ${variantName}`,
     );
   }
 
   if (!state.promotionEligible) {
     throw fatalError(
       ErrorPhase.BETA_SETUP,
-      'PROMOTION_NOT_ELIGIBLE',
+      "PROMOTION_NOT_ELIGIBLE",
       `Variant ${variantName} is not eligible for promotion`,
       undefined,
-      'Complete all promotion criteria first (run check-promotion-eligibility for details)'
+      "Complete all promotion criteria first (run check-promotion-eligibility for details)",
     );
   }
 
   const now = new Date().toISOString();
-  state.status = 'stable';
+  state.status = "stable";
   state.statusSince = now;
 
   saveLifecycleState(state);
@@ -570,12 +563,12 @@ async function main() {
   const command = args[0];
 
   switch (command) {
-    case 'init': {
+    case "init": {
       const variantName = args[1];
       const variantType = args[2] as VariantType;
 
       if (!variantName || !variantType) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts init <variant-name> <variant-type>');
+        console.error("Usage: bun scripts/helpers/beta-lifecycle.ts init <variant-name> <variant-type>");
         process.exit(1);
       }
 
@@ -583,14 +576,16 @@ async function main() {
       break;
     }
 
-    case 'record-engagement': {
+    case "record-engagement": {
       const variantName = args[1];
       const clientId = args[2];
-      const outcome = args[3] as 'success' | 'failure' | 'ongoing';
+      const outcome = args[3] as "success" | "failure" | "ongoing";
       const notes = args[4];
 
       if (!variantName || !clientId || !outcome) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts record-engagement <variant> <client-id> <success|failure|ongoing> [notes]');
+        console.error(
+          "Usage: bun scripts/helpers/beta-lifecycle.ts record-engagement <variant> <client-id> <success|failure|ongoing> [notes]",
+        );
         process.exit(1);
       }
 
@@ -598,13 +593,15 @@ async function main() {
       break;
     }
 
-    case 'record-bug': {
+    case "record-bug": {
       const variantName = args[1];
-      const severity = args[2] as 'critical' | 'high' | 'medium' | 'low';
+      const severity = args[2] as "critical" | "high" | "medium" | "low";
       const description = args[3];
 
       if (!variantName || !severity || !description) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts record-bug <variant> <critical|high|medium|low> <description>');
+        console.error(
+          "Usage: bun scripts/helpers/beta-lifecycle.ts record-bug <variant> <critical|high|medium|low> <description>",
+        );
         process.exit(1);
       }
 
@@ -612,13 +609,15 @@ async function main() {
       break;
     }
 
-    case 'update-bug': {
+    case "update-bug": {
       const variantName = args[1];
       const bugIndex = parseInt(args[2], 10);
-      const newStatus = args[3] as 'open' | 'in_progress' | 'resolved' | 'wontfix';
+      const newStatus = args[3] as "open" | "in_progress" | "resolved" | "wontfix";
 
       if (!variantName || isNaN(bugIndex) || !newStatus) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts update-bug <variant> <bug-index> <open|in_progress|resolved|wontfix>');
+        console.error(
+          "Usage: bun scripts/helpers/beta-lifecycle.ts update-bug <variant> <bug-index> <open|in_progress|resolved|wontfix>",
+        );
         process.exit(1);
       }
 
@@ -626,12 +625,12 @@ async function main() {
       break;
     }
 
-    case 'record-check': {
+    case "record-check": {
       const variantName = args[1];
       const checkName = args[2];
 
       if (!variantName || !checkName) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts record-check <variant> <check-name>');
+        console.error("Usage: bun scripts/helpers/beta-lifecycle.ts record-check <variant> <check-name>");
         process.exit(1);
       }
 
@@ -639,12 +638,12 @@ async function main() {
       break;
     }
 
-    case 'check-eligibility': {
+    case "check-eligibility": {
       const variantName = args[1];
       const variantType = args[2];
 
       if (!variantName || !variantType) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts check-eligibility <variant> <variant-type>');
+        console.error("Usage: bun scripts/helpers/beta-lifecycle.ts check-eligibility <variant> <variant-type>");
         process.exit(1);
       }
 
@@ -652,11 +651,11 @@ async function main() {
       break;
     }
 
-    case 'promote': {
+    case "promote": {
       const variantName = args[1];
 
       if (!variantName) {
-        console.error('Usage: bun scripts/helpers/beta-lifecycle.ts promote <variant>');
+        console.error("Usage: bun scripts/helpers/beta-lifecycle.ts promote <variant>");
         process.exit(1);
       }
 
@@ -665,14 +664,14 @@ async function main() {
     }
 
     default:
-      console.error('Usage:');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts init <variant> <type>');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts record-engagement <variant> <client> <outcome> [notes]');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts record-bug <variant> <severity> <description>');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts update-bug <variant> <index> <status>');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts record-check <variant> <check-name>');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts check-eligibility <variant> <type>');
-      console.error('  bun scripts/helpers/beta-lifecycle.ts promote <variant>');
+      console.error("Usage:");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts init <variant> <type>");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts record-engagement <variant> <client> <outcome> [notes]");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts record-bug <variant> <severity> <description>");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts update-bug <variant> <index> <status>");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts record-check <variant> <check-name>");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts check-eligibility <variant> <type>");
+      console.error("  bun scripts/helpers/beta-lifecycle.ts promote <variant>");
       process.exit(1);
   }
 

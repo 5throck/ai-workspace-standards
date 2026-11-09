@@ -84,30 +84,29 @@
  *   advisory lock is CLI-only.
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { die } from './lib/error-handling.ts';
-import * as yaml from 'js-yaml';
-import { composeResolvedAgentContent } from './helpers/resolve-pm-stub.ts';
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { die } from "./lib/error-handling.ts";
+import * as yaml from "js-yaml";
+import { composeResolvedAgentContent } from "./helpers/resolve-pm-stub.ts";
 
 // Canonical long literals, declared once and referenced everywhere else
 // (grep-pinned by tests/unit/sync-agent-mirrors.test.ts).
-const SCRIPT_NAME = 'sync-agent-mirrors.ts';
-const DESIGN_SPEC = 'docs/designs/2026-10-28-platform-agent-mirror-design.md';
-const REGISTRY_BLOCK = 'platform_surfaces';
-const MIRROR_MANIFEST_NAME = '.sync-agent-mirrors-managed.json';
-const LOCK_NAME = '.sync-agent-mirrors.lock';
-const MIRROR_DIR_DEFAULT = '.claude/agents';
-const SCHEMA_REL = join('docs', 'workspace-schema.json');
+const SCRIPT_NAME = "sync-agent-mirrors.ts";
+const DESIGN_SPEC = "docs/designs/2026-10-28-platform-agent-mirror-design.md";
+const REGISTRY_BLOCK = "platform_surfaces";
+const MIRROR_MANIFEST_NAME = ".sync-agent-mirrors-managed.json";
+const LOCK_NAME = ".sync-agent-mirrors.lock";
+const MIRROR_DIR_DEFAULT = ".claude/agents";
+const SCHEMA_REL = join("docs", "workspace-schema.json");
 
 // Ported verbatim from scripts/hooks/agent-model-gate.ts (v1.2.0 contract): the
 // Claude alias is derived from the models.claude registry ID
 // (claude-<alias>-<ver> -> <alias>); the tier vocabulary is the ADR-0102 scalar
 // form.
-const VALID_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'fable']);
-const VALID_TIERS = new Set(['high', 'medium', 'low']);
-
+const VALID_ALIASES = new Set(["sonnet", "opus", "haiku", "fable"]);
+const VALID_TIERS = new Set(["high", "medium", "low"]);
 
 // ── Registry types (docs/workspace-schema.json platform_surfaces) ─────────────
 
@@ -120,7 +119,7 @@ export interface SurfaceCapability {
   /** Frontmatter fields the platform accepts for agent mirrors. */
   allowed_fields?: string[];
   /** How the tier-resolved model identifier renders: registry alias or literal registry ID. */
-  model_format?: 'alias' | 'id';
+  model_format?: "alias" | "id";
   /** Which models registry the tier resolves through, e.g. "models.claude". */
   model_source?: string;
   note?: string;
@@ -161,10 +160,10 @@ export function resolvePlatformModel(
   platform: string,
   tier: string,
   models: ModelRegistry,
-  format: 'alias' | 'id' = 'alias',
+  format: "alias" | "id" = "alias",
 ): string {
   const tierMap = models?.[platform];
-  if (!tierMap || typeof tierMap !== 'object') {
+  if (!tierMap || typeof tierMap !== "object") {
     throw new Error(
       `resolvePlatformModel: models registry has no '${platform}' block — add it to ${SCHEMA_REL} models (repair: extend the models registry, never hardcode)`,
     );
@@ -172,15 +171,15 @@ export function resolvePlatformModel(
   const registryId = tierMap[tier];
   if (!registryId) {
     throw new Error(
-      `resolvePlatformModel: models.${platform} has no entry for tier '${tier}' (known tiers: ${Object.keys(tierMap).join(', ')})`,
+      `resolvePlatformModel: models.${platform} has no entry for tier '${tier}' (known tiers: ${Object.keys(tierMap).join(", ")})`,
     );
   }
-  if (format === 'id') return registryId;
-  const alias = registryId.split('-')[1];
+  if (format === "id") return registryId;
+  const alias = registryId.split("-")[1];
   if (!alias || !VALID_ALIASES.has(alias)) {
     throw new Error(
       `resolvePlatformModel: no valid alias derivable from models.${platform}.${tier} = '${registryId}' ` +
-      `(claude-<alias>-<ver> -> <alias>; known aliases: ${[...VALID_ALIASES].join(', ')})`,
+        `(claude-<alias>-<ver> -> <alias>; known aliases: ${[...VALID_ALIASES].join(", ")})`,
     );
   }
   return alias;
@@ -211,25 +210,25 @@ export interface AgentSurfaceAdapter {
 
 /** Collapse a frontmatter value into one safely double-quoted YAML scalar. */
 function quoteScalar(value: string): string {
-  const oneLine = value.replace(/\s+/g, ' ').trim();
-  return `"${oneLine.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  const oneLine = value.replace(/\s+/g, " ").trim();
+  return `"${oneLine.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
 const claudeAdapter: AgentSurfaceAdapter = {
-  platform: 'claude',
-  emits: ['name', 'description', 'model'],
+  platform: "claude",
+  emits: ["name", "description", "model"],
   render: (agent, resolvedModel, sourceRel) =>
     [
-      '---',
+      "---",
       `name: ${agent.name}`,
       `description: ${quoteScalar(agent.description)}`,
       `model: ${resolvedModel}`,
-      '---',
-      '',
+      "---",
+      "",
       `<!-- GENERATED from ${sourceRel} by scripts/${SCRIPT_NAME} — do not edit; rerun the script. -->`,
-      '',
+      "",
       agent.body,
-    ].join('\n'),
+    ].join("\n"),
 };
 
 /**
@@ -253,32 +252,38 @@ export const PLATFORM_AGENT_ADAPTERS: Record<string, AgentSurfaceAdapter> = {
  */
 export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void {
   const block = schema?.platform_surfaces;
-  if (!block || typeof block !== 'object' || !block.platforms || typeof block.platforms !== 'object') {
+  if (!block || typeof block !== "object" || !block.platforms || typeof block.platforms !== "object") {
     throw new Error(
       `${REGISTRY_BLOCK} block missing from ${SCHEMA_REL} — the registry IS the contract ` +
-      `(repair: restore the ${REGISTRY_BLOCK} block per ${DESIGN_SPEC} §4.1; never regenerate mirrors without it)`,
+        `(repair: restore the ${REGISTRY_BLOCK} block per ${DESIGN_SPEC} §4.1; never regenerate mirrors without it)`,
     );
   }
   const problems: string[] = [];
   const supportedPlatforms = new Set<string>();
   for (const [platform, row] of Object.entries(block.platforms)) {
-    for (const surface of ['agents', 'skills', 'commands', 'hooks'] as const) {
+    for (const surface of ["agents", "skills", "commands", "hooks"] as const) {
       const cap = (row as unknown as Record<string, SurfaceCapability | undefined>)[surface];
-      if (!cap || typeof cap !== 'object' || typeof cap.supported !== 'boolean') {
+      if (!cap || typeof cap !== "object" || typeof cap.supported !== "boolean") {
         problems.push(`platforms.${platform}.${surface}: missing or non-boolean "supported"`);
         continue;
       }
-      if (!cap.supported && !(typeof cap.evidence === 'string' && cap.evidence.trim() !== '')) {
-        problems.push(`platforms.${platform}.${surface}: supported:false without an "evidence" string (add why, or flip the row deliberately)`);
+      if (!cap.supported && !(typeof cap.evidence === "string" && cap.evidence.trim() !== "")) {
+        problems.push(
+          `platforms.${platform}.${surface}: supported:false without an "evidence" string (add why, or flip the row deliberately)`,
+        );
       }
     }
     const agentsRow = row.agents;
     if (agentsRow?.supported === true) {
       supportedPlatforms.add(platform);
-      if (!(typeof agentsRow.mirror_dir === 'string' && agentsRow.mirror_dir.trim() !== '')) {
+      if (!(typeof agentsRow.mirror_dir === "string" && agentsRow.mirror_dir.trim() !== "")) {
         problems.push(`platforms.${platform}.agents: supported:true without a "mirror_dir"`);
       }
-      if (agentsRow.model_format !== undefined && agentsRow.model_format !== 'alias' && agentsRow.model_format !== 'id') {
+      if (
+        agentsRow.model_format !== undefined &&
+        agentsRow.model_format !== "alias" &&
+        agentsRow.model_format !== "id"
+      ) {
         problems.push(`platforms.${platform}.agents: model_format must be "alias" or "id"`);
       }
     }
@@ -287,7 +292,7 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
     if (!supportedPlatforms.has(platform)) {
       problems.push(
         `adapter '${platform}' names no agents.supported:true registry row — remove the adapter or flip the registry row deliberately ` +
-        `(repair: keep PLATFORM_AGENT_ADAPTERS and ${REGISTRY_BLOCK} in lockstep; ${DESIGN_SPEC} §4.3.3)`,
+          `(repair: keep PLATFORM_AGENT_ADAPTERS and ${REGISTRY_BLOCK} in lockstep; ${DESIGN_SPEC} §4.3.3)`,
       );
     }
   }
@@ -295,7 +300,7 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
     if (!PLATFORM_AGENT_ADAPTERS[platform]) {
       problems.push(
         `registry marks platforms.${platform}.agents supported:true but PLATFORM_AGENT_ADAPTERS has no '${platform}' adapter ` +
-        `(repair: add the adapter to scripts/${SCRIPT_NAME}, or set the row to supported:false with evidence)`,
+          `(repair: add the adapter to scripts/${SCRIPT_NAME}, or set the row to supported:false with evidence)`,
       );
     }
     const allowed = block.platforms[platform]?.agents?.allowed_fields;
@@ -304,8 +309,8 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
       const outside = emits.filter((f) => !allowed.includes(f));
       if (outside.length > 0) {
         problems.push(
-          `adapter '${platform}' emits field(s) [${outside.join(', ')}] outside platforms.${platform}.agents.allowed_fields ` +
-          `[${allowed.join(', ')}] (repair: align the adapter's emits with the registry's allowed_fields)`,
+          `adapter '${platform}' emits field(s) [${outside.join(", ")}] outside platforms.${platform}.agents.allowed_fields ` +
+            `[${allowed.join(", ")}] (repair: align the adapter's emits with the registry's allowed_fields)`,
         );
       }
     }
@@ -313,8 +318,8 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
   if (problems.length > 0) {
     throw new Error(
       `${REGISTRY_BLOCK} <-> generator adapter coverage guard FAILED (${problems.length}):\n  - ` +
-      problems.join('\n  - ') +
-      `\nRepair: bring ${SCHEMA_REL} ${REGISTRY_BLOCK} and PLATFORM_AGENT_ADAPTERS back in lockstep before running the generator.`,
+        problems.join("\n  - ") +
+        `\nRepair: bring ${SCHEMA_REL} ${REGISTRY_BLOCK} and PLATFORM_AGENT_ADAPTERS back in lockstep before running the generator.`,
     );
   }
 }
@@ -324,7 +329,7 @@ export function assertRegistryAdapterCoverage(schema: WorkspaceSchemaLike): void
 /** Bounded ancestor walk — a sane cap; a deeper nesting than this is a layout bug. */
 export const TEMPLATES_ROOT_MAX_ANCESTORS = 8;
 
-const TEMPLATES_COMMON_AGENTS_REL = join('templates', 'common', 'agents');
+const TEMPLATES_COMMON_AGENTS_REL = join("templates", "common", "agents");
 
 /**
  * Where extends-stub L1 bodies are sourced from.
@@ -343,7 +348,7 @@ export function discoverTemplatesRoot(targetRoot: string): { root: string | null
   for (let depth = 0; depth <= TEMPLATES_ROOT_MAX_ANCESTORS; depth++) {
     searched.push(dir);
     if (existsSync(join(dir, TEMPLATES_COMMON_AGENTS_REL))) {
-      return { root: join(dir, 'templates'), searched };
+      return { root: join(dir, "templates"), searched };
     }
     const parent = dirname(dir);
     if (parent === dir) break;
@@ -353,12 +358,12 @@ export function discoverTemplatesRoot(targetRoot: string): { root: string | null
 }
 
 export function resolveTemplatesRoot(targetRoot: string, override?: string | null): string {
-  if (override !== undefined && override !== null && override !== '') {
+  if (override !== undefined && override !== null && override !== "") {
     const tplDir = resolve(override);
-    if (!existsSync(join(tplDir, 'common', 'agents'))) {
+    if (!existsSync(join(tplDir, "common", "agents"))) {
       throw new SsotError(
         `--templates-root '${override}' does not contain common/agents/ — extends-stub bodies cannot resolve from it ` +
-        `(repair: pass the workspace templates/ directory, e.g. --templates-root <workspace>/templates)`,
+          `(repair: pass the workspace templates/ directory, e.g. --templates-root <workspace>/templates)`,
       );
     }
     return tplDir;
@@ -367,8 +372,8 @@ export function resolveTemplatesRoot(targetRoot: string, override?: string | nul
   if (found === null) {
     throw new SsotError(
       `templates/common/agents not found walking up from ${resolve(targetRoot)} ` +
-      `(searched: ${searched.join(' -> ')}) — extends-stubs cannot resolve to self-contained personas ` +
-      `(repair: pass --templates-root <workspace>/templates, or run inside a workspace checkout)`,
+        `(searched: ${searched.join(" -> ")}) — extends-stubs cannot resolve to self-contained personas ` +
+        `(repair: pass --templates-root <workspace>/templates, or run inside a workspace checkout)`,
     );
   }
   return found;
@@ -406,10 +411,10 @@ function bodyOf(content: string): string {
 
 function readVariantName(root: string): string {
   try {
-    const v = JSON.parse(readFileSync(join(root, 'variant.json'), 'utf8')) as { variant?: unknown };
-    return typeof v.variant === 'string' ? v.variant : '';
+    const v = JSON.parse(readFileSync(join(root, "variant.json"), "utf8")) as { variant?: unknown };
+    return typeof v.variant === "string" ? v.variant : "";
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -428,16 +433,18 @@ export function parseSsotAgent(
   warnings: string[],
   templatesRoot?: string | null,
 ): SsotAgent {
-  const rel = relative(root, filePath).split('\\').join('/');
+  const rel = relative(root, filePath).split("\\").join("/");
   let content: string;
   try {
-    content = readFileSync(filePath, 'utf8');
+    content = readFileSync(filePath, "utf8");
   } catch (err) {
     throw new SsotError(`${rel}: unreadable (${(err as Error).message})`);
   }
   const fmMatch = FM_RE.exec(content);
   if (!fmMatch) {
-    throw new SsotError(`${rel}: no YAML frontmatter block — agents/*.md must carry name/description/scalar tier (${DESIGN_SPEC} §4.2)`);
+    throw new SsotError(
+      `${rel}: no YAML frontmatter block — agents/*.md must carry name/description/scalar tier (${DESIGN_SPEC} §4.2)`,
+    );
   }
   const fm = fmMatch[1];
 
@@ -446,41 +453,49 @@ export function parseSsotAgent(
   // hard-error contract when the block does not parse as YAML. The parsed block
   // also carries the `extends:` pointer for stub-body resolution below.
   let parsedFm: Record<string, unknown> | null = null;
-  let name = '';
-  let description = '';
+  let name = "";
+  let description = "";
   try {
     parsedFm = yaml.load(fm) as Record<string, unknown> | null;
-    if (parsedFm && typeof parsedFm === 'object') {
-      if (typeof parsedFm.name === 'string') name = parsedFm.name.trim();
-      if (typeof parsedFm.description === 'string') description = parsedFm.description.trim();
+    if (parsedFm && typeof parsedFm === "object") {
+      if (typeof parsedFm.name === "string") name = parsedFm.name.trim();
+      if (typeof parsedFm.description === "string") description = parsedFm.description.trim();
     }
   } catch {
     // fall through to the regex extraction below
   }
   if (!name) {
     const nameMatch = fm.match(/^name[ \t]*:[ \t]*(.+)$/m);
-    name = nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, '') : '';
+    name = nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, "") : "";
   }
   if (!name) {
-    throw new SsotError(`${rel}: frontmatter is missing a usable "name:" field — hard error, never a silent skip (repair: add name to the SSOT frontmatter)`);
+    throw new SsotError(
+      `${rel}: frontmatter is missing a usable "name:" field — hard error, never a silent skip (repair: add name to the SSOT frontmatter)`,
+    );
   }
   if (!description) {
     const descMatch = fm.match(/^description[ \t]*:[ \t]*(.+)$/m);
-    description = descMatch ? descMatch[1].trim().replace(/^["']|["']$/g, '') : '';
+    description = descMatch ? descMatch[1].trim().replace(/^["']|["']$/g, "") : "";
   }
   if (!description) {
-    throw new SsotError(`${rel}: frontmatter is missing a usable "description:" field — hard error, never a silent skip (repair: add description to the SSOT frontmatter)`);
+    throw new SsotError(
+      `${rel}: frontmatter is missing a usable "description:" field — hard error, never a silent skip (repair: add description to the SSOT frontmatter)`,
+    );
   }
   // Scalar tier form only (ADR-0102 canonical). A legacy map-form tier block
   // has no scalar match and hard-errors here — exactly the SSOT-shape violation
   // the generator must never project.
   const tierMatch = fm.match(/^tier[ \t]*:[ \t]*([\w-]+)[ \t]*(?:#.*)?$/m);
-  const tier = tierMatch ? tierMatch[1].trim().toLowerCase() : '';
+  const tier = tierMatch ? tierMatch[1].trim().toLowerCase() : "";
   if (!tier || !VALID_TIERS.has(tier)) {
-    throw new SsotError(`${rel}: frontmatter has no scalar "tier: high|medium|low" declaration — hard error (ADR-0102; repair: normalize the tier to the scalar form)`);
+    throw new SsotError(
+      `${rel}: frontmatter has no scalar "tier: high|medium|low" declaration — hard error (ADR-0102; repair: normalize the tier to the scalar form)`,
+    );
   }
   if (/^model[ \t]*:/m.test(fm)) {
-    warnings.push(`${rel}: carries a "model:" field — the SSOT is platform-neutral (tier only); the field is ignored here and was removed by the sweep (§4.4)`);
+    warnings.push(
+      `${rel}: carries a "model:" field — the SSOT is platform-neutral (tier only); the field is ignored here and was removed by the sweep (§4.4)`,
+    );
   }
 
   let body = bodyOf(content);
@@ -492,8 +507,8 @@ export function parseSsotAgent(
     // templates convention (common/agents/<name> under a validated
     // --templates-root or bounded ancestor discovery) is the fallback for
     // pointer-less or dangling stubs.
-    const extendsRaw = parsedFm && typeof parsedFm.extends === 'string' ? parsedFm.extends.trim() : '';
-    const extendsTarget = extendsRaw ? resolve(dirname(filePath), extendsRaw) : '';
+    const extendsRaw = parsedFm && typeof parsedFm.extends === "string" ? parsedFm.extends.trim() : "";
+    const extendsTarget = extendsRaw ? resolve(dirname(filePath), extendsRaw) : "";
     let commonPath: string;
     if (extendsTarget && existsSync(extendsTarget)) {
       commonPath = extendsTarget;
@@ -509,13 +524,15 @@ export function parseSsotAgent(
       } catch (err) {
         throw new UnresolvableStubError((err as Error).message, name, rel);
       }
-      commonPath = join(tplRoot, 'common', 'agents', basename(filePath));
+      commonPath = join(tplRoot, "common", "agents", basename(filePath));
       if (!existsSync(commonPath)) {
         throw new UnresolvableStubError(
           `${rel}: extends-stub but the L1 body is unavailable ` +
-          (extendsTarget ? `(extends '${extendsRaw}' -> ${extendsTarget}; convention path ${commonPath})` : `(${commonPath})`) +
-          ` — a stub must never project as a dead mirror ` +
-          `(repair: restore the body at the extends target or the convention path, or inline the body)`,
+            (extendsTarget
+              ? `(extends '${extendsRaw}' -> ${extendsTarget}; convention path ${commonPath})`
+              : `(${commonPath})`) +
+            ` — a stub must never project as a dead mirror ` +
+            `(repair: restore the body at the extends target or the convention path, or inline the body)`,
           name,
           rel,
         );
@@ -526,29 +543,33 @@ export function parseSsotAgent(
     if (composed.missingL1) {
       throw new UnresolvableStubError(
         `${rel}: extends-stub but the L1 body is unavailable (${commonPath}) — a stub must never project as a dead mirror ` +
-        `(repair: restore the body at ${commonPath} or inline the body)`,
+          `(repair: restore the body at ${commonPath} or inline the body)`,
         name,
         rel,
       );
     }
     if (!composed.composed) {
-      throw new UnresolvableStubError(`${rel}: carries extends: but the composer declined to resolve it — refusing to project a stub body (repair: inline the persona body or fix the extends target)`, name, rel);
+      throw new UnresolvableStubError(
+        `${rel}: carries extends: but the composer declined to resolve it — refusing to project a stub body (repair: inline the persona body or fix the extends target)`,
+        name,
+        rel,
+      );
     }
     body = bodyOf(composed.content);
   }
-  if (body.trim() === '') {
+  if (body.trim() === "") {
     throw new SsotError(`${rel}: resolved body is empty — refusing to project an empty mirror`);
   }
-  if (!body.endsWith('\n')) body += '\n';
+  if (!body.endsWith("\n")) body += "\n";
   return { file: basename(filePath), name, description, tier, body };
 }
 
 /** Enumerate the SSOT roster: agents/*.md minus README-class and _COMMON.md. */
 export function listSsotAgents(root: string): string[] {
-  const dir = join(root, 'agents');
+  const dir = join(root, "agents");
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((f) => f.endsWith('.md') && !/^README/i.test(f) && f !== '_COMMON.md')
+    .filter((f) => f.endsWith(".md") && !/^README/i.test(f) && f !== "_COMMON.md")
     .sort()
     .map((f) => join(dir, f));
 }
@@ -569,9 +590,12 @@ export function readManagedManifest(mirrorDir: string): ManagedManifest | null {
   const p = join(mirrorDir, MIRROR_MANIFEST_NAME);
   if (!existsSync(p)) return null;
   try {
-    const parsed = JSON.parse(readFileSync(p, 'utf8')) as { version?: unknown; generated?: unknown };
-    if (!Array.isArray(parsed.generated) || parsed.generated.some((n) => typeof n !== 'string')) return null;
-    return { version: typeof parsed.version === 'number' ? parsed.version : 1, generated: parsed.generated as string[] };
+    const parsed = JSON.parse(readFileSync(p, "utf8")) as { version?: unknown; generated?: unknown };
+    if (!Array.isArray(parsed.generated) || parsed.generated.some((n) => typeof n !== "string")) return null;
+    return {
+      version: typeof parsed.version === "number" ? parsed.version : 1,
+      generated: parsed.generated as string[],
+    };
   } catch {
     return null;
   }
@@ -585,14 +609,14 @@ function writeManifestAtomic(mirrorDir: string, generated: string[]): void {
 /** Atomic file write: temp sibling + rename (the defaultCopyDir durability pattern). */
 function atomicWriteFile(filePath: string, content: string): void {
   const tmp = `${filePath}.tmp-${process.pid}`;
-  writeFileSync(tmp, content, 'utf8');
+  writeFileSync(tmp, content, "utf8");
   renameSync(tmp, filePath);
 }
 
 // ── Core sync (library entry; CLI owns the lock) ─────────────────────────────
 
 export interface MirrorDrift {
-  kind: 'missing' | 'extra-managed' | 'differing';
+  kind: "missing" | "extra-managed" | "differing";
   file: string;
   detail: string;
 }
@@ -621,10 +645,12 @@ export function loadWorkspaceSchema(root: string): WorkspaceSchemaLike {
   if (!existsSync(p)) {
     // R8: a half-delivered state (script present, schema block absent) fails
     // visibly — the same posture as validate-model-registry's missing-models fatal.
-    throw new SsotError(`${SCHEMA_REL} not found under ${root} — the platform registry is the generator's contract (repair: deliver the schema, or run this script only in delivered roots)`);
+    throw new SsotError(
+      `${SCHEMA_REL} not found under ${root} — the platform registry is the generator's contract (repair: deliver the schema, or run this script only in delivered roots)`,
+    );
   }
   try {
-    return JSON.parse(readFileSync(p, 'utf8')) as WorkspaceSchemaLike;
+    return JSON.parse(readFileSync(p, "utf8")) as WorkspaceSchemaLike;
   } catch (err) {
     throw new SsotError(`${SCHEMA_REL} is not valid JSON (${(err as Error).message})`);
   }
@@ -668,9 +694,11 @@ export function syncAgentMirrors(
   // Project scoping: a root without variant.json (the workspace root itself) is
   // mirror-less by design (root dispatch reads agents/ directly, §12) — green
   // no-op. Adding root mirrors later is a config change, not a redesign.
-  if (!existsSync(join(root, 'variant.json'))) {
+  if (!existsSync(join(root, "variant.json"))) {
     result.skipped = true;
-    result.notes.push(`${root} has no variant.json — mirrors are project-scoped; root rosters are read directly and generate no mirrors by design (${DESIGN_SPEC} §12)`);
+    result.notes.push(
+      `${root} has no variant.json — mirrors are project-scoped; root rosters are read directly and generate no mirrors by design (${DESIGN_SPEC} §12)`,
+    );
     return result;
   }
 
@@ -679,20 +707,22 @@ export function syncAgentMirrors(
   const templatesRoot = opts.templatesRoot ? resolveTemplatesRoot(root, opts.templatesRoot) : opts.templatesRoot;
 
   // v1 emits exactly the registry's supported rows (today: Claude Code only).
-  const adapterEntries = Object.entries(PLATFORM_AGENT_ADAPTERS).filter(([platform]) =>
-    schema.platform_surfaces?.platforms?.[platform]?.agents?.supported === true,
+  const adapterEntries = Object.entries(PLATFORM_AGENT_ADAPTERS).filter(
+    ([platform]) => schema.platform_surfaces?.platforms?.[platform]?.agents?.supported === true,
   );
   if (adapterEntries.length !== 1) {
     // Unreachable while the coverage guard holds (the pinned v1 set is exactly
     // one row); kept as a belt-and-braces invariant against multi-platform
     // surprises — extend the projection loop deliberately (§3) if it ever fires.
-    throw new SsotError(`expected exactly one supported agents adapter in v1, found ${adapterEntries.length} — extend the projection loop deliberately (${DESIGN_SPEC} §3)`);
+    throw new SsotError(
+      `expected exactly one supported agents adapter in v1, found ${adapterEntries.length} — extend the projection loop deliberately (${DESIGN_SPEC} §3)`,
+    );
   }
   const [adapterPlatform, adapter] = adapterEntries[0]!;
   const agentsRow = schema.platform_surfaces!.platforms![adapterPlatform]!.agents;
-  const mirrorDir = join(root, agentsRow.mirror_dir ?? '.claude/agents');
+  const mirrorDir = join(root, agentsRow.mirror_dir ?? ".claude/agents");
   result.mirrorDir = mirrorDir;
-  const modelFormat = agentsRow.model_format ?? 'alias';
+  const modelFormat = agentsRow.model_format ?? "alias";
 
   // Parse the SSOT roster (hard errors throw, naming the file). CHECK mode
   // degrades PER-AGENT (v1.3.0 — U-20261029-001, T-20261029-008 follow-up):
@@ -716,11 +746,11 @@ export function syncAgentMirrors(
   }
   result.agents = agents.length;
   if (result.unverifiable.length > 0) {
-    const listing = result.unverifiable.map((uv) => `${uv.name} (${uv.file})`).join(', ');
+    const listing = result.unverifiable.map((uv) => `${uv.name} (${uv.file})`).join(", ");
     result.warnings.push(
       `stub-body parity unverifiable for ${result.unverifiable.length} mirror(s) out-of-root ` +
-      `(content not compared; presence still enforced) (U-20261029-001, T-20261029-008 follow-up): ${listing} — ` +
-      `run inside a workspace checkout or pass --templates-root <workspace>/templates`,
+        `(content not compared; presence still enforced) (U-20261029-001, T-20261029-008 follow-up): ${listing} — ` +
+        `run inside a workspace checkout or pass --templates-root <workspace>/templates`,
     );
   }
 
@@ -735,7 +765,7 @@ export function syncAgentMirrors(
   if (prior === null) {
     result.notes.push(
       `no readable ${MIRROR_MANIFEST_NAME} under ${mirrorDir} — removals are disabled this run; ` +
-      `existing mirrors with generated names are adopted by rewrite, unknown files stay untouched`,
+        `existing mirrors with generated names are adopted by rewrite, unknown files stay untouched`,
     );
   }
 
@@ -743,12 +773,20 @@ export function syncAgentMirrors(
     for (const [name, content] of projections) {
       const mirrorPath = join(mirrorDir, `${name}.md`);
       if (!existsSync(mirrorPath)) {
-        result.drifts.push({ kind: 'missing', file: relative(root, mirrorPath), detail: `SSOT agents/${name}.md has no mirror` });
+        result.drifts.push({
+          kind: "missing",
+          file: relative(root, mirrorPath),
+          detail: `SSOT agents/${name}.md has no mirror`,
+        });
         continue;
       }
-      const existing = readFileSync(mirrorPath, 'utf8');
+      const existing = readFileSync(mirrorPath, "utf8");
       if (existing !== content) {
-        result.drifts.push({ kind: 'differing', file: relative(root, mirrorPath), detail: 'mirror content differs from the registry-resolved projection' });
+        result.drifts.push({
+          kind: "differing",
+          file: relative(root, mirrorPath),
+          detail: "mirror content differs from the registry-resolved projection",
+        });
       }
     }
     if (prior !== null) {
@@ -757,7 +795,11 @@ export function syncAgentMirrors(
         // but its body cannot resolve out-of-root) — it is never extra-managed.
         if (result.unverifiable.some((uv) => uv.name === name)) continue;
         if (!projections.has(name) && existsSync(join(mirrorDir, `${name}.md`))) {
-          result.drifts.push({ kind: 'extra-managed', file: relative(root, join(mirrorDir, `${name}.md`)), detail: 'recorded in the provenance manifest but its SSOT counterpart is gone' });
+          result.drifts.push({
+            kind: "extra-managed",
+            file: relative(root, join(mirrorDir, `${name}.md`)),
+            detail: "recorded in the provenance manifest but its SSOT counterpart is gone",
+          });
         }
       }
     }
@@ -768,9 +810,10 @@ export function syncAgentMirrors(
       const mirrorPath = join(mirrorDir, `${uv.name}.md`);
       if (!existsSync(mirrorPath)) {
         result.drifts.push({
-          kind: 'missing',
+          kind: "missing",
           file: relative(root, mirrorPath),
-          detail: 'stub SSOT has no mirror and its body cannot be resolved in this checkout — presence is enforceable regardless (real drift, not unverifiable)',
+          detail:
+            "stub SSOT has no mirror and its body cannot be resolved in this checkout — presence is enforceable regardless (real drift, not unverifiable)",
         });
       }
     }
@@ -783,7 +826,7 @@ export function syncAgentMirrors(
   for (const [name, content] of projections) {
     const mirrorPath = join(mirrorDir, `${name}.md`);
     if (existsSync(mirrorPath)) {
-      const existing = readFileSync(mirrorPath, 'utf8');
+      const existing = readFileSync(mirrorPath, "utf8");
       if (existing === content) {
         result.unchanged += 1;
         continue;
@@ -808,12 +851,14 @@ export function syncAgentMirrors(
 
   // Files we neither generated nor recorded stay untouched (user-owned).
   for (const f of readdirSync(mirrorDir)) {
-    if (!f.endsWith('.md')) continue;
-    const stem = f.replace(/\.md$/, '');
+    if (!f.endsWith(".md")) continue;
+    const stem = f.replace(/\.md$/, "");
     if (!projections.has(stem)) result.userFiles.push(relative(root, join(mirrorDir, f)));
   }
   if (result.userFiles.length > 0) {
-    result.notes.push(`${result.userFiles.length} unmanaged mirror file(s) left untouched (never removed): ${result.userFiles.join(', ')}`);
+    result.notes.push(
+      `${result.userFiles.length} unmanaged mirror file(s) left untouched (never removed): ${result.userFiles.join(", ")}`,
+    );
   }
 
   writeManifestAtomic(mirrorDir, [...projections.keys()]);
@@ -829,24 +874,30 @@ function parseArgs(argv: string[]): { check: boolean; dir: string | null; templa
   let templatesRoot: string | null = null;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
-    if (arg === '--check') {
+    if (arg === "--check") {
       check = true;
-    } else if (arg === '--dir') {
+    } else if (arg === "--dir") {
       const value = argv[i + 1];
-      if (value === undefined || value.startsWith('--')) {
-        die(`--dir requires a path argument (got ${value ?? 'nothing'}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
+      if (value === undefined || value.startsWith("--")) {
+        die(
+          `--dir requires a path argument (got ${value ?? "nothing"}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`,
+        );
       }
       dir = value;
       i += 1;
-    } else if (arg === '--templates-root') {
+    } else if (arg === "--templates-root") {
       const value = argv[i + 1];
-      if (value === undefined || value.startsWith('--')) {
-        die(`--templates-root requires a path argument (got ${value ?? 'nothing'}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
+      if (value === undefined || value.startsWith("--")) {
+        die(
+          `--templates-root requires a path argument (got ${value ?? "nothing"}) — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`,
+        );
       }
       templatesRoot = value;
       i += 1;
     } else {
-      die(`unknown argument '${arg}' — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`);
+      die(
+        `unknown argument '${arg}' — usage: bun scripts/${SCRIPT_NAME} [--check] [--dir <path>] [--templates-root <path>]`,
+      );
     }
   }
   return { check, dir, templatesRoot };
@@ -860,41 +911,53 @@ function pidAlive(pid: number): boolean {
     process.kill(pid, 0);
     return true;
   } catch (err) {
-    return (err as NodeJS.ErrnoException)?.code === 'EPERM';
+    return (err as NodeJS.ErrnoException)?.code === "EPERM";
   }
 }
 
 function acquireLock(root: string): void {
   const lockPath = join(root, LOCK_NAME);
   const writeLock = (): void => {
-    writeFileSync(lockPath, `${process.pid}\n${new Date().toISOString()}\n`, { flag: 'wx' });
+    writeFileSync(lockPath, `${process.pid}\n${new Date().toISOString()}\n`, { flag: "wx" });
   };
   const release = (): void => {
-    try { rmSync(lockPath, { force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(lockPath, { force: true });
+    } catch {
+      /* best effort */
+    }
   };
   try {
     writeLock();
   } catch {
     let lockPid = NaN;
     try {
-      lockPid = parseInt(readFileSync(lockPath, 'utf8').split('\n')[0]!.trim(), 10);
-    } catch { /* unreadable lock treated as stale below */ }
+      lockPid = parseInt(readFileSync(lockPath, "utf8").split("\n")[0]!.trim(), 10);
+    } catch {
+      /* unreadable lock treated as stale below */
+    }
     if (Number.isInteger(lockPid) && lockPid !== process.pid && pidAlive(lockPid)) {
       console.error(`ERROR: another ${SCRIPT_NAME} run appears active (pid ${lockPid}; lock: ${lockPath}).`);
-      console.error('   Wait for it to finish, or remove the lock file if that process is gone.');
+      console.error("   Wait for it to finish, or remove the lock file if that process is gone.");
       process.exit(1);
     }
-    console.warn(`WARNING: removing stale ${LOCK_NAME} (pid ${Number.isNaN(lockPid) ? 'unknown' : lockPid} is gone).`);
-    try { rmSync(lockPath, { force: true }); } catch { /* fall through to retry */ }
+    console.warn(`WARNING: removing stale ${LOCK_NAME} (pid ${Number.isNaN(lockPid) ? "unknown" : lockPid} is gone).`);
+    try {
+      rmSync(lockPath, { force: true });
+    } catch {
+      /* fall through to retry */
+    }
     try {
       writeLock();
     } catch {
-      console.error(`ERROR: could not acquire the ${LOCK_NAME} lock (${lockPath}) after stale-lock recovery — another run may be starting right now.`);
+      console.error(
+        `ERROR: could not acquire the ${LOCK_NAME} lock (${lockPath}) after stale-lock recovery — another run may be starting right now.`,
+      );
       process.exit(1);
     }
   }
-  process.on('exit', release);
-  for (const sig of ['SIGINT', 'SIGTERM'] as const) {
+  process.on("exit", release);
+  for (const sig of ["SIGINT", "SIGTERM"] as const) {
     process.on(sig, () => {
       release();
       process.exit(1);
@@ -904,16 +967,17 @@ function acquireLock(root: string): void {
 
 function printReport(res: SyncAgentMirrorsResult, check: boolean): number {
   if (res.skipped) {
-    console.log(`sync-agent-mirrors: ${res.notes[0] ?? 'skipped (non-project root)'}`);
+    console.log(`sync-agent-mirrors: ${res.notes[0] ?? "skipped (non-project root)"}`);
     return 0;
   }
   for (const w of res.warnings) console.warn(`  WARN: ${w}`);
   if (check) {
     if (res.drifts.length === 0) {
-      const uvNote = res.unverifiable.length > 0
-        ? `, ${res.unverifiable.length} stub-derived mirror(s) unverifiable`
-        : '';
-      console.log(`sync-agent-mirrors --check: ${res.agents} agent(s) in parity at ${res.mirrorDir} (0 missing / 0 extra-managed / 0 differing${uvNote})`);
+      const uvNote =
+        res.unverifiable.length > 0 ? `, ${res.unverifiable.length} stub-derived mirror(s) unverifiable` : "";
+      console.log(
+        `sync-agent-mirrors --check: ${res.agents} agent(s) in parity at ${res.mirrorDir} (0 missing / 0 extra-managed / 0 differing${uvNote})`,
+      );
       if (res.unverifiable.length > 0) {
         // The degraded-green WARN is echoed on STDOUT too: the audit arm greps
         // stdout for 'WARN:' before its Pass line (audit v2.58.0) — a CI
@@ -921,7 +985,7 @@ function printReport(res: SyncAgentMirrorsResult, check: boolean): number {
         // audit log, not only on stderr.
         console.log(
           `  WARN: stub-body parity unverifiable for ${res.unverifiable.length} mirror(s) out-of-root ` +
-          `(U-20261029-001, T-20261029-008 follow-up) — run inside a workspace checkout or pass --templates-root <workspace>/templates`,
+            `(U-20261029-001, T-20261029-008 follow-up) — run inside a workspace checkout or pass --templates-root <workspace>/templates`,
         );
         // The repair line stays (parity with the hard-error message): the
         // unverifiable class is always root-anchorable.
@@ -934,15 +998,19 @@ function printReport(res: SyncAgentMirrorsResult, check: boolean): number {
       console.error(`  [${d.kind}] ${d.file} — ${d.detail}`);
     }
     if (res.unverifiable.length > 0) {
-      console.error(`  additionally unverifiable out-of-root (content not compared; presence enforced): ${res.unverifiable.map((uv) => uv.name).join(', ')}`);
+      console.error(
+        `  additionally unverifiable out-of-root (content not compared; presence enforced): ${res.unverifiable.map((uv) => uv.name).join(", ")}`,
+      );
     }
-    const dirArg = process.cwd() === res.targetRoot ? '' : ` --dir ${res.targetRoot}`;
-    console.error(`Repair (one deliberate, reviewable write — /sync never auto-repairs): bun scripts/${SCRIPT_NAME}${dirArg}`);
+    const dirArg = process.cwd() === res.targetRoot ? "" : ` --dir ${res.targetRoot}`;
+    console.error(
+      `Repair (one deliberate, reviewable write — /sync never auto-repairs): bun scripts/${SCRIPT_NAME}${dirArg}`,
+    );
     return 1;
   }
   console.log(
     `sync-agent-mirrors: ${res.agents} agent(s) -> ${res.mirrorDir} — ` +
-    `${res.written.length} written, ${res.removed.length} removed, ${res.unchanged} unchanged`,
+      `${res.written.length} written, ${res.removed.length} removed, ${res.unchanged} unchanged`,
   );
   for (const f of res.written) console.log(`  wrote ${f}`);
   for (const f of res.removed) console.log(`  removed stale managed mirror ${f}`);

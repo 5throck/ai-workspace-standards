@@ -221,7 +221,7 @@ describe("dev-sync step 6.4 placement (design §7.8 structural pin)", () => {
 
   test("dev-sync imports the shared classifier (one derivation, two callers)", async () => {
     const src = await devSync;
-    expect(src).toContain("from './lib/workspace-hygiene.ts'");
+    expect(src).toContain('from "./lib/workspace-hygiene.ts"');
     expect(src).toContain("classifyWorkspaceHygieneResidue");
   });
 

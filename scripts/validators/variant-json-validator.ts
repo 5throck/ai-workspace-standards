@@ -15,23 +15,23 @@
  *   6. skills[] is an array with name fields
  */
 
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
-import { isVariantType } from '../helpers/registries/index.ts';
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
+import { isVariantType } from "../helpers/registries/index.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-const VALID_STATUSES = ['draft', 'beta', 'stable'] as const;
+const VALID_STATUSES = ["draft", "beta", "stable"] as const;
 
 const REQUIRED_TOP_LEVEL_FIELDS = [
-  'name',
-  'variant_type',
-  'status',
-  'version',
-  'inherits_common',
-  'agents',
-  'skills',
+  "name",
+  "variant_type",
+  "status",
+  "version",
+  "inherits_common",
+  "agents",
+  "skills",
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ const REQUIRED_TOP_LEVEL_FIELDS = [
  * Build a ValidationIssue for a missing or invalid field.
  */
 function issue(
-  severity: ValidationIssue['severity'],
+  severity: ValidationIssue["severity"],
   category: string,
   message: string,
   file?: string,
@@ -58,8 +58,8 @@ function issue(
  * Validates the variant.json manifest structure and content.
  */
 export const variantJsonValidator: ValidatorDefinition = {
-  name: 'variant-json',
-  description: 'Validates variant.json manifest for required fields and correct values',
+  name: "variant-json",
+  description: "Validates variant.json manifest for required fields and correct values",
   prerequisites: [],
 
   validate(ctx: ValidatorContext): ValidatorResult {
@@ -72,58 +72,54 @@ export const variantJsonValidator: ValidatorDefinition = {
     for (const field of REQUIRED_TOP_LEVEL_FIELDS) {
       checks++;
       if (!(field in v)) {
-        issues.push(issue(
-          'error',
-          'missing-field',
-          `variant.json missing required field: "${field}"`,
-          'variant.json',
-        ));
+        issues.push(issue("error", "missing-field", `variant.json missing required field: "${field}"`, "variant.json"));
       }
     }
 
     // ── Check: status enum ────────────────────────────────────────────────
     checks++;
-    if ('status' in v && !VALID_STATUSES.includes(v.status)) {
-      issues.push(issue(
-        'error',
-        'invalid-status',
-        `variant.json status "${v.status}" is not one of: ${VALID_STATUSES.join(', ')}`,
-        'variant.json',
-      ));
+    if ("status" in v && !VALID_STATUSES.includes(v.status)) {
+      issues.push(
+        issue(
+          "error",
+          "invalid-status",
+          `variant.json status "${v.status}" is not one of: ${VALID_STATUSES.join(", ")}`,
+          "variant.json",
+        ),
+      );
     }
 
     // ── Check: variant_type registry ─────────────────────────────────────
     checks++;
-    if ('variant_type' in v && typeof v.variant_type === 'string') {
+    if ("variant_type" in v && typeof v.variant_type === "string") {
       if (!isVariantType(v.variant_type)) {
-        issues.push(issue(
-          'error',
-          'invalid-variant-type',
-          `variant.json variant_type "${v.variant_type}" is not a registered variant type`,
-          'variant.json',
-        ));
+        issues.push(
+          issue(
+            "error",
+            "invalid-variant-type",
+            `variant.json variant_type "${v.variant_type}" is not a registered variant type`,
+            "variant.json",
+          ),
+        );
       }
     }
 
     // ── Check: agents array ──────────────────────────────────────────────
     checks++;
-    if ('agents' in v && !Array.isArray(v.agents)) {
-      issues.push(issue(
-        'error',
-        'invalid-agents',
-        'variant.json "agents" must be an array',
-        'variant.json',
-      ));
-    } else if ('agents' in v && Array.isArray(v.agents)) {
+    if ("agents" in v && !Array.isArray(v.agents)) {
+      issues.push(issue("error", "invalid-agents", 'variant.json "agents" must be an array', "variant.json"));
+    } else if ("agents" in v && Array.isArray(v.agents)) {
       // Check agents is non-empty
       checks++;
       if (v.agents.length === 0) {
-        issues.push(issue(
-          'error',
-          'empty-agents',
-          'variant.json "agents" array is empty — at least one agent is required',
-          'variant.json',
-        ));
+        issues.push(
+          issue(
+            "error",
+            "empty-agents",
+            'variant.json "agents" array is empty — at least one agent is required',
+            "variant.json",
+          ),
+        );
       }
 
       // Check each agent has name + file
@@ -131,73 +127,54 @@ export const variantJsonValidator: ValidatorDefinition = {
         const agent = v.agents[i];
         checks++;
 
-        if (!agent || typeof agent !== 'object') {
-          issues.push(issue(
-            'error',
-            'invalid-agent-entry',
-            `agents[${i}] is not a valid object`,
-            'variant.json',
-          ));
+        if (!agent || typeof agent !== "object") {
+          issues.push(issue("error", "invalid-agent-entry", `agents[${i}] is not a valid object`, "variant.json"));
           continue;
         }
 
-        if (!('name' in agent) || typeof agent.name !== 'string' || agent.name.trim() === '') {
-          issues.push(issue(
-            'error',
-            'missing-agent-name',
-            `agents[${i}] missing or empty "name" field`,
-            'variant.json',
-          ));
+        if (!("name" in agent) || typeof agent.name !== "string" || agent.name.trim() === "") {
+          issues.push(
+            issue("error", "missing-agent-name", `agents[${i}] missing or empty "name" field`, "variant.json"),
+          );
         }
 
-        if (!('file' in agent) || typeof agent.file !== 'string' || agent.file.trim() === '') {
-          issues.push(issue(
-            'error',
-            'missing-agent-file',
-            `agents[${i}] ("${agent.name ?? '<unknown>'}") missing or empty "file" field`,
-            'variant.json',
-          ));
+        if (!("file" in agent) || typeof agent.file !== "string" || agent.file.trim() === "") {
+          issues.push(
+            issue(
+              "error",
+              "missing-agent-file",
+              `agents[${i}] ("${agent.name ?? "<unknown>"}") missing or empty "file" field`,
+              "variant.json",
+            ),
+          );
         }
       }
     }
 
     // ── Check: skills array ───────────────────────────────────────────────
     checks++;
-    if ('skills' in v && !Array.isArray(v.skills)) {
-      issues.push(issue(
-        'error',
-        'invalid-skills',
-        'variant.json "skills" must be an array',
-        'variant.json',
-      ));
-    } else if ('skills' in v && Array.isArray(v.skills)) {
+    if ("skills" in v && !Array.isArray(v.skills)) {
+      issues.push(issue("error", "invalid-skills", 'variant.json "skills" must be an array', "variant.json"));
+    } else if ("skills" in v && Array.isArray(v.skills)) {
       for (let i = 0; i < v.skills.length; i++) {
         const skill = v.skills[i];
         checks++;
 
-        if (!skill || typeof skill !== 'object') {
-          issues.push(issue(
-            'error',
-            'invalid-skill-entry',
-            `skills[${i}] is not a valid object`,
-            'variant.json',
-          ));
+        if (!skill || typeof skill !== "object") {
+          issues.push(issue("error", "invalid-skill-entry", `skills[${i}] is not a valid object`, "variant.json"));
           continue;
         }
 
-        if (!('name' in skill) || typeof skill.name !== 'string' || skill.name.trim() === '') {
-          issues.push(issue(
-            'error',
-            'missing-skill-name',
-            `skills[${i}] missing or empty "name" field`,
-            'variant.json',
-          ));
+        if (!("name" in skill) || typeof skill.name !== "string" || skill.name.trim() === "") {
+          issues.push(
+            issue("error", "missing-skill-name", `skills[${i}] missing or empty "name" field`, "variant.json"),
+          );
         }
       }
     }
 
     return {
-      validator: 'variant-json',
+      validator: "variant-json",
       duration_ms: performance.now() - start,
       checks,
       issues,

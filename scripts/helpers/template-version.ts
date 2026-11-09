@@ -25,11 +25,11 @@
  * Import-safe: no I/O at import time; pure parsing plus an explicit read.
  */
 
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 /** Repo-relative location of the version SSOT. */
-export const TEMPLATE_VERSION_RELPATH = 'templates/VERSION';
+export const TEMPLATE_VERSION_RELPATH = "templates/VERSION";
 
 /**
  * Accepts a bare x.y.z version, optionally with pre-release/build suffixes
@@ -45,7 +45,7 @@ const TEMPLATE_VERSION_RE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
  */
 export function parseTemplateVersion(content: string): string {
   const trimmed = content.trim();
-  if (trimmed === '') {
+  if (trimmed === "") {
     throw new Error(
       `templates/VERSION is empty — cannot record scaffold provenance. ` +
         `Restore the version (SSOT: ${TEMPLATE_VERSION_RELPATH}) and re-run.`,
@@ -73,7 +73,7 @@ export function readTemplateVersion(rootDir: string): string {
         `Restore the version SSOT and re-run.`,
     );
   }
-  return parseTemplateVersion(readFileSync(absPath, 'utf-8'));
+  return parseTemplateVersion(readFileSync(absPath, "utf-8"));
 }
 
 /**
@@ -89,6 +89,6 @@ export function readTemplateVersion(rootDir: string): string {
  *      SSOT version aborts instead of recording fabricated provenance.
  */
 export function resolveProvenanceVersion(explicit: string, rootDir: string): string {
-  if (explicit !== '') return explicit;
+  if (explicit !== "") return explicit;
   return readTemplateVersion(rootDir);
 }

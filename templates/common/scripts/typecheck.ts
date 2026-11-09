@@ -78,17 +78,23 @@ function main() {
 
   if (errorCount <= baseline.count) {
     if (errorCount < baseline.count) {
-      console.log(`   ℹ️  Baseline can be tightened by ${baseline.count - errorCount}: consider updating scripts/helpers/typecheck-baseline.json.`);
+      console.log(
+        `   ℹ️  Baseline can be tightened by ${baseline.count - errorCount}: consider updating scripts/helpers/typecheck-baseline.json.`,
+      );
     }
     console.log(`✅ Typecheck at/below baseline (delta ${errorCount - baseline.count}). ${baseline.note}`);
     process.exit(0);
   }
 
-  console.error(`❌ Typecheck regression: ${baseline.count} → ${errorCount} (+${errorCount - baseline.count} above baseline).`);
+  console.error(
+    `❌ Typecheck regression: ${baseline.count} → ${errorCount} (+${errorCount - baseline.count} above baseline).`,
+  );
   const errorLines = output.split("\n").filter((line) => /error TS\d+:/.test(line));
   for (const line of errorLines.slice(0, 10)) console.error("   " + line.trim());
   if (errorLines.length > 10) console.error(`   … and ${errorLines.length - 10} more`);
-  console.error("   Fix the new type errors. Only lower the baseline after triage per T-20260910-012 — never raise it to absorb new debt.");
+  console.error(
+    "   Fix the new type errors. Only lower the baseline after triage per T-20260910-012 — never raise it to absorb new debt.",
+  );
   process.exit(1);
 }
 

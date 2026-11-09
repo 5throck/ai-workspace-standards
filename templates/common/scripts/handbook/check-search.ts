@@ -42,9 +42,7 @@ export function checkSearchIndex(): SearchIndexError[] {
   const manifest = readManifest(docsDir);
   if (!manifest) return errors; // no manifest — skip
 
-  const actualFiles = new Set(
-    findAllHtmlFiles().map((f) => relative(docsDir, f).replace(/\\/g, "/"))
-  );
+  const actualFiles = new Set(findAllHtmlFiles().map((f) => relative(docsDir, f).replace(/\\/g, "/")));
 
   const manifestPaths = new Set(manifest.pages.map((p) => p.path.replace(/\\/g, "/")));
 

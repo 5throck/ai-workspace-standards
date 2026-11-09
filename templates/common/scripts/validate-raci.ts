@@ -23,9 +23,9 @@
  * @version 1.2.0
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { load as yamlLoad } from 'js-yaml';
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { load as yamlLoad } from "js-yaml";
 
 interface Issue {
   layer: string;
@@ -67,11 +67,11 @@ function parseYaml(text: string, file: string): any | null {
 /** Discover variant namespaces: co-* templates + common */
 function discoverVariants(root: string): string[] {
   const variants: string[] = [];
-  const templatesDir = join(root, 'templates');
+  const templatesDir = join(root, "templates");
   if (existsSync(templatesDir)) {
     // Add all co-* variants
     for (const name of readdirSync(templatesDir)) {
-      if ((name.startsWith('co-') || name === 'common') && statSync(join(templatesDir, name)).isDirectory()) {
+      if ((name.startsWith("co-") || name === "common") && statSync(join(templatesDir, name)).isDirectory()) {
         variants.push(name);
       }
     }
@@ -81,7 +81,7 @@ function discoverVariants(root: string): string[] {
 
 /** Load human-roles registry if it exists */
 function loadHumanRoles(variantDir: string): Set<string> {
-  const humanRolesPath = join(variantDir, 'governance', '_human-roles.yaml');
+  const humanRolesPath = join(variantDir, "governance", "_human-roles.yaml");
   const roles = new Set<string>();
 
   if (!existsSync(humanRolesPath)) {
@@ -89,8 +89,8 @@ function loadHumanRoles(variantDir: string): Set<string> {
   }
 
   try {
-    const data = yamlLoad(readFileSync(humanRolesPath, 'utf-8')) as any;
-    if (data?.human_roles && typeof data.human_roles === 'object') {
+    const data = yamlLoad(readFileSync(humanRolesPath, "utf-8")) as any;
+    if (data?.human_roles && typeof data.human_roles === "object") {
       for (const key of Object.keys(data.human_roles)) {
         roles.add(key);
       }
@@ -105,16 +105,16 @@ function loadHumanRoles(variantDir: string): Set<string> {
 /** Check if an agent file exists */
 function agentFileExists(agentKey: string, root: string): boolean {
   // Try all variant agent directories
-  const templatesDir = join(root, 'templates');
+  const templatesDir = join(root, "templates");
   if (existsSync(templatesDir)) {
     for (const variant of readdirSync(templatesDir)) {
-      const agentPath = join(templatesDir, variant, 'agents', `${agentKey}.md`);
+      const agentPath = join(templatesDir, variant, "agents", `${agentKey}.md`);
       if (existsSync(agentPath)) return true;
     }
   }
 
   // Try workspace agents
-  const workspaceAgentPath = join(root, 'agents', `${agentKey}.md`);
+  const workspaceAgentPath = join(root, "agents", `${agentKey}.md`);
   if (existsSync(workspaceAgentPath)) return true;
 
   return false;
@@ -122,7 +122,7 @@ function agentFileExists(agentKey: string, root: string): boolean {
 
 /** Load gates from decisions/gates.yaml for a variant */
 function loadGates(variantDir: string): Map<string, Gate> {
-  const gatesPath = join(variantDir, 'decisions', 'gates.yaml');
+  const gatesPath = join(variantDir, "decisions", "gates.yaml");
   const gates = new Map<string, Gate>();
 
   if (!existsSync(gatesPath)) {
@@ -130,7 +130,7 @@ function loadGates(variantDir: string): Map<string, Gate> {
   }
 
   try {
-    const data = yamlLoad(readFileSync(gatesPath, 'utf-8')) as any;
+    const data = yamlLoad(readFileSync(gatesPath, "utf-8")) as any;
     if (data?.gates && Array.isArray(data.gates)) {
       for (const gate of data.gates) {
         if (gate?.id && gate?.decider_agent) {
@@ -149,36 +149,32 @@ function loadGates(variantDir: string): Map<string, Gate> {
  * Load and validate a RACI matrix file. Returns the parsed data if valid,
  * null if the file doesn't exist (not an error — P4 will create it).
  */
-function validateRACIFile(
-  variant: string,
-  root: string,
-  issues: Issue[],
-): RACIMatrix | null {
-  const variantDir = join(root, 'templates', variant);
-  const raciPath = join(variantDir, 'governance', 'raci.yaml');
+function validateRACIFile(variant: string, root: string, issues: Issue[]): RACIMatrix | null {
+  const variantDir = join(root, "templates", variant);
+  const raciPath = join(variantDir, "governance", "raci.yaml");
 
   if (!existsSync(raciPath)) {
     // RACI file doesn't exist yet (P4 will create it)
     return null;
   }
 
-  const content = readFileSync(raciPath, 'utf-8');
+  const content = readFileSync(raciPath, "utf-8");
   const data = parseYaml(content, raciPath) as RACIMatrix;
 
-  if (data && typeof data === 'object' && '__parseError' in (data as any)) {
+  if (data && typeof data === "object" && "__parseError" in (data as any)) {
     issues.push({
-      layer: 'L1',
+      layer: "L1",
       file: raciPath,
       message: `YAML parse error: ${(data as any).__parseError}`,
     });
     return null;
   }
 
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     issues.push({
-      layer: 'L1',
+      layer: "L1",
       file: raciPath,
-      message: 'raci.yaml must contain a YAML object',
+      message: "raci.yaml must contain a YAML object",
     });
     return null;
   }
@@ -186,7 +182,7 @@ function validateRACIFile(
   // Basic structure validation
   if (!Array.isArray(data.rows)) {
     issues.push({
-      layer: 'L2',
+      layer: "L2",
       file: raciPath,
       message: 'raci.yaml must have a "rows" array',
     });
@@ -197,9 +193,9 @@ function validateRACIFile(
 
   for (let i = 0; i < data.rows.length; i++) {
     const row = data.rows[i];
-    if (!row || typeof row !== 'object') {
+    if (!row || typeof row !== "object") {
       issues.push({
-        layer: 'L2',
+        layer: "L2",
         file: raciPath,
         message: `rows[${i}] must be an object`,
       });
@@ -210,16 +206,16 @@ function validateRACIFile(
 
     // DEG-R-01: exactly one accountable
     const accountable = row.accountable;
-    if (!accountable || (typeof accountable === 'string' ? !accountable : !Array.isArray(accountable))) {
+    if (!accountable || (typeof accountable === "string" ? !accountable : !Array.isArray(accountable))) {
       issues.push({
-        layer: 'DEG-R-01',
+        layer: "DEG-R-01",
         file: raciPath,
         message: `${activity}: must declare exactly one accountable agent`,
       });
     } else if (Array.isArray(accountable)) {
       if (accountable.length !== 1) {
         issues.push({
-          layer: 'DEG-R-01',
+          layer: "DEG-R-01",
           file: raciPath,
           message: `${activity}: accountable must be a single agent, not an array of ${accountable.length}`,
         });
@@ -228,19 +224,22 @@ function validateRACIFile(
 
     // DEG-R-02: at least one responsible
     const responsible = row.responsible;
-    if (!responsible || (typeof responsible === 'string' ? !responsible : (!Array.isArray(responsible) || responsible.length === 0))) {
+    if (
+      !responsible ||
+      (typeof responsible === "string" ? !responsible : !Array.isArray(responsible) || responsible.length === 0)
+    ) {
       issues.push({
-        layer: 'DEG-R-02',
+        layer: "DEG-R-02",
         file: raciPath,
         message: `${activity}: must declare at least one responsible agent`,
       });
     }
 
     // DEG-R-03: no agent both accountable and informed
-    if (typeof accountable === 'string' && Array.isArray(row.informed)) {
+    if (typeof accountable === "string" && Array.isArray(row.informed)) {
       if ((row.informed as string[]).includes(accountable)) {
         issues.push({
-          layer: 'DEG-R-03',
+          layer: "DEG-R-03",
           file: raciPath,
           message: `${activity}: agent "${accountable}" cannot be both accountable and informed`,
         });
@@ -249,15 +248,15 @@ function validateRACIFile(
 
     // DEG-R-04: Every RACI agent key resolves to an agent file or human-role entry
     const allAgents = new Set<string>();
-    if (typeof accountable === 'string') allAgents.add(accountable);
+    if (typeof accountable === "string") allAgents.add(accountable);
     if (Array.isArray(responsible)) responsible.forEach((a: string) => allAgents.add(a));
-    if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach(a => allAgents.add(a));
-    if (Array.isArray(row.informed)) (row.informed as string[]).forEach(a => allAgents.add(a));
+    if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach((a) => allAgents.add(a));
+    if (Array.isArray(row.informed)) (row.informed as string[]).forEach((a) => allAgents.add(a));
 
     for (const agent of allAgents) {
       if (!agentFileExists(agent, root) && !humanRoles.has(agent)) {
         issues.push({
-          layer: 'DEG-R-04',
+          layer: "DEG-R-04",
           file: raciPath,
           message: `${activity}: agent "${agent}" not found in agent files or human-roles registry`,
         });
@@ -266,12 +265,12 @@ function validateRACIFile(
 
     // DEG-R-06: An activity whose accountable key types as human MUST have a matching gate
     // This check only applies to variants that ship _human-roles.yaml
-    if (humanRoles.size > 0 && typeof accountable === 'string' && humanRoles.has(accountable)) {
+    if (humanRoles.size > 0 && typeof accountable === "string" && humanRoles.has(accountable)) {
       const gates = loadGates(variantDir);
-      const matchingGate = Array.from(gates.values()).find(g => g.decider_agent === accountable);
+      const matchingGate = Array.from(gates.values()).find((g) => g.decider_agent === accountable);
       if (!matchingGate) {
         issues.push({
-          layer: 'DEG-R-06',
+          layer: "DEG-R-06",
           file: raciPath,
           message: `${activity}: human-accountable agent "${accountable}" has no matching gate in decisions/gates.yaml with decider_agent="${accountable}"`,
         });
@@ -279,12 +278,12 @@ function validateRACIFile(
     }
 
     // DEG-R-07: When actor_types is present, its key set MUST equal the union of R/A/C/I keys
-    if (row.actor_types && typeof row.actor_types === 'object') {
+    if (row.actor_types && typeof row.actor_types === "object") {
       const expectedKeys = new Set<string>();
-      if (typeof accountable === 'string') expectedKeys.add(accountable);
+      if (typeof accountable === "string") expectedKeys.add(accountable);
       if (Array.isArray(responsible)) responsible.forEach((a: string) => expectedKeys.add(a));
-      if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach(a => expectedKeys.add(a));
-      if (Array.isArray(row.informed)) (row.informed as string[]).forEach(a => expectedKeys.add(a));
+      if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach((a) => expectedKeys.add(a));
+      if (Array.isArray(row.informed)) (row.informed as string[]).forEach((a) => expectedKeys.add(a));
 
       const actualKeys = new Set<string>(Object.keys(row.actor_types));
 
@@ -292,7 +291,7 @@ function validateRACIFile(
       for (const key of expectedKeys) {
         if (!actualKeys.has(key)) {
           issues.push({
-            layer: 'DEG-R-07',
+            layer: "DEG-R-07",
             file: raciPath,
             message: `${activity}: actor_types missing key "${key}" from R/A/C/I slots`,
           });
@@ -303,7 +302,7 @@ function validateRACIFile(
       for (const key of actualKeys) {
         if (!expectedKeys.has(key)) {
           issues.push({
-            layer: 'DEG-R-07',
+            layer: "DEG-R-07",
             file: raciPath,
             message: `${activity}: actor_types has extra key "${key}" not found in R/A/C/I slots`,
           });
@@ -338,11 +337,12 @@ function main(): void {
   let variant: string | undefined;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--variant') variant = args[++i];
-    else if (args[i] === '--root') root = args[++i];
-    else if (args[i] === '--all') { /* default scope */ }
-    else if (args[i] === '--help' || args[i] === '-h') {
-      console.log('Usage: bun scripts/validate-raci.ts [--variant <name>] [--all] [--root <dir>]');
+    if (args[i] === "--variant") variant = args[++i];
+    else if (args[i] === "--root") root = args[++i];
+    else if (args[i] === "--all") {
+      /* default scope */
+    } else if (args[i] === "--help" || args[i] === "-h") {
+      console.log("Usage: bun scripts/validate-raci.ts [--variant <name>] [--all] [--root <dir>]");
       process.exit(0);
     } else {
       console.error(`Unknown argument: ${args[i]}`);
@@ -353,7 +353,7 @@ function main(): void {
   const issues = validateAll(root, variant);
 
   if (issues.length === 0) {
-    const scope = variant ?? 'all variants';
+    const scope = variant ?? "all variants";
     console.log(`OK: RACI validation passed for ${scope}.`);
     process.exit(0);
   }
