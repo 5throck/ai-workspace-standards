@@ -3,29 +3,55 @@ id: T-20261109-002
 kind: manual
 title: >-
   Residual gap after the 2026-11-09 repository-config guard: corruption mode 1
-  (rogue commits) still has no mechanical detector — propose a
-  "git log --author='Test <test@example.com>' <base>..HEAD" emptiness check in
-  the same dev-sync 4.88 gate that carries the config-integrity guard (any
-  match aborts), plus two residual exposures to close: (a) config.worktree —
-  with extensions.worktreeConfig enabled, per-worktree config lives in
+  (rogue commits) still has no mechanical detector — propose a "git log
+  --author='Test <test@example.com>' <base>..HEAD" emptiness check in the same
+  dev-sync 4.88 gate that carries the config-integrity guard (any match aborts),
+  plus two residual exposures to close: (a) config.worktree — with
+  extensions.worktreeConfig enabled, per-worktree config lives in
   .git/worktrees/<name>/config.worktree and the --local snapshot in
   scripts/lib/repo-integrity.ts does not read it; (b) a direct `bun test` run
   (no hook, no dev-sync) inherits whatever GIT_DIR the caller exported and is
-  covered by neither the snapshot/compare gate nor the env sanitizer —
-  consider having the affected fixture suites assert their own
-  repository/remote identity (git rev-parse --absolute-git-dir must be inside
-  the fixture root). Detector NOT implemented in the PR that filed this
-  ticket (deliberately out of scope): pre-push v1.8.1 + repo-integrity.ts
-  v1.0.0 guard mode 2 only. Design context:
+  covered by neither the snapshot/compare gate nor the env sanitizer — consider
+  having the affected fixture suites assert their own repository/remote identity
+  (git rev-parse --absolute-git-dir must be inside the fixture root). Detector
+  NOT implemented in the PR that filed this ticket (deliberately out of scope):
+  pre-push v1.8.1 + repo-integrity.ts v1.0.0 guard mode 2 only. Design context:
   docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11; incident
   ticket T-20261109-001.
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-09T10:32:10.030+09:00'
 history:
   - at: '2026-11-09T10:32:10.030+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T04:02:33.461+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T04:02:33.479+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-10T04:04:26.501+09:00'
+    from: running
+    to: review
+  - at: '2026-11-10T04:04:26.519+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via the merged repo-integrity lineage (dev-sync v1.46.0,
+  repo-integrity.ts v1.1.0, PR #1856-era merges): Arm 1 — config
+  snapshot/compare now covers the per-worktree scope (snapshotRepoConfig
+  captures git config --worktree --list when extensions.worktreeConfig is
+  enabled; delta rows print wt:-prefixed; empty-scope-on-error = truthful [])
+  closing residual exposure (a). Arm 2 — the rogue-commit detector:
+  resolveRogueScanBase (upstream → origin/main → fail-closed) + scanRogueCommits
+  filtering one git log base..HEAD spawn for fixture identities (author AND
+  committer, case-insensitive), FATAL with SHA+identity+subject — the proposed
+  emptiness check in dev-sync step 4.88. Residual exposure (b):
+  assertFixtureGitIdentity implemented in tests/helpers/fixture-git.ts and wired
+  into upgrade-decision-log, external-deps-cli, generator-manifest suites + the
+  dedicated fixture-git-identity.test.ts — fixtures assert their git dir
+  resolves inside the fixture root. Verified on origin/main: dev-sync @1.46.0,
+  repo-integrity v1.1.0, helper + suites present.
 error: null
