@@ -3,7 +3,7 @@ id: U-20261108-001
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-08T18:23:33.590+09:00'
 history:
@@ -13,7 +13,24 @@ history:
   - at: '2026-11-09T20:08:36.766+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-10T06:47:07.575+09:00'
+    from: review
+    to: done
+result: >-
+  Verified as L0 defects, not L2: delivered scripts are byte-identical mirrors
+  of L0 source and L0's own baseline was weaker (no biome.json, non-strict
+  tsconfig). Fixed via PR #1942 (merge ccb897df): Option A compliance
+  (DEC-20261109-01 ruling 2) — biome.json adopted at L0 (Biome 2.6.6 profile
+  matching co-newbiz's strict config), strict-clean templates/common/scripts
+  (183 files), ~440-script format sweep with token-level semantic audit, ~14
+  while((m=exec())) rewrites, and the two real L0 defect fixes: audit.ts
+  nul-lint same-line invariant deleted via NUL_REDIRECT_DISPLAY construction
+  (v2.65.0) and extractScriptDependencies rewritten
+  quote-agnostic/shape-complete with node:->builtin mapping (v1.12.0).
+  Sub-symptom TS2307 (ticket-drift importing L0-only ticket-store) was already
+  fixed at source via computed dynamic import before this report — not
+  reproducible at 0.30.0. Upgrade on your next delivery to pick up the compliant
+  scripts.
 error: null
 upstream:
   project: co-newbiz
@@ -58,3 +75,22 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-11-08T18:23:33.590+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1942
+    template_version: unreleased
+    summary: >-
+      Verified as L0 defects, not L2: delivered scripts are byte-identical
+      mirrors of L0 source and L0's own baseline was weaker (no biome.json,
+      non-strict tsconfig). Fixed via PR #1942 (merge ccb897df): Option A
+      compliance (DEC-20261109-01 ruling 2) — biome.json adopted at L0 (Biome
+      2.6.6 profile matching co-newbiz's strict config), strict-clean
+      templates/common/scripts (183 files), ~440-script format sweep with
+      token-level semantic audit, ~14 while((m=exec())) rewrites, and the two
+      real L0 defect fixes: audit.ts nul-lint same-line invariant deleted via
+      NUL_REDIRECT_DISPLAY construction (v2.65.0) and extractScriptDependencies
+      rewritten quote-agnostic/shape-complete with node:->builtin mapping
+      (v1.12.0). Sub-symptom TS2307 (ticket-drift importing L0-only
+      ticket-store) was already fixed at source via computed dynamic import
+      before this report — not reproducible at 0.30.0. Upgrade on your next
+      delivery to pick up the compliant scripts.

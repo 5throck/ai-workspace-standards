@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261110-001
+kind: manual
+title: >-
+  Windows CI flake: tests/unit/co-workspace-admin-console.test.ts intermittently
+  fails windows-latest with two alternating modes — (a) TIMEOUT (120000ms suite
+  cap) and (b) the M5 'simulated hash failure' test's intentional throw escaping
+  as an unhandled rejection (500-handler log then suite abort). Observed
+  2026-11-09 on PR #1942 CI: run 42656818953 attempt 1 mode (b), attempt 2 mode
+  (a), attempt 3 PASS — identical base where PR #1943's CI passed all platforms
+  first try. PR-2's diff does not touch services/co-workspace; root cause is the
+  heavy async service suite on Windows runners (precedent T-20261105-001
+  mcp-upstream-server flake, T-20261106-008 FILE_TIME_BUDGETS mechanism).
+  Candidate fixes: raise/join the suite's per-file time budget for
+  windows-latest, make the simulated-failure test contain its rejection (await
+  the 500 response before test end), or split the suite. File-time-budget
+  mechanism already exists (T-20261106-008) — extend rather than invent.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T06:54:03.702+09:00'
+history:
+  - at: '2026-11-10T06:54:03.702+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

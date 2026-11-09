@@ -3,7 +3,7 @@ id: U-20261109-001
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-09T18:02:30.124+09:00'
 history:
@@ -13,7 +13,24 @@ history:
   - at: '2026-11-09T20:08:36.784+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-10T06:47:07.627+09:00'
+    from: review
+    to: done
+result: >-
+  Verified against canonical root skill (v1.4.4, not 1.4.3 — the requester's
+  version reference was a stale project-local command stub). Implemented via PR
+  #1943 (merge 4b2c6011): skills/meeting-facilitation SKILL.md v1.5.0
+  committee-form alignment per co-newbiz ADR-0196 (design
+  docs/designs/2026-11-09-meeting-facilitation-committee-alignment-design.md,
+  DEC-20261109-01 ruling 3) — 6-step flow with facilitator agenda pass (2-5
+  named issues) and the four-clause round 2+ response contract (>=2 named peers
+  agree/rebut/ask, answer prior-round questions, changed:/no-change: stance
+  line, stay on-issue); Output Format is the 7-section committee minutes with
+  verbatim dissent and PROPOSAL-labelled recommendation; Governance Rules
+  byte-identical. Requested target .claude/commands/meeting.md does not exist at
+  root (retired 2026-09-26) — project copies will receive the updated skill on
+  next upgrade delivery. The 38 stale v1.4.3 stubs + co-safety lineage
+  divergence were filed separately as T-20261109-003.
 error: null
 upstream:
   project: co-newbiz
@@ -55,3 +72,23 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-11-09T18:02:30.124+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1943
+    template_version: unreleased
+    summary: >-
+      Verified against canonical root skill (v1.4.4, not 1.4.3 — the requester's
+      version reference was a stale project-local command stub). Implemented via
+      PR #1943 (merge 4b2c6011): skills/meeting-facilitation SKILL.md v1.5.0
+      committee-form alignment per co-newbiz ADR-0196 (design
+      docs/designs/2026-11-09-meeting-facilitation-committee-alignment-design.md,
+      DEC-20261109-01 ruling 3) — 6-step flow with facilitator agenda pass (2-5
+      named issues) and the four-clause round 2+ response contract (>=2 named
+      peers agree/rebut/ask, answer prior-round questions, changed:/no-change:
+      stance line, stay on-issue); Output Format is the 7-section committee
+      minutes with verbatim dissent and PROPOSAL-labelled recommendation;
+      Governance Rules byte-identical. Requested target
+      .claude/commands/meeting.md does not exist at root (retired 2026-09-26) —
+      project copies will receive the updated skill on next upgrade delivery.
+      The 38 stale v1.4.3 stubs + co-safety lineage divergence were filed
+      separately as T-20261109-003.
