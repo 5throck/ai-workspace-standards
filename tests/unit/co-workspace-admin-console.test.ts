@@ -822,7 +822,7 @@ describe("GET /admin page gate for a must-change admin", () => {
 describe("review H1: data.bak snapshots are gitignored", () => {
   test("the root .gitignore ignores services/co-workspace/data.bak-*/", () => {
     const gitignore = readFileSync(join(import.meta.dir, "..", "..", ".gitignore"), "utf8");
-    expect(gitignore.split("\n")).toContain("services/co-workspace/data.bak-*/");
+    expect(gitignore.split(/\r?\n/)).toContain("services/co-workspace/data.bak-*/");
   });
 });
 
